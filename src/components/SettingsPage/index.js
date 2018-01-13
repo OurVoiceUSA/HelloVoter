@@ -267,19 +267,22 @@ export default class App extends PureComponent {
               RNGooglePlaces.openAutocompleteModal()
               .then((place) => {
                 if (!_specificAddress(place.address)) {
-                  Alert.alert(
-                    'Ambiguous Address',
-                    'Unfortunately we can\'t guarantee accurate district results without a whole address.',
-                    [
-                      {text: 'Continue Anyway', onPress: () => {
-                        this.setState({
-                          profileUpdate: true,
-                          myPositionOld: myPosition,
-                          myPosition: place,
-                        });
-                      }},
-                      {text: 'Cancel'}
-                    ], { cancelable: false });
+                  setTimeout(() => {
+                    Alert.alert(
+                      'Ambiguous Address',
+                      'Unfortunately we can\'t guarantee accurate district results without a whole address.',
+                      [
+                        {text: 'Continue Anyway', onPress: () => {
+                          this.setState({
+                            profileUpdate: true,
+                            myPositionOld: myPosition,
+                            myPosition: place,
+                          });
+                        }},
+                        {text: 'Cancel'}
+                      ], { cancelable: false }
+                    );
+                  }, 500);
                 } else {
                   this.setState({
                     profileUpdate: true,
