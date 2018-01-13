@@ -1,5 +1,5 @@
 
-## Purpose of this CLA
+## Purpose of our CLA
 
 We want this software to be as widely available as possible, and still protect the freedom and integrity of it. In order to provide distribution through stores, as well as keep the software available under the GPL, we require any code contributions to come with a signed CLA.
 
@@ -9,7 +9,7 @@ It is normal for organizations to require a CLA for code contributions, for lega
 * Another well-written rationale: https://github.com/Medium/opensource/blob/master/cla-rationale.md
 * Note from the Free Software Foundtaion: https://www.fsf.org/blogs/rms/assigning-copyright
 
-## Redistribution on stores
+## Redistribution on Stores
 
 Distribution in compiled form on stores in general can possibly be interpreted as violating the “Anti-Tivoization” clause of the GPL. This is because these apps are often cryptography signed, and refuse to execute if modified. Because we believe signing execution protects the integrity of the code for its intended use, and the end user in general, we grant a specific exemption to stores, at our discretion, to allow signing protection of the code in compiled form so long as it's from an unmodified, a publically avilable version of corresponding source code.
 
