@@ -54,7 +54,28 @@ Finally, build the app:
     react-native-cli: 2.0.1
     react-native: 0.51.0
 
+## Contributing
+
+Thank you for your interest in contributing to us! To avoid potential legal headaches and to allow distribution on Apple's App Store please sign our CLA (Contributors License Agreement). We handle this via pull request hooks on GitHub provided by https://cla-assistant.io/
+
 ## License
 
-GPLv3
+	Software License Agreement (GPLv3+)
+	
+	Copyright (c) 2018, Our Voice Initiative. All rights reserved.
+	
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+	
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+	
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+**NOTE:** We relicense this code for the purposes of distribution on the App Store. For details, read our CLA Rationale. 
 
