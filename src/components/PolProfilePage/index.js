@@ -79,11 +79,6 @@ export default class App extends PureComponent {
     if (number && !user.loggedin) {
       this.setState({SmLoginScreen: true, numberReturn: number});
     } else {
-      if (number == 5) {
-        this.setState({dealwithit_taps: dealwithit_taps+1});
-      } else {
-        this.setState({dealwithit_taps: 0});
-      }
       if (!ratings.user || ratings.user != number) {
         this.setState({loading: true});
         var input = { politician_id: profile.id, lng: location.longitude, lat: location.latitude };
