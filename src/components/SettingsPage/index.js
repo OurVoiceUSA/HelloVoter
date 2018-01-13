@@ -398,7 +398,7 @@ export default class App extends PureComponent {
         <View style={{flex: 1, alignItems: 'center'}}>
             <TouchableOpacity
               style={{flexDirection: 'row', padding: 10, alignItems: 'center', backgroundColor: '#d7d7d7'}}
-              onPress={() => {navigate('Survey')}}>
+              onPress={() => {/*navigate('Survey')*/}}>
               <Text>Take Survey</Text>
             </TouchableOpacity>
         </View>
