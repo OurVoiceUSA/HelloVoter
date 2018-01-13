@@ -10,6 +10,39 @@ For voters, finding out information about candidates running for office is disjo
 
 Likewise for candidates, the only option to accomplish canvassing and outreach needs as they gathered voter data door-to-door was sold to them by a couple of companies. Unfortunately, those canvassing companies charge people thousands of dollars to use their services which hinders people from accessing much needed information to run for office. This creates a high barrier to entry to run for office. Our app has a canvassing tool that's free to use - but in order to be viable, needs lots of work.
 
+## Development Setup
+
+Start by configuring the `.env` file:
+
+    cat << EOF > .env
+    WS_BASE=https://wsdev.ourvoiceusa.org
+    GOOGLE_API_KEY_IOS=YOUR_KEY
+    GOOGLE_API_KEY_ANDROID=YOUR_KEY
+    EOF
+
+* The `GOOGLE_API_KEY_` values are credentials created by visiting http://console.developers.google.com/. If you plan on releasing this app, or a fork of it yourself, be sure you lock down the API key to the assosiated platform device specified to avoid quota theft.
+* Without these keys, the address and geocoding won't function, rendering the app basically worthless.
+
+Install https://nodejs.org/en/download/ if you havne't already, and run:
+
+`npm install`
+
+The install may overwrite some dependancy overrides or other configuration - revert those by doing a force checkout:
+
+`git checkout -f`
+
+If you're developing the **Android** app - install https://developer.android.com/studio/releases/ if you haven't already, import the OVMobile project, and follow the prompts to download all the build and runtime dependancies. You'll also have to run this command:
+
+`echo "sdk.dir = $HOME/Library/Android/sdk" > android/local.properties`
+
+If you're developing the **iOS** app - simply install the build dependancies with pods:
+
+`(cd ios/ && pod install)`
+
+Finally, build the app:
+
+`react-native run-ios` or `react-native run-android`
+
 ## License
 
 GPLv3
