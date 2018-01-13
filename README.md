@@ -25,7 +25,8 @@ Start by configuring the `.env` file:
 
 Install https://nodejs.org/en/download/ if you havne't already, and run:
 
-`npm install`
+    npm install
+    npm install -g react-native-cli
 
 The install may overwrite some dependancy overrides or other configuration - revert those by doing a force checkout:
 
@@ -42,6 +43,16 @@ If you're developing the **iOS** app - simply install the build dependancies wit
 Finally, build the app:
 
 `react-native run-ios` or `react-native run-android`
+
+**NOTE:** At the time of this writing, the tool versions are as follows:
+
+    $ npm -v
+    5.6.0
+    $ node -v
+    v9.3.0
+    $ react-native -v
+    react-native-cli: 2.0.1
+    react-native: 0.51.0
 
 ## License
 
