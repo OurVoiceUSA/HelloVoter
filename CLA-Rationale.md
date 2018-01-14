@@ -19,6 +19,6 @@ We require code reference integrity. If at any point the reference back to the c
 
 ## In Good Faith
 
-The intent of this CLA is to strike a balance in good faith between the purpose of the GPL license to protect the source code’s integrity and availability to the end user, so they can download and make modifications to it if they so desire, and making the app available to people through stores, many of who would otherwise be unable to use the software without it being available on the store. In order to do this, Our Voice Initiative needs to retain full copyright of the software so it can legally assign a different license for distribution through stores, and does so, so long as they meet all terms as described above.
+The intent of [our CLA] is to strike a balance in good faith between the purpose of the GPL license to protect the source code’s integrity and availability to the end user, so they can download and make modifications to it if they so desire, and making the app available to people through stores, many of who would otherwise be unable to use the software without it being available on the store. In order to do this, Our Voice Initiative needs to retain full copyright of the software so it can legally assign a different license for distribution through stores, and does so, so long as they meet all terms as described above.
 
-
+[our CLA]: <https://gist.github.com/cormander/c2cf681a0bbef3a4df7791559684d79b>
