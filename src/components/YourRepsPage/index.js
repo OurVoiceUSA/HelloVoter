@@ -163,24 +163,24 @@ export default class App extends PureComponent {
   }
 
   onLocationChange (e: Event) {
-    this.doGeocode();
+    this.doGeocode(e.Longitude, e.Latitude);
   }
 
   getLocation() {
     navigator.geolocation.getCurrentPosition((position) => {
-      this.doGeocode();
+      this.doGeocode(position.coords.longitude, position.coords.latitude);
     },
     (error) => { this._genericServiceError(error, "Unable to retrieve your location from your device."); },
     { enableHighAccuracy: true, timeout: 2000, maximumAge: 1000 });
   }
 
-  doGeocode = async () => {
+  doGeocode = async (lng, lat) => {
     try {
       let results = await RNGooglePlaces.getCurrentPlace();
       this._whorepme(results[0].longitude, results[0].latitude, results[0].address, 'map-marker');
     } catch (error) {
       this.setState({myPosition: {icon: 'map-marker', address: 'location address error', error: true}});
-      this._genericServiceError(error, "Unable to determine the address of your location.");
+      this._whorepme(lng, lat, 'location address error', 'map-marker');
     }
     if (this.evEmitter) {
       RNGLocation.disconnect();
