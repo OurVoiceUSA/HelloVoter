@@ -380,7 +380,7 @@ export default class App extends PureComponent {
               <Text style={{fontSize: 20}}>Political Views:</Text>
             </View>
           </View>
-          {party &&
+          {/* party &&
           <View style={{flexDirection: 'row', alignItems: 'center', marginRight: 20}}>
             <Text style={{marginRight: 7, fontWeight: 'bold'}}>Complete</Text>
             <Icon name="check-circle" size={30} color="green" />
@@ -395,15 +395,25 @@ export default class App extends PureComponent {
             <Text style={{marginRight: 7, fontWeight: 'bold'}}>Not Started</Text>
             <Icon name="times-circle" size={30} color="red" />
           </View>
-          }
+          */}
+          <View style={{flexDirection: 'row', alignItems: 'center', marginRight: 20}}>
+            <Text style={{marginRight: 7, fontWeight: 'bold'}}>not working</Text>
+            <Icon name="bug" size={30} color="purple" />
+          </View>
         </View>
 
         <View style={{flex: 1, alignItems: 'center'}}>
             <TouchableOpacity
               style={{flexDirection: 'row', padding: 10, alignItems: 'center', backgroundColor: '#d7d7d7'}}
               onPress={() => {/*navigate('Survey')*/}}>
-              <Text>Take Survey</Text>
+              <Text>Take Survey (broken)</Text>
             </TouchableOpacity>
+        </View>
+
+        <View style={{flexDirection: 'row', justifyContent: 'center', margin: 10 }}>
+          <Text style={{fontStyle: 'italic'}}>
+             I apologize! This feature is currently broken.
+          </Text>
         </View>
 
         <View style={{flexDirection: 'row', margin: 20, marginTop: 10}}>
