@@ -58,7 +58,7 @@ export default class App extends PureComponent {
 
   componentDidUpdate(prevProps, prevState) {
     const { SmLoginScreen, user, goToCanvassing } = this.state;
-    if (prevState.SmLoginScreen && !SmLoginScreen && user && goToCanvassing) {
+    if (prevState.SmLoginScreen && !SmLoginScreen && user.loggedin && goToCanvassing) {
       this.goToCanvassing();
     }
   }
