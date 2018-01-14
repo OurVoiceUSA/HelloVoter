@@ -43,9 +43,11 @@ export default class App extends PureComponent {
     _loginPing(this, false);
   }
 
-  goToCanvassing() {
+  goToCanvassing = async () => {
     const { navigate } = this.props.navigation;
-    const { user } = this.state;
+
+    // TODO: this makes the button tap akward on high network latentcy
+    let user = await _loginPing(this, true);
 
     if (user.loggedin) {
       navigate('Canvassing', {userId: user.id});
@@ -56,7 +58,7 @@ export default class App extends PureComponent {
 
   componentDidUpdate(prevProps, prevState) {
     const { SmLoginScreen, user, goToCanvassing } = this.state;
-    if (prevState.SmLoginScreen && !prevState.user && !SmLoginScreen && user && goToCanvassing) {
+    if (prevState.SmLoginScreen && !SmLoginScreen && user && goToCanvassing) {
       this.goToCanvassing();
     }
   }
