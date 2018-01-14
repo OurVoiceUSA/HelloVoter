@@ -37,7 +37,7 @@ export default class App extends PureComponent {
   }
 
   _loginPing = async () => {
-    var user = await _getJWT();
+    var user = await _getJWT(true);
     if (user !== null) {
       this.setState({user: user});
       if (user.loggedin) this._doTheRate(null);

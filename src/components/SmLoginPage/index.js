@@ -33,7 +33,7 @@ export default class App extends PureComponent {
   }
 
   _doCheck = async () => {
-    var user = await _loginPing(this);
+    var user = await _loginPing(this, true);
     if (user.loggedin) {
       this.props.refer.setState({user: user, SmLoginScreen: false});
     } else if (user.id) {

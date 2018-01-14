@@ -64,7 +64,7 @@ export default class App extends PureComponent {
   }
 
   _loadProfile = async () => {
-    var user = await _getJWT();
+    var user = await _getJWT(true);
     if (user) {
       this.setState({
         user: user,

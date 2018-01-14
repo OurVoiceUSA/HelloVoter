@@ -7,8 +7,8 @@ import { wsbase } from './config';
 const JWT = 'OV_JWT';
 const USERLOCAL = 'OV_USER';
 
-export async function _loginPing(refer) {
-  let user = await _getJWT();
+export async function _loginPing(refer, remote) {
+  let user = await _getJWT(remote);
   if (user !== null)
       refer.setState({user: user});
   return user;
@@ -80,7 +80,7 @@ export async function _saveUser(user, remote) {
   }
 }
 
-export async function _getJWT() {
+export async function _getJWT(remote) {
 
   // assemble device info
   const dinfo = {
@@ -106,8 +106,13 @@ export async function _getJWT() {
 
   let user = null;
   var dinfo_resp = null;
-  var remote = false;
   var localuser = await _getUserLocal();
+
+  // just use locally cached data
+  if (!remote) {
+    if (localuser == null) localuser = { profile: {} };
+    return localuser;
+  }
 
   try {
     jwt = await storage.get(JWT);

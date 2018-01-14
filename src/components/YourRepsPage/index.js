@@ -47,7 +47,7 @@ export default class App extends PureComponent {
   }
 
   componentDidMount() {
-    _loginPing(this);
+    _loginPing(this, false);
   }
 
   componentDidUpdate(prevProps, prevState) {

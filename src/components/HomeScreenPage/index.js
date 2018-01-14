@@ -40,7 +40,7 @@ export default class App extends PureComponent {
 
   componentDidMount() {
     this.requestPushPermission();
-    _loginPing(this);
+    _loginPing(this, false);
   }
 
   goToCanvassing() {
