@@ -179,8 +179,8 @@ export default class App extends PureComponent {
       let results = await RNGooglePlaces.getCurrentPlace();
       this._whorepme(results[0].longitude, results[0].latitude, results[0].address, 'map-marker');
     } catch (error) {
-      this.setState({myPosition: {icon: 'map-marker', address: 'device location error', error: true}});
-      this._genericServiceError(error, "Unable to retrieve your location from your device.");
+      this.setState({myPosition: {icon: 'map-marker', address: 'location address error', error: true}});
+      this._genericServiceError(error, "Unable to determine the address of your location.");
     }
     if (this.evEmitter) {
       RNGLocation.disconnect();
