@@ -17,6 +17,7 @@ export default class App extends PureComponent {
   openTwitter = () => this.openURL('https://twitter.com/OurVoiceUsa');
   openYouTube = () => this.openURL('https://www.youtube.com/channel/UCw5fpnK-IZVQ4IkYuapIbiw');
   openWebsite = () => this.openURL('https://ourvoiceusa.org/');
+  openGitHub = (repo) => this.openURL('https://github.com/OurVoiceUSA/'+(repo?repo:''));
 
   openURL = (url) => {
     return Linking.openURL(url).catch(() => null);
@@ -37,10 +38,11 @@ export default class App extends PureComponent {
         </Text>
 
         <View style={{flexDirection: 'row', justifyContent: 'center', marginBottom: 15}}>
-          <Icon name="facebook-official" size={50} color="#3b5998" style={{marginRight: 25}} onPress={this.openFacebook} />
-          <Icon name="twitter" size={50} color="#0084b4" style={{marginRight: 25}} onPress={this.openTwitter} />
-          <Icon name="youtube-play" size={50} color="#ff0000" style={{marginRight: 25}} onPress={this.openYouTube} />
-          <Icon name="globe" size={50} color="#008080" onPress={this.openWebsite} />
+          <Icon name="facebook-official" size={40} color="#3b5998" style={{marginRight: 25}} onPress={this.openFacebook} />
+          <Icon name="twitter" size={40} color="#0084b4" style={{marginRight: 25}} onPress={this.openTwitter} />
+          <Icon name="youtube-play" size={40} color="#ff0000" style={{marginRight: 25}} onPress={this.openYouTube} />
+          <Icon name="github" size={40} style={{marginRight: 25}} onPress={() => {this.openGitHub(null)}} />
+          <Icon name="globe" size={40} color="#008080" onPress={this.openWebsite} />
         </View>
 
         <View style={{marginLeft: 50, marginRight: 50, flexDirection: 'row', justifyContent: 'center', marginBottom: 15}}>
@@ -77,9 +79,9 @@ export default class App extends PureComponent {
         </Text>
 
         <Text style={{margin: 15, fontSize: 18, color: 'dimgray'}}>
-            This mobile app is in active development with the goal of updating
-            occasionally with new features that help every day people get involved
-            with the political process.
+            This mobile app is open source! Your code contribution is welcome.
+            Our goal is to update occasionally with new features that help every day
+            people get involved with the political process.
         </Text>
 
         <View style={{flexDirection: 'row', justifyContent: 'center'}}>
@@ -89,7 +91,19 @@ export default class App extends PureComponent {
         </View>
         <View style={{flexDirection: 'row', justifyContent: 'center', marginBottom: 15}}>
           <Text style={{fontSize: 18, color: 'dimgray'}}>
-            {DeviceInfo.getVersion()}-b{DeviceInfo.getBuildNumber()}
+            {DeviceInfo.getVersion()}
+          </Text>
+        </View>
+
+        <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginBottom: 15}}>
+          <Text style={{fontSize: 18, color: 'dimgray'}}>
+            Find the source code on GitHub:
+          </Text>
+        </View>
+
+        <View style={{flexDirection: 'row', justifyContent: 'center', marginBottom: 15}}>
+          <Text style={{fontSize: 16, fontWeight: 'bold', color: 'blue'}} onPress={() => {this.openGitHub('OVMobile')}}>
+            https://github.com/OurVoiceUSA/OVMobile
           </Text>
         </View>
 
