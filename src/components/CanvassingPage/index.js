@@ -52,13 +52,17 @@ export default class App extends PureComponent {
   }
 
   doGeocode = async () => {
+    let address = null;
     try {
       let res = await RNGooglePlaces.getCurrentPlace();
-      if (res["0"])
-        this.setState({ myAddress: res["0"].address });
+      if (res["0"]) {
+        address = res["0"].address;
+        this.setState({ myAddress: address });
+      }
     } catch (error) {
       console.warn(error);
     }
+    return address;
   }
 
   onLocationChange (e: Event) {
@@ -73,7 +77,6 @@ export default class App extends PureComponent {
       lng: e.Longitude,
     };
 
-    this.doGeocode();
   }
 
   requestLocationPermission = async () => {
@@ -122,8 +125,6 @@ export default class App extends PureComponent {
         lng: position.coords.longitude
       };
 
-      this.doGeocode();
-
     },
     (error) => { },
     { enableHighAccuracy: true, timeout: 2000, maximumAge: 1000 });
@@ -152,7 +153,7 @@ export default class App extends PureComponent {
       latitude: myAddress.position.lat,
       longitude: myAddress.position.lng,
     };
-    addr = myAddress;
+    addr = await doGeocode();
 
     // res is an Array of geocoding object, take the first one
     this.setState({ inputPosition: LL, geoAddress: addr, inputAddress: addr.formattedAddress, isModalVisible: false });
