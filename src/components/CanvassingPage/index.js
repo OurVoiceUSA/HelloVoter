@@ -22,11 +22,9 @@ import {
 import { NavigationActions } from 'react-navigation'
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Permissions from 'react-native-permissions';
-import isEqual from 'lodash/isEqual';
-
-import Modal from 'react-native-modal';
-import ModalInput from '../ModalInput';
-import {abbrRegion} from './states';
+import RNGLocation from 'react-native-google-location';
+import RNGooglePlaces from 'react-native-google-places';
+import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 
 export default class App extends PureComponent {
 
@@ -53,6 +51,16 @@ export default class App extends PureComponent {
 
   }
 
+  doGeocode = async () => {
+    try {
+      let res = await RNGooglePlaces.getCurrentPlace();
+      if (res["0"])
+        this.setState({ myAddress: res["0"].address });
+    } catch (error) {
+      console.warn(error);
+    }
+  }
+
   onLocationChange (e: Event) {
     let { myPosition } = this.state;
     myPosition = {
@@ -64,15 +72,8 @@ export default class App extends PureComponent {
       lat: e.Latitude,
       lng: e.Longitude,
     };
-    Geocoder.fallbackToGoogle(google_api_key);
-    // use the lib as usual
-    let ret = Geocoder.geocodePosition(LL).then(
-      (res) => {
-         this.setState({ myAddress: res["0"] });
-      }
-    ).catch(err => {
-      // nothing we can really do about this?
-    });
+
+    this.doGeocode();
   }
 
   requestLocationPermission = async () => {
@@ -121,14 +122,7 @@ export default class App extends PureComponent {
         lng: position.coords.longitude
       };
 
-      // use the lib as usual
-      let ret = Geocoder.geocodePosition(LL).then(
-        (res) => {
-           this.setState({ myAddress: res["0"] });
-        }
-      ).catch(err => {
-        // nothing we can really do about this?
-      });
+      this.doGeocode();
 
     },
     (error) => { },
@@ -146,44 +140,19 @@ export default class App extends PureComponent {
     }
   }
 
-  showConfirmAddress() {
-	 var governArea;
-    const { myAddress, inputAddress, cAddress } = this.state;
-  if(myAddress !== null)
-  {
-		governArea = abbrRegion(myAddress.adminArea, 'abbr');
-    this.setState({ isModalVisible: true,
-		cAddress : [myAddress.streetNumber, myAddress.streetName, myAddress.locality, governArea, myAddress.postalCode, ""]
-    });
-  }
-  }
-
   doConfirmAddress = async () => {
     const { myAddress, cAddress } = this.state;
     var LL;
     var addr;
     var inputAddress = cAddress[0] + " " + cAddress[1] + " " + cAddress[2] + " " + cAddress[3] + " " + cAddress[4];
-    // geocode from address
-    try {
 
-      res = await Geocoder.geocodeAddress(inputAddress);
-
-      LL = {
-        latitude: res["0"].position.lat,
-        longitude: res["0"].position.lng,
-      };
-
-      addr = res["0"];
-
-    } catch (error) {
-
-      // just use the original lat/lng
-      LL = {
-        latitude: myAddress.position.lat,
-        longitude: myAddress.position.lng,
-      };
-      addr = myAddress;
-    }
+    // TODO: use RNGooglePlaces, but for now...
+    // just use the original lat/lng
+    LL = {
+      latitude: myAddress.position.lat,
+      longitude: myAddress.position.lng,
+    };
+    addr = myAddress;
 
     // res is an Array of geocoding object, take the first one
     this.setState({ inputPosition: LL, geoAddress: addr, inputAddress: addr.formattedAddress, isModalVisible: false });
@@ -369,151 +338,15 @@ export default class App extends PureComponent {
     return (
       <View style={styles.container}>
 
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <Modal style={{
-          alignItems: 'center',
-          marginBottom: Dimensions.get('window').height * 0.2, // temp solution for keyboard spacing
-          justifyContent: 'center'}}
-          isVisible={this.state.isModalVisible}
-        >
-          <View style={{flexDirection: 'column'}}>
-            <View style={{width: Dimensions.get('window').width * 0.7, height: 245, backgroundColor: 'white', marginTop: 15, borderRadius: 15, padding: 25, alignSelf: 'flex-start'}}>
-              <Text style={{color: 'blue', fontWeight: 'bold', fontSize: 15}}>Confirm the Address</Text>
-                <View>
-                  <Text style={styles.baseText, {position: 'absolute', bottom: -53, fontSize: 12}}>Street Address</Text>
-                  <View style={{flexDirection: 'row', position: 'absolute', right: 0, bottom: -45, alignItems: 'center'}}>
-                    <TextInput style={{height: 45, width: 75, fontSize: 15 }}
-                      onChange={(event) => {cAddress[0] = event.nativeEvent.text; this.setState({cAddress});}}
-                      underlineColorAndroid={'transparent'}
-                      value={cAddress[0]}
-                      multiline={false}
-                    />
-                    <View style={{position: 'absolute', bottom:10, width: 72, right: 138, height: 1, backgroundColor: 'gray'}} />
-                    <TextInput style={{height: 45, width: 135, fontSize: 15 }}
-                      onChange={(event) => {cAddress[1] = event.nativeEvent.text; this.setState({cAddress});}}
-                      underlineColorAndroid={'transparent'}
-                      value={cAddress[1]}
-                      multiline={false}
-                    />
-                   <View style={{position: 'absolute', bottom:10, width: 135, right: -3, height: 1, backgroundColor: 'gray'}} />
-                 </View>
-                 <Text style={styles.baseText, {position: 'absolute', bottom: -93, fontSize: 12}}>Unit #</Text>
-                 <TextInput
-                   style={{height: 45, width: 100, fontSize: 15, flexDirection: 'row', position: 'absolute', right: 110, bottom: -85, alignItems: 'center'}}
-                   onChange={(event) => {cAddress[5] = event.nativeEvent.text; this.setState({cAddress});}}
-                   underlineColorAndroid={'transparent'}
-                   value={cAddress[5]}
-                   multiline={false}
-                 />
-                 <View style={{position: 'absolute', bottom:-75, width: 100, right: 110, height: 1, backgroundColor: 'gray'}} />
-                 <Text style={styles.baseText, {position: 'absolute', bottom: -137, fontSize: 12}}>City</Text>
-                 <Text style={styles.baseText, {position: 'absolute', right:53,bottom: -137, fontSize: 12}}>State</Text>
-                 <Text style={styles.baseText, {position: 'absolute', right:27, bottom: -137, fontSize: 12}}>Zip</Text>
-                 <View style={{flexDirection: 'row', position: 'absolute', right: 0, bottom: -130, alignItems: 'center'}}>
-                 <TextInput
-                   style={{height: 45, width: 130, fontSize: 15 }}
-                   onChange={(event) => {cAddress[2] = event.nativeEvent.text; this.setState({cAddress});}}
-                   underlineColorAndroid={'transparent'}
-                   value={cAddress[2]}
-                   multiline={false}
-                 />
-                 <View style={{position: 'absolute', bottom:10, width: 125, right: 85, height: 1, backgroundColor: 'gray'}} />
-                 <TextInput
-                   style={{height: 45, width: 30, fontSize: 15 }}
-                   onChange={(event) => {cAddress[3] = event.nativeEvent.text; this.setState({cAddress});}}
-                   underlineColorAndroid={'transparent'}
-                   value={cAddress[3]}
-                   multiline={false}
-                 />
-                 <View style={{position: 'absolute', bottom:10, width: 25, right: 53, height: 1, backgroundColor: 'gray'}} />
-                 <TextInput
-                   style={{height: 45, width: 50, fontSize: 15}}
-                   onChange={(event) => {cAddress[4] = event.nativeEvent.text; this.setState({cAddress});}}
-                   underlineColorAndroid={'transparent'}
-                   value={cAddress[4]}
-                   multiline={false}
-                 />
-                 <View style={{position: 'absolute', bottom:10, width: 48, right: 0, height: 1, backgroundColor: 'gray'}} />
-               </View>
-               <View style={{flexDirection: 'row', position: 'absolute', right: 25, bottom: -170, alignItems: 'center'}}>
-                 <TouchableOpacity onPress={() => this.setState({isModalVisible: false})}>
-                   <Text style={{fontWeight: 'bold', color: 'blue'}}>Cancel</Text>
-                 </TouchableOpacity>
-                 <TouchableOpacity style={{marginLeft: 30}} onPress={() => {
-                   this.doConfirmAddress();
-                 }}>
-                   <Text style={{fontWeight: 'bold', color: 'blue'}}>OK</Text>
-                 </TouchableOpacity>
-               </View>
-             </View>
-          </View>
-        </View>
-      </Modal>
-      </TouchableWithoutFeedback>
-
-      <Modal style={{
-        alignItems: 'center',
-        marginBottom: Dimensions.get('window').height * 0.2, // temp solution for keyboard spacing
-        justifyContent: 'center'}}
-        isVisible={this.state.isKnockMenuVisible}
-      >
-          <View style={{flexDirection: 'column'}}>
-            <View style={{width: Dimensions.get('window').width * 0.7, height: 260, backgroundColor: 'white', marginTop: 15, borderRadius: 15, padding: 25, alignSelf: 'flex-start'}}>
-              <Text style={{color: 'blue', fontWeight: 'bold', fontSize: 20}}>Are they home?</Text>
-              <View>
-
-                <View style={{margin: 5, flexDirection: 'row'}}>
-                  <Icon.Button
-                    name="check-circle"
-                    backgroundColor="#d7d7d7"
-                    color="#000000"
-                    onPress={() => {this.setState({ isKnockMenuVisible: false }); this.addpin("green"); }}
-                    {...iconStyles}>
-                    Take Survey
-                  </Icon.Button>
-                </View>
-
-                <View style={{margin: 5, flexDirection: 'row'}}>
-                  <Icon.Button
-                    name="circle-o"
-                    backgroundColor="#d7d7d7"
-                    color="#000000"
-                    onPress={() => {this.setState({ isKnockMenuVisible: false }); this.addpin("yellow"); }}
-                    {...iconStyles}>
-                    Not Home
-                  </Icon.Button>
-                </View>
-
-                <View style={{margin: 5, flexDirection: 'row'}}>
-                  <Icon.Button
-                    name="ban"
-                    backgroundColor="#d7d7d7"
-                    color="#000000"
-                    onPress={() => {this.setState({ isKnockMenuVisible: false }); this.addpin("red"); }}
-                    {...iconStyles}>
-                    Not Interested
-                  </Icon.Button>
-                </View>
-
-              </View>
-
-              <TouchableOpacity onPress={() => this.setState({ isKnockMenuVisible: false })}>
-                <Text style={{fontWeight: 'bold', color: 'blue'}}>Cancel</Text>
-              </TouchableOpacity>
-
-            </View>
-          </View>
-        </Modal>
-
         <MapView
           ref={component => this.map = component}
-    initialRegion={{latitude: myPosition.latitude, longitude: myPosition.longitude, latitudeDelta: 0.005, longitudeDelta: 0.005}}
-          provider={this.props.provider}
+          initialRegion={{latitude: myPosition.latitude, longitude: myPosition.longitude, latitudeDelta: 0.005, longitudeDelta: 0.005}}
+          provider={PROVIDER_GOOGLE}
           style={styles.map}
-    showsUserLocation={true}
-    followsUserLocation={false}
+          showsUserLocation={true}
+          followsUserLocation={false}
           keyboardShouldPersistTaps={true}
-    {...this.props}>
+          {...this.props}>
           {
             myPins.map((marker, index) => (
               <MapView.Marker
@@ -538,7 +371,7 @@ export default class App extends PureComponent {
             name="hand-rock-o"
             backgroundColor="#d7d7d7"
             color="#000000"
-            onPress={() => {this.showConfirmAddress();}}
+            onPress={() => {Alert.alert('Error', 'I apologize! This feature is currently broken. Will be fixed soon.', [{text: 'OK'}], { cancelable: false })}}
             {...iconStyles}>
             Prepare to Knock
           </Icon.Button>

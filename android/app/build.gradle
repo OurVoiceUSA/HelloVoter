@@ -84,6 +84,7 @@ android {
 dependencies {
     implementation project(':react-native-config')
     implementation project(':react-native-vector-icons')
+    implementation(project(':react-native-maps')){ exclude group: 'com.google.android.gms' }
     implementation(project(':react-native-device-info')){ exclude group: 'com.google.android.gms' }
     implementation(project(':react-native-google-places')){ exclude group: 'com.google.android.gms' }
     implementation(project(':react-native-google-location')){ exclude group: 'com.google.android.gms' }

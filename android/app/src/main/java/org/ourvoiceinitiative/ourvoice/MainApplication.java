@@ -3,6 +3,7 @@ package org.ourvoiceinitiative.ourvoice;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.airbnb.android.react.maps.MapsPackage;
 import com.timhagn.rngloc.RNGLocation;
 import com.lugg.ReactNativeConfig.ReactNativeConfigPackage;
 import com.arttitude360.reactnative.rngoogleplaces.RNGooglePlacesPackage;
@@ -28,6 +29,7 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new MapsPackage(),
             new RNGLocation(),
             new ReactNativeConfigPackage(),
             new RNGooglePlacesPackage(),

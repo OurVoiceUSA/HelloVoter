@@ -12,6 +12,9 @@ import {
 } from 'react-native';
 
 import Permissions from 'react-native-permissions';
+import { _loginPing } from '../../common';
+import SmLoginPage from '../SmLoginPage';
+import Modal from 'react-native-simple-modal';
 
 export default class App extends PureComponent {
 
@@ -19,7 +22,10 @@ export default class App extends PureComponent {
     super(props);
 
     this.state = {
-      moreOptions: "false",
+      user: null,
+      moreOptions: false,
+      SmLoginScreen: false,
+      goToCanvassing: false,
     };
 
   }
@@ -34,6 +40,25 @@ export default class App extends PureComponent {
 
   componentDidMount() {
     this.requestPushPermission();
+    _loginPing(this);
+  }
+
+  goToCanvassing() {
+    const { navigate } = this.props.navigation;
+    const { user } = this.state;
+
+    if (user.loggedin) {
+      navigate('Canvassing', {userId: user.id});
+    } else {
+      this.setState({ SmLoginScreen: true, goToCanvassing: true });
+    }
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    const { SmLoginScreen, user, goToCanvassing } = this.state;
+    if (prevState.SmLoginScreen && !prevState.user && !SmLoginScreen && user && goToCanvassing) {
+      this.goToCanvassing();
+    }
   }
 
   _pressHandler() {
@@ -53,73 +78,64 @@ export default class App extends PureComponent {
 
   render() {
     const { navigate } = this.props.navigation;
-    const { moreOptions } = this.state;
+    const { moreOptions, SmLoginScreen } = this.state;
 
     const homeImage = require('../../../img/UnitedNotSilenced.png')
 
-    if (moreOptions === "true") {
-      return (
-      <View style={{flex: 1, backgroundColor: 'white'}}>
+    return (
+    <View style={{flex: 1, backgroundColor: 'white'}}>
 
-        <Image source={homeImage} style={{flex: 1, padding: 15, maxWidth: Dimensions.get('window').width}} resizeMode={'contain'} />
+      <Image source={homeImage} style={{flex: 1, padding: 15, maxWidth: Dimensions.get('window').width}} resizeMode={'contain'} />
 
-        <View style={{flex: 1}}>
+      {moreOptions &&
+      <View style={{flex: 1}}>
 
-          <View style={{margin: 5, flexDirection: 'row'}}>
-            <TouchableOpacity
-              style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10}}
-              onPress={this._CNYpressHandler}>
-              <Text style={{textAlign: 'center'}}>Candidate Directory</Text>
-            </TouchableOpacity>
-          </View>
+        <View style={{margin: 5, flexDirection: 'row'}}>
+          <TouchableOpacity
+            style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10}}
+            onPress={() => {this.goToCanvassing();}}>
+            <Text style={{textAlign: 'center'}}>Canvassing</Text>
+          </TouchableOpacity>
+        </View>
 
-          <View style={{margin: 5, flexDirection: 'row'}}>
-            <TouchableOpacity
-              style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10}}
-              onPress={this._RVSpressHandler}>
-              <Text style={{textAlign: 'center'}}>Register to Vote</Text>
-            </TouchableOpacity>
-          </View>
+        <View style={{margin: 5, flexDirection: 'row'}}>
+          <TouchableOpacity
+            style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10}}
+            onPress={this._RVSpressHandler}>
+            <Text style={{textAlign: 'center'}}>Register to Vote</Text>
+          </TouchableOpacity>
+        </View>
 
-          <View style={{margin: 5, flexDirection: 'row'}}>
-            <TouchableOpacity
-              style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10}}
-              onPress={this._pressHandler}>
-              <Text style={{textAlign: 'center'}}>Donate</Text>
-            </TouchableOpacity>
-          </View>
+        <View style={{margin: 5, flexDirection: 'row'}}>
+          <TouchableOpacity
+            style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10}}
+            onPress={this._pressHandler}>
+            <Text style={{textAlign: 'center'}}>Donate</Text>
+          </TouchableOpacity>
+        </View>
 
-          <View style={{margin: 5, flexDirection: 'row'}}>
-            <TouchableOpacity
-              style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10}}
-              onPress={() => {this.setState({ moreOptions: "false"})}}>
-              <Text style={{textAlign: 'center'}}>Main Menu</Text>
-            </TouchableOpacity>
-          </View>
-
+        <View style={{margin: 5, flexDirection: 'row'}}>
+          <TouchableOpacity
+            style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10}}
+             onPress={() => {this.setState({ moreOptions: false})}}>
+            <Text style={{textAlign: 'center'}}>Main Menu</Text>
+          </TouchableOpacity>
         </View>
 
       </View>
-      );
-    }
+      ||
+      <View style={{flex: 1}}>
 
-    return (
-      <View style={{flex: 1, backgroundColor: 'white'}}>
+        <View style={{margin: 5, flexDirection: 'row'}}>
+          <TouchableOpacity
+            style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10}}
+            onPress={() => {navigate('YourReps')}}>
+            <Text style={{textAlign: 'center'}}>Your Representatives</Text>
+          </TouchableOpacity>
+        </View>
 
-        <Image source={homeImage} style={{flex: 1, padding: 15, maxWidth: Dimensions.get('window').width}} resizeMode={'contain'} />
-
-        <View style={{flex: 1}}>
-
-          <View style={{margin: 5, flexDirection: 'row'}}>
-            <TouchableOpacity
-              style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10}}
-              onPress={() => {navigate('YourReps')}}>
-              <Text style={{textAlign: 'center'}}>Your Representatives</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={{margin: 5, flexDirection: 'row'}}>
-            <TouchableOpacity
+        <View style={{margin: 5, flexDirection: 'row'}}>
+          <TouchableOpacity
               style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10}}
               onPress={() => {navigate('Settings')}}>
               <Text style={{textAlign: 'center'}}>Your Voice</Text>
@@ -137,12 +153,27 @@ export default class App extends PureComponent {
           <View style={{margin: 5, flexDirection: 'row'}}>
             <TouchableOpacity
               style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10}}
-              onPress={() => {this.setState({ moreOptions: "true"})}}>
+              onPress={() => {this.setState({ moreOptions: true})}}>
               <Text style={{textAlign: 'center'}}>More Options</Text>
             </TouchableOpacity>
           </View>
-
         </View>
+        }
+
+        <Modal
+          open={SmLoginScreen}
+          modalStyle={{width: 335, height: 400, backgroundColor: "transparent",
+            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
+          style={{alignItems: 'center'}}
+          overlayBackground={'rgba(0, 0, 0, 0.75)'}
+          animationDuration={200}
+          animationTension={40}
+          modalDidOpen={() => undefined}
+          modalDidClose={() => this.setState({SmLoginScreen: false})}
+          closeOnTouchOutside={true}
+          disableOnBackPress={false}>
+          <SmLoginPage refer={this} />
+        </Modal>
 
       </View>
     );

@@ -4,7 +4,7 @@ import HomeScreenPage from '../components/HomeScreenPage';
 import YourRepsPage from '../components/YourRepsPage';
 import PolProfilePage from '../components/PolProfilePage';
 import SettingsPage from '../components/SettingsPage';
-//import CanvassingPage from '../components/CanvassingPage';
+import CanvassingPage from '../components/CanvassingPage';
 //import SurveyPage from '../components/SurveyPage';
 import AboutPage from '../components/AboutPage';
 
@@ -38,12 +38,14 @@ export default App = StackNavigator({
         });
       },
     },
+*/
     Canvassing: {
       screen: CanvassingPage,
       navigationOptions: ({navigation}) => ({
         title: 'Canvassing',
       }),
     },
+/*
       Survey: {
         screen: SurveyPage,
         navigationOptions: ({navigation}) => ({
