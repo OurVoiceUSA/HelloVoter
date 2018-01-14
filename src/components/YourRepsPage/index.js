@@ -59,7 +59,7 @@ export default class App extends PureComponent {
       if (user.lastsearchpos.icon == 'map-marker') {
         this.doCurrentLocation();
       } else {
-        this._whorepme(user.lastsearchpos.longitude, user.lastsearchpos.latitude, user.lastsearchpos.address, user.lastsearchpos.icon);
+        this._whorepme(user.lastsearchpos);
       }
     }
     if (!prevState.user && user && !user.lastsearchpos) {
@@ -80,37 +80,32 @@ export default class App extends PureComponent {
     console.warn(error);
   }
 
-  _whorepme = async (lng, lat, address, icon) => {
+  _whorepme = async (position) => {
     let { user } = this.state;
 
     this.setState({
       loading: true,
-      myPosition: {address: address, longitude: lng, latitude: lat, icon: icon},
+      myPosition: position,
       modalIsOpen: false,
     });
 
     var body = null;
     try {
       if (user) {
-        user.lastsearchpos = {
-          address: address,
-          longitude: lng,
-          latitude: lat,
-          icon: icon,
-        };
-        if (icon == 'home' && !user.profile.home_address) {
-          user.profile.home_address = address;
-          user.profile.home_lng = lng;
-          user.profile.home_lat = lat;
+        user.lastsearchpos = position;
+        if (position.icon == 'home' && !user.profile.home_address) {
+          user.profile.home_address = position.address;
+          user.profile.home_lng = position.longitude;
+          user.profile.home_lat = position.latitude;
         }
         _saveUser(user, true);
       }
 
-      let res = await _apiCall('/api/whorepme?lng='+lng+'&lat='+lat, {address: address});
+      let res = await _apiCall('/api/whorepme?lng='+position.longitude+'&lat='+position.latitude, {address: position.address});
       body = await res.json();
 
     } catch (error) {
-      _genericServiceError(error, "There was an error fetching data for this request.");
+      this._genericServiceError(error, "There was an error fetching data for this request.");
       console.warn(JSON.stringify(error));
     }
 
@@ -126,7 +121,12 @@ export default class App extends PureComponent {
     const { user } = this.state;
 
     if (user && user.profile.home_address && user.profile.home_lng && user.profile.home_lat) {
-      this._whorepme(user.profile.home_lng, user.profile.home_lat, user.profile.home_address, 'home');
+      this._whorepme({
+        longitude: user.profile.home_lng,
+        latitude: user.profile.home_lat,
+        address: user.profile.home_address,
+        icon: 'home',
+      });
       return;
     }
     this.locationIcon = 'home';
@@ -149,14 +149,16 @@ export default class App extends PureComponent {
             'Unfortunately we can\'t guarantee accurate district results without a whole address.',
             [
               {text: 'Continue Anyway', onPress: () => {
-                this._whorepme(place.longitude, place.latitude, place.address, this.locationIcon);
+                place.icon = this.locationIcon;
+                this._whorepme(place);
               }},
               {text: 'Cancel'}
             ], { cancelable: false }
           );
         }, 500);
       } else {
-        this._whorepme(place.longitude, place.latitude, place.address, this.locationIcon);
+        place.icon = this.locationIcon;
+        this._whorepme(place);
       }
     })
     .catch(error => console.log(error.message));
@@ -177,10 +179,18 @@ export default class App extends PureComponent {
   doGeocode = async (lng, lat) => {
     try {
       let results = await RNGooglePlaces.getCurrentPlace();
-      this._whorepme(results[0].longitude, results[0].latitude, results[0].address, 'map-marker');
+      results[0].icon = 'map-marker';
+      this._whorepme(results[0]);
     } catch (error) {
-      this.setState({myPosition: {icon: 'map-marker', address: 'location address error', error: true}});
-      this._whorepme(lng, lat, 'location address error', 'map-marker');
+      let position = {
+        longitude: lng,
+        latitude: lat,
+        address: 'location address error',
+        icon: 'map-marker',
+        error: true,
+      };
+      this.setState({myPosition: position});
+      this._whorepme(position);
     }
     if (this.evEmitter) {
       RNGLocation.disconnect();
