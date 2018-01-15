@@ -25,6 +25,8 @@ import Permissions from 'react-native-permissions';
 import RNGLocation from 'react-native-google-location';
 import RNGooglePlaces from 'react-native-google-places';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
+import Modal from 'react-native-modal';
+import ModalInput from '../ModalInput';
 
 export default class App extends PureComponent {
 
@@ -35,11 +37,9 @@ export default class App extends PureComponent {
       serviceError: null,
       locationAccess: null,
       myPosition: null,
-      myAddress: null,
-      geoAddress: null,
       inputPosition: null,
       inputAddress: null,
-      cAddress : ["#","Name","City","State","Zip", "Apt #"],
+      cAddress: ["#","Name","City","State","Zip", "Apt #"],
       myPins: [],
       asyncStorageKey: 'OV_CANVASS_PINS@'+props.navigation.state.params.userId,
       DisclosureKey : 'OV_DISCLOUSER',
@@ -52,17 +52,14 @@ export default class App extends PureComponent {
   }
 
   doGeocode = async () => {
-    let address = null;
     try {
       let res = await RNGooglePlaces.getCurrentPlace();
-      if (res["0"]) {
-        address = res["0"].address;
-        this.setState({ myAddress: address });
-      }
+      if (res["0"])
+        return res["0"];
     } catch (error) {
       console.warn(error);
     }
-    return address;
+    return null;
   }
 
   onLocationChange (e: Event) {
@@ -76,7 +73,6 @@ export default class App extends PureComponent {
       lat: e.Latitude,
       lng: e.Longitude,
     };
-
   }
 
   requestLocationPermission = async () => {
@@ -141,29 +137,50 @@ export default class App extends PureComponent {
     }
   }
 
+  showConfirmAddress = async () => {
+    var cAddress = [];
+    var geoAddress;
+
+    let res = await this.doGeocode();
+
+    if (res) {
+      let arr = res.address.split(",");
+      let country = arr[arr.length-1]; // unused
+      let state_zip = arr[arr.length-2];
+      let state = (state_zip?state_zip.split(" ")[1]:null);
+      let zip = (state_zip?state_zip.split(" ")[2]:null);
+      let city = arr[arr.length-3];
+      let street = arr[arr.length-4];
+
+      cAddress = [street, null, city, state, zip];
+    }
+
+    this.setState({
+      isModalVisible: true,
+      cAddress: cAddress,
+    });
+  }
+
   doConfirmAddress = async () => {
-    const { myAddress, cAddress } = this.state;
+    const { myPosition, cAddress } = this.state;
     var LL;
     var addr;
-    var inputAddress = cAddress[0] + " " + cAddress[1] + " " + cAddress[2] + " " + cAddress[3] + " " + cAddress[4];
+    var inputAddress = cAddress[0] + (cAddress[1]?" #"+cAddress[1]:"") + ", " + cAddress[2] + ", " + cAddress[3] + ", " + cAddress[4];
 
-    // TODO: use RNGooglePlaces, but for now...
-    // just use the original lat/lng
     LL = {
-      latitude: myAddress.position.lat,
-      longitude: myAddress.position.lng,
+      longitude: myPosition.longitude,
+      latitude: myPosition.latitude,
     };
-    addr = await doGeocode();
 
     // res is an Array of geocoding object, take the first one
-    this.setState({ inputPosition: LL, geoAddress: addr, inputAddress: addr.formattedAddress, isModalVisible: false });
+    this.setState({ inputPosition: LL, inputAddress: inputAddress, isModalVisible: false });
     this.map.animateToCoordinate(LL, 500)
     // second modal doesn't show because of the map animation (a bug?) - have it set after it's done
     setTimeout(() => { this.setState({ isKnockMenuVisible: true }); }, 550);
   }
 
   addpin(color) {
-    let { inputPosition, myPins, inputAddress, geoAddress, userId } = this.state;
+    let { inputPosition, myPins, inputAddress, userId } = this.state;
     let epoch = Math.floor(new Date().getTime() / 1000);
 
     const pin = {
@@ -181,7 +198,7 @@ export default class App extends PureComponent {
     this._savePinsAsyncStorage();
 
     const { navigate } = this.props.navigation;
-    if (color === "green") navigate('Survey', {address: geoAddress, pinId: epoch, userId: userId});
+    if (color === "green") navigate('Survey', {address: inputAddress, pinId: epoch, userId: userId});
 
   }
 
@@ -243,7 +260,8 @@ export default class App extends PureComponent {
   render() {
 
     const { navigate } = this.props.navigation;
-    const { showDisclosure, myPosition, cAddress, myPins, userId, locationAccess, serviceError } = this.state;
+    const { showDisclosure, myPosition, myPins, userId, locationAccess, serviceError } = this.state;
+    let { cAddress } = this.state;
 
     if (showDisclosure === "true") {
       return (
@@ -339,6 +357,135 @@ export default class App extends PureComponent {
     return (
       <View style={styles.container}>
 
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <Modal style={{
+          alignItems: 'center',
+          marginBottom: Dimensions.get('window').height * 0.2, // temp solution for keyboard spacing
+          justifyContent: 'center'}}
+          isVisible={this.state.isModalVisible}
+        >
+          <View style={{flexDirection: 'column'}}>
+            <View style={{width: Dimensions.get('window').width * 0.7, height: 245, backgroundColor: 'white', marginTop: 15, borderRadius: 15, padding: 25, alignSelf: 'flex-start'}}>
+              <Text style={{color: 'blue', fontWeight: 'bold', fontSize: 15}}>Confirm the Address</Text>
+                <View>
+                  <Text style={styles.baseText, {position: 'absolute', bottom: -53, fontSize: 12}}>Street Address</Text>
+                  <View style={{flexDirection: 'row', position: 'absolute', right: 80, bottom: -45, alignItems: 'center'}}>
+                    <TextInput style={{height: 45, width: 135, fontSize: 15 }}
+                      onChange={(event) => {cAddress[0] = event.nativeEvent.text; this.setState({cAddress});}}
+                      underlineColorAndroid={'transparent'}
+                      value={cAddress[0]}
+                      multiline={false}
+                    />
+                   <View style={{position: 'absolute', bottom:10, width: 135, right: -3, height: 1, backgroundColor: 'gray'}} />
+                 </View>
+                 <Text style={styles.baseText, {position: 'absolute', bottom: -93, fontSize: 12}}>Unit #</Text>
+                 <TextInput
+                   style={{height: 45, width: 100, fontSize: 15, flexDirection: 'row', position: 'absolute', right: 110, bottom: -85, alignItems: 'center'}}
+                   onChange={(event) => {cAddress[5] = event.nativeEvent.text; this.setState({cAddress});}}
+                   underlineColorAndroid={'transparent'}
+                   value={cAddress[1]}
+                   multiline={false}
+                 />
+                 <View style={{position: 'absolute', bottom:-75, width: 100, right: 110, height: 1, backgroundColor: 'gray'}} />
+                 <Text style={styles.baseText, {position: 'absolute', bottom: -137, fontSize: 12}}>City</Text>
+                 <Text style={styles.baseText, {position: 'absolute', right:53,bottom: -137, fontSize: 12}}>State</Text>
+                 <Text style={styles.baseText, {position: 'absolute', right:27, bottom: -137, fontSize: 12}}>Zip</Text>
+                 <View style={{flexDirection: 'row', position: 'absolute', right: 0, bottom: -130, alignItems: 'center'}}>
+                 <TextInput
+                   style={{height: 45, width: 130, fontSize: 15 }}
+                   onChange={(event) => {cAddress[2] = event.nativeEvent.text; this.setState({cAddress});}}
+                   underlineColorAndroid={'transparent'}
+                   value={cAddress[2]}
+                   multiline={false}
+                 />
+                 <View style={{position: 'absolute', bottom:10, width: 125, right: 85, height: 1, backgroundColor: 'gray'}} />
+                 <TextInput
+                   style={{height: 45, width: 30, fontSize: 15 }}
+                   onChange={(event) => {cAddress[3] = event.nativeEvent.text; this.setState({cAddress});}}
+                   underlineColorAndroid={'transparent'}
+                   value={cAddress[3]}
+                   multiline={false}
+                 />
+                 <View style={{position: 'absolute', bottom:10, width: 25, right: 53, height: 1, backgroundColor: 'gray'}} />
+                 <TextInput
+                   style={{height: 45, width: 50, fontSize: 15}}
+                   onChange={(event) => {cAddress[4] = event.nativeEvent.text; this.setState({cAddress});}}
+                   underlineColorAndroid={'transparent'}
+                   value={cAddress[4]}
+                   multiline={false}
+                 />
+                 <View style={{position: 'absolute', bottom:10, width: 48, right: 0, height: 1, backgroundColor: 'gray'}} />
+               </View>
+               <View style={{flexDirection: 'row', position: 'absolute', right: 25, bottom: -170, alignItems: 'center'}}>
+                 <TouchableOpacity onPress={() => this.setState({isModalVisible: false})}>
+                   <Text style={{fontWeight: 'bold', color: 'blue'}}>Cancel</Text>
+                 </TouchableOpacity>
+                 <TouchableOpacity style={{marginLeft: 30}} onPress={() => {
+                   this.doConfirmAddress();
+                 }}>
+                   <Text style={{fontWeight: 'bold', color: 'blue'}}>OK</Text>
+                 </TouchableOpacity>
+               </View>
+             </View>
+          </View>
+        </View>
+      </Modal>
+      </TouchableWithoutFeedback>
+
+      <Modal style={{
+        alignItems: 'center',
+        marginBottom: Dimensions.get('window').height * 0.2, // temp solution for keyboard spacing
+        justifyContent: 'center'}}
+        isVisible={this.state.isKnockMenuVisible}
+      >
+          <View style={{flexDirection: 'column'}}>
+            <View style={{width: Dimensions.get('window').width * 0.7, height: 260, backgroundColor: 'white', marginTop: 15, borderRadius: 15, padding: 25, alignSelf: 'flex-start'}}>
+              <Text style={{color: 'blue', fontWeight: 'bold', fontSize: 20}}>Are they home?</Text>
+              <View>
+
+                <View style={{margin: 5, flexDirection: 'row'}}>
+                  <Icon.Button
+                    name="check-circle"
+                    backgroundColor="#d7d7d7"
+                    color="#000000"
+                    onPress={() => {this.setState({ isKnockMenuVisible: false }); this.addpin("green"); }}
+                    {...iconStyles}>
+                    Take Survey
+                  </Icon.Button>
+                </View>
+
+                <View style={{margin: 5, flexDirection: 'row'}}>
+                  <Icon.Button
+                    name="circle-o"
+                    backgroundColor="#d7d7d7"
+                    color="#000000"
+                    onPress={() => {this.setState({ isKnockMenuVisible: false }); this.addpin("yellow"); }}
+                    {...iconStyles}>
+                    Not Home
+                  </Icon.Button>
+                </View>
+
+                <View style={{margin: 5, flexDirection: 'row'}}>
+                  <Icon.Button
+                    name="ban"
+                    backgroundColor="#d7d7d7"
+                    color="#000000"
+                    onPress={() => {this.setState({ isKnockMenuVisible: false }); this.addpin("red"); }}
+                    {...iconStyles}>
+                    Not Interested
+                  </Icon.Button>
+                </View>
+
+              </View>
+
+              <TouchableOpacity onPress={() => this.setState({ isKnockMenuVisible: false })}>
+                <Text style={{fontWeight: 'bold', color: 'blue'}}>Cancel</Text>
+              </TouchableOpacity>
+
+            </View>
+          </View>
+        </Modal>
+
         <MapView
           ref={component => this.map = component}
           initialRegion={{latitude: myPosition.latitude, longitude: myPosition.longitude, latitudeDelta: 0.005, longitudeDelta: 0.005}}
@@ -372,7 +519,7 @@ export default class App extends PureComponent {
             name="hand-rock-o"
             backgroundColor="#d7d7d7"
             color="#000000"
-            onPress={() => {Alert.alert('Error', 'I apologize! This feature is currently broken. Will be fixed soon.', [{text: 'OK'}], { cancelable: false })}}
+            onPress={() => {this.showConfirmAddress();}}
             {...iconStyles}>
             Prepare to Knock
           </Icon.Button>
