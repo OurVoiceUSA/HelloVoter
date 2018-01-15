@@ -26,6 +26,7 @@ export default class App extends PureComponent {
     this.state = {
       SmLoginScreen: false,
       numberReturn: null,
+      tellUsReturn: false,
       loading: false,
       office: props.navigation.state.params.office,
       profile: props.navigation.state.params.profile,
@@ -49,13 +50,21 @@ export default class App extends PureComponent {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const { SmLoginScreen, user, numberReturn } = this.state;
-    if (prevState.SmLoginScreen && !SmLoginScreen && user.loggedin && numberReturn) {
+    const { SmLoginScreen, user, numberReturn, tellUsReturn } = this.state;
+    if (prevState.SmLoginScreen && !SmLoginScreen && user.loggedin) {
       // lots of state updates in these calls - do it outside of componentDidUpdate
-      setTimeout(() => { 
-        this._doTheRate(numberReturn);
-        this.setState({numberReturn: null});
-      }, 500);
+      if (numberReturn) {
+        setTimeout(() => { 
+          this._doTheRate(numberReturn);
+          this.setState({numberReturn: null});
+        }, 500);
+      }
+      if (tellUsReturn) {
+        setTimeout(() => {
+          this._doTellUs();
+          this.setState({tellUsReturn: false});
+        }, 500);
+      }
     }
   }
 
@@ -72,6 +81,24 @@ export default class App extends PureComponent {
 
   openURL = (url) => {
     return Linking.openURL(url).catch(() => null);
+  }
+
+  _doTellUs = async () => {
+    const { user, office } = this.state;
+
+    if (!user.loggedin) {
+      this.setState({SmLoginScreen: true, tellUsReturn: true});
+    } else {
+      this.openURL(
+        "https://docs.google.com/forms/d/e/1FAIpQLSfmtSKEZh66HLNpkvOIg4W4MbFOIvklGBwweuExsQCL0P11FQ/viewform?usp=pp_url"
+        +((user.profile && user.profile.name)?"&entry.775957053="+user.profile.name:"")
+        +((user.profile && user.profile.email)?"&entry.2004667629="+user.profile.email:"")
+        +"&entry.839337160="+office.state
+        +"&entry.883929373="+((office.type == "sen" || office.type == "rep")?"Federal":"State")
+        +"&entry.1678115432="+office.name
+        +(office.district?"&entry.1511558516="+office.district:"")
+      );
+    }
   }
 
   _doTheRate = async (number) => {
@@ -247,15 +274,7 @@ export default class App extends PureComponent {
         <View style={{margin: 15, flexDirection: 'row'}}>
           <TouchableOpacity
             style={{backgroundColor: '#d7d7d7', flex: 1, padding: 20}}
-            onPress={() => {
-              this.openURL(
-                "https://docs.google.com/forms/d/e/1FAIpQLSfmtSKEZh66HLNpkvOIg4W4MbFOIvklGBwweuExsQCL0P11FQ/viewform?usp=pp_url"
-                +"&entry.839337160="+office.state
-                +"&entry.883929373="+((office.type == "sen" || office.type == "rep")?"Federal":"State")
-                +"&entry.1678115432="+office.name
-                +(office.district?"&entry.1511558516="+office.district:"")
-              );
-            }}>
+            onPress={() => {this._doTellUs()}}>
             <Text style={{textAlign: 'center'}}>If you know anyone who is running against this politican, tap here to tell us.</Text>
           </TouchableOpacity>
         </View>
