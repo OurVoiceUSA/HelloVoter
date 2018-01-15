@@ -25,6 +25,7 @@ export default class App extends PureComponent {
       surveys: {},
       surveyData: [],
       asyncStorageKey: 'OV_SURVEY@'+state.params.userId,
+      refer: state.params.refer,
       userId: state.params.userId,
       pinId: state.params.pinId,
       address: state.params.address,
@@ -137,7 +138,7 @@ export default class App extends PureComponent {
   }
 
   saveSurveyData = async () => {
-    const { asyncStorageKey, pinId } = this.state;
+    const { asyncStorageKey, pinId, refer } = this.state;
     let { surveys, surveyData } = this.state;
 
     // transpose value to numeric
@@ -170,6 +171,8 @@ export default class App extends PureComponent {
     } catch (error) {
       console.error(error);
     }
+
+    if (refer) refer.loadSurveyData();
 
   }
 

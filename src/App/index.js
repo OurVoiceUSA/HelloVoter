@@ -5,7 +5,7 @@ import YourRepsPage from '../components/YourRepsPage';
 import PolProfilePage from '../components/PolProfilePage';
 import SettingsPage from '../components/SettingsPage';
 import CanvassingPage from '../components/CanvassingPage';
-//import SurveyPage from '../components/SurveyPage';
+import SurveyPage from '../components/SurveyPage';
 import AboutPage from '../components/AboutPage';
 
 import { StackNavigator } from 'react-navigation';
@@ -27,7 +27,6 @@ export default App = StackNavigator({
         title: 'Your Voice',
       }),
     },
-/*
     PoliticalViews: {
       screen: SurveyPage,
       navigationOptions: ({navigation}) => {
@@ -38,21 +37,18 @@ export default App = StackNavigator({
         });
       },
     },
-*/
     Canvassing: {
       screen: CanvassingPage,
       navigationOptions: ({navigation}) => ({
         title: 'Canvassing',
       }),
     },
-/*
       Survey: {
         screen: SurveyPage,
         navigationOptions: ({navigation}) => ({
           title: 'Survey',
         }),
       },
-*/
     YourReps: {
       screen: YourRepsPage,
       navigationOptions: ({navigation}) => ({

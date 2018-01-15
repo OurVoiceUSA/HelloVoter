@@ -190,6 +190,7 @@ export async function _getUserLocal() {
 export async function _rmUser() {
   try {
     await storage.del(USERLOCAL);
+    await storage.del('OV_SURVEY@0');
   } catch (error) {
     console.warn(error);
   }

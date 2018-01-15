@@ -21,6 +21,7 @@ import ModalPicker from 'react-native-modal-selector';
 import Modal from 'react-native-simple-modal';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import SmLoginPage from '../SmLoginPage';
+import storage from 'react-native-storage-wrapper';
 import { google_api_key } from '../../config';
 import { _getJWT, _rmJWT, _saveUser, _rmUser, _apiCall, _specificAddress } from '../../common';
 
@@ -42,6 +43,8 @@ export default class App extends PureComponent {
     this.state = {
       SmLoginScreen: false,
       profileUpdate: false,
+      surveyComplete: false,
+      surveyPartial: false,
       user: null,
       party: null,
       myPosition: { address: null, longitude: null, latitude: null },
@@ -102,6 +105,7 @@ export default class App extends PureComponent {
   componentDidMount() {
     this.checkPermissionLocation();
     this.checkPermissionNotification();
+    this.loadSurveyData();
     this._loadProfile();
   }
 
@@ -138,12 +142,29 @@ export default class App extends PureComponent {
     this.setState({permissionNotification: access});
   }
 
+  loadSurveyData = async () => {
+    try {
+      let data = await storage.get('OV_SURVEY@0')
+      if (data !== null) {
+        let answered = 0;
+        let surveys = JSON.parse(data);
+        for (let i = 0; i < surveys[0].survey.length; i++) {
+          if (surveys[0].survey[i].value !== "") answered++;
+        }
+        if (answered >= 25) this.setState({surveyComplete: true});
+        else this.setState({surveyPartial: true});
+      }
+    } catch (error) {
+      console.warn(error);
+    }
+  }
+
   sessionExpired() {
     Alert.alert('Logged Out', 'Your login session has expired. Please login again to update your profile.', [{text: 'OK'}], { cancelable: false });
   }
 
   render() {
-    const { user, permissionLocation, permissionNotification, SmLoginScreen, party, myPosition } = this.state;
+    const { user, permissionLocation, permissionNotification, SmLoginScreen, surveyComplete, surveyPartial, party, myPosition } = this.state;
     const { navigate } = this.props.navigation;
 
     // wait for user object to become available
@@ -380,12 +401,12 @@ export default class App extends PureComponent {
               <Text style={{fontSize: 20}}>Political Views:</Text>
             </View>
           </View>
-          {/* party &&
+          {surveyComplete &&
           <View style={{flexDirection: 'row', alignItems: 'center', marginRight: 20}}>
             <Text style={{marginRight: 7, fontWeight: 'bold'}}>Complete</Text>
             <Icon name="check-circle" size={30} color="green" />
           </View>
-          || party &&
+          || surveyPartial &&
           <View style={{flexDirection: 'row', alignItems: 'center', marginRight: 20}}>
             <Text style={{marginRight: 7, fontWeight: 'bold'}}>Incomplete</Text>
             <Icon name="exclamation-circle" size={30} color="orange" />
@@ -395,25 +416,15 @@ export default class App extends PureComponent {
             <Text style={{marginRight: 7, fontWeight: 'bold'}}>Not Started</Text>
             <Icon name="times-circle" size={30} color="red" />
           </View>
-          */}
-          <View style={{flexDirection: 'row', alignItems: 'center', marginRight: 20}}>
-            <Text style={{marginRight: 7, fontWeight: 'bold'}}>not working</Text>
-            <Icon name="bug" size={30} color="purple" />
-          </View>
+          }
         </View>
 
         <View style={{flex: 1, alignItems: 'center'}}>
             <TouchableOpacity
               style={{flexDirection: 'row', padding: 10, alignItems: 'center', backgroundColor: '#d7d7d7'}}
-              onPress={() => {/*navigate('Survey')*/}}>
-              <Text>Take Survey (broken)</Text>
+              onPress={() => {navigate('Survey', {refer: this, userId: 0, pinId: 0})}}>
+              <Text>Take Survey</Text>
             </TouchableOpacity>
-        </View>
-
-        <View style={{flexDirection: 'row', justifyContent: 'center', margin: 10 }}>
-          <Text style={{fontStyle: 'italic'}}>
-             I apologize! This feature is currently broken.
-          </Text>
         </View>
 
         <View style={{flexDirection: 'row', margin: 20, marginTop: 10}}>
