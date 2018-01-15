@@ -247,7 +247,15 @@ export default class App extends PureComponent {
         <View style={{margin: 15, flexDirection: 'row'}}>
           <TouchableOpacity
             style={{backgroundColor: '#d7d7d7', flex: 1, padding: 20}}
-            onPress={() => {this.openURL("https://docs.google.com/forms/d/1rCvfxHaj0oLRMblAMT1hdsM3rgmoSP9Xo_uxzBM6jqU/viewform");}}>
+            onPress={() => {
+              this.openURL(
+                "https://docs.google.com/forms/d/e/1FAIpQLSfmtSKEZh66HLNpkvOIg4W4MbFOIvklGBwweuExsQCL0P11FQ/viewform?usp=pp_url"
+                +"&entry.839337160="+office.state
+                +"&entry.883929373="+((office.type == "sen" || office.type == "rep")?"Federal":"State")
+                +"&entry.1678115432="+office.name
+                +(office.district?"&entry.1511558516="+office.district:"")
+              );
+            }}>
             <Text style={{textAlign: 'center'}}>If you know anyone who is running against this politican, tap here to tell us.</Text>
           </TouchableOpacity>
         </View>
