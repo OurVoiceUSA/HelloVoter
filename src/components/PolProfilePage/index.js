@@ -240,6 +240,18 @@ export default class App extends PureComponent {
           </View>
         </View>
 
+        <View style={{margin: 15, marginBottom: 0, marginTop: 0, flexDirection: 'row'}}>
+                <Text style={{fontSize: 14, textAlign: 'center'}}>We currently aren't aware of who is challenging this politican in the next primary.</Text>
+        </View>
+
+        <View style={{margin: 15, flexDirection: 'row'}}>
+          <TouchableOpacity
+            style={{backgroundColor: '#d7d7d7', flex: 1, padding: 20}}
+            onPress={() => {this.openURL("https://docs.google.com/forms/d/1rCvfxHaj0oLRMblAMT1hdsM3rgmoSP9Xo_uxzBM6jqU/viewform");}}>
+            <Text style={{textAlign: 'center'}}>If you know anyone who is running against this politican, tap here to tell us.</Text>
+          </TouchableOpacity>
+        </View>
+
         <View style={{alignItems: 'center'}}>
           {starArea}
         </View>
