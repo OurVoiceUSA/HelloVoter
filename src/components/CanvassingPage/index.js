@@ -193,13 +193,6 @@ export default class App extends PureComponent {
 
   }
 
-  SaveVariable(name, val)
-  {
-    this.setState(this.state.tempName : name);
-    this.setState(this.state.tempValue : val);
-    this.a_SaveVariable();
-  }
-  
   //Load a saved showDisclosure
   LoadDisclosure = async () => {
     try {
