@@ -40,7 +40,11 @@ export default class App extends PureComponent {
       myPosition: null,
       inputPosition: null,
       inputAddress: null,
-      cAddress: ["#","Name","City","State","Zip", "Apt #"],
+      cStreet: null,
+      cUnit: null,
+      cCity: null,
+      cState: null,
+      cZip: null,
       myPins: [],
       asyncStorageKey: 'OV_CANVASS_PINS@'+props.navigation.state.params.userId,
       DisclosureKey : 'OV_DISCLOUSER',
@@ -129,7 +133,6 @@ export default class App extends PureComponent {
 
   showConfirmAddress = async () => {
     const { myPosition } = this.state;
-    var cAddress = [];
     var geoAddress;
 
     let res = await _doGeocode(myPosition.longitude, myPosition.latitude);
@@ -138,25 +141,24 @@ export default class App extends PureComponent {
       let arr = res.address.split(",");
       let country = arr[arr.length-1]; // unused
       let state_zip = arr[arr.length-2];
-      let state = (state_zip?state_zip.split(" ")[1]:null);
-      let zip = (state_zip?state_zip.split(" ")[2]:null);
-      let city = arr[arr.length-3];
-      let street = arr[arr.length-4];
+      let cState = (state_zip?state_zip.split(" ")[1]:null);
+      let cZip = (state_zip?state_zip.split(" ")[2]:null);
+      let cCity = arr[arr.length-3];
+      let cStreet = arr[arr.length-4];
 
-      cAddress = [street, null, city, state, zip];
+      this.setState({cStreet, cCity, cZip, cState, cUnit: null});
     }
 
     this.setState({
       isModalVisible: true,
-      cAddress: cAddress,
     });
   }
 
   doConfirmAddress = async () => {
-    const { myPosition, cAddress } = this.state;
+    const { myPosition, cStreet, cUnit, cCity, cState, cZip } = this.state;
     var LL;
     var addr;
-    var inputAddress = cAddress[0] + (cAddress[1]?" #"+cAddress[1]:"") + ", " + cAddress[2] + ", " + cAddress[3] + ", " + cAddress[4];
+    var inputAddress = cStreet + (cUnit?" #"+cUnit:"") + ", " + cCity + ", " + cState + ", " + cZip;
 
     LL = {
       longitude: myPosition.longitude,
@@ -244,8 +246,10 @@ export default class App extends PureComponent {
   render() {
 
     const { navigate } = this.props.navigation;
-    const { showDisclosure, myPosition, myPins, userId, locationAccess, serviceError } = this.state;
-    let { cAddress } = this.state;
+    const {
+      showDisclosure, myPosition, myPins, userId, locationAccess, serviceError,
+      cStreet, cUnit, cCity, cState, cZip,
+    } = this.state;
 
     if (showDisclosure === "true") {
       return (
@@ -355,9 +359,9 @@ export default class App extends PureComponent {
                   <Text style={styles.baseText, {position: 'absolute', bottom: -53, fontSize: 12}}>Street Address</Text>
                   <View style={{flexDirection: 'row', position: 'absolute', right: 80, bottom: -45, alignItems: 'center'}}>
                     <TextInput style={{height: 45, width: 135, fontSize: 15 }}
-                      onChange={(event) => {cAddress[0] = event.nativeEvent.text; this.setState({cAddress});}}
+                      onChangeText={(text) => {this.setState({cStreet: text});}}
                       underlineColorAndroid={'transparent'}
-                      value={cAddress[0]}
+                      value={cStreet}
                       multiline={false}
                     />
                    <View style={{position: 'absolute', bottom:10, width: 135, right: -3, height: 1, backgroundColor: 'gray'}} />
@@ -365,9 +369,9 @@ export default class App extends PureComponent {
                  <Text style={styles.baseText, {position: 'absolute', bottom: -93, fontSize: 12}}>Unit #</Text>
                  <TextInput
                    style={{height: 45, width: 100, fontSize: 15, flexDirection: 'row', position: 'absolute', right: 110, bottom: -85, alignItems: 'center'}}
-                   onChange={(event) => {cAddress[5] = event.nativeEvent.text; this.setState({cAddress});}}
+                  onChangeText={(text) => {this.setState({cUnit: text});}}
                    underlineColorAndroid={'transparent'}
-                   value={cAddress[1]}
+                   value={cUnit}
                    multiline={false}
                  />
                  <View style={{position: 'absolute', bottom:-75, width: 100, right: 110, height: 1, backgroundColor: 'gray'}} />
@@ -377,25 +381,25 @@ export default class App extends PureComponent {
                  <View style={{flexDirection: 'row', position: 'absolute', right: 0, bottom: -130, alignItems: 'center'}}>
                  <TextInput
                    style={{height: 45, width: 130, fontSize: 15 }}
-                   onChange={(event) => {cAddress[2] = event.nativeEvent.text; this.setState({cAddress});}}
+                   onChangeText={(text) => {this.setState({cCity: text});}}
                    underlineColorAndroid={'transparent'}
-                   value={cAddress[2]}
+                   value={cCity}
                    multiline={false}
                  />
                  <View style={{position: 'absolute', bottom:10, width: 125, right: 85, height: 1, backgroundColor: 'gray'}} />
                  <TextInput
                    style={{height: 45, width: 30, fontSize: 15 }}
-                   onChange={(event) => {cAddress[3] = event.nativeEvent.text; this.setState({cAddress});}}
+                   onChangeText={(text) => {this.setState({cState: text});}}
                    underlineColorAndroid={'transparent'}
-                   value={cAddress[3]}
+                   value={cState}
                    multiline={false}
                  />
                  <View style={{position: 'absolute', bottom:10, width: 25, right: 53, height: 1, backgroundColor: 'gray'}} />
                  <TextInput
                    style={{height: 45, width: 50, fontSize: 15}}
-                   onChange={(event) => {cAddress[4] = event.nativeEvent.text; this.setState({cAddress});}}
+                   onChangeText={(text) => {this.setState({cZip: text});}}
                    underlineColorAndroid={'transparent'}
-                   value={cAddress[4]}
+                   value={cZip}
                    multiline={false}
                  />
                  <View style={{position: 'absolute', bottom:10, width: 48, right: 0, height: 1, backgroundColor: 'gray'}} />
