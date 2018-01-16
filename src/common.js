@@ -50,6 +50,10 @@ export async function _doGeocode(lng, lat) {
       console.warn(error);
     }
   }
+
+  if (position.address)
+    position.address = position.address.replace(/\s\s+/g, ' ');
+
   return position;
 }
 
