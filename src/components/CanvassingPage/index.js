@@ -27,6 +27,7 @@ import RNGooglePlaces from 'react-native-google-places';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import Modal from 'react-native-modal';
 import ModalInput from '../ModalInput';
+import { _doGeocode } from '../../common';
 
 export default class App extends PureComponent {
 
@@ -49,17 +50,6 @@ export default class App extends PureComponent {
       showDisclosure: "true",
     };
 
-  }
-
-  doGeocode = async () => {
-    try {
-      let res = await RNGooglePlaces.getCurrentPlace();
-      if (res["0"])
-        return res["0"];
-    } catch (error) {
-      console.warn(error);
-    }
-    return null;
   }
 
   onLocationChange (e: Event) {
@@ -138,10 +128,11 @@ export default class App extends PureComponent {
   }
 
   showConfirmAddress = async () => {
+    const { myPosition } = this.state;
     var cAddress = [];
     var geoAddress;
 
-    let res = await this.doGeocode();
+    let res = await _doGeocode(myPosition.longitude, myPosition.latitude);
 
     if (res) {
       let arr = res.address.split(",");

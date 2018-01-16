@@ -23,7 +23,7 @@ import RNGooglePlaces from 'react-native-google-places';
 import Modal from 'react-native-simple-modal';
 import DisplayRep from './display-rep';
 import { wsbase } from '../../config'
-import { _apiCall, _loginPing, _saveUser, _specificAddress } from '../../common';
+import { _apiCall, _loginPing, _doGeocode, _saveUser, _specificAddress } from '../../common';
 
 export default class App extends PureComponent {
 
@@ -177,21 +177,10 @@ export default class App extends PureComponent {
   }
 
   doGeocode = async (lng, lat) => {
-    try {
-      let results = await RNGooglePlaces.getCurrentPlace();
-      results[0].icon = 'map-marker';
-      this._whorepme(results[0]);
-    } catch (error) {
-      let position = {
-        longitude: lng,
-        latitude: lat,
-        address: 'location address error',
-        icon: 'map-marker',
-        error: true,
-      };
-      this.setState({myPosition: position});
-      this._whorepme(position);
-    }
+    let position = await _doGeocode(lng, lat);
+
+    this._whorepme(position);
+
     if (this.evEmitter) {
       RNGLocation.disconnect();
       this.evEmitter.remove();

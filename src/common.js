@@ -2,6 +2,8 @@
 import storage from 'react-native-storage-wrapper';
 import jwt_decode from 'jwt-decode';
 import DeviceInfo from 'react-native-device-info';
+import RNGooglePlaces from 'react-native-google-places';
+import Geocoder from 'react-native-geocoder';
 import { wsbase } from './config';
 
 const JWT = 'OV_JWT';
@@ -17,6 +19,38 @@ export async function _loginPing(refer, remote) {
 export function _specificAddress(address) {
   if ((address.match(/,/g) || []).length <= 2) return false;
   return true;
+}
+
+export async function _doGeocode(lng, lat) {
+  let position = {
+    longitude: lng,
+    latitude: lat,
+    icon: 'map-marker',
+  };
+
+  try {
+    let results = await Geocoder.geocodePosition({lng: lng, lat: lat});
+    position.address = results[0].formattedAddress;
+  } catch (error) {
+    console.warn(error);
+  }
+
+  // fall back to GooglePlaces
+  if (!position.address) {
+    try {
+      let results = await RNGooglePlaces.getCurrentPlace();
+      // the "place" object has other stuff we don't want - just get what we need
+      position.longitude = results[0].longitude;
+      position.latitude = results[0].latitude;
+      position.address = results[0].address;
+    } catch (error) {
+      // can't geocode, set the address as an error
+      position.address = 'location address error';
+      position.error = true;
+      console.warn(error);
+    }
+  }
+  return position;
 }
 
 export async function _apiCall(uri, input) {
