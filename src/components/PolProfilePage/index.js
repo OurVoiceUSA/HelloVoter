@@ -291,7 +291,7 @@ export default class App extends PureComponent {
           </View>
         </View>
 
-        <View style={{marginLeft: 20, marginRight: 20, alignItems: 'center'}}>
+        <View style={{marginLeft: 20, marginRight: 20, paddingBottom: 35, alignItems: 'center'}}>
           <View style={{flex: 1, alignItems: 'center'}}>
             <View style={{flex: 1, flexDirection: 'row'}}>
               <View style={{marginRight: 5}}>
