@@ -21,7 +21,7 @@ Start by configuring the `.env` file:
     EOF
 
 * The `GOOGLE_API_KEY_` values are credentials created by visiting http://console.developers.google.com/. If you plan on releasing this app, or a fork of it yourself, be sure you lock down the API key to the assosiated platform device specified to avoid quota theft.
-* Without these keys, the address and geocoding won't function, rendering the app basically worthless.
+* Without these keys, address searches won't function, which limits functionality
 
 Install https://nodejs.org/en/download/ if you havne't already, and run:
 
