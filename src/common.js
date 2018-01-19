@@ -30,7 +30,7 @@ export async function _doGeocode(lng, lat) {
 
   try {
     let results = await Geocoder.geocodePosition({lng: lng, lat: lat});
-    position.address = results[0].formattedAddress;
+    position.address = results[0].formattedAddress.replace(/\u2013\d+/, "");
   } catch (error) {
     console.warn(error);
   }
