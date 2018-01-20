@@ -346,12 +346,7 @@ export default class App extends PureComponent {
           }
         />
 
-        <View style={styles.content}>
-          <Text>{"\n"}
-NOTE: We are working hard to build out and maintain a database of elected officials across the country.
-If there is missing or incorrect information, please <Text style={{fontSize: 15, fontWeight: 'bold', color: 'blue'}} onPress={() => {this.email('info@ourvoiceusa.org')}}>
-email us.</Text>
-          </Text>
+        <View style={{paddingBottom: 35}}>
         </View>
         </View>
         }
