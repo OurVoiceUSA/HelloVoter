@@ -54,10 +54,10 @@ export default DisplayRep = (props) => {
 
     <View style={{margin: 5, flex: 1, flexDirection: 'row'}} key={incumbent.last_name+incumbent.first_name}>
       <TouchableOpacity disabled={!incumbent.phone && !incumbent.donotcall} onPress={() => call(incumbent)}>
-        <Icon name="phone-square" size={55} color={(incumbent.donotcall ? '#ff0000' : (incumbent.phone ? '#5BC236' : '#e3e3e3'))} />
+        <Icon name="phone-square" size={45} color={(incumbent.donotcall ? '#ff0000' : (incumbent.phone ? '#5BC236' : '#e3e3e3'))} />
       </TouchableOpacity>
       <TouchableOpacity disabled={!incumbent.email} onPress={() => email(incumbent.email)}>
-        <Icon style={{marginLeft: 5}} name="envelope-square" size={55} color={(incumbent.email ? '#0076ff' : '#e3e3e3')} />
+        <Icon style={{marginLeft: 5}} name="envelope-square" size={45} color={(incumbent.email ? '#0076ff' : '#e3e3e3')} />
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -65,8 +65,8 @@ export default DisplayRep = (props) => {
         disabled={!incumbent.last_name}
         onPress={() => {navigate('PolProfile', {location: location, office: office, profile: incumbent})}}>
         <View style={{flex: 1}}>
-          <Text style={{marginLeft: 10, fontSize: 22}}>
-            {office.name + (office.district ? ' District ' + office.district : '')}{"\n"}
+          <Text style={{marginLeft: 10, fontSize: 18}}>
+            {office.name}{"\n"}
             {(incumbent.last_name ? ( incumbent.party ? '(' + incumbent.party + ') ' : '' ) + incumbent.first_name + ' ' + incumbent.last_name : 'Data Unavailable')}
           </Text>
         </View>
