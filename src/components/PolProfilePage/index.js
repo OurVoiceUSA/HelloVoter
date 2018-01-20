@@ -213,7 +213,7 @@ export default class App extends PureComponent {
               {profile.first_name + ' ' + profile.last_name}
             </Text>
             <Text style={{fontSize: 18}} selectable={true}>
-              {(office?office.state + ' ' + office.name + (office.district ? ' District ' + office.district : ''):'')}
+              {(office?office.name:'')}
             </Text>
             <Text style={{fontSize: 18}} selectable={true}>
               {this.partyNameFromKey(profile.party)}
