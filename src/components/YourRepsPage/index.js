@@ -346,7 +346,7 @@ export default class App extends PureComponent {
           }
         />
 
-        <Text style={styles.header}>Local</Text>
+        <Text style={styles.header}>Other</Text>
         <FlatList
           scrollEnabled={false}
           data={apiData.local.offices}
