@@ -89,11 +89,15 @@ export default class App extends PureComponent {
             Installed Version:
           </Text>
         </View>
-        <View style={{flexDirection: 'row', justifyContent: 'center', marginBottom: 15}}>
+        <View style={{flexDirection: 'row', justifyContent: 'center'}}>
           <Text style={{fontSize: 18, color: 'dimgray'}}>
             {DeviceInfo.getVersion()}
           </Text>
         </View>
+
+        <Text style={{margin: 15, fontSize: 18, color: 'dimgray'}}>
+          Data for this app comes from various public APIs that provide civic information.
+        </Text>
 
         <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginBottom: 15}}>
           <Text style={{fontSize: 18, color: 'dimgray'}}>
