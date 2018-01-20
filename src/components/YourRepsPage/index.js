@@ -303,7 +303,7 @@ export default class App extends PureComponent {
 
         {apiData && !apiData.msg && !loading &&
         <View>
-        <Text style={styles.header}>Federal - {apiData.federal.name}</Text>
+        <Text style={styles.header}>Federal</Text>
 
         <FlatList
           scrollEnabled={false}
@@ -325,10 +325,31 @@ export default class App extends PureComponent {
           }
         />
 
-        <Text style={styles.header}>State - {apiData.state.name}</Text>
+        <Text style={styles.header}>State</Text>
         <FlatList
           scrollEnabled={false}
           data={apiData.state.offices}
+          renderItem={({item}) =>
+            <DisplayRep
+              navigation={this.props.navigation}
+              office={item}
+              location={myPosition}
+              />
+          }
+          ItemSeparatorComponent={() =>
+            <View style={{
+                width: Dimensions.get('window').width,
+                height: 1,
+                backgroundColor: 'lightgray'
+              }}
+            />
+          }
+        />
+
+        <Text style={styles.header}>Local</Text>
+        <FlatList
+          scrollEnabled={false}
+          data={apiData.local.offices}
           renderItem={({item}) =>
             <DisplayRep
               navigation={this.props.navigation}
