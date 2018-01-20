@@ -358,7 +358,8 @@ email us.</Text>
 
         <Modal
           open={modalIsOpen}
-          modalStyle={{width: 335, height: 400, backgroundColor: "transparent"}}
+          modalStyle={{width: 335, height: 400, backgroundColor: "transparent",
+            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
           offset={0}
           overlayBackground={'rgba(0, 0, 0, 0.75)'}
           animationDuration={200}
