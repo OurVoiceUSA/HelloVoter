@@ -89,15 +89,11 @@ export default class App extends PureComponent {
             Installed Version:
           </Text>
         </View>
-        <View style={{flexDirection: 'row', justifyContent: 'center'}}>
+        <View style={{flexDirection: 'row', justifyContent: 'center', marginBottom: 15}}>
           <Text style={{fontSize: 18, color: 'dimgray'}}>
             {DeviceInfo.getVersion()}
           </Text>
         </View>
-
-        <Text style={{margin: 15, fontSize: 18, color: 'dimgray'}}>
-          Data for this app comes from various public APIs that provide civic information.
-        </Text>
 
         <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginBottom: 15}}>
           <Text style={{fontSize: 18, color: 'dimgray'}}>
@@ -105,11 +101,15 @@ export default class App extends PureComponent {
           </Text>
         </View>
 
-        <View style={{flexDirection: 'row', justifyContent: 'center', marginBottom: 15}}>
+        <View style={{flexDirection: 'row', justifyContent: 'center'}}>
           <Text style={{fontSize: 16, fontWeight: 'bold', color: 'blue'}} onPress={() => {this.openGitHub('OVMobile')}}>
             https://github.com/OurVoiceUSA/OVMobile
           </Text>
         </View>
+
+        <Text style={{margin: 15, fontSize: 18, color: 'dimgray'}}>
+          Data for this app comes from various public APIs that provide civic information.
+        </Text>
 
         <Text style={{margin: 5, fontSize: 18, color: 'black', fontWeight: 'bold'}}>
             You
