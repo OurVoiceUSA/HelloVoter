@@ -82,12 +82,12 @@ export default class App extends PureComponent {
     const { navigate } = this.props.navigation;
     const { moreOptions, SmLoginScreen } = this.state;
 
-    const homeImage = require('../../../img/UnitedNotSilenced.png')
+    const homeImage = require('../../../img/HomeScreen.png')
 
     return (
     <View style={{flex: 1, backgroundColor: 'white'}}>
 
-      <Image source={homeImage} style={{flex: 1, padding: 15, maxWidth: Dimensions.get('window').width}} resizeMode={'contain'} />
+      <Image source={homeImage} style={{padding: 15, maxWidth: Dimensions.get('window').width}} resizeMode={'contain'} />
 
       {moreOptions &&
       <View style={{flex: 1}}>
