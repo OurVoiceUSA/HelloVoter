@@ -15,16 +15,6 @@ export default DisplayRep = (props) => {
   const { navigate } = props.navigation;
   var { office, location } = props;
 
-  // TODO: we at least know what office this is trying to be ...
-  if (office.nodata)
-    return (<Text style={{marginLeft: 20, fontSize: 20}}>Data Unavailable</Text>);
-
-  var incumbents = office.incumbents;
-
-  if (!incumbents) {
-    incumbents = [];
-  }
-
   const call = async (profile) => {
     const url = 'tel:+1' + profile.phone;
 
@@ -53,6 +43,23 @@ export default DisplayRep = (props) => {
       <Text style={{marginLeft: 10, fontSize: 20}}>{office.title?office.title:office.name}</Text>
     </View>
   );
+
+  var incumbents = office.incumbents;
+
+  if (!incumbents) {
+    incumbents = [];
+
+    items.push(
+    <View style={{margin: 5, flex: 1, flexDirection: 'row'}} key='nodata'>
+      <Icon name="question-circle" size={55} color='#e3e3e3' />
+      <View style={{flex: 1, flexDirection: 'row', alignItems: 'center'}}>
+        <Text style={{marginLeft: 10, fontSize: 16}}>
+          Unable to determine your district
+        </Text>
+      </View>
+    </View>
+    )
+  }
 
   for (let i = 0; i < incumbents.length; i++) {
 

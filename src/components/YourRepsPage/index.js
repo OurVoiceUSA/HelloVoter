@@ -234,27 +234,27 @@ export default class App extends PureComponent {
     if (apiData && !apiData.msg) {
 
       if (apiData.cd.length == 0) {
-        var nodata = {key: 1, nodata: true};
+        var nodata = {key: 1, title: 'U.S. House of Representatives'};
         apiData.cd.push(nodata);
       }
 
       if (apiData.sen.length == 0) {
-        var nodata = {key: 1, nodata: true};
+        var nodata = {key: 1, title: 'U.S. Senate'};
         apiData.sen.push(nodata);
       }
 
       if (apiData.sldl.length == 0) {
-        var nodata = {key: 1, nodata: true};
+        var nodata = {key: 1, title: 'State Legislative Lower House'};
         apiData.sldl.push(nodata);
       }
 
       if (apiData.sldu.length == 0) {
-        var nodata = {key: 1, nodata: true};
+        var nodata = {key: 1, title: 'State Legislative Upper House'};
         apiData.sldu.push(nodata);
       }
 
       if (apiData.other.length == 0) {
-        var nodata = {key: 1, nodata: true};
+        var nodata = {key: 1, title: 'State/Local Officials'};
         apiData.other.push(nodata);
       }
 
