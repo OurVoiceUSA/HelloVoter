@@ -233,19 +233,29 @@ export default class App extends PureComponent {
 
     if (apiData && !apiData.msg) {
 
-      if (apiData.federal.offices.length == 0) {
+      if (apiData.cd.length == 0) {
         var nodata = {key: 1, nodata: true};
-        apiData.federal.offices.push(nodata);
+        apiData.cd.push(nodata);
       }
 
-      if (apiData.state.offices.length == 0) {
+      if (apiData.sen.length == 0) {
         var nodata = {key: 1, nodata: true};
-        apiData.state.offices.push(nodata);
+        apiData.sen.push(nodata);
       }
 
-      if (apiData.local.offices.length == 0) {
+      if (apiData.sldl.length == 0) {
         var nodata = {key: 1, nodata: true};
-        apiData.local.offices.push(nodata);
+        apiData.sldl.push(nodata);
+      }
+
+      if (apiData.sldu.length == 0) {
+        var nodata = {key: 1, nodata: true};
+        apiData.sldu.push(nodata);
+      }
+
+      if (apiData.other.length == 0) {
+        var nodata = {key: 1, nodata: true};
+        apiData.other.push(nodata);
       }
 
     }
@@ -303,72 +313,83 @@ export default class App extends PureComponent {
 
         {apiData && !apiData.msg && !loading &&
         <View>
-        <Text style={styles.header}>Federal</Text>
+          <FlatList
+            scrollEnabled={false}
+            data={apiData.cd}
+            renderItem={({item}) =>
+              <DisplayRep
+                navigation={this.props.navigation}
+                office={item}
+                location={myPosition}
+                />
+            }
+            ItemSeparatorComponent={() =>
+              <View style={{width: Dimensions.get('window').width, height: 1, backgroundColor: 'lightgray' }} />
+            }
+          />
 
-        <FlatList
-          scrollEnabled={false}
-          data={apiData.federal.offices}
-          renderItem={({item}) =>
-            <DisplayRep
-              navigation={this.props.navigation}
-              office={item}
-              location={myPosition}
-              />
-          }
-          ItemSeparatorComponent={() =>
-            <View style={{
-                width: Dimensions.get('window').width,
-                height: 1,
-                backgroundColor: 'lightgray'
-              }}
-            />
-          }
-        />
+          <FlatList
+            scrollEnabled={false}
+            data={apiData.sen}
+            renderItem={({item}) =>
+              <DisplayRep
+                navigation={this.props.navigation}
+                office={item}
+                location={myPosition}
+                />
+            }
+            ItemSeparatorComponent={() =>
+              <View style={{width: Dimensions.get('window').width, height: 1, backgroundColor: 'lightgray' }} />
+            }
+          />
 
-        <Text style={styles.header}>State</Text>
-        <FlatList
-          scrollEnabled={false}
-          data={apiData.state.offices}
-          renderItem={({item}) =>
-            <DisplayRep
-              navigation={this.props.navigation}
-              office={item}
-              location={myPosition}
-              />
-          }
-          ItemSeparatorComponent={() =>
-            <View style={{
-                width: Dimensions.get('window').width,
-                height: 1,
-                backgroundColor: 'lightgray'
-              }}
-            />
-          }
-        />
+          <FlatList
+            scrollEnabled={false}
+            data={apiData.sldl}
+            renderItem={({item}) =>
+              <DisplayRep
+                navigation={this.props.navigation}
+                office={item}
+                location={myPosition}
+                />
+            }
+            ItemSeparatorComponent={() =>
+              <View style={{width: Dimensions.get('window').width, height: 1, backgroundColor: 'lightgray' }} />
+            }
+          />
 
-        <Text style={styles.header}>Other</Text>
-        <FlatList
-          scrollEnabled={false}
-          data={apiData.local.offices}
-          renderItem={({item}) =>
-            <DisplayRep
-              navigation={this.props.navigation}
-              office={item}
-              location={myPosition}
-              />
-          }
-          ItemSeparatorComponent={() =>
-            <View style={{
-                width: Dimensions.get('window').width,
-                height: 1,
-                backgroundColor: 'lightgray'
-              }}
-            />
-          }
-        />
+          <FlatList
+            scrollEnabled={false}
+            data={apiData.sldu}
+            renderItem={({item}) =>
+              <DisplayRep
+                navigation={this.props.navigation}
+                office={item}
+                location={myPosition}
+                />
+            }
+            ItemSeparatorComponent={() =>
+              <View style={{width: Dimensions.get('window').width, height: 1, backgroundColor: 'lightgray' }} />
+            }
+          />
 
-        <View style={{paddingBottom: 35}}>
-        </View>
+          <FlatList
+            scrollEnabled={false}
+            data={apiData.other}
+            renderItem={({item}) =>
+              <DisplayRep
+                navigation={this.props.navigation}
+                office={item}
+                location={myPosition}
+                />
+            }
+            ItemSeparatorComponent={() =>
+              <View style={{width: Dimensions.get('window').width, height: 1, backgroundColor: 'lightgray' }} />
+            }
+          />
+
+          <View style={{paddingBottom: 35}}>
+          </View>
         </View>
         }
 
@@ -443,7 +464,7 @@ const styles = StyleSheet.create({
     margin: 10,
   },
   header: {
-    fontSize: 25,
+    fontSize: 22,
     marginBottom: 10,
     marginLeft: 10,
     fontWeight: 'bold',

@@ -16,7 +16,7 @@ import {
 import Modal from 'react-native-simple-modal';
 import SmLoginPage from '../SmLoginPage';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { _getJWT, _apiCall } from '../../common';
+import { _getJWT, _apiCall, _partyNameFromKey } from '../../common';
 
 export default class App extends PureComponent {
 
@@ -144,17 +144,6 @@ export default class App extends PureComponent {
     return '#e3e3e3';
   }
 
-  partyNameFromKey(party) {
-    switch (party) {
-      case 'D': return 'Democrat';
-      case 'R': return 'Republican';
-      case 'I': return 'Independent';
-      case 'G': return 'Green';
-      case 'L': return 'Libertarian';
-      default: return '';
-    }
-  }
-
   render() {
 
     const { office, user, pic_url, profile, ratings, SmLoginScreen, loading } = this.state;
@@ -216,7 +205,7 @@ export default class App extends PureComponent {
               {(office?office.name:'')}
             </Text>
             <Text style={{fontSize: 18}} selectable={true}>
-              {this.partyNameFromKey(profile.party)}
+              {_partyNameFromKey(profile.party)}
             </Text>
 
             <View style={{flex: 1, marginTop: 7}}>

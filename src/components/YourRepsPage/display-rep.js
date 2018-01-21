@@ -7,6 +7,7 @@ import {
   Text,
 } from 'react-native';
 
+import { _partyNameFromKey } from '../../common';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 export default DisplayRep = (props) => {
@@ -14,6 +15,7 @@ export default DisplayRep = (props) => {
   const { navigate } = props.navigation;
   var { office, location } = props;
 
+  // TODO: we at least know what office this is trying to be ...
   if (office.nodata)
     return (<Text style={{marginLeft: 20, fontSize: 20}}>Data Unavailable</Text>);
 
@@ -46,6 +48,12 @@ export default DisplayRep = (props) => {
 
   var items = [];
 
+  items.push(
+    <View key='header' style={{margin: 5}}>
+      <Text style={{marginLeft: 10, fontSize: 20}}>{office.title?office.title:office.name}</Text>
+    </View>
+  );
+
   for (let i = 0; i < incumbents.length; i++) {
 
     let incumbent = incumbents[i];
@@ -54,10 +62,10 @@ export default DisplayRep = (props) => {
 
     <View style={{margin: 5, flex: 1, flexDirection: 'row'}} key={incumbent.last_name+incumbent.first_name}>
       <TouchableOpacity disabled={!incumbent.phone && !incumbent.donotcall} onPress={() => call(incumbent)}>
-        <Icon name="phone-square" size={45} color={(incumbent.donotcall ? '#ff0000' : (incumbent.phone ? '#5BC236' : '#e3e3e3'))} />
+        <Icon name="phone-square" size={55} color={(incumbent.donotcall ? '#ff0000' : (incumbent.phone ? '#5BC236' : '#e3e3e3'))} />
       </TouchableOpacity>
       <TouchableOpacity disabled={!incumbent.email} onPress={() => email(incumbent.email)}>
-        <Icon style={{marginLeft: 5}} name="envelope-square" size={45} color={(incumbent.email ? '#0076ff' : '#e3e3e3')} />
+        <Icon style={{marginLeft: 5}} name="envelope-square" size={55} color={(incumbent.email ? '#0076ff' : '#e3e3e3')} />
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -65,9 +73,9 @@ export default DisplayRep = (props) => {
         disabled={!incumbent.last_name}
         onPress={() => {navigate('PolProfile', {location: location, office: office, profile: incumbent})}}>
         <View style={{flex: 1}}>
-          <Text style={{marginLeft: 10, fontSize: 18}}>
-            {office.name}{"\n"}
-            {(incumbent.last_name ? ( incumbent.party ? '(' + incumbent.party + ') ' : '' ) + incumbent.first_name + ' ' + incumbent.last_name : 'Data Unavailable')}
+          <Text style={{marginLeft: 10, fontSize: 20}}>
+            {incumbent.first_name + ' ' + incumbent.last_name}{"\n"}
+            {(office.district?'District '+office.district+', ':'')}{_partyNameFromKey(incumbent.party)}
           </Text>
         </View>
         <View style={{justifyContent: 'center', alignItems: 'flex-end'}}>

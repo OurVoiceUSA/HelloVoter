@@ -21,6 +21,17 @@ export function _specificAddress(address) {
   return true;
 }
 
+export function _partyNameFromKey(party) {
+  switch (party) {
+    case 'D': return 'Democrat';
+    case 'R': return 'Republican';
+    case 'I': return 'Independent';
+    case 'G': return 'Green';
+    case 'L': return 'Libertarian';
+    default: return '';
+  }
+}
+
 export async function _doGeocode(lng, lat) {
   let position = {
     longitude: lng,
