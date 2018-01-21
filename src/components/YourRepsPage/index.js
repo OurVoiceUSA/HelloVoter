@@ -323,9 +323,6 @@ export default class App extends PureComponent {
                 location={myPosition}
                 />
             }
-            ItemSeparatorComponent={() =>
-              <View style={{width: Dimensions.get('window').width, height: 1, backgroundColor: 'lightgray' }} />
-            }
           />
 
           <FlatList
@@ -337,9 +334,6 @@ export default class App extends PureComponent {
                 office={item}
                 location={myPosition}
                 />
-            }
-            ItemSeparatorComponent={() =>
-              <View style={{width: Dimensions.get('window').width, height: 1, backgroundColor: 'lightgray' }} />
             }
           />
 
@@ -353,9 +347,6 @@ export default class App extends PureComponent {
                 location={myPosition}
                 />
             }
-            ItemSeparatorComponent={() =>
-              <View style={{width: Dimensions.get('window').width, height: 1, backgroundColor: 'lightgray' }} />
-            }
           />
 
           <FlatList
@@ -368,9 +359,6 @@ export default class App extends PureComponent {
                 location={myPosition}
                 />
             }
-            ItemSeparatorComponent={() =>
-              <View style={{width: Dimensions.get('window').width, height: 1, backgroundColor: 'lightgray' }} />
-            }
           />
 
           <FlatList
@@ -382,9 +370,6 @@ export default class App extends PureComponent {
                 office={item}
                 location={myPosition}
                 />
-            }
-            ItemSeparatorComponent={() =>
-              <View style={{width: Dimensions.get('window').width, height: 1, backgroundColor: 'lightgray' }} />
             }
           />
 

@@ -80,8 +80,10 @@ export default DisplayRep = (props) => {
         disabled={!incumbent.name}
         onPress={() => {navigate('PolProfile', {location: location, office: office, profile: incumbent})}}>
         <View style={{flex: 1}}>
-          <Text style={{marginLeft: 10, fontSize: 20}}>
-            {incumbent.name}{"\n"}
+          <Text style={{marginLeft: 10, fontSize: 22}}>
+            {incumbent.name}
+          </Text>
+          <Text style={{marginLeft: 10, fontSize: 18}}>
             {(office.district?'District '+office.district+', ':'')}{_partyNameFromKey(incumbent.party)}
           </Text>
         </View>
