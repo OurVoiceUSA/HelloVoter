@@ -23,7 +23,6 @@ export default class App extends PureComponent {
 
     this.state = {
       user: null,
-      moreOptions: false,
       SmLoginScreen: false,
       goToCanvassing: false,
     };
@@ -80,7 +79,7 @@ export default class App extends PureComponent {
 
   render() {
     const { navigate } = this.props.navigation;
-    const { moreOptions, SmLoginScreen } = this.state;
+    const { SmLoginScreen } = this.state;
 
     const homeImage = require('../../../img/HomeScreen.png')
 
@@ -89,9 +88,33 @@ export default class App extends PureComponent {
 
       <Image source={homeImage} style={{padding: 15, maxWidth: Dimensions.get('window').width}} resizeMode={'contain'} />
 
-      {moreOptions &&
       <View style={{flex: 1}}>
 
+        <View style={{margin: 5, flexDirection: 'row'}}>
+          <TouchableOpacity
+            style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10}}
+            onPress={() => {navigate('YourReps')}}>
+            <Text style={{textAlign: 'center'}}>Your Representatives</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={{margin: 5, flexDirection: 'row'}}>
+          <TouchableOpacity
+            style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10}}
+            onPress={() => {navigate('Settings')}}>
+            <Text style={{textAlign: 'center'}}>Your Voice</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={{margin: 5, flexDirection: 'row'}}>
+          <TouchableOpacity
+            style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10}}
+            onPress={() => {navigate('About')}}>
+            <Text style={{textAlign: 'center'}}>About Our Voice</Text>
+          </TouchableOpacity>
+        </View>
+
+{/*
         <View style={{margin: 5, flexDirection: 'row'}}>
           <TouchableOpacity
             style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10}}
@@ -99,6 +122,7 @@ export default class App extends PureComponent {
             <Text style={{textAlign: 'center'}}>Canvassing</Text>
           </TouchableOpacity>
         </View>
+*/}
 
         <View style={{margin: 5, flexDirection: 'row'}}>
           <TouchableOpacity
@@ -116,51 +140,8 @@ export default class App extends PureComponent {
           </TouchableOpacity>
         </View>
 
-        <View style={{margin: 5, flexDirection: 'row'}}>
-          <TouchableOpacity
-            style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10}}
-             onPress={() => {this.setState({ moreOptions: false})}}>
-            <Text style={{textAlign: 'center'}}>Main Menu</Text>
-          </TouchableOpacity>
+
         </View>
-
-      </View>
-      ||
-      <View style={{flex: 1}}>
-
-        <View style={{margin: 5, flexDirection: 'row'}}>
-          <TouchableOpacity
-            style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10}}
-            onPress={() => {navigate('YourReps')}}>
-            <Text style={{textAlign: 'center'}}>Your Representatives</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={{margin: 5, flexDirection: 'row'}}>
-          <TouchableOpacity
-              style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10}}
-              onPress={() => {navigate('Settings')}}>
-              <Text style={{textAlign: 'center'}}>Your Voice</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={{margin: 5, flexDirection: 'row'}}>
-            <TouchableOpacity
-              style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10}}
-              onPress={() => {navigate('About')}}>
-              <Text style={{textAlign: 'center'}}>About Our Voice</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={{margin: 5, flexDirection: 'row'}}>
-            <TouchableOpacity
-              style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10}}
-              onPress={() => {this.setState({ moreOptions: true})}}>
-              <Text style={{textAlign: 'center'}}>More Options</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-        }
 
         <Modal
           open={SmLoginScreen}
