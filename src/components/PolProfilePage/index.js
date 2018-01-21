@@ -162,10 +162,16 @@ export default class App extends PureComponent {
     } else if (profile.photo_url) {
       polPic = {uri: profile.photo_url.replace('http:','https:')};
     } else {
-      if (profile.gender == 'F')
+      switch (profile.gender) {
+      case 'F':
         polPic = require('../../../img/nopic_female.png');
-      else
+        break;
+      case 'M':
         polPic = require('../../../img/nopic_male.png');
+        break;
+      default:
+        polPic = require('../../../img/nopic.png');
+      }
     }
 
     if (user && ratings.msg) {
