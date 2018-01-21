@@ -205,7 +205,7 @@ export default class App extends PureComponent {
 
           <View style={{flex: 1}}>
             <Text style={{fontSize: 25}} selectable={true}>
-              {profile.first_name + ' ' + profile.last_name}
+              {profile.name}
             </Text>
             <Text style={{fontSize: 18}} selectable={true}>
               {(office?office.name:'')}
