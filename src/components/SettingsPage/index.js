@@ -394,6 +394,7 @@ export default class App extends PureComponent {
           }}
         />
 
+{/*
         <View style={{flexDirection: 'row', margin: 20, marginBottom: 10}}>
           <View style={{flex: 1}}>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -440,6 +441,7 @@ export default class App extends PureComponent {
             backgroundColor: 'lightgray'
           }}
         />
+*/}
 
         <View style={{flexDirection: 'row', margin: 20, marginBottom: 10}}>
           <View style={{flex: 1}}>
