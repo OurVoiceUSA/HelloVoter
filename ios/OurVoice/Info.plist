@@ -53,13 +53,13 @@
 		</dict>
 	</dict>
 	<key>NSBluetoothPeripheralUsageDescription</key>
-	<string>We use your location information to find your district, and for the canvassing.</string>
+	<string>We use your location information to find your district.</string>
 	<key>NSCalendarsUsageDescription</key>
-	<string>We use your location information to find your district, and for the canvassing.</string>
+	<string>We use your location information to find your district.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>We use your location information to find your district, and for the canvassing.</string>
+	<string>We use your location information to find your district.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>We use your location information to find your district, and for the canvassing.</string>
+	<string>We use your location information to find your district.</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Entypo.ttf</string>

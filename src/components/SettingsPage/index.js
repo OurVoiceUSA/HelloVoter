@@ -466,7 +466,7 @@ export default class App extends PureComponent {
         <View style={{flexDirection: 'row', margin: 20, marginTop: 0}}>
           <Text>
             We use your device's location when you select the "current location"
-            option when searching representatives. Also used for the canvassing tool.
+            option when searching representatives.
           </Text>
         </View>
 
