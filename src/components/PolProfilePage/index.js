@@ -94,7 +94,7 @@ export default class App extends PureComponent {
         +((user.profile && user.profile.name)?"&entry.775957053="+user.profile.name:"")
         +((user.profile && user.profile.email)?"&entry.2004667629="+user.profile.email:"")
         +"&entry.839337160="+office.state
-        +"&entry.883929373="+((office.type == "sen" || office.type == "rep")?"Federal":"State")
+        +"&entry.883929373="+((office.type == "country")?"Federal":"State")
         +"&entry.1678115432="+office.name
         +(office.district?"&entry.1511558516="+office.district:"")
       );
