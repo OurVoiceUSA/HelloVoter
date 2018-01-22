@@ -12,10 +12,11 @@ Likewise for candidates, the only option to accomplish canvassing and outreach n
 
 ## Development Setup
 
-Start by configuring the `.env` file:
+Start by settings up the back-end service - see the `civic-broker` git repository.
+
+Set up your `.env` file:
 
     cat << EOF > .env
-    WS_BASE=https://wsdev.ourvoiceusa.org
     GOOGLE_API_KEY_IOS=YOUR_KEY
     GOOGLE_API_KEY_ANDROID=YOUR_KEY
     EOF
