@@ -127,7 +127,7 @@ export default class App extends PureComponent {
         'Thanks for rating a politician! In order to provide you with the most accurate and useful rating information, please update your profile.',
         [
           {text: 'Update Profile', onPress: () => {
-            this.props.navigation.navigate('AboutYou');
+            this.props.navigation.navigate('Settings');
           }},
           {text: 'Maybe later'},
         ], { cancelable: false }
