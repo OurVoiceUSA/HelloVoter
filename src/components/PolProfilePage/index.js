@@ -111,7 +111,7 @@ export default class App extends PureComponent {
         var input = { politician_id: profile.id, lng: location.longitude, lat: location.latitude };
         if (number) input.rating = number;
         try {
-          var blah = await _apiCall('/api/protected/politician_rate', input);
+          var blah = await _apiCall('/api/v1/protected/politician_rate', input);
           var json = JSON.parse(blah._bodyInit);
           this.setState({ratings: json});
         } catch (error) {

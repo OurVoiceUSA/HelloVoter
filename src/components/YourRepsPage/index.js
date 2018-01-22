@@ -101,7 +101,7 @@ export default class App extends PureComponent {
         _saveUser(user, true);
       }
 
-      let res = await _apiCall('/api/whorepme?lng='+position.longitude+'&lat='+position.latitude, {address: position.address});
+      let res = await _apiCall('/api/v1/whorepme?lng='+position.longitude+'&lat='+position.latitude, {address: position.address});
       body = await res.json();
 
     } catch (error) {

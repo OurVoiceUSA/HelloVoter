@@ -101,7 +101,7 @@ export async function _saveUser(user, remote) {
   try {
     if (remote) {
       if(user.loggedin) {
-        _apiCall('/api/protected/dprofile', {
+        _apiCall('/api/v1/protected/dprofile', {
           party: user.profile.party,
           address: user.profile.home_address,
           lng: user.profile.home_lng,
@@ -109,7 +109,7 @@ export async function _saveUser(user, remote) {
         });
       } else {
         if (!user.lastsmlogin) {
-          _apiCall('/api/dprofile', {
+          _apiCall('/api/v1/dprofile', {
             party: user.profile.party,
             address: user.profile.home_address,
             lng: user.profile.home_lng,
@@ -167,7 +167,7 @@ export async function _getJWT(remote) {
     jwt = await storage.get(JWT);
     if (jwt !== null) {
       // bounce the token off the API to see if it's still valid
-      let res = await fetch(wsbase+'/api/protected/dinfo', {
+      let res = await fetch(wsbase+'/api/v1/protected/dinfo', {
         method: 'POST',
         headers: {
           'Authorization': 'Bearer '+jwt,
