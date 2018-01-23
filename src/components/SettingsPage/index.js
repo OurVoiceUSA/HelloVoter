@@ -89,6 +89,10 @@ export default class App extends PureComponent {
       user.profile.home_address = myPosition.address;
       user.profile.home_lng = myPosition.longitude;
       user.profile.home_lat = myPosition.latitude;
+      if (user.lastsearchpos && user.lastsearchpos.icon == 'home') {
+        user.lastsearchpos = myPosition;
+        user.lastsearchpos.icon = 'home';
+      }
       _saveUser(user, true);
       this.setState({user: user});
     }
