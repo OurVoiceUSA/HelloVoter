@@ -73,16 +73,14 @@ export async function _apiCall(uri, input) {
   var jwt = await storage.get(JWT);
 
   if (!jwt) {
-    res = await fetch(wsbase+uri, {
+    res = await fetch(wsbase+'/auth/jwt', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(input)}
-    );
-    return res;
+      body: JSON.stringify({apiKey: DeviceInfo.getUniqueID()})
+    });
+    jwt = JSON.parse(res._bodyInit).jwt;
+    _saveJWT(jwt);
   }
-
-  // add device id to input
-  input.deviceId = DeviceInfo.getUniqueID;
 
   res = await fetch(wsbase+uri, {
     method: 'POST',
