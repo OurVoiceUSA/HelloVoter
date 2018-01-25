@@ -68,8 +68,7 @@ export async function _doGeocode(lng, lat) {
   return position;
 }
 
-export async function _apiCall(uri, input) {
-  var res;
+export async function _getApiToken() {
   var jwt = await storage.get(JWT);
 
   if (!jwt) {
@@ -81,39 +80,50 @@ export async function _apiCall(uri, input) {
     jwt = JSON.parse(res._bodyInit).jwt;
     _saveJWT(jwt);
   }
+  return jwt;
+}
 
-  res = await fetch(wsbase+uri, {
-    method: 'POST',
-    headers: {
-      'Authorization': 'Bearer '+jwt,
-      'Content-Type': 'application/json',
+export async function _apiCall(uri, input) {
+  var res;
+  var jwt;
+  var retry = false;
+
+  do {
+    jwt = await _getApiToken();
+
+    res = await fetch(wsbase+uri, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer '+jwt,
+        'Content-Type': 'application/json',
 //      'Accept-encoding': 'gzip',
-    },
-    body: JSON.stringify(input),
-  });
+      },
+      body: JSON.stringify(input),
+    });
+
+    if (res.status != 200) {
+      if (retry) break; // don't retry again
+      await _rmJWT();
+      retry = true;
+    } else {
+      retry = false;
+    }
+
+  } while (retry);
+
   return res;
 }
 
 export async function _saveUser(user, remote) {
-
   try {
     if (remote) {
       if(user.loggedin) {
-        _apiCall('/api/v1/protected/dprofile', {
+        _apiCall('/api/v1/dprofile', {
           party: user.profile.party,
           address: user.profile.home_address,
           lng: user.profile.home_lng,
           lat: user.profile.home_lat,
         });
-      } else {
-        if (!user.lastsmlogin) {
-          _apiCall('/api/v1/dprofile', {
-            party: user.profile.party,
-            address: user.profile.home_address,
-            lng: user.profile.home_lng,
-            lat: user.profile.home_lat,
-          });
-        }
       }
     }
   } catch (error) {
@@ -165,7 +175,7 @@ export async function _getJWT(remote) {
     jwt = await storage.get(JWT);
     if (jwt !== null) {
       // bounce the token off the API to see if it's still valid
-      let res = await fetch(wsbase+'/api/v1/protected/dinfo', {
+      let res = await fetch(wsbase+'/api/v1/dinfo', {
         method: 'POST',
         headers: {
           'Authorization': 'Bearer '+jwt,
@@ -174,7 +184,7 @@ export async function _getJWT(remote) {
         },
         body: JSON.stringify(dinfo),
       });
-      if (res.status == 401) {
+      if (res.status != 200) {
         _rmJWT();
         jwt = null;
       } else {
