@@ -68,13 +68,22 @@ export async function _doGeocode(lng, lat) {
   return position;
 }
 
+function _UserAgent() {
+  return 'OurVoiceApp/'+DeviceInfo.getVersion()+
+    ' ('+DeviceInfo.getManufacturer()+' '+DeviceInfo.getModel()+'; '+
+    DeviceInfo.getSystemName()+' '+DeviceInfo.getSystemVersion()+')';
+}
+
 export async function _getApiToken() {
   var jwt = await storage.get(JWT);
 
   if (!jwt) {
     res = await fetch(wsbase+'/auth/jwt', {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': _UserAgent(),
+      },
       body: JSON.stringify({apiKey: DeviceInfo.getUniqueID()})
     });
     jwt = JSON.parse(res._bodyInit).jwt;
@@ -97,6 +106,7 @@ export async function _apiCall(uri, input) {
         'Authorization': 'Bearer '+jwt,
         'Content-Type': 'application/json',
 //      'Accept-encoding': 'gzip',
+        'User-Agent': _UserAgent(),
       },
       body: JSON.stringify(input),
     });
@@ -181,6 +191,7 @@ export async function _getJWT(remote) {
           'Authorization': 'Bearer '+jwt,
           'Content-Type': 'application/json',
 //          'Accept-encoding': 'gzip',
+          'User-Agent': _UserAgent(),
         },
         body: JSON.stringify(dinfo),
       });
