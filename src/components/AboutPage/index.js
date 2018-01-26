@@ -47,7 +47,7 @@ export default class App extends PureComponent {
 
         <View style={{marginLeft: 50, marginRight: 50, flexDirection: 'row', justifyContent: 'center', marginBottom: 15}}>
           <TouchableOpacity
-            style={{backgroundColor: '#d7d7d7', flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', padding: 10}}
+            style={{backgroundColor: '#d7d7d7', flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', padding: 10, borderRadius: 20}}
             onPress={() => {
               Share.share({
                 message: 'When we stand united, Our Voice cannot be ignored!',

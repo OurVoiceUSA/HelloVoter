@@ -268,7 +268,7 @@ export default class App extends PureComponent {
 
         <View style={{margin: 15, flexDirection: 'row'}}>
           <TouchableOpacity
-            style={{backgroundColor: '#d7d7d7', flex: 1, padding: 20}}
+            style={{backgroundColor: '#d7d7d7', flex: 1, padding: 20, borderRadius: 35}}
             onPress={() => {this._doTellUs()}}>
             <Text style={{textAlign: 'center'}}>If you know anyone who is running against this politican, tap here to tell us.</Text>
           </TouchableOpacity>
