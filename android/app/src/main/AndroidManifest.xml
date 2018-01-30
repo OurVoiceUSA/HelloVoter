@@ -23,11 +23,13 @@
       <meta-data
         android:name="com.google.android.gms.version"
         android:value="@integer/google_play_services_version" />
+      <!-- the ".SplashActivity" breaks login, need to fix that -->
       <activity
-        android:name=".SplashActivity"
+        android:name=".MainActivity"
         android:launchMode="singleTask"
         android:label="@string/app_name"
-        android:theme="@style/SplashTheme">
+        android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+        android:windowSoftInputMode="adjustResize">
         <intent-filter>
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
@@ -38,11 +40,7 @@
             <category android:name="android.intent.category.BROWSABLE" />
             <data android:scheme="ourvoiceapp" android:host="login" />
         </intent-filter>
-        </activity>
-        <activity android:name=".MainActivity" 
-            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
-            android:windowSoftInputMode="adjustResize"
-            android:exported="true" />
+      </activity>
       <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" />
     </application>
 
