@@ -86,7 +86,7 @@ export default class App extends PureComponent {
     return (
     <View style={{flex: 1, backgroundColor: 'white'}}>
 
-      <Image source={homeImage} style={{padding: 15, maxWidth: Dimensions.get('window').width}} resizeMode={'contain'} />
+      <Image source={homeImage} style={{padding: 15, alignSelf: 'center', maxWidth: Dimensions.get('window').width}} resizeMode={'contain'} />
 
       <View style={{flex: 1}}>
 
