@@ -88,11 +88,11 @@ export default class App extends PureComponent {
 
       <Image source={homeImage} style={{padding: 15, alignSelf: 'center', maxWidth: Dimensions.get('window').width}} resizeMode={'contain'} />
 
-      <View style={{flex: 1}}>
+      <View style={{flex: 1, alignItems: 'center'}}>
 
         <View style={{margin: 5, flexDirection: 'row'}}>
           <TouchableOpacity
-            style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20}}
+            style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20, maxWidth: 350}}
             onPress={() => {navigate('YourReps')}}>
             <Text style={{textAlign: 'center'}}>Your Representatives</Text>
           </TouchableOpacity>
@@ -100,7 +100,7 @@ export default class App extends PureComponent {
 
         <View style={{margin: 5, flexDirection: 'row'}}>
           <TouchableOpacity
-            style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20}}
+            style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20, maxWidth: 350}}
             onPress={() => {navigate('Settings')}}>
             <Text style={{textAlign: 'center'}}>Your Voice</Text>
           </TouchableOpacity>
@@ -108,7 +108,7 @@ export default class App extends PureComponent {
 
         <View style={{margin: 5, flexDirection: 'row'}}>
           <TouchableOpacity
-            style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20}}
+            style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20, maxWidth: 350}}
             onPress={() => {navigate('About')}}>
             <Text style={{textAlign: 'center'}}>About Our Voice</Text>
           </TouchableOpacity>
@@ -117,7 +117,7 @@ export default class App extends PureComponent {
 {/*
         <View style={{margin: 5, flexDirection: 'row'}}>
           <TouchableOpacity
-            style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20}}
+            style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20, maxWidth: 350}}
             onPress={() => {this.goToCanvassing();}}>
             <Text style={{textAlign: 'center'}}>Canvassing</Text>
           </TouchableOpacity>
@@ -126,7 +126,7 @@ export default class App extends PureComponent {
 
         <View style={{margin: 5, flexDirection: 'row'}}>
           <TouchableOpacity
-            style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20}}
+            style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20, maxWidth: 350}}
             onPress={this._RVSpressHandler}>
             <Text style={{textAlign: 'center'}}>Register to Vote</Text>
           </TouchableOpacity>
@@ -134,12 +134,11 @@ export default class App extends PureComponent {
 
         <View style={{margin: 5, flexDirection: 'row'}}>
           <TouchableOpacity
-            style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20}}
+            style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20, maxWidth: 350}}
             onPress={this._pressHandler}>
             <Text style={{textAlign: 'center'}}>Donate</Text>
           </TouchableOpacity>
         </View>
-
 
         </View>
 

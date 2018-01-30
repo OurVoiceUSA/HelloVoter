@@ -262,13 +262,13 @@ export default class App extends PureComponent {
           </View>
         </View>
 
-        <View style={{margin: 15, marginBottom: 0, marginTop: 0, flexDirection: 'row'}}>
+        <View style={{margin: 15, marginBottom: 0, marginTop: 0, alignItems: 'center'}}>
                 <Text style={{fontSize: 14, textAlign: 'center'}}>We currently aren't aware of who is challenging this politican in the next primary.</Text>
         </View>
 
-        <View style={{margin: 15, flexDirection: 'row'}}>
+        <View style={{margin: 15, alignItems: 'center'}}>
           <TouchableOpacity
-            style={{backgroundColor: '#d7d7d7', flex: 1, padding: 20, borderRadius: 35}}
+            style={{backgroundColor: '#d7d7d7', flex: 1, padding: 20, borderRadius: 35, maxWidth: 350}}
             onPress={() => {this._doTellUs()}}>
             <Text style={{textAlign: 'center'}}>If you know anyone who is running against this politican, tap here to tell us.</Text>
           </TouchableOpacity>
