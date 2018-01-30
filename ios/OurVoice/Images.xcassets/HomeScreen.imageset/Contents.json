@@ -4,6 +4,16 @@
       "idiom" : "universal",
       "filename" : "HomeScreen.png",
       "scale" : "1x"
+    },
+    {
+      "idiom" : "universal",
+      "filename" : "HomeScreen.png",
+      "scale" : "2x"
+    },
+    {
+      "idiom" : "universal",
+      "filename" : "HomeScreen.png",
+      "scale" : "3x"
     }
   ],
   "info" : {
