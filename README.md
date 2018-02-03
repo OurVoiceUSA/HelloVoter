@@ -4,6 +4,8 @@ This is the mobile app for Our Voice Initiative, a 501(c)(4) non-profit, non-par
 
 Find the app on the [Google Play Store (Android)](https://play.google.com/store/apps/details?id=org.ourvoiceinitiative.ourvoice) and the [Apple Store (iPhone)](https://itunes.apple.com/us/app/our-voice-usa/id1275301651?ls=1&mt=8).
 
+![App Preview](https://ourvoiceusa.org/wp-content/uploads/2018/02/RNgif.gif)
+
 ## Features
 
 Our Voice is a mobile app for civic education and engagement. You can view information on the politicians in office who represent you, contact them, and rate them.
