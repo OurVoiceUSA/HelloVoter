@@ -105,7 +105,6 @@ export async function _apiCall(uri, input) {
       headers: {
         'Authorization': 'Bearer '+jwt,
         'Content-Type': 'application/json',
-//      'Accept-encoding': 'gzip',
         'User-Agent': _UserAgent(),
       },
       body: JSON.stringify(input),
@@ -190,7 +189,6 @@ export async function _getJWT(remote) {
         headers: {
           'Authorization': 'Bearer '+jwt,
           'Content-Type': 'application/json',
-//          'Accept-encoding': 'gzip',
           'User-Agent': _UserAgent(),
         },
         body: JSON.stringify(dinfo),
