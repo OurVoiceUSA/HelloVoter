@@ -2,9 +2,15 @@
 
 This is the mobile app for Our Voice Initiative, a 501(c)(4) non-profit, non-partisian organization for the civic education. We are writing tools to engage everyday citizens with the political process by providing easy access to civic information that's relevant to the individual.
 
+Find the app on the [Google Play Store (Android)](https://play.google.com/store/apps/details?id=org.ourvoiceinitiative.ourvoice) and the [Apple Store (iPhone)](https://itunes.apple.com/us/app/our-voice-usa/id1275301651?ls=1&mt=8).
+
 ## Features
 
-Right now we list what districts you are in and who holds those offices, up and down the ballot. What's next is to let candidates, no matter what office they are running for, define who they are. Voters in turn are able to easily find who is running in their area by seeing them as challengers to the incumbents, and know where they stand on the issues compared to their own policy beliefs.
+Our Voice is a mobile app for civic education and engagement. You can view information on the politicians in office who represent you, contact them, and rate them.
+
+## Future Development Goals
+
+What's next is to let candidates, no matter what office they are running for, define who they are. Voters will be able to easily find who is running in their area by seeing them as challengers to the incumbents, and know where they stand on the issues compared to their own policy beliefs.
 
 For voters, finding out information about candidates running for office is disjointed and unorganized. There is no clear, cohesive system by which candidates up and down the ballot can register and define their thoughts on policy. This puts a large burden on voters to do research in their limited free time, and many vote for a candidate without knowing a thing about him or her - other than perhaps their political party affiliation. Our app will bring all this information into a single place and displayed in an unbiased, non-partisan manner.
 
@@ -17,6 +23,7 @@ Start by settings up the back-end service - see the `civic-broker` git repositor
 Set up your `.env` file:
 
     cat << EOF > .env
+    WS_BASE=YOUR_CIVIC_BROKER_URL
     GOOGLE_API_KEY_IOS=YOUR_KEY
     GOOGLE_API_KEY_ANDROID=YOUR_KEY
     EOF
