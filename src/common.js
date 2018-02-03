@@ -171,7 +171,6 @@ export async function _getJWT(remote) {
   };
 
   let user = null;
-  var dinfo_resp = null;
   var localuser = await _getUserLocal();
 
   // just use locally cached data
@@ -180,10 +179,20 @@ export async function _getJWT(remote) {
     return localuser;
   }
 
+  let jwt = null;
   try {
     jwt = await storage.get(JWT);
-    if (jwt !== null) {
-      // bounce the token off the API to see if it's still valid
+  } catch (error) {
+    console.warn(error);
+  }
+
+  if (jwt !== null)
+    user = jwt_decode(jwt);
+
+  // if it's a user JWT, bounce the token off the API to see if it's still valid
+  if (user && user.id) {
+    let dinfo_resp = null;
+    try {
       let res = await fetch(wsbase+'/api/v1/dinfo', {
         method: 'POST',
         headers: {
@@ -199,13 +208,10 @@ export async function _getJWT(remote) {
       } else {
         dinfo_resp = JSON.parse(res._bodyInit);
       }
+    } catch (error) {
+      console.warn(error);
     }
-  } catch (error) {
-    console.warn(error);
-  }
 
-  if (jwt !== null) {
-    user = jwt_decode(jwt);
     user.profile = (dinfo_resp?dinfo_resp:{});
     if (localuser) {
       // copy local objects
@@ -220,7 +226,6 @@ export async function _getJWT(remote) {
     }
     user.lastsmlogin = Math.floor(new Date().getTime() / 1000);
     user.loggedin = true;
-    _saveJWT(jwt);
     _saveUser(user, remote);
   } else {
     user = await _getUserLocal();
