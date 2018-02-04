@@ -68,7 +68,7 @@ export default class App extends PureComponent {
     }
   }
 
-  openFacebook = (id) => this.openURL('https://www.facebook.com/'+id);
+  openFacebook = (id) => this.openURL('https://m.facebook.com/'+id);
   openTwitter = (id) => this.openURL('https://twitter.com/'+id);
   openWikipedia = (id) => this.openURL('https://wikipedia.org/wiki/'+id);
   openWebsite = (id) => this.openURL(id);

@@ -13,7 +13,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 
 export default class App extends PureComponent {
 
-  openFacebook = () => this.openURL('https://www.facebook.com/OurVoiceUsa');
+  openFacebook = () => this.openURL('https://m.facebook.com/OurVoiceUsa');
   openTwitter = () => this.openURL('https://twitter.com/OurVoiceUsa');
   openYouTube = () => this.openURL('https://www.youtube.com/channel/UCw5fpnK-IZVQ4IkYuapIbiw');
   openWebsite = () => this.openURL('https://ourvoiceusa.org/');
