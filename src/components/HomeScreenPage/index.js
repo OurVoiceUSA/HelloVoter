@@ -13,7 +13,7 @@ import {
 
 import Permissions from 'react-native-permissions';
 import { _loginPing } from '../../common';
-import SmLoginPage from '../SmLoginPage';
+import DropboxLoginPage from '../DropboxLoginPage';
 import Modal from 'react-native-simple-modal';
 
 export default class App extends PureComponent {
@@ -23,7 +23,7 @@ export default class App extends PureComponent {
 
     this.state = {
       user: null,
-      SmLoginScreen: false,
+      DropboxLoginScreen: false,
       goToCanvassing: false,
     };
 
@@ -45,19 +45,18 @@ export default class App extends PureComponent {
   goToCanvassing = async () => {
     const { navigate } = this.props.navigation;
 
-    // TODO: this makes the button tap akward on high network latentcy
-    let user = await _loginPing(this, true);
+    let user = await _loginPing(this, false);
 
-    if (user.loggedin) {
+    if (user.dropboxToken) {
       navigate('Canvassing', {userId: user.id});
     } else {
-      this.setState({ SmLoginScreen: true, goToCanvassing: true });
+      this.setState({ DropboxLoginScreen: true, goToCanvassing: true });
     }
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const { SmLoginScreen, user, goToCanvassing } = this.state;
-    if (prevState.SmLoginScreen && !SmLoginScreen && user.loggedin && goToCanvassing) {
+    const { DropboxLoginScreen, user, goToCanvassing } = this.state;
+    if (prevState.DropboxLoginScreen && !DropboxLoginScreen && user.dropboxToken && goToCanvassing) {
       this.goToCanvassing();
     }
   }
@@ -79,7 +78,7 @@ export default class App extends PureComponent {
 
   render() {
     const { navigate } = this.props.navigation;
-    const { SmLoginScreen } = this.state;
+    const { DropboxLoginScreen } = this.state;
 
     const homeImage = require('../../../img/HomeScreen.png')
 
@@ -114,7 +113,6 @@ export default class App extends PureComponent {
           </TouchableOpacity>
         </View>
 
-{/*
         <View style={{margin: 5, flexDirection: 'row'}}>
           <TouchableOpacity
             style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20, maxWidth: 350}}
@@ -122,7 +120,6 @@ export default class App extends PureComponent {
             <Text style={{textAlign: 'center'}}>Canvassing</Text>
           </TouchableOpacity>
         </View>
-*/}
 
         <View style={{margin: 5, flexDirection: 'row'}}>
           <TouchableOpacity
@@ -143,7 +140,7 @@ export default class App extends PureComponent {
         </View>
 
         <Modal
-          open={SmLoginScreen}
+          open={DropboxLoginScreen}
           modalStyle={{width: 335, height: 400, backgroundColor: "transparent",
             position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
           style={{alignItems: 'center'}}
@@ -151,10 +148,10 @@ export default class App extends PureComponent {
           animationDuration={200}
           animationTension={40}
           modalDidOpen={() => undefined}
-          modalDidClose={() => this.setState({SmLoginScreen: false})}
+          modalDidClose={() => this.setState({DropboxLoginScreen: false})}
           closeOnTouchOutside={true}
           disableOnBackPress={false}>
-          <SmLoginPage refer={this} />
+          <DropboxLoginPage refer={this} />
         </Modal>
 
       </View>
