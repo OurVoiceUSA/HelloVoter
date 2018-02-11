@@ -13,20 +13,16 @@ import {
 
 import Permissions from 'react-native-permissions';
 import { _loginPing } from '../../common';
-import DropboxLoginPage from '../DropboxLoginPage';
 import Modal from 'react-native-simple-modal';
 
 export default class App extends PureComponent {
 
   constructor(props) {
     super(props);
+  }
 
-    this.state = {
-      user: null,
-      DropboxLoginScreen: false,
-      goToCanvassing: false,
-    };
-
+  componentDidMount() {
+    this.requestPushPermission();
   }
 
   requestPushPermission = async () => {
@@ -34,30 +30,6 @@ export default class App extends PureComponent {
       res = await Permissions.request('notification');
     } catch(error) {
       // nothing we can do about it
-    }
-  }
-
-  componentDidMount() {
-    this.requestPushPermission();
-    _loginPing(this, false);
-  }
-
-  goToCanvassing = async () => {
-    const { navigate } = this.props.navigation;
-
-    let user = await _loginPing(this, false);
-
-    if (user.dropboxToken) {
-      navigate('Canvassing', {userId: user.id});
-    } else {
-      this.setState({ DropboxLoginScreen: true, goToCanvassing: true });
-    }
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    const { DropboxLoginScreen, user, goToCanvassing } = this.state;
-    if (prevState.DropboxLoginScreen && !DropboxLoginScreen && user.dropboxToken && goToCanvassing) {
-      this.goToCanvassing();
     }
   }
 
@@ -78,7 +50,6 @@ export default class App extends PureComponent {
 
   render() {
     const { navigate } = this.props.navigation;
-    const { DropboxLoginScreen } = this.state;
 
     const homeImage = require('../../../img/HomeScreen.png')
 
@@ -116,14 +87,6 @@ export default class App extends PureComponent {
         <View style={{margin: 5, flexDirection: 'row'}}>
           <TouchableOpacity
             style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20, maxWidth: 350}}
-            onPress={() => {this.goToCanvassing();}}>
-            <Text style={{textAlign: 'center'}}>Canvassing</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={{margin: 5, flexDirection: 'row'}}>
-          <TouchableOpacity
-            style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20, maxWidth: 350}}
             onPress={this._RVSpressHandler}>
             <Text style={{textAlign: 'center'}}>Register to Vote</Text>
           </TouchableOpacity>
@@ -138,21 +101,6 @@ export default class App extends PureComponent {
         </View>
 
         </View>
-
-        <Modal
-          open={DropboxLoginScreen}
-          modalStyle={{width: 335, height: 400, backgroundColor: "transparent",
-            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
-          style={{alignItems: 'center'}}
-          overlayBackground={'rgba(0, 0, 0, 0.75)'}
-          animationDuration={200}
-          animationTension={40}
-          modalDidOpen={() => undefined}
-          modalDidClose={() => this.setState({DropboxLoginScreen: false})}
-          closeOnTouchOutside={true}
-          disableOnBackPress={false}>
-          <DropboxLoginPage refer={this} />
-        </Modal>
 
       </View>
     );
