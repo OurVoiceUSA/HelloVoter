@@ -262,6 +262,7 @@ export async function _rmUser() {
   try {
     await storage.del(USERLOCAL);
     await storage.del('OV_SURVEY@0');
+    await storage.del('OV_DISCLOUSER');
   } catch (error) {
     console.warn(error);
   }
