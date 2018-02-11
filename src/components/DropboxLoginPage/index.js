@@ -88,7 +88,7 @@ export default class App extends PureComponent {
   };
 
   // Handle Login with Dropbox button tap
-  loginWithDropbox = () => this.openURL(wsbase+'/auth/db');
+  loginWithDropbox = () => this.openURL(wsbase+'/auth/dm');
 
   // Open URL in a browser
   openURL = (url) => {
