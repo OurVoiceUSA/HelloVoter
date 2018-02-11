@@ -4,6 +4,7 @@ import HomeScreenPage from '../components/HomeScreenPage';
 import YourRepsPage from '../components/YourRepsPage';
 import PolProfilePage from '../components/PolProfilePage';
 import SettingsPage from '../components/SettingsPage';
+import CanvassingSetupPage from '../components/CanvassingSetupPage';
 import CanvassingPage from '../components/CanvassingPage';
 import SurveyPage from '../components/SurveyPage';
 import AboutPage from '../components/AboutPage';
@@ -36,6 +37,12 @@ export default App = StackNavigator({
           headerRight: <HelpButton onPress={() => setParams({isHelpModalVisible: true})} />,
         });
       },
+    },
+    CanvassingSetup: {
+      screen: CanvassingSetupPage,
+      navigationOptions: ({navigation}) => ({
+        title: 'Canvassing Setup',
+      }),
     },
     Canvassing: {
       screen: CanvassingPage,

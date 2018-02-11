@@ -20,6 +20,7 @@ import {
 } from 'react-native';
 
 import { NavigationActions } from 'react-navigation'
+import DeviceInfo from 'react-native-device-info';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Permissions from 'react-native-permissions';
 import RNGLocation from 'react-native-google-location';
@@ -46,12 +47,13 @@ export default class App extends PureComponent {
       cState: null,
       cZip: null,
       myPins: [],
-      asyncStorageKey: 'OV_CANVASS_PINS@'+props.navigation.state.params.userId,
+      asyncStorageKey: 'OV_CANVASS_PINS',
       DisclosureKey : 'OV_DISCLOUSER',
       isModalVisible: false,
       isKnockMenuVisible: false,
-      userId: props.navigation.state.params.userId,
+      userId: DeviceInfo.getUniqueID(),
       showDisclosure: "true",
+      form: props.navigation.state.params.form,
     };
 
   }
@@ -173,7 +175,7 @@ export default class App extends PureComponent {
   }
 
   addpin(color) {
-    let { inputPosition, myPins, inputAddress, userId } = this.state;
+    let { inputPosition, myPins, inputAddress, userId, form } = this.state;
     let epoch = Math.floor(new Date().getTime() / 1000);
 
     const pin = {
@@ -191,7 +193,7 @@ export default class App extends PureComponent {
     this._savePinsAsyncStorage();
 
     const { navigate } = this.props.navigation;
-    if (color === "green") navigate('Survey', {address: inputAddress, pinId: epoch, userId: userId});
+    if (color === "green") navigate('Survey', {address: inputAddress, pinId: epoch, userId: userId, form: form});
 
   }
 
@@ -247,7 +249,7 @@ export default class App extends PureComponent {
 
     const { navigate } = this.props.navigation;
     const {
-      showDisclosure, myPosition, myPins, userId, locationAccess, serviceError,
+      showDisclosure, myPosition, myPins, userId, locationAccess, serviceError, form,
       cStreet, cUnit, cCity, cState, cZip,
     } = this.state;
 
@@ -493,7 +495,7 @@ export default class App extends PureComponent {
                 pinColor={marker.color}
                 onCalloutPress={() => {
                   if (marker.color == "green")
-                    navigate('Survey', {pinId: marker.epoch, userId: userId, viewOnly: true})
+                    navigate('Survey', {pinId: marker.epoch, userId: userId, form: form, viewOnly: true})
                 }}
                 />
             ))

@@ -114,7 +114,6 @@ export default class App extends PureComponent {
   componentDidMount() {
     this.checkPermissionLocation();
     this.checkPermissionNotification();
-    this.loadSurveyData();
     this._loadProfile();
   }
 
@@ -124,7 +123,7 @@ export default class App extends PureComponent {
     let user = await _loginPing(this, false);
 
     if (user.dropboxToken) {
-      navigate('Canvassing', {userId: user.id});
+      navigate('CanvassingSetup');
     } else {
       this.setState({ DropboxLoginScreen: true, goToCanvassing: true });
     }
@@ -164,23 +163,6 @@ export default class App extends PureComponent {
       // nothing we can do about it
     }
     this.setState({permissionNotification: access});
-  }
-
-  loadSurveyData = async () => {
-    try {
-      let data = await storage.get('OV_SURVEY@0')
-      if (data !== null) {
-        let answered = 0;
-        let surveys = JSON.parse(data);
-        for (let i = 0; i < surveys[0].survey.length; i++) {
-          if (surveys[0].survey[i].value !== "") answered++;
-        }
-        if (answered >= 25) this.setState({surveyComplete: true});
-        else this.setState({surveyPartial: true});
-      }
-    } catch (error) {
-      console.warn(error);
-    }
   }
 
   sessionExpired() {
@@ -418,55 +400,6 @@ export default class App extends PureComponent {
             backgroundColor: 'lightgray'
           }}
         />
-
-{/*
-        <View style={{flexDirection: 'row', margin: 20, marginBottom: 10}}>
-          <View style={{flex: 1}}>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <Icon style={{marginRight: 10}} name="bank" size={18} color="black" />
-              <Text style={{fontSize: 20}}>Political Views:</Text>
-            </View>
-          </View>
-          {surveyComplete &&
-          <View style={{flexDirection: 'row', alignItems: 'center', marginRight: 20}}>
-            <Text style={{marginRight: 7, fontWeight: 'bold'}}>Complete</Text>
-            <Icon name="check-circle" size={30} color="green" />
-          </View>
-          || surveyPartial &&
-          <View style={{flexDirection: 'row', alignItems: 'center', marginRight: 20}}>
-            <Text style={{marginRight: 7, fontWeight: 'bold'}}>Incomplete</Text>
-            <Icon name="exclamation-circle" size={30} color="orange" />
-          </View>
-          ||
-          <View style={{flexDirection: 'row', alignItems: 'center', marginRight: 20}}>
-            <Text style={{marginRight: 7, fontWeight: 'bold'}}>Not Started</Text>
-            <Icon name="times-circle" size={30} color="red" />
-          </View>
-          }
-        </View>
-
-        <View style={{flex: 1, alignItems: 'center'}}>
-            <TouchableOpacity
-              style={{flexDirection: 'row', padding: 10, alignItems: 'center', backgroundColor: '#d7d7d7'}}
-              onPress={() => {navigate('Survey', {refer: this, userId: 0, pinId: 0})}}>
-              <Text>Take Survey</Text>
-            </TouchableOpacity>
-        </View>
-
-        <View style={{flexDirection: 'row', margin: 20, marginTop: 10}}>
-          <Text>
-             We use your selections on the various policy issues to identify politicans
-             who most closely align with your world view.
-          </Text>
-        </View>
-
-        <View style={{
-            width: Dimensions.get('window').width,
-            height: 1,
-            backgroundColor: 'lightgray'
-          }}
-        />
-*/}
 
         <View style={{flexDirection: 'row', margin: 20, marginBottom: 10}}>
           <View style={{flex: 1}}>
