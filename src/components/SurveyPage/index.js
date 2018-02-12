@@ -3,6 +3,7 @@ import {
   AsyncStorage,
   Dimensions,
   TouchableOpacity,
+  TouchableHighlight,
   FlatList,
   Text,
   View,
@@ -10,11 +11,8 @@ import {
   ScrollView,
 } from 'react-native';
 
-import Modal from 'react-native-modal';
+import storage from 'react-native-storage-wrapper';
 import t from 'tcomb-form-native';
-
-import InfoField from '../InfoField';
-import ModalInput from '../ModalInput';
 
 var Form = t.form.Form;
 
@@ -45,24 +43,26 @@ export default class App extends PureComponent {
     const { state } = this.props.navigation;
 
     this.state = {
-      isModalVisible: false,
-      selectedField: '',
-      surveys: {},
-      surveyData: [],
-      asyncStorageKey: 'OV_SURVEY@'+state.params.userId,
-      refer: state.params.refer,
-      userId: state.params.userId,
       pinId: state.params.pinId,
       address: state.params.address,
       viewOnly: state.params.viewOnly,
       form: state.params.form,
     };
+
+    this.doSave = this.doSave.bind(this);
+  }
+
+  doSave() {
+    let value = this.refs.form.getValue();
+    if (value) {
+      console.warn(value);
+    }
   }
 
   render() {
 
     const { goBack, setParams, state } = this.props.navigation;
-    let { surveyData, surveys, viewOnly, form } = this.state;
+    let { viewOnly, form } = this.state;
 
     let newStruct = {};
     let newOptions = { fields: {} };
@@ -95,6 +95,10 @@ export default class App extends PureComponent {
         />
         </View>
 
+        <TouchableHighlight style={styles.button} onPress={this.doSave} underlayColor='#99d9f4'>
+          <Text style={styles.buttonText}>Save</Text>
+        </TouchableHighlight>
+
       </ScrollView>
     );
   }
@@ -103,7 +107,6 @@ export default class App extends PureComponent {
 var styles = StyleSheet.create({
   container: {
     justifyContent: 'center',
-    marginTop: 50,
     padding: 20,
     backgroundColor: '#ffffff',
   },

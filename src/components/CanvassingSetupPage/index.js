@@ -3,21 +3,14 @@ import React, { PureComponent } from 'react';
 
 import {
   ActivityIndicator,
-  Alert,
   Dimensions,
   Text,
   View,
-  StyleSheet,
   ScrollView,
-  Image,
-  Platform,
   TouchableOpacity,
-  TouchableWithoutFeedback,
 } from 'react-native';
 
-import ModalPicker from 'react-native-modal-selector';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import storage from 'react-native-storage-wrapper';
 import { Dropbox } from 'dropbox';
 import { _loginPing } from '../../common';
 

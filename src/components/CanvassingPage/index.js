@@ -1,7 +1,6 @@
 import React, { PureComponent } from 'react';
 
 import {
-  Alert,
   ActivityIndicator,
   AsyncStorage,
   StyleSheet,
