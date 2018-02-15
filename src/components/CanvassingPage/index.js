@@ -35,6 +35,7 @@ export default class App extends PureComponent {
     super(props);
 
     this.state = {
+      loading: false,
       serviceError: null,
       locationAccess: null,
       myPosition: null,
@@ -132,27 +133,34 @@ export default class App extends PureComponent {
     }
   }
 
-  showConfirmAddress = async () => {
+  showConfirmAddress() {
     const { myPosition } = this.state;
     var geoAddress;
 
-    let res = await _doGeocode(myPosition.longitude, myPosition.latitude);
-
-    if (res) {
-      let arr = res.address.split(",");
-      let country = arr[arr.length-1]; // unused
-      let state_zip = arr[arr.length-2];
-      let cState = (state_zip?state_zip.split(" ")[1]:null);
-      let cZip = (state_zip?state_zip.split(" ")[2]:null);
-      let cCity = arr[arr.length-3];
-      let cStreet = arr[arr.length-4];
-
-      this.setState({cStreet, cCity, cZip, cState, cUnit: null});
-    }
-
     this.setState({
+      loading: true,
       isModalVisible: true,
     });
+
+    setTimeout(async () => {
+      let res = await _doGeocode(myPosition.longitude, myPosition.latitude);
+
+      if (res) {
+        let arr = res.address.split(",");
+        let country = arr[arr.length-1]; // unused
+        let state_zip = arr[arr.length-2];
+        let cState = (state_zip?state_zip.split(" ")[1]:null);
+        let cZip = (state_zip?state_zip.split(" ")[2]:null);
+        let cCity = arr[arr.length-3];
+        let cStreet = arr[arr.length-4];
+
+        this.setState({cStreet, cCity, cZip, cState, cUnit: null});
+      }
+
+      this.setState({
+        loading: false,
+      });
+    }, 550);
   }
 
   doConfirmAddress = async () => {
@@ -249,7 +257,7 @@ export default class App extends PureComponent {
     const { navigate } = this.props.navigation;
     const {
       showDisclosure, myPosition, myPins, userId, locationAccess, serviceError, form,
-      cStreet, cUnit, cCity, cState, cZip,
+      cStreet, cUnit, cCity, cState, cZip, loading,
     } = this.state;
 
     if (showDisclosure === "true") {
@@ -355,6 +363,13 @@ export default class App extends PureComponent {
         >
           <View style={{flexDirection: 'column'}}>
             <View style={{width: Dimensions.get('window').width * 0.7, height: 245, backgroundColor: 'white', marginTop: 15, borderRadius: 15, padding: 25, alignSelf: 'flex-start'}}>
+              {loading &&
+              <View>
+                <Text style={{color: 'blue', fontWeight: 'bold', fontSize: 15}}>Loading Address</Text>
+                <ActivityIndicator size="large" />
+              </View>
+              ||
+              <View>
               <Text style={{color: 'blue', fontWeight: 'bold', fontSize: 15}}>Confirm the Address</Text>
                 <View>
                   <Text style={styles.baseText, {position: 'absolute', bottom: -53, fontSize: 12}}>Street Address</Text>
@@ -415,7 +430,9 @@ export default class App extends PureComponent {
                    <Text style={{fontWeight: 'bold', color: 'blue'}}>OK</Text>
                  </TouchableOpacity>
                </View>
+               </View>
              </View>
+             }
           </View>
         </View>
       </Modal>
