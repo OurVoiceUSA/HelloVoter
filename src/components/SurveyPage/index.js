@@ -77,6 +77,7 @@ export default class App extends PureComponent {
         case 'Party': value = Party; break;
         default: value = t.String;
       }
+      if (form.questions[keys[k]].optional) value = t.maybe(value);
       newStruct[keys[k]] = value;
       newOptions.fields[keys[k]] = { label: form.questions[keys[k]].label };
     }
