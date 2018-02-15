@@ -29,7 +29,6 @@ export default class App extends PureComponent {
 
   componentDidMount() {
     this._loadDBData();
-
   }
 
   _loadDBData = async () => {
@@ -72,11 +71,6 @@ export default class App extends PureComponent {
     };
 
     this.setState({ loading: false, forms: forms });
-  }
-
-  saveValues() {
-    const formValues = this.formGenerator.getValues();
-    console.warn('FORM VALUES', formValues);
   }
 
   render() {
