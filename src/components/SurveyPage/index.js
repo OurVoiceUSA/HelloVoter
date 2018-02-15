@@ -79,7 +79,7 @@ export default class App extends PureComponent {
       }
       if (form.questions[keys[k]].optional) value = t.maybe(value);
       newStruct[keys[k]] = value;
-      newOptions.fields[keys[k]] = { label: form.questions[keys[k]].label };
+      newOptions.fields[keys[k]] = { label: form.questions[keys[k]].label + (form.questions[keys[k]].optional ? ' (optional)' : '') };
     }
 
     CanvassForm = t.struct(newStruct);
