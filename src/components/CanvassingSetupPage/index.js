@@ -71,35 +71,6 @@ export default class App extends PureComponent {
       console.warn(error);
     };
 
-/*
-    let newStruct = {};
-    let newOptions = { fields: {} };
-    let json = {};
-
-    try {
-      var data = await dbx.filesDownload({ path: '/Canvassing/test.txt' });
-      json = JSON.parse(data.fileBinary);
-    } catch(error) {
-      console.warn("Err: "+error);
-    }
-
-    let keys = Object.keys(json.questions);
-    for (let k in keys) {
-      let value;
-      switch (json.questions[keys[k]].type) {
-        case 'Number': value = t.Number; break;
-        case 'Boolean': value = t.Boolean; break;
-        case 'SAD': value = SAD; break;
-        default: value = t.String;
-      }
-      newStruct[keys[k]] = value;
-      newOptions.fields[keys[k]] = { label: json.questions[keys[k]].label };
-    }
-
-    CanvassForm = t.struct(newStruct);
-    options = newOptions;
-*/
-
     this.setState({ loading: false, forms: forms });
   }
 
