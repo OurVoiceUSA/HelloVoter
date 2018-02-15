@@ -122,7 +122,7 @@ export default class App extends PureComponent {
 
     let user = await _loginPing(this, false);
 
-    if (user.dropboxToken) {
+    if (user.dropbox) {
       navigate('CanvassingSetup');
     } else {
       this.setState({ DropboxLoginScreen: true, goToCanvassing: true });
@@ -139,7 +139,7 @@ export default class App extends PureComponent {
     if (prevState.SmLoginScreen && !SmLoginScreen)
       setTimeout(() => {this._loadProfile();}, 500);
 
-    if (prevState.DropboxLoginScreen && !DropboxLoginScreen && user.dropboxToken && goToCanvassing)
+    if (prevState.DropboxLoginScreen && !DropboxLoginScreen && user.dropbox && goToCanvassing)
       this.goToCanvassing();
   }
 
@@ -408,7 +408,7 @@ export default class App extends PureComponent {
               <Text style={{fontSize: 20}}>Canvassing:</Text>
             </View>
           </View>
-          {user.dropboxToken &&
+          {user.dropbox &&
           <View style={{flexDirection: 'row', alignItems: 'center', marginRight: 20}}>
             <Text style={{marginRight: 7, fontWeight: 'bold'}}>Ready</Text>
             <Icon name="check-circle" size={30} color="green" />
@@ -426,7 +426,7 @@ export default class App extends PureComponent {
             <TouchableOpacity
               style={{backgroundColor: '#d7d7d7', flex: 1, flexDirection: 'row', alignItems: 'center', padding: 12}}
               onPress={() => {this.goToCanvassing();}}>
-              {user.dropboxToken &&
+              {user.dropbox &&
               <Text>Start Canvassing</Text>
               ||
               <Text>Link Dropbox</Text>

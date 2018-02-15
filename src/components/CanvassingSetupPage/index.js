@@ -36,7 +36,7 @@ export default class App extends PureComponent {
     const { navigate } = this.props.navigation;
 
     let user = await _loginPing(this, false);
-    let dbx = new Dropbox({ accessToken: user.dropboxToken });
+    let dbx = new Dropbox({ accessToken: user.dropbox.accessToken });
     let forms = [];
 
     // look for canvassing forms

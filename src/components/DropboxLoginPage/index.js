@@ -36,8 +36,8 @@ export default class App extends PureComponent {
   _doCheck = async () => {
     var refer = this.props.refer;
     let user = await _loginPing(this, false);
-    if (user.dropboxToken) {
-      let dbx = new Dropbox({ accessToken: user.dropboxToken });
+    if (user.dropbox) {
+      let dbx = new Dropbox({ accessToken: user.dropbox.accessToken });
 
       // verify the token works
       dbx.filesListFolder({path: ''})
@@ -74,7 +74,7 @@ export default class App extends PureComponent {
 
     try {
       let user = await _loginPing(this, false);
-      user.dropboxToken = jwt_decode(token).accessToken;
+      user.dropbox = jwt_decode(token);
       await _saveUser(user, false);
     } catch(error) {
       console.warn(error);
