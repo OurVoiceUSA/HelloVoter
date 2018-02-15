@@ -84,10 +84,16 @@ export default class App extends PureComponent {
         </View>
       );
 
+
     if (!loading && !forms.length) forms.push(<View key={1}><Text>No Canvassing forms found in your dropbox. A folder with a well formatted CanvassingForm.json file in it is needed for this tool to work.</Text></View>);
 
     return (
       <ScrollView style={{flex: 1, backgroundColor: 'white'}}>
+
+        <View style={{margin: 20, alignItems: 'center'}}>
+          <Text>You are logged into Dropbox as:</Text>
+          <Text>{user.dropbox.name.display_name}</Text>
+        </View>
 
         <View style={{
             width: Dimensions.get('window').width,
@@ -98,15 +104,15 @@ export default class App extends PureComponent {
 
         <View style={{flexDirection: 'row', margin: 20, marginTop: 0}}>
             {loading &&
-<View>
-            <Text>Loading data from Dropbox...</Text>
-            <ActivityIndicator size="large" />
-</View>
+            <View style={{flex: 1, margin: 20, alignItems: 'center'}}>
+               <Text>Loading data from Dropbox...</Text>
+              <ActivityIndicator size="large" />
+            </View>
             ||
-              <View style={{flex: 1}}>
-<Text>Select a canvassing campaign:</Text>
+            <View style={{flex: 1, alignItems: 'center'}}>
+              <Text style={{margin: 10}}>Select a canvassing campaign:</Text>
               { forms }
-              </View>
+            </View>
             }
         </View>
 
