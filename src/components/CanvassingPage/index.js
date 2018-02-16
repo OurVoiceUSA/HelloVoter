@@ -19,6 +19,8 @@ import {
 } from 'react-native';
 
 import { NavigationActions } from 'react-navigation'
+import { Dropbox } from 'dropbox';
+import DeviceInfo from 'react-native-device-info';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Permissions from 'react-native-permissions';
 import RNGLocation from 'react-native-google-location';
@@ -180,25 +182,25 @@ export default class App extends PureComponent {
   }
 
   addpin(color) {
-    let { inputPosition, myPins, inputAddress, dbx, form } = this.state;
+    let { inputPosition, myPins, inputAddress, form } = this.state;
     let epoch = Math.floor(new Date().getTime() / 1000);
 
     const pin = {
+      id: epoch,
       latlng: {latitude: inputPosition.latitude, longitude: inputPosition.longitude},
       title: inputAddress,
       description: "Visited on "+new Date().toDateString(),
       color: color,
-      epoch: epoch,
     };
 
     myPins.pins.push(pin);
 
     this.setState({ myPins });
 
-    this._savePinsAsyncStorage();
+    this._savePins(myPins);
 
     const { navigate } = this.props.navigation;
-    if (color === "green") navigate('Survey', {dbx: dbx, address: inputAddress, pinId: epoch, form: form});
+    if (color === "green") navigate('Survey', {refer: this, myPins: myPins, form: form});
 
   }
 
@@ -235,12 +237,13 @@ export default class App extends PureComponent {
     }
   }
 
-  _savePinsAsyncStorage = async () => {
-    let { myPins } = this.state;
+  _savePins = async (myPins) => {
+    let { dbx } = this.state;
     myPins.last_saved = Math.floor(new Date().getTime() / 1000);
     try {
       let str = JSON.stringify(this.state.myPins);
       await AsyncStorage.setItem(this.state.asyncStorageKey, str);
+      dbx.filesUpload({ path: '/canvassing/'+DeviceInfo.getUniqueID()+'.txt', contents: str, mode: {'.tag': 'overwrite'} });
     } catch (error) {
       console.error(error);
     }

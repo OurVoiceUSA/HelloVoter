@@ -1,6 +1,5 @@
 import React, { PureComponent } from 'react';
 import {
-  AsyncStorage,
   Dimensions,
   TouchableOpacity,
   TouchableHighlight,
@@ -11,8 +10,6 @@ import {
   ScrollView,
 } from 'react-native';
 
-import { Dropbox } from 'dropbox';
-import DeviceInfo from 'react-native-device-info';
 import storage from 'react-native-storage-wrapper';
 import t from 'tcomb-form-native';
 
@@ -45,40 +42,25 @@ export default class App extends PureComponent {
     const { state } = this.props.navigation;
 
     this.state = {
-      pinId: state.params.pinId,
-      address: state.params.address,
-      viewOnly: state.params.viewOnly,
-      asyncStorageKey: 'OV_CANVASS_PINS@'+state.params.form.id,
-      dbx: state.params.dbx,
+      refer: state.params.refer,
       form: state.params.form,
+      myPins: state.params.myPins,
     };
 
     this.doSave = this.doSave.bind(this);
   }
 
   doSave = async () => {
-    const { pinId, dbx, form } = this.state;
+    let { refer, form, myPins } = this.state;
 
-    let value = this.refs.form.getValue();
-    if (value == null) return;
+    let json = this.refs.form.getValue();
+    if (json == null) return;
 
-    try {
-      const str = await AsyncStorage.getItem(this.state.asyncStorageKey);
-      let myPins = JSON.parse(str);
+    // last item in myPins is where we put our data
+    myPins.pins[myPins.pins.length-1].survey = json;
+    refer._savePins(myPins);
 
-/*
-      for (let i in myPins.pins) {
-        if (myPins.pins[i].epoch == pinId
-      }
-*/
-      dbx.filesUpload({ path: '/canvassing/'+DeviceInfo.getUniqueID()+'.txt', contents: JSON.stringify(value), mode: {'.tag': 'overwrite'} });
-
-      this.props.navigation.goBack();
-
-    } catch (error) {
-      console.error(error);
-      return;
-    }
+    this.props.navigation.goBack();
 
   }
 
