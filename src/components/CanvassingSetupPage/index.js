@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 
 import jwt_decode from 'jwt-decode';
+import DeviceInfo from 'react-native-device-info';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Dropbox } from 'dropbox';
 import { _loginPing } from '../../common';
@@ -94,6 +95,11 @@ export default class App extends PureComponent {
         <View style={{margin: 20, alignItems: 'center'}}>
           <Text>You are logged into Dropbox as:</Text>
           <Text>{user.dropbox.name.display_name}</Text>
+        </View>
+
+        <View style={{margin: 20, marginTop: 0, alignItems: 'center'}}>
+          <Text>Your Device ID is:</Text>
+          <Text>{DeviceInfo.getUniqueID()}</Text>
         </View>
 
         <View style={{
