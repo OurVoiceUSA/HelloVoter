@@ -238,15 +238,19 @@ export default class App extends PureComponent {
   }
 
   _savePins = async (myPins) => {
-    let { dbx } = this.state;
+    let { dbx, form } = this.state;
     myPins.last_saved = Math.floor(new Date().getTime() / 1000);
     try {
       let str = JSON.stringify(this.state.myPins);
       await AsyncStorage.setItem(this.state.asyncStorageKey, str);
       // convert to .csv file and upload
-      let csv = "address,longitude,latitude,color,data\n";
+      let keys = Object.keys(form.questions);
+      let csv = "address,longitude,latitude,color,"+keys.join(",")+"\n";
       for (let i in myPins.pins) {
-        csv += '"'+myPins.pins[i].title+'"'+","+myPins.pins[i].latlng.longitude+","+myPins.pins[i].latlng.latitude+","+myPins.pins[i].color+","+myPins.pins[i].survey+"\n";
+        csv += '"'+myPins.pins[i].title+'"'+","+myPins.pins[i].latlng.longitude+","+myPins.pins[i].latlng.latitude+","+myPins.pins[i].color;
+        for (let key in keys)
+          csv += ","+(myPins.pins[i].survey ? myPins.pins[i].survey[keys[key]] : '');
+        csv += "\n";
       }
       dbx.filesUpload({ path: '/canvassing/'+DeviceInfo.getUniqueID()+'.csv', contents: csv, mode: {'.tag': 'overwrite'} });
     } catch (error) {
