@@ -28,6 +28,7 @@ import RNGooglePlaces from 'react-native-google-places';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import Modal from 'react-native-modal';
 import ModalInput from '../ModalInput';
+import encoding from 'encoding';
 import { _doGeocode } from '../../common';
 
 export default class App extends PureComponent {
@@ -252,7 +253,7 @@ export default class App extends PureComponent {
           csv += ","+(myPins.pins[i].survey ? myPins.pins[i].survey[keys[key]] : '');
         csv += "\n";
       }
-      dbx.filesUpload({ path: '/canvassing/'+DeviceInfo.getUniqueID()+'.csv', contents: csv, mode: {'.tag': 'overwrite'} });
+      dbx.filesUpload({ path: '/canvassing/'+DeviceInfo.getUniqueID()+'.csv', contents: encoding.convert(csv, 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
     } catch (error) {
       console.error(error);
     }

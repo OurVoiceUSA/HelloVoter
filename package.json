@@ -8,6 +8,7 @@
 	},
 	"dependencies": {
 		"dropbox": "^3.0.4",
+		"encoding": "^0.1.12",
 		"jwt-decode": "^2.2.0",
 		"react": "^16.0.0",
 		"react-native": "^0.51.0",
@@ -25,6 +26,7 @@
 		"react-native-storage-wrapper": "0.1.0",
 		"react-native-vector-icons": "^4.4.3",
 		"react-navigation": "^1.0.0-beta.23",
+		"stream": "0.0.2",
 		"tcomb-form-native": "^0.6.11"
 	},
 	"devDependencies": {
