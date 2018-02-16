@@ -46,7 +46,7 @@ export default class App extends PureComponent {
       cCity: null,
       cState: null,
       cZip: null,
-      myPins: [],
+      myPins: { pins: [] },
       asyncStorageKey: 'OV_CANVASS_PINS@'+props.navigation.state.params.form.id,
       DisclosureKey : 'OV_DISCLOUSER',
       isModalVisible: false,
@@ -174,7 +174,6 @@ export default class App extends PureComponent {
       latitude: myPosition.latitude,
     };
 
-    // res is an Array of geocoding object, take the first one
     this.setState({ inputPosition: LL, inputAddress: inputAddress, isModalVisible: false });
     this.map.animateToCoordinate(LL, 500)
     // second modal doesn't show because of the map animation (a bug?) - have it set after it's done
@@ -193,7 +192,7 @@ export default class App extends PureComponent {
       epoch: epoch,
     };
 
-    myPins.push(pin);
+    myPins.pins.push(pin);
 
     this.setState({ myPins });
 
@@ -229,8 +228,8 @@ export default class App extends PureComponent {
     try {
       const value = await AsyncStorage.getItem(this.state.asyncStorageKey);
       if (value !== null) {
-        const pins = JSON.parse(value);
-        this.setState({myPins: pins});
+        let myPins = JSON.parse(value);
+        this.setState({ myPins: myPins });
       }
     } catch (error) {
       console.error(error);
@@ -238,9 +237,8 @@ export default class App extends PureComponent {
   }
 
   _savePinsAsyncStorage = async () => {
-    const pins = JSON.stringify(this.state.myPins);
     try {
-      await AsyncStorage.setItem(this.state.asyncStorageKey, pins);
+      await AsyncStorage.setItem(this.state.asyncStorageKey, JSON.stringify(this.state.myPins));
     } catch (error) {
       console.error(error);
     }
@@ -502,7 +500,7 @@ export default class App extends PureComponent {
           keyboardShouldPersistTaps={true}
           {...this.props}>
           {
-            myPins.map((marker, index) => (
+            myPins.pins.map((marker, index) => (
               <MapView.Marker
                 key={index}
                 coordinate={marker.latlng}
