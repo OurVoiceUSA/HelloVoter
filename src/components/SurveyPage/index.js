@@ -11,6 +11,8 @@ import {
   ScrollView,
 } from 'react-native';
 
+import { Dropbox } from 'dropbox';
+import DeviceInfo from 'react-native-device-info';
 import storage from 'react-native-storage-wrapper';
 import t from 'tcomb-form-native';
 
@@ -46,22 +48,42 @@ export default class App extends PureComponent {
       pinId: state.params.pinId,
       address: state.params.address,
       viewOnly: state.params.viewOnly,
+      asyncStorageKey: 'OV_CANVASS_PINS@'+state.params.form.id,
+      dbx: state.params.dbx,
       form: state.params.form,
     };
 
     this.doSave = this.doSave.bind(this);
   }
 
-  doSave() {
+  doSave = async () => {
+    const { pinId, dbx, form } = this.state;
+
     let value = this.refs.form.getValue();
-    if (value) {
-      console.warn(value);
+    if (value == null) return;
+
+    try {
+      const str = await AsyncStorage.getItem(this.state.asyncStorageKey);
+      let myPins = JSON.parse(str);
+
+/*
+      for (let i in myPins.pins) {
+        if (myPins.pins[i].epoch == pinId
+      }
+*/
+      dbx.filesUpload({ path: '/canvassing/'+DeviceInfo.getUniqueID()+'.txt', contents: JSON.stringify(value), mode: {'.tag': 'overwrite'} });
+
+      this.props.navigation.goBack();
+
+    } catch (error) {
+      console.error(error);
+      return;
     }
+
   }
 
   render() {
 
-    const { goBack, setParams, state } = this.props.navigation;
     let { viewOnly, form } = this.state;
 
     let newStruct = {};

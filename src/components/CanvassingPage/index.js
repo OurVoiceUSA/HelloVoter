@@ -19,8 +19,6 @@ import {
 } from 'react-native';
 
 import { NavigationActions } from 'react-navigation'
-import { Dropbox } from 'dropbox';
-import DeviceInfo from 'react-native-device-info';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Permissions from 'react-native-permissions';
 import RNGLocation from 'react-native-google-location';
@@ -182,7 +180,7 @@ export default class App extends PureComponent {
   }
 
   addpin(color) {
-    let { inputPosition, myPins, inputAddress, form } = this.state;
+    let { inputPosition, myPins, inputAddress, dbx, form } = this.state;
     let epoch = Math.floor(new Date().getTime() / 1000);
 
     const pin = {
@@ -200,7 +198,7 @@ export default class App extends PureComponent {
     this._savePinsAsyncStorage();
 
     const { navigate } = this.props.navigation;
-    if (color === "green") navigate('Survey', {address: inputAddress, pinId: epoch, form: form});
+    if (color === "green") navigate('Survey', {dbx: dbx, address: inputAddress, pinId: epoch, form: form});
 
   }
 
@@ -238,17 +236,15 @@ export default class App extends PureComponent {
   }
 
   _savePinsAsyncStorage = async () => {
-    let { myPins, dbx } = this.state;
+    let { myPins } = this.state;
     myPins.last_saved = Math.floor(new Date().getTime() / 1000);
     try {
       let str = JSON.stringify(this.state.myPins);
       await AsyncStorage.setItem(this.state.asyncStorageKey, str);
-      dbx.filesUpload({ path: '/canvassing/'+DeviceInfo.getUniqueID()+'.txt', contents: str, mode: {'.tag': 'overwrite'} });
     } catch (error) {
       console.error(error);
     }
   }
-
   
   _canvassUrlHandler() {
     const url = "https://ourvoiceusa.org/ourvoice-canvassing-guidelines/";
@@ -512,10 +508,6 @@ export default class App extends PureComponent {
                 title={marker.title}
                 description={marker.description}
                 pinColor={marker.color}
-                onCalloutPress={() => {
-                  if (marker.color == "green")
-                    navigate('Survey', {pinId: marker.epoch, form: form, viewOnly: true})
-                }}
                 />
             ))
           }
