@@ -243,7 +243,12 @@ export default class App extends PureComponent {
     try {
       let str = JSON.stringify(this.state.myPins);
       await AsyncStorage.setItem(this.state.asyncStorageKey, str);
-      dbx.filesUpload({ path: '/canvassing/'+DeviceInfo.getUniqueID()+'.txt', contents: str, mode: {'.tag': 'overwrite'} });
+      // convert to .csv file and upload
+      let csv = "address,longitude,latitude,color,data\n";
+      for (let i in myPins.pins) {
+        csv += '"'+myPins.pins[i].title+'"'+","+myPins.pins[i].latlng.longitude+","+myPins.pins[i].latlng.latitude+","+myPins.pins[i].color+","+myPins.pins[i].survey+"\n";
+      }
+      dbx.filesUpload({ path: '/canvassing/'+DeviceInfo.getUniqueID()+'.csv', contents: csv, mode: {'.tag': 'overwrite'} });
     } catch (error) {
       console.error(error);
     }
