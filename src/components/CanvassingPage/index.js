@@ -19,6 +19,7 @@ import {
 } from 'react-native';
 
 import { NavigationActions } from 'react-navigation'
+import { Dropbox } from 'dropbox';
 import DeviceInfo from 'react-native-device-info';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Permissions from 'react-native-permissions';
@@ -51,8 +52,8 @@ export default class App extends PureComponent {
       DisclosureKey : 'OV_DISCLOUSER',
       isModalVisible: false,
       isKnockMenuVisible: false,
-      userId: DeviceInfo.getUniqueID(),
       showDisclosure: "true",
+      dbx: props.navigation.state.params.dbx,
       form: props.navigation.state.params.form,
     };
 
@@ -181,7 +182,7 @@ export default class App extends PureComponent {
   }
 
   addpin(color) {
-    let { inputPosition, myPins, inputAddress, userId, form } = this.state;
+    let { inputPosition, myPins, inputAddress, form } = this.state;
     let epoch = Math.floor(new Date().getTime() / 1000);
 
     const pin = {
@@ -199,7 +200,7 @@ export default class App extends PureComponent {
     this._savePinsAsyncStorage();
 
     const { navigate } = this.props.navigation;
-    if (color === "green") navigate('Survey', {address: inputAddress, pinId: epoch, userId: userId, form: form});
+    if (color === "green") navigate('Survey', {address: inputAddress, pinId: epoch, form: form});
 
   }
 
@@ -237,10 +238,12 @@ export default class App extends PureComponent {
   }
 
   _savePinsAsyncStorage = async () => {
-    let { myPins } = this.state;
+    let { myPins, dbx } = this.state;
     myPins.last_saved = Math.floor(new Date().getTime() / 1000);
     try {
-      await AsyncStorage.setItem(this.state.asyncStorageKey, JSON.stringify(this.state.myPins));
+      let str = JSON.stringify(this.state.myPins);
+      await AsyncStorage.setItem(this.state.asyncStorageKey, str);
+      dbx.filesUpload({ path: '/canvassing/'+DeviceInfo.getUniqueID()+'.txt', contents: str, mode: {'.tag': 'overwrite'} });
     } catch (error) {
       console.error(error);
     }
@@ -256,7 +259,7 @@ export default class App extends PureComponent {
 
     const { navigate } = this.props.navigation;
     const {
-      showDisclosure, myPosition, myPins, userId, locationAccess, serviceError, form,
+      showDisclosure, myPosition, myPins, locationAccess, serviceError, form,
       cStreet, cUnit, cCity, cState, cZip, loading,
     } = this.state;
 
@@ -511,7 +514,7 @@ export default class App extends PureComponent {
                 pinColor={marker.color}
                 onCalloutPress={() => {
                   if (marker.color == "green")
-                    navigate('Survey', {pinId: marker.epoch, userId: userId, form: form, viewOnly: true})
+                    navigate('Survey', {pinId: marker.epoch, form: form, viewOnly: true})
                 }}
                 />
             ))
