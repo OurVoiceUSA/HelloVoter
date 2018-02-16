@@ -405,7 +405,7 @@ export default class App extends PureComponent {
           <View style={{flex: 1}}>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <Icon style={{marginRight: 10}} name="map-signs" size={22} color="black" />
-              <Text style={{fontSize: 20}}>Canvassing:</Text>
+              <Text style={{fontSize: 20}}>Canvassing (BETA):</Text>
             </View>
           </View>
           {user.dropbox &&
