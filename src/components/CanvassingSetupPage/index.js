@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
+import jwt_decode from 'jwt-decode';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Dropbox } from 'dropbox';
 import { _loginPing } from '../../common';
@@ -40,16 +41,16 @@ export default class App extends PureComponent {
 
     // look for canvassing forms
     try {
-      let res = await dbx.filesListFolder({path: ''});
+      let res = await dbx.filesListFolder({path: '/canvassing'});
       for (let i in res.entries) {
         item = res.entries[i];
-        if (item['.tag'] != 'folder') continue;
+        if (!item.path_display.match(/\.jwt$/)) continue;
 
-        // check if this folder has a CanvassingForm.json
+        // check if this folder has a jwt
         try {
 
-          var data = await dbx.filesDownload({ path: item.path_display+'/CanvassingForm.json' });
-          let json = JSON.parse(data.fileBinary);
+          var data = await dbx.filesDownload({ path: item.path_display });
+          let json = jwt_decode(data.fileBinary);
 
           forms.push(
             <View key={i} style={{margin: 5, flexDirection: 'row'}}>
