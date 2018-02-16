@@ -47,7 +47,7 @@ export default class App extends PureComponent {
       cState: null,
       cZip: null,
       myPins: [],
-      asyncStorageKey: 'OV_CANVASS_PINS',
+      asyncStorageKey: 'OV_CANVASS_PINS@'+props.navigation.state.params.form.id,
       DisclosureKey : 'OV_DISCLOUSER',
       isModalVisible: false,
       isKnockMenuVisible: false,
