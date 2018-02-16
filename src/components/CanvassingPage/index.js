@@ -237,6 +237,8 @@ export default class App extends PureComponent {
   }
 
   _savePinsAsyncStorage = async () => {
+    let { myPins } = this.state;
+    myPins.last_saved = Math.floor(new Date().getTime() / 1000);
     try {
       await AsyncStorage.setItem(this.state.asyncStorageKey, JSON.stringify(this.state.myPins));
     } catch (error) {
