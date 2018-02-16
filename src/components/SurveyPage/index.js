@@ -16,13 +16,13 @@ import t from 'tcomb-form-native';
 
 var Form = t.form.Form;
 
-const SAD = t.enums({
+const SAND = t.enums({
   'SA': 'Strongly Agree',
   'A': 'Agree',
   'N': 'Neutral',
   'D': 'Disagree',
   'SD': 'Strongly Disagree',
-}, 'SAD');
+}, 'SAND');
 
 const Party = t.enums({
   'D': 'Democrat',
@@ -73,7 +73,7 @@ export default class App extends PureComponent {
       switch (form.questions[keys[k]].type) {
         case 'Number': value = t.Number; break;
         case 'Boolean': value = t.Boolean; break;
-        case 'SAD': value = SAD; break;
+        case 'SAND': value = SAND; break;
         case 'Party': value = Party; break;
         default: value = t.String;
       }
