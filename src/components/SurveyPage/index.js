@@ -23,15 +23,6 @@ const SAND = t.enums({
   'SD': 'Strongly Disagree',
 }, 'SAND');
 
-const Party = t.enums({
-  'D': 'Democrat',
-  'R': 'Republican',
-  'I': 'Independent',
-  'G': 'Green',
-  'L': 'Libertarian',
-  'O': 'Other',
-}, 'Party');
-
 var CanvassForm = t.struct({});
 var options = {};
 
@@ -64,6 +55,13 @@ export default class App extends PureComponent {
 
   }
 
+  valueToEnums(options) {
+    let obj = {};
+    for (let i in options)
+      obj[options[i]] = options[i];
+    return t.enums(obj);
+  }
+
   render() {
 
     let { viewOnly, form } = this.state;
@@ -77,8 +75,8 @@ export default class App extends PureComponent {
       switch (form.questions[keys[k]].type) {
         case 'Number': value = t.Number; break;
         case 'Boolean': value = t.Boolean; break;
+        case 'List': value = this.valueToEnums(form.questions[keys[k]].options); break;
         case 'SAND': value = SAND; break;
-        case 'Party': value = Party; break;
         default: value = t.String;
       }
       if (form.questions[keys[k]].optional) value = t.maybe(value);
