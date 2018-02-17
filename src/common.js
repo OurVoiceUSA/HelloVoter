@@ -216,6 +216,7 @@ export async function _getJWT(remote) {
     if (localuser) {
       // copy local objects
       user.lastsearchpos = localuser.lastsearchpos;
+      user.dropbox = localuser.dropbox;
       // merge localuser with user where user profile item is null
       if (localuser.profile) {
         if (!user.profile.party && localuser.profile.party) { user.profile.party = localuser.profile.party; remote = true; }

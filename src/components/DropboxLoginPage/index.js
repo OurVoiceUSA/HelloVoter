@@ -42,6 +42,8 @@ export default class App extends PureComponent {
       // verify the token works
       dbx.filesListFolder({path: ''})
       .then(function(response) {
+        // if this user is logged in, persist that to setstate
+        if (refer.state.user.loggedin) user.loggedin = true;
         refer.setState({user: user, DropboxLoginScreen: false});
       })
       .catch(function(error) {

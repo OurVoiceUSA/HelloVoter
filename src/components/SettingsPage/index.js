@@ -119,8 +119,7 @@ export default class App extends PureComponent {
 
   goToCanvassing = async () => {
     const { navigate } = this.props.navigation;
-
-    let user = await _loginPing(this, false);
+    const { user } = this.state;
 
     if (user.dropbox) {
       navigate('CanvassingSetup');
