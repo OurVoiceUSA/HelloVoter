@@ -35,6 +35,7 @@ export default class App extends PureComponent {
 
   _loadDBData = async () => {
     const { navigate } = this.props.navigation;
+    let folders = [];
 
     let user = await _loginPing(this, false);
     let dbx = new Dropbox({ accessToken: user.dropbox.accessToken });
@@ -42,36 +43,45 @@ export default class App extends PureComponent {
 
     // look for canvassing forms
     try {
-      let res = await dbx.filesListFolder({path: '/canvassing'});
+      let res = await dbx.filesListFolder({path: ''});
       for (let i in res.entries) {
         item = res.entries[i];
-        if (!item.path_display.match(/\.jwt$/)) continue;
-
-        // check if this folder has a jwt
-        try {
-
-          var data = await dbx.filesDownload({ path: item.path_display });
-          let json = jwt_decode(data.fileBinary);
-          json.file_path = item.path_display;
-
-          forms.push(
-            <View key={i} style={{margin: 5, flexDirection: 'row'}}>
-              <TouchableOpacity
-                style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20, maxWidth: 350}}
-                onPress={() => {navigate('Canvassing', {dbx: dbx, form: json})}}>
-                <Text style={{fontWeight: 'bold'}}>{json.name}</Text>
-                <Text style={{fontSize: 12}}>Created by {json.author}</Text>
-              </TouchableOpacity>
-            </View>
-          );
-        } catch(error) {
-          // nothing to do
-        }
+        if (item['.tag'] != 'folder') continue;
+        folders.push(item.path_display);
       }
-
     } catch (error) {
       console.warn(error);
     };
+
+    let pro = [];
+
+    for (let i in folders) {
+      pro.push(dbx.filesDownload({ path: folders[i]+'/canvassingform.jwt' }));
+    }
+
+    let objs = await Promise.all(pro.map(p => p.catch(e => e)));
+    for (let i in objs) {
+      try {
+        item = objs[i];
+        if (item.error) continue;
+
+        let json = jwt_decode(item.fileBinary);
+        json.file_path = item.path_display;
+
+        forms.push(
+          <View key={i} style={{margin: 5, flexDirection: 'row'}}>
+            <TouchableOpacity
+              style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20, maxWidth: 350}}
+              onPress={() => {navigate('Canvassing', {dbx: dbx, form: json})}}>
+              <Text style={{fontWeight: 'bold'}}>{json.name}</Text>
+              <Text style={{fontSize: 12}}>Created by {json.author}</Text>
+            </TouchableOpacity>
+          </View>
+        );
+      } catch(error) {
+        // nothing to do
+      }
+    }
 
     this.setState({ loading: false, forms: forms });
   }
