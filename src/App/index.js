@@ -7,6 +7,7 @@ import SettingsPage from '../components/SettingsPage';
 import CanvassingSetupPage from '../components/CanvassingSetupPage';
 import CanvassingPage from '../components/CanvassingPage';
 import SurveyPage from '../components/SurveyPage';
+import CreateSurveyPage from '../components/CreateSurveyPage';
 import AboutPage from '../components/AboutPage';
 
 import { StackNavigator } from 'react-navigation';
@@ -22,52 +23,48 @@ export default App = StackNavigator({
       headerTruncatedBackTitle: ' ',
     }),
   },
-    Settings: {
-      screen: SettingsPage,
-      navigationOptions: ({navigation}) => ({
-        title: 'Your Voice',
-      }),
-    },
-    PoliticalViews: {
-      screen: SurveyPage,
-      navigationOptions: ({navigation}) => {
-        const { setParams } = navigation;
-        return ({
-          title: 'Your Political Views',
-          headerRight: <HelpButton onPress={() => setParams({isHelpModalVisible: true})} />,
-        });
-      },
-    },
-    CanvassingSetup: {
-      screen: CanvassingSetupPage,
-      navigationOptions: ({navigation}) => ({
-        title: 'Canvassing Setup',
-      }),
-    },
-    Canvassing: {
-      screen: CanvassingPage,
-      navigationOptions: ({navigation}) => ({
-        title: 'Canvassing',
-      }),
-    },
-      Survey: {
-        screen: SurveyPage,
-        navigationOptions: ({navigation}) => ({
-          title: 'Survey',
-        }),
-      },
-    YourReps: {
-      screen: YourRepsPage,
-      navigationOptions: ({navigation}) => ({
-        title: 'Your Representatives',
-      }),
-    },
-    PolProfile: {
-      screen: PolProfilePage,
-      navigationOptions: ({navigation}) => ({
-        title: 'Politician Profile',
-      }),
-    },
+  Settings: {
+    screen: SettingsPage,
+    navigationOptions: ({navigation}) => ({
+      title: 'Your Voice',
+    }),
+  },
+  CanvassingSetup: {
+    screen: CanvassingSetupPage,
+    navigationOptions: ({navigation}) => ({
+      title: 'Canvassing Setup',
+     }),
+  },
+  Canvassing: {
+    screen: CanvassingPage,
+    navigationOptions: ({navigation}) => ({
+      title: 'Canvassing',
+    }),
+  },
+  Survey: {
+    screen: SurveyPage,
+    navigationOptions: ({navigation}) => ({
+      title: 'Survey',
+    }),
+  },
+  CreateSurvey: {
+    screen: CreateSurveyPage,
+    navigationOptions: ({navigation}) => ({
+      title: 'Create Survey',
+    }),
+   },
+  YourReps: {
+    screen: YourRepsPage,
+    navigationOptions: ({navigation}) => ({
+      title: 'Your Representatives',
+    }),
+  },
+  PolProfile: {
+    screen: PolProfilePage,
+    navigationOptions: ({navigation}) => ({
+      title: 'Politician Profile',
+    }),
+  },
   About: {
     screen: AboutPage,
     navigationOptions: ({navigation}) => ({

@@ -98,7 +98,7 @@ export default class App extends PureComponent {
       );
 
 
-    if (!loading && !forms.length) forms.push(<View key={1}><Text>No Canvassing forms found in your dropbox. Canvassing forms are files with the .jwt file extention, and are needed for this tool to work.</Text></View>);
+    if (!loading && !forms.length) forms.push(<View key={1}><Text>No Canvassing forms found in your dropbox. Ask someone who created one to share their folder with you, or create a new one.</Text></View>);
 
     return (
       <ScrollView style={{flex: 1, backgroundColor: 'white'}}>
