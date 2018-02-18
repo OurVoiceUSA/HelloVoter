@@ -52,6 +52,7 @@ export default class App extends PureComponent {
 
           var data = await dbx.filesDownload({ path: item.path_display });
           let json = jwt_decode(data.fileBinary);
+          json.file_path = item.path_display;
 
           forms.push(
             <View key={i} style={{margin: 5, flexDirection: 'row'}}>
