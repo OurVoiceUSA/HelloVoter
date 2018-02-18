@@ -15,6 +15,20 @@ import t from 'tcomb-form-native';
 
 var Form = t.form.Form;
 
+const FTYPE = t.enums({
+  'String': 'Text Field',
+  'Number': 'Number',
+  'Boolean': 'Switch',
+  'List': 'List',
+}, 'FTYPE');
+
+var addItem = {
+  inputKey: t.String,
+  inputLabel: t.String,
+  type: FTYPE,
+  required: t.Boolean
+};
+
 var options = {};
 
 export default class App extends PureComponent {
@@ -24,17 +38,28 @@ export default class App extends PureComponent {
     const { state } = this.props.navigation;
 
     this.state = {
-      form: t.struct({}),
+      form: t.struct(addItem),
+      fields: [],
     };
 
+    this.doAdd = this.doAdd.bind(this);
     this.doSave = this.doSave.bind(this);
+  }
+
+  doAdd = async () => {
+    let { fields } = this.state;
+
+    let json = this.refs.form.getValue();
+    if (json == null) return;
+
+    fields.push(json);
+
+    this.setState({form: t.struct(addItem), fields: fields});
+
   }
 
   doSave = async () => {
     let { form } = this.state;
-
-    let json = this.refs.form.getValue();
-    if (json == null) return;
 
     //this.props.navigation.goBack();
 
@@ -42,7 +67,14 @@ export default class App extends PureComponent {
 
   render() {
 
-    let { viewOnly, form } = this.state;
+    let { form, fields } = this.state;
+    let items = [];
+
+    for (let i in fields) items.push(
+        <Text key={i}>
+          {fields[i].inputLabel+(fields[i].required?'':' (optional)')} : {fields[i].type}
+        </Text>
+      )
 
     return (
       <ScrollView style={{flex: 1, backgroundColor: 'white'}}>
@@ -53,6 +85,14 @@ export default class App extends PureComponent {
           type={form}
           options={options}
         />
+        </View>
+
+        <TouchableHighlight style={styles.button} onPress={this.doAdd} underlayColor='#99d9f4'>
+          <Text style={styles.buttonText}>Add this item</Text>
+        </TouchableHighlight>
+
+        <View style={{margin: 20}}>
+          { items }
         </View>
 
         <TouchableHighlight style={styles.button} onPress={this.doSave} underlayColor='#99d9f4'>
