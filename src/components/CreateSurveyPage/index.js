@@ -44,26 +44,6 @@ export default class App extends PureComponent {
 
     let { viewOnly, form } = this.state;
 
-    let newStruct = {};
-    let newOptions = { fields: {} };
-
-    let keys = Object.keys(form.questions);
-    for (let k in keys) {
-      let value;
-      switch (form.questions[keys[k]].type) {
-        case 'Number': value = t.Number; break;
-        case 'Boolean': value = t.Boolean; break;
-        case 'List': value = this.valueToEnums(form.questions[keys[k]].options); break;
-        case 'SAND': value = SAND; break;
-        default: value = t.String;
-      }
-      if (form.questions[keys[k]].optional) value = t.maybe(value);
-      newStruct[keys[k]] = value;
-      newOptions.fields[keys[k]] = { label: form.questions[keys[k]].label + (form.questions[keys[k]].optional ? ' (optional)' : '') };
-    }
-
-    options = newOptions;
-
     return (
       <ScrollView style={{flex: 1, backgroundColor: 'white'}}>
 
