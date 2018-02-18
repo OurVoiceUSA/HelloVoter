@@ -253,7 +253,7 @@ export default class App extends PureComponent {
           csv += ","+(myPins.pins[i].survey ? myPins.pins[i].survey[keys[key]] : '');
         csv += "\n";
       }
-      dbx.filesUpload({ path: '/canvassing/'+DeviceInfo.getUniqueID()+'.csv', contents: encoding.convert(csv, 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
+      dbx.filesUpload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.csv', contents: encoding.convert(csv, 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
     } catch (error) {
       console.error(error);
     }

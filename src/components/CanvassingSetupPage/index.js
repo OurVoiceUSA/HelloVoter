@@ -66,7 +66,7 @@ export default class App extends PureComponent {
         if (item.error) continue;
 
         let json = jwt_decode(item.fileBinary);
-        json.file_path = item.path_display;
+        json.folder_path = item.path_display.match('.*/')[0].slice(0, -1);
 
         forms.push(
           <View key={i} style={{margin: 5, flexDirection: 'row'}}>
