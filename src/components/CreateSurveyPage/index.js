@@ -126,6 +126,17 @@ export default class App extends PureComponent {
     this.setState({customForm: t.struct(addItem)});
   }
 
+  inputTypeToReadable(type) {
+    switch (type) {
+      case 'String': return 'Text Input';
+      case 'Number': return 'Number';
+      case 'Boolean': return 'On/Off Switch';
+      case 'SAND': return 'Agree/Disagree Scale';
+      case 'List': return 'Select One of Many';
+    }
+    return type;
+  }
+
   render() {
 
     let { name, form, customForm, fields } = this.state;
@@ -154,12 +165,20 @@ export default class App extends PureComponent {
 
     for (let i in fields) items.push(
         <Text key={i}>
-          {fields[i].label+(fields[i].required?' *':'')} : {fields[i].type}
+          {fields[i].label+(fields[i].required?' *':'')} : {this.inputTypeToReadable(fields[i].type)}
         </Text>
       )
 
     return (
       <ScrollView style={{flex: 1, backgroundColor: 'white'}}>
+
+        <View style={{flex: 1, flexDirection: 'row', margin: 20, alignItems: 'center'}}>
+          <Text>Your Canvassing form will have these items:</Text>
+        </View>
+
+        <View style={{margin: 20, marginTop: 0}}>
+          { items }
+        </View>
 
         {customForm &&
         <View style={styles.container}>
@@ -183,14 +202,6 @@ export default class App extends PureComponent {
           </TouchableHighlight>
         </View>
         }
-
-        <View style={{flex: 1, flexDirection: 'row', margin: 20, alignItems: 'center'}}>
-          <Text>Your Canvassing form will have these items:</Text>
-        </View>
-
-        <View style={{margin: 20, marginTop: 0}}>
-          { items }
-        </View>
 
         <TouchableHighlight style={styles.button} onPress={this.doSave} underlayColor='#99d9f4'>
           <Text style={styles.buttonText}>Save Form</Text>
