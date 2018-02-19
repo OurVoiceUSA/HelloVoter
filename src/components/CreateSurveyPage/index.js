@@ -2,6 +2,7 @@
 import React, { PureComponent } from 'react';
 
 import {
+  ActivityIndicator,
   Alert,
   Dimensions,
   TouchableOpacity,
@@ -84,6 +85,7 @@ export default class App extends PureComponent {
       name: null,
       customForm: null,
       fields: fields,
+      saving: false,
     };
 
     this.onChange = this.onChange.bind(this);
@@ -121,6 +123,8 @@ export default class App extends PureComponent {
   doSave = async () => {
     let { fields, refer, dbx } = this.state;
 
+    this.setState({saving: true});
+
     let forms = [];
 
     // make sure this name doesn't exist as a dropbox folder
@@ -138,6 +142,7 @@ export default class App extends PureComponent {
       Alert.alert('Error', 'Unable to save form, an unknown error occurred.', [{text: 'OK'}], { cancelable: false });
     }
 
+    this.setState({saving: false});
   }
 
   doShowCustom() {
@@ -157,9 +162,17 @@ export default class App extends PureComponent {
 
   render() {
 
-    let { name, form, customForm, fields } = this.state;
+    let { name, form, customForm, fields, saving } = this.state;
     let items = [];
     let defaultList = [];
+
+    // blank while saving
+    if (saving) return (
+        <View style={{flex: 1, backgroundColor: 'white', alignItems: 'center', justifyContent: 'center'}}>
+          <Text style={{fontSize: 20}}>Saving form...</Text>
+          <ActivityIndicator />
+        </View>
+      );
 
     // list premade questions that aren't in this state's fields
     for (let p in premade) {
