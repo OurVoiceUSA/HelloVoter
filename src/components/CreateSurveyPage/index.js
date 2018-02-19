@@ -78,8 +78,9 @@ export default class App extends PureComponent {
         if (premade[p].key == defaultFields[i]) fields.push(premade[p]);
 
     this.state = {
-      user: props.navigation.state.params.user,
-      dbx: props.navigation.state.params.dbx,
+      refer: props.navigation.state.params.refer,
+      user: props.navigation.state.params.refer.state.user,
+      dbx: props.navigation.state.params.refer.state.dbx,
       name: null,
       customForm: null,
       fields: fields,
@@ -118,20 +119,21 @@ export default class App extends PureComponent {
   }
 
   doSave = async () => {
-    let { fields, dbx } = this.state;
+    let { fields, refer, dbx } = this.state;
 
     let forms = [];
 
-    // make sure this name doesn't exist
+    // make sure this name doesn't exist as a dropbox folder
     try {
       let res = await dbx.filesListFolder({path: ''});
       for (let i in res.entries) {
         item = res.entries[i];
         if (item['.tag'] != 'folder') continue;
-        console.warn(item.path_display);
+        let name = item.path_display.substr(1).toLowerCase();
       }
 
-      //this.props.navigation.goBack();
+      await refer._loadDBData();
+      this.props.navigation.goBack();
     } catch (error) {
       Alert.alert('Error', 'Unable to save form, an unknown error occurred.', [{text: 'OK'}], { cancelable: false });
     }

@@ -91,19 +91,18 @@ export default class App extends PureComponent {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const { SmLoginScreen, user, dbx } = this.state;
+    const { SmLoginScreen, user } = this.state;
     const { navigate } = this.props.navigation;
 
-    if (prevState.SmLoginScreen && !SmLoginScreen && user.loggedin) navigate('CreateSurvey', {user: user, dbx: dbx});
+    if (prevState.SmLoginScreen && !SmLoginScreen && user.loggedin) navigate('CreateSurvey', {refer: this});
   }
 
   createForm = async () => {
-    const { dbx } = this.state;
     const { navigate } = this.props.navigation;
 
     let user = await _loginPing(this, true);
     if (user.loggedin) {
-      navigate('CreateSurvey', {user: user, dbx: dbx});
+      navigate('CreateSurvey', {refer: this});
     } else {
       this.setState({SmLoginScreen: true});
     }
