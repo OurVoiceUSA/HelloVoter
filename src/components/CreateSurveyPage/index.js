@@ -27,7 +27,6 @@ var addItem = {
   key: t.String,
   label: t.String,
   type: FTYPE,
-  required: t.Boolean
 };
 
 var options = {
@@ -46,16 +45,39 @@ var options = {
   },
 };
 
+var premade = [
+  { key: 'FullName', label: 'Full Name', type: 'String' },
+  { key: 'Email', label: 'Email Address', type: 'String' },
+  { key: 'RegisteredToVote', label: 'Are you registered to vote?', type: 'Boolean' },
+  { key: 'PartyAffiliation', label: 'Party Affiliation', type: 'List',
+    options: [
+      'No Party Preference',
+      'Democrat',
+      'Republican',
+      'Green',
+      'Libertarian',
+      'Other',
+    ]},
+  { key: 'VoteLastElection', label: 'Did you vote in the last election?', type: 'Boolean' },
+];
+var defaultFields = ['FullName', 'Email', 'RegisteredToVote', 'PartyAffiliation'];
+
 export default class App extends PureComponent {
   constructor(props) {
     super(props);
 
     const { state } = this.props.navigation;
 
+    // initialize state with a subset of premade questions
+    let fields = [];
+    for (let i in defaultFields)
+      for (let p in premade)
+        if (premade[p].key == defaultFields[i]) fields.push(premade[p]);
+
     this.state = {
       name: null,
       customForm: null,
-      fields: [],
+      fields: fields,
     };
 
     this.onChange = this.onChange.bind(this);
