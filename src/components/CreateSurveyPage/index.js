@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 
 import t from 'tcomb-form-native';
+import { Dropbox } from 'dropbox';
 
 var Form = t.form.Form;
 
@@ -78,6 +79,7 @@ export default class App extends PureComponent {
 
     this.state = {
       user: props.navigation.state.params.user,
+      dbx: props.navigation.state.params.dbx,
       name: null,
       customForm: null,
       fields: fields,
@@ -115,10 +117,24 @@ export default class App extends PureComponent {
 
   }
 
-  doSave() {
-    let { form, customForm } = this.state;
+  doSave = async () => {
+    let { fields, dbx } = this.state;
 
-    //this.props.navigation.goBack();
+    let forms = [];
+
+    // make sure this name doesn't exist
+    try {
+      let res = await dbx.filesListFolder({path: ''});
+      for (let i in res.entries) {
+        item = res.entries[i];
+        if (item['.tag'] != 'folder') continue;
+        console.warn(item.path_display);
+      }
+
+      //this.props.navigation.goBack();
+    } catch (error) {
+      Alert.alert('Error', 'Unable to save form, an unknown error occurred.', [{text: 'OK'}], { cancelable: false });
+    }
 
   }
 

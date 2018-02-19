@@ -28,6 +28,7 @@ export default class App extends PureComponent {
       loading: true,
       user: null,
       forms: [],
+      dbx: null,
     };
 
   }
@@ -86,22 +87,23 @@ export default class App extends PureComponent {
       }
     }
 
-    this.setState({ loading: false, forms: forms });
+    this.setState({ loading: false, forms: forms, dbx: dbx });
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const { SmLoginScreen, user } = this.state;
+    const { SmLoginScreen, user, dbx } = this.state;
     const { navigate } = this.props.navigation;
 
-    if (prevState.SmLoginScreen && !SmLoginScreen && user.loggedin) navigate('CreateSurvey', {user: user});
+    if (prevState.SmLoginScreen && !SmLoginScreen && user.loggedin) navigate('CreateSurvey', {user: user, dbx: dbx});
   }
 
   createForm = async () => {
+    const { dbx } = this.state;
     const { navigate } = this.props.navigation;
 
     let user = await _loginPing(this, true);
     if (user.loggedin) {
-      navigate('CreateSurvey', {user: user});
+      navigate('CreateSurvey', {user: user, dbx: dbx});
     } else {
       this.setState({SmLoginScreen: true});
     }
@@ -123,6 +125,7 @@ export default class App extends PureComponent {
     return (
       <ScrollView style={{flex: 1, backgroundColor: 'white'}} contentContainerStyle={{flexGrow:1}}>
 
+        {!loading &&
         <View style={{margin: 12, position: 'absolute', right: 0}}>
           <TouchableOpacity onPress={this.createForm}>
             <Icon
@@ -132,6 +135,7 @@ export default class App extends PureComponent {
               backgroundColor="#d7d7d7" />
           </TouchableOpacity>
         </View>
+        }
 
         <View style={{margin: 20, alignItems: 'center'}}>
           <Text>You are logged into Dropbox as:</Text>
