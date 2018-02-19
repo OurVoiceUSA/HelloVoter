@@ -1,5 +1,8 @@
+
 import React, { PureComponent } from 'react';
+
 import {
+  Alert,
   Dimensions,
   TouchableOpacity,
   TouchableHighlight,
@@ -98,6 +101,14 @@ export default class App extends PureComponent {
     let json = this.refs.customForm.getValue();
     if (json == null) return;
 
+    // check for duplicate keys
+    let keys = [json.key];
+    for (let f in fields) {
+      if (keys.indexOf(fields[f].key) !== -1)
+        return Alert.alert('Error', 'Duplicate Input Key. Change your Input Key to add this item.', [{text: 'OK'}], { cancelable: false });
+      keys.push(fields[f].key);
+    }
+
     fields.push(json);
 
     this.setState({customForm: null, fields: fields});
@@ -119,6 +130,17 @@ export default class App extends PureComponent {
 
     let { name, form, customForm, fields } = this.state;
     let items = [];
+    let defaultList = [];
+
+    // list premade questions that aren't in this state's fields
+    for (let p in premade) {
+      let found = false;
+      for (let f in fields) {
+        if (fields[f].key == premade[p].key) found = true;
+      }
+      if (!found) defaultList.push(premade[p]);
+    }
+
 
 /*
     if (name == null) return (
@@ -162,12 +184,16 @@ export default class App extends PureComponent {
         </View>
         }
 
-        <View style={{margin: 20}}>
+        <View style={{flex: 1, flexDirection: 'row', margin: 20, alignItems: 'center'}}>
+          <Text>Your Canvassing form will have these items:</Text>
+        </View>
+
+        <View style={{margin: 20, marginTop: 0}}>
           { items }
         </View>
 
         <TouchableHighlight style={styles.button} onPress={this.doSave} underlayColor='#99d9f4'>
-          <Text style={styles.buttonText}>Save</Text>
+          <Text style={styles.buttonText}>Save Form</Text>
         </TouchableHighlight>
 
       </ScrollView>
