@@ -13,7 +13,6 @@ import {
   ScrollView,
 } from 'react-native';
 
-import storage from 'react-native-storage-wrapper';
 import t from 'tcomb-form-native';
 
 var Form = t.form.Form;
@@ -78,6 +77,7 @@ export default class App extends PureComponent {
         if (premade[p].key == defaultFields[i]) fields.push(premade[p]);
 
     this.state = {
+      user: props.navigation.state.params.user,
       name: null,
       customForm: null,
       fields: fields,

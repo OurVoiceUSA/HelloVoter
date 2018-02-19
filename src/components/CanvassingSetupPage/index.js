@@ -93,7 +93,7 @@ export default class App extends PureComponent {
     const { SmLoginScreen, user } = this.state;
     const { navigate } = this.props.navigation;
 
-    if (prevState.SmLoginScreen && !SmLoginScreen && user.loggedin) navigate('CreateSurvey');
+    if (prevState.SmLoginScreen && !SmLoginScreen && user.loggedin) navigate('CreateSurvey', {user: user});
   }
 
   createForm = async () => {
@@ -101,7 +101,7 @@ export default class App extends PureComponent {
 
     let user = await _loginPing(this, true);
     if (user.loggedin) {
-      navigate('CreateSurvey');
+      navigate('CreateSurvey', {user: user});
     } else {
       this.setState({SmLoginScreen: true});
     }
