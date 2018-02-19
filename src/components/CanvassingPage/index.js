@@ -238,6 +238,11 @@ export default class App extends PureComponent {
     }
   }
 
+  timeFormat(epoch) {
+    let date = new Date(epoch*1000);
+    return date.toLocaleDateString('en-us')+" "+date.toLocaleTimeString('en-us');
+  }
+
   _savePins = async (myPins) => {
     let { dbx, form } = this.state;
     myPins.last_saved = Math.floor(new Date().getTime() / 1000);
@@ -246,12 +251,12 @@ export default class App extends PureComponent {
       await AsyncStorage.setItem(this.state.asyncStorageKey, str);
       // convert to .csv file and upload
       let keys = Object.keys(form.questions);
-      let csv = "address,longitude,latitude,epoch,color,"+keys.join(",")+"\n";
+      let csv = "address,longitude,latitude,datetime,color,"+keys.join(",")+"\n";
       for (let i in myPins.pins) {
         csv += '"'+myPins.pins[i].title+'"'+
           ","+myPins.pins[i].latlng.longitude+
           ","+myPins.pins[i].latlng.latitude+
-          ","+myPins.pins[i].id+
+          ","+this.timeFormat(myPins.pins[i].id)+
           ","+myPins.pins[i].color;
         for (let key in keys)
           csv += ","+(myPins.pins[i].survey ? myPins.pins[i].survey[keys[key]] : '');
