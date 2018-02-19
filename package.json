@@ -26,6 +26,7 @@
 		"react-native-storage-wrapper": "0.1.0",
 		"react-native-vector-icons": "^4.4.3",
 		"react-navigation": "^1.0.0-beta.23",
+		"sha1": "^1.1.1",
 		"stream": "0.0.2",
 		"tcomb-form-native": "^0.6.11"
 	},

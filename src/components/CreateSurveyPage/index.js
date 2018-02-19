@@ -15,9 +15,15 @@ import {
 } from 'react-native';
 
 import t from 'tcomb-form-native';
+import sha1 from 'sha1';
+import encoding from 'encoding';
 import { Dropbox } from 'dropbox';
 
 var Form = t.form.Form;
+
+var mainForm = t.struct({
+  'name': t.String,
+});
 
 const FTYPE = t.enums({
   'String': 'Text Input',
@@ -121,25 +127,59 @@ export default class App extends PureComponent {
   }
 
   doSave = async () => {
-    let { fields, refer, dbx } = this.state;
+    let { fields, refer, user, dbx } = this.state;
 
-    this.setState({saving: true});
+    let msg = null;
 
-    let forms = [];
+    let json = this.refs.mainForm.getValue();
+    if (json == null) msg = 'Please name this form.';
+    else {
+      this.setState({saving: true});
 
-    // make sure this name doesn't exist as a dropbox folder
-    try {
-      let res = await dbx.filesListFolder({path: ''});
-      for (let i in res.entries) {
-        item = res.entries[i];
-        if (item['.tag'] != 'folder') continue;
-        let name = item.path_display.substr(1).toLowerCase();
+      let forms = [];
+
+      // make sure this name doesn't exist as a dropbox folder
+      try {
+        let res = await dbx.filesListFolder({path: ''});
+        for (let i in res.entries) {
+          item = res.entries[i];
+          if (item['.tag'] != 'folder') continue;
+          let name = item.path_display.substr(1).toLowerCase();
+          if (name == json.name.toLowerCase())
+            msg = 'Dropbox folder name '+name+' already exists. Please choose a different name.';
+        }
+
+        let epoch = Math.floor(new Date().getTime() / 1000);
+
+        let obj = {
+          id: sha1(epoch+":"+json.name),
+          created: epoch,
+          name: json.name,
+          author: user.profile.name,
+          version: 'beta',
+          questions: {}
+        };
+
+        // fields is an array of objects with key, label, type. Need to convert it to a hash with key as the name and type and label as props
+        for (let f in fields) {
+          obj.questions[fields[f].key] = {type: fields[f].type, label: fields[f].label, options: fields[f].options, optional: true};
+        }
+
+        if (msg == null) {
+          await dbx.filesCreateFolderV2({path: '/'+json.name, autorename: false});
+          await dbx.filesUpload({ path: '/'+json.name+'/canvassingform.jwt', contents: encoding.convert(JSON.stringify(obj), 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
+        }
+
+      } catch (error) {
+        msg = 'Unable to save form, an unknown error occurred.';
       }
+    }
 
+    if (msg == null) {
       await refer._loadDBData();
       this.props.navigation.goBack();
-    } catch (error) {
-      Alert.alert('Error', 'Unable to save form, an unknown error occurred.', [{text: 'OK'}], { cancelable: false });
+    } else {
+      Alert.alert('Error', msg, [{text: 'OK'}], { cancelable: false });
     }
 
     this.setState({saving: false});
@@ -236,6 +276,11 @@ export default class App extends PureComponent {
           </TouchableHighlight>
         </View>
         }
+
+        <Form
+          ref="mainForm"
+          type={mainForm}
+        />
 
         <TouchableHighlight style={styles.button} onPress={this.doSave} underlayColor='#99d9f4'>
           <Text style={styles.buttonText}>Save Form</Text>
