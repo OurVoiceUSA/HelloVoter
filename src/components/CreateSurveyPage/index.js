@@ -16,20 +16,35 @@ import t from 'tcomb-form-native';
 var Form = t.form.Form;
 
 const FTYPE = t.enums({
-  'String': 'Text Field',
+  'String': 'Text Input',
   'Number': 'Number',
-  'Boolean': 'Switch',
-  'List': 'List',
+  'Boolean': 'On/Off Switch',
+  'SAND': 'Agree/Disagree Scale',
+//  'List': 'Select One of Many',
 }, 'FTYPE');
 
 var addItem = {
-  inputKey: t.String,
-  inputLabel: t.String,
+  key: t.String,
+  label: t.String,
   type: FTYPE,
   required: t.Boolean
 };
 
-var options = {};
+var options = {
+  fields: {
+    key: {
+      label: 'Input Key',
+      help: 'Column name in spreadsheet.',
+    },
+    label: {
+      label: 'Input Label',
+      help: 'Label the user sees on the form.',
+    },
+    type: {
+      help: 'The type of input the user can enter.',
+    },
+  },
+};
 
 export default class App extends PureComponent {
   constructor(props) {
@@ -38,15 +53,23 @@ export default class App extends PureComponent {
     const { state } = this.props.navigation;
 
     this.state = {
+      name: null,
       form: t.struct(addItem),
       fields: [],
     };
 
+    this.onChange = this.onChange.bind(this);
     this.doAdd = this.doAdd.bind(this);
     this.doSave = this.doSave.bind(this);
   }
 
-  doAdd = async () => {
+  onChange(value) {
+    const { typeList } = this.state;
+
+    if (value.type == 'List') value = t.String; // do something...
+  }
+
+  doAdd() {
     let { fields } = this.state;
 
     let json = this.refs.form.getValue();
@@ -58,7 +81,7 @@ export default class App extends PureComponent {
 
   }
 
-  doSave = async () => {
+  doSave() {
     let { form } = this.state;
 
     //this.props.navigation.goBack();
@@ -67,12 +90,22 @@ export default class App extends PureComponent {
 
   render() {
 
-    let { form, fields } = this.state;
+    let { name, form, fields } = this.state;
     let items = [];
+
+/*
+    if (name == null) return (
+      <View style={{flex: 1, justifyContent: 'flex-start', backgroundColor: 'white'}}>
+        <View style={{margin: 20}}>
+          <Text>Name your campaign:</Text>
+        </View>
+      </View>
+      );
+*/
 
     for (let i in fields) items.push(
         <Text key={i}>
-          {fields[i].inputLabel+(fields[i].required?'':' (optional)')} : {fields[i].type}
+          {fields[i].label+(fields[i].required?' *':'')} : {fields[i].type}
         </Text>
       )
 
@@ -84,6 +117,7 @@ export default class App extends PureComponent {
           ref="form"
           type={form}
           options={options}
+          onChange={this.onChange}
         />
         </View>
 
