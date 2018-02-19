@@ -54,13 +54,14 @@ export default class App extends PureComponent {
 
     this.state = {
       name: null,
-      form: t.struct(addItem),
+      customForm: null,
       fields: [],
     };
 
     this.onChange = this.onChange.bind(this);
-    this.doAdd = this.doAdd.bind(this);
+    this.doAddCustom = this.doAddCustom.bind(this);
     this.doSave = this.doSave.bind(this);
+    this.doShowCustom = this.doShowCustom.bind(this);
   }
 
   onChange(value) {
@@ -69,28 +70,32 @@ export default class App extends PureComponent {
     if (value.type == 'List') value = t.String; // do something...
   }
 
-  doAdd() {
+  doAddCustom() {
     let { fields } = this.state;
 
-    let json = this.refs.form.getValue();
+    let json = this.refs.customForm.getValue();
     if (json == null) return;
 
     fields.push(json);
 
-    this.setState({form: t.struct(addItem), fields: fields});
+    this.setState({customForm: null, fields: fields});
 
   }
 
   doSave() {
-    let { form } = this.state;
+    let { form, customForm } = this.state;
 
     //this.props.navigation.goBack();
 
   }
 
+  doShowCustom() {
+    this.setState({customForm: t.struct(addItem)});
+  }
+
   render() {
 
-    let { name, form, fields } = this.state;
+    let { name, form, customForm, fields } = this.state;
     let items = [];
 
 /*
@@ -112,18 +117,28 @@ export default class App extends PureComponent {
     return (
       <ScrollView style={{flex: 1, backgroundColor: 'white'}}>
 
+        {customForm &&
         <View style={styles.container}>
-        <Form
-          ref="form"
-          type={form}
-          options={options}
-          onChange={this.onChange}
-        />
+          <Form
+            ref="customForm"
+            type={customForm}
+            options={options}
+            onChange={this.onChange}
+          />
+          <TouchableHighlight style={styles.button} onPress={this.doAddCustom} underlayColor='#99d9f4'>
+            <Text style={styles.buttonText}>Add this item</Text>
+          </TouchableHighlight>
+          <TouchableHighlight style={styles.button} onPress={() => this.setState({customForm: null})} underlayColor='#99d9f4'>
+            <Text style={styles.buttonText}>Undo</Text>
+          </TouchableHighlight>
         </View>
-
-        <TouchableHighlight style={styles.button} onPress={this.doAdd} underlayColor='#99d9f4'>
-          <Text style={styles.buttonText}>Add this item</Text>
-        </TouchableHighlight>
+        ||
+        <View style={styles.container}>
+          <TouchableHighlight style={styles.button} onPress={this.doShowCustom} underlayColor='#99d9f4'>
+            <Text style={styles.buttonText}>Add custom field</Text>
+          </TouchableHighlight>
+        </View>
+        }
 
         <View style={{margin: 20}}>
           { items }
