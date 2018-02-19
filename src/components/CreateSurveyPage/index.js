@@ -164,9 +164,12 @@ export default class App extends PureComponent {
 */
 
     for (let i in fields) items.push(
-        <Text key={i}>
-          {fields[i].label+(fields[i].required?' *':'')} : {this.inputTypeToReadable(fields[i].type)}
-        </Text>
+        <View key={i}>
+          <View style={{width: Dimensions.get('window').width, height: 1, backgroundColor: 'lightgray' }} />
+          <Text style={{margin: 5}}>
+            {fields[i].label+(fields[i].required?' *':'')} : {this.inputTypeToReadable(fields[i].type)}
+          </Text>
+        </View>
       )
 
     return (
