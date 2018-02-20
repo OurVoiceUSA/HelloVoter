@@ -134,6 +134,9 @@ export default class App extends PureComponent {
     let json = this.refs.mainForm.getValue();
     if (json == null) msg = 'Please name this form.';
     else {
+      // get rid of ending whitespace
+      let formName = json.name.trim();
+
       this.setState({saving: true});
 
       let forms = [];
@@ -145,16 +148,16 @@ export default class App extends PureComponent {
           item = res.entries[i];
           if (item['.tag'] != 'folder') continue;
           let name = item.path_display.substr(1).toLowerCase();
-          if (name == json.name.toLowerCase())
+          if (name == formName.toLowerCase())
             msg = 'Dropbox folder name '+name+' already exists. Please choose a different name.';
         }
 
         let epoch = Math.floor(new Date().getTime() / 1000);
 
         let obj = {
-          id: sha1(epoch+":"+json.name),
+          id: sha1(epoch+":"+formName),
           created: epoch,
-          name: json.name,
+          name: formName,
           author: user.profile.name,
           version: 'beta',
           questions: {}
@@ -166,8 +169,8 @@ export default class App extends PureComponent {
         }
 
         if (msg == null) {
-          await dbx.filesCreateFolderV2({path: '/'+json.name, autorename: false});
-          await dbx.filesUpload({ path: '/'+json.name+'/canvassingform.json', contents: encoding.convert(JSON.stringify(obj), 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
+          await dbx.filesCreateFolderV2({path: '/'+formName, autorename: false});
+          await dbx.filesUpload({ path: '/'+formName+'/canvassingform.json', contents: encoding.convert(JSON.stringify(obj), 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
         }
 
       } catch (error) {
