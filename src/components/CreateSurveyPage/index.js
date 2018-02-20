@@ -176,7 +176,7 @@ export default class App extends PureComponent {
     }
 
     if (msg == null) {
-      await refer._loadDBData();
+      refer._loadDBData();
       this.props.navigation.goBack();
     } else {
       Alert.alert('Error', msg, [{text: 'OK'}], { cancelable: false });
@@ -222,17 +222,6 @@ export default class App extends PureComponent {
       }
       if (!found) defaultList.push(premade[p]);
     }
-
-
-/*
-    if (name == null) return (
-      <View style={{flex: 1, justifyContent: 'flex-start', backgroundColor: 'white'}}>
-        <View style={{margin: 20}}>
-          <Text>Name your campaign:</Text>
-        </View>
-      </View>
-      );
-*/
 
     for (let i in fields) items.push(
         <View key={i}>

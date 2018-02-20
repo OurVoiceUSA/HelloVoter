@@ -40,6 +40,8 @@ export default class App extends PureComponent {
     const { navigate } = this.props.navigation;
     let folders = [];
 
+    this.setState({loading: true});
+
     let user = await _loginPing(this, false);
     let dbx = new Dropbox({ accessToken: user.dropbox.accessToken });
     let forms = [];
