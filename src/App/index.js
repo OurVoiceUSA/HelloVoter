@@ -44,13 +44,13 @@ export default App = StackNavigator({
   Survey: {
     screen: SurveyPage,
     navigationOptions: ({navigation}) => ({
-      title: 'Survey',
+      title: 'Canvassing Form',
     }),
   },
   CreateSurvey: {
     screen: CreateSurveyPage,
     navigationOptions: ({navigation}) => ({
-      title: 'Create Survey',
+      title: 'Create Form',
     }),
    },
   YourReps: {
