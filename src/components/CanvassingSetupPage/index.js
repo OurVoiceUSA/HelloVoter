@@ -10,7 +10,6 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
-import jwt_decode from 'jwt-decode';
 import DeviceInfo from 'react-native-device-info';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Modal from 'react-native-simple-modal';
@@ -60,7 +59,7 @@ export default class App extends PureComponent {
     let pro = [];
 
     for (let i in folders) {
-      pro.push(dbx.filesDownload({ path: folders[i]+'/canvassingform.jwt' }));
+      pro.push(dbx.filesDownload({ path: folders[i]+'/canvassingform.json' }));
     }
 
     let objs = await Promise.all(pro.map(p => p.catch(e => e)));
@@ -69,7 +68,7 @@ export default class App extends PureComponent {
         item = objs[i];
         if (item.error) continue;
 
-        let json = jwt_decode(item.fileBinary);
+        let json = JSON.parse(item.fileBinary);
         json.folder_path = item.path_display.match('.*/')[0].slice(0, -1);
 
         forms.push(
