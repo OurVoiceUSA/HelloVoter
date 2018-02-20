@@ -269,7 +269,7 @@ export default class App extends PureComponent {
   }
   
   _canvassUrlHandler() {
-    const url = "https://ourvoiceusa.org/ourvoice-canvassing-guidelines/";
+    const url = "https://github.com/OurVoiceUSA/OVMobile/blob/master/docs/Canvassing-Guidelines.md";
     return Linking.openURL(url).catch(() => null);
   }
 
