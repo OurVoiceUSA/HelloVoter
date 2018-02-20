@@ -137,6 +137,9 @@ export default class App extends PureComponent {
       // get rid of ending whitespace
       let formName = json.name.trim();
 
+      // disallow anything other than alphanumeric and a few other chars
+      if (!formName.match(/^[a-zA-Z0-9\-_ ]+$/)) msg = 'From name can only contain alphanumeric characters, and spaces and dashes.';
+
       this.setState({saving: true});
 
       let forms = [];
