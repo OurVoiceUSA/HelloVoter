@@ -275,6 +275,8 @@ export default class App extends PureComponent {
           <Text style={styles.buttonText}>Save Form</Text>
         </TouchableHighlight>
 
+        <View style={{width: Dimensions.get('window').width, height: 1, marginBottom: 250}} />
+
       </ScrollView>
     );
   }
