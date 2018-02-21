@@ -26,12 +26,10 @@ import Permissions from 'react-native-permissions';
 import RNGLocation from 'react-native-google-location';
 import RNGooglePlaces from 'react-native-google-places';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
-import Modal from 'react-native-modal';
-import ModalInput from '../ModalInput';
 import encoding from 'encoding';
 import { _doGeocode } from '../../common';
 import DropboxSharePage from '../DropboxSharePage';
-import SModal from 'react-native-simple-modal';
+import Modal from 'react-native-simple-modal';
 
 
 export default class App extends PureComponent {
@@ -379,13 +377,55 @@ export default class App extends PureComponent {
     return (
       <View style={styles.container}>
 
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <Modal style={{
-          alignItems: 'center',
-          marginBottom: Dimensions.get('window').height * 0.2, // temp solution for keyboard spacing
-          justifyContent: 'center'}}
-          isVisible={this.state.isModalVisible}
-        >
+        <MapView
+          ref={component => this.map = component}
+          initialRegion={{latitude: myPosition.latitude, longitude: myPosition.longitude, latitudeDelta: 0.005, longitudeDelta: 0.005}}
+          provider={PROVIDER_GOOGLE}
+          style={styles.map}
+          showsUserLocation={true}
+          followsUserLocation={false}
+          keyboardShouldPersistTaps={true}
+          {...this.props}>
+          {
+            myPins.pins.map((marker, index) => (
+              <MapView.Marker
+                key={index}
+                coordinate={marker.latlng}
+                title={marker.title}
+                description={marker.description}
+                pinColor={marker.color}
+                />
+            ))
+          }
+        </MapView>
+          <View style={{ alignSelf: 'flex-end' }}>
+            <Icon name="share-square" size={50} color="#808080" style={{marginBottom: 20}} onPress={() => this.setState({DropboxShareScreen: true})} />
+            <Icon name="compass" size={50} color="#0084b4" onPress={() => this.map.animateToCoordinate({latitude: myPosition.latitude, longitude: myPosition.longitude}, 1000)} />
+          </View>
+        <View style={styles.buttonContainer}>
+          <Icon.Button
+            name="hand-rock-o"
+            backgroundColor="#d7d7d7"
+            color="#000000"
+            onPress={() => {this.showConfirmAddress();}}
+            {...iconStyles}>
+            Prepare to Knock
+          </Icon.Button>
+        </View>
+
+        <Modal
+          open={this.state.isModalVisible}
+          modalStyle={{width: 335, height: 400, backgroundColor: "transparent",
+            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
+          style={{alignItems: 'center'}}
+          offset={0}
+          overlayBackground={'rgba(0, 0, 0, 0.75)'}
+          animationDuration={200}
+          animationTension={40}
+          modalDidOpen={() => undefined}
+          modalDidClose={() => this.setState({isModalVisible: false})}
+          closeOnTouchOutside={true}
+          disableOnBackPress={false}>
           <View style={{flexDirection: 'column'}}>
             <View style={{width: Dimensions.get('window').width * 0.7, height: 245, backgroundColor: 'white', marginTop: 15, borderRadius: 15, padding: 25, alignSelf: 'flex-start'}}>
               {loading &&
@@ -461,14 +501,20 @@ export default class App extends PureComponent {
           </View>
         </View>
       </Modal>
-      </TouchableWithoutFeedback>
 
-      <Modal style={{
-        alignItems: 'center',
-        marginBottom: Dimensions.get('window').height * 0.2, // temp solution for keyboard spacing
-        justifyContent: 'center'}}
-        isVisible={this.state.isKnockMenuVisible}
-      >
+        <Modal
+          open={this.state.isKnockMenuVisible}
+          modalStyle={{width: 335, height: 400, backgroundColor: "transparent",
+            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
+          style={{alignItems: 'center'}}
+          offset={0}
+          overlayBackground={'rgba(0, 0, 0, 0.75)'}
+          animationDuration={200}
+          animationTension={40}
+          modalDidOpen={() => undefined}
+          modalDidClose={() => this.setState({isKnockMenuVisible: false})}
+          closeOnTouchOutside={true}
+          disableOnBackPress={false}>
           <View style={{flexDirection: 'column'}}>
             <View style={{width: Dimensions.get('window').width * 0.7, height: 260, backgroundColor: 'white', marginTop: 15, borderRadius: 15, padding: 25, alignSelf: 'flex-start'}}>
               <Text style={{color: 'blue', fontWeight: 'bold', fontSize: 20}}>Are they home?</Text>
@@ -517,43 +563,7 @@ export default class App extends PureComponent {
           </View>
         </Modal>
 
-        <MapView
-          ref={component => this.map = component}
-          initialRegion={{latitude: myPosition.latitude, longitude: myPosition.longitude, latitudeDelta: 0.005, longitudeDelta: 0.005}}
-          provider={PROVIDER_GOOGLE}
-          style={styles.map}
-          showsUserLocation={true}
-          followsUserLocation={false}
-          keyboardShouldPersistTaps={true}
-          {...this.props}>
-          {
-            myPins.pins.map((marker, index) => (
-              <MapView.Marker
-                key={index}
-                coordinate={marker.latlng}
-                title={marker.title}
-                description={marker.description}
-                pinColor={marker.color}
-                />
-            ))
-          }
-        </MapView>
-          <View style={{ alignSelf: 'flex-end' }}>
-            <Icon name="share-square" size={50} color="#808080" style={{marginBottom: 20}} onPress={() => this.setState({DropboxShareScreen: true})} />
-            <Icon name="compass" size={50} color="#0084b4" onPress={() => this.map.animateToCoordinate({latitude: myPosition.latitude, longitude: myPosition.longitude}, 1000)} />
-          </View>
-        <View style={styles.buttonContainer}>
-          <Icon.Button
-            name="hand-rock-o"
-            backgroundColor="#d7d7d7"
-            color="#000000"
-            onPress={() => {this.showConfirmAddress();}}
-            {...iconStyles}>
-            Prepare to Knock
-          </Icon.Button>
-        </View>
-
-        <SModal
+        <Modal
           open={DropboxShareScreen}
           modalStyle={{width: 335, height: 400, backgroundColor: "transparent",
             position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
@@ -567,7 +577,7 @@ export default class App extends PureComponent {
           closeOnTouchOutside={true}
           disableOnBackPress={false}>
           <DropboxSharePage refer={this} />
-        </SModal>
+        </Modal>
 
       </View>
     );
