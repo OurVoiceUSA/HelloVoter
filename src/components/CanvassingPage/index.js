@@ -539,8 +539,8 @@ export default class App extends PureComponent {
           }
         </MapView>
           <View style={{ alignSelf: 'flex-end' }}>
+            <Icon name="share-square" size={50} color="#808080" style={{marginBottom: 20}} onPress={() => this.setState({DropboxShareScreen: true})} />
             <Icon name="compass" size={50} color="#0084b4" onPress={() => this.map.animateToCoordinate({latitude: myPosition.latitude, longitude: myPosition.longitude}, 1000)} />
-            <Icon name="cog" size={50} color="#808080" style={{marginTop: 20}} onPress={() => this.setState({DropboxShareScreen: true})} />
           </View>
         <View style={styles.buttonContainer}>
           <Icon.Button
