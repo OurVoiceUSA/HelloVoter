@@ -30,6 +30,9 @@ import Modal from 'react-native-modal';
 import ModalInput from '../ModalInput';
 import encoding from 'encoding';
 import { _doGeocode } from '../../common';
+import DropboxSharePage from '../DropboxSharePage';
+import SModal from 'react-native-simple-modal';
+
 
 export default class App extends PureComponent {
 
@@ -54,6 +57,7 @@ export default class App extends PureComponent {
       isModalVisible: false,
       isKnockMenuVisible: false,
       showDisclosure: "true",
+      DropboxShareScreen: false,
       dbx: props.navigation.state.params.dbx,
       form: props.navigation.state.params.form,
     };
@@ -278,7 +282,7 @@ export default class App extends PureComponent {
     const { navigate } = this.props.navigation;
     const {
       showDisclosure, myPosition, myPins, locationAccess, serviceError, form,
-      cStreet, cUnit, cCity, cState, cZip, loading, dbx,
+      cStreet, cUnit, cCity, cState, cZip, loading, dbx, DropboxShareScreen,
     } = this.state;
 
     if (showDisclosure === "true") {
@@ -536,7 +540,7 @@ export default class App extends PureComponent {
         </MapView>
           <View style={{ alignSelf: 'flex-end' }}>
             <Icon name="compass" size={50} color="#0084b4" onPress={() => this.map.animateToCoordinate({latitude: myPosition.latitude, longitude: myPosition.longitude}, 1000)} />
-            <Icon name="cog" size={50} color="#808080" style={{marginTop: 20}} onPress={() => navigate('CanvassingSettings', {dbx: dbx, form: form})} />
+            <Icon name="cog" size={50} color="#808080" style={{marginTop: 20}} onPress={() => this.setState({DropboxShareScreen: true})} />
           </View>
         <View style={styles.buttonContainer}>
           <Icon.Button
@@ -548,6 +552,23 @@ export default class App extends PureComponent {
             Prepare to Knock
           </Icon.Button>
         </View>
+
+        <SModal
+          open={DropboxShareScreen}
+          modalStyle={{width: 335, height: 400, backgroundColor: "transparent",
+            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
+          style={{alignItems: 'center'}}
+          offset={0}
+          overlayBackground={'rgba(0, 0, 0, 0.75)'}
+          animationDuration={200}
+          animationTension={40}
+          modalDidOpen={() => undefined}
+          modalDidClose={() => this.setState({DropboxShareScreen: false})}
+          closeOnTouchOutside={true}
+          disableOnBackPress={false}>
+          <DropboxSharePage refer={this} />
+        </SModal>
+
       </View>
     );
   }

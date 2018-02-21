@@ -25,8 +25,8 @@ export default class App extends PureComponent {
     super(props);
 
     this.state = {
-      form: props.navigation.state.params.form,
-      dbx: props.navigation.state.params.dbx,
+      form: this.props.refer.state.form,
+      dbx: this.props.refer.state.dbx,
     };
 
     this.doShare = this.doShare.bind(this);
