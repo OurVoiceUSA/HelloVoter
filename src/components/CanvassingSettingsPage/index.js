@@ -38,16 +38,18 @@ export default class App extends PureComponent {
     let json = this.refs.mainForm.getValue();
     if (json == null) return;
 
+    // TODO: lowercase email address
+    // TODO: check if form.name or email folder already exists
+
     let SharingShareFolderLaunch;
 
     try {
       // create the folder with form.name
       SharingShareFolderLaunch = await dbx.sharingShareFolder({path: form.folder_path+'/'+form.name, force_async: false});
     } catch(error) {
-      // TODO: only ignore if it's already shread
       console.warn(error);
+      return;
     }
-      // TODO: now rename the folder to the email address
 
     try {
       // finally, add the email address as a user on the folder
@@ -58,7 +60,22 @@ export default class App extends PureComponent {
         custom_message: 'You have been invited to the canvassing campaign '+form.name+' managed by '+form.author+'! Login to Dropbox with the Our Voice App to participate. Find links to download the mobile app here: https://ourvoiceusa.org/our-voice-app/',
       });
     } catch (error) {
-      console.warn("error: "+error+" "+JSON.stringify(error));
+      console.warn(error);
+      // TODO: attempt to remove it
+      return;
+    }
+
+    // now rename the folder to the email address
+    try {
+      await dbx.filesMove({
+        from_path: form.folder_path+'/'+form.name,
+        to_path: form.folder_path+'/'+json.email,
+        allow_shared_folder: true,
+        autorename: false,
+        allow_ownership_transfer: true,
+      });
+    } catch(error) {
+      console.warn(error);
     }
 
   }
