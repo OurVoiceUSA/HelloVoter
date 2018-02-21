@@ -38,8 +38,25 @@ export default class App extends PureComponent {
     let json = this.refs.mainForm.getValue();
     if (json == null) return;
 
-    // TODO: lowercase email address
-    // TODO: check if form.name or email folder already exists
+    let folders = [];
+
+    try {
+      let res = await dbx.filesListFolder({path: form.folder_path});
+      for (let i in res.entries) {
+        item = res.entries[i];
+        if (item['.tag'] != 'folder') continue;
+        folders.push(item.path_display.split('/').pop().toLowerCase());
+      }
+    } catch (error) {
+      console.warn(error);
+      return;
+    };
+
+    let email = json.email.toLowerCase();
+
+    // check if form.name or email folder already exists
+    if (folders.indexOf(email) !== -1) return;
+    if (folders.indexOf(form.name.toLowerCase()) !== -1) return;
 
     let SharingShareFolderLaunch;
 
@@ -55,7 +72,7 @@ export default class App extends PureComponent {
       // finally, add the email address as a user on the folder
       await dbx.sharingAddFolderMember({
         shared_folder_id: SharingShareFolderLaunch.shared_folder_id,
-        members: [{member: {email: json.email, '.tag': 'email'}, access_level: {'.tag': 'editor'}}],
+        members: [{member: {email: email, '.tag': 'email'}, access_level: {'.tag': 'editor'}}],
         quiet: false,
         custom_message: 'You have been invited to the canvassing campaign '+form.name+' managed by '+form.author+'! Login to Dropbox with the Our Voice App to participate. Find links to download the mobile app here: https://ourvoiceusa.org/our-voice-app/',
       });
@@ -69,7 +86,7 @@ export default class App extends PureComponent {
     try {
       await dbx.filesMove({
         from_path: form.folder_path+'/'+form.name,
-        to_path: form.folder_path+'/'+json.email,
+        to_path: form.folder_path+'/'+email,
         allow_shared_folder: true,
         autorename: false,
         allow_ownership_transfer: true,
