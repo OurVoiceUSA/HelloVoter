@@ -38,19 +38,27 @@ export default class App extends PureComponent {
     let json = this.refs.mainForm.getValue();
     if (json == null) return;
 
+    let SharingShareFolderLaunch;
+
     try {
       // create the folder with form.name
-      let SharingShareFolderLaunch = await dbx.sharingShareFolder({path: form.folder_path+'/'+form.name, force_async: false});
+      SharingShareFolderLaunch = await dbx.sharingShareFolder({path: form.folder_path+'/'+form.name, force_async: false});
+    } catch(error) {
+      // TODO: only ignore if it's already shread
+      console.warn(error);
+    }
       // TODO: now rename the folder to the email address
 
+    try {
       // finally, add the email address as a user on the folder
       await dbx.sharingAddFolderMember({
-        shared_folder_id: SharingShareFolderLaunch.complete.shared_folder_id,
-        members: [json.email],
+        shared_folder_id: SharingShareFolderLaunch.shared_folder_id,
+        members: [{member: {email: json.email, '.tag': 'email'}, access_level: {'.tag': 'editor'}}],
         quiet: false,
         custom_message: 'You have been invited to the canvassing campaign '+form.name+' managed by '+form.author+'! Login to Dropbox with the Our Voice App to participate. Find links to download the mobile app here: https://ourvoiceusa.org/our-voice-app/',
       });
     } catch (error) {
+      console.warn("error: "+error+" "+JSON.stringify(error));
     }
 
   }
