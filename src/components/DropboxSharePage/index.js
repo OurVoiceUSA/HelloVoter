@@ -11,6 +11,7 @@ import {
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Dropbox } from 'dropbox';
+import encoding from 'encoding';
 import t from 'tcomb-form-native';
 
 var Form = t.form.Form;
@@ -91,6 +92,9 @@ export default class App extends PureComponent {
         autorename: false,
         allow_ownership_transfer: true,
       });
+
+      await dbx.filesUpload({ path: form.folder_path+'/'+email+'/canvassingform.json', contents: encoding.convert(JSON.stringify(form), 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
+
     } catch(error) {
       console.warn(error);
     }
