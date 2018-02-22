@@ -58,6 +58,7 @@ export default class App extends PureComponent {
       DropboxShareScreen: false,
       dbx: props.navigation.state.params.dbx,
       form: props.navigation.state.params.form,
+      user: props.navigation.state.params.user,
     };
 
   }
@@ -279,7 +280,7 @@ export default class App extends PureComponent {
 
     const { navigate } = this.props.navigation;
     const {
-      showDisclosure, myPosition, myPins, locationAccess, serviceError, form,
+      showDisclosure, myPosition, myPins, locationAccess, serviceError, form, user,
       cStreet, cUnit, cCity, cState, cZip, loading, dbx, DropboxShareScreen,
     } = this.state;
 
@@ -399,7 +400,9 @@ export default class App extends PureComponent {
           }
         </MapView>
           <View style={{ alignSelf: 'flex-end' }}>
+            {user.id == form.author_id &&
             <Icon name="share-square" size={50} color="#808080" style={{marginBottom: 20}} onPress={() => this.setState({DropboxShareScreen: true})} />
+            }
             <Icon name="compass" size={50} color="#0084b4" onPress={() => this.map.animateToCoordinate({latitude: myPosition.latitude, longitude: myPosition.longitude}, 1000)} />
           </View>
         <View style={styles.buttonContainer}>

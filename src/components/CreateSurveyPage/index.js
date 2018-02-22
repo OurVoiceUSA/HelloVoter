@@ -162,6 +162,7 @@ export default class App extends PureComponent {
           created: epoch,
           name: formName,
           author: user.profile.name,
+          author_id: user.id,
           version: 'beta',
           questions: {}
         };

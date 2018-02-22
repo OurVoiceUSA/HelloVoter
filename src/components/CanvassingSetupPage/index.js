@@ -77,7 +77,7 @@ export default class App extends PureComponent {
           <View key={i} style={{margin: 5, flexDirection: 'row'}}>
             <TouchableOpacity
               style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20, maxWidth: 350}}
-              onPress={() => {navigate('Canvassing', {dbx: dbx, form: json})}}>
+              onPress={() => {navigate('Canvassing', {dbx: dbx, form: json, user: user})}}>
               <Text style={{fontWeight: 'bold'}}>{json.name}</Text>
               <Text style={{fontSize: 12}}>Created by {json.author}</Text>
             </TouchableOpacity>
