@@ -400,7 +400,7 @@ export default class App extends PureComponent {
           }
         </MapView>
           <View style={{ alignSelf: 'flex-end' }}>
-            {user.id == form.author_id &&
+            {user.dropbox.account_id == form.author_id &&
             <Icon name="share-square" size={50} color="#808080" style={{marginBottom: 20}} onPress={() => this.setState({DropboxShareScreen: true})} />
             }
             <Icon name="compass" size={50} color="#0084b4" onPress={() => this.map.animateToCoordinate({latitude: myPosition.latitude, longitude: myPosition.longitude}, 1000)} />

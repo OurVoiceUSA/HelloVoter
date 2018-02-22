@@ -161,8 +161,8 @@ export default class App extends PureComponent {
           id: sha1(epoch+":"+formName),
           created: epoch,
           name: formName,
-          author: user.profile.name,
-          author_id: user.id,
+          author: user.dropbox.name.display_name,
+          author_id: user.dropbox.account_id,
           version: 'beta',
           questions: {}
         };

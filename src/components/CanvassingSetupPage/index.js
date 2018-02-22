@@ -12,8 +12,6 @@ import {
 
 import DeviceInfo from 'react-native-device-info';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import Modal from 'react-native-simple-modal';
-import SmLoginPage from '../SmLoginPage';
 import { Dropbox } from 'dropbox';
 import { _loginPing } from '../../common';
 
@@ -23,7 +21,6 @@ export default class App extends PureComponent {
     super(props);
 
     this.state = {
-      SmLoginScreen: false,
       loading: true,
       user: null,
       forms: [],
@@ -91,26 +88,9 @@ export default class App extends PureComponent {
     this.setState({ loading: false, forms: forms, dbx: dbx });
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    const { SmLoginScreen, user } = this.state;
-    const { navigate } = this.props.navigation;
-
-    if (prevState.SmLoginScreen && !SmLoginScreen && user.loggedin) navigate('CreateSurvey', {refer: this});
-  }
-
-  createForm = async () => {
-    const { navigate } = this.props.navigation;
-
-    let user = await _loginPing(this, true);
-    if (user.loggedin) {
-      navigate('CreateSurvey', {refer: this});
-    } else {
-      this.setState({SmLoginScreen: true});
-    }
-  }
-
   render() {
-    const { SmLoginScreen, loading, user, forms } = this.state;
+    const { loading, user, forms } = this.state;
+    const { navigate } = this.props.navigation;
 
     // wait for user object to become available
     if (!user) return (
@@ -127,7 +107,7 @@ export default class App extends PureComponent {
 
         {!loading &&
         <View style={{margin: 12, position: 'absolute', right: 0}}>
-          <TouchableOpacity onPress={this.createForm}>
+          <TouchableOpacity onPress={() => navigate('CreateSurvey', {refer: this})}>
             <Icon
               size={40}
               name="plus-circle"
@@ -167,22 +147,6 @@ export default class App extends PureComponent {
             </View>
             }
         </View>
-
-        <Modal
-          open={SmLoginScreen}
-          modalStyle={{width: 335, height: 400, backgroundColor: "transparent",
-            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
-          style={{alignItems: 'center'}}
-          offset={0}
-          overlayBackground={'rgba(0, 0, 0, 0.75)'}
-          animationDuration={200}
-          animationTension={40}
-          modalDidOpen={() => undefined}
-          modalDidClose={() => this.setState({SmLoginScreen: false})}
-          closeOnTouchOutside={true}
-          disableOnBackPress={false}>
-          <SmLoginPage refer={this} />
-        </Modal>
 
       </ScrollView>
     );
