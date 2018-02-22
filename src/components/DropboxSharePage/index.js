@@ -2,6 +2,7 @@
 import React, { PureComponent } from 'react';
 
 import {
+  ActivityIndicator,
   Text,
   View,
   TouchableOpacity,
@@ -26,8 +27,11 @@ export default class App extends PureComponent {
     super(props);
 
     this.state = {
+      refer: this.props.refer,
       form: this.props.refer.state.form,
       dbx: this.props.refer.state.dbx,
+      message: null,
+      submitted: false,
     };
 
     this.doShare = this.doShare.bind(this);
@@ -38,6 +42,8 @@ export default class App extends PureComponent {
 
     let json = this.refs.mainForm.getValue();
     if (json == null) return;
+
+    this.setState({submitted: true});
 
     let folders = [];
 
@@ -50,14 +56,17 @@ export default class App extends PureComponent {
       }
     } catch (error) {
       console.warn(error);
+      this.setState({message: "Dropbox folder list error."});
       return;
     };
 
     let email = json.email.toLowerCase();
 
     // check if form.name or email folder already exists
-    if (folders.indexOf(email) !== -1) return;
-    if (folders.indexOf(form.name.toLowerCase()) !== -1) return;
+    if (folders.indexOf(email) !== -1 || folders.indexOf(form.name.toLowerCase()) !== -1) {
+       this.setState({message: "Dropbox folder name already exists."});
+      return;
+    }
 
     let SharingShareFolderLaunch;
 
@@ -66,6 +75,7 @@ export default class App extends PureComponent {
       SharingShareFolderLaunch = await dbx.sharingShareFolder({path: form.folder_path+'/'+form.name, force_async: false});
     } catch(error) {
       console.warn(error);
+      this.setState({message: "Unable to create or share Dropbox folder."});
       return;
     }
 
@@ -80,6 +90,7 @@ export default class App extends PureComponent {
     } catch (error) {
       console.warn(error);
       // TODO: attempt to remove it
+      this.setState({message: "Unable to add member."});
       return;
     }
 
@@ -97,25 +108,47 @@ export default class App extends PureComponent {
 
     } catch(error) {
       console.warn(error);
+      this.setState({message: "Unable to copy canvassing form into shared folder."});
     }
 
+    this.setState({message: "Successfully invited "+email});
   }
 
   render() {
+    const { refer, submitted, message } = this.state;
+
     return (
       <View style={styles.container}>
 
+        {submitted &&
         <View style={{flex: 1, flexDirection: 'row', margin: 20, alignItems: 'center'}}>
-          <Text>Share your Canvassing form with someone:</Text>
+          {message &&
+          <View>
+            <Text style={{margin: 10}}>{message}</Text>
+            <TouchableHighlight style={styles.button} onPress={() => refer.setState({DropboxShareScreen: false})} underlayColor='#99d9f4'>
+              <Text style={styles.buttonText}>Dismiss</Text>
+            </TouchableHighlight>
+          </View>
+          ||
+          <ActivityIndicator size="large" />
+          }
         </View>
+        ||
+        <View>
+          <View style={{flex: 1, flexDirection: 'row', margin: 20, alignItems: 'center'}}>
+            <Text>Share your Canvassing form with someone:</Text>
+          </View>
 
-        <Form
-          ref="mainForm"
-          type={mainForm}
-        />
-        <TouchableHighlight style={styles.button} onPress={this.doShare} underlayColor='#99d9f4'>
-          <Text style={styles.buttonText}>Send Canvassing Invite</Text>
-        </TouchableHighlight>
+          <Form
+            ref="mainForm"
+           type={mainForm}
+          />
+          <TouchableHighlight style={styles.button} onPress={this.doShare} underlayColor='#99d9f4'>
+            <Text style={styles.buttonText}>Send Canvassing Invite</Text>
+          </TouchableHighlight>
+        </View>
+        }
+
       </View>
     );
   }
