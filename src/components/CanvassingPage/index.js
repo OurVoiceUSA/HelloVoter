@@ -254,7 +254,7 @@ export default class App extends PureComponent {
     try {
       let str = JSON.stringify(this.state.myPins);
       await AsyncStorage.setItem(this.state.asyncStorageKey, str);
-      dbx.filesUpload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jgz', contents: encoding.convert(str, 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
+      dbx.filesUpload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtxt', contents: encoding.convert(str, 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
     } catch (error) {
       console.error(error);
     }
@@ -265,9 +265,9 @@ export default class App extends PureComponent {
 
     this.setState({exportRunning: true});
 
-    // download all sub-folder .jgz files
+    // download all sub-folder .jtxt files
     let folders = [];
-    let jgzfiles = [myPins]; // no need to download our own
+    let jtxtfiles = [myPins]; // no need to download our own
     try {
       let res = await dbx.filesListFolder({path: form.folder_path});
       for (let i in res.entries) {
@@ -281,15 +281,15 @@ export default class App extends PureComponent {
 
     // TODO: do in paralell... let objs = await Promise.all(pro.map(p => p.catch(e => e)));
 
-    // for each folder, download all .jgz files
+    // for each folder, download all .jtxt files
     for (let f in folders) {
       try {
         let res = await dbx.filesListFolder({path: folders[f]});
         for (let i in res.entries) {
           item = res.entries[i];
-          if (item.path_display.match(/\.jgz$/)) {
+          if (item.path_display.match(/\.jtxt$/)) {
             let data = await dbx.filesDownload({ path: item.path_display });
-            jgzfiles.push(JSON.parse(data.fileBinary));
+            jtxtfiles.push(JSON.parse(data.fileBinary));
           }
         }
       } catch (error) {
@@ -300,8 +300,8 @@ export default class App extends PureComponent {
     // convert to .csv file and upload
     let keys = Object.keys(form.questions);
     let csv = "address,longitude,latitude,canvasser,datetime,color,"+keys.join(",")+"\n";
-    for (let f in jgzfiles) {
-      let obj = jgzfiles[f];
+    for (let f in jtxtfiles) {
+      let obj = jtxtfiles[f];
       for (let i in obj.pins) {
         csv += '"'+obj.pins[i].title+'"'+
           ","+obj.pins[i].latlng.longitude+
