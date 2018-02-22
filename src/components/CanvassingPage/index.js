@@ -39,6 +39,7 @@ export default class App extends PureComponent {
 
     this.state = {
       loading: false,
+      exportRunning: false,
       serviceError: null,
       locationAccess: null,
       myPosition: null,
@@ -247,28 +248,81 @@ export default class App extends PureComponent {
   }
 
   _savePins = async (myPins) => {
-    let { dbx, form } = this.state;
+    let { dbx, form, user } = this.state;
     myPins.last_saved = Math.floor(new Date().getTime() / 1000);
+    myPins.canvasser = user.dropbox.name.display_name;
     try {
       let str = JSON.stringify(this.state.myPins);
       await AsyncStorage.setItem(this.state.asyncStorageKey, str);
-      // convert to .csv file and upload
-      let keys = Object.keys(form.questions);
-      let csv = "address,longitude,latitude,datetime,color,"+keys.join(",")+"\n";
-      for (let i in myPins.pins) {
-        csv += '"'+myPins.pins[i].title+'"'+
-          ","+myPins.pins[i].latlng.longitude+
-          ","+myPins.pins[i].latlng.latitude+
-          ","+this.timeFormat(myPins.pins[i].id)+
-          ","+myPins.pins[i].color;
-        for (let key in keys)
-          csv += ","+(myPins.pins[i].survey ? myPins.pins[i].survey[keys[key]] : '');
-        csv += "\n";
-      }
-      dbx.filesUpload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.csv', contents: encoding.convert(csv, 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
+      dbx.filesUpload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jgz', contents: encoding.convert(str, 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
     } catch (error) {
       console.error(error);
     }
+  }
+
+  doExport = async () => {
+    let { dbx, form, myPins } = this.state;
+
+    this.setState({exportRunning: true});
+
+    // download all sub-folder .jgz files
+    let folders = [];
+    let jgzfiles = [myPins]; // no need to download our own
+    try {
+      let res = await dbx.filesListFolder({path: form.folder_path});
+      for (let i in res.entries) {
+        item = res.entries[i];
+        if (item['.tag'] != 'folder') continue;
+        folders.push(item.path_display);
+      }
+    } catch (error) {
+      console.warn(error);
+    };
+
+    // TODO: do in paralell... let objs = await Promise.all(pro.map(p => p.catch(e => e)));
+
+    // for each folder, download all .jgz files
+    for (let f in folders) {
+      try {
+        let res = await dbx.filesListFolder({path: folders[f]});
+        for (let i in res.entries) {
+          item = res.entries[i];
+          if (item.path_display.match(/\.jgz$/)) {
+            let data = await dbx.filesDownload({ path: item.path_display });
+            jgzfiles.push(JSON.parse(data.fileBinary));
+          }
+        }
+      } catch (error) {
+        console.warn(error);
+      }
+    }
+
+    // convert to .csv file and upload
+    let keys = Object.keys(form.questions);
+    let csv = "address,longitude,latitude,canvasser,datetime,color,"+keys.join(",")+"\n";
+    for (let f in jgzfiles) {
+      let obj = jgzfiles[f];
+      for (let i in obj.pins) {
+        csv += '"'+obj.pins[i].title+'"'+
+          ","+obj.pins[i].latlng.longitude+
+          ","+obj.pins[i].latlng.latitude+
+          ","+obj.canvasser+
+          ","+this.timeFormat(obj.pins[i].id)+
+          ","+obj.pins[i].color;
+        for (let key in keys)
+          csv += ","+(obj.pins[i].survey ? obj.pins[i].survey[keys[key]] : '');
+        csv += "\n";
+      }
+    }
+
+    try {
+      dbx.filesUpload({ path: form.folder_path+'/'+form.name+'.csv', contents: encoding.convert(csv, 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
+    } catch(error) {
+      console.warn(error);
+    }
+
+    this.setState({ exportRunning: false });
+
   }
   
   _canvassUrlHandler() {
@@ -281,7 +335,7 @@ export default class App extends PureComponent {
     const { navigate } = this.props.navigation;
     const {
       showDisclosure, myPosition, myPins, locationAccess, serviceError, form, user,
-      cStreet, cUnit, cCity, cState, cZip, loading, dbx, DropboxShareScreen,
+      cStreet, cUnit, cCity, cState, cZip, loading, dbx, DropboxShareScreen, exportRunning,
     } = this.state;
 
     if (showDisclosure === "true") {
@@ -401,7 +455,14 @@ export default class App extends PureComponent {
         </MapView>
           <View style={{ alignSelf: 'flex-end' }}>
             {user.dropbox.account_id == form.author_id &&
-            <Icon name="share-square" size={50} color="#808080" style={{marginBottom: 20}} onPress={() => this.setState({DropboxShareScreen: true})} />
+            <View style={{marginBottom: 20}}>
+              <Icon name="share-square" size={50} color="#808080" style={{marginBottom: 20}} onPress={() => this.setState({DropboxShareScreen: true})} />
+              {exportRunning &&
+              <ActivityIndicator size="large" />
+              ||
+              <Icon name="save" size={50} color="#b20000" onPress={() => this.doExport()} />
+              }
+            </View>
             }
             <Icon name="compass" size={50} color="#0084b4" onPress={() => this.map.animateToCoordinate({latitude: myPosition.latitude, longitude: myPosition.longitude}, 1000)} />
           </View>
