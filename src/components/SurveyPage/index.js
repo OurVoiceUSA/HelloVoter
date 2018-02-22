@@ -91,6 +91,12 @@ export default class App extends PureComponent {
       <ScrollView style={{flex: 1, backgroundColor: 'white'}}>
 
         <View style={styles.container}>
+
+        <View style={{flex: 1, marginBottom: 10, alignItems: 'center'}}>
+        <Text style={{fontSize: 20}}>{form.name}</Text>
+        <Text>Form created by {form.author}</Text>
+        </View>
+
         <Form
           ref="form"
           type={CanvassForm}
