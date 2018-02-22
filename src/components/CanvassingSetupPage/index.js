@@ -129,7 +129,7 @@ export default class App extends PureComponent {
         <View style={{margin: 12, position: 'absolute', right: 0}}>
           <TouchableOpacity onPress={this.createForm}>
             <Icon
-              size={25}
+              size={40}
               name="plus-circle"
               color="black"
               backgroundColor="#d7d7d7" />
