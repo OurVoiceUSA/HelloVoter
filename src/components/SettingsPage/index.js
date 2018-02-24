@@ -23,6 +23,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import storage from 'react-native-storage-wrapper';
 import SmLoginPage from '../SmLoginPage';
 import DropboxLoginPage from '../DropboxLoginPage';
+import { Dropbox } from 'dropbox';
 import { google_api_key } from '../../config';
 import { _getJWT, _loginPing, _rmJWT, _saveUser, _rmUser, _apiCall, _specificAddress } from '../../common';
 
@@ -58,6 +59,12 @@ export default class App extends PureComponent {
   }
 
   _logout() {
+    const { user } = this.state;
+    try {
+      if (user.dropbox) new Dropbox({ accessToken: user.dropbox.accessToken }).authTokenRevoke();
+    } catch (error) {
+      console.warn("error: "+error);
+    }
     const resetAction = NavigationActions.reset({
       index: 0,
       actions: [
