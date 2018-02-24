@@ -126,13 +126,22 @@ export default class App extends PureComponent {
 
   goToCanvassing = async () => {
     const { navigate } = this.props.navigation;
-    const { user } = this.state;
+    let { user } = this.state;
 
     if (user.dropbox) {
-      navigate('CanvassingSetup');
-    } else {
-      this.setState({ DropboxLoginScreen: true, goToCanvassing: true });
+      try {
+        // poke the API to ensure this token is still authorized
+        let res = await new Dropbox({ accessToken: user.dropbox.accessToken }).filesListFolder({path: ''});
+        navigate('CanvassingSetup');
+        return;
+      } catch(error) {
+      }
+      // token didn't work - remove it
+      delete user.dropbox;
+      _saveUser(user, false);
     }
+
+    this.setState({ DropboxLoginScreen: true, goToCanvassing: true, user: user });
   }
 
   componentDidUpdate(prevProps, prevState) {
