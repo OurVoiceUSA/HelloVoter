@@ -1,5 +1,6 @@
 # misc files
 *.orig
+*.swp
 
 # react-native stuff
 .env*
