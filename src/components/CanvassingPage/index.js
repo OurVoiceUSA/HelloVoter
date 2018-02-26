@@ -2,7 +2,6 @@ import React, { PureComponent } from 'react';
 
 import {
   ActivityIndicator,
-  AsyncStorage,
   StyleSheet,
   Text,
   TextInput,
@@ -21,6 +20,7 @@ import {
 import { NavigationActions } from 'react-navigation'
 import { Dropbox } from 'dropbox';
 import DeviceInfo from 'react-native-device-info';
+import storage from 'react-native-storage-wrapper';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Permissions from 'react-native-permissions';
 import RNGLocation from 'react-native-google-location';
@@ -212,7 +212,7 @@ export default class App extends PureComponent {
   LoadDisclosure = async () => {
     try {
     //Load with DisclosureKey
-      const value = await AsyncStorage.getItem(this.state.DisclosureKey);
+      const value = await storage.get(this.state.DisclosureKey);
       if (value !== null) {
       //Set state to variable if found
         this.setState({showDisclosure : value});
@@ -223,7 +223,7 @@ export default class App extends PureComponent {
   SaveDisclosure = async () => {
     try {
       //Save with DisclosureKey the value "false"
-      await AsyncStorage.setItem(this.state.DisclosureKey, "false");
+      await storage.set(this.state.DisclosureKey, "false");
     } catch (error) {
       console.error(error);
     }
@@ -231,7 +231,7 @@ export default class App extends PureComponent {
 
   _getPinsAsyncStorage = async () => {
     try {
-      const value = await AsyncStorage.getItem(this.state.asyncStorageKey);
+      const value = await storage.get(this.state.asyncStorageKey);
       if (value !== null) {
         let myPins = JSON.parse(value);
         this.setState({ myPins: myPins });
@@ -252,7 +252,7 @@ export default class App extends PureComponent {
     this.setState({myPins: myPins});
     try {
       let str = JSON.stringify(myPins);
-      await AsyncStorage.setItem(this.state.asyncStorageKey, str);
+      await storage.set(this.state.asyncStorageKey, str);
     } catch (error) {
       console.error(error);
     }
