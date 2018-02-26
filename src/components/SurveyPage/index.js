@@ -64,7 +64,7 @@ export default class App extends PureComponent {
 
   render() {
 
-    let { viewOnly, form } = this.state;
+    const { form } = this.state;
 
     let newStruct = {};
     let newOptions = { fields: {} };
@@ -81,7 +81,7 @@ export default class App extends PureComponent {
       }
       if (form.questions[keys[k]].optional) value = t.maybe(value);
       newStruct[keys[k]] = value;
-      newOptions.fields[keys[k]] = { label: form.questions[keys[k]].label + (form.questions[keys[k]].optional ? ' (optional)' : '') };
+      newOptions.fields[keys[k]] = { label: form.questions[keys[k]].label + (form.questions[keys[k]].optional ? '' : ' *') };
     }
 
     CanvassForm = t.struct(newStruct);

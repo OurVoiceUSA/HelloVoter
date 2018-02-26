@@ -40,6 +40,7 @@ export default class App extends PureComponent {
     this.state = {
       loading: false,
       exportRunning: false,
+      syncRunning: false,
       serviceError: null,
       locationAccess: null,
       myPosition: null,
@@ -50,7 +51,7 @@ export default class App extends PureComponent {
       cCity: null,
       cState: null,
       cZip: null,
-      myPins: { pins: [] },
+      myPins: { pins: [], last_synced: 0 },
       asyncStorageKey: 'OV_CANVASS_PINS@'+props.navigation.state.params.form.id,
       DisclosureKey : 'OV_DISCLOUSER',
       isModalVisible: false,
@@ -200,8 +201,6 @@ export default class App extends PureComponent {
 
     myPins.pins.push(pin);
 
-    this.setState({ myPins });
-
     this._savePins(myPins);
 
     const { navigate } = this.props.navigation;
@@ -248,22 +247,41 @@ export default class App extends PureComponent {
   }
 
   _savePins = async (myPins) => {
-    let { dbx, form, user } = this.state;
+    let { dbx } = this.state;
     myPins.last_saved = Math.floor(new Date().getTime() / 1000);
-    myPins.canvasser = user.dropbox.name.display_name;
+    this.setState({myPins: myPins});
     try {
-      let str = JSON.stringify(this.state.myPins);
+      let str = JSON.stringify(myPins);
       await AsyncStorage.setItem(this.state.asyncStorageKey, str);
-      dbx.filesUpload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtxt', contents: encoding.convert(str, 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
     } catch (error) {
       console.error(error);
     }
+  }
+
+  _syncPins = async () => {
+    let { dbx, form, user, myPins } = this.state;
+
+    if (myPins.last_synced > myPins.last_saved) return;
+
+    this.setState({syncRunning: true});
+
+    myPins.last_synced = Math.floor(new Date().getTime() / 1000);
+    myPins.canvasser = user.dropbox.name.display_name;
+    try {
+      let str = JSON.stringify(myPins);
+      await dbx.filesUpload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtxt', contents: encoding.convert(str, 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
+    } catch (error) {
+      console.error(error);
+    }
+
+    this.setState({syncRunning: false, myPins: myPins});
   }
 
   doExport = async () => {
     let { dbx, form, myPins } = this.state;
 
     this.setState({exportRunning: true});
+    this._syncPins(myPins);
 
     // download all sub-folder .jtxt files
     let folders = [];
@@ -335,7 +353,7 @@ export default class App extends PureComponent {
     const { navigate } = this.props.navigation;
     const {
       showDisclosure, myPosition, myPins, locationAccess, serviceError, form, user,
-      cStreet, cUnit, cCity, cState, cZip, loading, dbx, DropboxShareScreen, exportRunning,
+      cStreet, cUnit, cCity, cState, cZip, loading, dbx, DropboxShareScreen, exportRunning, syncRunning,
     } = this.state;
 
     if (showDisclosure === "true") {
@@ -463,6 +481,15 @@ export default class App extends PureComponent {
               <Icon name="save" size={50} color="#b20000" onPress={() => this.doExport()} />
               }
             </View>
+            }
+            {(!myPins.last_synced || myPins.last_saved > myPins.last_synced || (syncRunning && !exportRunning)) &&
+              <View>
+              {syncRunning &&
+              <ActivityIndicator size="large" />
+              ||
+              <Icon name="refresh" size={50} color="#0084b4" onPress={() => this._syncPins()} />
+              }
+              </View>
             }
             <Icon name="compass" size={50} color="#0084b4" onPress={() => this.map.animateToCoordinate({latitude: myPosition.latitude, longitude: myPosition.longitude}, 1000)} />
           </View>
