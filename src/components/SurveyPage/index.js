@@ -3,7 +3,9 @@ import {
   Dimensions,
   TouchableOpacity,
   TouchableHighlight,
+  TouchableWithoutFeedback,
   FlatList,
+  Keyboard,
   Text,
   View,
   StyleSheet,
@@ -92,16 +94,18 @@ export default class App extends PureComponent {
 
         <View style={styles.container}>
 
-        <View style={{flex: 1, marginBottom: 10, alignItems: 'center'}}>
-        <Text style={{fontSize: 20}}>{form.name}</Text>
-        <Text>Form created by {form.author}</Text>
-        </View>
+          <View style={{flex: 1, marginBottom: 10, alignItems: 'center'}}>
+            <Text style={{fontSize: 20}}>{form.name}</Text>
+            <Text>Form created by {form.author}</Text>
+          </View>
 
-        <Form
-          ref="form"
-          type={CanvassForm}
-          options={options}
-        />
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <Form
+              ref="form"
+              type={CanvassForm}
+              options={options}
+            />
+          </TouchableWithoutFeedback>
         </View>
 
         <TouchableHighlight style={styles.button} onPress={this.doSave} underlayColor='#99d9f4'>
