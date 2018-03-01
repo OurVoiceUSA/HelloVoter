@@ -576,14 +576,14 @@ export default class App extends PureComponent {
                  />
                  <View style={{position: 'absolute', bottom:10, width: 48, right: 0, height: 1, backgroundColor: 'gray'}} />
                </View>
-               <View style={{flexDirection: 'row', position: 'absolute', right: 25, bottom: -170, alignItems: 'center'}}>
-                 <TouchableOpacity onPress={() => this.setState({isModalVisible: false})}>
+               <View style={{flexDirection: 'row', position: 'absolute', right: 25, bottom: -185, alignItems: 'center'}}>
+                 <TouchableOpacity style={{marginLeft: 30, backgroundColor: '#d7d7d7', padding: 10, borderRadius: 20}}
+                   onPress={() => this.setState({isModalVisible: false})}>
                    <Text style={{fontWeight: 'bold', color: 'blue'}}>Cancel</Text>
                  </TouchableOpacity>
-                 <TouchableOpacity style={{marginLeft: 30}} onPress={() => {
-                   this.doConfirmAddress();
-                 }}>
-                   <Text style={{fontWeight: 'bold', color: 'blue'}}>OK</Text>
+                 <TouchableOpacity style={{marginLeft: 30, backgroundColor: '#d7d7d7', padding: 10, borderRadius: 20}}
+                   onPress={() => { this.doConfirmAddress(); }}>
+                   <Text style={{fontWeight: 'bold', color: 'blue'}}>    OK    </Text>
                  </TouchableOpacity>
                </View>
                </View>
