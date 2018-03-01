@@ -481,7 +481,7 @@ export default class App extends PureComponent {
               {syncRunning &&
               <ActivityIndicator size="large" />
               ||
-              <Icon name="refresh" size={50} color="#0084b4" onPress={() => this._syncPins()} />
+              <Icon name="refresh" size={50} color="#00a86b" onPress={() => this._syncPins()} />
               }
               </View>
             }
