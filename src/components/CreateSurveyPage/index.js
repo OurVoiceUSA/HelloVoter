@@ -30,8 +30,8 @@ const FTYPE = t.enums({
   'String': 'Text Input',
   'Number': 'Number',
   'Boolean': 'On/Off Switch',
-  'SAND': 'Agree/Disagree Scale',
-//  'List': 'Select One of Many',
+  'SAND': 'Agree/Disagree',
+//  'List': 'Select from List',
 }, 'FTYPE');
 
 var addItem = {
@@ -202,8 +202,8 @@ export default class App extends PureComponent {
       case 'String': return 'Text Input';
       case 'Number': return 'Number';
       case 'Boolean': return 'On/Off Switch';
-      case 'SAND': return 'Agree/Disagree Scale';
-      case 'List': return 'Select One of Many';
+      case 'SAND': return 'Agree/Disagree';
+      case 'List': return 'Select from List';
     }
     return type;
   }
@@ -233,18 +233,27 @@ export default class App extends PureComponent {
         <View key={i}>
           <View style={{width: Dimensions.get('window').width, height: 1, backgroundColor: 'lightgray' }} />
           <View style={{flexDirection: 'row'}}>
-            <Text style={{margin: 5}}>
-              {fields[i].label+(fields[i].required?' *':'')} : {this.inputTypeToReadable(fields[i].type)}
-            </Text>
-            <Icon
-              name="times-circle"
-              backgroundColor="#d7d7d7"
-              color="#ff0000"
-              size={20}
-              onPress={() => {
-                this.rmField(i);
-              }}>
-            </Icon>
+            <View style={{width: (Dimensions.get('window').width*.6)-5}}>
+              <Text style={{margin: 5}}>
+                {fields[i].label+(fields[i].required?' *':'')}
+              </Text>
+            </View>
+            <View style={{width: (Dimensions.get('window').width*.35)-5}}>
+              <Text style={{margin: 5}}>
+                : {this.inputTypeToReadable(fields[i].type)}
+              </Text>
+            </View>
+            <View style={{width: Dimensions.get('window').width*.05, justifyContent: 'center'}}>
+              <Icon
+                name="times-circle"
+                backgroundColor="#d7d7d7"
+                color="#ff0000"
+                size={20}
+                onPress={() => {
+                  this.rmField(i);
+                }}>
+              </Icon>
+            </View>
           </View>
         </View>
       )
@@ -256,8 +265,9 @@ export default class App extends PureComponent {
           <Text>Your Canvassing form will have these items:</Text>
         </View>
 
-        <View style={{margin: 20, marginTop: 0}}>
+        <View style={{margin: 5, marginTop: 0}}>
           { items }
+          <View style={{width: Dimensions.get('window').width, height: 1, backgroundColor: 'lightgray' }} />
         </View>
 
         {customForm &&
