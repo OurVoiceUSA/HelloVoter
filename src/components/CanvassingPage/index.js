@@ -116,14 +116,7 @@ export default class App extends PureComponent {
 
   getLocation() {
     navigator.geolocation.getCurrentPosition((position) => {
-
       this.setState({ myPosition: position.coords });
-
-      var LL = {
-        lat: position.coords.latitude,
-        lng: position.coords.longitude
-      };
-
     },
     (error) => { },
     { enableHighAccuracy: true, timeout: 2000, maximumAge: 1000 });
