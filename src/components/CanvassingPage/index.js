@@ -650,7 +650,7 @@ export default class App extends PureComponent {
 
         <Modal
           open={DropboxShareScreen}
-          modalStyle={{width: 335, height: 400, backgroundColor: "transparent",
+          modalStyle={{width: 335, height: 250, backgroundColor: "transparent",
             position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
           style={{alignItems: 'center'}}
           offset={0}
