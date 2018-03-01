@@ -2,6 +2,7 @@ import React, { PureComponent } from 'react';
 
 import {
   ActivityIndicator,
+  Alert,
   StyleSheet,
   Text,
   TextInput,
@@ -260,8 +261,10 @@ export default class App extends PureComponent {
       let str = JSON.stringify(myPins);
       await dbx.filesUpload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtxt', contents: encoding.convert(str, 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
       this._savePins(myPins, false);
+      Alert.alert('Success', 'Data sync successful!', [{text: 'OK'}], { cancelable: false });
     } catch (error) {
       console.error(error);
+      Alert.alert('Error', 'Unable to sync with the server.', [{text: 'OK'}], { cancelable: false });
     }
 
     this.setState({syncRunning: false, myPins: myPins});
@@ -325,8 +328,10 @@ export default class App extends PureComponent {
 
     try {
       dbx.filesUpload({ path: form.folder_path+'/'+form.name+'.csv', contents: encoding.convert(csv, 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
+      Alert.alert('Success', 'Data export successful!', [{text: 'OK'}], { cancelable: false });
     } catch(error) {
       console.warn(error);
+      Alert.alert('Error', 'Unable to export data to the server.', [{text: 'OK'}], { cancelable: false });
     }
 
     this.setState({ exportRunning: false });
