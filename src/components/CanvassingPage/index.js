@@ -72,10 +72,6 @@ export default class App extends PureComponent {
       longitude: e.Longitude,
     };
     this.setState({ myPosition });
-    var LL = {
-      lat: e.Latitude,
-      lng: e.Longitude,
-    };
   }
 
   requestLocationPermission = async () => {
