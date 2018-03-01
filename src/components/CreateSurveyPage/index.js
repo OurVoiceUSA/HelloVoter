@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 
 import t from 'tcomb-form-native';
+import Icon from 'react-native-vector-icons/FontAwesome';
 import sha1 from 'sha1';
 import encoding from 'encoding';
 import { Dropbox } from 'dropbox';
@@ -68,9 +69,7 @@ var premade = [
       'Libertarian',
       'Other',
     ]},
-  { key: 'VoteLastElection', label: 'Did you vote in the last election?', type: 'Boolean' },
 ];
-var defaultFields = ['FullName', 'Email', 'RegisteredToVote', 'PartyAffiliation'];
 
 export default class App extends PureComponent {
   constructor(props) {
@@ -80,9 +79,8 @@ export default class App extends PureComponent {
 
     // initialize state with a subset of premade questions
     let fields = [];
-    for (let i in defaultFields)
-      for (let p in premade)
-        if (premade[p].key == defaultFields[i]) fields.push(premade[p]);
+    for (let p in premade)
+      fields.push(premade[p]);
 
     this.state = {
       refer: props.navigation.state.params.refer,
@@ -210,6 +208,13 @@ export default class App extends PureComponent {
     return type;
   }
 
+  rmField(idx) {
+    let { fields } = this.state;
+    fields.splice(idx, 1);
+    this.setState({fields: fields});
+    this.forceUpdate();
+  }
+
   render() {
 
     let { name, form, customForm, fields, saving } = this.state;
@@ -224,21 +229,23 @@ export default class App extends PureComponent {
         </View>
       );
 
-    // list premade questions that aren't in this state's fields
-    for (let p in premade) {
-      let found = false;
-      for (let f in fields) {
-        if (fields[f].key == premade[p].key) found = true;
-      }
-      if (!found) defaultList.push(premade[p]);
-    }
-
     for (let i in fields) items.push(
         <View key={i}>
           <View style={{width: Dimensions.get('window').width, height: 1, backgroundColor: 'lightgray' }} />
-          <Text style={{margin: 5}}>
-            {fields[i].label+(fields[i].required?' *':'')} : {this.inputTypeToReadable(fields[i].type)}
-          </Text>
+          <View style={{flexDirection: 'row'}}>
+            <Text style={{margin: 5}}>
+              {fields[i].label+(fields[i].required?' *':'')} : {this.inputTypeToReadable(fields[i].type)}
+            </Text>
+            <Icon
+              name="times-circle"
+              backgroundColor="#d7d7d7"
+              color="#ff0000"
+              size={20}
+              onPress={() => {
+                this.rmField(i);
+              }}>
+            </Icon>
+          </View>
         </View>
       )
 
