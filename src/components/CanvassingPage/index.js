@@ -201,7 +201,7 @@ export default class App extends PureComponent {
 
     myPins.pins.push(pin);
 
-    this._savePins(myPins);
+    this._savePins(myPins, true);
 
     const { navigate } = this.props.navigation;
     if (color === "green") navigate('Survey', {refer: this, myPins: myPins, form: form});
@@ -246,9 +246,9 @@ export default class App extends PureComponent {
     return date.toLocaleDateString('en-us')+" "+date.toLocaleTimeString('en-us');
   }
 
-  _savePins = async (myPins) => {
+  _savePins = async (myPins, local) => {
     let { dbx } = this.state;
-    myPins.last_saved = Math.floor(new Date().getTime() / 1000);
+    if (local) myPins.last_saved = Math.floor(new Date().getTime() / 1000);
     this.setState({myPins: myPins});
     try {
       let str = JSON.stringify(myPins);
@@ -270,6 +270,7 @@ export default class App extends PureComponent {
     try {
       let str = JSON.stringify(myPins);
       await dbx.filesUpload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtxt', contents: encoding.convert(str, 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
+      this._savePins(myPins, false);
     } catch (error) {
       console.error(error);
     }
