@@ -140,6 +140,9 @@ export default class App extends PureComponent {
       // disallow anything other than alphanumeric and a few other chars
       if (!formName.match(/^[a-zA-Z0-9\-_ ]+$/)) msg = 'From name can only contain alphanumeric characters, and spaces and dashes.';
 
+      // max length
+      if (formName.length > 255) msg = 'Form name cannot be longer than 255 characters.';
+
       this.setState({saving: true});
 
       let forms = [];
