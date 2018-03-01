@@ -467,8 +467,8 @@ export default class App extends PureComponent {
         </MapView>
           <View style={{ alignSelf: 'flex-end' }}>
             {user.dropbox.account_id == form.author_id &&
-            <View style={{marginBottom: 20}}>
-              <Icon name="share-square" size={50} color="#808080" style={{marginBottom: 20}} onPress={() => this.setState({DropboxShareScreen: true})} />
+            <View style={{marginBottom: 10}}>
+              <Icon name="share-square" size={50} color="#808080" style={{marginBottom: 10}} onPress={() => this.setState({DropboxShareScreen: true})} />
               {exportRunning &&
               <ActivityIndicator size="large" />
               ||
@@ -477,7 +477,7 @@ export default class App extends PureComponent {
             </View>
             }
             {(!myPins.last_synced || myPins.last_saved > myPins.last_synced || (syncRunning && !exportRunning)) &&
-              <View>
+              <View style={{marginBottom: 10}}>
               {syncRunning &&
               <ActivityIndicator size="large" />
               ||
