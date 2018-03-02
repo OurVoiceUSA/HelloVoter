@@ -140,39 +140,43 @@ export default class App extends PureComponent {
     });
 
     setTimeout(async () => {
-      let res = await _doGeocode(myPosition.longitude, myPosition.latitude);
+      try {
+        let res = await _doGeocode(myPosition.longitude, myPosition.latitude);
 
-      if (res) {
-        let arr = res.address.split(",");
-        let country = arr[arr.length-1]; // unused
-        let state_zip = arr[arr.length-2];
-        let cState = (state_zip?state_zip.split(" ")[1]:null);
-        let cZip = (state_zip?state_zip.split(" ")[2]:null);
-        let cCity = arr[arr.length-3];
-        let cStreet = arr[arr.length-4];
+        if (res) {
+          let arr = res.address.split(",");
+          let country = arr[arr.length-1]; // unused
+          let state_zip = arr[arr.length-2];
+          let cState = (state_zip?state_zip.split(" ")[1]:null);
+          let cZip = (state_zip?state_zip.split(" ")[2]:null);
+          let cCity = arr[arr.length-3];
+          let cStreet = arr[arr.length-4];
 
-        this.setState({cStreet, cCity, cZip, cState, cUnit: null});
+          this.setState({cStreet, cCity, cZip, cState, cUnit: null});
+        }
+
+      } catch (error) {
       }
-
-      this.setState({
-        loading: false,
-      });
+      this.setState({loading: false})
     }, 550);
   }
 
   doConfirmAddress = async () => {
     const { myPosition, cStreet, cUnit, cCity, cState, cZip } = this.state;
-    var LL;
+    var LL = {};
     var addr;
     var inputAddress = cStreet + (cUnit?" #"+cUnit:"") + ", " + cCity + ", " + cState + ", " + cZip;
 
-    LL = {
-      longitude: myPosition.longitude,
-      latitude: myPosition.latitude,
-    };
+    if (myPosition)
+      LL = {
+        longitude: myPosition.longitude,
+        latitude: myPosition.latitude,
+      };
 
     this.setState({ inputPosition: LL, inputAddress: inputAddress, isModalVisible: false });
-    this.map.animateToCoordinate(LL, 500)
+    try {
+      this.map.animateToCoordinate(LL, 500)
+    } catch (error) {}
     // second modal doesn't show because of the map animation (a bug?) - have it set after it's done
     setTimeout(() => { this.setState({ isKnockMenuVisible: true }); }, 550);
   }
@@ -402,44 +406,26 @@ export default class App extends PureComponent {
       );
     }
 
+    var nomap_content = [];
+
     if (locationAccess === false) {
-      return (
-        <View style={styles.container}>
-          <View style={styles.content}>
-            <Text>Access to your location is disabled.</Text>
-            <Text>The canvassing tool requires it to be enabled.</Text>
-          </View>
+      nomap_content.push(
+        <View key={1} style={styles.content}>
+          <Text>Access to your location is disabled.</Text>
+          <Text>The map will not render unless you grant location access.</Text>
         </View>
       );
-    }
-
-    if (Platform.OS === 'android' && Platform.Version < 22) {
-      return (
-        <View style={styles.container}>
-          <View style={styles.content}>
-            <Text>Android version 5.1 or greater is required to run the canvassing app.</Text>
-          </View>
+    } else if (serviceError === true) {
+      nomap_content.push(
+        <View key={1} style={styles.content}>
+          <Text>Unable to load location services from your device.</Text>
         </View>
       );
-    }
-
-    if (serviceError === true) {
-      return (
-        <View style={styles.container}>
-          <View style={styles.content}>
-            <Text>Unable to load location services from your device.</Text>
-          </View>
-        </View>
-      );
-    }
-
-    if (!myPosition) {
-      return (
-        <View style={styles.container}>
-          <View style={styles.content}>
-            <Text>Waiting on location data from your device...</Text>
-            <ActivityIndicator />
-          </View>
+    } else if (!myPosition) {
+      nomap_content.push(
+        <View key={1} style={styles.content}>
+          <Text>Waiting on location data from your device...</Text>
+          <ActivityIndicator />
         </View>
       );
     }
@@ -447,6 +433,11 @@ export default class App extends PureComponent {
     return (
       <View style={styles.container}>
 
+        {nomap_content.length &&
+          <View>
+            { nomap_content }
+          </View>
+        ||
         <MapView
           ref={component => this.map = component}
           initialRegion={{latitude: myPosition.latitude, longitude: myPosition.longitude, latitudeDelta: 0.005, longitudeDelta: 0.005}}
@@ -468,6 +459,7 @@ export default class App extends PureComponent {
             ))
           }
         </MapView>
+        }
           <View style={{ alignSelf: 'flex-end' }}>
             {user.dropbox.account_id == form.author_id &&
             <View style={{marginBottom: 10}}>
@@ -488,7 +480,9 @@ export default class App extends PureComponent {
               }
               </View>
             }
+            {nomap_content.length == 0 &&
             <Icon name="compass" size={50} color="#0084b4" onPress={() => this.map.animateToCoordinate({latitude: myPosition.latitude, longitude: myPosition.longitude}, 1000)} />
+            }
           </View>
         <View style={styles.buttonContainer}>
           <Icon.Button
