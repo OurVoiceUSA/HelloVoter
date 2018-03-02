@@ -135,10 +135,15 @@ export default class App extends PureComponent {
         navigate('CanvassingSetup');
         return;
       } catch(error) {
+        // if the token didn't work - remove it
+        if (error.error && error.error.error && error.error.error['.tag'] == 'invalid_access_token') {
+          delete user.dropbox;
+          _saveUser(user, false);
+        } else {
+          navigate('CanvassingSetup');
+          return;
+        }
       }
-      // token didn't work - remove it
-      delete user.dropbox;
-      _saveUser(user, false);
     }
 
     this.setState({ DropboxLoginScreen: true, goToCanvassing: true, user: user });
