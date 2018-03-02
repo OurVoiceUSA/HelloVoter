@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
+import storage from 'react-native-storage-wrapper';
 import DeviceInfo from 'react-native-device-info';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Dropbox } from 'dropbox';
@@ -25,6 +26,7 @@ export default class App extends PureComponent {
       user: null,
       forms: [],
       dbx: null,
+      connected: false,
     };
 
   }
@@ -36,6 +38,7 @@ export default class App extends PureComponent {
   _loadDBData = async () => {
     const { navigate } = this.props.navigation;
     let folders = [];
+    let forms_local = [];
 
     this.setState({loading: true});
 
@@ -51,8 +54,14 @@ export default class App extends PureComponent {
         if (item['.tag'] != 'folder') continue;
         folders.push(item.path_display);
       }
+      this.setState({connected: true});
     } catch (error) {
-      console.warn(error);
+      this.setState({connected: false});
+      // failed to load - look locally
+      try {
+        forms_local = JSON.parse(await storage.get('OV_CANVASS_FORMS'));
+      } catch (error) {
+      }
     };
 
     let pro = [];
@@ -70,26 +79,37 @@ export default class App extends PureComponent {
         let json = JSON.parse(item.fileBinary);
         json.folder_path = item.path_display.match('.*/')[0].slice(0, -1);
 
-        forms.push(
-          <View key={i} style={{margin: 5, flexDirection: 'row'}}>
-            <TouchableOpacity
-              style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20, maxWidth: 350}}
-              onPress={() => {navigate('Canvassing', {dbx: dbx, form: json, user: user})}}>
-              <Text style={{fontWeight: 'bold'}}>{json.name}</Text>
-              <Text style={{fontSize: 12}}>Created by {json.author}</Text>
-            </TouchableOpacity>
-          </View>
-        );
+        forms_local.push(json);
       } catch(error) {
         // nothing to do
       }
+    }
+
+    for (let i in forms_local) {
+      let json = forms_local[i];
+      forms.push(
+        <View key={i} style={{margin: 5, flexDirection: 'row'}}>
+          <TouchableOpacity
+            style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20, maxWidth: 350}}
+            onPress={() => {navigate('Canvassing', {dbx: dbx, form: json, user: user})}}>
+            <Text style={{fontWeight: 'bold'}}>{json.name}</Text>
+            <Text style={{fontSize: 12}}>Created by {json.author}</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
+    // cache forms locally
+    try {
+      await storage.set('OV_CANVASS_FORMS', JSON.stringify(forms_local));
+    } catch (error) {
     }
 
     this.setState({ loading: false, forms: forms, dbx: dbx });
   }
 
   render() {
-    const { loading, user, forms } = this.state;
+    const { loading, connected, user, forms } = this.state;
     const { navigate } = this.props.navigation;
 
     // wait for user object to become available
@@ -100,12 +120,15 @@ export default class App extends PureComponent {
         </View>
       );
 
-    if (!loading && !forms.length) forms.push(<View key={1}><Text>No Canvassing forms found in your dropbox. Ask someone who created one to share their folder with you, or create a new one.</Text></View>);
+    if (!loading && !forms.length) {
+      if (connected) forms.push(<View key={1}><Text>No Canvassing forms found in your dropbox. Ask someone who created one to share their folder with you, or create a new one.</Text></View>);
+      else foms.push(<View key={1}><Text>No Canvassing forms found. Connect your device to the internet to download forms from your dropbox.</Text></View>);
+    }
 
     return (
       <ScrollView style={{flex: 1, backgroundColor: 'white'}} contentContainerStyle={{flexGrow:1}}>
 
-        {!loading &&
+        {!loading && connected &&
         <View style={{margin: 12, position: 'absolute', right: 0}}>
           <TouchableOpacity onPress={() => navigate('CreateSurvey', {refer: this})}>
             <Icon
@@ -142,6 +165,9 @@ export default class App extends PureComponent {
             </View>
             ||
             <View style={{flex: 1, alignItems: 'center'}}>
+              {!connected &&
+              <Text style={{margin: 10, color: '#ff0000'}}>Not connected to server.</Text>
+              }
               <Text style={{margin: 10}}>Select a canvassing campaign:</Text>
               { forms }
             </View>
