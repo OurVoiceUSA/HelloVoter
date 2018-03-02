@@ -248,23 +248,25 @@ export default class App extends PureComponent {
     }
   }
 
-  _syncPins = async () => {
+  _syncPins = async (flag) => {
     let { dbx, form, user, myPins } = this.state;
 
     if (myPins.last_synced > myPins.last_saved) return;
 
     this.setState({syncRunning: true});
 
+    let last_synced = myPins.last_synced;
     myPins.last_synced = Math.floor(new Date().getTime() / 1000);
     myPins.canvasser = user.dropbox.name.display_name;
+
     try {
       let str = JSON.stringify(myPins);
       await dbx.filesUpload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtxt', contents: encoding.convert(str, 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
       this._savePins(myPins, false);
       Alert.alert('Success', 'Data sync successful!', [{text: 'OK'}], { cancelable: false });
     } catch (error) {
-      console.error(error);
-      Alert.alert('Error', 'Unable to sync with the server.', [{text: 'OK'}], { cancelable: false });
+      if (flag) Alert.alert('Error', 'Unable to sync with the server.', [{text: 'OK'}], { cancelable: false });
+      myPins.last_synced = last_synced;
     }
 
     this.setState({syncRunning: false, myPins: myPins});
@@ -274,7 +276,7 @@ export default class App extends PureComponent {
     let { dbx, form, myPins } = this.state;
 
     this.setState({exportRunning: true});
-    this._syncPins(myPins);
+    this._syncPins(false);
 
     // download all sub-folder .jtxt files
     let folders = [];
@@ -327,7 +329,7 @@ export default class App extends PureComponent {
     }
 
     try {
-      dbx.filesUpload({ path: form.folder_path+'/'+form.name+'.csv', contents: encoding.convert(csv, 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
+      await dbx.filesUpload({ path: form.folder_path+'/'+form.name+'.csv', contents: encoding.convert(csv, 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
       Alert.alert('Success', 'Data export successful!', [{text: 'OK'}], { cancelable: false });
     } catch(error) {
       console.warn(error);
@@ -482,7 +484,7 @@ export default class App extends PureComponent {
               {syncRunning &&
               <ActivityIndicator size="large" />
               ||
-              <Icon name="refresh" size={50} color="#00a86b" onPress={() => this._syncPins()} />
+              <Icon name="refresh" size={50} color="#00a86b" onPress={() => this._syncPins(true)} />
               }
               </View>
             }
