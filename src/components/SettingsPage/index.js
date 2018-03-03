@@ -425,7 +425,7 @@ export default class App extends PureComponent {
           <View style={{flex: 1}}>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <Icon style={{marginRight: 10}} name="map-signs" size={22} color="black" />
-              <Text style={{fontSize: 20}}>Canvassing (BETA):</Text>
+              <Text style={{fontSize: 20}}>Canvassing:</Text>
             </View>
           </View>
           {user.dropbox &&
@@ -457,7 +457,7 @@ export default class App extends PureComponent {
 
         <View style={{flexDirection: 'row', margin: 20, marginTop: 0}}>
           <Text>
-            We use Dropbox to enable people to share canvassing data.
+            Canvass for any cause at zero cost! Use this tool to organize a canvassing campaign, or join an existing one.
           </Text>
         </View>
 

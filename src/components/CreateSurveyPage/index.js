@@ -18,6 +18,7 @@ import t from 'tcomb-form-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import sha1 from 'sha1';
 import encoding from 'encoding';
+import { transliterate as tr } from 'transliteration/src/main/browser';
 import { Dropbox } from 'dropbox';
 
 var Form = t.form.Form;
@@ -164,7 +165,7 @@ export default class App extends PureComponent {
           name: formName,
           author: user.dropbox.name.display_name,
           author_id: user.dropbox.account_id,
-          version: 'beta',
+          version: 1,
           questions: {}
         };
 
@@ -175,7 +176,7 @@ export default class App extends PureComponent {
 
         if (msg == null) {
           await dbx.filesCreateFolderV2({path: '/'+formName, autorename: false});
-          await dbx.filesUpload({ path: '/'+formName+'/canvassingform.json', contents: encoding.convert(JSON.stringify(obj), 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
+          await dbx.filesUpload({ path: '/'+formName+'/canvassingform.json', contents: encoding.convert(tr(JSON.stringify(obj)), 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
         }
 
       } catch (error) {

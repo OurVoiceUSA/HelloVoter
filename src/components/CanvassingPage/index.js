@@ -28,6 +28,7 @@ import RNGLocation from 'react-native-google-location';
 import RNGooglePlaces from 'react-native-google-places';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import encoding from 'encoding';
+import { transliterate as tr } from 'transliteration/src/main/browser';
 import { _doGeocode } from '../../common';
 import DropboxSharePage from '../DropboxSharePage';
 import Modal from 'react-native-simple-modal';
@@ -44,9 +45,7 @@ export default class App extends PureComponent {
       syncRunning: false,
       serviceError: null,
       locationAccess: null,
-      myPosition: null,
-      inputPosition: null,
-      inputAddress: null,
+      myPosition: {latitude: null, longitude: null},
       cStreet: null,
       cUnit: null,
       cCity: null,
@@ -154,41 +153,32 @@ export default class App extends PureComponent {
 
           this.setState({cStreet, cCity, cZip, cState, cUnit: null});
         }
-
-      } catch (error) {
-      }
+      } catch (error) {}
       this.setState({loading: false})
     }, 550);
   }
 
   doConfirmAddress = async () => {
     const { myPosition, cStreet, cUnit, cCity, cState, cZip } = this.state;
-    var LL = {};
     var addr;
-    var inputAddress = cStreet + (cUnit?" #"+cUnit:"") + ", " + cCity + ", " + cState + ", " + cZip;
 
-    if (myPosition)
-      LL = {
-        longitude: myPosition.longitude,
-        latitude: myPosition.latitude,
-      };
-
-    this.setState({ inputPosition: LL, inputAddress: inputAddress, isModalVisible: false });
+    this.setState({ isModalVisible: false });
     try {
-      this.map.animateToCoordinate(LL, 500)
+      this.map.animateToCoordinate(myPosition, 500)
     } catch (error) {}
     // second modal doesn't show because of the map animation (a bug?) - have it set after it's done
     setTimeout(() => { this.setState({ isKnockMenuVisible: true }); }, 550);
   }
 
   addpin(color) {
-    let { inputPosition, myPins, inputAddress, form } = this.state;
+    let { cStreet, cUnit, cCity, cState, cZip, myPosition, myPins, form } = this.state;
     let epoch = Math.floor(new Date().getTime() / 1000);
 
     const pin = {
       id: epoch,
-      latlng: {latitude: inputPosition.latitude, longitude: inputPosition.longitude},
-      title: inputAddress,
+      latlng: {latitude: myPosition.latitude, longitude: myPosition.longitude},
+      title: cStreet + (cUnit?" #"+cUnit:"") + ", " + cCity + ", " + cState + ", " + cZip,
+      address: [cStreet, cUnit, cCity, cState, cZip],
       description: "Visited on "+new Date().toDateString(),
       color: color,
     };
@@ -224,14 +214,23 @@ export default class App extends PureComponent {
   }
 
   _getPinsAsyncStorage = async () => {
+    const { dbx, form } = this.state;
     try {
       const value = await storage.get(this.state.asyncStorageKey);
       if (value !== null) {
         let myPins = JSON.parse(value);
         this.setState({ myPins: myPins });
+      } else {
+        // look on dropbox to see if this device has data that was cleared locally
+        try {
+          let data = await dbx.filesDownload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtxt' });
+          let myPins = JSON.parse(data.fileBinary);
+          this.setState({ myPins: myPins });
+          this._savePins(myPins, true);
+        } catch (error) {}
       }
     } catch (error) {
-      console.error(error);
+      console.warn(error);
     }
   }
 
@@ -265,7 +264,7 @@ export default class App extends PureComponent {
 
     try {
       let str = JSON.stringify(myPins);
-      await dbx.filesUpload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtxt', contents: encoding.convert(str, 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
+      await dbx.filesUpload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtxt', contents: encoding.convert(tr(str), 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
       this._savePins(myPins, false);
       Alert.alert('Success', 'Data sync successful!', [{text: 'OK'}], { cancelable: false });
     } catch (error) {
@@ -284,11 +283,16 @@ export default class App extends PureComponent {
 
     // download all sub-folder .jtxt files
     let folders = [];
-    let jtxtfiles = [myPins]; // no need to download our own
+    let jtxtfiles = [];
     try {
       let res = await dbx.filesListFolder({path: form.folder_path});
       for (let i in res.entries) {
         item = res.entries[i];
+        // any devices logged in with the form creator are here
+        if (item.path_display.match(/\.jtxt$/)) {
+          let data = await dbx.filesDownload({ path: item.path_display });
+          jtxtfiles.push(JSON.parse(data.fileBinary));
+        }
         if (item['.tag'] != 'folder') continue;
         folders.push(item.path_display);
       }
@@ -316,24 +320,27 @@ export default class App extends PureComponent {
 
     // convert to .csv file and upload
     let keys = Object.keys(form.questions);
-    let csv = "address,longitude,latitude,canvasser,datetime,color,"+keys.join(",")+"\n";
+    let csv = "Street,Unit,City,State,Zip,longitude,latitude,canvasser,datetime,color,"+keys.join(",")+"\n";
     for (let f in jtxtfiles) {
       let obj = jtxtfiles[f];
       for (let i in obj.pins) {
-        csv += '"'+obj.pins[i].title+'"'+
-          ","+obj.pins[i].latlng.longitude+
-          ","+obj.pins[i].latlng.latitude+
+        csv += obj.pins[i].address.map((x) => '"'+(x?x:'')+'"').join(',')+
+          ","+(obj.pins[i].latlng.longitude?obj.pins[i].latlng.longitude:'')+
+          ","+(obj.pins[i].latlng.latitude?obj.pins[i].latlng.latitude:'')+
           ","+obj.canvasser+
           ","+this.timeFormat(obj.pins[i].id)+
           ","+obj.pins[i].color;
-        for (let key in keys)
-          csv += ","+(obj.pins[i].survey ? obj.pins[i].survey[keys[key]] : '');
+        for (let key in keys) {
+          let value = '';
+          if (obj.pins[i].survey && obj.pins[i].survey[keys[key]]) value = obj.pins[i].survey[keys[key]];
+          csv += ',"'+value+'"';
+        }
         csv += "\n";
       }
     }
 
     try {
-      await dbx.filesUpload({ path: form.folder_path+'/'+form.name+'.csv', contents: encoding.convert(csv, 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
+      await dbx.filesUpload({ path: form.folder_path+'/'+form.name+'.csv', contents: encoding.convert(tr(csv), 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
       Alert.alert('Success', 'Data export successful!', [{text: 'OK'}], { cancelable: false });
     } catch(error) {
       console.warn(error);
@@ -421,7 +428,7 @@ export default class App extends PureComponent {
           <Text>Unable to load location services from your device.</Text>
         </View>
       );
-    } else if (!myPosition) {
+    } else if (myPosition.latitude == null || myPosition.longitude == null) {
       nomap_content.push(
         <View key={1} style={styles.content}>
           <Text>Waiting on location data from your device...</Text>
@@ -448,7 +455,7 @@ export default class App extends PureComponent {
           keyboardShouldPersistTaps={true}
           {...this.props}>
           {
-            myPins.pins.map((marker, index) => (
+            myPins.pins.map((marker, index) => marker.latlng.longitude !== null && (
               <MapView.Marker
                 key={index}
                 coordinate={marker.latlng}
@@ -481,7 +488,7 @@ export default class App extends PureComponent {
               </View>
             }
             {nomap_content.length == 0 &&
-            <Icon name="compass" size={50} color="#0084b4" onPress={() => this.map.animateToCoordinate({latitude: myPosition.latitude, longitude: myPosition.longitude}, 1000)} />
+            <Icon name="compass" size={50} color="#0084b4" onPress={() => this.map.animateToCoordinate(myPosition, 1000)} />
             }
           </View>
         <View style={styles.buttonContainer}>
@@ -497,7 +504,7 @@ export default class App extends PureComponent {
 
         <Modal
           open={this.state.isModalVisible}
-          modalStyle={{width: 335, height: 245, backgroundColor: "transparent",
+          modalStyle={{width: 335, height: 280, backgroundColor: "transparent",
             position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
           style={{alignItems: 'center'}}
           offset={0}
@@ -586,7 +593,7 @@ export default class App extends PureComponent {
 
         <Modal
           open={this.state.isKnockMenuVisible}
-          modalStyle={{width: 335, height: 260, backgroundColor: "transparent",
+          modalStyle={{width: 335, height: 280, backgroundColor: "transparent",
             position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
           style={{alignItems: 'center'}}
           offset={0}

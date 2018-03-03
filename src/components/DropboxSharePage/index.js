@@ -121,10 +121,13 @@ export default class App extends PureComponent {
       <View style={styles.container}>
 
         {submitted &&
-        <View style={{flex: 1, flexDirection: 'row', margin: 20, alignItems: 'center'}}>
+        <View>
           {message &&
           <View>
-            <Text style={{margin: 10}}>{message}</Text>
+            <View style={{flex: 1, flexDirection: 'row', margin: 20, alignItems: 'center'}}>
+              <Text style={{margin: 10}}>{message}</Text>
+            </View>
+
             <TouchableHighlight style={styles.button} onPress={() => refer.setState({DropboxShareScreen: false})} underlayColor='#99d9f4'>
               <Text style={styles.buttonText}>Dismiss</Text>
             </TouchableHighlight>

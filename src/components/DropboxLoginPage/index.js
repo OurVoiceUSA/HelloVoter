@@ -142,8 +142,8 @@ export default class App extends PureComponent {
 
             <View style={{marginTop: 30}}>
               <Text style={{fontSize: 10, textAlign: 'justify'}}>
-                Canvassing requires a file sharing service to store and sync data.
-                We value your privacy, your data remains private to your device.
+                This tool requires a file sharing service to store and sync data.
+                We value your privacy, your data remains private to your device and data sync account.
                 Read our <Text style={{fontSize: 10, fontWeight: 'bold', color: 'blue'}} onPress={() => {this._policyUrlHandler()}}>privacy policy</Text> for details.
               </Text>
             </View>

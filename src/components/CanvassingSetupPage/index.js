@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 
 import storage from 'react-native-storage-wrapper';
-import DeviceInfo from 'react-native-device-info';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Dropbox } from 'dropbox';
 import { _loginPing } from '../../common';
@@ -121,33 +120,16 @@ export default class App extends PureComponent {
       );
 
     if (!loading && !forms.length) {
-      if (connected) forms.push(<View key={1}><Text>No Canvassing forms found in your dropbox. Ask someone who created one to share their folder with you, or create a new one.</Text></View>);
-      else foms.push(<View key={1}><Text>No Canvassing forms found. Connect your device to the internet to download forms from your dropbox.</Text></View>);
+      if (connected) forms.push(<View key={1}><Text>No Canvassing forms found in your Dropbox. Ask someone who created one to share their form with you, or create a new one.</Text></View>);
+      else forms.push(<View key={1}><Text>No Canvassing forms found. Connect your device to the internet to download forms from your Dropbox.</Text></View>);
     }
 
     return (
       <ScrollView style={{flex: 1, backgroundColor: 'white'}} contentContainerStyle={{flexGrow:1}}>
 
-        {!loading && connected &&
-        <View style={{margin: 12, position: 'absolute', right: 0}}>
-          <TouchableOpacity onPress={() => navigate('CreateSurvey', {refer: this})}>
-            <Icon
-              size={40}
-              name="plus-circle"
-              color="black"
-              backgroundColor="#d7d7d7" />
-          </TouchableOpacity>
-        </View>
-        }
-
         <View style={{margin: 20, alignItems: 'center'}}>
           <Text>You are logged into Dropbox as:</Text>
           <Text>{user.dropbox.name.display_name}</Text>
-        </View>
-
-        <View style={{margin: 20, marginTop: 0, alignItems: 'center'}}>
-          <Text>Your Device ID is:</Text>
-          <Text>{DeviceInfo.getUniqueID()}</Text>
         </View>
 
         <View style={{
@@ -173,6 +155,22 @@ export default class App extends PureComponent {
             </View>
             }
         </View>
+
+        {!loading && connected &&
+        <View>
+          <View style={{width: Dimensions.get('window').width, height: 1, backgroundColor: 'lightgray'}} />
+
+          <View style={{margin: 12, alignItems: 'center'}}>
+            <Icon.Button
+              name="plus-circle"
+              backgroundColor="#d7d7d7"
+              color="black"
+              onPress={() => navigate('CreateSurvey', {refer: this})}>
+              Create Canvassing Form
+            </Icon.Button>
+          </View>
+        </View>
+        }
 
       </ScrollView>
     );

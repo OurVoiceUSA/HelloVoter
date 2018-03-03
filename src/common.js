@@ -262,8 +262,14 @@ export async function _getUserLocal() {
 export async function _rmUser() {
   try {
     await storage.del(USERLOCAL);
-    await storage.del('OV_SURVEY@0');
     await storage.del('OV_DISCLOUSER');
+    try {
+      let forms = JSON.parse(await storage.get('OV_CANVASS_FORMS'));
+      for (let i in forms) {
+        await storage.del('OV_CANVASS_PINS@'+forms[i].id);
+      }
+    } catch (error) {}
+    await storage.del('OV_CANVASS_FORMS');
   } catch (error) {
     console.warn(error);
   }
