@@ -15,7 +15,6 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   DeviceEventEmitter,
-  Dimensions,
 } from 'react-native';
 
 import { NavigationActions } from 'react-navigation'
@@ -516,7 +515,7 @@ export default class App extends PureComponent {
           closeOnTouchOutside={true}
           disableOnBackPress={false}>
           <View style={{flexDirection: 'column'}}>
-            <View style={{width: Dimensions.get('window').width * 0.7, height: 245, backgroundColor: 'white', marginTop: 15, borderRadius: 15, padding: 25, alignSelf: 'flex-start'}}>
+            <View style={{width: 262, height: 245, backgroundColor: 'white', marginTop: 15, borderRadius: 15, padding: 25, alignSelf: 'flex-start'}}>
               {loading &&
               <View>
                 <Text style={{color: 'blue', fontWeight: 'bold', fontSize: 15}}>Loading Address</Text>
@@ -605,7 +604,7 @@ export default class App extends PureComponent {
           closeOnTouchOutside={true}
           disableOnBackPress={false}>
           <View style={{flexDirection: 'column'}}>
-            <View style={{width: Dimensions.get('window').width * 0.7, height: 260, backgroundColor: 'white', marginTop: 15, borderRadius: 15, padding: 25, alignSelf: 'flex-start'}}>
+            <View style={{width: 262, height: 260, backgroundColor: 'white', marginTop: 15, borderRadius: 15, padding: 25, alignSelf: 'flex-start'}}>
               <Text style={{color: 'blue', fontWeight: 'bold', fontSize: 20}}>Are they home?</Text>
               <View>
 
