@@ -32,7 +32,6 @@ import { _doGeocode } from '../../common';
 import DropboxSharePage from '../DropboxSharePage';
 import Modal from 'react-native-simple-modal';
 
-
 export default class App extends PureComponent {
 
   constructor(props) {

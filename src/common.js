@@ -42,9 +42,7 @@ export async function _doGeocode(lng, lat) {
   try {
     let results = await Geocoder.geocodePosition({lng: lng, lat: lat});
     position.address = results[0].formattedAddress.replace(/\u2013\d+/, "");
-  } catch (error) {
-    console.warn(error);
-  }
+  } catch (error) {}
 
   // fall back to GooglePlaces
   if (!position.address) {
@@ -58,7 +56,6 @@ export async function _doGeocode(lng, lat) {
       // can't geocode, set the address as an error
       position.address = 'location address error';
       position.error = true;
-      console.warn(error);
     }
   }
 
