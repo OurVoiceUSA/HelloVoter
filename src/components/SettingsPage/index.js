@@ -203,7 +203,7 @@ export default class App extends PureComponent {
       );
 
     return (
-      <ScrollView style={{flex: 1, backgroundColor: 'white'}}>
+      <ScrollView style={{flex: 1, backgroundColor: 'white'}} contentContainerStyle={{flexGrow:1}}>
 
         <View style={{flexDirection: 'row', margin: 20, marginBottom: 10}}>
           <View style={{flex: 1}}>
