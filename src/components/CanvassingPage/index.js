@@ -140,7 +140,7 @@ export default class App extends PureComponent {
       try {
         let res = await _doGeocode(myPosition.longitude, myPosition.latitude);
 
-        if (res) {
+        if (!res.error) {
           let arr = res.address.split(",");
           let country = arr[arr.length-1]; // unused
           let state_zip = arr[arr.length-2];
