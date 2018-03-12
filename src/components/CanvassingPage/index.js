@@ -453,7 +453,7 @@ export default class App extends PureComponent {
           keyboardShouldPersistTaps={true}
           {...this.props}>
           {
-            myPins.pins.map((marker, index) => marker.latlng.longitude !== null && (
+            myPins.pins.map((marker, index) => marker.latlng.longitude !== null && Math.hypot(myPosition.longitude-marker.latlng.longitude, myPosition.latitude-marker.latlng.latitude) < 0.005 && (
               <MapView.Marker
                 key={index}
                 coordinate={marker.latlng}
