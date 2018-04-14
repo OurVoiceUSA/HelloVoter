@@ -339,7 +339,7 @@ export default class App extends PureComponent {
 
     try {
       await dbx.filesUpload({ path: form.folder_path+'/'+form.name+'.csv', contents: encoding.convert(tr(csv), 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
-      Alert.alert('Success', 'Data export successful!', [{text: 'OK'}], { cancelable: false });
+      Alert.alert('Success', 'Data export successful! Check your dropbox account for the spreadsheet.', [{text: 'OK'}], { cancelable: false });
     } catch(error) {
       console.warn(error);
       Alert.alert('Error', 'Unable to export data to the server.', [{text: 'OK'}], { cancelable: false });
