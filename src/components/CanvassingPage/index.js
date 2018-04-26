@@ -209,72 +209,82 @@ export default class App extends PureComponent {
     } catch (error) {}
   }
 
+  _nodesFromJSON(str) {
+    let myNodes;
+
+    try {
+      myNodes = JSON.parse(str);
+    } catch (e) { console.warn(e); }
+
+    if (!myNodes.nodes) myNodes.nodes = [];
+
+    // check for old version 1 format and convert
+    if (myNodes.pins) {
+      for (let p in myNodes.pins) {
+        let pin = myNodes.pins[p];
+
+        // address had "unit" in it - splice it out
+        let unit = pin.address.splice(1, 1);
+        // "city" started with a space... a bug
+        pin.address[1] = pin.address[1].trim();
+
+        let id = sha1(JSON.stringify(pin.address));
+        let pid = id;
+
+        myNodes.nodes.push({
+          type: "address",
+          id: id,
+          created: pin.id,
+          latlng: pin.latlng,
+          address: pin.address,
+          multi_unit: (unit?true:false),
+        });
+
+        if (unit) {
+          id = sha1(pid+unit);
+          myNodes.nodes.push({
+            type: "unit",
+            id: id,
+            parent_id: pid,
+            unit: unit,
+          });
+        }
+
+        if (pin.survey) {
+          let status = '';
+          switch (pin.color) {
+            case 'green': status = 'home'; break;
+            case 'yellow': status = 'not home'; break;
+            case 'red': status = 'not interested'; break;
+          }
+
+          myNodes.nodes.push({
+            type: "survey",
+            id: sha1(id+JSON.stringify(pin.survey)+id),
+            parent_id: id,
+            created: pin.id,
+            status: status,
+            survey: pin.survey,
+          });
+        }
+      }
+
+      delete myNodes.pins;
+    }
+    return myNodes;
+  }
+
   _getNodesAsyncStorage = async () => {
     const { dbx, form } = this.state;
     try {
       const value = await storage.get(this.state.asyncStorageKey);
       if (value !== null) {
-        let myNodes = JSON.parse(value);
-
-        if (!myNodes.nodes) myNodes.nodes = [];
-
-        // check for old version 1 format and convert
-        // TODO: make this a function - also have to do this on EXPORT
-        if (myNodes.pins) {
-          for (let p in myNodes.pins) {
-            let pin = myNodes.pins[p];
-
-            // address had "unit" in it - splice it out
-            let unit = pin.address.splice(1, 1);
-            // "city" started with a space... a bug
-            pin.address[1] = pin.address[1].trim();
-
-            let id = sha1(JSON.stringify(pin.address));
-
-            myNodes.nodes.push({
-              type: "address",
-              id: id,
-              created: pin.id,
-              latlng: pin.latlng,
-              address: pin.address,
-              multi_unit: (unit?true:false),
-            });
-
-            if (unit) {
-              let pid = id;
-              id = sha1(pid+unit);
-              myNodes.nodes.push({
-                type: "unit",
-                id: id,
-                parent_id: pid,
-              });
-            }
-
-            let status = '';
-            switch (pin.color) {
-              case 'green': status = 'home'; break;
-              case 'yellow': status = 'not home'; break;
-              case 'red': status = 'not interested'; break;
-            }
-
-            myNodes.nodes.push({
-              type: "survey",
-              id: sha1(id+JSON.stringify(pin.survey)+id),
-              parent_id: id,
-              created: pin.id,
-              status: status,
-              survey: pin.survey,
-            });
-          }
-
-          delete myNodes.pins;
-        }
-        this.setState({ myNodes: myNodes });
+        this.setState({ myNodes: this._nodesFromJSON(value) });
       } else {
         // look on dropbox to see if this device has data that was cleared locally
         try {
           let data = await dbx.filesDownload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtxt' });
-          let myNodes = JSON.parse(data.fileBinary);
+          let myNodes = this._nodesFromJSON(data.fileBinary);
           this.setState({ myNodes: myNodes });
           this._saveNodes(myNodes, true);
         } catch (error) {}
@@ -333,7 +343,7 @@ export default class App extends PureComponent {
         if (node.parent_id) {
           let pid = node.parent_id;
           delete node.parent_id;
-          Object.assign(node, this.getNodeById(pid));
+          Object.assign(node, this.getNodeById(pid, store));
         }
         return node;
       }
@@ -359,7 +369,7 @@ export default class App extends PureComponent {
         // any devices logged in with the form creator are here
         if (item.path_display.match(/\.jtxt$/)) {
           let data = await dbx.filesDownload({ path: item.path_display });
-          jtxtfiles.push(JSON.parse(data.fileBinary));
+          jtxtfiles.push(this._nodesFromJSON(data.fileBinary));
         }
         if (item['.tag'] != 'folder') continue;
         folders.push(item.path_display);
@@ -378,7 +388,7 @@ export default class App extends PureComponent {
           item = res.entries[i];
           if (item.path_display.match(/\.jtxt$/)) {
             let data = await dbx.filesDownload({ path: item.path_display });
-            jtxtfiles.push(JSON.parse(data.fileBinary));
+            jtxtfiles.push(this._nodesFromJSON(data.fileBinary));
           }
         }
       } catch (error) {
