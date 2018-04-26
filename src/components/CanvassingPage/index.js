@@ -22,6 +22,7 @@ import { Dropbox } from 'dropbox';
 import DeviceInfo from 'react-native-device-info';
 import storage from 'react-native-storage-wrapper';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import sha1 from 'sha1';
 import Permissions from 'react-native-permissions';
 import RNGLocation from 'react-native-google-location';
 import RNGooglePlaces from 'react-native-google-places';
@@ -44,12 +45,12 @@ export default class App extends PureComponent {
       serviceError: null,
       locationAccess: null,
       myPosition: {latitude: null, longitude: null},
+      objectId: null,
       cStreet: null,
-      cUnit: null,
       cCity: null,
       cState: null,
       cZip: null,
-      myPins: { pins: [], last_synced: 0 },
+      myNodes: { nodes: [], pins: [], last_synced: 0 },
       asyncStorageKey: 'OV_CANVASS_PINS@'+props.navigation.state.params.form.id,
       DisclosureKey : 'OV_DISCLOUSER',
       isModalVisible: false,
@@ -73,7 +74,7 @@ export default class App extends PureComponent {
   }
 
   requestLocationPermission = async () => {
-    
+
     access = false;
 
     try {
@@ -104,7 +105,7 @@ export default class App extends PureComponent {
   }
   componentDidMount() {
     this.requestLocationPermission();
-    this._getPinsAsyncStorage();
+    this._getNodesAsyncStorage();
   this.LoadDisclosure(); //Updates showDisclosure state if the user previously accepted
   }
 
@@ -129,7 +130,6 @@ export default class App extends PureComponent {
 
   showConfirmAddress() {
     const { myPosition } = this.state;
-    var geoAddress;
 
     this.setState({
       loading: true,
@@ -141,15 +141,15 @@ export default class App extends PureComponent {
         let res = await _doGeocode(myPosition.longitude, myPosition.latitude);
 
         if (!res.error) {
-          let arr = res.address.split(",");
+          let arr = res.address.split(", ");
           let country = arr[arr.length-1]; // unused
           let state_zip = arr[arr.length-2];
-          let cState = (state_zip?state_zip.split(" ")[1]:null);
-          let cZip = (state_zip?state_zip.split(" ")[2]:null);
+          let cState = (state_zip?state_zip.split(" ")[0]:null);
+          let cZip = (state_zip?state_zip.split(" ")[1]:null);
           let cCity = arr[arr.length-3];
           let cStreet = arr[arr.length-4];
 
-          this.setState({cStreet, cCity, cZip, cState, cUnit: null});
+          this.setState({cStreet, cCity, cZip, cState});
         }
       } catch (error) {}
       this.setState({loading: false})
@@ -157,74 +157,72 @@ export default class App extends PureComponent {
   }
 
   doConfirmAddress = async () => {
-    const { myPosition, cStreet, cUnit, cCity, cState, cZip } = this.state;
-    var addr;
+    const { cStreet, cCity, cState, cZip } = this.state;
 
-    this.setState({ isModalVisible: false });
+    // TODO: loop through myNodes.nodes for type == "address" and verify it doesn't already exist
+
     try {
-      this.map.animateToCoordinate(myPosition, 500)
+      await this.map.animateToCoordinate(this.state.myPosition, 500)
     } catch (error) {}
-    // second modal doesn't show because of the map animation (a bug?) - have it set after it's done
-    setTimeout(() => { this.setState({ isKnockMenuVisible: true }); }, 550);
+
+    this.addpin();
+    this.setState({ isModalVisible: false });
   }
 
-  addpin(color) {
-    let { cStreet, cUnit, cCity, cState, cZip, myPosition, myPins, form } = this.state;
+  _addNode(node) {
+    let { myNodes } = this.state;
     let epoch = Math.floor(new Date().getTime() / 1000);
 
-    const pin = {
-      id: epoch,
-      latlng: {latitude: myPosition.latitude, longitude: myPosition.longitude},
-      title: cStreet + (cUnit?" #"+cUnit:"") + ", " + cCity + ", " + cState + ", " + cZip,
-      address: [cStreet, cUnit, cCity, cState, cZip],
-      description: "Visited on "+new Date().toDateString(),
-      color: color,
-    };
+    node.created = epoch;
+    if (!node.id) node.id = sha1(epoch+JSON.stringify(node)+this.state.objectId);
 
-    myPins.pins.push(pin);
-
-    this._savePins(myPins, true);
-
-    const { navigate } = this.props.navigation;
-    if (color === "green") navigate('Survey', {refer: this, myPins: myPins, form: form});
-
+    myNodes.nodes.push(node);
+    this._saveNodes(myNodes, true);
   }
 
-  //Load a saved showDisclosure
+  addpin() {
+    let { cStreet, cCity, cState, cZip, myPosition, myNodes, form } = this.state;
+    let epoch = Math.floor(new Date().getTime() / 1000);
+    let address = [cStreet, cCity, cState, cZip];
+
+    this._addNode({
+      type: "address",
+      id: sha1(JSON.stringify(address)),
+      latlng: {latitude: myPosition.latitude, longitude: myPosition.longitude},
+      address: address,
+      multi_unit: false,
+    });
+  }
+
   LoadDisclosure = async () => {
     try {
-    //Load with DisclosureKey
       const value = await storage.get(this.state.DisclosureKey);
       if (value !== null) {
-      //Set state to variable if found
         this.setState({showDisclosure : value});
       }
-    } catch (error) {    }
-  }
-  
-  SaveDisclosure = async () => {
-    try {
-      //Save with DisclosureKey the value "false"
-      await storage.set(this.state.DisclosureKey, "false");
-    } catch (error) {
-      console.error(error);
-    }
+    } catch (error) {}
   }
 
-  _getPinsAsyncStorage = async () => {
+  SaveDisclosure = async () => {
+    try {
+      await storage.set(this.state.DisclosureKey, "false");
+    } catch (error) {}
+  }
+
+  _getNodesAsyncStorage = async () => {
     const { dbx, form } = this.state;
     try {
       const value = await storage.get(this.state.asyncStorageKey);
       if (value !== null) {
-        let myPins = JSON.parse(value);
-        this.setState({ myPins: myPins });
+        let myNodes = JSON.parse(value);
+        this.setState({ myNodes: myNodes });
       } else {
         // look on dropbox to see if this device has data that was cleared locally
         try {
           let data = await dbx.filesDownload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtxt' });
-          let myPins = JSON.parse(data.fileBinary);
-          this.setState({ myPins: myPins });
-          this._savePins(myPins, true);
+          let myNodes = JSON.parse(data.fileBinary);
+          this.setState({ myNodes: myNodes });
+          this._saveNodes(myNodes, true);
         } catch (error) {}
       }
     } catch (error) {
@@ -237,47 +235,63 @@ export default class App extends PureComponent {
     return date.toLocaleDateString('en-us')+" "+date.toLocaleTimeString('en-us');
   }
 
-  _savePins = async (myPins, local) => {
+  _saveNodes = async (myNodes, local) => {
     let { dbx } = this.state;
-    if (local) myPins.last_saved = Math.floor(new Date().getTime() / 1000);
-    this.setState({myPins: myPins});
+    if (local) myNodes.last_saved = Math.floor(new Date().getTime() / 1000);
+    this.setState({myNodes: myNodes});
     try {
-      let str = JSON.stringify(myPins);
+      let str = JSON.stringify(myNodes);
       await storage.set(this.state.asyncStorageKey, str);
     } catch (error) {
-      console.error(error);
+      console.warn(error);
     }
   }
 
-  _syncPins = async (flag) => {
-    let { dbx, form, user, myPins } = this.state;
+  _syncNodes = async (flag) => {
+    let { dbx, form, user, myNodes } = this.state;
 
-    if (myPins.last_synced > myPins.last_saved) return;
+    if (myNodes.last_synced > myNodes.last_saved) return;
 
     this.setState({syncRunning: true});
 
-    let last_synced = myPins.last_synced;
-    myPins.last_synced = Math.floor(new Date().getTime() / 1000);
-    myPins.canvasser = user.dropbox.name.display_name;
+    let last_synced = myNodes.last_synced;
+    myNodes.last_synced = Math.floor(new Date().getTime() / 1000);
+    myNodes.canvasser = user.dropbox.name.display_name;
 
     try {
-      let str = JSON.stringify(myPins);
+      let str = JSON.stringify(myNodes);
       await dbx.filesUpload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtxt', contents: encoding.convert(tr(str), 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
-      this._savePins(myPins, false);
+      this._saveNodes(myNodes, false);
       Alert.alert('Success', 'Data sync successful!', [{text: 'OK'}], { cancelable: false });
     } catch (error) {
       if (flag) Alert.alert('Error', 'Unable to sync with the server.', [{text: 'OK'}], { cancelable: false });
-      myPins.last_synced = last_synced;
+      myNodes.last_synced = last_synced;
     }
 
-    this.setState({syncRunning: false, myPins: myPins});
+    this.setState({syncRunning: false, myNodes: myNodes});
+  }
+
+  getNodeById(id) {
+    for (let i in this.state.myNodes.nodes) {
+      let node = this.state.myNodes.nodes[i];
+      if (node.id === id) {
+        // if we have a parent_id, recursively merge properties. This makes "unit" a polymorph of "address"
+        if (node.parent_id) {
+          let pid = node.parent_id;
+          delete node.parent_id;
+          Object.assign(node, this.getNodeById(pid));
+        }
+        return node;
+      }
+    }
+    return {};
   }
 
   doExport = async () => {
-    let { dbx, form, myPins } = this.state;
+    let { dbx, form, myNodes } = this.state;
 
     this.setState({exportRunning: true});
-    this._syncPins(false);
+    this._syncNodes(false);
 
     // download all sub-folder .jtxt files
     let folders = [];
@@ -318,19 +332,25 @@ export default class App extends PureComponent {
 
     // convert to .csv file and upload
     let keys = Object.keys(form.questions);
-    let csv = "Street,Unit,City,State,Zip,longitude,latitude,canvasser,datetime,color,"+keys.join(",")+"\n";
+    let csv = "Street,City,State,Zip,Unit,longitude,latitude,canvasser,datetime,status,"+keys.join(",")+"\n";
     for (let f in jtxtfiles) {
       let obj = jtxtfiles[f];
-      for (let i in obj.pins) {
-        csv += obj.pins[i].address.map((x) => '"'+(x?x:'')+'"').join(',')+
-          ","+(obj.pins[i].latlng.longitude?obj.pins[i].latlng.longitude:'')+
-          ","+(obj.pins[i].latlng.latitude?obj.pins[i].latlng.latitude:'')+
+      for (let i in obj.nodes) {
+        let node = obj.nodes[i];
+        if (node.type !== "survey") continue;
+
+        let addr = this.getNodeById(node.parent_id);
+
+        csv += (addr.address?addr.address.map((x) => '"'+(x?x:'')+'"').join(','):'')+
+          ","+(addr.unit?addr.unit:'')+
+          ","+(addr.latlng?addr.latlng.longitude:'')+
+          ","+(addr.latlng?addr.latlng.latitude:'')+
           ","+obj.canvasser+
-          ","+this.timeFormat(obj.pins[i].id)+
-          ","+obj.pins[i].color;
+          ","+this.timeFormat(node.created)+
+          ","+node.status;
         for (let key in keys) {
           let value = '';
-          if (obj.pins[i].survey && obj.pins[i].survey[keys[key]]) value = obj.pins[i].survey[keys[key]];
+          if (node.survey && node.survey[keys[key]]) value = node.survey[keys[key]];
           csv += ',"'+value+'"';
         }
         csv += "\n";
@@ -348,7 +368,7 @@ export default class App extends PureComponent {
     this.setState({ exportRunning: false });
 
   }
-  
+
   _canvassUrlHandler() {
     const url = "https://github.com/OurVoiceUSA/OVMobile/blob/master/docs/Canvassing-Guidelines.md";
     return Linking.openURL(url).catch(() => null);
@@ -358,8 +378,8 @@ export default class App extends PureComponent {
 
     const { navigate } = this.props.navigation;
     const {
-      showDisclosure, myPosition, myPins, locationAccess, serviceError, form, user,
-      cStreet, cUnit, cCity, cState, cZip, loading, dbx, DropboxShareScreen, exportRunning, syncRunning,
+      showDisclosure, myPosition, myNodes, locationAccess, serviceError, form, user,
+      cStreet, cCity, cState, cZip, loading, dbx, DropboxShareScreen, exportRunning, syncRunning,
     } = this.state;
 
     if (showDisclosure === "true") {
@@ -453,13 +473,22 @@ export default class App extends PureComponent {
           keyboardShouldPersistTaps={true}
           {...this.props}>
           {
-            myPins.pins.map((marker, index) => marker.latlng.longitude !== null && Math.hypot(myPosition.longitude-marker.latlng.longitude, myPosition.latitude-marker.latlng.latitude) < 0.005 && (
+            myNodes.nodes.map((marker, index) =>
+              marker.type === "address" &&
+              marker.latlng.longitude !== null &&
+              Math.hypot(myPosition.longitude-marker.latlng.longitude, myPosition.latitude-marker.latlng.latitude) < 0.005 &&
+              (
               <MapView.Marker
                 key={index}
                 coordinate={marker.latlng}
-                title={marker.title}
-                description={marker.description}
-                pinColor={marker.color}
+                title={marker.address.join(", ")}
+                description={"BLAH!"}
+                onCalloutPress={() => {
+                  if (marker.multi_unit === true)
+                    console.warn("FIXME: multi unit addresses");
+                  else
+                    this.setState({isKnockMenuVisible: true, objectId: marker.id});
+                }}
                 />
             ))
           }
@@ -476,12 +505,12 @@ export default class App extends PureComponent {
               }
             </View>
             }
-            {(!myPins.last_synced || myPins.last_saved > myPins.last_synced || (syncRunning && !exportRunning)) &&
+            {(!myNodes.last_synced || myNodes.last_saved > myNodes.last_synced || (syncRunning && !exportRunning)) &&
               <View style={{marginBottom: 10}}>
               {syncRunning &&
               <ActivityIndicator size="large" />
               ||
-              <Icon name="refresh" size={50} color="#00a86b" onPress={() => this._syncPins(true)} />
+              <Icon name="refresh" size={50} color="#00a86b" onPress={() => this._syncNodes(true)} />
               }
               </View>
             }
@@ -491,12 +520,12 @@ export default class App extends PureComponent {
           </View>
         <View style={styles.buttonContainer}>
           <Icon.Button
-            name="hand-rock-o"
+            name="home"
             backgroundColor="#d7d7d7"
             color="#000000"
             onPress={() => {this.showConfirmAddress();}}
             {...iconStyles}>
-            Prepare to Knock
+            Record New Address
           </Icon.Button>
         </View>
 
@@ -534,15 +563,10 @@ export default class App extends PureComponent {
                     />
                    <View style={{position: 'absolute', bottom:10, width: 135, right: -3, height: 1, backgroundColor: 'gray'}} />
                  </View>
-                 <Text style={styles.baseText, {position: 'absolute', bottom: -93, fontSize: 12}}>Unit #</Text>
-                 <TextInput
-                   style={{height: 45, width: 100, fontSize: 15, flexDirection: 'row', position: 'absolute', right: 110, bottom: -85, alignItems: 'center'}}
-                  onChangeText={(text) => {this.setState({cUnit: text});}}
-                   underlineColorAndroid={'transparent'}
-                   value={cUnit}
-                   multiline={false}
+                 <Text style={styles.baseText, {position: 'absolute', bottom: -93, fontSize: 12}}>Multi Unit Building:</Text>
+                 <TouchableOpacity
+                   style={{flex: 1, padding: 10, borderRadius: 20, maxWidth: 350}}
                  />
-                 <View style={{position: 'absolute', bottom:-75, width: 100, right: 110, height: 1, backgroundColor: 'gray'}} />
                  <Text style={styles.baseText, {position: 'absolute', bottom: -137, fontSize: 12}}>City</Text>
                  <Text style={styles.baseText, {position: 'absolute', right:53,bottom: -137, fontSize: 12}}>State</Text>
                  <Text style={styles.baseText, {position: 'absolute', right:27, bottom: -137, fontSize: 12}}>Zip</Text>
@@ -612,7 +636,10 @@ export default class App extends PureComponent {
                     name="check-circle"
                     backgroundColor="#d7d7d7"
                     color="#000000"
-                    onPress={() => {this.setState({ isKnockMenuVisible: false }); this.addpin("green"); }}
+                    onPress={() => {
+                      this.setState({ isKnockMenuVisible: false });
+                      navigate('Survey', {refer: this, myNodes: myNodes, form: form});
+                    }}
                     {...iconStyles}>
                     Take Survey
                   </Icon.Button>
@@ -623,7 +650,14 @@ export default class App extends PureComponent {
                     name="circle-o"
                     backgroundColor="#d7d7d7"
                     color="#000000"
-                    onPress={() => {this.setState({ isKnockMenuVisible: false }); this.addpin("yellow"); }}
+                    onPress={() => {
+                      this._addNode({
+                        type: "survey",
+                        parent_id: this.state.objectId,
+                        status: 'not home',
+                      });
+                      this.setState({ isKnockMenuVisible: false })
+                    }}
                     {...iconStyles}>
                     Not Home
                   </Icon.Button>
@@ -634,7 +668,14 @@ export default class App extends PureComponent {
                     name="ban"
                     backgroundColor="#d7d7d7"
                     color="#000000"
-                    onPress={() => {this.setState({ isKnockMenuVisible: false }); this.addpin("red"); }}
+                    onPress={() => {
+                      this._addNode({
+                        type: "survey",
+                        parent_id: this.state.objectId,
+                        status: 'not interested',
+                      });
+                      this.setState({ isKnockMenuVisible: false });
+                    }}
                     {...iconStyles}>
                     Not Interested
                   </Icon.Button>

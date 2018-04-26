@@ -14,6 +14,7 @@ import {
 
 import storage from 'react-native-storage-wrapper';
 import t from 'tcomb-form-native';
+import sha1 from 'sha1';
 
 var Form = t.form.Form;
 
@@ -37,24 +38,27 @@ export default class App extends PureComponent {
     this.state = {
       refer: state.params.refer,
       form: state.params.form,
-      myPins: state.params.myPins,
     };
 
     this.doSave = this.doSave.bind(this);
   }
 
   doSave = async () => {
-    let { refer, form, myPins } = this.state;
-
+    let { refer, form } = this.state;
     let json = this.refs.form.getValue();
     if (json == null) return;
 
-    // last item in myPins is where we put our data
-    myPins.pins[myPins.pins.length-1].survey = json;
-    refer._savePins(myPins);
+    let epoch = Math.floor(new Date().getTime() / 1000);
+
+    refer._addNode({
+      type: "survey",
+      id: sha1(epoch+JSON.stringify(json)+refer.state.objectId),
+      parent_id: refer.state.objectId,
+      status: 'home',
+      survey: json,
+    });
 
     this.props.navigation.goBack();
-
   }
 
   valueToEnums(options) {
@@ -144,4 +148,3 @@ var styles = StyleSheet.create({
     justifyContent: 'center'
   }
 });
-
