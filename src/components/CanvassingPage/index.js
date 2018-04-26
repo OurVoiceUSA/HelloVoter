@@ -291,7 +291,7 @@ export default class App extends PureComponent {
     let { dbx, form, myNodes } = this.state;
 
     this.setState({exportRunning: true});
-    this._syncNodes(false);
+    await this._syncNodes(false);
 
     // download all sub-folder .jtxt files
     let folders = [];
