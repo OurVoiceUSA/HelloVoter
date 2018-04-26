@@ -271,9 +271,9 @@ export default class App extends PureComponent {
     this.setState({syncRunning: false, myNodes: myNodes});
   }
 
-  getNodeById(id) {
-    for (let i in this.state.myNodes.nodes) {
-      let node = this.state.myNodes.nodes[i];
+  getNodeById(id, store) {
+    for (let i in store.nodes) {
+      let node = store.nodes[i];
       if (node.id === id) {
         // if we have a parent_id, recursively merge properties. This makes "unit" a polymorph of "address"
         if (node.parent_id) {
@@ -288,7 +288,9 @@ export default class App extends PureComponent {
   }
 
   doExport = async () => {
-    let { dbx, form, myNodes } = this.state;
+    let { dbx, form } = this.state;
+
+    let allNodes = {nodes: []};
 
     this.setState({exportRunning: true});
     await this._syncNodes(false);
@@ -330,31 +332,32 @@ export default class App extends PureComponent {
       }
     }
 
+    // concat everything into allNodes
+    for (let f in jtxtfiles)
+      allNodes.nodes = allNodes.nodes.concat(jtxtfiles[f].nodes)
+
     // convert to .csv file and upload
     let keys = Object.keys(form.questions);
     let csv = "Street,City,State,Zip,Unit,longitude,latitude,canvasser,datetime,status,"+keys.join(",")+"\n";
-    for (let f in jtxtfiles) {
-      let obj = jtxtfiles[f];
-      for (let i in obj.nodes) {
-        let node = obj.nodes[i];
-        if (node.type !== "survey") continue;
+    for (let n in allNodes.nodes) {
+      let node = allNodes.nodes[n];
+      if (node.type !== "survey") continue;
 
-        let addr = this.getNodeById(node.parent_id);
+      let addr = this.getNodeById(node.parent_id, allNodes);
 
-        csv += (addr.address?addr.address.map((x) => '"'+(x?x:'')+'"').join(','):'')+
-          ","+(addr.unit?addr.unit:'')+
-          ","+(addr.latlng?addr.latlng.longitude:'')+
-          ","+(addr.latlng?addr.latlng.latitude:'')+
-          ","+obj.canvasser+
-          ","+this.timeFormat(node.created)+
-          ","+node.status;
-        for (let key in keys) {
-          let value = '';
-          if (node.survey && node.survey[keys[key]]) value = node.survey[keys[key]];
-          csv += ',"'+value+'"';
-        }
-        csv += "\n";
+      csv += (addr.address?addr.address.map((x) => '"'+(x?x:'')+'"').join(','):'')+
+        ","+(addr.unit?addr.unit:'')+
+        ","+(addr.latlng?addr.latlng.longitude:'')+
+        ","+(addr.latlng?addr.latlng.latitude:'')+
+        ","+"FIXME"//obj.canvasser+
+        ","+this.timeFormat(node.created)+
+        ","+node.status;
+      for (let key in keys) {
+        let value = '';
+        if (node.survey && node.survey[keys[key]]) value = node.survey[keys[key]];
+        csv += ',"'+value+'"';
       }
+      csv += "\n";
     }
 
     try {
