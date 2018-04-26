@@ -50,7 +50,7 @@ export default class App extends PureComponent {
       cCity: null,
       cState: null,
       cZip: null,
-      myNodes: { nodes: [], pins: [], last_synced: 0 },
+      myNodes: { nodes: [], last_synced: 0 },
       asyncStorageKey: 'OV_CANVASS_PINS@'+props.navigation.state.params.form.id,
       DisclosureKey : 'OV_DISCLOUSER',
       isModalVisible: false,
@@ -215,6 +215,50 @@ export default class App extends PureComponent {
       const value = await storage.get(this.state.asyncStorageKey);
       if (value !== null) {
         let myNodes = JSON.parse(value);
+
+        if (!myNodes.nodes) myNodes.nodes = [];
+
+        // check for old version 1 format and convert
+        // TODO: make this a function - also have to do this on EXPORT
+        if (myNodes.pins) {
+          for (let p in myNodes.pins) {
+            let pin = myNodes.pins[p];
+
+            // address had "unit" in it - splice it out
+            let unit = pin.address.splice(1, 1);
+            // "city" started with a space... a bug
+            pin.address[1] = pin.address[1].trim();
+
+            let id = sha1(JSON.stringify(pin.address));
+
+            myNodes.nodes.push({
+              type: "address",
+              id: id,
+              created: pin.id,
+              latlng: pin.latlng,
+              address: pin.address,
+              //multi_unit: (unit?true:false),
+            });
+
+            let status = '';
+            switch (pin.color) {
+              case 'green': status = 'home'; break;
+              case 'yellow': status = 'not home'; break;
+              case 'red': status = 'not interested'; break;
+            }
+
+            myNodes.nodes.push({
+              type: "survey",
+              id: sha1(id+JSON.stringify(pin.survey)+id),
+              parent_id: id,
+              created: pin.id,
+              status: status,
+              survey: pin.survey,
+            });
+          }
+
+          delete myNodes.pins;
+        }
         this.setState({ myNodes: myNodes });
       } else {
         // look on dropbox to see if this device has data that was cleared locally
