@@ -463,6 +463,10 @@ export default class App extends PureComponent {
       );
     }
 
+    // toggle pin horizon based on how many we have, for now - TODO: make this a setting
+    let markerDistanceFlag = true;
+    if (myNodes.nodes.length > 300) markerDistanceFlag = true;
+
     return (
       <View style={styles.container}>
 
@@ -473,7 +477,7 @@ export default class App extends PureComponent {
         ||
         <MapView
           ref={component => this.map = component}
-          initialRegion={{latitude: myPosition.latitude, longitude: myPosition.longitude, latitudeDelta: 0.005, longitudeDelta: 0.005}}
+          initialRegion={{latitude: myPosition.latitude, longitude: myPosition.longitude, latitudeDelta: 0.05, longitudeDelta: 0.005}}
           provider={PROVIDER_GOOGLE}
           style={styles.map}
           showsUserLocation={true}
@@ -484,7 +488,7 @@ export default class App extends PureComponent {
             myNodes.nodes.map((marker, index) =>
               marker.type === "address" &&
               marker.latlng.longitude !== null &&
-              Math.hypot(myPosition.longitude-marker.latlng.longitude, myPosition.latitude-marker.latlng.latitude) < 0.005 &&
+              (!markerDistanceFlag || (markerDistanceFlag && Math.hypot(myPosition.longitude-marker.latlng.longitude, myPosition.latitude-marker.latlng.latitude) < 0.025)) &&
               (
               <MapView.Marker
                 key={index}
