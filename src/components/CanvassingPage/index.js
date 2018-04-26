@@ -231,14 +231,19 @@ export default class App extends PureComponent {
         let id = sha1(JSON.stringify(pin.address));
         let pid = id;
 
-        myNodes.nodes.push({
-          type: "address",
-          id: id,
-          created: pin.id,
-          latlng: pin.latlng,
-          address: pin.address,
-          multi_unit: (unit?true:false),
-        });
+        // chech for duplicate address pins
+        let check = this.getNodeById(id, myNodes);
+
+        if (!check.id) {
+          myNodes.nodes.push({
+            type: "address",
+            id: id,
+            created: pin.id,
+            latlng: pin.latlng,
+            address: pin.address,
+            multi_unit: (unit?true:false),
+          });
+        }
 
         if (unit) {
           id = sha1(pid+unit);
