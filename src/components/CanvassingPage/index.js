@@ -333,8 +333,13 @@ export default class App extends PureComponent {
     }
 
     // concat everything into allNodes
-    for (let f in jtxtfiles)
-      allNodes.nodes = allNodes.nodes.concat(jtxtfiles[f].nodes)
+    for (let f in jtxtfiles) {
+      let obj = jtxtfiles[f];
+      // copy canvasser property since it gets lost in the concat
+      for (let n in obj.nodes)
+        obj.nodes[n].canvasser = obj.canvasser;
+      allNodes.nodes = allNodes.nodes.concat(obj.nodes);
+    }
 
     // convert to .csv file and upload
     let keys = Object.keys(form.questions);
@@ -349,7 +354,7 @@ export default class App extends PureComponent {
         ","+(addr.unit?addr.unit:'')+
         ","+(addr.latlng?addr.latlng.longitude:'')+
         ","+(addr.latlng?addr.latlng.latitude:'')+
-        ","+"FIXME"//obj.canvasser+
+        ","+node.canvasser+
         ","+this.timeFormat(node.created)+
         ","+node.status;
       for (let key in keys) {
