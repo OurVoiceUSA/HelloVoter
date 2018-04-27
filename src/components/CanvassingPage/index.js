@@ -173,7 +173,7 @@ export default class App extends PureComponent {
       multi_unit: false,
     };
 
-    this._addNode(node);
+    node = this._addNode(node);
     this.setState({ isModalVisible: false });
     this.doMarkerPress(node);
   }
@@ -199,8 +199,12 @@ export default class App extends PureComponent {
 
     if (!check.id)
       myNodes.nodes.push(node);
+    else
+      node = check;
 
     this._saveNodes(myNodes, true);
+
+    return node;
   }
 
   LoadDisclosure = async () => {
