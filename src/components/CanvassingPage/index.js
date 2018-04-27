@@ -245,7 +245,7 @@ export default class App extends PureComponent {
           });
         }
 
-        if (unit) {
+        if (unit && unit[0] !== "") {
           id = sha1(pid+unit);
           myNodes.nodes.push({
             type: "unit",
