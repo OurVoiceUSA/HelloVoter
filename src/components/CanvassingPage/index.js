@@ -603,9 +603,15 @@ export default class App extends PureComponent {
               (!markerDistanceFlag || (markerDistanceFlag && Math.hypot(myPosition.longitude-marker.latlng.longitude, myPosition.latitude-marker.latlng.latitude) < 0.025)) &&
               (
               <MapView.Marker
-                key={index}
+                key={marker.id}
                 coordinate={marker.latlng}
                 title={marker.address.join(", ")}
+                draggable
+                onDragEnd={(e) => {
+                  marker.latlng = e.nativeEvent.coordinate;
+                  marker.updated = Math.floor(new Date().getTime() / 1000);
+                  this._saveNodes(myNodes, true);
+                }}
                 pinColor={this.getPinColor(marker)}
                 description={(marker.multi_unit?"Multi-unit address.  "+this.getChildNodesById(marker.id, myNodes).length:"Single unit address")}
                 onCalloutPress={() => {this.doMarkerPress(marker);}}
