@@ -172,8 +172,10 @@ export default class App extends PureComponent {
   }
 
   doMarkerPress(node) {
+    const { navigate } = this.props.navigation;
+
     if (node.multi_unit === true)
-      console.warn("FIXME: multi unit addresses");
+      navigate('ListMultiUnit', {refer: this});
     else
       this.setState({isKnockMenuVisible: true, objectId: node.id});
   }

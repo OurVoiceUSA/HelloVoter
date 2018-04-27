@@ -6,6 +6,7 @@ import PolProfilePage from '../components/PolProfilePage';
 import SettingsPage from '../components/SettingsPage';
 import CanvassingSetupPage from '../components/CanvassingSetupPage';
 import CanvassingPage from '../components/CanvassingPage';
+import ListMultiUnitPage from '../components/ListMultiUnitPage';
 import SurveyPage from '../components/SurveyPage';
 import CreateSurveyPage from '../components/CreateSurveyPage';
 import AboutPage from '../components/AboutPage';
@@ -39,6 +40,12 @@ export default App = StackNavigator({
     screen: CanvassingPage,
     navigationOptions: ({navigation}) => ({
       title: 'Canvassing',
+    }),
+  },
+  ListMultiUnit: {
+    screen: ListMultiUnitPage,
+    navigationOptions: ({navigation}) => ({
+      title: 'Units',
     }),
   },
   Survey: {
