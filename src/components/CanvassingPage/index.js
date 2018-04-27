@@ -356,6 +356,35 @@ export default class App extends PureComponent {
     return {};
   }
 
+  getChildNodesById(id, store) {
+    let nodes = [];
+    for (let i in store.nodes) {
+      let node = store.nodes[i];
+      if (node.parent_id === id) {
+        nodes.push(node);
+      }
+    }
+    return nodes;
+  }
+
+  getPinColor(node) {
+    if (node.multi_unit) return "cyan";
+
+    nodes = this.getChildNodesById(node.id, this.state.myNodes);
+
+    // no interactions
+    if (nodes.length === 0) return "#8b4513";
+
+    // TODO: ensure this is the last interaction; ie, sort by "created"
+    switch (nodes[nodes.length-1].status) {
+      case 'home': return "green";
+      case 'not home': return "yellow";
+      case 'not interested': return "red";
+    }
+
+    return "#8b4513";
+  }
+
   doExport = async () => {
     let { dbx, form } = this.state;
 
@@ -563,7 +592,8 @@ export default class App extends PureComponent {
                 key={index}
                 coordinate={marker.latlng}
                 title={marker.address.join(", ")}
-                description={"BLAH!"}
+                pinColor={this.getPinColor(marker)}
+                description={(marker.multi_unit?"Multi-unit address.  "+this.getChildNodesById(marker.id, myNodes).length:"Single unit address")}
                 onCalloutPress={() => {
                   if (marker.multi_unit === true)
                     console.warn("FIXME: multi unit addresses");
