@@ -157,17 +157,24 @@ export default class App extends PureComponent {
   }
 
   doConfirmAddress = async () => {
-    const { cStreet, cCity, cState, cZip } = this.state;
-
-    // TODO: loop through myNodes.nodes for type == "address" and verify it doesn't already exist
+    const { cStreet, cCity, cState, cZip, myPosition, myNodes, form } = this.state;
 
     try {
-      await this.map.animateToCoordinate(this.state.myPosition, 500)
+      await this.map.animateToCoordinate(myPosition, 500)
     } catch (error) {}
 
-    let node = this.addpin();
-    this.setState({ isModalVisible: false });
+    let epoch = Math.floor(new Date().getTime() / 1000);
+    let address = [cStreet, cCity, cState, cZip];
+    let node = {
+      type: "address",
+      id: sha1(JSON.stringify(address)),
+      latlng: {latitude: myPosition.latitude, longitude: myPosition.longitude},
+      address: address,
+      multi_unit: false,
+    };
 
+    this._addNode(node);
+    this.setState({ isModalVisible: false });
     this.doMarkerPress(node);
   }
 
@@ -187,25 +194,13 @@ export default class App extends PureComponent {
     node.created = epoch;
     if (!node.id) node.id = sha1(epoch+JSON.stringify(node)+this.state.objectId);
 
-    myNodes.nodes.push(node);
+    // chech for duplicate address pins
+    let check = this.getNodeById(node.id, myNodes);
+
+    if (!check.id)
+      myNodes.nodes.push(node);
+
     this._saveNodes(myNodes, true);
-  }
-
-  addpin() {
-    let { cStreet, cCity, cState, cZip, myPosition, myNodes, form } = this.state;
-    let epoch = Math.floor(new Date().getTime() / 1000);
-    let address = [cStreet, cCity, cState, cZip];
-    let node = {
-      type: "address",
-      id: sha1(JSON.stringify(address)),
-      latlng: {latitude: myPosition.latitude, longitude: myPosition.longitude},
-      address: address,
-      multi_unit: false,
-    }
-
-    this._addNode(node);
-
-    return node;
   }
 
   LoadDisclosure = async () => {
