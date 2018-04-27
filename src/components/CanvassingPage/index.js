@@ -165,8 +165,17 @@ export default class App extends PureComponent {
       await this.map.animateToCoordinate(this.state.myPosition, 500)
     } catch (error) {}
 
-    this.addpin();
+    let node = this.addpin();
     this.setState({ isModalVisible: false });
+
+    this.doMarkerPress(node);
+  }
+
+  doMarkerPress(node) {
+    if (node.multi_unit === true)
+      console.warn("FIXME: multi unit addresses");
+    else
+      this.setState({isKnockMenuVisible: true, objectId: node.id});
   }
 
   _addNode(node) {
@@ -184,14 +193,17 @@ export default class App extends PureComponent {
     let { cStreet, cCity, cState, cZip, myPosition, myNodes, form } = this.state;
     let epoch = Math.floor(new Date().getTime() / 1000);
     let address = [cStreet, cCity, cState, cZip];
-
-    this._addNode({
+    let node = {
       type: "address",
       id: sha1(JSON.stringify(address)),
       latlng: {latitude: myPosition.latitude, longitude: myPosition.longitude},
       address: address,
       multi_unit: false,
-    });
+    }
+
+    this._addNode(node);
+
+    return node;
   }
 
   LoadDisclosure = async () => {
@@ -594,12 +606,7 @@ export default class App extends PureComponent {
                 title={marker.address.join(", ")}
                 pinColor={this.getPinColor(marker)}
                 description={(marker.multi_unit?"Multi-unit address.  "+this.getChildNodesById(marker.id, myNodes).length:"Single unit address")}
-                onCalloutPress={() => {
-                  if (marker.multi_unit === true)
-                    console.warn("FIXME: multi unit addresses");
-                  else
-                    this.setState({isKnockMenuVisible: true, objectId: marker.id});
-                }}
+                onCalloutPress={() => {this.doMarkerPress(marker);}}
                 />
             ))
           }
