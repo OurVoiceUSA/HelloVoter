@@ -241,17 +241,17 @@ export default class App extends PureComponent {
             created: pin.id,
             latlng: pin.latlng,
             address: pin.address,
-            multi_unit: (unit?true:false),
+            multi_unit: ((unit && unit[0] !== null && unit[0] !== "")?true:false),
           });
         }
 
-        if (unit && unit[0] !== "") {
+        if (unit && unit[0] !== null && unit[0] !== "") {
           id = sha1(pid+unit);
           myNodes.nodes.push({
             type: "unit",
             id: id,
             parent_id: pid,
-            unit: unit,
+            unit: unit[0],
           });
         }
 
