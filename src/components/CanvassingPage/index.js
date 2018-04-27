@@ -175,7 +175,7 @@ export default class App extends PureComponent {
     const { navigate } = this.props.navigation;
 
     if (node.multi_unit === true)
-      navigate('ListMultiUnit', {refer: this});
+      navigate('ListMultiUnit', {refer: this, node: node});
     else
       this.setState({isKnockMenuVisible: true, objectId: node.id});
   }
