@@ -26,6 +26,8 @@ export default class App extends PureComponent {
 
   render() {
     const { refer } = this.state;
+    const { navigate } = this.props.navigation;
+
     return (
       <ScrollView style={{flex: 1, backgroundColor: 'white'}} contentContainerStyle={{flexGrow:1}}>
         <View>
@@ -33,6 +35,7 @@ export default class App extends PureComponent {
           <FlatList
             scrollEnabled={false}
             data={refer.getChildNodesById(this.state.node.id, this.state.myNodes)}
+            keyExtractor={(item) => item.id}
             renderItem={({item}) => {
               let nodes = refer.getChildNodesById(item.id, this.state.myNodes);
               let color = refer.getPinColor(item);
@@ -41,16 +44,26 @@ export default class App extends PureComponent {
 
               let info = {};
 
-              if (nodes.length) info = {
-                FullName: nodes[nodes.length-1].FullName,
-                PartyAffiliation: nodes[nodes.length-1].PartyAffiliation,
-                LastVisted: nodes[nodes.length-1].created,
+              if (nodes.length)  {
+                let last = nodes[nodes.length-1];
+                if (last.survey) {
+                  info.FullName = last.survey.FullName;
+                  info.PartyAffiliation = last.survey.PartyAffiliation;
+                }
+                info.LastVisted = last.created;
               };
 
               return (
-                <View key={item.id} style={{flexDirection: 'row', alignItems: 'center', padding: 10}}>
-                  <Icon name={icon} size={40} color={color} style={{margin: 5}} />
-                  <Text>Unit: {item.unit}, {JSON.stringify(info)}</Text>
+                <View key={item.id} style={{padding: 10}}>
+                  <TouchableOpacity
+                    style={{flexDirection: 'row', alignItems: 'center'}}
+                    onPress={() => {
+                      //this.setState({ isKnockMenuVisible: false });
+                      navigate('Survey', {refer: refer, myNodes: this.state.myNodes, form: refer.state.form});
+                    }}>
+                    <Icon name={icon} size={40} color={color} style={{margin: 5}} />
+                    <Text>Unit: {item.unit}, {JSON.stringify(info)}</Text>
+                  </TouchableOpacity>
                 </View>
               );
             }}
