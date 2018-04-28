@@ -233,7 +233,7 @@ export default class App extends PureComponent {
   }
 
   getLatestSurvey(id) {
-    let nodes = this.getChildNodesById(id, this.state.myNodes).sort(this.dynamicSort('updated'));
+    let nodes = this.getChildNodesByIdType(id, "survey", this.state.myNodes).sort(this.dynamicSort('updated'));
     let info = {};
     const timeAgo = new TimeAgo('en-US')
 
@@ -431,11 +431,11 @@ export default class App extends PureComponent {
     }
   }
 
-  getChildNodesById(id, store) {
+  getChildNodesByIdType(id, type, store) {
     let nodes = [];
     for (let i in store.nodes) {
       let node = store.nodes[i];
-      if (node.parent_id === id) {
+      if (node.parent_id === id && node.type === type) {
         nodes.push(node);
       }
     }
@@ -457,7 +457,7 @@ export default class App extends PureComponent {
   getPinColor(node) {
     if (node.multi_unit) return "cyan";
 
-    nodes = this.getChildNodesById(node.id, this.state.myNodes);
+    nodes = this.getChildNodesByIdType(node.id, "survey", this.state.myNodes);
 
     // no interactions
     if (nodes.length === 0) return "#8b4513";

@@ -60,7 +60,7 @@ export default class App extends PureComponent {
   render() {
     const { refer } = this.state;
 
-    let childNodes = refer.getChildNodesById(this.state.node.id, this.state.myNodes).sort(refer.dynamicSort('unit'));
+    let childNodes = refer.getChildNodesByIdType(this.state.node.id, "unit", this.state.myNodes).sort(refer.dynamicSort('unit'));
 
     return (
       <ScrollView style={{flex: 1, backgroundColor: 'white'}} contentContainerStyle={{flexGrow:1}}>
