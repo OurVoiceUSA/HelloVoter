@@ -216,6 +216,7 @@ export default class App extends PureComponent {
     let epoch = Math.floor(new Date().getTime() / 1000);
 
     node.created = epoch;
+    node.updated = epoch;
     if (!node.id) node.id = sha1(epoch+JSON.stringify(node)+this.state.objectId);
 
     // chech for duplicate address pins
@@ -232,7 +233,7 @@ export default class App extends PureComponent {
   }
 
   getLatestSurvey(id) {
-    let nodes = this.getChildNodesById(id, this.state.myNodes);
+    let nodes = this.getChildNodesById(id, this.state.myNodes).sort(this.dynamicSort('updated'));
     let info = {};
     const timeAgo = new TimeAgo('en-US')
 
@@ -242,7 +243,7 @@ export default class App extends PureComponent {
         info.FullName = last.survey.FullName;
         info.PartyAffiliation = last.survey.PartyAffiliation;
       }
-      info.LastVisted = timeAgo.format(new Date(last.created*1000));
+      info.LastVisted = timeAgo.format(new Date(last.updated*1000));
     };
 
     return info;
@@ -293,6 +294,7 @@ export default class App extends PureComponent {
             type: "address",
             id: id,
             created: pin.id,
+            updated: pin.id,
             latlng: pin.latlng,
             address: pin.address,
             multi_unit: ((unit && unit[0] !== null && unit[0] !== "")?true:false),
@@ -322,6 +324,7 @@ export default class App extends PureComponent {
             id: sha1(id+JSON.stringify(pin.survey)+id),
             parent_id: id,
             created: pin.id,
+            updated: pin.id,
             status: status,
             survey: pin.survey,
           });
@@ -519,7 +522,7 @@ export default class App extends PureComponent {
         ","+(addr.latlng?addr.latlng.longitude:'')+
         ","+(addr.latlng?addr.latlng.latitude:'')+
         ","+node.canvasser+
-        ","+this.timeFormat(node.created)+
+        ","+this.timeFormat(node.updated)+
         ","+node.status;
       for (let key in keys) {
         let value = '';
