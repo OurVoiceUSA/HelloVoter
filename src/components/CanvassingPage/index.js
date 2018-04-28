@@ -190,7 +190,7 @@ export default class App extends PureComponent {
     };
 
     node = this._addNode(node);
-    this.setState({ isModalVisible: false });
+    this.setState({ fAddress: json, isModalVisible: false });
     this.doMarkerPress(node);
   }
 
