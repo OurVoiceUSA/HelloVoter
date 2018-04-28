@@ -73,6 +73,7 @@ export default class App extends PureComponent {
       user: props.navigation.state.params.user,
     };
 
+    this.onChange = this.onChange.bind(this);
   }
 
   onLocationChange (e: Event) {
@@ -167,6 +168,10 @@ export default class App extends PureComponent {
       } catch (error) {}
       this.setState({loading: false})
     }, 550);
+  }
+
+  onChange(fAddress) {
+    this.setState({fAddress});
   }
 
   doConfirmAddress = async () => {
@@ -696,6 +701,7 @@ export default class App extends PureComponent {
                 <Form
                  ref="mainForm"
                  type={mainForm}
+                 onChange={this.onChange}
                  value={fAddress}
                 />
                 <TouchableHighlight style={styles.addButton} onPress={this.doConfirmAddress} underlayColor='#99d9f4'>
