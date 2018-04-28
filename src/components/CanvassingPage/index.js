@@ -11,6 +11,7 @@ import {
   ScrollView,
   PermissionsAndroid,
   Platform,
+  TouchableHighlight,
   TouchableOpacity,
   TouchableWithoutFeedback,
   Keyboard,
@@ -34,6 +35,18 @@ import DropboxSharePage from '../DropboxSharePage';
 import KnockPage from '../KnockPage';
 import Modal from 'react-native-simple-modal';
 
+import t from 'tcomb-form-native';
+
+var Form = t.form.Form;
+
+var mainForm = t.struct({
+  'street': t.String,
+  'multi_unit': t.Boolean,
+  'city': t.String,
+  'state': t.String,
+  'zip': t.String,
+});
+
 export default class App extends PureComponent {
 
   constructor(props) {
@@ -47,10 +60,7 @@ export default class App extends PureComponent {
       locationAccess: null,
       myPosition: {latitude: null, longitude: null},
       objectId: null,
-      cStreet: null,
-      cCity: null,
-      cState: null,
-      cZip: null,
+      fAddress: {},
       myNodes: { nodes: [], last_synced: 0 },
       asyncStorageKey: 'OV_CANVASS_PINS@'+props.navigation.state.params.form.id,
       DisclosureKey : 'OV_DISCLOUSER',
@@ -145,12 +155,14 @@ export default class App extends PureComponent {
           let arr = res.address.split(", ");
           let country = arr[arr.length-1]; // unused
           let state_zip = arr[arr.length-2];
-          let cState = (state_zip?state_zip.split(" ")[0]:null);
-          let cZip = (state_zip?state_zip.split(" ")[1]:null);
-          let cCity = arr[arr.length-3];
-          let cStreet = arr[arr.length-4];
+          let fAddress = {
+            state: (state_zip?state_zip.split(" ")[0]:null),
+            zip: (state_zip?state_zip.split(" ")[1]:null),
+            city: arr[arr.length-3],
+            street: arr[arr.length-4],
+          };
 
-          this.setState({cStreet, cCity, cZip, cState});
+          this.setState({fAddress});
         }
       } catch (error) {}
       this.setState({loading: false})
@@ -158,20 +170,23 @@ export default class App extends PureComponent {
   }
 
   doConfirmAddress = async () => {
-    const { cStreet, cCity, cState, cZip, myPosition, myNodes, form } = this.state;
+    const { myPosition, myNodes, form } = this.state;
+
+    let json = this.refs.mainForm.getValue();
+    if (json == null) return;
 
     try {
       await this.map.animateToCoordinate(myPosition, 500)
     } catch (error) {}
 
     let epoch = Math.floor(new Date().getTime() / 1000);
-    let address = [cStreet, cCity, cState, cZip];
+    let address = [json.street, json.city, json.state, json.zip];
     let node = {
       type: "address",
       id: sha1(JSON.stringify(address)),
       latlng: {latitude: myPosition.latitude, longitude: myPosition.longitude},
       address: address,
-      multi_unit: false,
+      multi_unit: json.multi_unit,
     };
 
     node = this._addNode(node);
@@ -499,7 +514,7 @@ export default class App extends PureComponent {
     const { navigate } = this.props.navigation;
     const {
       showDisclosure, myPosition, myNodes, locationAccess, serviceError, form, user,
-      cStreet, cCity, cState, cZip, loading, dbx, DropboxShareScreen, exportRunning, syncRunning,
+      fAddress, loading, dbx, DropboxShareScreen, exportRunning, syncRunning,
     } = this.state;
 
     if (showDisclosure === "true") {
@@ -657,7 +672,7 @@ export default class App extends PureComponent {
 
         <Modal
           open={this.state.isModalVisible}
-          modalStyle={{width: 335, height: 280, backgroundColor: "transparent",
+          modalStyle={{width: 350, height: 500, backgroundColor: "transparent",
             position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
           style={{alignItems: 'center'}}
           offset={0}
@@ -669,7 +684,7 @@ export default class App extends PureComponent {
           closeOnTouchOutside={true}
           disableOnBackPress={false}>
           <View style={{flexDirection: 'column'}}>
-            <View style={{width: 262, height: 245, backgroundColor: 'white', marginTop: 15, borderRadius: 15, padding: 25, alignSelf: 'flex-start'}}>
+            <View style={{width: 325, backgroundColor: 'white', marginTop: 5, borderRadius: 15, padding: 10, alignSelf: 'flex-start'}}>
               {loading &&
               <View>
                 <Text style={{color: 'blue', fontWeight: 'bold', fontSize: 15}}>Loading Address</Text>
@@ -677,67 +692,20 @@ export default class App extends PureComponent {
               </View>
               ||
               <View>
-              <Text style={{color: 'blue', fontWeight: 'bold', fontSize: 15}}>Confirm the Address</Text>
-                <View>
-                  <Text style={styles.baseText, {position: 'absolute', bottom: -53, fontSize: 12}}>Street Address</Text>
-                  <View style={{flexDirection: 'row', position: 'absolute', right: 80, bottom: -45, alignItems: 'center'}}>
-                    <TextInput style={{height: 45, width: 135, fontSize: 15 }}
-                      onChangeText={(text) => {this.setState({cStreet: text});}}
-                      underlineColorAndroid={'transparent'}
-                      value={cStreet}
-                      multiline={false}
-                    />
-                   <View style={{position: 'absolute', bottom:10, width: 135, right: -3, height: 1, backgroundColor: 'gray'}} />
-                 </View>
-                 <Text style={styles.baseText, {position: 'absolute', bottom: -93, fontSize: 12}}>Multi Unit Building:</Text>
-                 <TouchableOpacity
-                   style={{flex: 1, padding: 10, borderRadius: 20, maxWidth: 350}}
-                 />
-                 <Text style={styles.baseText, {position: 'absolute', bottom: -137, fontSize: 12}}>City</Text>
-                 <Text style={styles.baseText, {position: 'absolute', right:53,bottom: -137, fontSize: 12}}>State</Text>
-                 <Text style={styles.baseText, {position: 'absolute', right:27, bottom: -137, fontSize: 12}}>Zip</Text>
-                 <View style={{flexDirection: 'row', position: 'absolute', right: 0, bottom: -130, alignItems: 'center'}}>
-                 <TextInput
-                   style={{height: 45, width: 130, fontSize: 15 }}
-                   onChangeText={(text) => {this.setState({cCity: text});}}
-                   underlineColorAndroid={'transparent'}
-                   value={cCity}
-                   multiline={false}
-                 />
-                 <View style={{position: 'absolute', bottom:10, width: 125, right: 85, height: 1, backgroundColor: 'gray'}} />
-                 <TextInput
-                   style={{height: 45, width: 30, fontSize: 15 }}
-                   onChangeText={(text) => {this.setState({cState: text});}}
-                   underlineColorAndroid={'transparent'}
-                   value={cState}
-                   multiline={false}
-                 />
-                 <View style={{position: 'absolute', bottom:10, width: 25, right: 53, height: 1, backgroundColor: 'gray'}} />
-                 <TextInput
-                   style={{height: 45, width: 50, fontSize: 15}}
-                   onChangeText={(text) => {this.setState({cZip: text});}}
-                   underlineColorAndroid={'transparent'}
-                   value={cZip}
-                   multiline={false}
-                 />
-                 <View style={{position: 'absolute', bottom:10, width: 48, right: 0, height: 1, backgroundColor: 'gray'}} />
-               </View>
-               <View style={{flexDirection: 'row', position: 'absolute', right: 25, bottom: -185, alignItems: 'center'}}>
-                 <TouchableOpacity style={{marginLeft: 30, backgroundColor: '#d7d7d7', padding: 10, borderRadius: 20}}
-                   onPress={() => this.setState({isModalVisible: false})}>
-                   <Text style={{fontWeight: 'bold', color: 'blue'}}>Cancel</Text>
-                 </TouchableOpacity>
-                 <TouchableOpacity style={{marginLeft: 30, backgroundColor: '#d7d7d7', padding: 10, borderRadius: 20}}
-                   onPress={() => { this.doConfirmAddress(); }}>
-                   <Text style={{fontWeight: 'bold', color: 'blue'}}>    OK    </Text>
-                 </TouchableOpacity>
-               </View>
-               </View>
-             </View>
-             }
+                <Text style={{color: 'blue', fontWeight: 'bold', fontSize: 15}}>Confirm the Address</Text>
+                <Form
+                 ref="mainForm"
+                 type={mainForm}
+                 value={fAddress}
+                />
+                <TouchableHighlight style={styles.addButton} onPress={this.doConfirmAddress} underlayColor='#99d9f4'>
+                  <Text style={styles.buttonText}>Add</Text>
+                </TouchableHighlight>
+              </View>
+              }
+            </View>
           </View>
-        </View>
-      </Modal>
+        </Modal>
 
         <Modal
           open={this.state.isKnockMenuVisible}
@@ -815,12 +783,24 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
     backgroundColor: '#d7d7d7',
   },
+  buttonText: {
+    fontSize: 18,
+    color: 'white',
+    alignSelf: 'center'
+  },
+  addButton: {
+    height: 36,
+    backgroundColor: '#48BBEC',
+    borderColor: '#48BBEC',
+    borderWidth: 1,
+    borderRadius: 8,
+    marginBottom: 10,
+    alignSelf: 'stretch',
+    justifyContent: 'center'
+  },
   buttonContainer: {
     flexDirection: 'row',
     marginVertical: 20,
     backgroundColor: 'transparent',
-  },
-  buttonText: {
-    textAlign: 'center',
   },
 });
