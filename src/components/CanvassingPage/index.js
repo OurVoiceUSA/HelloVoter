@@ -652,7 +652,7 @@ export default class App extends PureComponent {
         ||
         <MapView
           ref={component => this.map = component}
-          initialRegion={{latitude: myPosition.latitude, longitude: myPosition.longitude, latitudeDelta: 0.05, longitudeDelta: 0.005}}
+          initialRegion={{latitude: myPosition.latitude, longitude: myPosition.longitude, latitudeDelta: 0.005, longitudeDelta: 0.005}}
           provider={PROVIDER_GOOGLE}
           style={styles.map}
           showsUserLocation={true}
