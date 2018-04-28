@@ -28,7 +28,7 @@ export default class App extends PureComponent {
 
     return (
       <View style={{flexDirection: 'column'}}>
-        <View style={{width: 262, height: 260, backgroundColor: 'white', marginTop: 15, borderRadius: 15, padding: 25, alignSelf: 'flex-start'}}>
+        <View style={{width: 280, height: 350, backgroundColor: 'white', marginTop: 15, borderRadius: 15, padding: 25, alignSelf: 'flex-start'}}>
           <Text style={{color: 'blue', fontWeight: 'bold', fontSize: 20}}>Are they home?</Text>
           <View>
 
@@ -84,7 +84,8 @@ export default class App extends PureComponent {
               </Icon.Button>
             </View>
 
-            <View style={{margin: 5, flexDirection: 'row'}}>
+            {refer.state.currentNode.type === "address" &&
+            <View style={{margin: 5, marginTop: 50, flexDirection: 'row'}}>
               <Icon.Button
                 name="building"
                 backgroundColor="#d7d7d7"
@@ -92,17 +93,15 @@ export default class App extends PureComponent {
                 onPress={() => {
                   refer.setState({ isKnockMenuVisible: false });
                   funcs.updateNodeById(refer.state.currentNode.id, refer.state.myNodes, 'multi_unit', true);
+                  funcs.doMarkerPress(refer.state.currentNode);
                 }}
                 {...iconStyles}>
-                Update Address Info
+                Update to multi-unit
               </Icon.Button>
             </View>
+            }
 
           </View>
-
-          <TouchableOpacity onPress={() => refer.setState({ isKnockMenuVisible: false })}>
-            <Text style={{fontWeight: 'bold', color: 'blue'}}>Cancel</Text>
-          </TouchableOpacity>
 
         </View>
       </View>

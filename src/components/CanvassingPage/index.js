@@ -426,6 +426,7 @@ export default class App extends PureComponent {
       let node = store.nodes[i];
       if (node.id === id) {
         node[prop] = value;
+        this._saveNodes(store, true);
       }
     }
   }
@@ -767,7 +768,7 @@ export default class App extends PureComponent {
 
         <Modal
           open={this.state.isKnockMenuVisible}
-          modalStyle={{width: 335, height: 280, backgroundColor: "transparent",
+          modalStyle={{width: 335, height: 350, backgroundColor: "transparent",
             position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
           style={{alignItems: 'center'}}
           offset={0}

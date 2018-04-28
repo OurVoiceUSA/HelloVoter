@@ -60,6 +60,8 @@ export default class App extends PureComponent {
   render() {
     const { refer } = this.state;
 
+    let childNodes = refer.getChildNodesById(this.state.node.id, this.state.myNodes).sort(refer.dynamicSort('unit'));
+
     return (
       <ScrollView style={{flex: 1, backgroundColor: 'white'}} contentContainerStyle={{flexGrow:1}}>
         <View>
@@ -76,9 +78,27 @@ export default class App extends PureComponent {
             Add new unit/apt number
           </Icon.Button>
 
+          {childNodes.length === 0 &&
+          <View>
+            <View style={{margin: 10}} />
+            <Icon.Button
+              name="minus-circle"
+              backgroundColor="#d7d7d7"
+              color="#000000"
+              onPress={() => {
+                refer.updateNodeById(this.state.node.id, refer.state.myNodes, 'multi_unit', false);
+                refer.forceUpdate();
+                this.props.navigation.goBack();
+              }}
+              {...iconStyles}>
+              Update to single-unit address
+            </Icon.Button>
+          </View>
+          }
+
           <FlatList
             scrollEnabled={false}
-            data={refer.getChildNodesById(this.state.node.id, this.state.myNodes).sort(refer.dynamicSort('unit'))}
+            data={childNodes}
             keyExtractor={(item) => item.id}
             renderItem={({item}) => {
               let color = refer.getPinColor(item);
