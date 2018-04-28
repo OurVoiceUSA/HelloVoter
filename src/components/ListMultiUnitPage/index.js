@@ -81,21 +81,10 @@ export default class App extends PureComponent {
             data={refer.getChildNodesById(this.state.node.id, this.state.myNodes)}
             keyExtractor={(item) => item.id}
             renderItem={({item}) => {
-              let nodes = refer.getChildNodesById(item.id, this.state.myNodes);
               let color = refer.getPinColor(item);
-
               let icon = (color === "red" ? "ban" : "address-book");
 
-              let info = {};
-
-              if (nodes.length)  {
-                let last = nodes[nodes.length-1];
-                if (last.survey) {
-                  info.FullName = last.survey.FullName;
-                  info.PartyAffiliation = last.survey.PartyAffiliation;
-                }
-                info.LastVisted = last.created;
-              };
+              let info = refer.getLatestSurvey(item.id);
 
               return (
                 <View key={item.id} style={{padding: 10}}>

@@ -24,11 +24,15 @@ export default class App extends PureComponent {
     const { refer, funcs } = this.state;
     const { navigate } = refer.props.navigation;
 
+    let info = funcs.getLatestSurvey(refer.state.objectId);
+
     return (
       <View style={{flexDirection: 'column'}}>
         <View style={{width: 262, height: 260, backgroundColor: 'white', marginTop: 15, borderRadius: 15, padding: 25, alignSelf: 'flex-start'}}>
           <Text style={{color: 'blue', fontWeight: 'bold', fontSize: 20}}>Are they home?</Text>
           <View>
+
+            <Text>{JSON.stringify(info)}</Text>
 
             <View style={{margin: 5, flexDirection: 'row'}}>
               <Icon.Button

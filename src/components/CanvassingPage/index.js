@@ -228,6 +228,22 @@ export default class App extends PureComponent {
     return node;
   }
 
+  getLatestSurvey(id) {
+    let nodes = this.getChildNodesById(id, this.state.myNodes);
+    let info = {};
+
+    if (nodes.length)  {
+      let last = nodes[nodes.length-1];
+      if (last.survey) {
+        info.FullName = last.survey.FullName;
+        info.PartyAffiliation = last.survey.PartyAffiliation;
+      }
+      info.LastVisted = last.created;
+    };
+
+    return info;
+  }
+
   LoadDisclosure = async () => {
     try {
       const value = await storage.get(this.state.DisclosureKey);
