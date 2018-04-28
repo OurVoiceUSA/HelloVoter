@@ -84,6 +84,20 @@ export default class App extends PureComponent {
               </Icon.Button>
             </View>
 
+            <View style={{margin: 5, flexDirection: 'row'}}>
+              <Icon.Button
+                name="building"
+                backgroundColor="#d7d7d7"
+                color="#000000"
+                onPress={() => {
+                  refer.setState({ isKnockMenuVisible: false });
+                  funcs.updateNodeById(refer.state.objectId, refer.state.myNodes, 'multi_unit', true);
+                }}
+                {...iconStyles}>
+                Update Address Info
+              </Icon.Button>
+            </View>
+
           </View>
 
           <TouchableOpacity onPress={() => refer.setState({ isKnockMenuVisible: false })}>

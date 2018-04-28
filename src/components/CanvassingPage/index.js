@@ -421,6 +421,15 @@ export default class App extends PureComponent {
     return {};
   }
 
+  updateNodeById(id, store, prop, value) {
+    for (let i in store.nodes) {
+      let node = store.nodes[i];
+      if (node.id === id) {
+        node[prop] = value;
+      }
+    }
+  }
+
   getChildNodesById(id, store) {
     let nodes = [];
     for (let i in store.nodes) {
