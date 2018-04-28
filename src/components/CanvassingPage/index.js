@@ -34,8 +34,11 @@ import { _doGeocode } from '../../common';
 import DropboxSharePage from '../DropboxSharePage';
 import KnockPage from '../KnockPage';
 import Modal from 'react-native-simple-modal';
-
+import TimeAgo from 'javascript-time-ago'
+import en from 'javascript-time-ago/locale/en'
 import t from 'tcomb-form-native';
+
+TimeAgo.locale(en);
 
 var Form = t.form.Form;
 
@@ -231,6 +234,7 @@ export default class App extends PureComponent {
   getLatestSurvey(id) {
     let nodes = this.getChildNodesById(id, this.state.myNodes);
     let info = {};
+    const timeAgo = new TimeAgo('en-US')
 
     if (nodes.length)  {
       let last = nodes[nodes.length-1];
@@ -238,7 +242,7 @@ export default class App extends PureComponent {
         info.FullName = last.survey.FullName;
         info.PartyAffiliation = last.survey.PartyAffiliation;
       }
-      info.LastVisted = last.created;
+      info.LastVisted = timeAgo.format(new Date(last.created*1000));
     };
 
     return info;

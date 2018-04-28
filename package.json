@@ -9,6 +9,7 @@
 	"dependencies": {
 		"dropbox": "^3.0.4",
 		"encoding": "^0.1.12",
+		"javascript-time-ago": "^1.0.30",
 		"jwt-decode": "^2.2.0",
 		"react": "^16.2.0",
 		"react-native": "^0.53.3",
