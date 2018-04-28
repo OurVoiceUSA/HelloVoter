@@ -78,7 +78,7 @@ export default class App extends PureComponent {
 
           <FlatList
             scrollEnabled={false}
-            data={refer.getChildNodesById(this.state.node.id, this.state.myNodes)}
+            data={refer.getChildNodesById(this.state.node.id, this.state.myNodes).sort(refer.dynamicSort('unit'))}
             keyExtractor={(item) => item.id}
             renderItem={({item}) => {
               let color = refer.getPinColor(item);
