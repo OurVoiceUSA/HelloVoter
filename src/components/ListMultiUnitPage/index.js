@@ -12,6 +12,7 @@ import {
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Modal from 'react-native-simple-modal';
+import KnockPage from '../KnockPage';
 
 export default class App extends PureComponent {
 
@@ -21,6 +22,7 @@ export default class App extends PureComponent {
       refer: props.navigation.state.params.refer,
       node: props.navigation.state.params.node,
       myNodes: props.navigation.state.params.refer.state.myNodes,
+      isKnockMenuVisible: false,
     };
   }
 
@@ -58,8 +60,7 @@ export default class App extends PureComponent {
                   <TouchableOpacity
                     style={{flexDirection: 'row', alignItems: 'center'}}
                     onPress={() => {
-                      //this.setState({ isKnockMenuVisible: false });
-                      navigate('Survey', {refer: refer, myNodes: this.state.myNodes, form: refer.state.form});
+                      this.setState({ isKnockMenuVisible: true });
                     }}>
                     <Icon name={icon} size={40} color={color} style={{margin: 5}} />
                     <Text>Unit: {item.unit}, {JSON.stringify(info)}</Text>
@@ -69,6 +70,23 @@ export default class App extends PureComponent {
             }}
           />
         </View>
+
+        <Modal
+          open={this.state.isKnockMenuVisible}
+          modalStyle={{width: 335, height: 280, backgroundColor: "transparent",
+            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
+          style={{alignItems: 'center'}}
+          offset={0}
+          overlayBackground={'rgba(0, 0, 0, 0.75)'}
+          animationDuration={200}
+          animationTension={40}
+          modalDidOpen={() => undefined}
+          modalDidClose={() => this.setState({isKnockMenuVisible: false})}
+          closeOnTouchOutside={true}
+          disableOnBackPress={false}>
+          <KnockPage refer={this} />
+        </Modal>
+
       </ScrollView>
      );
    }

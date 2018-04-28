@@ -31,6 +31,7 @@ import encoding from 'encoding';
 import { transliterate as tr } from 'transliteration/src/main/browser';
 import { _doGeocode } from '../../common';
 import DropboxSharePage from '../DropboxSharePage';
+import KnockPage from '../KnockPage';
 import Modal from 'react-native-simple-modal';
 
 export default class App extends PureComponent {
@@ -751,69 +752,7 @@ export default class App extends PureComponent {
           modalDidClose={() => this.setState({isKnockMenuVisible: false})}
           closeOnTouchOutside={true}
           disableOnBackPress={false}>
-          <View style={{flexDirection: 'column'}}>
-            <View style={{width: 262, height: 260, backgroundColor: 'white', marginTop: 15, borderRadius: 15, padding: 25, alignSelf: 'flex-start'}}>
-              <Text style={{color: 'blue', fontWeight: 'bold', fontSize: 20}}>Are they home?</Text>
-              <View>
-
-                <View style={{margin: 5, flexDirection: 'row'}}>
-                  <Icon.Button
-                    name="check-circle"
-                    backgroundColor="#d7d7d7"
-                    color="#000000"
-                    onPress={() => {
-                      this.setState({ isKnockMenuVisible: false });
-                      navigate('Survey', {refer: this, myNodes: myNodes, form: form});
-                    }}
-                    {...iconStyles}>
-                    Take Survey
-                  </Icon.Button>
-                </View>
-
-                <View style={{margin: 5, flexDirection: 'row'}}>
-                  <Icon.Button
-                    name="circle-o"
-                    backgroundColor="#d7d7d7"
-                    color="#000000"
-                    onPress={() => {
-                      this._addNode({
-                        type: "survey",
-                        parent_id: this.state.objectId,
-                        status: 'not home',
-                      });
-                      this.setState({ isKnockMenuVisible: false })
-                    }}
-                    {...iconStyles}>
-                    Not Home
-                  </Icon.Button>
-                </View>
-
-                <View style={{margin: 5, flexDirection: 'row'}}>
-                  <Icon.Button
-                    name="ban"
-                    backgroundColor="#d7d7d7"
-                    color="#000000"
-                    onPress={() => {
-                      this._addNode({
-                        type: "survey",
-                        parent_id: this.state.objectId,
-                        status: 'not interested',
-                      });
-                      this.setState({ isKnockMenuVisible: false });
-                    }}
-                    {...iconStyles}>
-                    Not Interested
-                  </Icon.Button>
-                </View>
-
-              </View>
-
-              <TouchableOpacity onPress={() => this.setState({ isKnockMenuVisible: false })}>
-                <Text style={{fontWeight: 'bold', color: 'blue'}}>Cancel</Text>
-              </TouchableOpacity>
-
-            </View>
-          </View>
+          <KnockPage refer={this} />
         </Modal>
 
         <Modal
