@@ -53,8 +53,8 @@ export default class App extends PureComponent {
 
     funcs._addNode({
       type: "survey",
-      id: sha1(epoch+JSON.stringify(json)+refer.state.objectId),
-      parent_id: refer.state.objectId,
+      id: sha1(epoch+JSON.stringify(json)+refer.state.currentNode.id),
+      parent_id: refer.state.currentNode.id,
       status: 'home',
       survey: json,
     });

@@ -24,7 +24,7 @@ export default class App extends PureComponent {
     const { refer, funcs } = this.state;
     const { navigate } = refer.props.navigation;
 
-    let info = funcs.getLatestSurvey(refer.state.objectId);
+    let info = funcs.getLatestSurvey(refer.state.currentNode.id);
 
     return (
       <View style={{flexDirection: 'column'}}>
@@ -56,7 +56,7 @@ export default class App extends PureComponent {
                 onPress={() => {
                   funcs._addNode({
                     type: "survey",
-                    parent_id: refer.state.objectId,
+                    parent_id: refer.state.currentNode.id,
                     status: 'not home',
                   });
                   refer.setState({ isKnockMenuVisible: false })
@@ -74,7 +74,7 @@ export default class App extends PureComponent {
                 onPress={() => {
                   funcs._addNode({
                     type: "survey",
-                    parent_id: refer.state.objectId,
+                    parent_id: refer.state.currentNode.id,
                     status: 'not interested',
                   });
                   refer.setState({ isKnockMenuVisible: false });
@@ -91,7 +91,7 @@ export default class App extends PureComponent {
                 color="#000000"
                 onPress={() => {
                   refer.setState({ isKnockMenuVisible: false });
-                  funcs.updateNodeById(refer.state.objectId, refer.state.myNodes, 'multi_unit', true);
+                  funcs.updateNodeById(refer.state.currentNode.id, refer.state.myNodes, 'multi_unit', true);
                 }}
                 {...iconStyles}>
                 Update Address Info

@@ -91,7 +91,7 @@ export default class App extends PureComponent {
                   <TouchableOpacity
                     style={{flexDirection: 'row', alignItems: 'center'}}
                     onPress={() => {
-                      this.setState({ isKnockMenuVisible: true, objectId: item.id });
+                      this.setState({ isKnockMenuVisible: true, currentNode: item });
                     }}>
                     <Icon name={icon} size={40} color={color} style={{margin: 5}} />
                     <Text>Unit: {item.unit}, {JSON.stringify(info)}</Text>

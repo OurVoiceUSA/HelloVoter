@@ -62,7 +62,7 @@ export default class App extends PureComponent {
       serviceError: null,
       locationAccess: null,
       myPosition: {latitude: null, longitude: null},
-      objectId: null,
+      currentNode: null,
       fAddress: {},
       myNodes: { nodes: [], last_synced: 0 },
       asyncStorageKey: 'OV_CANVASS_PINS@'+props.navigation.state.params.form.id,
@@ -208,7 +208,7 @@ export default class App extends PureComponent {
     if (node.multi_unit === true)
       navigate('ListMultiUnit', {refer: this, node: node});
     else
-      this.setState({isKnockMenuVisible: true, objectId: node.id});
+      this.setState({isKnockMenuVisible: true, currentNode: node});
   }
 
   _addNode(node) {
@@ -217,7 +217,7 @@ export default class App extends PureComponent {
 
     node.created = epoch;
     node.updated = epoch;
-    if (!node.id) node.id = sha1(epoch+JSON.stringify(node)+this.state.objectId);
+    if (!node.id) node.id = sha1(epoch+JSON.stringify(node)+this.state.currentNode.id);
 
     // chech for duplicate address pins
     let check = this.getNodeById(node.id, myNodes);
