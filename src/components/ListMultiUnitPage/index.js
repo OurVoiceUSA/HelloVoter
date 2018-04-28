@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
+import sha1 from 'sha1';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Modal from 'react-native-simple-modal';
 import KnockPage from '../KnockPage';
@@ -38,13 +39,21 @@ export default class App extends PureComponent {
   }
 
   addUnit = async () => {
-    let { dbx, form } = this.state;
+    let { refer, form, node } = this.state;
 
     let json = this.refs.mainForm.getValue();
     if (json == null) return;
 
-    console.warn(JSON.stringify(json));
+    let unit = {
+      type: "unit",
+      id: sha1(node.id+json.unit),
+      parent_id: node.id,
+      unit: json.unit,
+    };
 
+    // TODO: check for duplicates
+
+    refer._addNode(unit);
     this.setState({newUnitModalVisible: false});
   }
 
