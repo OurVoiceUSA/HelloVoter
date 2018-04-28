@@ -64,6 +64,18 @@ export default class App extends PureComponent {
       <ScrollView style={{flex: 1, backgroundColor: 'white'}} contentContainerStyle={{flexGrow:1}}>
         <View>
           <Text style={{fontSize: 20, padding: 10}}>{this.state.node.address.join(", ")}</Text>
+
+          <Icon.Button
+            name="plus-circle"
+            backgroundColor="#d7d7d7"
+            color="#000000"
+            onPress={() => {
+              this.setState({ newUnitModalVisible: true });
+            }}
+            {...iconStyles}>
+            Add new unit/apt number
+          </Icon.Button>
+
           <FlatList
             scrollEnabled={false}
             data={refer.getChildNodesById(this.state.node.id, this.state.myNodes)}
@@ -99,17 +111,6 @@ export default class App extends PureComponent {
               );
             }}
           />
-
-          <Icon.Button
-            name="plus-circle"
-            backgroundColor="#d7d7d7"
-            color="#000000"
-            onPress={() => {
-              this.setState({ newUnitModalVisible: true });
-            }}
-            {...iconStyles}>
-            Add new unit/apt number
-          </Icon.Button>
 
         </View>
 
