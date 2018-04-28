@@ -7,12 +7,21 @@ import {
   View,
   FlatList,
   Dimensions,
+  TouchableHighlight,
   TouchableOpacity,
 } from 'react-native';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Modal from 'react-native-simple-modal';
 import KnockPage from '../KnockPage';
+
+import t from 'tcomb-form-native';
+
+var Form = t.form.Form;
+
+var mainForm = t.struct({
+  'unit': t.String,
+});
 
 export default class App extends PureComponent {
 
@@ -24,7 +33,19 @@ export default class App extends PureComponent {
       myNodes: props.navigation.state.params.refer.state.myNodes,
       form: props.navigation.state.params.refer.state.form,
       isKnockMenuVisible: false,
+      newUnitModalVisible: false,
     };
+  }
+
+  addUnit = async () => {
+    let { dbx, form } = this.state;
+
+    let json = this.refs.mainForm.getValue();
+    if (json == null) return;
+
+    console.warn(JSON.stringify(json));
+
+    this.setState({newUnitModalVisible: false});
   }
 
   render() {
@@ -69,6 +90,18 @@ export default class App extends PureComponent {
               );
             }}
           />
+
+          <Icon.Button
+            name="plus-circle"
+            backgroundColor="#d7d7d7"
+            color="#000000"
+            onPress={() => {
+              this.setState({ newUnitModalVisible: true });
+            }}
+            {...iconStyles}>
+            Add new unit/apt number
+          </Icon.Button>
+
         </View>
 
         <Modal
@@ -87,6 +120,36 @@ export default class App extends PureComponent {
           <KnockPage refer={this} funcs={refer} />
         </Modal>
 
+        <Modal
+          open={this.state.newUnitModalVisible}
+          modalStyle={{width: 335, height: 250, backgroundColor: "transparent",
+            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
+          style={{alignItems: 'center'}}
+          offset={0}
+          overlayBackground={'rgba(0, 0, 0, 0.75)'}
+          animationDuration={200}
+          animationTension={40}
+          modalDidOpen={() => undefined}
+          modalDidClose={() => this.setState({newUnitModalVisible: false})}
+          closeOnTouchOutside={true}
+          disableOnBackPress={false}>
+          <View style={styles.container}>
+            <View>
+              <View style={{flex: 1, flexDirection: 'row', margin: 20, alignItems: 'center'}}>
+                <Text>Recording a new unit for this address:</Text>
+              </View>
+
+              <Form
+                ref="mainForm"
+               type={mainForm}
+              />
+              <TouchableHighlight style={styles.button} onPress={this.addUnit} underlayColor='#99d9f4'>
+                <Text style={styles.buttonText}>Add</Text>
+              </TouchableHighlight>
+            </View>
+          </View>
+        </Modal>
+
       </ScrollView>
      );
    }
@@ -102,6 +165,21 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFF',
+  },
+  buttonText: {
+    fontSize: 18,
+    color: 'white',
+    alignSelf: 'center'
+  },
+  button: {
+    height: 36,
+    backgroundColor: '#48BBEC',
+    borderColor: '#48BBEC',
+    borderWidth: 1,
+    borderRadius: 8,
+    marginBottom: 10,
+    alignSelf: 'stretch',
+    justifyContent: 'center'
   },
   content: {
     flex: 1,
