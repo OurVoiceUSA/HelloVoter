@@ -628,7 +628,7 @@ export default class App extends PureComponent {
                   this._saveNodes(myNodes, true);
                 }}
                 pinColor={this.getPinColor(marker)}
-                description={(marker.multi_unit?"Multi-unit address.  "+this.getChildNodesById(marker.id, myNodes).length:"Single unit address")}
+                description={(marker.multi_unit?"Multi-unit address":"Single unit address")}
                 onCalloutPress={() => {this.doMarkerPress(marker);}}
                 />
             ))
