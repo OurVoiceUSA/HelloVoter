@@ -22,13 +22,13 @@ export default class App extends PureComponent {
       refer: props.navigation.state.params.refer,
       node: props.navigation.state.params.node,
       myNodes: props.navigation.state.params.refer.state.myNodes,
+      form: props.navigation.state.params.refer.state.form,
       isKnockMenuVisible: false,
     };
   }
 
   render() {
     const { refer } = this.state;
-    const { navigate } = this.props.navigation;
 
     return (
       <ScrollView style={{flex: 1, backgroundColor: 'white'}} contentContainerStyle={{flexGrow:1}}>
@@ -60,7 +60,7 @@ export default class App extends PureComponent {
                   <TouchableOpacity
                     style={{flexDirection: 'row', alignItems: 'center'}}
                     onPress={() => {
-                      this.setState({ isKnockMenuVisible: true });
+                      this.setState({ isKnockMenuVisible: true, objectId: item.id });
                     }}>
                     <Icon name={icon} size={40} color={color} style={{margin: 5}} />
                     <Text>Unit: {item.unit}, {JSON.stringify(info)}</Text>
@@ -84,7 +84,7 @@ export default class App extends PureComponent {
           modalDidClose={() => this.setState({isKnockMenuVisible: false})}
           closeOnTouchOutside={true}
           disableOnBackPress={false}>
-          <KnockPage refer={this} />
+          <KnockPage refer={this} funcs={refer} />
         </Modal>
 
       </ScrollView>

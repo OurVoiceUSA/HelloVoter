@@ -752,7 +752,7 @@ export default class App extends PureComponent {
           modalDidClose={() => this.setState({isKnockMenuVisible: false})}
           closeOnTouchOutside={true}
           disableOnBackPress={false}>
-          <KnockPage refer={this} />
+          <KnockPage refer={this} funcs={this} />
         </Modal>
 
         <Modal

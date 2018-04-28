@@ -16,11 +16,12 @@ export default class App extends PureComponent {
     super(props);
     this.state = {
       refer: this.props.refer,
+      funcs: this.props.funcs,
     };
   }
 
   render() {
-    const { refer } = this.state;
+    const { refer, funcs } = this.state;
     const { navigate } = refer.props.navigation;
 
     return (
@@ -36,7 +37,7 @@ export default class App extends PureComponent {
                 color="#000000"
                 onPress={() => {
                   refer.setState({ isKnockMenuVisible: false });
-                  navigate('Survey', {refer: refer, myNodes: refer.state.myNodes, form: refer.state.form});
+                  navigate('Survey', {refer: refer, funcs: funcs, myNodes: refer.state.myNodes});
                 }}
                 {...iconStyles}>
                 Take Survey
@@ -49,7 +50,7 @@ export default class App extends PureComponent {
                 backgroundColor="#d7d7d7"
                 color="#000000"
                 onPress={() => {
-                  refer._addNode({
+                  funcs._addNode({
                     type: "survey",
                     parent_id: refer.state.objectId,
                     status: 'not home',
@@ -67,7 +68,7 @@ export default class App extends PureComponent {
                 backgroundColor="#d7d7d7"
                 color="#000000"
                 onPress={() => {
-                  refer._addNode({
+                  funcs._addNode({
                     type: "survey",
                     parent_id: refer.state.objectId,
                     status: 'not interested',
@@ -81,7 +82,7 @@ export default class App extends PureComponent {
 
           </View>
 
-          <TouchableOpacity onPress={() => this.setState({ isKnockMenuVisible: false })}>
+          <TouchableOpacity onPress={() => refer.setState({ isKnockMenuVisible: false })}>
             <Text style={{fontWeight: 'bold', color: 'blue'}}>Cancel</Text>
           </TouchableOpacity>
 

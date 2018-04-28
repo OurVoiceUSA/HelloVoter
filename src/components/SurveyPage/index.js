@@ -37,20 +37,21 @@ export default class App extends PureComponent {
 
     this.state = {
       refer: state.params.refer,
-      form: state.params.form,
+      funcs: state.params.funcs,
+      form: state.params.refer.state.form,
     };
 
     this.doSave = this.doSave.bind(this);
   }
 
   doSave = async () => {
-    let { refer, form } = this.state;
+    let { refer, funcs, form } = this.state;
     let json = this.refs.form.getValue();
     if (json == null) return;
 
     let epoch = Math.floor(new Date().getTime() / 1000);
 
-    refer._addNode({
+    funcs._addNode({
       type: "survey",
       id: sha1(epoch+JSON.stringify(json)+refer.state.objectId),
       parent_id: refer.state.objectId,
@@ -58,6 +59,7 @@ export default class App extends PureComponent {
       survey: json,
     });
 
+    refer.forceUpdate();
     this.props.navigation.goBack();
   }
 
