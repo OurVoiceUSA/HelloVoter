@@ -283,6 +283,12 @@ export default class App extends PureComponent {
         // "city" started with a space... a bug
         pin.address[1] = pin.address[1].trim();
 
+        // ensure latlng aren't strings
+        if (pin.latlng) {
+          pin.latlng.longitude = parseFloat(pin.latlng.longitude);
+          pin.latlng.latitude = parseFloat(pin.latlng.latitude);
+        }
+
         let id = sha1(JSON.stringify(pin.address));
         let pid = id;
 
@@ -306,6 +312,8 @@ export default class App extends PureComponent {
           myNodes.nodes.push({
             type: "unit",
             id: id,
+            created: pin.id,
+            updated: pin.id,
             parent_id: pid,
             unit: unit[0],
           });
