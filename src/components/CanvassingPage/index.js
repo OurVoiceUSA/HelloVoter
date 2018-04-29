@@ -657,8 +657,21 @@ export default class App extends PureComponent {
     try {
       // turf
       await dbx.filesUpload({ path: form.folder_path+'/exported.jtrf', contents: encoding.convert(tr(JSON.stringify(allNodes)), 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
-      // TODO: copy exported.jtrf to all sub-folders, if configured in settings
-      // csv
+
+      // copy exported.jtrf to all sub-folders if configured in settings
+      if (this.state.canvassSettings.share_progress === true) {
+        try {
+          let res = await dbx.filesListFolder({path: form.folder_path});
+          for (let i in res.entries) {
+            item = res.entries[i];
+            if (item['.tag'] != 'folder') continue;
+            if (item.path_display.match(/@/))
+              await dbx.filesUpload({ path: item.path_display+'/exported.jtrf', contents: encoding.convert(tr(JSON.stringify(allNodes)), 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
+          }
+        } catch (e) {}
+      }
+
+      // csv file
       await dbx.filesUpload({ path: form.folder_path+'/'+form.name+'.csv', contents: encoding.convert(tr(csv), 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
       Alert.alert('Success', 'Data export successful! Check your dropbox account for the spreadsheet.', [{text: 'OK'}], { cancelable: false });
     } catch(error) {
@@ -792,7 +805,7 @@ export default class App extends PureComponent {
                 key={marker.id}
                 coordinate={marker.latlng}
                 title={marker.address.join(", ")}
-                draggable={this.state.canvassSettings.movable_pins}
+                draggable={this.state.canvassSettings.draggable_pins}
                 onDragEnd={(e) => {
                   this.updateNodeById(marker.id, 'latlng', e.nativeEvent.coordinate);
                 }}

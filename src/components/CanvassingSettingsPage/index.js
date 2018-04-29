@@ -14,10 +14,22 @@ import t from 'tcomb-form-native';
 
 var Form = t.form.Form;
 
-var mainForm = t.struct({
-  'show_only_my_turf': t.Boolean,
-  'movable_pins': t.Boolean,
-});
+var options = {
+  fields: {
+    draggable_pins: {
+      label: 'Pins can be moved',
+      help: 'Some devices GPS make address pins get dropped in the incorrect spot. Enabling this allows you to drag-and-drop pins.',
+    },
+    show_only_my_turf: {
+      label: 'Show only my turf',
+      help: 'If you don\'t want to see the progress of others with this form, enable this option.',
+    },
+    share_progress: {
+      label: 'Share progress',
+      help: 'When you export your form data, enabling this option will allow all your canvassers to see each other\'s progress on thier devices.',
+    },
+  },
+};
 
 export default class App extends PureComponent {
   constructor(props) {
@@ -35,6 +47,20 @@ export default class App extends PureComponent {
   }
 
   render() {
+    const { refer } = this.state;
+
+    let formOpt = {
+      'show_only_my_turf': t.Boolean,
+      'draggable_pins': t.Boolean,
+    };
+
+    // additional settings for the form owner
+    if (refer.state.user.dropbox.account_id === refer.state.form.author_id) {
+      formOpt['share_progress'] = t.Boolean;
+    }
+
+    let mainForm = t.struct(formOpt);
+
     return (
       <ScrollView style={{flex: 1, padding: 15, backgroundColor: 'white'}}>
 
@@ -47,8 +73,9 @@ export default class App extends PureComponent {
           <Form
            ref="mainForm"
            type={mainForm}
+           options={options}
            onChange={this.onChange}
-           value={this.state.refer.state.canvassSettings}
+           value={refer.state.canvassSettings}
           />
         </TouchableWithoutFeedback>
 
