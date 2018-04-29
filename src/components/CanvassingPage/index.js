@@ -624,6 +624,10 @@ export default class App extends PureComponent {
     }
 
     try {
+      // turf
+      await dbx.filesUpload({ path: form.folder_path+'/exported.jtrf', contents: encoding.convert(tr(JSON.stringify(allNodes)), 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
+      // TODO: copy exported.jtrf to all sub-folders, if configured in settings
+      // csv
       await dbx.filesUpload({ path: form.folder_path+'/'+form.name+'.csv', contents: encoding.convert(tr(csv), 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
       Alert.alert('Success', 'Data export successful! Check your dropbox account for the spreadsheet.', [{text: 'OK'}], { cancelable: false });
     } catch(error) {
@@ -631,8 +635,7 @@ export default class App extends PureComponent {
       Alert.alert('Error', 'Unable to export data to the server.', [{text: 'OK'}], { cancelable: false });
     }
 
-    this.setState({ exportRunning: false });
-
+    this.setState({ exportRunning: false, turfNodes: allNodes });
   }
 
   _canvassUrlHandler() {
