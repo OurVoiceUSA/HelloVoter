@@ -418,12 +418,15 @@ export default class App extends PureComponent {
     this.setState({syncRunning: false, myNodes: myNodes});
   }
 
-  getNodeById(id) {
+  mergeNodes() {
     let merged = {nodes: []};
-
     merged.nodes = this.state.myNodes.nodes.concat(this.state.turfNodes.nodes);
 
-    return this.getNodeByIdStore(id, merged);
+    return merged;
+  }
+
+  getNodeById(id) {
+    return this.getNodeByIdStore(id, this.mergeNodes());
   }
 
   getNodeByIdStore(id, store) {
@@ -443,10 +446,7 @@ export default class App extends PureComponent {
   }
 
   updateNodeById(id, prop, value) {
-    let store = this.state.myNodes;
-    let merged = {nodes: []};
-
-    merged.nodes = store.nodes.concat(this.state.turfNodes.nodes);
+    let merged = this.mergeNodes();
 
     for (let i in merged.nodes) {
       let node = merged.nodes[i];
@@ -466,11 +466,7 @@ export default class App extends PureComponent {
   }
 
   getNodesbyType(type) {
-    let store = this.state.myNodes;
-    let merged = {nodes: []};
-
-    merged.nodes = store.nodes.concat(this.state.turfNodes.nodes);
-
+    let merged = this.mergeNodes();
     let nodes = [];
     for (let i in merged.nodes) {
       let node = merged.nodes[i];
@@ -481,11 +477,7 @@ export default class App extends PureComponent {
   }
 
   getChildNodesByIdType(id, type) {
-    let store = this.state.myNodes;
-    let merged = {nodes: []};
-
-    merged.nodes = store.nodes.concat(this.state.turfNodes.nodes);
-
+    let merged = this.mergeNodes();
     let nodes = [];
     for (let i in merged.nodes) {
       let node = merged.nodes[i];
