@@ -489,6 +489,19 @@ export default class App extends PureComponent {
     return nodes;
   }
 
+  dedupeNodes(nodes) {
+    let idx = [];
+    let deDupe = [];
+    for (let i in nodes) {
+      let node = nodes[i];
+      if (idx.indexOf(node.id) === -1) {
+        idx.push(node.id);
+        deDupe.push(node);
+      }
+    }
+    return deDupe;
+  }
+
   dynamicSort(property) {
     var sortOrder = 1;
     if(property[0] === "-") {
@@ -693,9 +706,10 @@ export default class App extends PureComponent {
       );
     }
 
-    // toggle pin horizon based on how many we have, for now - TODO: make this a setting
-    let markers = this.getNodesbyType("address");
+    // reverse sort and de-dupe address pins
+    let markers = this.dedupeNodes(this.getNodesbyType("address").sort(this.dynamicSort('updated')).reverse());
 
+    // toggle pin horizon based on how many we have, for now - TODO: make this a setting
     if (markers.length > 300) {
       markersInView = [];
 
