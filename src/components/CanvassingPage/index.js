@@ -693,7 +693,7 @@ export default class App extends PureComponent {
           }
         </MapView>
         }
-          <View style={{ alignSelf: 'flex-end' }}>
+          <View style={{alignSelf: 'flex-end', alignItems: 'flex-end', marginRight: 5}}>
             {user.dropbox.account_id == form.author_id &&
             <View style={{marginBottom: 10}}>
               <Icon name="share-square" size={50} color="#808080" style={{marginBottom: 10}} onPress={() => this.setState({DropboxShareScreen: true})} />
@@ -714,8 +714,12 @@ export default class App extends PureComponent {
               </View>
             }
             {nomap_content.length == 0 &&
-            <Icon name="compass" size={50} color="#0084b4" onPress={() => this.map.animateToCoordinate(myPosition, 1000)} />
+            <Icon name="compass" style={{marginBottom: 10}} size={50} color="#0084b4" onPress={() => this.map.animateToCoordinate(myPosition, 1000)} />
             }
+            <Icon name="cog" style={{marginBottom: 10}} size={50} color="#808080" onPress={() => console.warn("woot")} />
+            <View style={{backgroundColor: '#FFFFFF', width: 75, height: 75}}>
+              <Text>Infobox</Text>
+            </View>
           </View>
         <View style={styles.buttonContainer}>
           <Icon.Button
