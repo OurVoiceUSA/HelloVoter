@@ -193,7 +193,7 @@ export default class App extends PureComponent {
     } catch (error) {}
 
     let epoch = this.getEpoch();
-    let address = [json.street, json.city, json.state, json.zip];
+    let address = [json.street.trim(), json.city.trim(), json.state.trim(), json.zip.trim()];
     let node = {
       type: "address",
       id: sha1(JSON.stringify(address)),
