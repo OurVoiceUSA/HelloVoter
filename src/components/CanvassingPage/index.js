@@ -362,20 +362,26 @@ export default class App extends PureComponent {
           let data = await dbx.filesDownload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtxt' });
           let myNodes = this._nodesFromJSON(data.fileBinary);
           this.setState({ myNodes });
-          this._saveNodes(myNodes, true);
+          await this._saveNodes(myNodes, true);
         } catch (error) {}
       }
 
-      // look on dropbox for turf
-      try {
-        let data = await dbx.filesDownload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtrf' });
-        let turfNodes = this._nodesFromJSON(data.fileBinary);
-        this.setState({ turfNodes: turfNodes });
-      } catch (error) {}
+      await this.syncTurf();
 
     } catch (error) {
       console.warn(error);
     }
+  }
+
+  syncTurf = async () => {
+    const { form, dbx } = this.state;
+
+    // look on dropbox for turf
+    try {
+      let data = await dbx.filesDownload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtrf' });
+      let turfNodes = this._nodesFromJSON(data.fileBinary);
+      this.setState({ turfNodes: turfNodes });
+    } catch (error) {}
   }
 
   timeFormat(epoch) {
@@ -409,7 +415,8 @@ export default class App extends PureComponent {
     try {
       let str = JSON.stringify(myNodes);
       await dbx.filesUpload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtxt', contents: encoding.convert(tr(str), 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
-      this._saveNodes(myNodes, false);
+      await this._saveNodes(myNodes, false);
+      await this.syncTurf();
       Alert.alert('Success', 'Data sync successful!', [{text: 'OK'}], { cancelable: false });
     } catch (error) {
       if (flag) Alert.alert('Error', 'Unable to sync with the server.', [{text: 'OK'}], { cancelable: false });
