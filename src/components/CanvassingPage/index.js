@@ -445,21 +445,22 @@ export default class App extends PureComponent {
     return {};
   }
 
-  updateNodeById(id, prop, value) {
+  updateNodeById = async (id, prop, value) => {
     let merged = this.mergeNodes();
 
     for (let i in merged.nodes) {
       let node = merged.nodes[i];
       if (node.id === id) {
+        node[prop] = value;
+        node.updated = this.getEpoch();
+
         // check if this ID is in the myNodes stora
-        let check = this.getNodeByIdStore(node.id, store);
+        let check = this.getNodeByIdStore(node.id, this.state.myNodes);
 
         if (!check.id) {
-          this._addNode(node);
+          await this._addNode(node);
         } else {
-          node[prop] = value;
-          node.updated = this.getEpoch();
-          this._saveNodes(store, true);
+          await this._saveNodes(this.state.myNodes, true);
         }
       }
     }
