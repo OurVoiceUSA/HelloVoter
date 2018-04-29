@@ -68,6 +68,8 @@ export default class App extends PureComponent {
       myNodes: { nodes: [], last_synced: 0 },
       turfNodes: { nodes: [] },
       asyncStorageKey: 'OV_CANVASS_PINS@'+props.navigation.state.params.form.id,
+      settingsStorageKey: 'OV_CANVASS_SETTINGS',
+      canvassSettings: {},
       DisclosureKey : 'OV_DISCLOUSER',
       isModalVisible: false,
       isKnockMenuVisible: false,
@@ -123,6 +125,7 @@ export default class App extends PureComponent {
   componentDidMount() {
     this.requestLocationPermission();
     this._getNodesAsyncStorage();
+    this._getCanvassSettings();
   this.LoadDisclosure(); //Updates showDisclosure state if the user previously accepted
   }
 
@@ -371,6 +374,23 @@ export default class App extends PureComponent {
     } catch (error) {
       console.warn(error);
     }
+  }
+
+  _getCanvassSettings = async () => {
+    try {
+      const value = await storage.get(this.state.settingsStorageKey);
+      if (value !== null) {
+        this.setState({ canvassSettings: JSON.parse(value) });
+      }
+    } catch (e) {}
+  }
+
+  _setCanvassSettings = async (canvassSettings) => {
+    try {
+      let str = JSON.stringify(canvassSettings);
+      await storage.set(this.state.settingsStorageKey, str);
+      this.setState({canvassSettings});
+    } catch (e) {}
   }
 
   syncTurf = async () => {

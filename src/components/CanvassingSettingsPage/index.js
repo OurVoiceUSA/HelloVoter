@@ -15,7 +15,7 @@ import t from 'tcomb-form-native';
 var Form = t.form.Form;
 
 var mainForm = t.struct({
-  'show_all_pins': t.Boolean,
+  'show_only_my_turf': t.Boolean,
   'movable_pins': t.Boolean,
 });
 
@@ -27,23 +27,14 @@ export default class App extends PureComponent {
       refer: props.navigation.state.params.refer,
     };
 
-    this.doSave = this.doSave.bind(this);
+    this.onChange = this.onChange.bind(this);
   }
 
-  doSave = async () => {
-    let { refer } = this.state;
-    let json = this.refs.form.getValue();
-    if (json == null) return;
-
-    let epoch = Math.floor(new Date().getTime() / 1000);
-
-    refer.forceUpdate();
-    this.props.navigation.goBack();
+  onChange(canvassSettings) {
+    this.state.refer._setCanvassSettings(canvassSettings);
   }
 
   render() {
-    const { refer } = this.state;
-
     return (
       <ScrollView style={{flex: 1, padding: 15, backgroundColor: 'white'}}>
 
@@ -56,12 +47,10 @@ export default class App extends PureComponent {
           <Form
            ref="mainForm"
            type={mainForm}
+           onChange={this.onChange}
+           value={this.state.refer.state.canvassSettings}
           />
         </TouchableWithoutFeedback>
-
-        <TouchableHighlight style={styles.button} onPress={this.doSave} underlayColor='#99d9f4'>
-          <Text style={styles.buttonText}>Save</Text>
-        </TouchableHighlight>
 
       </ScrollView>
     );
