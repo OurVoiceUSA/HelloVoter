@@ -743,9 +743,7 @@ export default class App extends PureComponent {
                 title={marker.address.join(", ")}
                 draggable
                 onDragEnd={(e) => {
-                  marker.latlng = e.nativeEvent.coordinate;
-                  marker.updated = this.getEpoch();
-                  this._saveNodes(myNodes, true);
+                  this.updateNodeById(marker.id, 'latlng', e.nativeEvent.coordinate);
                 }}
                 pinColor={this.getPinColor(marker)}
                 description={(marker.multi_unit?"Multi-unit address":"Single unit address")}
