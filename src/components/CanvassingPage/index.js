@@ -62,6 +62,7 @@ export default class App extends PureComponent {
       serviceError: null,
       locationAccess: null,
       myPosition: {latitude: null, longitude: null},
+      region: {latitudeDelta: 0.004, longitudeDelta: 0.004},
       currentNode: null,
       fAddress: {},
       myNodes: { nodes: [], last_synced: 0 },
@@ -630,7 +631,7 @@ export default class App extends PureComponent {
     const { navigate } = this.props.navigation;
     const {
       showDisclosure, myPosition, myNodes, locationAccess, serviceError, form, user,
-      fAddress, loading, dbx, DropboxShareScreen, exportRunning, syncRunning,
+      fAddress, loading, dbx, DropboxShareScreen, exportRunning, syncRunning, region,
     } = this.state;
 
     if (showDisclosure === "true") {
@@ -709,18 +710,14 @@ export default class App extends PureComponent {
     // reverse sort and de-dupe address pins
     let markers = this.dedupeNodes(this.getNodesbyType("address").sort(this.dynamicSort('updated')).reverse());
 
-    // toggle pin horizon based on how many we have, for now - TODO: make this a setting
-    if (markers.length > 300) {
-      markersInView = [];
+    // toggle pin horizon based on zoom level
+    let markersInView = [];
 
-      for (let m in markers) {
-        let marker = markers[m];
-        if (marker.latlng && marker.latlng.longitude !== null &&
-          Math.hypot(myPosition.longitude-marker.latlng.longitude, myPosition.latitude-marker.latlng.latitude) < 0.025)
-          markersInView.push(marker);
-      }
-    } else {
-      markersInView = markers;
+    for (let m in markers) {
+      let marker = markers[m];
+      if (marker.latlng && marker.latlng.longitude !== null &&
+        Math.hypot(region.longitude-marker.latlng.longitude, region.latitude-marker.latlng.latitude) < region.longitudeDelta/2)
+        markersInView.push(marker);
     }
 
     return (
@@ -733,7 +730,10 @@ export default class App extends PureComponent {
         ||
         <MapView
           ref={component => this.map = component}
-          initialRegion={{latitude: myPosition.latitude, longitude: myPosition.longitude, latitudeDelta: 0.004, longitudeDelta: 0.004}}
+          initialRegion={{latitude: myPosition.latitude, longitude: myPosition.longitude, latitudeDelta: region.latitudeDelta, longitudeDelta: region.longitudeDelta}}
+          onRegionChangeComplete={(region) => {
+            this.setState({region});
+          }}
           provider={PROVIDER_GOOGLE}
           style={styles.map}
           showsUserLocation={true}
