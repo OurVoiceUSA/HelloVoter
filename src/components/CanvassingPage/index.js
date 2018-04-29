@@ -737,7 +737,7 @@ export default class App extends PureComponent {
             <Icon name="compass" style={{marginBottom: 10}} size={50} color="#0084b4" onPress={() => this.map.animateToCoordinate(myPosition, 1000)} />
             }
             <Icon name="cog" style={{marginBottom: 10}} size={50} color="#808080" onPress={() => console.warn("woot")} />
-            <View style={{backgroundColor: '#FFFFFF', padding: 10, width: 85, height: 55}}>
+            <View style={{backgroundColor: '#FFFFFF', alignItems: 'flex-end', padding: 10, width: 100, height: 55}}>
               <Text>{markers.length} pins</Text>
               <Text>{markersInView.length} in view</Text>
             </View>
