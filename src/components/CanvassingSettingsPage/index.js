@@ -18,7 +18,7 @@ var options = {
   fields: {
     draggable_pins: {
       label: 'Pins can be moved',
-      help: 'Some devices GPS make address pins get dropped in the incorrect spot. Enabling this allows you to drag-and-drop pins.',
+      help: 'Your device\'s GPS may drop pins with low accuracy. Enabling this allows you to drag-and-drop pins.',
     },
     show_only_my_turf: {
       label: 'Show only my turf',
