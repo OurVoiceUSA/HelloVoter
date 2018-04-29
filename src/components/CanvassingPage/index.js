@@ -578,7 +578,6 @@ export default class App extends PureComponent {
   }
 
   render() {
-
     const { navigate } = this.props.navigation;
     const {
       showDisclosure, myPosition, myNodes, locationAccess, serviceError, form, user,
@@ -736,7 +735,7 @@ export default class App extends PureComponent {
             {nomap_content.length == 0 &&
             <Icon name="compass" style={{marginBottom: 10}} size={50} color="#0084b4" onPress={() => this.map.animateToCoordinate(myPosition, 1000)} />
             }
-            <Icon name="cog" style={{marginBottom: 10}} size={50} color="#808080" onPress={() => console.warn("woot")} />
+            <Icon name="cog" style={{marginBottom: 10}} size={50} color="#808080" onPress={() => {navigate("CanvassingSettingsPage", {refer: this})}} />
             <View style={{backgroundColor: '#FFFFFF', alignItems: 'flex-end', padding: 10, width: 100, height: 55}}>
               <Text>{markers.length} pins</Text>
               <Text>{markersInView.length} in view</Text>
