@@ -41,7 +41,7 @@ export default class App extends PureComponent {
                 color="#000000"
                 onPress={() => {
                   refer.setState({ isKnockMenuVisible: false });
-                  navigate('Survey', {refer: refer, funcs: funcs, myNodes: refer.state.myNodes});
+                  navigate('Survey', {refer: refer, funcs: funcs});
                 }}
                 {...iconStyles}>
                 Take Survey
@@ -92,7 +92,7 @@ export default class App extends PureComponent {
                 color="#000000"
                 onPress={() => {
                   refer.setState({ isKnockMenuVisible: false });
-                  funcs.updateNodeById(refer.state.currentNode.id, refer.state.myNodes, 'multi_unit', true);
+                  funcs.updateNodeById(refer.state.currentNode.id, 'multi_unit', true);
                   funcs.doMarkerPress(refer.state.currentNode);
                 }}
                 {...iconStyles}>

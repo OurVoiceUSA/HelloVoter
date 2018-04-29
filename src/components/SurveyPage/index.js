@@ -49,7 +49,7 @@ export default class App extends PureComponent {
     let json = this.refs.form.getValue();
     if (json == null) return;
 
-    let epoch = Math.floor(new Date().getTime() / 1000);
+    let epoch = funcs.getEpoch();
 
     funcs._addNode({
       type: "survey",

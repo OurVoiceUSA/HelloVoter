@@ -65,6 +65,7 @@ export default class App extends PureComponent {
       currentNode: null,
       fAddress: {},
       myNodes: { nodes: [], last_synced: 0 },
+      turfNodes: { nodes: [] },
       asyncStorageKey: 'OV_CANVASS_PINS@'+props.navigation.state.params.form.id,
       DisclosureKey : 'OV_DISCLOUSER',
       isModalVisible: false,
@@ -177,6 +178,10 @@ export default class App extends PureComponent {
     this.setState({fAddress});
   }
 
+  getEpoch() {
+    return Math.floor(new Date().getTime() / 1000)
+  }
+
   doConfirmAddress = async () => {
     const { myPosition, myNodes, form } = this.state;
 
@@ -187,7 +192,7 @@ export default class App extends PureComponent {
       await this.map.animateToCoordinate(myPosition, 500)
     } catch (error) {}
 
-    let epoch = Math.floor(new Date().getTime() / 1000);
+    let epoch = this.getEpoch();
     let address = [json.street, json.city, json.state, json.zip];
     let node = {
       type: "address",
@@ -213,14 +218,14 @@ export default class App extends PureComponent {
 
   _addNode(node) {
     let { myNodes } = this.state;
-    let epoch = Math.floor(new Date().getTime() / 1000);
+    let epoch = this.getEpoch();
 
     node.created = epoch;
     node.updated = epoch;
     if (!node.id) node.id = sha1(epoch+JSON.stringify(node)+this.state.currentNode.id);
 
     // chech for duplicate address pins
-    let check = this.getNodeById(node.id, myNodes);
+    let check = this.getNodeByIdStore(node.id, myNodes);
 
     if (!check.id)
       myNodes.nodes.push(node);
@@ -233,7 +238,7 @@ export default class App extends PureComponent {
   }
 
   getLatestSurvey(id) {
-    let nodes = this.getChildNodesByIdType(id, "survey", this.state.myNodes).sort(this.dynamicSort('updated'));
+    let nodes = this.getChildNodesByIdType(id, "survey").sort(this.dynamicSort('updated'));
     let info = {};
     const timeAgo = new TimeAgo('en-US')
 
@@ -265,18 +270,18 @@ export default class App extends PureComponent {
   }
 
   _nodesFromJSON(str) {
-    let myNodes;
+    let store;
 
     try {
-      myNodes = JSON.parse(str);
+      store = JSON.parse(str);
     } catch (e) { console.warn(e); }
 
-    if (!myNodes.nodes) myNodes.nodes = [];
+    if (!store.nodes) store.nodes = [];
 
     // check for old version 1 format and convert
-    if (myNodes.pins) {
-      for (let p in myNodes.pins) {
-        let pin = myNodes.pins[p];
+    if (store.pins) {
+      for (let p in store.pins) {
+        let pin = store.pins[p];
 
         // address had "unit" in it - splice it out
         let unit = pin.address.splice(1, 1);
@@ -293,10 +298,10 @@ export default class App extends PureComponent {
         let pid = id;
 
         // chech for duplicate address pins
-        let check = this.getNodeById(id, myNodes);
+        let check = this.getNodeById(id);
 
         if (!check.id) {
-          myNodes.nodes.push({
+          store.nodes.push({
             type: "address",
             id: id,
             created: pin.id,
@@ -309,7 +314,7 @@ export default class App extends PureComponent {
 
         if (unit && unit[0] !== null && unit[0] !== "") {
           id = sha1(pid+unit);
-          myNodes.nodes.push({
+          store.nodes.push({
             type: "unit",
             id: id,
             created: pin.id,
@@ -327,7 +332,7 @@ export default class App extends PureComponent {
             case 'red': status = 'not interested'; break;
           }
 
-          myNodes.nodes.push({
+          store.nodes.push({
             type: "survey",
             id: sha1(id+JSON.stringify(pin.survey)+id),
             parent_id: id,
@@ -339,9 +344,9 @@ export default class App extends PureComponent {
         }
       }
 
-      delete myNodes.pins;
+      delete store.pins;
     }
-    return myNodes;
+    return store;
   }
 
   _getNodesAsyncStorage = async () => {
@@ -355,10 +360,18 @@ export default class App extends PureComponent {
         try {
           let data = await dbx.filesDownload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtxt' });
           let myNodes = this._nodesFromJSON(data.fileBinary);
-          this.setState({ myNodes: myNodes });
+          this.setState({ myNodes });
           this._saveNodes(myNodes, true);
         } catch (error) {}
       }
+
+      // look on dropbox for turf
+      try {
+        let data = await dbx.filesDownload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtrf' });
+        let turfNodes = this._nodesFromJSON(data.fileBinary);
+        this.setState({ turfNodes: turfNodes });
+      } catch (error) {}
+
     } catch (error) {
       console.warn(error);
     }
@@ -371,7 +384,7 @@ export default class App extends PureComponent {
 
   _saveNodes = async (myNodes, local) => {
     let { dbx } = this.state;
-    if (local) myNodes.last_saved = Math.floor(new Date().getTime() / 1000);
+    if (local) myNodes.last_saved = this.getEpoch();
     this.setState({myNodes: myNodes});
     try {
       let str = JSON.stringify(myNodes);
@@ -389,7 +402,7 @@ export default class App extends PureComponent {
     this.setState({syncRunning: true});
 
     let last_synced = myNodes.last_synced;
-    myNodes.last_synced = Math.floor(new Date().getTime() / 1000);
+    myNodes.last_synced = this.getEpoch();
     myNodes.canvasser = user.dropbox.name.display_name;
 
     try {
@@ -405,7 +418,15 @@ export default class App extends PureComponent {
     this.setState({syncRunning: false, myNodes: myNodes});
   }
 
-  getNodeById(id, store) {
+  getNodeById(id) {
+    let merged = {nodes: []};
+
+    merged.nodes = this.state.myNodes.nodes.concat(this.state.turfNodes.nodes);
+
+    return this.getNodeByIdStore(id, merged);
+  }
+
+  getNodeByIdStore(id, store) {
     for (let i in store.nodes) {
       let node = store.nodes[i];
       if (node.id === id) {
@@ -413,7 +434,7 @@ export default class App extends PureComponent {
         if (node.parent_id) {
           let pid = node.parent_id;
           delete node.parent_id;
-          Object.assign(node, this.getNodeById(pid, store));
+          Object.assign(node, this.getNodeByIdStore(pid, store));
         }
         return node;
       }
@@ -421,30 +442,53 @@ export default class App extends PureComponent {
     return {};
   }
 
-  updateNodeById(id, store, prop, value) {
-    for (let i in store.nodes) {
-      let node = store.nodes[i];
+  updateNodeById(id, prop, value) {
+    let store = this.state.myNodes;
+    let merged = {nodes: []};
+
+    merged.nodes = store.nodes.concat(this.state.turfNodes.nodes);
+
+    for (let i in merged.nodes) {
+      let node = merged.nodes[i];
       if (node.id === id) {
-        node[prop] = value;
-        this._saveNodes(store, true);
+        // check if this ID is in the myNodes stora
+        let check = this.getNodeByIdStore(node.id, store);
+
+        if (!check.id) {
+          this._addNode(node);
+        } else {
+          node[prop] = value;
+          node.updated = this.getEpoch();
+          this._saveNodes(store, true);
+        }
       }
     }
   }
 
-  getNodesbyType(type, store) {
+  getNodesbyType(type) {
+    let store = this.state.myNodes;
+    let merged = {nodes: []};
+
+    merged.nodes = store.nodes.concat(this.state.turfNodes.nodes);
+
     let nodes = [];
-    for (let i in store.nodes) {
-      let node = store.nodes[i];
+    for (let i in merged.nodes) {
+      let node = merged.nodes[i];
       if (node.type === type)
         nodes.push(node);
     }
     return nodes;
   }
 
-  getChildNodesByIdType(id, type, store) {
+  getChildNodesByIdType(id, type) {
+    let store = this.state.myNodes;
+    let merged = {nodes: []};
+
+    merged.nodes = store.nodes.concat(this.state.turfNodes.nodes);
+
     let nodes = [];
-    for (let i in store.nodes) {
-      let node = store.nodes[i];
+    for (let i in merged.nodes) {
+      let node = merged.nodes[i];
       if (node.parent_id === id && node.type === type) {
         nodes.push(node);
       }
@@ -467,12 +511,11 @@ export default class App extends PureComponent {
   getPinColor(node) {
     if (node.multi_unit) return "cyan";
 
-    nodes = this.getChildNodesByIdType(node.id, "survey", this.state.myNodes);
+    nodes = this.getChildNodesByIdType(node.id, "survey").sort(this.dynamicSort('updated'));
 
     // no interactions
     if (nodes.length === 0) return "#8b4513";
 
-    // TODO: ensure this is the last interaction; ie, sort by "created"
     switch (nodes[nodes.length-1].status) {
       case 'home': return "green";
       case 'not home': return "yellow";
@@ -543,7 +586,7 @@ export default class App extends PureComponent {
       let node = allNodes.nodes[n];
       if (node.type !== "survey") continue;
 
-      let addr = this.getNodeById(node.parent_id, allNodes);
+      let addr = this.getNodeByIdStore(node.parent_id, allNodes);
 
       csv += (addr.address?addr.address.map((x) => '"'+(x?x:'')+'"').join(','):'')+
         ","+(addr.unit?addr.unit:'')+
@@ -658,7 +701,7 @@ export default class App extends PureComponent {
     }
 
     // toggle pin horizon based on how many we have, for now - TODO: make this a setting
-    let markers = this.getNodesbyType("address", this.state.myNodes);
+    let markers = this.getNodesbyType("address");
 
     if (markers.length > 300) {
       markersInView = [];
@@ -701,7 +744,7 @@ export default class App extends PureComponent {
                 draggable
                 onDragEnd={(e) => {
                   marker.latlng = e.nativeEvent.coordinate;
-                  marker.updated = Math.floor(new Date().getTime() / 1000);
+                  marker.updated = this.getEpoch();
                   this._saveNodes(myNodes, true);
                 }}
                 pinColor={this.getPinColor(marker)}

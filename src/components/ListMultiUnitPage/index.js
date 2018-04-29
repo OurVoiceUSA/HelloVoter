@@ -31,7 +31,6 @@ export default class App extends PureComponent {
     this.state = {
       refer: props.navigation.state.params.refer,
       node: props.navigation.state.params.node,
-      myNodes: props.navigation.state.params.refer.state.myNodes,
       form: props.navigation.state.params.refer.state.form,
       isKnockMenuVisible: false,
       newUnitModalVisible: false,
@@ -60,7 +59,7 @@ export default class App extends PureComponent {
   render() {
     const { refer } = this.state;
 
-    let childNodes = refer.getChildNodesByIdType(this.state.node.id, "unit", this.state.myNodes).sort(refer.dynamicSort('unit'));
+    let childNodes = refer.getChildNodesByIdType(this.state.node.id, "unit").sort(refer.dynamicSort('unit'));
 
     return (
       <ScrollView style={{flex: 1, backgroundColor: 'white'}} contentContainerStyle={{flexGrow:1}}>
@@ -86,7 +85,7 @@ export default class App extends PureComponent {
               backgroundColor="#d7d7d7"
               color="#000000"
               onPress={() => {
-                refer.updateNodeById(this.state.node.id, refer.state.myNodes, 'multi_unit', false);
+                refer.updateNodeById(this.state.node.id, 'multi_unit', false);
                 refer.forceUpdate();
                 this.props.navigation.goBack();
               }}
