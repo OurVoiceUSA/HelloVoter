@@ -780,15 +780,12 @@ export default class App extends PureComponent {
           followsUserLocation={false}
           keyboardShouldPersistTaps={true}
           {...this.props}>
-          {
-            markersInView.map((marker, index) =>
-              marker.latlng.longitude !== null &&
-              (
+          {markersInView.map((marker) => (
               <MapView.Marker
                 key={marker.id}
                 coordinate={marker.latlng}
                 title={marker.address.join(", ")}
-                draggable
+                draggable={this.state.canvassSettings.movable_pins}
                 onDragEnd={(e) => {
                   this.updateNodeById(marker.id, 'latlng', e.nativeEvent.coordinate);
                 }}
@@ -796,8 +793,7 @@ export default class App extends PureComponent {
                 description={(marker.multi_unit?"Multi-unit address":"Single unit address")}
                 onCalloutPress={() => {this.doMarkerPress(marker);}}
                 />
-            ))
-          }
+          ))}
         </MapView>
         }
           <View style={{alignSelf: 'flex-end', alignItems: 'flex-end', marginRight: 5}}>
