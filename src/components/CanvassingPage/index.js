@@ -431,6 +431,16 @@ export default class App extends PureComponent {
     }
   }
 
+  getNodesbyType(type, store) {
+    let nodes = [];
+    for (let i in store.nodes) {
+      let node = store.nodes[i];
+      if (node.type === type)
+        nodes.push(node);
+    }
+    return nodes;
+  }
+
   getChildNodesByIdType(id, type, store) {
     let nodes = [];
     for (let i in store.nodes) {
@@ -649,8 +659,20 @@ export default class App extends PureComponent {
     }
 
     // toggle pin horizon based on how many we have, for now - TODO: make this a setting
-    let markerDistanceFlag = true;
-    if (myNodes.nodes.length > 300) markerDistanceFlag = true;
+    let markers = this.getNodesbyType("address", this.state.myNodes);
+
+    if (markers.length > 300) {
+      markersInView = [];
+
+      for (let m in markers) {
+        let marker = markers[m];
+        if (marker.latlng && marker.latlng.longitude !== null &&
+          Math.hypot(myPosition.longitude-marker.latlng.longitude, myPosition.latitude-marker.latlng.latitude) < 0.025)
+          markersInView.push(marker);
+      }
+    } else {
+      markersInView = markers;
+    }
 
     return (
       <View style={styles.container}>
@@ -670,10 +692,8 @@ export default class App extends PureComponent {
           keyboardShouldPersistTaps={true}
           {...this.props}>
           {
-            myNodes.nodes.map((marker, index) =>
-              marker.type === "address" &&
+            markersInView.map((marker, index) =>
               marker.latlng.longitude !== null &&
-              (!markerDistanceFlag || (markerDistanceFlag && Math.hypot(myPosition.longitude-marker.latlng.longitude, myPosition.latitude-marker.latlng.latitude) < 0.025)) &&
               (
               <MapView.Marker
                 key={marker.id}
@@ -717,8 +737,9 @@ export default class App extends PureComponent {
             <Icon name="compass" style={{marginBottom: 10}} size={50} color="#0084b4" onPress={() => this.map.animateToCoordinate(myPosition, 1000)} />
             }
             <Icon name="cog" style={{marginBottom: 10}} size={50} color="#808080" onPress={() => console.warn("woot")} />
-            <View style={{backgroundColor: '#FFFFFF', width: 75, height: 75}}>
-              <Text>Infobox</Text>
+            <View style={{backgroundColor: '#FFFFFF', padding: 10, width: 85, height: 55}}>
+              <Text>{markers.length} pins</Text>
+              <Text>{markersInView.length} in view</Text>
             </View>
           </View>
         <View style={styles.buttonContainer}>
