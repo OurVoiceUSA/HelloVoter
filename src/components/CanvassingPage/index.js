@@ -763,7 +763,7 @@ export default class App extends PureComponent {
     for (let m in markers) {
       let marker = markers[m];
       if (marker.latlng && marker.latlng.longitude !== null &&
-        Math.hypot(region.longitude-marker.latlng.longitude, region.latitude-marker.latlng.latitude) < region.longitudeDelta/2)
+        Math.hypot(region.longitude-marker.latlng.longitude, region.latitude-marker.latlng.latitude) < region.longitudeDelta/1.75)
         markersInView.push(marker);
     }
 
