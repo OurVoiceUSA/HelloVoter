@@ -375,13 +375,19 @@ export default class App extends PureComponent {
 
   syncTurf = async () => {
     const { form, dbx } = this.state;
+    let turfNodes = { nodes: [] };
 
-    // look on dropbox for turf
-    try {
-      let data = await dbx.filesDownload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtrf' });
-      let turfNodes = this._nodesFromJSON(data.fileBinary);
-      this.setState({ turfNodes: turfNodes });
-    } catch (error) {}
+    let files = ['exported', DeviceInfo.getUniqueID()];
+    for (let f in files) {
+      let file = files[f];
+      try {
+        let data = await dbx.filesDownload({ path: form.folder_path+'/'+file+'.jtrf' });
+        let obj = this._nodesFromJSON(data.fileBinary);
+        turfNodes.nodes = turfNodes.nodes.concat(obj.nodes);
+      } catch (error) {}
+    }
+
+    this.setState({ turfNodes: turfNodes });
   }
 
   timeFormat(epoch) {
