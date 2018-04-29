@@ -124,8 +124,8 @@ export default class App extends PureComponent {
   }
   componentDidMount() {
     this.requestLocationPermission();
-    this._getNodesAsyncStorage();
     this._getCanvassSettings();
+    this._getNodesAsyncStorage();
   this.LoadDisclosure(); //Updates showDisclosure state if the user previously accepted
   }
 
@@ -386,18 +386,25 @@ export default class App extends PureComponent {
   }
 
   _setCanvassSettings = async (canvassSettings) => {
+    let sync = false;
+    if (this.state.canvassSettings.show_only_my_turf !== canvassSettings.show_only_my_turf) sync = true;
+
     try {
       let str = JSON.stringify(canvassSettings);
       await storage.set(this.state.settingsStorageKey, str);
       this.setState({canvassSettings});
     } catch (e) {}
+
+    if (sync) await this.syncTurf();
   }
 
   syncTurf = async () => {
     const { form, dbx } = this.state;
     let turfNodes = { nodes: [] };
 
-    let files = ['exported', DeviceInfo.getUniqueID()];
+    let files = [DeviceInfo.getUniqueID()];
+    if (this.state.canvassSettings.show_only_my_turf !== true) files.push('exported');
+
     for (let f in files) {
       let file = files[f];
       try {
