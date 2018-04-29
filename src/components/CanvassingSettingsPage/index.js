@@ -9,6 +9,7 @@ import {
   ScrollView,
 } from 'react-native';
 
+import DeviceInfo from 'react-native-device-info';
 import t from 'tcomb-form-native';
 
 var Form = t.form.Form;
@@ -45,6 +46,11 @@ export default class App extends PureComponent {
 
     return (
       <ScrollView style={{flex: 1, padding: 15, backgroundColor: 'white'}}>
+
+        <View style={{flex: 1, alignItems: 'flex-end'}}>
+          <Text>Your device ID is:</Text>
+          <Text>{DeviceInfo.getUniqueID()}</Text>
+        </View>
 
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <Form
