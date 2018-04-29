@@ -386,8 +386,13 @@ export default class App extends PureComponent {
   }
 
   _setCanvassSettings = async (canvassSettings) => {
+    const { form, dbx } = this.state;
+
     let sync = false;
+    let rmshare = false;
+
     if (this.state.canvassSettings.show_only_my_turf !== canvassSettings.show_only_my_turf) sync = true;
+    if (this.state.canvassSettings.share_progress !== canvassSettings.share_progress && canvassSettings.share_progress === false) rmshare = true;
 
     try {
       let str = JSON.stringify(canvassSettings);
@@ -396,6 +401,19 @@ export default class App extends PureComponent {
     } catch (e) {}
 
     if (sync) await this.syncTurf();
+
+    if (rmshare) {
+      try {
+        let res = await dbx.filesListFolder({path: form.folder_path});
+        for (let i in res.entries) {
+          item = res.entries[i];
+          if (item['.tag'] != 'folder') continue;
+          if (item.path_display.match(/@/))
+            await dbx.filesDelete({ path: item.path_display+'/exported.jtrf' });
+        }
+      } catch (e) {}
+    }
+
   }
 
   syncTurf = async () => {
