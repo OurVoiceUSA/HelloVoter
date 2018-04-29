@@ -623,6 +623,10 @@ export default class App extends PureComponent {
       csv += "\n";
     }
 
+    // scrub canvasser property
+    for (let n in allNodes.nodes)
+      delete allNodes.nodes[n].canvasser;
+
     try {
       // turf
       await dbx.filesUpload({ path: form.folder_path+'/exported.jtrf', contents: encoding.convert(tr(JSON.stringify(allNodes)), 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
