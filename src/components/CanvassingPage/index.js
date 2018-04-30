@@ -658,7 +658,7 @@ export default class App extends PureComponent {
       allNodes.nodes.push(node);
     }
 
-    allNodes.nodes = this.dedupeNodes(allNodes.nodes);
+    allNodes.nodes = this.dedupeNodes(allNodes.nodes).sort(this.dynamicSort('updated'));
 
     // convert to .csv file and upload
     let keys = Object.keys(form.questions);
