@@ -656,6 +656,8 @@ export default class App extends PureComponent {
       allNodes.nodes.push(node);
     }
 
+    allNodes.nodes = this.dedupeNodes(allNodes.nodes);
+
     // convert to .csv file and upload
     let keys = Object.keys(form.questions);
     let csv = "Street,City,State,Zip,Unit,longitude,latitude,canvasser,datetime,status,"+keys.join(",")+"\n";
