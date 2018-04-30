@@ -928,7 +928,7 @@ export default class App extends PureComponent {
 
         <Modal
           open={this.state.isModalVisible}
-          modalStyle={{width: 350, height: 500, backgroundColor: "transparent",
+          modalStyle={{width: 350, height: 400, backgroundColor: "transparent",
             position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
           style={{alignItems: 'center'}}
           offset={0}
