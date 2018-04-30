@@ -337,7 +337,7 @@ export default class App extends PureComponent {
 
         store.nodes.push({
           type: "survey",
-          id: sha1(id+JSON.stringify(pin.survey)+id),
+          id: sha1(id+JSON.stringify(pin.survey)+pin.id),
           parent_id: id,
           created: pin.id,
           updated: pin.id,
