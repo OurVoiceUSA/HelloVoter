@@ -328,24 +328,22 @@ export default class App extends PureComponent {
           });
         }
 
-        if (pin.survey) {
-          let status = '';
-          switch (pin.color) {
-            case 'green': status = 'home'; break;
-            case 'yellow': status = 'not home'; break;
-            case 'red': status = 'not interested'; break;
-          }
-
-          store.nodes.push({
-            type: "survey",
-            id: sha1(id+JSON.stringify(pin.survey)+id),
-            parent_id: id,
-            created: pin.id,
-            updated: pin.id,
-            status: status,
-            survey: pin.survey,
-          });
+        let status = '';
+        switch (pin.color) {
+          case 'green': status = 'home'; break;
+          case 'yellow': status = 'not home'; break;
+          case 'red': status = 'not interested'; break;
         }
+
+        store.nodes.push({
+          type: "survey",
+          id: sha1(id+JSON.stringify(pin.survey)+id),
+          parent_id: id,
+          created: pin.id,
+          updated: pin.id,
+          status: status,
+          survey: pin.survey,
+        });
       }
 
       delete store.pins;
