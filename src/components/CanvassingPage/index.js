@@ -644,6 +644,20 @@ export default class App extends PureComponent {
       allNodes.nodes = allNodes.nodes.concat(obj.nodes);
     }
 
+    // make sure we have all turf to reference
+    let toggle = false;
+    if (this.state.canvassSettings.show_only_my_turf) {
+      this._setCanvassSettings({show_only_my_turf: false});
+      toggle = true;
+    }
+
+    // add everything from turf except "survey" nodes
+    for (let t in this.state.turfNodes.nodes) {
+      let node = this.state.turfNodes.nodes[t];
+      if (node.type === "survey") continue;
+      allNodes.nodes.push(node);
+    }
+
     // convert to .csv file and upload
     let keys = Object.keys(form.questions);
     let csv = "Street,City,State,Zip,Unit,longitude,latitude,canvasser,datetime,status,"+keys.join(",")+"\n";
@@ -652,6 +666,12 @@ export default class App extends PureComponent {
       if (node.type !== "survey") continue;
 
       let addr = this.getNodeByIdStore(node.parent_id, allNodes);
+
+      // orphaned survey
+      if (!addr.id) continue
+
+      // unit
+      if (addr.type === "unit") addr = this.getNodeByIdStore(addr.parent_id, allNodes);
 
       csv += (addr.address?addr.address.map((x) => '"'+(x?x:'')+'"').join(','):'')+
         ","+(addr.unit?addr.unit:'')+
@@ -696,6 +716,9 @@ export default class App extends PureComponent {
       console.warn(error);
       Alert.alert('Error', 'Unable to export data to the server.', [{text: 'OK'}], { cancelable: false });
     }
+
+    if (toggle)
+      this._setCanvassSettings({show_only_my_turf: true});
 
     this.setState({ exportRunning: false, turfNodes: allNodes });
   }
