@@ -468,7 +468,7 @@ export default class App extends PureComponent {
       await dbx.filesUpload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtxt', contents: encoding.convert(tr(str), 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
       await this._saveNodes(myNodes, false);
       await this.syncTurf();
-      Alert.alert('Success', 'Data sync successful!', [{text: 'OK'}], { cancelable: false });
+      if (flag) Alert.alert('Success', 'Data sync successful!', [{text: 'OK'}], { cancelable: false });
     } catch (error) {
       if (flag) Alert.alert('Error', 'Unable to sync with the server.', [{text: 'OK'}], { cancelable: false });
       myNodes.last_synced = last_synced;
