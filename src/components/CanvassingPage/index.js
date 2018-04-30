@@ -214,10 +214,12 @@ export default class App extends PureComponent {
   doMarkerPress(node) {
     const { navigate } = this.props.navigation;
 
+    this.setState({currentNode: node});
+
     if (node.multi_unit === true)
       navigate('ListMultiUnit', {refer: this, node: node});
     else
-      this.setState({isKnockMenuVisible: true, currentNode: node});
+      this.setState({isKnockMenuVisible: true});
   }
 
   _addNode(node) {
