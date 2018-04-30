@@ -37,18 +37,34 @@ import Modal from 'react-native-simple-modal';
 import TimeAgo from 'javascript-time-ago'
 import en from 'javascript-time-ago/locale/en'
 import t from 'tcomb-form-native';
+import _ from 'lodash';
 
 TimeAgo.locale(en);
 
 var Form = t.form.Form;
 
-var mainForm = t.struct({
+var formStreet = t.struct({
   'street': t.String,
+});
+var formCity = t.struct({
   'multi_unit': t.Boolean,
   'city': t.String,
+});
+var formState = t.struct({
   'state': t.String,
   'zip': t.String,
 });
+
+const formStyleRow = _.cloneDeep(t.form.Form.stylesheet);
+formStyleRow.fieldset = {
+  flexDirection: 'row'
+};
+formStyleRow.formGroup.normal.flex = 1;
+formStyleRow.formGroup.error.flex = 1;
+
+const formOptRow = {
+  stylesheet: formStyleRow,
+};
 
 export default class App extends PureComponent {
 
@@ -189,25 +205,36 @@ export default class App extends PureComponent {
   doConfirmAddress = async () => {
     const { myPosition, myNodes, form } = this.state;
 
-    let json = this.refs.mainForm.getValue();
-    if (json == null) return;
+    let jsonStreet = this.refs.formStreet.getValue();
+    let jsonCity = this.refs.formCity.getValue();
+    let jsonState = this.refs.formState.getValue();
+
+    if (jsonStreet === null || jsonCity === null || jsonState === null) return;
 
     try {
       await this.map.animateToCoordinate(myPosition, 500)
     } catch (error) {}
 
     let epoch = this.getEpoch();
-    let address = [json.street.trim(), json.city.trim(), json.state.trim(), json.zip.trim()];
+    let fAddress = {
+      street: jsonStreet.street.trim(),
+      multi_unit: jsonCity.multi_unit,
+      city: jsonCity.city.trim(),
+      state: jsonState.state.trim(),
+      zip: jsonState.zip.trim(),
+
+    };
+    let address = [fAddress.street, fAddress.city, fAddress.state, fAddress.zip];
     let node = {
       type: "address",
       id: sha1(JSON.stringify(address)),
       latlng: {latitude: myPosition.latitude, longitude: myPosition.longitude},
       address: address,
-      multi_unit: json.multi_unit,
+      multi_unit: jsonCity.multi_unit,
     };
 
     node = this._addNode(node);
-    this.setState({ fAddress: json, isModalVisible: false });
+    this.setState({ fAddress: fAddress, isModalVisible: false });
     this.doMarkerPress(node);
   }
 
@@ -923,9 +950,23 @@ export default class App extends PureComponent {
               <View>
                 <Text style={{color: 'blue', fontWeight: 'bold', fontSize: 15}}>Confirm the Address</Text>
                 <Form
-                 ref="mainForm"
-                 type={mainForm}
+                 ref="formStreet"
+                 type={formStreet}
                  onChange={this.onChange}
+                 value={fAddress}
+                />
+                <Form
+                 ref="formCity"
+                 type={formCity}
+                 onChange={this.onChange}
+                 options={formOptRow}
+                 value={fAddress}
+                />
+                <Form
+                 ref="formState"
+                 type={formState}
+                 onChange={this.onChange}
+                 options={formOptRow}
                  value={fAddress}
                 />
                 <TouchableHighlight style={styles.addButton} onPress={this.doConfirmAddress} underlayColor='#99d9f4'>
