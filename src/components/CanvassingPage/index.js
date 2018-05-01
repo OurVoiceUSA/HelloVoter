@@ -520,7 +520,7 @@ export default class App extends PureComponent {
 
   mergeNodes() {
     let merged = {nodes: []};
-    merged.nodes = this.state.myNodes.nodes.concat(this.state.turfNodes.nodes);
+    merged.nodes = this.dedupeNodes(this.state.myNodes.nodes.concat(this.state.turfNodes.nodes));
 
     return merged;
   }
@@ -592,7 +592,7 @@ export default class App extends PureComponent {
   dedupeNodes(nodes) {
     let idx = [];
     let deDupe = [];
-    for (let i in nodes) {
+    for (let i in nodes.sort(this.dynamicSort('updated')).reverse()) {
       let node = nodes[i];
       if (idx.indexOf(node.id) === -1) {
         idx.push(node.id);
@@ -699,7 +699,7 @@ export default class App extends PureComponent {
       allNodes.nodes.push(node);
     }
 
-    allNodes.nodes = this.dedupeNodes(allNodes.nodes).sort(this.dynamicSort('updated'));
+    allNodes.nodes = this.dedupeNodes(allNodes.nodes);
 
     // convert to .csv file and upload
     let keys = Object.keys(form.questions);
@@ -852,7 +852,7 @@ export default class App extends PureComponent {
     }
 
     // reverse sort and de-dupe address pins
-    let markers = this.dedupeNodes(this.getNodesbyType("address").sort(this.dynamicSort('updated')).reverse());
+    let markers = this.dedupeNodes(this.getNodesbyType("address"));
 
     // toggle pin horizon based on zoom level
     let markersInView = [];
