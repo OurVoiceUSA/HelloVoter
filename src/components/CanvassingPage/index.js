@@ -467,10 +467,9 @@ export default class App extends PureComponent {
         let data = await dbx.filesDownload({ path: form.folder_path+'/'+file+'.jtrf' });
         let obj = this._nodesFromJSON(data.fileBinary);
         turfNodes.nodes = turfNodes.nodes.concat(obj.nodes);
+        this.setState({ turfNodes: turfNodes });
       } catch (error) {}
     }
-
-    this.setState({ turfNodes: turfNodes });
   }
 
   timeFormat(epoch) {
