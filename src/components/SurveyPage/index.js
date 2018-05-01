@@ -38,6 +38,7 @@ export default class App extends PureComponent {
     this.state = {
       refer: state.params.refer,
       funcs: state.params.funcs,
+      info: state.params.info,
       form: state.params.refer.state.form,
     };
 
@@ -110,6 +111,7 @@ export default class App extends PureComponent {
               ref="form"
               type={CanvassForm}
               options={options}
+              value={this.state.info}
             />
           </TouchableWithoutFeedback>
         </View>

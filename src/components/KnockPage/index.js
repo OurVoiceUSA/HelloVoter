@@ -46,7 +46,7 @@ export default class App extends PureComponent {
                 color="#000000"
                 onPress={() => {
                   refer.setState({ isKnockMenuVisible: false });
-                  navigate('Survey', {refer: refer, funcs: funcs});
+                  navigate('Survey', {refer: refer, funcs: funcs, info: info});
                 }}
                 {...iconStyles}>
                 Take Survey
