@@ -532,15 +532,8 @@ export default class App extends PureComponent {
   getNodeByIdStore(id, store) {
     for (let i in store.nodes) {
       let node = store.nodes[i];
-      if (node.id === id) {
-        // if we have a parent_id, recursively merge properties. This makes "unit" a polymorph of "address"
-        if (node.parent_id) {
-          let pid = node.parent_id;
-          delete node.parent_id;
-          Object.assign(node, this.getNodeByIdStore(pid, store));
-        }
+      if (node.id === id)
         return node;
-      }
     }
     return {};
   }
