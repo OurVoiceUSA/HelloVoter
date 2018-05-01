@@ -287,6 +287,17 @@ export default class App extends PureComponent {
     return info;
   }
 
+  getLatestSurveyInfoByProp(id, prop) {
+    let nodes = this.getChildNodesByIdType(id, "survey").sort(this.dynamicSort('updated')).reverse();
+
+    for (let n in nodes) {
+      let node = nodes[n];
+      if (node.survey && node.survey[prop]) return node.survey;
+    }
+
+    return {};
+  }
+
   LoadDisclosure = async () => {
     try {
       const value = await storage.get(this.state.DisclosureKey);

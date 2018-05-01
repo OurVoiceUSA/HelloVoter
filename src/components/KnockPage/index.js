@@ -24,15 +24,20 @@ export default class App extends PureComponent {
     const { refer, funcs } = this.state;
     const { navigate } = refer.props.navigation;
 
-    let info = funcs.getLatestSurvey(refer.state.currentNode.id);
+    let status = funcs.getLatestSurvey(refer.state.currentNode.id);
+    let info = funcs.getLatestSurveyInfoByProp(refer.state.currentNode.id, "FullName");
+
+    let FullName = (info.FullName ? info.FullName : 'N/A');
+    let PartyAffiliation = (info.PartyAffiliation ? info.PartyAffiliation : 'N/A');
+    let LastVisted = (status.LastVisted ? status.LastVisted : 'Never');
 
     return (
       <View style={{flexDirection: 'column'}}>
         <View style={{width: 280, height: 350, backgroundColor: 'white', marginTop: 15, borderRadius: 15, padding: 25, alignSelf: 'flex-start'}}>
-          <Text style={{color: 'blue', fontWeight: 'bold', fontSize: 20}}>Are they home?</Text>
           <View>
-
-            <Text>{JSON.stringify(info)}</Text>
+            <Text>Name: {FullName}</Text>
+            <Text>Party: {PartyAffiliation}</Text>
+            <Text>Last Visited: {LastVisted}</Text>
 
             <View style={{margin: 5, flexDirection: 'row'}}>
               <Icon.Button
