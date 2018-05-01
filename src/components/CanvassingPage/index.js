@@ -687,7 +687,7 @@ export default class App extends PureComponent {
 
     // make sure we have all turf to reference
     let toggle = false;
-    if (this.state.canvassSettings.show_only_my_turf) {
+    if (this.state.canvassSettings.show_only_my_turf === true) {
       this._setCanvassSettings({show_only_my_turf: false});
       toggle = true;
     }
