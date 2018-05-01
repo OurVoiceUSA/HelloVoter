@@ -692,12 +692,8 @@ export default class App extends PureComponent {
       toggle = true;
     }
 
-    // add everything from turf except "survey" nodes
-    for (let t in this.state.turfNodes.nodes) {
-      let node = this.state.turfNodes.nodes[t];
-      if (node.type === "survey") continue;
-      allNodes.nodes.push(node);
-    }
+    // add everything from turf
+    allNodes.nodes = allNodes.nodes.concat(this.state.turfNodes.nodes);
 
     allNodes.nodes = this.dedupeNodes(allNodes.nodes);
 
