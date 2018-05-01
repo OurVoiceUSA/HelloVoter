@@ -113,7 +113,7 @@ export default class App extends PureComponent {
                       this.setState({ isKnockMenuVisible: true, currentNode: item });
                     }}>
                     <Icon name={icon} size={40} color={color} style={{margin: 5}} />
-                    <Text>Unit: {item.unit}, {JSON.stringify(info)}</Text>
+                    <Text>Unit {item.unit} - {(info.LastVisted ? 'Last Visited '+info.LastVisted : 'Never Visited')}</Text>
                   </TouchableOpacity>
                 </View>
               );
