@@ -28,7 +28,11 @@ In many areas, there are laws specific to who receive monetary or other compensa
 
 ### Data gathering laws
 
-By using the canvassing tool, you are collecting data about the people who live in the area. That data is uploaded to your Dropbox account. From there, it is accessible to other users of the app which you’ve chosen to share it with. Local laws may prohibit sharing of data collected in this way. As such, don’t use the canvassing tool where this is prohibited.  
+By using the canvassing tool, you are collecting data about the people who live in the area. That data is uploaded to your Dropbox account. From there, it is accessible to other users of the app which you’ve chosen to share it with. Laws in the area may prohibit sharing of data collected in this way. As such, don’t use the canvassing tool where this is prohibited.  
+
+### Data import and sharing
+
+By importing data into the canvassing tool, and sharing a form with others, users are expected to acknowledge and adhere to any and all applicable local, state, and federal laws and statutes regarding voter data and the sharing of that data. Our Voice USA encourages everyone to remain lawful in their activities while using these resources and tools.
 
 ### You represent yourself
 
@@ -70,7 +74,7 @@ Our Voice will never presume to put words into your mouth, but we can recommend 
 “My name is [your name] and I am gathering some information for [your group’s name] in order to better understand how real people like you and I think and feel about the big issues we all face as a nation. I am using this canvassing tool on my phone from Our Voice in order to keep an accurate track of the information people provide. I have just a few important questions to ask you. Do you mind participating for a few minutes?”
 “Hey there! My fellow canvassers and I are checking in with everyone we can in [your city/town] so we can get a better understanding of what folks around here think of major issues we all have to deal with these days. My name is [your name] and I am with [your group] and I’d like to spend just a few minutes asking you some simple, yet super important questions while I mark your answers with this Our Voice canvassing tool. May I ask your name, [ma’am] [sir]?”
 
-### The Importance Of Data 
+### The Importance Of Data
 
 Be as accurate as possible with the information you collect on the resident! Make sure the names and addresses are spelled correctly.
 
