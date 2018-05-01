@@ -532,7 +532,7 @@ export default class App extends PureComponent {
   getNodeByIdStore(id, store) {
     for (let i in store.nodes)
       if (store.nodes[i].id === id)
-        return node;
+        return store.nodes[i];
     return {};
   }
 
