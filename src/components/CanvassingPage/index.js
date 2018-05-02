@@ -602,6 +602,7 @@ export default class App extends PureComponent {
   }
 
   updateNodeById = async (id, prop, value) => {
+    let { myNodes } = this.state;
     let merged = this.mergeNodes();
 
     for (let i in merged.nodes) {
@@ -610,14 +611,18 @@ export default class App extends PureComponent {
         node[prop] = value;
         node.updated = this.getEpoch();
 
-        // check if this ID is in the myNodes stora
-        let check = this.getNodeByIdStore(node.id, this.state.myNodes);
-
-        if (!check.id) {
-          await this._addNode(node);
-        } else {
-          await this._saveNodes(this.state.myNodes, true);
+        // check if this ID is in myNodes
+        for (let i in myNodes.nodes) {
+          if (myNodes.nodes[i].id === id) {
+            myNodes.nodes[i] = node;
+            await this._saveNodes(myNodes, true);
+            return;
+          }
         }
+
+        // it isn't in myNodes, so add it
+        await this._addNode(node);
+        return;
       }
     }
   }
