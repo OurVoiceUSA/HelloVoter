@@ -753,7 +753,7 @@ export default class App extends PureComponent {
     this.setState({ exportRunning: false, turfNodes: allNodes });
   }
 
-  _canvassUrlHandler() {
+  _canvassGuidelinesUrlHandler() {
     const url = "https://github.com/OurVoiceUSA/OVMobile/blob/master/docs/Canvassing-Guidelines.md";
     return Linking.openURL(url).catch(() => null);
   }
@@ -779,7 +779,7 @@ export default class App extends PureComponent {
             <View style={{margin: 15}}>
               <Text style={{fontSize: 18, color: 'dimgray'}}>
                 By using this tool you acknowledge that you are acting on your own behalf, do not represent Our Voice USA
-                or its affiliates, and have read our <Text style={{fontSize: 18, fontWeight: 'bold', color: 'blue'}} onPress={() => {this._canvassUrlHandler()}}>
+                or its affiliates, and have read our <Text style={{fontSize: 18, fontWeight: 'bold', color: 'blue'}} onPress={() => {this._canvassGuidelinesUrlHandler()}}>
                 canvassing guidelines</Text>. Please be courteous to those you meet.
               </Text>
             </View>

@@ -109,14 +109,6 @@ export default class App extends PureComponent {
           }}
         />
 
-        <View style={{marginTop: 10}}>
-          <Text>
-            By using this tool you acknowledge that you are acting on your own behalf, do not represent Our Voice USA
-            or its affiliates, and have read our <Text style={{fontWeight: 'bold', color: 'blue'}} onPress={() => {refer._canvassUrlHandler()}}>
-            canvassing guidelines</Text>. Please be courteous to those you meet.
-          </Text>
-        </View>
-
       </ScrollView>
     );
   }

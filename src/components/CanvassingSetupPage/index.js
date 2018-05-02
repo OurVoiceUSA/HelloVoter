@@ -4,6 +4,7 @@ import React, { PureComponent } from 'react';
 import {
   ActivityIndicator,
   Dimensions,
+  Linking,
   Text,
   View,
   ScrollView,
@@ -107,6 +108,16 @@ export default class App extends PureComponent {
     this.setState({ loading: false, forms: forms, dbx: dbx });
   }
 
+  _canvassGuidelinesUrlHandler() {
+    const url = "https://github.com/OurVoiceUSA/OVMobile/blob/master/docs/Canvassing-Guidelines.md";
+    return Linking.openURL(url).catch(() => null);
+  }
+
+  _canvassUrlHandler() {
+    const url = "https://github.com/OurVoiceUSA/OVMobile/blob/master/docs/Canvassing.md";
+    return Linking.openURL(url).catch(() => null);
+  }
+
   render() {
     const { loading, connected, user, forms } = this.state;
     const { navigate } = this.props.navigation;
@@ -171,6 +182,35 @@ export default class App extends PureComponent {
           </View>
         </View>
         }
+
+        <View style={{
+            width: Dimensions.get('window').width,
+            height: 1,
+            backgroundColor: 'lightgray'
+          }}
+        />
+
+        <View style={{margin: 12}}>
+          <Text>
+            Need help using this tool? Check out our <Text style={{fontWeight: 'bold', color: 'blue'}} onPress={() => {this._canvassUrlHandler()}}>
+            canvassing documentation</Text> with useful articles and video demos.
+          </Text>
+        </View>
+
+        <View style={{
+            width: Dimensions.get('window').width,
+            height: 1,
+            backgroundColor: 'lightgray'
+          }}
+        />
+
+        <View style={{margin: 12}}>
+          <Text>
+            By using this tool you acknowledge that you are acting on your own behalf, do not represent Our Voice USA
+            or its affiliates, and have read our <Text style={{fontWeight: 'bold', color: 'blue'}} onPress={() => {this._canvassGuidelinesUrlHandler()}}>
+            canvassing guidelines</Text>. Please be courteous to those you meet.
+          </Text>
+        </View>
 
       </ScrollView>
     );
