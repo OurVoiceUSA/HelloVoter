@@ -1,5 +1,7 @@
 import React, { PureComponent } from 'react';
 import {
+  Alert,
+  Dimensions,
   TouchableHighlight,
   TouchableWithoutFeedback,
   Keyboard,
@@ -43,7 +45,21 @@ export default class App extends PureComponent {
   }
 
   onChange(canvassSettings) {
-    this.state.refer._setCanvassSettings(canvassSettings);
+    const { refer } = this.state;
+
+    if (refer.state.canvassSettings.share_progress !== true && canvassSettings.share_progress === true) {
+      Alert.alert(
+        'Data Sharing',
+        '"Share progress" enables anyone who you shared your canvassing form with to see everyone\'s progress. Local laws in your area may govern with whom you may share name and address information with. It is your responsibility to make sure you are in compliance with the law. Are you sure you wish to enable this option?',
+        [
+          {text: 'Yes', onPress: () => {
+            refer._setCanvassSettings(canvassSettings);
+          }},
+          {text: 'No', onPress: () => this.forceUpdate()}
+        ], { cancelable: false });
+    } else {
+      refer._setCanvassSettings(canvassSettings);
+    }
   }
 
   render() {
@@ -69,6 +85,13 @@ export default class App extends PureComponent {
           <Text>{DeviceInfo.getUniqueID()}</Text>
         </View>
 
+        <View style={{
+            width: Dimensions.get('window').width,
+            height: 1,
+            backgroundColor: 'lightgray'
+          }}
+        />
+
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <Form
            ref="mainForm"
@@ -78,6 +101,21 @@ export default class App extends PureComponent {
            value={refer.state.canvassSettings}
           />
         </TouchableWithoutFeedback>
+
+        <View style={{
+            width: Dimensions.get('window').width,
+            height: 1,
+            backgroundColor: 'lightgray'
+          }}
+        />
+
+        <View style={{marginTop: 10}}>
+          <Text>
+            By using this tool you acknowledge that you are acting on your own behalf, do not represent Our Voice USA
+            or its affiliates, and have read our <Text style={{fontWeight: 'bold', color: 'blue'}} onPress={() => {refer._canvassUrlHandler()}}>
+            canvassing guidelines</Text>. Please be courteous to those you meet.
+          </Text>
+        </View>
 
       </ScrollView>
     );
