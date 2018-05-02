@@ -96,6 +96,8 @@ export default class App extends PureComponent {
       user: props.navigation.state.params.user,
     };
 
+    this.markers = [];
+
     this.onChange = this.onChange.bind(this);
   }
 
@@ -234,6 +236,7 @@ export default class App extends PureComponent {
     };
 
     node = this._addNode(node);
+    this.updateMarkers();
     this.setState({ fAddress: fAddress, isModalVisible: false });
     this.doMarkerPress(node);
   }
@@ -416,6 +419,12 @@ export default class App extends PureComponent {
     } catch (error) {
       console.warn(error);
     }
+
+    this.updateMarkers();
+  }
+
+  updateMarkers() {
+    this.markers = this.dedupeNodes(this.getNodesbyType("address"));
   }
 
   _getCanvassSettings = async () => {
@@ -828,14 +837,11 @@ export default class App extends PureComponent {
       );
     }
 
-    // reverse sort and de-dupe address pins
-    let markers = this.dedupeNodes(this.getNodesbyType("address"));
-
     // toggle pin horizon based on zoom level
     let markersInView = [];
 
-    for (let m in markers) {
-      let marker = markers[m];
+    for (let m in this.markers) {
+      let marker = this.markers[m];
       if (marker.latlng && marker.latlng.longitude !== null &&
         Math.hypot(region.longitude-marker.latlng.longitude, region.latitude-marker.latlng.latitude) < region.longitudeDelta/1.75)
         markersInView.push(marker);
@@ -902,7 +908,7 @@ export default class App extends PureComponent {
             }
             <Icon name="cog" style={{marginBottom: 10}} size={50} color="#808080" onPress={() => {navigate("CanvassingSettingsPage", {refer: this})}} />
             <View style={{backgroundColor: '#FFFFFF', alignItems: 'flex-end', padding: 10, width: 100, height: 55}}>
-              <Text>{markers.length} pins</Text>
+              <Text>{this.markers.length} pins</Text>
               <Text>{markersInView.length} in view</Text>
             </View>
           </View>
