@@ -255,6 +255,7 @@ export default class App extends PureComponent {
 
     node.created = epoch;
     node.updated = epoch;
+    node.canvasser = this.state.user.dropbox.name.display_name;
     if (!node.id) node.id = sha1(epoch+JSON.stringify(node)+this.state.currentNode.id);
 
     // chech for duplicate address pins
@@ -350,6 +351,7 @@ export default class App extends PureComponent {
             id: id,
             created: pin.id,
             updated: pin.id,
+            canvasser: store.canvasser,
             latlng: pin.latlng,
             address: pin.address,
             multi_unit: ((unit && unit[0] !== null && unit[0] !== "")?true:false),
@@ -363,6 +365,7 @@ export default class App extends PureComponent {
             id: id,
             created: pin.id,
             updated: pin.id,
+            canvasser: store.canvasser,
             parent_id: pid,
             unit: unit[0],
           });
@@ -381,6 +384,7 @@ export default class App extends PureComponent {
           parent_id: id,
           created: pin.id,
           updated: pin.id,
+          canvasser: store.canvasser,
           status: status,
           survey: pin.survey,
         });
@@ -407,7 +411,7 @@ export default class App extends PureComponent {
         } catch (error) {}
       }
 
-      await this.syncTurf();
+      await this.syncTurf(false);
 
     } catch (error) {
       console.warn(error);
@@ -438,7 +442,7 @@ export default class App extends PureComponent {
       this.setState({canvassSettings});
     } catch (e) {}
 
-    if (sync) await this.syncTurf();
+    if (sync) await this.syncTurf(canvassSettings.show_only_my_turf);
 
     if (rmshare) {
       try {
@@ -454,12 +458,12 @@ export default class App extends PureComponent {
 
   }
 
-  syncTurf = async () => {
+  syncTurf = async (flag) => {
     const { form, dbx } = this.state;
     let turfNodes = { nodes: [] };
 
     let files = [DeviceInfo.getUniqueID()];
-    if (this.state.canvassSettings.show_only_my_turf !== true) files.push('exported');
+    if (this.state.canvassSettings.show_only_my_turf !== true || flag === true) files.push('exported');
 
     for (let f in files) {
       let file = files[f];
@@ -471,9 +475,14 @@ export default class App extends PureComponent {
     }
 
     // don't setState a 0 length turf
-    if (turfNodes.nodes.length === 0) return;
+    if (turfNodes.nodes.length === 0)
+      return turfNodes;
 
-    this.setState({ turfNodes: turfNodes });
+    // don't setState inside a sync
+    if (flag === false)
+      this.setState({ turfNodes: turfNodes });
+
+    return turfNodes;
   }
 
   timeFormat(epoch) {
@@ -495,27 +504,87 @@ export default class App extends PureComponent {
 
   _syncNodes = async (flag) => {
     let { dbx, form, user, myNodes } = this.state;
-
-    if (myNodes.last_synced > myNodes.last_saved) return;
+    let allNodes = {nodes: []};
 
     this.setState({syncRunning: true});
 
     let last_synced = myNodes.last_synced;
     myNodes.last_synced = this.getEpoch();
-    myNodes.canvasser = user.dropbox.name.display_name;
 
     try {
       let str = JSON.stringify(myNodes);
       await dbx.filesUpload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtxt', contents: encoding.convert(tr(str), 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
       await this._saveNodes(myNodes, false);
-      await this.syncTurf();
+
+      // extra sync stuff for the form owner
+      if (user.dropbox.account_id == form.author_id) {
+        // download all sub-folder .jtxt files
+        let folders = [];
+        let jtxtfiles = [];
+        let res = await dbx.filesListFolder({path: form.folder_path});
+        for (let i in res.entries) {
+          item = res.entries[i];
+          // any devices logged in with the form creator are here
+          if (item.path_display.match(/\.jtxt$/)) {
+            let data = await dbx.filesDownload({ path: item.path_display });
+            jtxtfiles.push(this._nodesFromJSON(data.fileBinary));
+          }
+          if (item['.tag'] != 'folder') continue;
+          folders.push(item.path_display);
+        }
+
+        // TODO: do in paralell... let objs = await Promise.all(pro.map(p => p.catch(e => e)));
+
+        // for each folder, download all .jtxt files
+        for (let f in folders) {
+          try {
+            let res = await dbx.filesListFolder({path: folders[f]});
+            for (let i in res.entries) {
+              item = res.entries[i];
+              if (item.path_display.match(/\.jtxt$/)) {
+                let data = await dbx.filesDownload({ path: item.path_display });
+                jtxtfiles.push(this._nodesFromJSON(data.fileBinary));
+              }
+            }
+          } catch (e) {
+            console.warn(e);
+          }
+        }
+
+        // concat everything into allNodes
+        for (let f in jtxtfiles)
+          allNodes.nodes = allNodes.nodes.concat(jtxtfiles[f].nodes);
+        allNodes.nodes = this.dedupeNodes(allNodes.nodes); //.concat(await this.syncTurf(true).nodes));
+
+        await dbx.filesUpload({ path: form.folder_path+'/exported.jtrf', contents: encoding.convert(tr(JSON.stringify(allNodes)), 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
+
+        // copy exported.jtrf to all sub-folders if configured in settings
+        if (this.state.canvassSettings.share_progress === true) {
+          try {
+            let res = await dbx.filesListFolder({path: form.folder_path});
+            for (let i in res.entries) {
+              item = res.entries[i];
+              if (item['.tag'] != 'folder') continue;
+              if (item.path_display.match(/@/))
+                await dbx.filesUpload({ path: item.path_display+'/exported.jtrf', contents: encoding.convert(tr(JSON.stringify(allNodes)), 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
+            }
+          } catch (e) {
+            console.warn(e);
+          }
+        }
+      }
+
+      await this.syncTurf(false);
+
       if (flag) Alert.alert('Success', 'Data sync successful!', [{text: 'OK'}], { cancelable: false });
     } catch (error) {
       if (flag) Alert.alert('Error', 'Unable to sync with the server.', [{text: 'OK'}], { cancelable: false });
-      myNodes.last_synced = last_synced;
+      return;
     }
 
     this.setState({syncRunning: false, myNodes: myNodes});
+
+    return allNodes;
   }
 
   mergeNodes() {
@@ -625,132 +694,52 @@ export default class App extends PureComponent {
   doExport = async () => {
     let { dbx, form } = this.state;
 
-    let allNodes = {nodes: []};
-
     this.setState({exportRunning: true});
-    await this._syncNodes(false);
-
-    // download all sub-folder .jtxt files
-    let folders = [];
-    let jtxtfiles = [];
-    try {
-      let res = await dbx.filesListFolder({path: form.folder_path});
-      for (let i in res.entries) {
-        item = res.entries[i];
-        // any devices logged in with the form creator are here
-        if (item.path_display.match(/\.jtxt$/)) {
-          let data = await dbx.filesDownload({ path: item.path_display });
-          jtxtfiles.push(this._nodesFromJSON(data.fileBinary));
-        }
-        if (item['.tag'] != 'folder') continue;
-        folders.push(item.path_display);
-      }
-    } catch (error) {
-      console.warn(error);
-    };
-
-    // TODO: do in paralell... let objs = await Promise.all(pro.map(p => p.catch(e => e)));
-
-    // for each folder, download all .jtxt files
-    for (let f in folders) {
-      try {
-        let res = await dbx.filesListFolder({path: folders[f]});
-        for (let i in res.entries) {
-          item = res.entries[i];
-          if (item.path_display.match(/\.jtxt$/)) {
-            let data = await dbx.filesDownload({ path: item.path_display });
-            jtxtfiles.push(this._nodesFromJSON(data.fileBinary));
-          }
-        }
-      } catch (error) {
-        console.warn(error);
-      }
-    }
-
-    // concat everything into allNodes
-    for (let f in jtxtfiles) {
-      let obj = jtxtfiles[f];
-      // copy canvasser property since it gets lost in the concat
-      for (let n in obj.nodes)
-        obj.nodes[n].canvasser = obj.canvasser;
-      allNodes.nodes = allNodes.nodes.concat(obj.nodes);
-    }
-
-    // make sure we have all turf to reference
-    let toggle = false;
-    if (this.state.canvassSettings.show_only_my_turf === true) {
-      this._setCanvassSettings({show_only_my_turf: false});
-      toggle = true;
-    }
-
-    // add everything from turf
-    allNodes.nodes = allNodes.nodes.concat(this.state.turfNodes.nodes);
-
-    allNodes.nodes = this.dedupeNodes(allNodes.nodes);
-
-    // convert to .csv file and upload
-    let keys = Object.keys(form.questions);
-    let csv = "Street,City,State,Zip,Unit,longitude,latitude,canvasser,datetime,status,"+keys.join(",")+"\n";
-    for (let n in allNodes.nodes) {
-      let node = allNodes.nodes[n];
-      if (node.type !== "survey") continue;
-
-      let addr = this.getNodeByIdStore(node.parent_id, allNodes);
-
-      // orphaned survey
-      if (!addr.id) continue
-
-      // unit
-      if (addr.type === "unit") addr = this.getNodeByIdStore(addr.parent_id, allNodes);
-
-      csv += (addr.address?addr.address.map((x) => '"'+(x?x:'')+'"').join(','):'')+
-        ","+(addr.unit?addr.unit:'')+
-        ","+(addr.latlng?addr.latlng.longitude:'')+
-        ","+(addr.latlng?addr.latlng.latitude:'')+
-        ","+node.canvasser+
-        ","+this.timeFormat(node.updated)+
-        ","+node.status;
-      for (let key in keys) {
-        let value = '';
-        if (node.survey && node.survey[keys[key]]) value = node.survey[keys[key]];
-        csv += ',"'+value+'"';
-      }
-      csv += "\n";
-    }
-
-    // scrub canvasser property
-    for (let n in allNodes.nodes)
-      delete allNodes.nodes[n].canvasser;
+    let allNodes;
 
     try {
-      // turf
-      await dbx.filesUpload({ path: form.folder_path+'/exported.jtrf', contents: encoding.convert(tr(JSON.stringify(allNodes)), 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
+      allNodes = await this._syncNodes(false);
 
-      // copy exported.jtrf to all sub-folders if configured in settings
-      if (this.state.canvassSettings.share_progress === true) {
-        try {
-          let res = await dbx.filesListFolder({path: form.folder_path});
-          for (let i in res.entries) {
-            item = res.entries[i];
-            if (item['.tag'] != 'folder') continue;
-            if (item.path_display.match(/@/))
-              await dbx.filesUpload({ path: item.path_display+'/exported.jtrf', contents: encoding.convert(tr(JSON.stringify(allNodes)), 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
-          }
-        } catch (e) {}
+      // convert to .csv file and upload
+      let keys = Object.keys(form.questions);
+      let csv = "Street,City,State,Zip,Unit,longitude,latitude,canvasser,datetime,status,"+keys.join(",")+"\n";
+
+      for (let n in allNodes.nodes.sort(this.dynamicSort('updated'))) {
+        let node = allNodes.nodes[n];
+        if (node.type !== "survey") continue;
+
+        let addr = this.getNodeByIdStore(node.parent_id, allNodes);
+
+        // orphaned survey
+        if (!addr.id) continue
+
+        // unit
+        if (addr.type === "unit") addr = this.getNodeByIdStore(addr.parent_id, allNodes);
+
+        csv += (addr.address?addr.address.map((x) => '"'+(x?x:'')+'"').join(','):'')+
+          ","+(addr.unit?addr.unit:'')+
+          ","+(addr.latlng?addr.latlng.longitude:'')+
+          ","+(addr.latlng?addr.latlng.latitude:'')+
+          ","+node.canvasser+
+          ","+this.timeFormat(node.updated)+
+          ","+node.status;
+        for (let key in keys) {
+          let value = '';
+          if (node.survey && node.survey[keys[key]]) value = node.survey[keys[key]];
+          csv += ',"'+value+'"';
+        }
+        csv += "\n";
       }
 
       // csv file
       await dbx.filesUpload({ path: form.folder_path+'/'+form.name+'.csv', contents: encoding.convert(tr(csv), 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
       Alert.alert('Success', 'Data export successful! Check your dropbox account for the spreadsheet.', [{text: 'OK'}], { cancelable: false });
-    } catch(error) {
-      console.warn(error);
+    } catch(e) {
+      console.warn(e);
       Alert.alert('Error', 'Unable to export data to the server.', [{text: 'OK'}], { cancelable: false });
     }
 
-    if (toggle)
-      this._setCanvassSettings({show_only_my_turf: true});
-
-    this.setState({ exportRunning: false, turfNodes: allNodes });
+    this.setState({ exportRunning: false });
   }
 
   _canvassGuidelinesUrlHandler() {
