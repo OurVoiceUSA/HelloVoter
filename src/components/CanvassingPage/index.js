@@ -520,14 +520,13 @@ export default class App extends PureComponent {
       if (user.dropbox.account_id == form.author_id) {
         // download all sub-folder .jtxt files
         let folders = [];
-        let jtxtfiles = [];
         let res = await dbx.filesListFolder({path: form.folder_path});
         for (let i in res.entries) {
           item = res.entries[i];
           // any devices logged in with the form creator are here
           if (item.path_display.match(/\.jtxt$/)) {
             let data = await dbx.filesDownload({ path: item.path_display });
-            jtxtfiles.push(this._nodesFromJSON(data.fileBinary));
+            allNodes.nodes = allNodes.nodes.concat((this._nodesFromJSON(data.fileBinary)).nodes);
           }
           if (item['.tag'] != 'folder') continue;
           folders.push(item.path_display);
@@ -543,7 +542,7 @@ export default class App extends PureComponent {
               item = res.entries[i];
               if (item.path_display.match(/\.jtxt$/)) {
                 let data = await dbx.filesDownload({ path: item.path_display });
-                jtxtfiles.push(this._nodesFromJSON(data.fileBinary));
+                allNodes.nodes = allNodes.nodes.concat((this._nodesFromJSON(data.fileBinary)).nodes);
               }
             }
           } catch (e) {
@@ -551,10 +550,7 @@ export default class App extends PureComponent {
           }
         }
 
-        // concat everything into allNodes
-        for (let f in jtxtfiles)
-          allNodes.nodes = allNodes.nodes.concat(jtxtfiles[f].nodes);
-        allNodes.nodes = this.dedupeNodes(allNodes.nodes); //.concat(await this.syncTurf(true).nodes));
+        allNodes.nodes = this.dedupeNodes(allNodes.nodes.concat((await this.syncTurf(true)).nodes));
 
         await dbx.filesUpload({ path: form.folder_path+'/exported.jtrf', contents: encoding.convert(tr(JSON.stringify(allNodes)), 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
 
