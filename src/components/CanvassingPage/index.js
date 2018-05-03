@@ -97,6 +97,8 @@ export default class App extends PureComponent {
     };
 
     this.markers = [];
+    this.idx = {};
+    this.idc = {};
 
     this.onChange = this.onChange.bind(this);
   }
@@ -236,6 +238,13 @@ export default class App extends PureComponent {
     };
 
     node = this._addNode(node);
+
+    this.idx[node.id] = node;
+    if (node.partent_id) {
+      if (!this.idc[nodes.parent_id]) this.idc[node.parent_id] = [];
+      this.idc[node.parent_id].unshift(nodes);
+    }
+
     this.updateMarkers();
     this.setState({ fAddress: fAddress, isModalVisible: false });
     this.doMarkerPress(node);
@@ -268,6 +277,12 @@ export default class App extends PureComponent {
       myNodes.nodes.push(node);
     else
       node = check;
+
+    this.idx[node.id] = node;
+    if (node.parent_id) {
+      if (!this.idc[node.parent_id]) this.idc[node.parent_id] = [];
+      this.idc[node.parent_id].unshift(node);
+    }
 
     this._saveNodes(myNodes, true);
 
@@ -425,7 +440,23 @@ export default class App extends PureComponent {
 
   updateMarkers() {
     this.markers = this.dedupeNodes(this.getNodesbyType("address"));
+    this.updateIndex();
     this.forceUpdate();
+  }
+
+  updateIndex() {
+    this.idx = {};
+    this.idc = {};
+
+    let merged = this.mergeNodes();
+
+    for (let m in merged.nodes) {
+      this.idx[merged.nodes[m].id] = merged.nodes[m];
+      if (merged.nodes[m].parent_id) {
+        if (!this.idc[merged.nodes[m].parent_id]) this.idc[merged.nodes[m].parent_id] = [];
+        this.idc[merged.nodes[m].parent_id].unshift(merged.nodes[m])
+      }
+    }
   }
 
   _getCanvassSettings = async () => {
@@ -602,6 +633,8 @@ export default class App extends PureComponent {
 
     this.setState({syncRunning: false, myNodes: myNodes});
 
+    this.updateIndex();
+
     return allNodes;
   }
 
@@ -613,6 +646,7 @@ export default class App extends PureComponent {
   }
 
   getNodeById(id) {
+    if (this.idx[id]) return this.idx[id];
     return this.getNodeByIdStore(id, this.mergeNodes());
   }
 
@@ -632,6 +666,8 @@ export default class App extends PureComponent {
       if (node.id === id) {
         node[prop] = value;
         node.updated = this.getEpoch();
+
+        this.idx[node.id] = node;
 
         // check if this ID is in myNodes
         for (let i in myNodes.nodes) {
@@ -661,8 +697,16 @@ export default class App extends PureComponent {
   }
 
   getChildNodesByIdType(id, type) {
-    let merged = this.mergeNodes();
     let nodes = [];
+
+    if (this.idc[id]) {
+      for (let i in this.idc[id])
+        if (this.idc[id][i].type === type)
+          nodes.push(this.idc[id][i]);
+      return nodes;
+    }
+
+    let merged = this.mergeNodes();
     for (let i in merged.nodes) {
       let node = merged.nodes[i];
       if (node.parent_id === id && node.type === type) {
