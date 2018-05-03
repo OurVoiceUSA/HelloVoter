@@ -425,6 +425,7 @@ export default class App extends PureComponent {
 
   updateMarkers() {
     this.markers = this.dedupeNodes(this.getNodesbyType("address"));
+    this.forceUpdate();
   }
 
   _getCanvassSettings = async () => {
@@ -451,7 +452,7 @@ export default class App extends PureComponent {
       this.setState({canvassSettings});
     } catch (e) {}
 
-    if (sync) await this.syncTurf(canvassSettings.show_only_my_turf);
+    if (sync) await this.syncTurf(false);
 
     if (rmshare) {
       try {
@@ -474,6 +475,20 @@ export default class App extends PureComponent {
     let files = [DeviceInfo.getUniqueID()];
     if (this.state.canvassSettings.show_only_my_turf !== true || flag === true) files.push('exported');
 
+    // other jtxt files on this account are "my turf" too
+    if (this.state.canvassSettings.show_only_my_turf !== true && flag === false) {
+      let res = await dbx.filesListFolder({path: form.folder_path});
+      for (let i in res.entries) {
+        item = res.entries[i];
+        if (item.path_display.match(/\.jtxt$/) && !item.path_display.match(DeviceInfo.getUniqueID())) {
+          try {
+            let data = await dbx.filesDownload({ path: item.path_display });
+            turfNodes.nodes = turfNodes.nodes.concat((this._nodesFromJSON(data.fileBinary)).nodes);
+          } catch (e) {}
+        }
+      }
+    }
+
     for (let f in files) {
       let file = files[f];
       try {
@@ -483,13 +498,11 @@ export default class App extends PureComponent {
       } catch (e) {}
     }
 
-    // don't setState a 0 length turf
-    if (turfNodes.nodes.length === 0)
-      return turfNodes;
-
     // don't setState inside a sync
     if (flag === false)
       this.setState({ turfNodes: turfNodes });
+
+    this.updateMarkers();
 
     return turfNodes;
   }
