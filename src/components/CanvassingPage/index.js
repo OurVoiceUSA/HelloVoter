@@ -924,7 +924,10 @@ export default class App extends PureComponent {
           followsUserLocation={false}
           keyboardShouldPersistTaps={true}
           {...this.props}>
-          {markersInView.map((marker) => (
+          {markersInView.map((marker) => {
+            let status = this.getLatestSurvey(marker);
+            let LastVisted = (status.LastVisted ? status.LastVisted : 'Never');
+            return (
               <MapView.Marker
                 key={marker.id}
                 coordinate={marker.latlng}
@@ -933,11 +936,15 @@ export default class App extends PureComponent {
                 onDragEnd={(e) => {
                   this.updateNodeById(marker.id, 'latlng', e.nativeEvent.coordinate);
                 }}
-                pinColor={this.getPinColor(marker)}
-                description={(marker.multi_unit?"Multi-unit address":"Single unit address")}
-                onCalloutPress={() => {this.doMarkerPress(marker);}}
-                />
-          ))}
+                pinColor={this.getPinColor(marker)}>
+                  <MapView.Callout onPress={() => {this.doMarkerPress(marker);}}>
+                    <View style={{backgroundColor: '#FFFFFF', alignItems: 'center', padding: 5, width: 300, height: 65}}>
+                      <Text style={{fontWeight: 'bold'}}>{marker.address.join(", ")}</Text>
+                      <Text>{(marker.multi_unit ? 'Multi-unit address' : 'Last Visisted: '+LastVisted)}</Text>
+                    </View>
+                  </MapView.Callout>
+                </MapView.Marker>
+          )})}
         </MapView>
         }
           <View style={{alignSelf: 'flex-end', alignItems: 'flex-end', marginRight: 5}}>
