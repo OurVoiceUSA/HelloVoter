@@ -951,7 +951,10 @@ export default class App extends PureComponent {
         }
 
         <View style={{alignSelf: 'flex-end', alignItems: 'flex-end', marginRight: 5}}>
-          <View style={{backgroundColor: '#FFFFFF', alignItems: 'flex-end', padding: 10, width: 100, height: 55}}>
+          <View style={{
+              backgroundColor: '#FFFFFF', alignItems: 'flex-end', padding: 8,
+              borderColor: '#000000', borderWidth: 2, borderRadius: 10, width: 100, height: 60,
+            }}>
             {this.state.syncTurfRunning &&
             <ActivityIndicator size="large" />
             ||
