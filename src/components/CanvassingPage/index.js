@@ -75,6 +75,7 @@ export default class App extends PureComponent {
       loading: false,
       exportRunning: false,
       syncRunning: false,
+      syncTurfRunning: false,
       serviceError: null,
       locationAccess: null,
       myPosition: {latitude: null, longitude: null},
@@ -501,6 +502,8 @@ export default class App extends PureComponent {
 
   syncTurf = async (flag) => {
     const { form, dbx } = this.state;
+
+    this.setState({syncTurfRunning: true});
     let turfNodes = { nodes: [] };
 
     let files = [DeviceInfo.getUniqueID()];
@@ -534,6 +537,7 @@ export default class App extends PureComponent {
       this.setState({ turfNodes: turfNodes });
 
     this.updateMarkers();
+    this.setState({syncTurfRunning: false});
 
     return turfNodes;
   }
@@ -972,8 +976,14 @@ export default class App extends PureComponent {
             }
             <Icon name="cog" style={{marginBottom: 10}} size={50} color="#808080" onPress={() => {navigate("CanvassingSettingsPage", {refer: this})}} />
             <View style={{backgroundColor: '#FFFFFF', alignItems: 'flex-end', padding: 10, width: 100, height: 55}}>
-              <Text>{this.markers.length} pins</Text>
-              <Text>{markersInView.length} in view</Text>
+              {this.state.syncTurfRunning &&
+              <ActivityIndicator size="large" />
+              ||
+              <View>
+                <Text>{this.markers.length} pins</Text>
+                <Text>{markersInView.length} in view</Text>
+              </View>
+              }
             </View>
           </View>
         <View style={styles.buttonContainer}>
