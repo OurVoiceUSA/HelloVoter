@@ -31,7 +31,6 @@ import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import encoding from 'encoding';
 import { transliterate as tr } from 'transliteration/src/main/browser';
 import { _doGeocode } from '../../common';
-import DropboxSharePage from '../DropboxSharePage';
 import KnockPage from '../KnockPage';
 import Modal from 'react-native-simple-modal';
 import TimeAgo from 'javascript-time-ago'
@@ -91,7 +90,6 @@ export default class App extends PureComponent {
       isModalVisible: false,
       isKnockMenuVisible: false,
       showDisclosure: "true",
-      DropboxShareScreen: false,
       dbx: props.navigation.state.params.dbx,
       form: props.navigation.state.params.form,
       user: props.navigation.state.params.user,
@@ -822,7 +820,7 @@ export default class App extends PureComponent {
     const { navigate } = this.props.navigation;
     const {
       showDisclosure, myPosition, myNodes, locationAccess, serviceError, form, user,
-      fAddress, loading, dbx, DropboxShareScreen, exportRunning, syncRunning, region,
+      fAddress, loading, dbx, region,
     } = this.state;
 
     if (showDisclosure === "true") {
@@ -951,50 +949,67 @@ export default class App extends PureComponent {
           )})}
         </MapView>
         }
-          <View style={{alignSelf: 'flex-end', alignItems: 'flex-end', marginRight: 5}}>
-            {user.dropbox.account_id == form.author_id &&
-            <View style={{marginBottom: 10}}>
-              <Icon name="share-square" size={50} color="#808080" style={{marginBottom: 10}} onPress={() => this.setState({DropboxShareScreen: true})} />
-              {exportRunning &&
-              <ActivityIndicator size="large" />
-              ||
-              <Icon name="save" size={50} color="#b20000" onPress={() => this.doExport()} />
-              }
+
+        <View style={{alignSelf: 'flex-end', alignItems: 'flex-end', marginRight: 5}}>
+          <View style={{backgroundColor: '#FFFFFF', alignItems: 'flex-end', padding: 10, width: 100, height: 55}}>
+            {this.state.syncTurfRunning &&
+            <ActivityIndicator size="large" />
+            ||
+            <View>
+              <Text>{this.markers.length} pins</Text>
+              <Text>{markersInView.length} in view</Text>
             </View>
             }
-            {(!myNodes.last_synced || myNodes.last_saved > myNodes.last_synced || (syncRunning && !exportRunning)) &&
-              <View style={{marginBottom: 10}}>
-              {syncRunning &&
-              <ActivityIndicator size="large" />
-              ||
-              <Icon name="refresh" size={50} color="#00a86b" onPress={() => this._syncNodes(true)} />
-              }
-              </View>
-            }
-            {nomap_content.length == 0 &&
-            <Icon name="compass" style={{marginBottom: 10}} size={50} color="#0084b4" onPress={() => this.map.animateToCoordinate(myPosition, 1000)} />
-            }
-            <Icon name="cog" style={{marginBottom: 10}} size={50} color="#808080" onPress={() => {navigate("CanvassingSettingsPage", {refer: this})}} />
-            <View style={{backgroundColor: '#FFFFFF', alignItems: 'flex-end', padding: 10, width: 100, height: 55}}>
-              {this.state.syncTurfRunning &&
-              <ActivityIndicator size="large" />
-              ||
-              <View>
-                <Text>{this.markers.length} pins</Text>
-                <Text>{markersInView.length} in view</Text>
-              </View>
-              }
-            </View>
           </View>
+        </View>
+
         <View style={styles.buttonContainer}>
-          <Icon.Button
-            name="home"
-            backgroundColor="#d7d7d7"
-            color="#000000"
-            onPress={() => {this.showConfirmAddress();}}
-            {...iconStyles}>
-            Record New Address
-          </Icon.Button>
+          <TouchableOpacity style={styles.iconContainer}
+            onPress={() => {this.showConfirmAddress();}}>
+            <Icon
+              name="map-marker"
+              size={50}
+              color="#8b4513"
+              {...iconStyles} />
+          </TouchableOpacity>
+
+          {nomap_content.length == 0 &&
+          <TouchableOpacity style={styles.iconContainer}
+            onPress={() => this.map.animateToCoordinate(myPosition, 1000)}>
+            <Icon
+              name="location-arrow"
+              size={50}
+              color="#0084b4"
+              {...iconStyles} />
+          </TouchableOpacity>
+          }
+
+          {this.state.syncRunning &&
+          <View style={styles.iconContainer}>
+            <ActivityIndicator size="large" />
+          </View>
+          ||
+          <View>
+            <TouchableOpacity style={styles.iconContainer}
+              onPress={() => {this._syncNodes(true)}}>
+              <Icon
+                name="refresh"
+                size={50}
+                color="#00a86b"
+                {...iconStyles} />
+            </TouchableOpacity>
+          </View>
+          }
+
+          <TouchableOpacity style={styles.iconContainer}
+            onPress={() => {navigate("CanvassingSettingsPage", {refer: this})}}>
+            <Icon
+              name="cog"
+              size={50}
+              color="#808080"
+              {...iconStyles} />
+          </TouchableOpacity>
+
         </View>
 
         <Modal
@@ -1065,22 +1080,6 @@ export default class App extends PureComponent {
           <KnockPage refer={this} funcs={this} />
         </Modal>
 
-        <Modal
-          open={DropboxShareScreen}
-          modalStyle={{width: 335, height: 250, backgroundColor: "transparent",
-            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
-          style={{alignItems: 'center'}}
-          offset={0}
-          overlayBackground={'rgba(0, 0, 0, 0.75)'}
-          animationDuration={200}
-          animationTension={40}
-          modalDidOpen={() => undefined}
-          modalDidClose={() => this.setState({DropboxShareScreen: false})}
-          closeOnTouchOutside={true}
-          disableOnBackPress={false}>
-          <DropboxSharePage refer={this} />
-        </Modal>
-
       </View>
     );
   }
@@ -1103,6 +1102,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  iconContainer: {
+    backgroundColor: '#ffffff', width: 65, height: 65, borderRadius: 65,
+    borderWidth: 2, borderColor: '#000000',
+    alignItems: 'center', justifyContent: 'center', margin: 2.5,
   },
   map: {
     ...StyleSheet.absoluteFillObject,

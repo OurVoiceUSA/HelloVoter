@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   Dimensions,
   TouchableHighlight,
@@ -11,7 +12,10 @@ import {
   ScrollView,
 } from 'react-native';
 
+import Icon from 'react-native-vector-icons/FontAwesome';
+import DropboxSharePage from '../DropboxSharePage';
 import DeviceInfo from 'react-native-device-info';
+import Modal from 'react-native-simple-modal';
 import t from 'tcomb-form-native';
 
 var Form = t.form.Form;
@@ -39,6 +43,9 @@ export default class App extends PureComponent {
 
     this.state = {
       refer: props.navigation.state.params.refer,
+      form: props.navigation.state.params.refer.state.form,
+      dbx: props.navigation.state.params.refer.state.dbx,
+      DropboxShareScreen: false,
     };
 
     this.onChange = this.onChange.bind(this);
@@ -71,7 +78,7 @@ export default class App extends PureComponent {
     };
 
     // additional settings for the form owner
-    if (refer.state.user.dropbox.account_id === refer.state.form.author_id) {
+    if (refer.state.user.dropbox.account_id === this.state.form.author_id) {
       formOpt['share_progress'] = t.Boolean;
     }
 
@@ -108,6 +115,33 @@ export default class App extends PureComponent {
             backgroundColor: 'lightgray'
           }}
         />
+
+        {refer.state.user.dropbox.account_id == refer.state.form.author_id &&
+        <View style={{marginBottom: 10}}>
+          <Icon name="share-square" size={50} color="#808080" style={{marginBottom: 10}} onPress={() => this.setState({DropboxShareScreen: true})} />
+          {refer.state.exportRunning &&
+          <ActivityIndicator size="large" />
+          ||
+          <Icon name="save" size={50} color="#b20000" onPress={() => refer.doExport()} />
+          }
+        </View>
+        }
+
+        <Modal
+          open={this.state.DropboxShareScreen}
+          modalStyle={{width: 335, height: 250, backgroundColor: "transparent",
+            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
+          style={{alignItems: 'center'}}
+          offset={0}
+          overlayBackground={'rgba(0, 0, 0, 0.75)'}
+          animationDuration={200}
+          animationTension={40}
+          modalDidOpen={() => undefined}
+          modalDidClose={() => this.setState({DropboxShareScreen: false})}
+          closeOnTouchOutside={true}
+          disableOnBackPress={false}>
+          <DropboxSharePage refer={this} />
+        </Modal>
 
       </ScrollView>
     );
