@@ -72,6 +72,7 @@
 		CFBD10D9736E420C9CC77BD0 /* Entypo.ttf in Resources */ = {isa = PBXBuildFile; fileRef = ADCC85FA6BC64B9E95498D99 /* Entypo.ttf */; };
 		E060FA8DB0FE41EBB605C3A1 /* FontAwesome.ttf in Resources */ = {isa = PBXBuildFile; fileRef = B555DB84CB9846678D60A0B7 /* FontAwesome.ttf */; };
 		E3E1A72408694980BB8B971F /* MaterialCommunityIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C7A5743636864653A264E34C /* MaterialCommunityIcons.ttf */; };
+		E566696AA78836476D2B1B24 /* libPods-OurVoice.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F08E4DD05EFDE8698A940A7 /* libPods-OurVoice.a */; };
 		E5B25E41DDD64C38B5107618 /* libRNGooglePlaces.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6E9158D16EE94DACA8AC4840 /* libRNGooglePlaces.a */; };
 		F9FCFA052F02401186DEF69B /* SimpleLineIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7DBA2E9E6CC24C4EB1DE5BF8 /* SimpleLineIcons.ttf */; };
 /* End PBXBuildFile section */
@@ -507,6 +508,7 @@
 				9B2A2FD3200D8B6400210EFC /* libRNGeocoder.a in Frameworks */,
 				E5B25E41DDD64C38B5107618 /* libRNGooglePlaces.a in Frameworks */,
 				9B6FB2C2DC22452883FA1094 /* libReactNativeConfig.a in Frameworks */,
+				E566696AA78836476D2B1B24 /* libPods-OurVoice.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -920,7 +922,6 @@
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
-				D43A8D299B7310FE2F1FDD85 /* [CP] Embed Pods Frameworks */,
 				F45AA3AE9D1F7541F021C0CC /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
@@ -1474,21 +1475,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		D43A8D299B7310FE2F1FDD85 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-OurVoice/Pods-OurVoice-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		F45AA3AE9D1F7541F021C0CC /* [CP] Copy Pods Resources */ = {
