@@ -940,7 +940,7 @@ export default class App extends PureComponent {
                   <MapView.Callout onPress={() => {this.doMarkerPress(marker);}}>
                     <View style={{backgroundColor: '#FFFFFF', alignItems: 'center', padding: 5, width: 300, height: 65}}>
                       <Text style={{fontWeight: 'bold'}}>{marker.address.join(", ")}</Text>
-                      <Text>{(marker.multi_unit ? 'Multi-unit address' : 'Last Visisted: '+LastVisted)}</Text>
+                      <Text>{(marker.multi_unit ? 'Multi-unit address' : 'Last Visted: '+LastVisted)}</Text>
                     </View>
                   </MapView.Callout>
                 </MapView.Marker>
