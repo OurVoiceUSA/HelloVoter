@@ -925,7 +925,7 @@ export default class App extends PureComponent {
           keyboardShouldPersistTaps={true}
           {...this.props}>
           {markersInView.map((marker) => {
-            let status = this.getLatestSurvey(marker);
+            let status = this.getLatestSurvey(marker.id);
             let LastVisted = (status.LastVisted ? status.LastVisted : 'Never');
             return (
               <MapView.Marker
