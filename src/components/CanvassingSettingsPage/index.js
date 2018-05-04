@@ -43,8 +43,7 @@ export default class App extends PureComponent {
 
     this.state = {
       refer: props.navigation.state.params.refer,
-      form: props.navigation.state.params.refer.state.form,
-      dbx: props.navigation.state.params.refer.state.dbx,
+      exportRunning: false,
       DropboxShareScreen: false,
     };
 
@@ -69,6 +68,13 @@ export default class App extends PureComponent {
     }
   }
 
+  exportDone(success) {
+    if (success)
+      Alert.alert('Success', 'Data export successful! Check your dropbox account for the spreadsheet.', [{text: 'OK'}], { cancelable: false });
+    else
+      Alert.alert('Error', 'Unable to export data to the server.', [{text: 'OK'}], { cancelable: false });  
+  }
+
   render() {
     const { refer } = this.state;
 
@@ -78,7 +84,7 @@ export default class App extends PureComponent {
     };
 
     // additional settings for the form owner
-    if (refer.state.user.dropbox.account_id === this.state.form.author_id) {
+    if (refer.state.user.dropbox.account_id === refer.state.form.author_id) {
       formOpt['share_progress'] = t.Boolean;
     }
 
@@ -87,7 +93,7 @@ export default class App extends PureComponent {
     return (
       <ScrollView style={{flex: 1, padding: 15, backgroundColor: 'white'}}>
 
-        <View style={{flex: 1, alignItems: 'flex-end'}}>
+        <View style={{flex: 1, alignItems: 'flex-end', marginBottom: 10}}>
           <Text>Your device ID is:</Text>
           <Text>{DeviceInfo.getUniqueID()}</Text>
         </View>
@@ -118,12 +124,18 @@ export default class App extends PureComponent {
 
         {refer.state.user.dropbox.account_id == refer.state.form.author_id &&
         <View style={{marginBottom: 10}}>
-          <Icon name="share-square" size={50} color="#808080" style={{marginBottom: 10}} onPress={() => this.setState({DropboxShareScreen: true})} />
-          {refer.state.exportRunning &&
-          <ActivityIndicator size="large" />
-          ||
-          <Icon name="save" size={50} color="#b20000" onPress={() => refer.doExport()} />
-          }
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <Icon name="share-square" size={50} color="#808080" style={{marginBottom: 10}} onPress={() => this.setState({DropboxShareScreen: true})} />
+            <Text style={{fontSize: 20, marginLeft: 10}}>Share form</Text>
+          </View>
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            {this.state.exportRunning &&
+            <ActivityIndicator size="large" />
+            ||
+            <Icon name="save" size={50} color="#b20000" onPress={() => refer.doExport(this)} />
+            }
+            <Text style={{fontSize: 20, marginLeft: 10}}>Export data to spreadsheet</Text>
+          </View>
         </View>
         }
 

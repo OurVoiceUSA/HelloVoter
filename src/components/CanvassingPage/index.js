@@ -760,11 +760,12 @@ export default class App extends PureComponent {
     return "#8b4513";
   }
 
-  doExport = async () => {
+  doExport = async (refer) => {
     let { dbx, form } = this.state;
 
-    this.setState({exportRunning: true});
+    refer.setState({exportRunning: true});
     let allNodes;
+    let success = false;
 
     try {
       allNodes = await this._syncNodes(false);
@@ -802,13 +803,12 @@ export default class App extends PureComponent {
 
       // csv file
       await dbx.filesUpload({ path: form.folder_path+'/'+form.name+'.csv', contents: encoding.convert(tr(csv), 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
-      Alert.alert('Success', 'Data export successful! Check your dropbox account for the spreadsheet.', [{text: 'OK'}], { cancelable: false });
+      success = true;
     } catch(e) {
       console.warn(e);
-      Alert.alert('Error', 'Unable to export data to the server.', [{text: 'OK'}], { cancelable: false });
     }
 
-    this.setState({ exportRunning: false });
+    refer.setState({ exportRunning: false }, refer.exportDone(success));
   }
 
   _canvassGuidelinesUrlHandler() {
