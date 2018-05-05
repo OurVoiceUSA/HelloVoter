@@ -174,20 +174,20 @@ export default class App extends PureComponent {
   }
 
   handleConnectivityChange(ci) {
-    switch (ci.type) {
-      case 'wifi':
-      case 'bluetooth':
-      case 'ethernet':
-        state = 'wifi';
-        break;
-      case 'cellular':
-      case 'wimax':
-        state = 'cellular';
-        break;
-      default:
-        state = 'none';
-        break;
-    }
+    let state = 'none';
+    try {
+      switch (ci.type) {
+        case 'wifi':
+        case 'bluetooth':
+        case 'ethernet':
+          state = 'wifi';
+          break;
+        case 'cellular':
+        case 'wimax':
+          state = 'cellular';
+          break;
+      }
+    } catch (e) {}
     this.setState({netInfo: state});
   }
 
