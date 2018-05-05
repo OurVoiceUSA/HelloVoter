@@ -786,6 +786,8 @@ export default class App extends PureComponent {
         // unit
         if (addr.type === "unit") addr = this.getNodeByIdStore(addr.parent_id, allNodes);
 
+        if (this.state.canvassSettings.only_export_home === true && node.status !== 'home') continue;
+
         csv += (addr.address?addr.address.map((x) => '"'+(x?x:'')+'"').join(','):'')+
           ","+(addr.unit?addr.unit:'')+
           ","+(addr.latlng?addr.latlng.longitude:'')+

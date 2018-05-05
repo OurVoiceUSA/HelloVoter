@@ -34,6 +34,10 @@ var options = {
       label: 'Share progress',
       help: 'When you export your form data, enabling this option will allow all your canvassers to see each other\'s progress on thier devices.',
     },
+    only_export_home: {
+      label: 'Only export taken surveys',
+      help: 'When you export your data, this makes it so \'not home\' and \'not interested\' don\'t show up in the spreadsheet.',
+    },
   },
 };
 
@@ -72,7 +76,7 @@ export default class App extends PureComponent {
     if (success)
       Alert.alert('Success', 'Data export successful! Check your dropbox account for the spreadsheet.', [{text: 'OK'}], { cancelable: false });
     else
-      Alert.alert('Error', 'Unable to export data to the server.', [{text: 'OK'}], { cancelable: false });  
+      Alert.alert('Error', 'Unable to export data to the server.', [{text: 'OK'}], { cancelable: false });
   }
 
   render() {
@@ -86,6 +90,7 @@ export default class App extends PureComponent {
     // additional settings for the form owner
     if (refer.state.user.dropbox.account_id === refer.state.form.author_id) {
       formOpt['share_progress'] = t.Boolean;
+      formOpt['only_export_home'] = t.Boolean;
     }
 
     let mainForm = t.struct(formOpt);
@@ -128,7 +133,7 @@ export default class App extends PureComponent {
             <Icon name="share-square" size={50} color="#808080" style={{marginBottom: 10}} onPress={() => this.setState({DropboxShareScreen: true})} />
             <Text style={{fontSize: 20, marginLeft: 10}}>Share form</Text>
           </View>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: 10}}>
             {this.state.exportRunning &&
             <ActivityIndicator size="large" />
             ||
