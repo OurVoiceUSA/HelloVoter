@@ -105,42 +105,27 @@ export default class App extends PureComponent {
     return (
       <ScrollView style={{flex: 1, padding: 15, backgroundColor: 'white'}}>
 
-        <View style={{flex: 1, alignItems: 'flex-end', marginBottom: 10}}>
+        <View style={{flex: 1, alignItems: 'flex-end'}}>
           <Text>Your device ID is:</Text>
           <Text>{DeviceInfo.getUniqueID()}</Text>
         </View>
 
-        <View style={{
-            width: Dimensions.get('window').width,
-            height: 1,
-            backgroundColor: 'lightgray'
-          }}
-        />
-
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <Form
-           ref="mainForm"
-           type={mainForm}
-           options={options}
-           onChange={this.onChange}
-           value={refer.state.canvassSettings}
-          />
-        </TouchableWithoutFeedback>
-
-        <View style={{
-            width: Dimensions.get('window').width,
-            height: 1,
-            backgroundColor: 'lightgray'
-          }}
-        />
-
         {refer.state.user.dropbox.account_id == refer.state.form.author_id &&
-        <View style={{marginBottom: 10}}>
+        <View>
+
+          <View style={{
+              width: Dimensions.get('window').width,
+              height: 1,
+              backgroundColor: 'lightgray',
+              margin: 10,
+            }}
+          />
+
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
             <Icon name="share-square" size={50} color="#808080" style={{marginBottom: 10}} onPress={() => this.setState({DropboxShareScreen: true})} />
             <Text style={{fontSize: 20, marginLeft: 10}}>Share form</Text>
           </View>
-          <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: 10}}>
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
             {this.state.exportRunning &&
             <ActivityIndicator size="large" />
             ||
@@ -158,6 +143,32 @@ export default class App extends PureComponent {
           </View>
         </View>
         }
+
+        <View style={{
+            width: Dimensions.get('window').width,
+            height: 1,
+            backgroundColor: 'lightgray',
+            margin: 10,
+          }}
+        />
+
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <Form
+           ref="mainForm"
+           type={mainForm}
+           options={options}
+           onChange={this.onChange}
+           value={refer.state.canvassSettings}
+          />
+        </TouchableWithoutFeedback>
+
+        <View style={{
+            width: Dimensions.get('window').width,
+            height: 1,
+            backgroundColor: 'lightgray',
+            margin: 10,
+          }}
+        />
 
         <Modal
           open={this.state.DropboxShareScreen}
