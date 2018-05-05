@@ -34,6 +34,10 @@ var options = {
       label: 'Sync over cellular',
       help: 'Allow syncing of data over your cellular connection. Data rates may apply.',
     },
+    auto_sync: {
+      label: 'Automatially sync data',
+      help: 'If you are on wifi, or enabled syncing on cellular, data will sync automatically as you canvass.',
+    },
     share_progress: {
       label: 'Share progress',
       help: 'When you export your form data, enabling this option will allow all your canvassers to see each other\'s progress on thier devices.',
@@ -92,6 +96,7 @@ export default class App extends PureComponent {
       'show_only_my_turf': t.Boolean,
       'draggable_pins': t.Boolean,
       'sync_on_cellular': t.Boolean,
+      'auto_sync': t.Boolean,
     };
 
     // additional settings for the form owner

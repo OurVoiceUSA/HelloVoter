@@ -606,6 +606,8 @@ export default class App extends PureComponent {
     } catch (error) {
       console.warn(error);
     }
+
+    if (this.state.canvassSettings.auto_sync && this.syncingOk() && !this.state.syncRunning) this._syncNodes(false);
   }
 
   _syncNodes = async (flag) => {
