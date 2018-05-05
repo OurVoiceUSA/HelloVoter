@@ -14,8 +14,6 @@ import AboutPage from '../components/AboutPage';
 
 import { StackNavigator } from 'react-navigation';
 
-import HelpButton from './help-button';
-
 export default App = StackNavigator({
   HomeScreen: {
     screen: HomeScreenPage,
