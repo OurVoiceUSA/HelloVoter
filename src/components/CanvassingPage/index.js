@@ -181,6 +181,9 @@ export default class App extends PureComponent {
         case 'bluetooth':
         case 'ethernet':
           state = 'wifi';
+          // TODO: this doesn't trigger a sync when you first open the app, only because settings aren't loaded yet
+          //       need more rubost state change logic
+          if (this.state.canvassSettings.auto_sync && !this.state.syncRunning) this._syncNodes(false);
           break;
         case 'cellular':
         case 'wimax':
