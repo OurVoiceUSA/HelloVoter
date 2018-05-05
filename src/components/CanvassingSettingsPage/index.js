@@ -139,6 +139,8 @@ export default class App extends PureComponent {
                   Alert.alert('Export failed.', 'You are not connected to the internet.', [{text: 'OK'}], { cancelable: false });
                 } else if (!refer.syncingOk()) {
                   Alert.alert('Export failed.', 'You are not connected to wifi. To sync over your cellular connection, enable \'Sync over cellular\' in settings.', [{text: 'OK'}], { cancelable: false });
+                } else if (refer.state.syncRunning) {
+                  Alert.alert('Export failed.', 'Data sync is currently running. Wait until it\'s finished and try again.', [{text: 'OK'}], { cancelable: false });
                 } else {
                   refer.doExport(this);
                 }
