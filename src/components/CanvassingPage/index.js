@@ -4,6 +4,7 @@ import {
   ActivityIndicator,
   Alert,
   StyleSheet,
+  NetInfo,
   Text,
   TextInput,
   View,
@@ -72,6 +73,7 @@ export default class App extends PureComponent {
 
     this.state = {
       loading: false,
+      netInfo: 'none',
       exportRunning: false,
       syncRunning: false,
       syncTurfRunning: false,
@@ -100,6 +102,7 @@ export default class App extends PureComponent {
     this.idc = {};
 
     this.onChange = this.onChange.bind(this);
+    this.handleConnectivityChange = this.handleConnectivityChange.bind(this);
   }
 
   onLocationChange (e: Event) {
@@ -141,11 +144,13 @@ export default class App extends PureComponent {
 
     this.setState({ locationAccess: access });
   }
+
   componentDidMount() {
     this.requestLocationPermission();
+    this.setupConnectionListener();
     this._getCanvassSettings();
     this._getNodesAsyncStorage();
-  this.LoadDisclosure(); //Updates showDisclosure state if the user previously accepted
+    this.LoadDisclosure(); //Updates showDisclosure state if the user previously accepted
   }
 
   getLocation() {
@@ -154,6 +159,42 @@ export default class App extends PureComponent {
     },
     (error) => { },
     { enableHighAccuracy: true, timeout: 2000, maximumAge: 1000 });
+  }
+
+  setupConnectionListener = async () => {
+    try {
+      let ci = await NetInfo.getConnectionInfo();
+      this.handleConnectivityChange(ci);
+    } catch (e) {}
+
+    NetInfo.addEventListener(
+     'connectionChange',
+     this.handleConnectivityChange
+    );
+  }
+
+  handleConnectivityChange(ci) {
+    switch (ci.type) {
+      case 'wifi':
+      case 'bluetooth':
+      case 'ethernet':
+        state = 'wifi';
+        break;
+      case 'cellular':
+      case 'wimax':
+        state = 'cellular';
+        break;
+      default:
+        state = 'none';
+        break;
+    }
+    this.setState({netInfo: state});
+  }
+
+  syncingOk() {
+    if (this.state.netInfo === 'none') return false;
+    if (this.state.canvassSettings.sync_on_cellular !== true && this.state.netInfo !== 'wifi') return false;
+    return true;
   }
 
   componentWillUnmount() {
@@ -165,6 +206,10 @@ export default class App extends PureComponent {
         this.evEmitter.remove();
       }
     }
+    NetInfo.removeEventListener(
+      'connectionChange',
+      this.handleConnectivityChange
+    );
   }
 
   showConfirmAddress() {
@@ -1002,11 +1047,19 @@ export default class App extends PureComponent {
           ||
           <View>
             <TouchableOpacity style={styles.iconContainer}
-              onPress={() => {this._syncNodes(true)}}>
+              onPress={() => {
+                if (this.state.netInfo === 'none') {
+                  Alert.alert('Sync failed.', 'You are not connected to the internet.', [{text: 'OK'}], { cancelable: false });
+                } else if (!this.syncingOk()) {
+                  Alert.alert('Sync failed.', 'You are not connected to wifi. To sync over your cellular connection, enable \'Sync over cellular\' in settings.', [{text: 'OK'}], { cancelable: false });
+                } else {
+                  this._syncNodes(true);
+                }
+              }}>
               <Icon
                 name="refresh"
                 size={50}
-                color="#00a86b"
+                color={(this.syncingOk() ? "#00a86b" : "#d3d3d3")}
                 {...iconStyles} />
             </TouchableOpacity>
           </View>

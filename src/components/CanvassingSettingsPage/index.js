@@ -30,6 +30,10 @@ var options = {
       label: 'Show only my turf',
       help: 'If you don\'t want to see the progress of others with this form, enable this option.',
     },
+    sync_on_cellular: {
+      label: 'Sync over cellular',
+      help: 'Allow syncing of data over your cellular connection. Data rates may apply.',
+    },
     share_progress: {
       label: 'Share progress',
       help: 'When you export your form data, enabling this option will allow all your canvassers to see each other\'s progress on thier devices.',
@@ -70,6 +74,8 @@ export default class App extends PureComponent {
     } else {
       refer._setCanvassSettings(canvassSettings);
     }
+
+    setTimeout(() => this.forceUpdate(), 500);
   }
 
   exportDone(success) {
@@ -85,6 +91,7 @@ export default class App extends PureComponent {
     let formOpt = {
       'show_only_my_turf': t.Boolean,
       'draggable_pins': t.Boolean,
+      'sync_on_cellular': t.Boolean,
     };
 
     // additional settings for the form owner
@@ -137,7 +144,15 @@ export default class App extends PureComponent {
             {this.state.exportRunning &&
             <ActivityIndicator size="large" />
             ||
-            <Icon name="save" size={50} color="#b20000" onPress={() => refer.doExport(this)} />
+            <Icon name="save" size={50} color={(refer.syncingOk() ? "#b20000" : "#d3d3d3")} onPress={() => {
+                if (refer.state.netInfo === 'none') {
+                  Alert.alert('Export failed.', 'You are not connected to the internet.', [{text: 'OK'}], { cancelable: false });
+                } else if (!refer.syncingOk()) {
+                  Alert.alert('Export failed.', 'You are not connected to wifi. To sync over your cellular connection, enable \'Sync over cellular\' in settings.', [{text: 'OK'}], { cancelable: false });
+                } else {
+                  refer.doExport(this);
+                }
+              }} />
             }
             <Text style={{fontSize: 20, marginLeft: 10}}>Export data to spreadsheet</Text>
           </View>
