@@ -89,7 +89,7 @@ export default class App extends PureComponent {
               </Icon.Button>
             </View>
 
-            {refer.state.currentNode.type === "address" &&
+            {refer.state.currentNode.type === "address" && !funcs.nodeHasSurvey(refer.state.currentNode) &&
             <View style={{margin: 5, marginTop: 50, flexDirection: 'row'}}>
               <Icon.Button
                 name="building"

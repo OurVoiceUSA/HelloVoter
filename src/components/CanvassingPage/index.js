@@ -458,6 +458,12 @@ export default class App extends PureComponent {
     }
   }
 
+  nodeHasSurvey(node) {
+    let children = this.getChildNodesByIdType(node.id, "survey");
+    if (children.length === 0) return false;
+    return true;
+  }
+
   _getCanvassSettings = async () => {
     try {
       const value = await storage.get(this.state.settingsStorageKey);
