@@ -986,15 +986,14 @@ export default class App extends PureComponent {
               <MapView.Marker
                 key={marker.id}
                 coordinate={marker.latlng}
-                title={marker.address.join(", ")}
                 draggable={this.state.canvassSettings.draggable_pins}
                 onDragEnd={(e) => {
                   this.updateNodeById(marker.id, 'latlng', e.nativeEvent.coordinate);
                 }}
                 pinColor={this.getPinColor(marker)}>
                   <MapView.Callout onPress={() => {this.doMarkerPress(marker);}}>
-                    <View style={{backgroundColor: '#FFFFFF', alignItems: 'center', padding: 5, width: 300, height: 65}}>
-                      <Text style={{fontWeight: 'bold'}}>{marker.address.join(", ")}</Text>
+                    <View style={{backgroundColor: '#FFFFFF', padding: 5, width: 175}}>
+                      <Text style={{fontWeight: 'bold'}}>{marker.address.join("\n")}</Text>
                       <Text>{(marker.multi_unit ? 'Multi-unit address' : 'Last Visted: '+LastVisted)}</Text>
                     </View>
                   </MapView.Callout>
