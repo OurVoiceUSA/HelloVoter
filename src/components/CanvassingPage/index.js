@@ -1007,6 +1007,12 @@ export default class App extends PureComponent {
         </MapView>
         }
 
+        {__DEV__ &&
+        <View style={{flex: 1, alignSelf: 'flex-end'}}>
+          <TouchableOpacity style={{padding: 20, width: 100, height: 40}} onPress={() => this.forceUpdate()} />
+          </View>
+        }
+
         <View style={{alignSelf: 'flex-end', alignItems: 'flex-end', marginRight: 5}}>
           <View style={{
               backgroundColor: '#FFFFFF', alignItems: 'flex-end', padding: 8,
