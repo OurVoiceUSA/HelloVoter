@@ -472,6 +472,8 @@ export default class App extends PureComponent {
       }
     } catch (e) {}
 
+    this.updateMarkers();
+
     if (this.syncingOk())
       await this._syncNodes(false);
 
@@ -937,14 +939,10 @@ export default class App extends PureComponent {
               backgroundColor: '#FFFFFF', alignItems: 'flex-end', padding: 8,
               borderColor: '#000000', borderWidth: 2, borderRadius: 10, width: 100, height: 60,
             }}>
-            {this.state.syncRunning &&
-            <ActivityIndicator size="large" />
-            ||
             <View>
               <Text>{this.markers.length} pins</Text>
               <Text>{(tooManyMarkers ? 'clustering' : markersInView.length+' in view')}</Text>
             </View>
-            }
           </View>
         </View>
 
