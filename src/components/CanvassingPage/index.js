@@ -407,20 +407,22 @@ export default class App extends PureComponent {
         let id = sha1(JSON.stringify(pin.address));
         let pid = id;
 
-        store.nodes[id] = {
-          type: "address",
-          id: id,
-          children: [],
-          created: pin.id,
-          updated: pin.id,
-          canvasser: store.canvasser,
-          latlng: pin.latlng,
-          address: pin.address,
-          multi_unit: ((unit && unit[0] !== null && unit[0] !== "")?true:false),
-        };
+        if (!store.nodes[id]) {
+          store.nodes[id] = {
+            type: "address",
+            id: id,
+            children: [],
+            created: pin.id,
+            updated: pin.id,
+            canvasser: store.canvasser,
+            latlng: pin.latlng,
+            address: pin.address,
+            multi_unit: ((unit && unit[0] !== null && unit[0] !== "")?true:false),
+          };
+        }
 
         if (unit && unit[0] !== null && unit[0] !== "") {
-          id = sha1(pid+unit);
+          id = sha1(pid+unit[0]);
           store.nodes[id] = {
             type: "unit",
             id: id,
@@ -457,7 +459,6 @@ export default class App extends PureComponent {
         store.nodes[id].children.push(survey_id);
       }
 
-      delete store.pins;
     }
 
     return store.nodes;
