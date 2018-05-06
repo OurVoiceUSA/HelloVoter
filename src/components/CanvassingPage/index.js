@@ -155,8 +155,12 @@ export default class App extends PureComponent {
       // force the map to center to the correct place
       try {
         if (position.coords.latitude !== null && this.state.myPosition.latitude === null)
-          setTimeout(() => this.map.animateToRegion((Object.assign({}, this.state.region, position.coords)), 1), 100);
-      } catch(e) {console.warn("error:"+e)}
+          setTimeout(() => {
+            try {
+              this.map.animateToRegion((Object.assign({}, this.state.region, position.coords)), 1);
+            } catch (e) {}
+          }, 100);
+      } catch(e) {}
 
       this.setState({ myPosition: position.coords });
     },
