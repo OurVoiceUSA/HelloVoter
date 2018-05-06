@@ -942,8 +942,8 @@ export default class App extends PureComponent {
     if (locationAccess === false) {
       nomap_content.push(
         <View key={1} style={styles.content}>
-          <Text>Access to your location is disabled.</Text>
-          <Text>The map will not render unless you grant location access.</Text>
+          <Text>Unable to determine your location.</Text>
+          <Text>To view the map, enable location permissions in your device settings.</Text>
         </View>
       );
     } else if (serviceError === true) {
