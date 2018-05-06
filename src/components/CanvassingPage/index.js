@@ -409,6 +409,7 @@ export default class App extends PureComponent {
         store.nodes[id] = {
           type: "address",
           id: id,
+          children: [],
           created: pin.id,
           updated: pin.id,
           canvasser: store.canvasser,
@@ -423,11 +424,13 @@ export default class App extends PureComponent {
             type: "unit",
             id: id,
             parent_id: pid,
+            children: [],
             created: pin.id,
             updated: pin.id,
             canvasser: store.canvasser,
             unit: unit[0],
           };
+          store.nodes[pid].children.push(id);
         }
 
         let status = '';
@@ -443,12 +446,14 @@ export default class App extends PureComponent {
           type: "survey",
           id: survey_id,
           parent_id: id,
+          children: [],
           created: pin.id,
           updated: pin.id,
           canvasser: store.canvasser,
           status: status,
           survey: pin.survey,
         };
+        store.nodes[id].children.push(survey_id);
       }
 
       delete store.pins;
