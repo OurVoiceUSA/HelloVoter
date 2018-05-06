@@ -477,6 +477,20 @@ export default class App extends PureComponent {
   }
 
   updateMarkers() {
+    let nodes = [];
+    let nodeList;
+
+    if (this.state.canvassSettings.show_only_my_turf)
+      nodeList = this.turfNodes;
+    else
+      nodeList = this.allNodes;
+
+    for (let n in nodeList) {
+      let node = nodeList[n];
+      if (node.type === type)
+        nodes.push(node);
+    }
+
     this.markers = this.getNodesbyType("address");
     this.forceUpdate();
   }
@@ -636,10 +650,6 @@ export default class App extends PureComponent {
         } catch (e) {}
       }
 
-      // don't setState inside a sync
-      if (flag === false)
-        this.setState({ turfNodes: turfNodes });
-
       if (flag) Alert.alert('Success', 'Data sync successful!', [{text: 'OK'}], { cancelable: false });
     } catch (error) {
       if (flag) Alert.alert('Error', 'Unable to sync with the server.', [{text: 'OK'}], { cancelable: false });
@@ -668,18 +678,6 @@ export default class App extends PureComponent {
     this.allNodes[id] = node;
 
     await this._saveNodes(this.myNodes);
-  }
-
-  getNodesbyType(type) {
-    let nodes = [];
-
-    for (let a in this.allNodes) {
-      let node = this.allNodes[a];
-      if (node.type === type)
-        nodes.push(node);
-    }
-
-    return nodes;
   }
 
   getChildNodesByIdType(id, type) {
