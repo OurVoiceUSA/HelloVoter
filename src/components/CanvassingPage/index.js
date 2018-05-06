@@ -155,6 +155,13 @@ export default class App extends PureComponent {
 
   getLocation() {
     navigator.geolocation.getCurrentPosition((position) => {
+      // if this was the first call to getLocation (previous state null), an iOS bug renders in the ocean
+      // force the map to center to the correct place
+      try {
+        if (position.coords.latitude !== null && this.state.myPosition.latitude === null)
+          setTimeout(() => this.map.animateToRegion((Object.assign({}, this.state.region, position.coords)), 1), 100);
+      } catch(e) {console.warn("error:"+e)}
+
       this.setState({ myPosition: position.coords });
     },
     (error) => { },
@@ -945,7 +952,7 @@ export default class App extends PureComponent {
           <Text>Unable to load location services from your device.</Text>
         </View>
       );
-    } else if (myPosition.latitude == null || myPosition.longitude == null) {
+    } else if (myPosition.latitude === null || myPosition.longitude === null) {
       nomap_content.push(
         <View key={1} style={styles.content}>
           <Text>Waiting on location data from your device...</Text>
