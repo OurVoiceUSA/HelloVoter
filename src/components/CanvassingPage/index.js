@@ -677,8 +677,6 @@ export default class App extends PureComponent {
     this.allNodes = this.mergeNodes(allsrc);
 
     this.updateMarkers();
-
-    return this.allNodes;
   }
 
   getNodeById(id) {
@@ -747,14 +745,14 @@ export default class App extends PureComponent {
     let success = false;
 
     try {
-      let allNodes = await this._syncNodes(false);
+      await this._syncNodes(false);
 
       // convert to .csv file and upload
       let keys = Object.keys(form.questions);
       let csv = "Street,City,State,Zip,Unit,longitude,latitude,canvasser,datetime,status,"+keys.join(",")+"\n";
 
-      for (let a in allNodes) {
-        let node = allNodes[a];
+      for (let a in this.allNodes) {
+        let node = this.allNodes[a];
         if (node.type !== "survey") continue;
 
         let addr = this.getNodeById(node.parent_id);
