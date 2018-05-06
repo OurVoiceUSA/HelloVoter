@@ -40,7 +40,7 @@ var options = {
     },
     share_progress: {
       label: 'Share progress',
-      help: 'When you export your form data, enabling this option will allow all your canvassers to see each other\'s progress on thier devices.',
+      help: 'If enabled, syncing your device will allow all your canvassers to see each other\'s progress on thier devices after they sync too.',
     },
     only_export_home: {
       label: 'Only export taken surveys',
