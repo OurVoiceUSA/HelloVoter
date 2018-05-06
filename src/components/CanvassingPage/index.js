@@ -76,7 +76,6 @@ export default class App extends PureComponent {
       netInfo: 'none',
       exportRunning: false,
       syncRunning: false,
-      syncTurfRunning: false,
       serviceError: null,
       locationAccess: null,
       myPosition: {latitude: null, longitude: null},
@@ -463,25 +462,16 @@ export default class App extends PureComponent {
   }
 
   _getNodesAsyncStorage = async () => {
-    const { dbx, form } = this.state;
     try {
       const value = await storage.get(this.state.asyncStorageKey);
       if (value !== null) {
         this.myNodes = this._nodesFromJSON(value);
         this.allNodes = this.myNodes;
-      } else {
-        // look on dropbox to see if this device has data that was cleared locally
-        try {
-          let data = await dbx.filesDownload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtxt' });
-          await this._saveNodes(this._nodesFromJSON(data.fileBinary));
-        } catch (error) {}
       }
+    } catch (e) {}
 
-      //await this.syncTurf(false);
-
-    } catch (error) {
-      console.warn(error);
-    }
+    if (this.syncingOk())
+      await this._syncNodes(false);
 
     this.updateMarkers();
   }
@@ -521,8 +511,6 @@ export default class App extends PureComponent {
       this.setState({canvassSettings});
     } catch (e) {}
 
-    if (sync) await this.syncTurf(false);
-
     if (rmshare) {
       try {
         let res = await dbx.filesListFolder({path: form.folder_path});
@@ -535,49 +523,6 @@ export default class App extends PureComponent {
       } catch (e) {}
     }
 
-  }
-
-  syncTurf = async (flag) => {
-    const { form, dbx } = this.state;
-
-    this.setState({syncTurfRunning: true});
-    let turf = [];
-
-    let files = [DeviceInfo.getUniqueID()];
-    if (this.state.canvassSettings.show_only_my_turf !== true || flag === true) files.push('exported');
-
-    // TODO: exported and other jtxt files only go into allNodes
-
-    // other jtxt files on this account are "my turf" too
-    if (this.state.canvassSettings.show_only_my_turf !== true && flag === false) {
-      let res = await dbx.filesListFolder({path: form.folder_path});
-      for (let i in res.entries) {
-        item = res.entries[i];
-        if (item.path_display.match(/\.jtxt$/) && !item.path_display.match(DeviceInfo.getUniqueID())) {
-          try {
-            let data = await dbx.filesDownload({ path: item.path_display });
-            turf.push(this._nodesFromJSON(data.fileBinary));
-          } catch (e) {}
-        }
-      }
-    }
-
-    for (let f in files) {
-      let file = files[f];
-      try {
-        let data = await dbx.filesDownload({ path: form.folder_path+'/'+file+'.jtrf' });
-        turf.push(this._nodesFromJSON(data.fileBinary));
-      } catch (e) {}
-    }
-
-    // don't setState inside a sync
-    if (flag === false)
-      this.setState({ turfNodes: turfNodes });
-
-    this.updateMarkers();
-    this.setState({syncTurfRunning: false});
-
-    return turfNodes;
   }
 
   timeFormat(epoch) {
@@ -643,8 +588,6 @@ export default class App extends PureComponent {
           }
         }
 
-        allNodes.nodes = this.dedupeNodes(allNodes.nodes.concat((await this.syncTurf(true)).nodes));
-
         await dbx.filesUpload({ path: form.folder_path+'/exported.jtrf', contents: encoding.convert(tr(this.strifyNodes(allNodes)), 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
 
         // copy exported.jtrf to all sub-folders if configured in settings
@@ -663,7 +606,39 @@ export default class App extends PureComponent {
         }
       }
 
-      await this.syncTurf(false);
+      // sync turf
+      let turf = [];
+
+      let files = [DeviceInfo.getUniqueID()];
+      if (this.state.canvassSettings.show_only_my_turf !== true || flag === true) files.push('exported');
+
+      // TODO: exported and other jtxt files only go into allNodes
+
+      // other jtxt files on this account are "my turf" too
+      if (this.state.canvassSettings.show_only_my_turf !== true && flag === false) {
+        let res = await dbx.filesListFolder({path: form.folder_path});
+        for (let i in res.entries) {
+          item = res.entries[i];
+          if (item.path_display.match(/\.jtxt$/) && !item.path_display.match(DeviceInfo.getUniqueID())) {
+            try {
+              let data = await dbx.filesDownload({ path: item.path_display });
+              turf.push(this._nodesFromJSON(data.fileBinary));
+            } catch (e) {}
+          }
+        }
+      }
+
+      for (let f in files) {
+        let file = files[f];
+        try {
+          let data = await dbx.filesDownload({ path: form.folder_path+'/'+file+'.jtrf' });
+          turf.push(this._nodesFromJSON(data.fileBinary));
+        } catch (e) {}
+      }
+
+      // don't setState inside a sync
+      if (flag === false)
+        this.setState({ turfNodes: turfNodes });
 
       if (flag) Alert.alert('Success', 'Data sync successful!', [{text: 'OK'}], { cancelable: false });
     } catch (error) {
@@ -752,11 +727,10 @@ export default class App extends PureComponent {
     let { dbx, form } = this.state;
 
     refer.setState({exportRunning: true});
-    let allNodes;
     let success = false;
 
     try {
-      allNodes = await this._syncNodes(false);
+      let allNodes = await this._syncNodes(false);
 
       // convert to .csv file and upload
       let keys = Object.keys(form.questions);
@@ -950,7 +924,7 @@ export default class App extends PureComponent {
               backgroundColor: '#FFFFFF', alignItems: 'flex-end', padding: 8,
               borderColor: '#000000', borderWidth: 2, borderRadius: 10, width: 100, height: 60,
             }}>
-            {this.state.syncTurfRunning &&
+            {this.state.syncRunning &&
             <ActivityIndicator size="large" />
             ||
             <View>
