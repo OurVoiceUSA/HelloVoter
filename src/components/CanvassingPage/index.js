@@ -880,12 +880,18 @@ export default class App extends PureComponent {
 
     // toggle pin horizon based on zoom level
     let markersInView = [];
+    let tooManyMarkers = false;
 
     for (let m in this.markers) {
       let marker = this.markers[m];
       if (marker.latlng && marker.latlng.longitude !== null &&
         Math.hypot(region.longitude-marker.latlng.longitude, region.latitude-marker.latlng.latitude) < region.longitudeDelta/1.75)
         markersInView.push(marker);
+
+      if (markersInView.length >= 500) {
+        tooManyMarkers = true;
+        break;
+      }
     }
 
     return (
@@ -947,7 +953,7 @@ export default class App extends PureComponent {
             ||
             <View>
               <Text>{this.markers.length} pins</Text>
-              <Text>{markersInView.length} in view</Text>
+              <Text>{(tooManyMarkers ? 'clustering' : markersInView.length+' in view')}</Text>
             </View>
             }
           </View>
