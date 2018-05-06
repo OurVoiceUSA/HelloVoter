@@ -98,6 +98,7 @@ export default class App extends PureComponent {
     this.myNodes = {};
     this.turfNodes = {};
     this.allNodes = {};
+    this.family = {};
 
     this.onChange = this.onChange.bind(this);
     this.handleConnectivityChange = this.handleConnectivityChange.bind(this);
@@ -313,7 +314,6 @@ export default class App extends PureComponent {
 
     node.updated = epoch;
     node.canvasser = this.state.user.dropbox.name.display_name;
-    node.children = [];
     if (!node.id) node.id = sha1(epoch+JSON.stringify(node)+this.state.currentNode.id);
 
     let dupe = this.getNodeById(node.id);
@@ -321,13 +321,6 @@ export default class App extends PureComponent {
 
     this.myNodes[node.id] = node;
     this.allNodes[node.id] = node;
-
-    if (node.parent_id) {
-      this.myNodes[node.parent_id] = this.allNodes[node.parent_id];
-      if (!this.myNodes[node.parent_id].children) this.myNodes[node.parent_id].children = [];
-      this.myNodes[node.parent_id].children.unshift(node.id);
-      this.allNodes[node.parent_id] = this.myNodes[node.parent_id];
-    }
 
     this._saveNodes(this.myNodes);
 
@@ -411,7 +404,6 @@ export default class App extends PureComponent {
           store.nodes[id] = {
             type: "address",
             id: id,
-            children: [],
             created: pin.id,
             updated: pin.id,
             canvasser: store.canvasser,
@@ -427,13 +419,11 @@ export default class App extends PureComponent {
             type: "unit",
             id: id,
             parent_id: pid,
-            children: [],
             created: pin.id,
             updated: pin.id,
             canvasser: store.canvasser,
             unit: unit[0],
           };
-          store.nodes[pid].children.push(id);
         }
 
         let status = '';
@@ -449,14 +439,12 @@ export default class App extends PureComponent {
           type: "survey",
           id: survey_id,
           parent_id: id,
-          children: [],
           created: pin.id,
           updated: pin.id,
           canvasser: store.canvasser,
           status: status,
           survey: pin.survey,
         };
-        store.nodes[id].children.push(survey_id);
       }
 
     }
@@ -576,6 +564,12 @@ export default class App extends PureComponent {
         if (!nodes[node.id]) nodes[node.id] = node;
         else {
           if (node.updated > nodes[node.id].updated) nodes[node.id] = node;
+        }
+        if (nodes[node.id].parent_id) {
+          if (!this.family[nodes[node.id].parent_id])
+            this.family[nodes[node.id].parent_id] = [];
+          if (this.family[nodes[node.id].parent_id].indexOf(node.id) === -1)
+            this.family[nodes[node.id].parent_id].push(node.id);
         }
       }
     }
@@ -701,10 +695,13 @@ export default class App extends PureComponent {
   getChildNodesByIdType(id, type) {
     let nodes = [];
 
-    for (let c in this.allNodes[id].children) {
-      let node = this.getNodeById(this.allNodes[id].children[c]);
-      if (node.type === type)
+    if (!this.family[id]) return nodes;
+
+    for (let c in this.family[id]) {
+      let node = this.getNodeById(this.family[id][c]);
+      if (node.type === type) {
         nodes.push(node);
+      }
     }
 
     return nodes;
