@@ -293,7 +293,6 @@ export default class App extends PureComponent {
 
     node = await this._addNode(node);
 
-    this.updateMarkers();
     this.setState({ fAddress: fAddress, isModalVisible: false });
     this.doMarkerPress(node);
   }
@@ -552,6 +551,7 @@ export default class App extends PureComponent {
     }
 
     if (this.state.canvassSettings.auto_sync && this.syncingOk() && !this.state.syncRunning) this._syncNodes(false);
+    else this.updateMarkers();
   }
 
   mergeNodes(stores) {
@@ -569,9 +569,14 @@ export default class App extends PureComponent {
           if (!this.family[nodes[node.id].parent_id])
             this.family[nodes[node.id].parent_id] = [];
           if (this.family[nodes[node.id].parent_id].indexOf(node.id) === -1)
-            this.family[nodes[node.id].parent_id].push(node.id);
+            this.family[nodes[node.id].parent_id].push(node);
         }
       }
+    }
+
+    // sort everything in family
+    for (let f in this.family) {
+      this.family[f] = this.family[f].sort(this.dynamicSort("updated")).reverse();
     }
 
     return nodes;
@@ -698,7 +703,7 @@ export default class App extends PureComponent {
     if (!this.family[id]) return nodes;
 
     for (let c in this.family[id]) {
-      let node = this.getNodeById(this.family[id][c]);
+      let node = this.family[id][c];
       if (node.type === type) {
         nodes.push(node);
       }
