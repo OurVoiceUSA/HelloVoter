@@ -105,8 +105,6 @@ export default class App extends PureComponent {
               let color = refer.getPinColor(item);
               let icon = (color === "red" ? "ban" : "address-book");
 
-              let info = refer.getLatestSurvey(item.id);
-
               return (
                 <View key={item.id} style={{padding: 10}}>
                   <TouchableOpacity
@@ -115,7 +113,7 @@ export default class App extends PureComponent {
                       this.setState({ isKnockMenuVisible: true, currentNode: item });
                     }}>
                     <Icon name={icon} size={40} color={color} style={{margin: 5}} />
-                    <Text>Unit {item.unit} - {(info.LastVisted ? 'Last Visited '+info.LastVisted : 'Never Visited')}</Text>
+                    <Text>Unit {item.unit} - {refer.getLastInteraction(item.id)}</Text>
                   </TouchableOpacity>
                 </View>
               );

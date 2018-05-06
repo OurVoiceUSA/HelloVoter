@@ -334,21 +334,23 @@ export default class App extends PureComponent {
     return node;
   }
 
-  getLatestSurvey(id) {
+  ucFirst(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+  }
+
+  getLastInteraction(id) {
     let nodes = this.getChildNodesByIdType(id, "survey");
-    let info = {};
     const timeAgo = new TimeAgo('en-US')
+    let str;
 
     if (nodes.length)  {
       let last = nodes[0];
-      if (last.survey) {
-        info.FullName = last.survey.FullName;
-        info.PartyAffiliation = last.survey.PartyAffiliation;
-      }
-      info.LastVisted = timeAgo.format(new Date(last.updated*1000));
-    };
+      str = this.ucFirst(last.status)+' '+timeAgo.format(new Date(last.updated*1000));
+    } else {
+      str = "Haven't visited";
+    }
 
-    return info;
+    return str;
   }
 
   getLatestSurveyInfoByProp(id, prop) {
@@ -910,8 +912,6 @@ export default class App extends PureComponent {
           keyboardShouldPersistTaps={true}
           {...this.props}>
           {markersInView.map((marker) => {
-            let status = this.getLatestSurvey(marker.id);
-            let LastVisted = (status.LastVisted ? status.LastVisted : 'Never');
             return (
               <MapView.Marker
                 key={marker.id}
@@ -924,7 +924,7 @@ export default class App extends PureComponent {
                   <MapView.Callout onPress={() => {this.doMarkerPress(marker);}}>
                     <View style={{backgroundColor: '#FFFFFF', padding: 5, width: 175}}>
                       <Text style={{fontWeight: 'bold'}}>{marker.address.join("\n")}</Text>
-                      <Text>{(marker.multi_unit ? 'Multi-unit address' : 'Last Visted: '+LastVisted)}</Text>
+                      <Text>{(marker.multi_unit ? 'Multi-unit address' : this.getLastInteraction(marker.id))}</Text>
                     </View>
                   </MapView.Callout>
                 </MapView.Marker>

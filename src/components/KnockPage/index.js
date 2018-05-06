@@ -24,12 +24,11 @@ export default class App extends PureComponent {
     const { refer, funcs } = this.state;
     const { navigate } = refer.props.navigation;
 
-    let status = funcs.getLatestSurvey(refer.state.currentNode.id);
+    let LastInteraction = funcs.getLastInteraction(refer.state.currentNode.id);
     let info = funcs.getLatestSurveyInfoByProp(refer.state.currentNode.id, "FullName");
 
     let FullName = (info.FullName ? info.FullName : 'N/A');
     let PartyAffiliation = (info.PartyAffiliation ? info.PartyAffiliation : 'N/A');
-    let LastVisted = (status.LastVisted ? status.LastVisted : 'Never');
 
     return (
       <View style={{flexDirection: 'column'}}>
@@ -37,7 +36,7 @@ export default class App extends PureComponent {
           <View>
             <Text>Name: {FullName}</Text>
             <Text>Party: {PartyAffiliation}</Text>
-            <Text>Last Visited: {LastVisted}</Text>
+            <Text>{LastInteraction}</Text>
 
             <View style={{margin: 5, flexDirection: 'row'}}>
               <Icon.Button
