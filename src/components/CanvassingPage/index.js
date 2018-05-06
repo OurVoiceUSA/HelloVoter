@@ -481,7 +481,7 @@ export default class App extends PureComponent {
     let nodeList;
 
     if (this.state.canvassSettings.show_only_my_turf)
-      nodeList = this.turfNodes;
+      nodeList = this.mergeNodes([this.turfNodes, this.myNodes]);
     else
       nodeList = this.allNodes;
 
@@ -537,6 +537,7 @@ export default class App extends PureComponent {
       } catch (e) {}
     }
 
+    this.updateMarkers();
   }
 
   timeFormat(epoch) {
@@ -560,13 +561,58 @@ export default class App extends PureComponent {
     if (this.state.canvassSettings.auto_sync && this.syncingOk() && !this.state.syncRunning) this._syncNodes(false);
   }
 
+  mergeNodes(stores) {
+    let nodes = {};
+
+    for (let s in stores) {
+      let store = stores[s];
+      for (let n in store) {
+        let node = store[n];
+        if (!nodes[node.id]) nodes[node.id] = node;
+        else {
+          if (node.updated > nodes[node.id].updated) nodes[node.id] = node;
+        }
+      }
+    }
+
+    return nodes;
+  }
+
   _syncNodes = async (flag) => {
     let { dbx, form, user } = this.state;
+    let allsrc = [];
 
     this.setState({syncRunning: true});
 
     try {
       await dbx.filesUpload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtxt', contents: encoding.convert(tr(this.strifyNodes(this.myNodes)), 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
+
+      // download "turf" for this device
+      try {
+        let data = await dbx.filesDownload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtrf' });
+        this.turfNodes = this._nodesFromJSON(data.fileBinary);
+      } catch (e) {}
+
+      allsrc.push(this.myNodes);
+      allsrc.push(this.turfNodes);
+
+      // download other jtxt files on this account
+      let res = await dbx.filesListFolder({path: form.folder_path});
+      for (let i in res.entries) {
+        item = res.entries[i];
+        if (item.path_display.match(/\.jtxt$/) && !item.path_display.match(DeviceInfo.getUniqueID())) {
+          try {
+            let data = await dbx.filesDownload({ path: item.path_display });
+            allsrc.push(this._nodesFromJSON(data.fileBinary));
+          } catch (e) {}
+        }
+      }
+
+      // download exported "turf" for this account
+      try {
+        let data = await dbx.filesDownload({ path: form.folder_path+'/exported.jtrf' });
+        allsrc.push(this._nodesFromJSON(data.fileBinary));
+      } catch (e) {}
 
       // extra sync stuff for the form owner
       if (user.dropbox.account_id == form.author_id) {
@@ -576,10 +622,6 @@ export default class App extends PureComponent {
         for (let i in res.entries) {
           item = res.entries[i];
           // any devices logged in with the form creator are here
-          if (item.path_display.match(/\.jtxt$/)) {
-            let data = await dbx.filesDownload({ path: item.path_display });
-            allNodes.nodes = allNodes.nodes.concat((this._nodesFromJSON(data.fileBinary)).nodes);
-          }
           if (item['.tag'] != 'folder') continue;
           folders.push(item.path_display);
         }
@@ -594,7 +636,7 @@ export default class App extends PureComponent {
               item = res.entries[i];
               if (item.path_display.match(/\.jtxt$/)) {
                 let data = await dbx.filesDownload({ path: item.path_display });
-                allNodes.nodes = allNodes.nodes.concat((this._nodesFromJSON(data.fileBinary)).nodes);
+                allsrc.push(this._nodesFromJSON(data.fileBinary));
               }
             }
           } catch (e) {
@@ -602,7 +644,8 @@ export default class App extends PureComponent {
           }
         }
 
-        await dbx.filesUpload({ path: form.folder_path+'/exported.jtrf', contents: encoding.convert(tr(this.strifyNodes(allNodes)), 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
+        let exportedFile = encoding.convert(tr(this.strifyNodes(this.mergeNodes(allsrc))), 'ISO-8859-1');
+        await dbx.filesUpload({ path: form.folder_path+'/exported.jtrf', contents: exportedFile, mode: {'.tag': 'overwrite'} });
 
         // copy exported.jtrf to all sub-folders if configured in settings
         if (this.state.canvassSettings.share_progress === true) {
@@ -612,42 +655,12 @@ export default class App extends PureComponent {
               item = res.entries[i];
               if (item['.tag'] != 'folder') continue;
               if (item.path_display.match(/@/))
-                await dbx.filesUpload({ path: item.path_display+'/exported.jtrf', contents: encoding.convert(tr(this.strifyNodes(allNodes)), 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
+                await dbx.filesUpload({ path: item.path_display+'/exported.jtrf', contents: exportedFile, mode: {'.tag': 'overwrite'} });
             }
           } catch (e) {
             console.warn(e);
           }
         }
-      }
-
-      // sync turf
-      let turf = [];
-
-      let files = [DeviceInfo.getUniqueID()];
-      if (this.state.canvassSettings.show_only_my_turf !== true || flag === true) files.push('exported');
-
-      // TODO: exported and other jtxt files only go into allNodes
-
-      // other jtxt files on this account are "my turf" too
-      if (this.state.canvassSettings.show_only_my_turf !== true && flag === false) {
-        let res = await dbx.filesListFolder({path: form.folder_path});
-        for (let i in res.entries) {
-          item = res.entries[i];
-          if (item.path_display.match(/\.jtxt$/) && !item.path_display.match(DeviceInfo.getUniqueID())) {
-            try {
-              let data = await dbx.filesDownload({ path: item.path_display });
-              turf.push(this._nodesFromJSON(data.fileBinary));
-            } catch (e) {}
-          }
-        }
-      }
-
-      for (let f in files) {
-        let file = files[f];
-        try {
-          let data = await dbx.filesDownload({ path: form.folder_path+'/'+file+'.jtrf' });
-          turf.push(this._nodesFromJSON(data.fileBinary));
-        } catch (e) {}
       }
 
       if (flag) Alert.alert('Success', 'Data sync successful!', [{text: 'OK'}], { cancelable: false });
@@ -657,9 +670,11 @@ export default class App extends PureComponent {
 
     this.setState({syncRunning: false});
 
+    this.allNodes = this.mergeNodes(allsrc);
+
     this.updateMarkers();
 
-    return allNodes;
+    return this.allNodes;
   }
 
   getNodeById(id) {
