@@ -550,8 +550,9 @@ export default class App extends PureComponent {
       console.warn(error);
     }
 
+    this.updateMarkers();
+
     if (this.state.canvassSettings.auto_sync && this.syncingOk() && !this.state.syncRunning) this._syncNodes(false);
-    else this.updateMarkers();
   }
 
   mergeNodes(stores) {
@@ -576,7 +577,7 @@ export default class App extends PureComponent {
 
     // sort everything in family
     for (let f in this.family) {
-      this.family[f] = this.family[f].sort(this.dynamicSort("updated")).reverse();
+      this.family[f] = this.family[f].sort(this.dynamicSort("updated"));
     }
 
     return nodes;
@@ -705,7 +706,7 @@ export default class App extends PureComponent {
     for (let c in this.family[id]) {
       let node = this.family[id][c];
       if (node.type === type) {
-        nodes.push(node);
+        nodes.unshift(node);
       }
     }
 
