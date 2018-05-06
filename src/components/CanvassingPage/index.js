@@ -487,11 +487,11 @@ export default class App extends PureComponent {
 
     for (let n in nodeList) {
       let node = nodeList[n];
-      if (node.type === type)
+      if (node.type === "address")
         nodes.push(node);
     }
 
-    this.markers = this.getNodesbyType("address");
+    this.markers = nodes;
     this.forceUpdate();
   }
 
