@@ -475,7 +475,7 @@ export default class App extends PureComponent {
     if (this.state.canvassSettings.show_only_my_turf === true)
       nodeList = this.mergeNodes([this.turfNodes, this.myNodes]);
     else
-      nodeList = this.allNodes;
+      nodeList = this.mergeNodes(this.allNodes);
 
     for (let n in nodeList) {
       let node = nodeList[n];
