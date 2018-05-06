@@ -668,7 +668,6 @@ export default class App extends PureComponent {
       if (flag) Alert.alert('Success', 'Data sync successful!', [{text: 'OK'}], { cancelable: false });
     } catch (error) {
       if (flag) Alert.alert('Error', 'Unable to sync with the server.', [{text: 'OK'}], { cancelable: false });
-      return;
     }
 
     this.setState({syncRunning: false});
