@@ -83,8 +83,6 @@ export default class App extends PureComponent {
       region: {latitudeDelta: 0.004, longitudeDelta: 0.004},
       currentNode: null,
       fAddress: {},
-      myNodes: { nodes: [], last_synced: 0 },
-      turfNodes: { nodes: [] },
       asyncStorageKey: 'OV_CANVASS_PINS@'+props.navigation.state.params.form.id,
       settingsStorageKey: 'OV_CANVASS_SETTINGS',
       canvassSettings: {},
@@ -98,8 +96,9 @@ export default class App extends PureComponent {
     };
 
     this.markers = [];
-    this.idx = {};
-    this.idc = {};
+    this.myNodes = {};
+    this.turfNodes = {};
+    this.allNodes = {};
 
     this.onChange = this.onChange.bind(this);
     this.handleConnectivityChange = this.handleConnectivityChange.bind(this);
@@ -115,15 +114,12 @@ export default class App extends PureComponent {
   }
 
   requestLocationPermission = async () => {
-
     access = false;
 
     try {
       res = await Permissions.request('location');
       if (res === "authorized") access = true;
-    } catch(error) {
-      // nothing we can do about it
-    }
+    } catch(error) {}
 
     if (access === true) {
       if (Platform.OS === 'android') {
@@ -261,7 +257,7 @@ export default class App extends PureComponent {
   }
 
   doConfirmAddress = async () => {
-    const { myPosition, myNodes, form } = this.state;
+    const { myPosition, form } = this.state;
 
     let jsonStreet = this.refs.formStreet.getValue();
     let jsonCity = this.refs.formCity.getValue();
@@ -291,13 +287,7 @@ export default class App extends PureComponent {
       multi_unit: jsonCity.multi_unit,
     };
 
-    node = this._addNode(node);
-
-    this.idx[node.id] = node;
-    if (node.partent_id) {
-      if (!this.idc[nodes.parent_id]) this.idc[node.parent_id] = [];
-      this.idc[node.parent_id].unshift(nodes);
-    }
+    node = await this._addNode(node);
 
     this.updateMarkers();
     this.setState({ fAddress: fAddress, isModalVisible: false });
@@ -316,40 +306,38 @@ export default class App extends PureComponent {
   }
 
   _addNode(node) {
-    let { myNodes } = this.state;
     let epoch = this.getEpoch();
 
-    node.created = epoch;
     node.updated = epoch;
     node.canvasser = this.state.user.dropbox.name.display_name;
+    node.children = [];
     if (!node.id) node.id = sha1(epoch+JSON.stringify(node)+this.state.currentNode.id);
 
-    // chech for duplicate address pins
-    let check = this.getNodeByIdStore(node.id, myNodes);
+    let dupe = this.getNodeById(node.id);
+    if (!dupe.id) node.created = epoch;
 
-    if (!check.id)
-      myNodes.nodes.push(node);
-    else
-      node = check;
+    this.myNodes[node.id] = node;
+    this.allNodes[node.id] = node;
 
-    this.idx[node.id] = node;
     if (node.parent_id) {
-      if (!this.idc[node.parent_id]) this.idc[node.parent_id] = [];
-      this.idc[node.parent_id].unshift(node);
+      this.myNodes[node.parent_id] = this.allNodes[node.parent_id];
+      if (!this.myNodes[node.parent_id].children) this.myNodes[node.parent_id].children = [];
+      this.myNodes[node.parent_id].children.unshift(node.id);
+      this.allNodes[node.parent_id] = this.myNodes[node.parent_id];
     }
 
-    this._saveNodes(myNodes, true);
+    this._saveNodes(this.myNodes);
 
     return node;
   }
 
   getLatestSurvey(id) {
-    let nodes = this.getChildNodesByIdType(id, "survey").sort(this.dynamicSort('updated'));
+    let nodes = this.getChildNodesByIdType(id, "survey");
     let info = {};
     const timeAgo = new TimeAgo('en-US')
 
     if (nodes.length)  {
-      let last = nodes[nodes.length-1];
+      let last = nodes[0];
       if (last.survey) {
         info.FullName = last.survey.FullName;
         info.PartyAffiliation = last.survey.PartyAffiliation;
@@ -361,7 +349,7 @@ export default class App extends PureComponent {
   }
 
   getLatestSurveyInfoByProp(id, prop) {
-    let nodes = this.getChildNodesByIdType(id, "survey").sort(this.dynamicSort('updated')).reverse();
+    let nodes = this.getChildNodesByIdType(id, "survey");
 
     for (let n in nodes) {
       let node = nodes[n];
@@ -393,7 +381,7 @@ export default class App extends PureComponent {
       store = JSON.parse(str);
     } catch (e) { console.warn(e); }
 
-    if (!store.nodes) store.nodes = [];
+    if (!store.nodes) store.nodes = {};
 
     // check for old version 1 format and convert
     if (store.pins) {
@@ -414,33 +402,28 @@ export default class App extends PureComponent {
         let id = sha1(JSON.stringify(pin.address));
         let pid = id;
 
-        // chech for duplicate address pins
-        let check = this.getNodeById(id);
-
-        if (!check.id) {
-          store.nodes.push({
-            type: "address",
-            id: id,
-            created: pin.id,
-            updated: pin.id,
-            canvasser: store.canvasser,
-            latlng: pin.latlng,
-            address: pin.address,
-            multi_unit: ((unit && unit[0] !== null && unit[0] !== "")?true:false),
-          });
-        }
+        store.nodes[id] = {
+          type: "address",
+          id: id,
+          created: pin.id,
+          updated: pin.id,
+          canvasser: store.canvasser,
+          latlng: pin.latlng,
+          address: pin.address,
+          multi_unit: ((unit && unit[0] !== null && unit[0] !== "")?true:false),
+        };
 
         if (unit && unit[0] !== null && unit[0] !== "") {
           id = sha1(pid+unit);
-          store.nodes.push({
+          store.nodes[id] = {
             type: "unit",
             id: id,
+            parent_id: pid,
             created: pin.id,
             updated: pin.id,
             canvasser: store.canvasser,
-            parent_id: pid,
             unit: unit[0],
-          });
+          };
         }
 
         let status = '';
@@ -450,21 +433,24 @@ export default class App extends PureComponent {
           case 'red': status = 'not interested'; break;
         }
 
-        store.nodes.push({
+        let survey_id = sha1(id+JSON.stringify(pin.survey)+pin.id);
+
+        store.nodes[survey_id] = {
           type: "survey",
-          id: sha1(id+JSON.stringify(pin.survey)+pin.id),
+          id: survey_id,
           parent_id: id,
           created: pin.id,
           updated: pin.id,
           canvasser: store.canvasser,
           status: status,
           survey: pin.survey,
-        });
+        };
       }
 
       delete store.pins;
     }
-    return store;
+
+    return store.nodes;
   }
 
   _getNodesAsyncStorage = async () => {
@@ -472,18 +458,17 @@ export default class App extends PureComponent {
     try {
       const value = await storage.get(this.state.asyncStorageKey);
       if (value !== null) {
-        this.setState({ myNodes: this._nodesFromJSON(value) });
+        this.myNodes = this._nodesFromJSON(value);
+        this.allNodes = this.myNodes;
       } else {
         // look on dropbox to see if this device has data that was cleared locally
         try {
           let data = await dbx.filesDownload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtxt' });
-          let myNodes = this._nodesFromJSON(data.fileBinary);
-          this.setState({ myNodes });
-          await this._saveNodes(myNodes, true);
+          await this._saveNodes(this._nodesFromJSON(data.fileBinary));
         } catch (error) {}
       }
 
-      await this.syncTurf(false);
+      //await this.syncTurf(false);
 
     } catch (error) {
       console.warn(error);
@@ -493,24 +478,8 @@ export default class App extends PureComponent {
   }
 
   updateMarkers() {
-    this.markers = this.dedupeNodes(this.getNodesbyType("address"));
-    this.updateIndex();
+    this.markers = this.getNodesbyType("address");
     this.forceUpdate();
-  }
-
-  updateIndex() {
-    this.idx = {};
-    this.idc = {};
-
-    let merged = this.mergeNodes();
-
-    for (let m in merged.nodes) {
-      this.idx[merged.nodes[m].id] = merged.nodes[m];
-      if (merged.nodes[m].parent_id) {
-        if (!this.idc[merged.nodes[m].parent_id]) this.idc[merged.nodes[m].parent_id] = [];
-        this.idc[merged.nodes[m].parent_id].unshift(merged.nodes[m])
-      }
-    }
   }
 
   nodeHasSurvey(node) {
@@ -563,10 +532,12 @@ export default class App extends PureComponent {
     const { form, dbx } = this.state;
 
     this.setState({syncTurfRunning: true});
-    let turfNodes = { nodes: [] };
+    let turf = [];
 
     let files = [DeviceInfo.getUniqueID()];
     if (this.state.canvassSettings.show_only_my_turf !== true || flag === true) files.push('exported');
+
+    // TODO: exported and other jtxt files only go into allNodes
 
     // other jtxt files on this account are "my turf" too
     if (this.state.canvassSettings.show_only_my_turf !== true && flag === false) {
@@ -576,7 +547,7 @@ export default class App extends PureComponent {
         if (item.path_display.match(/\.jtxt$/) && !item.path_display.match(DeviceInfo.getUniqueID())) {
           try {
             let data = await dbx.filesDownload({ path: item.path_display });
-            turfNodes.nodes = turfNodes.nodes.concat((this._nodesFromJSON(data.fileBinary)).nodes);
+            turf.push(this._nodesFromJSON(data.fileBinary));
           } catch (e) {}
         }
       }
@@ -586,8 +557,7 @@ export default class App extends PureComponent {
       let file = files[f];
       try {
         let data = await dbx.filesDownload({ path: form.folder_path+'/'+file+'.jtrf' });
-        let obj = this._nodesFromJSON(data.fileBinary);
-        turfNodes.nodes = turfNodes.nodes.concat(obj.nodes);
+        turf.push(this._nodesFromJSON(data.fileBinary));
       } catch (e) {}
     }
 
@@ -606,13 +576,15 @@ export default class App extends PureComponent {
     return date.toLocaleDateString('en-us')+" "+date.toLocaleTimeString('en-us');
   }
 
-  _saveNodes = async (myNodes, local) => {
-    let { dbx } = this.state;
-    if (local) myNodes.last_saved = this.getEpoch();
-    this.setState({myNodes: myNodes});
+  strifyNodes(nodes) {
+    return JSON.stringify({nodes: nodes});
+  }
+
+  _saveNodes = async (nodes) => {
+    this.myNodes = nodes;
+
     try {
-      let str = JSON.stringify(myNodes);
-      await storage.set(this.state.asyncStorageKey, str);
+      await storage.set(this.state.asyncStorageKey, this.strifyNodes(nodes));
     } catch (error) {
       console.warn(error);
     }
@@ -621,18 +593,12 @@ export default class App extends PureComponent {
   }
 
   _syncNodes = async (flag) => {
-    let { dbx, form, user, myNodes } = this.state;
-    let allNodes = {nodes: []};
+    let { dbx, form, user } = this.state;
 
     this.setState({syncRunning: true});
 
-    let last_synced = myNodes.last_synced;
-    myNodes.last_synced = this.getEpoch();
-
     try {
-      let str = JSON.stringify(myNodes);
-      await dbx.filesUpload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtxt', contents: encoding.convert(tr(str), 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
-      await this._saveNodes(myNodes, false);
+      await dbx.filesUpload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtxt', contents: encoding.convert(tr(this.strifyNodes(this.myNodes)), 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
 
       // extra sync stuff for the form owner
       if (user.dropbox.account_id == form.author_id) {
@@ -670,7 +636,7 @@ export default class App extends PureComponent {
 
         allNodes.nodes = this.dedupeNodes(allNodes.nodes.concat((await this.syncTurf(true)).nodes));
 
-        await dbx.filesUpload({ path: form.folder_path+'/exported.jtrf', contents: encoding.convert(tr(JSON.stringify(allNodes)), 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
+        await dbx.filesUpload({ path: form.folder_path+'/exported.jtrf', contents: encoding.convert(tr(this.strifyNodes(allNodes)), 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
 
         // copy exported.jtrf to all sub-folders if configured in settings
         if (this.state.canvassSettings.share_progress === true) {
@@ -680,7 +646,7 @@ export default class App extends PureComponent {
               item = res.entries[i];
               if (item['.tag'] != 'folder') continue;
               if (item.path_display.match(/@/))
-                await dbx.filesUpload({ path: item.path_display+'/exported.jtrf', contents: encoding.convert(tr(JSON.stringify(allNodes)), 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
+                await dbx.filesUpload({ path: item.path_display+'/exported.jtrf', contents: encoding.convert(tr(this.strifyNodes(allNodes)), 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
             }
           } catch (e) {
             console.warn(e);
@@ -696,102 +662,53 @@ export default class App extends PureComponent {
       return;
     }
 
-    this.setState({syncRunning: false, myNodes: myNodes});
+    this.setState({syncRunning: false});
 
-    this.updateIndex();
+    this.updateMarkers();
 
     return allNodes;
   }
 
-  mergeNodes() {
-    let merged = {nodes: []};
-    merged.nodes = this.dedupeNodes(this.state.myNodes.nodes.concat(this.state.turfNodes.nodes));
-
-    return merged;
-  }
-
   getNodeById(id) {
-    if (this.idx[id]) return this.idx[id];
-    return this.getNodeByIdStore(id, this.mergeNodes());
-  }
-
-  getNodeByIdStore(id, store) {
-    for (let i in store.nodes)
-      if (store.nodes[i].id === id)
-        return store.nodes[i];
-    return {};
+    return (this.allNodes[id] ? this.allNodes[id] : {});
   }
 
   updateNodeById = async (id, prop, value) => {
-    let { myNodes } = this.state;
-    let merged = this.mergeNodes();
+    let node = this.getNodeById(id);
 
-    for (let i in merged.nodes) {
-      let node = merged.nodes[i];
-      if (node.id === id) {
-        node[prop] = value;
-        node.updated = this.getEpoch();
+    if (!node.id) return;
 
-        this.idx[node.id] = node;
+    node[prop] = value;
+    node.updated = this.getEpoch();
 
-        // check if this ID is in myNodes
-        for (let i in myNodes.nodes) {
-          if (myNodes.nodes[i].id === id) {
-            myNodes.nodes[i] = node;
-            await this._saveNodes(myNodes, true);
-            return;
-          }
-        }
+    this.myNodes[id] = node;
+    this.allNodes[id] = node;
 
-        // it isn't in myNodes, so add it
-        await this._addNode(node);
-        return;
-      }
-    }
+    await this._saveNodes(this.myNodes);
   }
 
   getNodesbyType(type) {
-    let merged = this.mergeNodes();
     let nodes = [];
-    for (let i in merged.nodes) {
-      let node = merged.nodes[i];
+
+    for (let a in this.allNodes) {
+      let node = this.allNodes[a];
       if (node.type === type)
         nodes.push(node);
     }
+
     return nodes;
   }
 
   getChildNodesByIdType(id, type) {
     let nodes = [];
 
-    if (this.idc[id]) {
-      for (let i in this.idc[id])
-        if (this.idc[id][i].type === type)
-          nodes.push(this.idc[id][i]);
-      return nodes;
-    }
-
-    let merged = this.mergeNodes();
-    for (let i in merged.nodes) {
-      let node = merged.nodes[i];
-      if (node.parent_id === id && node.type === type) {
+    for (let c in this.allNodes[id].children) {
+      let node = this.getNodeById(this.allNodes[id].children[c]);
+      if (node.type === type)
         nodes.push(node);
-      }
     }
-    return nodes;
-  }
 
-  dedupeNodes(nodes) {
-    let idx = [];
-    let deDupe = [];
-    for (let i in nodes.sort(this.dynamicSort('updated')).reverse()) {
-      let node = nodes[i];
-      if (idx.indexOf(node.id) === -1) {
-        idx.push(node.id);
-        deDupe.push(node);
-      }
-    }
-    return deDupe;
+    return nodes;
   }
 
   dynamicSort(property) {
@@ -801,20 +718,20 @@ export default class App extends PureComponent {
         property = property.substr(1);
     }
     return function (a,b) {
-        var result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
-        return result * sortOrder;
+      var result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
+      return result * sortOrder;
     }
   }
 
   getPinColor(node) {
     if (node.multi_unit) return "cyan";
 
-    nodes = this.getChildNodesByIdType(node.id, "survey").sort(this.dynamicSort('updated'));
+    nodes = this.getChildNodesByIdType(node.id, "survey");
 
     // no interactions
     if (nodes.length === 0) return "#8b4513";
 
-    switch (nodes[nodes.length-1].status) {
+    switch (nodes[0].status) {
       case 'home': return "green";
       case 'not home': return "yellow";
       case 'not interested': return "red";
@@ -837,17 +754,17 @@ export default class App extends PureComponent {
       let keys = Object.keys(form.questions);
       let csv = "Street,City,State,Zip,Unit,longitude,latitude,canvasser,datetime,status,"+keys.join(",")+"\n";
 
-      for (let n in allNodes.nodes.sort(this.dynamicSort('updated'))) {
-        let node = allNodes.nodes[n];
+      for (let a in allNodes) {
+        let node = allNodes[a];
         if (node.type !== "survey") continue;
 
-        let addr = this.getNodeByIdStore(node.parent_id, allNodes);
+        let addr = this.getNodeById(node.parent_id);
 
         // orphaned survey
         if (!addr.id) continue
 
         // unit
-        if (addr.type === "unit") addr = this.getNodeByIdStore(addr.parent_id, allNodes);
+        if (addr.type === "unit") addr = this.getNodeById(addr.parent_id);
 
         if (this.state.canvassSettings.only_export_home === true && node.status !== 'home') continue;
 

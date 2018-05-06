@@ -50,16 +50,18 @@ export default class App extends PureComponent {
       unit: json.unit,
     };
 
-    // TODO: check for duplicates
+    // check for duplicates
+    let check = refer.getNodeById(unit.id);
+    if (!check.id)
+      refer._addNode(unit);
 
-    refer._addNode(unit);
     this.setState({newUnitModalVisible: false});
   }
 
   render() {
     const { refer } = this.state;
 
-    let childNodes = refer.getChildNodesByIdType(this.state.node.id, "unit").sort(refer.dynamicSort('unit'));
+    let childNodes = refer.getChildNodesByIdType(this.state.node.id, "unit").sort(refer.dynamicSort("unit"));
 
     return (
       <ScrollView style={{flex: 1, backgroundColor: 'white'}} contentContainerStyle={{flexGrow:1}}>
