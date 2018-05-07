@@ -475,7 +475,7 @@ export default class App extends PureComponent {
     if (this.state.canvassSettings.show_only_my_turf === true)
       nodeList = this.mergeNodes([this.turfNodes, this.myNodes]);
     else
-      nodeList = this.mergeNodes(this.allNodes);
+      nodeList = this.mergeNodes([this.allNodes]);
 
     for (let n in nodeList) {
       let node = nodeList[n];
@@ -505,10 +505,8 @@ export default class App extends PureComponent {
   _setCanvassSettings = async (canvassSettings) => {
     const { form, dbx } = this.state;
 
-    let sync = false;
     let rmshare = false;
 
-    if (this.state.canvassSettings.show_only_my_turf !== canvassSettings.show_only_my_turf) sync = true;
     if (this.state.canvassSettings.share_progress !== canvassSettings.share_progress && canvassSettings.share_progress === false) rmshare = true;
 
     try {
@@ -557,6 +555,7 @@ export default class App extends PureComponent {
 
   mergeNodes(stores) {
     let nodes = {};
+    let idx = [];
 
     for (let s in stores) {
       let store = stores[s];
@@ -569,8 +568,11 @@ export default class App extends PureComponent {
         if (nodes[node.id].parent_id) {
           if (!this.family[nodes[node.id].parent_id])
             this.family[nodes[node.id].parent_id] = [];
-          if (this.family[nodes[node.id].parent_id].indexOf(node.id) === -1)
+
+          if (idx.indexOf(node.id) === -1) {
+            idx.push(node.id);
             this.family[nodes[node.id].parent_id].push(node);
+          }
         }
       }
     }
