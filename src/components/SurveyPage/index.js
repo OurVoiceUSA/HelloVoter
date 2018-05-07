@@ -60,6 +60,7 @@ export default class App extends PureComponent {
       survey: json,
     });
 
+    funcs.updateMarkers();
     refer.forceUpdate();
     this.props.navigation.goBack();
   }

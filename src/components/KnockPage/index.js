@@ -64,6 +64,7 @@ export default class App extends PureComponent {
                     status: 'not home',
                   });
                   refer.setState({ isKnockMenuVisible: false })
+                  funcs.updateMarkers();
                 }}
                 {...iconStyles}>
                 Not Home
@@ -82,6 +83,7 @@ export default class App extends PureComponent {
                     status: 'not interested',
                   });
                   refer.setState({ isKnockMenuVisible: false });
+                  funcs.updateMarkers();
                 }}
                 {...iconStyles}>
                 Not Interested
