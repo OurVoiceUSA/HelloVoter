@@ -510,6 +510,7 @@ export default class App extends PureComponent {
     let rmshare = false;
 
     if (this.state.canvassSettings.share_progress !== canvassSettings.share_progress && canvassSettings.share_progress === false) rmshare = true;
+    if (this.state.canvassSettings.show_only_my_turf !== canvassSettings.how_only_my_turf) this.updateMarkers();
 
     try {
       let str = JSON.stringify(canvassSettings);
@@ -529,7 +530,6 @@ export default class App extends PureComponent {
       } catch (e) {}
     }
 
-    this.updateMarkers();
   }
 
   timeFormat(epoch) {

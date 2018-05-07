@@ -72,6 +72,7 @@ export default class App extends PureComponent {
         [
           {text: 'Yes', onPress: () => {
             refer._setCanvassSettings(canvassSettings);
+            setTimeout(() => this.forceUpdate(), 500);
           }},
           {text: 'No', onPress: () => this.forceUpdate()}
         ], { cancelable: false });
