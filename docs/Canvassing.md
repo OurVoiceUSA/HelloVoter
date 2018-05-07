@@ -2,7 +2,7 @@
 
 ## Guidelines
 
-First and foremost, please give our [Canvassing Guidelines](docs/Canvassing-Guidelines.md) a read.
+First and foremost, please give our [Canvassing Guidelines](Canvassing-Guidelines.md) a read.
 
 ## Demo Video
 
