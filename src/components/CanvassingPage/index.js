@@ -339,7 +339,10 @@ export default class App extends PureComponent {
 
     if (nodes.length)  {
       let last = nodes[0];
-      str = this.ucFirst(last.status)+' '+timeAgo.format(new Date(last.updated*1000));
+      if (last.type === "survey")
+        str = this.ucFirst(last.status)+' '+timeAgo.format(new Date(last.updated*1000));
+      else
+        str = "Haven't visited";
     } else {
       str = "Haven't visited";
     }
@@ -348,7 +351,7 @@ export default class App extends PureComponent {
   }
 
   getLatestSurveyInfoByProp(id, prop) {
-    let nodes = this.getChildNodesByIdTypes(id, ["survey"]);
+    let nodes = this.getChildNodesByIdTypes(id, ["survey", "import"]);
 
     for (let n in nodes) {
       let node = nodes[n];
