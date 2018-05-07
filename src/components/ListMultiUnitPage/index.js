@@ -56,6 +56,7 @@ export default class App extends PureComponent {
       refer._addNode(unit);
 
     this.setState({newUnitModalVisible: false});
+    refer.updateMarkers();
   }
 
   render() {
