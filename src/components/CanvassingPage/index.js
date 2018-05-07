@@ -98,7 +98,9 @@ export default class App extends PureComponent {
     this.myNodes = {};
     this.turfNodes = {};
     this.allNodes = {};
+
     this.family = {};
+    this.fidx = [];
 
     this.onChange = this.onChange.bind(this);
     this.handleConnectivityChange = this.handleConnectivityChange.bind(this);
@@ -555,7 +557,6 @@ export default class App extends PureComponent {
 
   mergeNodes(stores) {
     let nodes = {};
-    let idx = [];
 
     for (let s in stores) {
       let store = stores[s];
@@ -569,8 +570,8 @@ export default class App extends PureComponent {
           if (!this.family[nodes[node.id].parent_id])
             this.family[nodes[node.id].parent_id] = [];
 
-          if (idx.indexOf(node.id) === -1) {
-            idx.push(node.id);
+          if (this.fidx.indexOf(node.id) === -1) {
+            this.fidx.push(node.id);
             this.family[nodes[node.id].parent_id].push(node);
           }
         }
