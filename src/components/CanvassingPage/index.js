@@ -333,7 +333,7 @@ export default class App extends PureComponent {
   }
 
   getLastInteraction(id) {
-    let nodes = this.getChildNodesByIdType(id, "survey");
+    let nodes = this.getChildNodesByIdTypes(id, ["survey", "import"]);
     const timeAgo = new TimeAgo('en-US')
     let str;
 
@@ -348,7 +348,7 @@ export default class App extends PureComponent {
   }
 
   getLatestSurveyInfoByProp(id, prop) {
-    let nodes = this.getChildNodesByIdType(id, "survey");
+    let nodes = this.getChildNodesByIdTypes(id, ["survey"]);
 
     for (let n in nodes) {
       let node = nodes[n];
@@ -490,7 +490,7 @@ export default class App extends PureComponent {
   }
 
   nodeHasSurvey(node) {
-    let children = this.getChildNodesByIdType(node.id, "survey");
+    let children = this.getChildNodesByIdTypes(node.id, ["survey"]);
     if (children.length === 0) return false;
     return true;
   }
@@ -701,14 +701,14 @@ export default class App extends PureComponent {
     await this._saveNodes(this.myNodes);
   }
 
-  getChildNodesByIdType(id, type) {
+  getChildNodesByIdTypes(id, types) {
     let nodes = [];
 
     if (!this.family[id]) return nodes;
 
     for (let c in this.family[id]) {
       let node = this.family[id][c];
-      if (node.type === type) {
+      if (types.indexOf(node.type) !== -1) {
         nodes.unshift(node);
       }
     }
@@ -731,7 +731,7 @@ export default class App extends PureComponent {
   getPinColor(node) {
     if (node.multi_unit) return "cyan";
 
-    nodes = this.getChildNodesByIdType(node.id, "survey");
+    nodes = this.getChildNodesByIdTypes(node.id, ["survey"]);
 
     // no interactions
     if (nodes.length === 0) return "#8b4513";
