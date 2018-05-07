@@ -234,7 +234,7 @@ export default class App extends PureComponent {
 
     setTimeout(async () => {
       try {
-        if (locationAccess === false) throw "location access denied";
+        if (this.state.locationAccess === false) throw "location access denied";
 
         let res = await _doGeocode(myPosition.longitude, myPosition.latitude);
 
