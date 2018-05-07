@@ -234,6 +234,8 @@ export default class App extends PureComponent {
 
     setTimeout(async () => {
       try {
+        if (locationAccess === false) throw "location access denied";
+
         let res = await _doGeocode(myPosition.longitude, myPosition.latitude);
 
         if (!res.error) {
@@ -319,6 +321,11 @@ export default class App extends PureComponent {
 
     let dupe = this.getNodeById(node.id);
     if (!dupe.id) node.created = epoch;
+    else {
+      // prevent overwriting latlng info with null
+      if (dupe.latlng && (node.latlng.latitude === null || node.latlng.longitude === null))
+        node.latlng = dupe.latlng;
+    }
 
     this.myNodes[node.id] = node;
     this.allNodes[node.id] = node;
