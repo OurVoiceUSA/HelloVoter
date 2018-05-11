@@ -5,6 +5,7 @@ import {
   Dimensions,
   TouchableHighlight,
   TouchableWithoutFeedback,
+  TouchableOpacity,
   Keyboard,
   Text,
   View,
@@ -128,26 +129,37 @@ export default class App extends PureComponent {
           />
 
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <Icon name="share-square" size={50} color="#808080" style={{marginBottom: 10}} onPress={() => this.setState({DropboxShareScreen: true})} />
-            <Text style={{fontSize: 20, marginLeft: 10}}>Share form</Text>
+            <TouchableOpacity
+              style={{backgroundColor: '#d7d7d7', flex: 1, flexDirection: 'row', alignItems: 'center', padding: 10, borderRadius: 20, marginBottom: 10}}
+              onPress={() => this.setState({DropboxShareScreen: true})}>
+              <Icon name="share-square" size={50} color="#808080" />
+              <Text style={{fontSize: 20, marginLeft: 10}}>Share form</Text>
+            </TouchableOpacity>
           </View>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
             {this.state.exportRunning &&
-            <ActivityIndicator size="large" />
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <ActivityIndicator size="large" />
+              <Text style={{fontSize: 20, marginLeft: 10}}>Exporting data...</Text>
+            </View>
             ||
-            <Icon name="save" size={50} color={(refer.syncingOk() ? "#b20000" : "#d3d3d3")} onPress={() => {
-                if (refer.state.netInfo === 'none') {
-                  Alert.alert('Export failed.', 'You are not connected to the internet.', [{text: 'OK'}], { cancelable: false });
-                } else if (!refer.syncingOk()) {
-                  Alert.alert('Export failed.', 'You are not connected to wifi. To sync over your cellular connection, enable \'Sync over cellular\' in settings.', [{text: 'OK'}], { cancelable: false });
-                } else if (refer.state.syncRunning) {
-                  Alert.alert('Export failed.', 'Data sync is currently running. Wait until it\'s finished and try again.', [{text: 'OK'}], { cancelable: false });
-                } else {
-                  refer.doExport(this);
-                }
-              }} />
+            <TouchableOpacity
+              style={{backgroundColor: '#d7d7d7', flex: 1, flexDirection: 'row', alignItems: 'center', padding: 10, borderRadius: 20, marginBottom: 10}}
+              onPress={() => {
+              if (refer.state.netInfo === 'none') {
+                Alert.alert('Export failed.', 'You are not connected to the internet.', [{text: 'OK'}], { cancelable: false });
+              } else if (!refer.syncingOk()) {
+                Alert.alert('Export failed.', 'You are not connected to wifi. To sync over your cellular connection, enable \'Sync over cellular\' in settings.', [{text: 'OK'}], { cancelable: false });
+              } else if (refer.state.syncRunning) {
+                Alert.alert('Export failed.', 'Data sync is currently running. Wait until it\'s finished and try again.', [{text: 'OK'}], { cancelable: false });
+              } else {
+                refer.doExport(this);
+              }
+            }}>
+              <Icon name="save" size={50} color={(refer.syncingOk() ? "#b20000" : "#d3d3d3")} />
+              <Text style={{fontSize: 20, marginLeft: 10}}>Export data to spreadsheet</Text>
+            </TouchableOpacity>
             }
-            <Text style={{fontSize: 20, marginLeft: 10}}>Export data to spreadsheet</Text>
           </View>
         </View>
         }
