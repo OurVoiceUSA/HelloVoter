@@ -191,7 +191,7 @@ export default class App extends PureComponent {
           modalDidClose={() => this.setState({DropboxShareScreen: false})}
           closeOnTouchOutside={true}
           disableOnBackPress={false}>
-          <DropboxSharePage refer={this} />
+          <DropboxSharePage refer={this} funcs={refer} />
         </Modal>
 
       </ScrollView>

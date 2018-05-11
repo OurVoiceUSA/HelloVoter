@@ -28,8 +28,8 @@ export default class App extends PureComponent {
 
     this.state = {
       refer: this.props.refer,
-      form: this.props.refer.state.form,
-      dbx: this.props.refer.state.dbx,
+      form: this.props.funcs.state.form,
+      dbx: this.props.funcs.state.dbx,
       message: null,
       submitted: false,
     };
@@ -50,7 +50,7 @@ export default class App extends PureComponent {
     try {
       let res = await dbx.filesListFolder({path: form.folder_path});
       for (let i in res.entries) {
-        item = res.entries[i];
+        let item = res.entries[i];
         if (item['.tag'] != 'folder') continue;
         folders.push(item.path_display.split('/').pop().toLowerCase());
       }
@@ -180,4 +180,3 @@ var styles = StyleSheet.create({
     justifyContent: 'center'
   }
 });
-
