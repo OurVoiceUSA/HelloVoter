@@ -260,6 +260,7 @@ export async function _rmUser() {
   try {
     await storage.del(USERLOCAL);
     await storage.del('OV_DISCLOUSER');
+    await storage.del('OV_CANVASS_SETTINGS');
     try {
       let forms = JSON.parse(await storage.get('OV_CANVASS_FORMS'));
       for (let i in forms) {
@@ -279,4 +280,3 @@ export async function _rmJWT() {
     console.warn(error);
   }
 }
-

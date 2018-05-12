@@ -37,7 +37,7 @@ var options = {
     },
     auto_sync: {
       label: 'Automatially sync data',
-      help: 'If you are on wifi, or enabled syncing on cellular, data will sync automatically as you canvass.',
+      help: 'Data will sync automatically as you canvass, if you\'ve allowed syncing over cellular, or are connected to wifi.',
     },
     share_progress: {
       label: 'Share progress',

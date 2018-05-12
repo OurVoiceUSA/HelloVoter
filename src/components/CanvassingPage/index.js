@@ -506,12 +506,52 @@ export default class App extends PureComponent {
   }
 
   _getCanvassSettings = async () => {
+    let canvassSettings = {};
     try {
       const value = await storage.get(this.state.settingsStorageKey);
       if (value !== null) {
-        this.setState({ canvassSettings: JSON.parse(value) });
+        canvassSettings = JSON.parse(value);
+        this.setState({ canvassSettings });
       }
-    } catch (e) {}
+    } catch (e) {
+      // don't continue with the below questions on storage fetch error
+      return;
+    }
+
+    if (canvassSettings.asked_sync_on_cellular !== true) {
+      canvassSettings.asked_sync_on_cellular = true;
+      await this._setCanvassSettings(canvassSettings);
+
+      Alert.alert(
+        'Sync over cellular',
+        'Would you like to enable syncing of your data over your cellular connection?',
+        [
+          {text: 'Yes', onPress: async () => {
+            let { canvassSettings } = this.state;
+            canvassSettings.sync_on_cellular = true;
+            await this._setCanvassSettings(canvassSettings);
+          }},
+          {text: 'No'}
+        ], { cancelable: false });
+    }
+
+    if (canvassSettings.asked_auto_sync !== true) {
+      canvassSettings.asked_auto_sync = true;
+      await this._setCanvassSettings(canvassSettings);
+
+      Alert.alert(
+        'Automatially sync data',
+        'Would you like your data to automatically sync as you canvass, if a data connection is available?',
+        [
+          {text: 'Yes', onPress: async () => {
+            let { canvassSettings } = this.state;
+            canvassSettings.auto_sync = true;
+            await this._setCanvassSettings(canvassSettings);
+          }},
+          {text: 'No'}
+        ], { cancelable: false });
+    }
+
   }
 
   _setCanvassSettings = async (canvassSettings) => {
