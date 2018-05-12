@@ -75,8 +75,7 @@ export default class App extends PureComponent {
       try {
         item = objs[i];
         if (item.error) continue;
-
-        let json = JSON.parse(item.fileBinary);
+        let json = JSON.parse(item.fileBlob);
         json.folder_path = item.path_display.match('.*/')[0].slice(0, -1);
 
         forms_local.push(json);

@@ -35,6 +35,8 @@ import { _doGeocode } from '../../common';
 import KnockPage from '../KnockPage';
 import Modal from 'react-native-simple-modal';
 import TimeAgo from 'javascript-time-ago'
+import pako from 'pako';
+import base64 from 'base-64';
 import en from 'javascript-time-ago/locale/en'
 import t from 'tcomb-form-native';
 import _ from 'lodash';
@@ -386,12 +388,18 @@ export default class App extends PureComponent {
     } catch (error) {}
   }
 
-  _nodesFromJSON(str) {
+  _nodesFromJtxt(str) {
     let store;
 
     try {
-      store = JSON.parse(str);
-    } catch (e) { console.warn(e); }
+      store = JSON.parse(pako.ungzip(base64.decode(str), { to: 'string' }));
+    } catch (e) {
+      try {
+        store = JSON.parse(str);
+      } catch (e) {
+        return {};
+      }
+    }
 
     if (!store.nodes) store.nodes = {};
 
@@ -470,7 +478,7 @@ export default class App extends PureComponent {
     try {
       const value = await storage.get(this.state.asyncStorageKey);
       if (value !== null) {
-        this.myNodes = this._nodesFromJSON(value);
+        this.myNodes = this._nodesFromJtxt(value);
         this.allNodes = this.myNodes;
       }
     } catch (e) {}
@@ -607,7 +615,7 @@ export default class App extends PureComponent {
   }
 
   strifyNodes(nodes) {
-    return JSON.stringify({nodes: nodes});
+    return base64.encode(pako.gzip(JSON.stringify({nodes: nodes}), { to: 'string' }));
   }
 
   _saveNodes = async (nodes) => {
@@ -670,7 +678,7 @@ export default class App extends PureComponent {
       // download "turf" for this device
       try {
         let data = await dbx.filesDownload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtrf' });
-        this.turfNodes = this._nodesFromJSON(data.fileBinary);
+        this.turfNodes = this._nodesFromJtxt(data.fileBlob);
       } catch (e) {}
 
       allsrc.push(this.myNodes);
@@ -683,7 +691,7 @@ export default class App extends PureComponent {
         if (item.path_display.match(/\.jtxt$/) && !item.path_display.match(DeviceInfo.getUniqueID())) {
           try {
             let data = await dbx.filesDownload({ path: item.path_display });
-            allsrc.push(this._nodesFromJSON(data.fileBinary));
+            allsrc.push(this._nodesFromJtxt(data.fileBlob));
           } catch (e) {}
         }
       }
@@ -691,7 +699,7 @@ export default class App extends PureComponent {
       // download exported "turf" for this account
       try {
         let data = await dbx.filesDownload({ path: form.folder_path+'/exported.jtrf' });
-        allsrc.push(this._nodesFromJSON(data.fileBinary));
+        allsrc.push(this._nodesFromJtxt(data.fileBlob));
       } catch (e) {}
 
       // extra sync stuff for the form owner
@@ -716,7 +724,7 @@ export default class App extends PureComponent {
               item = res.entries[i];
               if (item.path_display.match(/\.jtxt$/)) {
                 let data = await dbx.filesDownload({ path: item.path_display });
-                allsrc.push(this._nodesFromJSON(data.fileBinary));
+                allsrc.push(this._nodesFromJtxt(data.fileBlob));
               }
             }
           } catch (e) {
