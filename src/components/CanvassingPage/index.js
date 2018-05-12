@@ -88,6 +88,7 @@ export default class App extends PureComponent {
       DisclosureKey : 'OV_DISCLOUSER',
       isModalVisible: false,
       isKnockMenuVisible: false,
+      isAlertMenuVisible: false,
       showDisclosure: "true",
       dbx: props.navigation.state.params.dbx,
       form: props.navigation.state.params.form,
@@ -101,6 +102,8 @@ export default class App extends PureComponent {
 
     this.family = {};
     this.fidx = [];
+
+    this.alerts = [];
 
     this.onChange = this.onChange.bind(this);
     this.handleConnectivityChange = this.handleConnectivityChange.bind(this);
@@ -474,8 +477,8 @@ export default class App extends PureComponent {
 
     this.updateMarkers();
 
-    if (this.syncingOk())
-      await this._syncNodes(false);
+    // even if sycn isn't OK over cellular - do the initial sync anyway
+    await this._syncNodes(false);
 
     this.updateMarkers();
   }
@@ -505,6 +508,18 @@ export default class App extends PureComponent {
     return true;
   }
 
+  alertPush(spec) {
+    this.alerts.push(spec);
+    this.setState({isAlertMenuVisible: true});
+  }
+
+  alertOnPress(func) {
+    func();
+    this.setState({isAlertMenuVisible: false});
+    this.alerts.shift();
+    if (this.alerts.length) setTimeout(() => this.setState({isAlertMenuVisible: true}), 500);
+  }
+
   _getCanvassSettings = async () => {
     let canvassSettings = {};
     try {
@@ -518,39 +533,43 @@ export default class App extends PureComponent {
       return;
     }
 
-    if (canvassSettings.asked_sync_on_cellular !== true) {
-      canvassSettings.asked_sync_on_cellular = true;
-      await this._setCanvassSettings(canvassSettings);
-
-      Alert.alert(
-        'Sync over cellular',
-        'Would you like to enable syncing of your data over your cellular connection?',
-        [
+    if (canvassSettings.sync_on_cellular !== true && canvassSettings.asked_sync_on_cellular !== true)
+      this.alertPush({
+        title: 'Sync over cellular',
+        description: 'Would you like to enable syncing of your data over your cellular connection?',
+        funcs: [
           {text: 'Yes', onPress: async () => {
             let { canvassSettings } = this.state;
+            canvassSettings.asked_sync_on_cellular = true;
             canvassSettings.sync_on_cellular = true;
             await this._setCanvassSettings(canvassSettings);
           }},
-          {text: 'No'}
-        ], { cancelable: false });
-    }
+          {text: 'No', onPress: async () => {
+            let { canvassSettings } = this.state;
+            canvassSettings.asked_sync_on_cellular = true;
+            await this._setCanvassSettings(canvassSettings);
+          }},
+        ]
+      });
 
-    if (canvassSettings.asked_auto_sync !== true) {
-      canvassSettings.asked_auto_sync = true;
-      await this._setCanvassSettings(canvassSettings);
-
-      Alert.alert(
-        'Automatially sync data',
-        'Would you like your data to automatically sync as you canvass, if a data connection is available?',
-        [
+    if (canvassSettings.auto_sync !== true && canvassSettings.asked_auto_sync !== true)
+      this.alertPush({
+        title: 'Automatially sync data',
+        description: 'Would you like your data to automatically sync as you canvass, if a data connection is available?',
+        funcs: [
           {text: 'Yes', onPress: async () => {
             let { canvassSettings } = this.state;
+            canvassSettings.asked_auto_sync = true;
             canvassSettings.auto_sync = true;
             await this._setCanvassSettings(canvassSettings);
           }},
-          {text: 'No'}
-        ], { cancelable: false });
-    }
+          {text: 'No', onPress: async () => {
+            let { canvassSettings } = this.state;
+            canvassSettings.asked_auto_sync = true;
+            await this._setCanvassSettings(canvassSettings);
+          }},
+        ]
+      });
 
   }
 
@@ -1124,6 +1143,40 @@ export default class App extends PureComponent {
           closeOnTouchOutside={true}
           disableOnBackPress={false}>
           <KnockPage refer={this} funcs={this} />
+        </Modal>
+
+        <Modal
+          open={this.state.isAlertMenuVisible}
+          modalStyle={{width: 335, height: 350, backgroundColor: "transparent",
+            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
+          style={{alignItems: 'center'}}
+          offset={0}
+          overlayBackground={'rgba(0, 0, 0, 0.75)'}
+          animationDuration={200}
+          animationTension={40}
+          modalDidOpen={() => undefined}
+          modalDidClose={() => this.setState({isAlertMenuVisible: false})}
+          closeOnTouchOutside={false}
+          disableOnBackPress={true}>
+          <View style={{flexDirection: 'column'}}>
+            <View style={{width: 325, backgroundColor: 'white', marginTop: 5, borderRadius: 15, padding: 10, alignItems: 'center'}}>
+              {this.alerts.length &&
+              <View>
+              <Text style={{fontWeight: 'bold', fontSize: 20, marginBottom: 10}}>{this.alerts[0].title}</Text>
+              <Text>{this.alerts[0].description}</Text>
+              <View style={{flexDirection: 'row'}}>
+                {this.alerts[0].funcs.map((spec) => (
+                  <TouchableOpacity key={spec.text}
+                    style={{backgroundColor: '#d7d7d7', flexDirection: 'row', alignItems: 'center', padding: 10, borderRadius: 20, margin: 10, width: 75}}
+                    onPress={() => this.alertOnPress(spec.onPress)}>
+                    <Text>{spec.text}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              </View>
+            }
+            </View>
+          </View>
         </Modal>
 
       </View>
