@@ -665,7 +665,7 @@ export default class App extends PureComponent {
 
   _syncNodes = async (flag) => {
     let { dbx, form, user } = this.state;
-    let allsrc = [];
+    let allsrc = [this.allNodes];
 
     if (this.state.syncRunning === true) return;
 
