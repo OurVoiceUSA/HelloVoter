@@ -667,6 +667,8 @@ export default class App extends PureComponent {
     let { dbx, form, user } = this.state;
     let allsrc = [];
 
+    if (this.state.syncRunning === true) return;
+
     this.setState({syncRunning: true});
 
     try {
