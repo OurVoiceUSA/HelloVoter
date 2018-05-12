@@ -41,7 +41,7 @@ export async function _doGeocode(lng, lat) {
 
   try {
     let results = await Geocoder.geocodePosition({lng: lng, lat: lat});
-    position.address = results[0].formattedAddress.replace(/\u2013\d+/, "");
+    position.address = results[0].formattedAddress.replace(/\u2013\d+/, "").replace(/\-\d+/, "");
   } catch (error) {}
 
   // fall back to GooglePlaces
