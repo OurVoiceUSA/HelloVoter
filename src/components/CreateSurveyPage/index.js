@@ -29,6 +29,7 @@ var mainForm = t.struct({
 
 const FTYPE = t.enums({
   'String': 'Text Input',
+  'TEXTBOX': 'Text Box',
   'Number': 'Number',
   'Boolean': 'On/Off Switch',
   'SAND': 'Agree/Disagree',
@@ -201,6 +202,7 @@ export default class App extends PureComponent {
   inputTypeToReadable(type) {
     switch (type) {
       case 'String': return 'Text Input';
+      case 'TEXTBOX': return 'Text Box';
       case 'Number': return 'Number';
       case 'Boolean': return 'On/Off Switch';
       case 'SAND': return 'Agree/Disagree';
@@ -332,4 +334,3 @@ var styles = StyleSheet.create({
     justifyContent: 'center'
   }
 });
-

@@ -82,7 +82,9 @@ export default class App extends PureComponent {
     let keys = Object.keys(form.questions);
     for (let k in keys) {
       let value;
+      let boxflag = false;
       switch (form.questions[keys[k]].type) {
+        case 'TEXTBOX': value = t.String; boxflag = true; break;
         case 'Number': value = t.Number; break;
         case 'Boolean': value = t.Boolean; break;
         case 'List': value = this.valueToEnums(form.questions[keys[k]].options); break;
@@ -92,6 +94,23 @@ export default class App extends PureComponent {
       if (form.questions[keys[k]].optional) value = t.maybe(value);
       newStruct[keys[k]] = value;
       newOptions.fields[keys[k]] = { label: form.questions[keys[k]].label + (form.questions[keys[k]].optional ? '' : ' *') };
+      if (boxflag === true) {
+        newOptions.fields[keys[k]].multiline = true;
+        newOptions.fields[keys[k]].stylesheet = {
+          ...Form.stylesheet,
+          textbox: {
+            ...Form.stylesheet.textbox,
+            normal: {
+              ...Form.stylesheet.textbox.normal,
+              height: 150
+            },
+            error: {
+              ...Form.stylesheet.textbox.error,
+              height: 150
+            }
+          }
+        };
+      }
     }
 
     CanvassForm = t.struct(newStruct);
