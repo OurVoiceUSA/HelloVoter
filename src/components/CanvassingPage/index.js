@@ -662,7 +662,7 @@ export default class App extends PureComponent {
     this.setState({syncRunning: true});
 
     try {
-      await dbx.filesUpload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtxt', contents: encoding.convert(tr(this.strifyNodes(this.myNodes)), 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
+      await dbx.filesUpload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtxt', contents: encoding.convert(tr(this.strifyNodes(this.myNodes)), 'ISO-8859-1'), mute: true, mode: {'.tag': 'overwrite'} });
 
       // download "turf" for this device
       try {
@@ -722,7 +722,7 @@ export default class App extends PureComponent {
         }
 
         let exportedFile = encoding.convert(tr(this.strifyNodes(this.mergeNodes(allsrc))), 'ISO-8859-1');
-        await dbx.filesUpload({ path: form.folder_path+'/exported.jtrf', contents: exportedFile, mode: {'.tag': 'overwrite'} });
+        await dbx.filesUpload({ path: form.folder_path+'/exported.jtrf', contents: exportedFile, mute: true, mode: {'.tag': 'overwrite'} });
 
         // copy exported.jtrf to all sub-folders if configured in settings
         if (this.state.canvassSettings.share_progress === true) {
@@ -732,7 +732,7 @@ export default class App extends PureComponent {
               item = res.entries[i];
               if (item['.tag'] != 'folder') continue;
               if (item.path_display.match(/@/))
-                await dbx.filesUpload({ path: item.path_display+'/exported.jtrf', contents: exportedFile, mode: {'.tag': 'overwrite'} });
+                await dbx.filesUpload({ path: item.path_display+'/exported.jtrf', contents: exportedFile, mute: true, mode: {'.tag': 'overwrite'} });
             }
           } catch (e) {
             console.warn(e);
@@ -857,7 +857,7 @@ export default class App extends PureComponent {
       }
 
       // csv file
-      await dbx.filesUpload({ path: form.folder_path+'/'+form.name+'.csv', contents: encoding.convert(tr(csv), 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
+      await dbx.filesUpload({ path: form.folder_path+'/'+form.name+'.csv', contents: encoding.convert(tr(csv), 'ISO-8859-1'), mute: false, mode: {'.tag': 'overwrite'} });
       success = true;
     } catch(e) {
       console.warn(e);

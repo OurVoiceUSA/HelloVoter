@@ -177,7 +177,7 @@ export default class App extends PureComponent {
 
         if (msg == null) {
           await dbx.filesCreateFolderV2({path: '/'+formName, autorename: false});
-          await dbx.filesUpload({ path: '/'+formName+'/canvassingform.json', contents: encoding.convert(tr(JSON.stringify(obj)), 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
+          await dbx.filesUpload({ path: '/'+formName+'/canvassingform.json', contents: encoding.convert(tr(JSON.stringify(obj)), 'ISO-8859-1'), mute: true, mode: {'.tag': 'overwrite'} });
         }
 
       } catch (error) {

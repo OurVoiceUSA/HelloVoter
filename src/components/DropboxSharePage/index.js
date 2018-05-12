@@ -104,7 +104,7 @@ export default class App extends PureComponent {
         allow_ownership_transfer: true,
       });
 
-      await dbx.filesUpload({ path: form.folder_path+'/'+email+'/canvassingform.json', contents: encoding.convert(JSON.stringify(form), 'ISO-8859-1'), mode: {'.tag': 'overwrite'} });
+      await dbx.filesUpload({ path: form.folder_path+'/'+email+'/canvassingform.json', contents: encoding.convert(JSON.stringify(form), 'ISO-8859-1'), mute: true, mode: {'.tag': 'overwrite'} });
 
     } catch(error) {
       console.warn(error);
