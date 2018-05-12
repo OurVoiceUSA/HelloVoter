@@ -662,6 +662,9 @@ export default class App extends PureComponent {
     this.setState({syncRunning: true});
 
     try {
+      let res = await dbx.filesListFolder({path: form.folder_path});
+      if (res.entries.length === 0) throw "The form's folder is missing!";
+
       await dbx.filesUpload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtxt', contents: encoding.convert(tr(this.strifyNodes(this.myNodes)), 'ISO-8859-1'), mute: true, mode: {'.tag': 'overwrite'} });
 
       // download "turf" for this device
@@ -674,7 +677,7 @@ export default class App extends PureComponent {
       allsrc.push(this.turfNodes);
 
       // download other jtxt files on this account
-      let res = await dbx.filesListFolder({path: form.folder_path});
+      res = await dbx.filesListFolder({path: form.folder_path});
       for (let i in res.entries) {
         item = res.entries[i];
         if (item.path_display.match(/\.jtxt$/) && !item.path_display.match(DeviceInfo.getUniqueID())) {
