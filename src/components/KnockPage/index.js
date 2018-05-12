@@ -25,17 +25,29 @@ export default class App extends PureComponent {
     const { navigate } = refer.props.navigation;
 
     let LastInteraction = funcs.getLastInteraction(refer.state.currentNode.id);
-    let info = funcs.getLatestSurveyInfoByProp(refer.state.currentNode.id, "FullName");
+    let info = funcs.getLatestSurveyInfo(refer.state.currentNode.id);
 
-    let FullName = (info.FullName ? info.FullName : 'N/A');
-    let PartyAffiliation = (info.PartyAffiliation ? info.PartyAffiliation : 'N/A');
+    let name = "N/A";
+    let party = "N/A";
+
+    // find me a key that has "name" and "party" in it
+    let keys = Object.keys(funcs.state.form.questions);
+    for (let k in keys) {
+      let key = keys[k];
+      if (info && info[key]) {
+        if (key.match(/name/i))
+          name = info[key];
+        if (key.match(/party/i))
+          party = info[key];
+      }
+    }
 
     return (
       <View style={{flexDirection: 'column'}}>
         <View style={{width: 280, height: 350, backgroundColor: 'white', marginTop: 15, borderRadius: 15, padding: 25, alignSelf: 'flex-start'}}>
           <View>
-            <Text>Name: {FullName}</Text>
-            <Text>Party: {PartyAffiliation}</Text>
+            <Text>Name: {name}</Text>
+            <Text>Party: {party}</Text>
             <Text>{LastInteraction}</Text>
 
             <View style={{margin: 5, flexDirection: 'row'}}>
