@@ -848,12 +848,16 @@ export default class App extends PureComponent {
         if (!addr.id) continue
 
         // unit
-        if (addr.type === "unit") addr = this.getNodeById(addr.parent_id);
+        let unit = {};
+        if (addr.type === "unit") {
+          unit = addr;
+          addr = this.getNodeById(addr.parent_id);
+        }
 
         if (this.state.canvassSettings.only_export_home === true && node.status !== 'home') continue;
 
         csv += (addr.address?addr.address.map((x) => '"'+(x?x:'')+'"').join(','):'')+
-          ","+(addr.unit?addr.unit:'')+
+          ","+(unit.unit?unit.unit:'')+
           ","+(addr.latlng?addr.latlng.longitude:'')+
           ","+(addr.latlng?addr.latlng.latitude:'')+
           ","+node.canvasser+
