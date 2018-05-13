@@ -95,14 +95,17 @@ export default class App extends PureComponent {
     const { refer } = this.state;
 
     let formOpt = {
-      'show_only_my_turf': t.Boolean,
       'draggable_pins': t.Boolean,
-      'sync_on_cellular': t.Boolean,
-      'auto_sync': t.Boolean,
+    };
+
+    if (refer.state.dbx) {
+      formOpt.show_only_my_turf = t.Boolean;
+      formOpt.sync_on_cellular =  t.Boolean;
+      formOpt.auto_sync = t.Boolean;
     };
 
     // additional settings for the form owner
-    if (refer.state.user.dropbox.account_id === refer.state.form.author_id) {
+    if (refer.state.dbx && refer.state.user.dropbox.account_id === refer.state.form.author_id) {
       formOpt['share_progress'] = t.Boolean;
       formOpt['only_export_home'] = t.Boolean;
     }
@@ -117,7 +120,7 @@ export default class App extends PureComponent {
           <Text>{DeviceInfo.getUniqueID()}</Text>
         </View>
 
-        {refer.state.user.dropbox.account_id == refer.state.form.author_id &&
+        {refer.state.dbx && refer.state.user.dropbox.account_id == refer.state.form.author_id &&
         <View>
 
           <View style={{

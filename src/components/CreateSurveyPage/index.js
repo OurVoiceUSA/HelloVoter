@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 
 import t from 'tcomb-form-native';
+import storage from 'react-native-storage-wrapper';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import sha1 from 'sha1';
 import encoding from 'encoding';
@@ -149,23 +150,27 @@ export default class App extends PureComponent {
 
       // make sure this name doesn't exist as a dropbox folder
       try {
-        let res = await dbx.filesListFolder({path: ''});
-        for (let i in res.entries) {
-          item = res.entries[i];
-          if (item['.tag'] != 'folder') continue;
-          let name = item.path_display.substr(1).toLowerCase();
-          if (name == formName.toLowerCase())
-            msg = 'Dropbox folder name '+name+' already exists. Please choose a different name.';
+
+        if (dbx) {
+          let res = await dbx.filesListFolder({path: ''});
+          for (let i in res.entries) {
+            item = res.entries[i];
+            if (item['.tag'] != 'folder') continue;
+            let name = item.path_display.substr(1).toLowerCase();
+            if (name == formName.toLowerCase())
+              msg = 'Dropbox folder name '+name+' already exists. Please choose a different name.';
+          }
         }
 
         let epoch = Math.floor(new Date().getTime() / 1000);
+        let id = sha1(epoch+":"+formName);
 
         let obj = {
-          id: sha1(epoch+":"+formName),
+          id: id,
           created: epoch,
           name: formName,
-          author: user.dropbox.name.display_name,
-          author_id: user.dropbox.account_id,
+          author: (user.dropbox ? user.dropbox.name.display_name : 'You'),
+          author_id: ( user.dropbox ? user.dropbox.account_id : id ),
           version: 1,
           questions: {}
         };
@@ -175,7 +180,24 @@ export default class App extends PureComponent {
           obj.questions[fields[f].key] = {type: fields[f].type, label: fields[f].label, options: fields[f].options, optional: true};
         }
 
-        if (msg == null) {
+        try {
+          let forms;
+
+          const value = await storage.get('OV_CANVASS_FORMS');
+          if (value !== null)
+            forms = JSON.parse(value);
+
+          if (!forms) forms = [];
+
+          forms.push(obj);
+
+          await storage.set('OV_CANVASS_FORMS', JSON.stringify(forms));
+        } catch (e) {
+          console.warn(""+e);
+          msg = "Unable to save form data.";
+        }
+
+        if (dbx && msg === null) {
           await dbx.filesCreateFolderV2({path: '/'+formName, autorename: false});
           await dbx.filesUpload({ path: '/'+formName+'/canvassingform.json', contents: encoding.convert(tr(JSON.stringify(obj)), 'ISO-8859-1'), mute: true, mode: {'.tag': 'overwrite'} });
         }
@@ -185,7 +207,7 @@ export default class App extends PureComponent {
       }
     }
 
-    if (msg == null) {
+    if (msg === null) {
       refer._loadDBData();
       this.props.navigation.goBack();
     } else {

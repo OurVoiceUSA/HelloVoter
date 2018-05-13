@@ -321,7 +321,7 @@ export default class App extends PureComponent {
     let epoch = this.getEpoch();
 
     node.updated = epoch;
-    node.canvasser = this.state.user.dropbox.name.display_name;
+    node.canvasser = (this.state.dbx ? this.state.user.dropbox.name.display_name : 'You');
     if (!node.id) node.id = sha1(epoch+JSON.stringify(node)+this.state.currentNode.id);
 
     let dupe = this.getNodeById(node.id);
@@ -486,7 +486,7 @@ export default class App extends PureComponent {
     this.updateMarkers();
 
     // even if sycn isn't OK over cellular - do the initial sync anyway
-    await this._syncNodes(false);
+    if (this.state.dbx) await this._syncNodes(false);
 
     this.updateMarkers();
   }
@@ -540,6 +540,8 @@ export default class App extends PureComponent {
       // don't continue with the below questions on storage fetch error
       return;
     }
+
+    if (!this.state.dbx) return;
 
     if (canvassSettings.sync_on_cellular !== true && canvassSettings.asked_sync_on_cellular !== true)
       this.alertPush({

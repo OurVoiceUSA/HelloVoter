@@ -42,12 +42,14 @@ export default class App extends PureComponent {
 
     this.setState({loading: true});
 
-    let user = await _loginPing(this, false);
-    let dbx = new Dropbox({ accessToken: user.dropbox.accessToken });
+    let user;
+    let dbx;
     let forms = [];
 
     // look for canvassing forms
     try {
+      user = await _loginPing(this, false);
+      dbx = new Dropbox({ accessToken: user.dropbox.accessToken });
       let res = await dbx.filesListFolder({path: ''});
       for (let i in res.entries) {
         item = res.entries[i];
@@ -61,8 +63,9 @@ export default class App extends PureComponent {
       try {
         forms_local = JSON.parse(await storage.get('OV_CANVASS_FORMS'));
       } catch (error) {
+        console.warn(error);
       }
-    };
+    }
 
     let pro = [];
 
@@ -130,17 +133,22 @@ export default class App extends PureComponent {
       );
 
     if (!loading && !forms.length) {
-      if (connected) forms.push(<View key={1}><Text>No Canvassing forms found in your Dropbox. Ask someone who created one to share their form with you, or create a new one.</Text></View>);
-      else forms.push(<View key={1}><Text>No Canvassing forms found. Connect your device to the internet to download forms from your Dropbox.</Text></View>);
+      forms.push(
+        <View key={1}>
+          <Text>No Canvassing forms found in your Dropbox. Ask someone who created one to share their form with you, or create a new one.</Text>
+        </View>
+      );
     }
 
     return (
       <ScrollView style={{flex: 1, backgroundColor: 'white'}} contentContainerStyle={{flexGrow:1}}>
 
+        {user.dropbox &&
         <View style={{margin: 20, alignItems: 'center'}}>
           <Text>You are logged into Dropbox as:</Text>
           <Text>{user.dropbox.name.display_name}</Text>
         </View>
+        }
 
         <View style={{
             width: Dimensions.get('window').width,
@@ -158,7 +166,7 @@ export default class App extends PureComponent {
             ||
             <View style={{flex: 1, alignItems: 'center'}}>
               {!connected &&
-              <Text style={{margin: 10, color: '#ff0000'}}>Not connected to server.</Text>
+              <Text style={{margin: 10, color: '#ff0000'}}>Not connected to Dropbox.</Text>
               }
               <Text style={{margin: 10}}>Select a canvassing campaign:</Text>
               { forms }
@@ -166,7 +174,6 @@ export default class App extends PureComponent {
             }
         </View>
 
-        {!loading && connected &&
         <View>
           <View style={{width: Dimensions.get('window').width, height: 1, backgroundColor: 'lightgray'}} />
 
@@ -180,7 +187,6 @@ export default class App extends PureComponent {
             </Icon.Button>
           </View>
         </View>
-        }
 
         <View style={{
             width: Dimensions.get('window').width,
