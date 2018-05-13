@@ -665,6 +665,7 @@ export default class App extends PureComponent {
 
   _syncNodes = async (flag) => {
     let { dbx, form, user } = this.state;
+    let folders = [];
     let allsrc = [this.allNodes];
 
     if (this.state.syncRunning === true) return;
@@ -672,24 +673,13 @@ export default class App extends PureComponent {
     this.setState({syncRunning: true});
 
     try {
+      // download other jtxt files on this account
       let res = await dbx.filesListFolder({path: form.folder_path});
       if (res.entries.length === 0) throw "The form's folder is missing!";
 
-      await dbx.filesUpload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtxt', contents: encoding.convert(tr(this.strifyNodes(this.myNodes)), 'ISO-8859-1'), mute: true, mode: {'.tag': 'overwrite'} });
-
-      // download "turf" for this device
-      try {
-        let data = await dbx.filesDownload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtrf' });
-        this.turfNodes = this._nodesFromJtxt(data.fileBlob);
-      } catch (e) {}
-
-      allsrc.push(this.myNodes);
-      allsrc.push(this.turfNodes);
-
-      // download other jtxt files on this account
-      res = await dbx.filesListFolder({path: form.folder_path});
       for (let i in res.entries) {
-        item = res.entries[i];
+        let item = res.entries[i];
+        if (item['.tag'] === 'folder') folders.push(item.path_display);
         if (item.path_display.match(/\.jtxt$/) && !item.path_display.match(DeviceInfo.getUniqueID())) {
           try {
             let data = await dbx.filesDownload({ path: item.path_display });
@@ -698,32 +688,31 @@ export default class App extends PureComponent {
         }
       }
 
+      // download "turf" for this device
+      try {
+        let data = await dbx.filesDownload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtrf' });
+        this.turfNodes = this._nodesFromJtxt(data.fileBlob);
+        allsrc.push(this.turfNodes);
+      } catch (e) {}
+
       // download exported "turf" for this account
       try {
         let data = await dbx.filesDownload({ path: form.folder_path+'/exported.jtrf' });
         allsrc.push(this._nodesFromJtxt(data.fileBlob));
       } catch (e) {}
 
+      await dbx.filesUpload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtxt', contents: encoding.convert(tr(this.strifyNodes(this.myNodes)), 'ISO-8859-1'), mute: true, mode: {'.tag': 'overwrite'} });
+      allsrc.push(this.myNodes);
+
       // extra sync stuff for the form owner
       if (user.dropbox.account_id == form.author_id) {
         // download all sub-folder .jtxt files
-        let folders = [];
-        let res = await dbx.filesListFolder({path: form.folder_path});
-        for (let i in res.entries) {
-          item = res.entries[i];
-          // any devices logged in with the form creator are here
-          if (item['.tag'] != 'folder') continue;
-          folders.push(item.path_display);
-        }
-
         // TODO: do in paralell... let objs = await Promise.all(pro.map(p => p.catch(e => e)));
-
-        // for each folder, download all .jtxt files
         for (let f in folders) {
           try {
             let res = await dbx.filesListFolder({path: folders[f]});
             for (let i in res.entries) {
-              item = res.entries[i];
+              let item = res.entries[i];
               if (item.path_display.match(/\.jtxt$/)) {
                 let data = await dbx.filesDownload({ path: item.path_display });
                 allsrc.push(this._nodesFromJtxt(data.fileBlob));
@@ -739,16 +728,15 @@ export default class App extends PureComponent {
 
         // copy exported.jtrf to all sub-folders if configured in settings
         if (this.state.canvassSettings.share_progress === true) {
-          try {
-            let res = await dbx.filesListFolder({path: form.folder_path});
-            for (let i in res.entries) {
-              item = res.entries[i];
-              if (item['.tag'] != 'folder') continue;
-              if (item.path_display.match(/@/))
-                await dbx.filesUpload({ path: item.path_display+'/exported.jtrf', contents: exportedFile, mute: true, mode: {'.tag': 'overwrite'} });
+          for (let f in folders) {
+            let folder = folders[f];
+            if (folder.match(/@/)) {
+              try {
+                await dbx.filesUpload({ path: folder+'/exported.jtrf', contents: exportedFile, mute: true, mode: {'.tag': 'overwrite'} });
+              } catch (e) {
+                console.warn(e);
+              }
             }
-          } catch (e) {
-            console.warn(e);
           }
         }
       }
