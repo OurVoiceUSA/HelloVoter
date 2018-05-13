@@ -1046,12 +1046,13 @@ export default class App extends PureComponent {
           </TouchableOpacity>
           }
 
-          {this.state.syncRunning &&
-          <View style={styles.iconContainer}>
-            <ActivityIndicator size="large" />
-          </View>
-          ||
+          {dbx &&
           <View>
+            {this.state.syncRunning &&
+            <View style={styles.iconContainer}>
+              <ActivityIndicator size="large" />
+            </View>
+            ||
             <TouchableOpacity style={styles.iconContainer}
               onPress={() => {
                 if (this.state.netInfo === 'none') {
@@ -1068,6 +1069,7 @@ export default class App extends PureComponent {
                 color={(this.syncingOk() ? "#00a86b" : "#d3d3d3")}
                 {...iconStyles} />
             </TouchableOpacity>
+            }
           </View>
           }
 
