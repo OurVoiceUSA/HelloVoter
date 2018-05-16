@@ -608,7 +608,7 @@ export default class App extends PureComponent {
       } catch (e) {}
     }
 
-    if (this.state.canvassSettings.show_only_my_turf !== canvassSettings.how_only_my_turf) this.updateMarkers();
+    if (this.state.canvassSettings.show_only_my_turf !== canvassSettings.show_only_my_turf) this.updateMarkers();
   }
 
   timeFormat(epoch) {
