@@ -32,10 +32,10 @@ android {
     defaultConfig {
         applicationId "org.ourvoiceinitiative.ourvoice"
         minSdkVersion 16
-        targetSdkVersion 23
+        targetSdkVersion 26
         versionName "1.7.2"
         versionCode 26
-        renderscriptTargetApi 23
+        renderscriptTargetApi 26
         renderscriptSupportModeEnabled true
         ndk {
             abiFilters "armeabi-v7a", "x86"
