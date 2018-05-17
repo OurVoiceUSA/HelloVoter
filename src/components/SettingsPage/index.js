@@ -22,7 +22,6 @@ import Modal from 'react-native-simple-modal';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import storage from 'react-native-storage-wrapper';
 import SmLoginPage from '../SmLoginPage';
-import DropboxLoginPage from '../DropboxLoginPage';
 import { Dropbox } from 'dropbox';
 import { google_api_key } from '../../config';
 import { _getJWT, _loginPing, _rmJWT, _saveUser, _rmUser, _apiCall, _specificAddress } from '../../common';
@@ -52,8 +51,6 @@ export default class App extends PureComponent {
       myPosition: { address: null, longitude: null, latitude: null },
       permissionLocation: null,
       permissionNotification: null,
-      DropboxLoginScreen: false,
-      goToCanvassing: false,
     };
 
   }
@@ -124,43 +121,14 @@ export default class App extends PureComponent {
     this._loadProfile();
   }
 
-  goToCanvassing = async () => {
-    const { navigate } = this.props.navigation;
-    let { user } = this.state;
-
-    if (user.dropbox) {
-      try {
-        // poke the API to ensure this token is still authorized
-        let res = await new Dropbox({ accessToken: user.dropbox.accessToken }).filesListFolder({path: ''});
-        navigate('CanvassingSetup');
-        return;
-      } catch(error) {
-        // if the token didn't work - remove it
-        if (error.error && error.error.error && error.error.error['.tag'] == 'invalid_access_token') {
-          delete user.dropbox;
-          _saveUser(user, false);
-        } else {
-          navigate('CanvassingSetup');
-          return;
-        }
-      }
-    }
-
-    this.setState({ DropboxLoginScreen: true, goToCanvassing: true, user: user });
-  }
-
   componentDidUpdate(prevProps, prevState) {
-    const { profileUpdate, SmLoginScreen, party, myPosition,
-            DropboxLoginScreen, user, goToCanvassing } = this.state;
+    const { profileUpdate, SmLoginScreen, party, myPosition, user } = this.state;
 
     if (profileUpdate)
-      this._updateProfile(); 
+      this._updateProfile();
 
     if (prevState.SmLoginScreen && !SmLoginScreen)
       setTimeout(() => {this._loadProfile();}, 500);
-
-    if (prevState.DropboxLoginScreen && !DropboxLoginScreen && user.dropbox && goToCanvassing)
-      this.goToCanvassing();
   }
 
   checkPermissionLocation = async () => {
@@ -424,53 +392,6 @@ export default class App extends PureComponent {
         <View style={{flexDirection: 'row', margin: 20, marginBottom: 10}}>
           <View style={{flex: 1}}>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <Icon style={{marginRight: 10}} name="map-signs" size={22} color="black" />
-              <Text style={{fontSize: 20}}>Canvassing:</Text>
-            </View>
-          </View>
-          {user.dropbox &&
-          <View style={{flexDirection: 'row', alignItems: 'center', marginRight: 20}}>
-            <Text style={{marginRight: 7, fontWeight: 'bold'}}>Ready</Text>
-            <Icon name="check-circle" size={30} color="green" />
-          </View>
-          ||
-          <TouchableOpacity style={{flexDirection: 'row', alignItems: 'center', marginRight: 20}}>
-            <Text style={{marginRight: 7, fontWeight: 'bold'}}>Not Set</Text>
-            <Icon name="times-circle" size={30} color="red" />
-          </TouchableOpacity>
-          }
-        </View>
-
-        <View style={{flex: 1, alignItems: 'center'}}>
-          <View style={{margin: 5}}>
-            <TouchableOpacity
-              style={{backgroundColor: '#d7d7d7', flex: 1, flexDirection: 'row', alignItems: 'center', padding: 12}}
-              onPress={() => {this.goToCanvassing();}}>
-              {user.dropbox &&
-              <Text>Start Canvassing</Text>
-              ||
-              <Text>Link Dropbox</Text>
-              }
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <View style={{flexDirection: 'row', margin: 20, marginTop: 0}}>
-          <Text>
-            Canvass for any cause at zero cost! Use this tool to organize a canvassing campaign, or join an existing one.
-          </Text>
-        </View>
-
-        <View style={{
-            width: Dimensions.get('window').width,
-            height: 1,
-            backgroundColor: 'lightgray'
-          }}
-        />
-
-        <View style={{flexDirection: 'row', margin: 20, marginBottom: 10}}>
-          <View style={{flex: 1}}>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <Icon style={{marginRight: 10}} name="map-marker" size={22} color="black" />
               <Text style={{fontSize: 20}}>Location Permissions:</Text>
             </View>
@@ -490,8 +411,8 @@ export default class App extends PureComponent {
         </View>
         <View style={{flexDirection: 'row', margin: 20, marginTop: 0}}>
           <Text>
-            We use your device's location when you select the "current location"
-            option when searching representatives.
+            We use your device location when you select the "current location"
+            option when searching representatives, or when using the canvassing tool.
           </Text>
         </View>
 
@@ -553,7 +474,7 @@ export default class App extends PureComponent {
         <View style={{flexDirection: 'row', margin: 20, marginTop: 0}}>
           {!user.lastsmlogin &&
           <Text>
-            We save your profile to your device. Clearing your profile will remove
+            We save your canvassing and profile data to your device. Clear data will remove
             all data for this app from your device.
           </Text>
           ||
@@ -597,20 +518,6 @@ export default class App extends PureComponent {
           closeOnTouchOutside={true}
           disableOnBackPress={false}>
           <SmLoginPage refer={this} />
-        </Modal>
-
-        <Modal
-          open={DropboxLoginScreen}
-          modalStyle={{width: 335, height: 400, backgroundColor: "transparent"}}
-          style={{alignItems: 'center'}}
-          overlayBackground={'rgba(0, 0, 0, 0.75)'}
-          animationDuration={200}
-          animationTension={40}
-          modalDidOpen={() => undefined}
-          modalDidClose={() => this.setState({DropboxLoginScreen: false})}
-          closeOnTouchOutside={true}
-          disableOnBackPress={false}>
-          <DropboxLoginPage refer={this} />
         </Modal>
 
       </ScrollView>

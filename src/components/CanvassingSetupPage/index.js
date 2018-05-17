@@ -11,8 +11,10 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
+import Modal from 'react-native-simple-modal';
 import storage from 'react-native-storage-wrapper';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import DropboxLoginPage from '../DropboxLoginPage';
 import { Dropbox } from 'dropbox';
 import { _loginPing } from '../../common';
 
@@ -27,6 +29,7 @@ export default class App extends PureComponent {
       forms: [],
       dbx: null,
       connected: false,
+      DropboxLoginScreen: false,
     };
 
   }
@@ -85,6 +88,23 @@ export default class App extends PureComponent {
       } catch(error) {
         // nothing to do
       }
+    }
+
+    if (!user.dropbox && forms_local === null) {
+      forms_local = [{
+          "id": "abcdefghijjlmnopqrstuvwxyz0123456789abcd",
+          "created": 1524953684,
+          "name": "Sample Canvassing Form",
+          "author": "Our Voice USA",
+          "author_id": "ovusa:ThisIsASongThatNeverEnds",
+          "version": 1,
+          "questions": {
+            "FullName":{"type":"String","label":"Full Name","optional":true},
+            "Email":{"type":"String","label":"Email","optional":true},
+            "Phone Number":{"type":"Number","label":"Phone","optional":true},
+            "Notes":{"type":"TEXTBOX","label":"Notes","optional":true},
+          },
+      }];
     }
 
     for (let i in forms_local) {
@@ -148,6 +168,12 @@ export default class App extends PureComponent {
           <Text>You are logged into Dropbox as:</Text>
           <Text>{user.dropbox.name.display_name}</Text>
         </View>
+        ||
+        <View style={{flexDirection: 'row', margin: 20}}>
+          <Text>
+            Canvass for any cause at zero cost! Use this tool to organize a canvassing campaign, or join an existing one.
+          </Text>
+        </View>
         }
 
         <View style={{
@@ -182,7 +208,12 @@ export default class App extends PureComponent {
               name="plus-circle"
               backgroundColor="#d7d7d7"
               color="black"
-              onPress={() => navigate('CreateSurvey', {refer: this})}>
+              onPress={() => {
+                if (user.dropbox)
+                  navigate('CreateSurvey', {refer: this})
+                else
+                  this.setState({DropboxLoginScreen: true});
+              }}>
               Create Canvassing Form
             </Icon.Button>
           </View>
@@ -217,8 +248,28 @@ export default class App extends PureComponent {
           </Text>
         </View>
 
+        <Modal
+          open={this.state.DropboxLoginScreen}
+          modalStyle={{width: 335, height: 400, backgroundColor: "transparent"}}
+          style={{alignItems: 'center'}}
+          overlayBackground={'rgba(0, 0, 0, 0.75)'}
+          animationDuration={200}
+          animationTension={40}
+          modalDidOpen={() => undefined}
+          modalDidClose={() => this.setState({DropboxLoginScreen: false})}
+          closeOnTouchOutside={true}
+          disableOnBackPress={false}>
+          <DropboxLoginPage refer={this} />
+        </Modal>
+
       </ScrollView>
     );
   }
 
 }
+
+const iconStyles = {
+  justifyContent: 'center',
+  borderRadius: 10,
+  padding: 10,
+};

@@ -76,7 +76,6 @@ export default class App extends PureComponent {
           </TouchableOpacity>
         </View>
 
-        {__DEV__ &&
         <View style={{margin: 5, flexDirection: 'row'}}>
           <TouchableOpacity
             style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20, maxWidth: 350}}
@@ -84,7 +83,6 @@ export default class App extends PureComponent {
             <Text style={{textAlign: 'center'}}>Canvassing</Text>
           </TouchableOpacity>
         </View>
-        }
 
         <View style={{margin: 5, flexDirection: 'row'}}>
           <TouchableOpacity

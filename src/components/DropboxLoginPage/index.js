@@ -44,7 +44,7 @@ export default class App extends PureComponent {
       .then(function(response) {
         // if this user is logged in, persist that to setstate
         if (refer.state.user.loggedin) user.loggedin = true;
-        refer.setState({user: user, DropboxLoginScreen: false});
+        refer.setState({user: user, DropboxLoginScreen: false}, () => refer._loadDBData());
       })
       .catch(function(error) {
          console.warn(error);
@@ -142,7 +142,7 @@ export default class App extends PureComponent {
 
             <View style={{marginTop: 30}}>
               <Text style={{fontSize: 10, textAlign: 'justify'}}>
-                This tool requires a file sharing service to store and sync data.
+                Syncing data requires a file sharing service.
                 We value your privacy, your data remains private to your device and data sync account.
                 Read our <Text style={{fontSize: 10, fontWeight: 'bold', color: 'blue'}} onPress={() => {this._policyUrlHandler()}}>privacy policy</Text> for details.
               </Text>
