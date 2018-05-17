@@ -1116,16 +1116,24 @@ export default class App extends PureComponent {
               <View>
                 <View style={{flexDirection: 'row'}}>
                   <Text style={{color: 'blue', fontWeight: 'bold', fontSize: 15}}>Confirm the Address</Text>
-                  <TouchableOpacity
-                    style={{backgroundColor: '#d7d7d7', padding: 10, borderRadius: 20, marginLeft: 5}}
-                    onPress={() => {this.setState({fAddress: this.state.pAddress})}}>
-                    <Text style={{textAlign: 'center'}}>Use Previous</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={{backgroundColor: '#d7d7d7', padding: 10, borderRadius: 20, marginLeft: 5}}
-                    onPress={() => {this.showConfirmAddress();}}>
-                    <Text style={{textAlign: 'center'}}>Retry</Text>
-                  </TouchableOpacity>
+                  <View style={{flexDirection: 'row'}}>
+                    <TouchableOpacity
+                      style={{
+                        backgroundColor: '#d7d7d7', padding: 10, borderRadius: 20, marginLeft: 5,
+                        ...((this.state.pAddress.street && this.state.pAddress.street !== this.state.fAddress.street) ? {} : displayNone)
+                      }}
+                      onPress={() => {this.setState({fAddress: this.state.pAddress})}}>
+                      <Text style={{textAlign: 'center'}}>Use Previous</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={{
+                        backgroundColor: '#d7d7d7', padding: 10, borderRadius: 20, marginLeft: 5,
+                        ...(this.state.netInfo === 'none' ? displayNone : {})
+                      }}
+                      onPress={() => {this.showConfirmAddress();}}>
+                      <Text style={{textAlign: 'center'}}>Retry</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
                 <Form
                  ref="formStreet"
@@ -1215,6 +1223,12 @@ const iconStyles = {
   justifyContent: 'center',
   borderRadius: 10,
   padding: 10,
+};
+
+const displayNone = {
+  height: 0,
+  maxHeight: 0,
+  opacity: 0,
 };
 
 const styles = StyleSheet.create({
