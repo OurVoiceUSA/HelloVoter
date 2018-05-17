@@ -232,6 +232,11 @@ export default class App extends PureComponent {
   showConfirmAddress() {
     const { myPosition } = this.state;
 
+    if (this.state.netInfo === 'none') {
+      this.setState({ isModalVisible: true });
+      return;
+    }
+
     this.setState({
       loading: true,
       isModalVisible: true,
