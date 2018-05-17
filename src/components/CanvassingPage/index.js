@@ -84,6 +84,7 @@ export default class App extends PureComponent {
       region: {latitudeDelta: 0.004, longitudeDelta: 0.004},
       currentNode: null,
       fAddress: {},
+      pAddress: {},
       asyncStorageKey: 'OV_CANVASS_PINS@'+props.navigation.state.params.form.id,
       settingsStorageKey: 'OV_CANVASS_SETTINGS',
       canvassSettings: {},
@@ -307,7 +308,7 @@ export default class App extends PureComponent {
 
     node = await this._addNode(node);
 
-    this.setState({ fAddress: fAddress, isModalVisible: false });
+    this.setState({ fAddress: fAddress, pAddress: fAddress, isModalVisible: false });
     this.doMarkerPress(node);
   }
 
@@ -1113,7 +1114,19 @@ export default class App extends PureComponent {
               </View>
               ||
               <View>
-                <Text style={{color: 'blue', fontWeight: 'bold', fontSize: 15}}>Confirm the Address</Text>
+                <View style={{flexDirection: 'row'}}>
+                  <Text style={{color: 'blue', fontWeight: 'bold', fontSize: 15}}>Confirm the Address</Text>
+                  <TouchableOpacity
+                    style={{backgroundColor: '#d7d7d7', padding: 10, borderRadius: 20, marginLeft: 5}}
+                    onPress={() => {this.setState({fAddress: this.state.pAddress})}}>
+                    <Text style={{textAlign: 'center'}}>Use Previous</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={{backgroundColor: '#d7d7d7', padding: 10, borderRadius: 20, marginLeft: 5}}
+                    onPress={() => {this.showConfirmAddress();}}>
+                    <Text style={{textAlign: 'center'}}>Retry</Text>
+                  </TouchableOpacity>
+                </View>
                 <Form
                  ref="formStreet"
                  type={formStreet}
