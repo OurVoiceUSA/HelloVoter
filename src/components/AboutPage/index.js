@@ -18,6 +18,7 @@ export default class App extends PureComponent {
   openYouTube = () => this.openURL('https://www.youtube.com/channel/UCw5fpnK-IZVQ4IkYuapIbiw');
   openWebsite = () => this.openURL('https://ourvoiceusa.org/');
   openGitHub = (repo) => this.openURL('https://github.com/OurVoiceUSA/'+(repo?repo:''));
+  openDonate = () => this.openURL('https://ourvoiceusa.org/donate-today-saves-tomorrow/');
 
   openURL = (url) => {
     return Linking.openURL(url).catch(() => null);
@@ -73,6 +74,15 @@ export default class App extends PureComponent {
             a network through easy to use tools, such as this mobile app, we can give
             grassroots candidates a fighting chance against their monied rivals.
         </Text>
+
+        <View style={{marginLeft: 50, marginRight: 50, flexDirection: 'row', justifyContent: 'center', marginBottom: 15}}>
+          <TouchableOpacity
+            style={{backgroundColor: '#85bb65', flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', padding: 10, borderRadius: 20}}
+            onPress={() => {this.openDonate()}}>
+            <Text>Donate <Icon name="dollar" size={18} color="green" />
+            <Icon name="dollar" size={18} color="green" /> to Our Voice!</Text>
+          </TouchableOpacity>
+        </View>
 
         <Text style={{margin: 5, fontSize: 18, color: 'black', fontWeight: 'bold'}}>
             This App

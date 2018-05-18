@@ -7,13 +7,10 @@ import {
   View,
   Text,
   PermissionsAndroid,
-  WebView,
-  Linking,
 } from 'react-native';
 
 import Permissions from 'react-native-permissions';
 import { _loginPing } from '../../common';
-import Modal from 'react-native-simple-modal';
 
 export default class App extends PureComponent {
 
@@ -33,72 +30,50 @@ export default class App extends PureComponent {
     }
   }
 
-  _pressHandler() {
-    const url = "https://ourvoiceusa.org/donate-today-saves-tomorrow/";
-    return Linking.openURL(url).catch(() => null);
-  }
-
-  _CNYpressHandler() {
-    const url = "https://ourvoiceusa.org/directory/";
-    return Linking.openURL(url).catch(() => null);
-  }
-
-  _RVSpressHandler() {
-    const url = "https://www.eac.gov/voters/register-and-vote-in-your-state/";
-    return Linking.openURL(url).catch(() => null);
-  }
-
   render() {
     const { navigate } = this.props.navigation;
 
     const homeImage = require('../../../img/HomeScreen.png')
 
     return (
-    <View style={{flex: 1, backgroundColor: 'white'}}>
+      <View style={{flex: 1, backgroundColor: 'white'}}>
 
-      <Image source={homeImage} style={{padding: 15, alignSelf: 'center', maxWidth: Dimensions.get('window').width}} resizeMode={'contain'} />
+        <Image source={homeImage} style={{padding: 15, alignSelf: 'center', maxWidth: Dimensions.get('window').width}} resizeMode={'contain'} />
 
-      <View style={{flex: 1, alignItems: 'center'}}>
+        <View style={{flex: 1, alignItems: 'center'}}>
 
-        <View style={{margin: 5, flexDirection: 'row'}}>
-          <TouchableOpacity
-            style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20, maxWidth: 350}}
-            onPress={() => {navigate('YourReps')}}>
-            <Text style={{textAlign: 'center'}}>Your Representatives</Text>
-          </TouchableOpacity>
-        </View>
+          <View style={{margin: 5, flexDirection: 'row'}}>
+            <TouchableOpacity
+              style={{
+                backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20,
+                height: 65, maxWidth: 350, justifyContent: 'center',
+              }}
+              onPress={() => {navigate('YourReps')}}>
+              <Text style={{textAlign: 'center'}}>Your Representatives</Text>
+            </TouchableOpacity>
+          </View>
 
-        <View style={{margin: 5, flexDirection: 'row'}}>
-          <TouchableOpacity
-            style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20, maxWidth: 350}}
-            onPress={() => {navigate('CanvassingSetup')}}>
-            <Text style={{textAlign: 'center'}}>Canvassing</Text>
-          </TouchableOpacity>
-        </View>
+          <View style={{margin: 5, flexDirection: 'row'}}>
+            <TouchableOpacity
+              style={{
+                backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20,
+                height: 65, maxWidth: 350, justifyContent: 'center',
+              }}
+              onPress={() => {navigate('CanvassingSetup')}}>
+              <Text style={{textAlign: 'center'}}>Canvassing</Text>
+            </TouchableOpacity>
+          </View>
 
-        <View style={{margin: 5, flexDirection: 'row'}}>
-          <TouchableOpacity
-            style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20, maxWidth: 350}}
-            onPress={() => {navigate('About')}}>
-            <Text style={{textAlign: 'center'}}>About Our Voice</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={{margin: 5, flexDirection: 'row'}}>
-          <TouchableOpacity
-            style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20, maxWidth: 350}}
-            onPress={this._RVSpressHandler}>
-            <Text style={{textAlign: 'center'}}>Register to Vote</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={{margin: 5, flexDirection: 'row'}}>
-          <TouchableOpacity
-            style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20, maxWidth: 350}}
-            onPress={this._pressHandler}>
-            <Text style={{textAlign: 'center'}}>Donate</Text>
-          </TouchableOpacity>
-        </View>
+          <View style={{margin: 5, flexDirection: 'row'}}>
+            <TouchableOpacity
+              style={{
+                backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20,
+                height: 65, maxWidth: 350, justifyContent: 'center',
+              }}
+              onPress={() => {navigate('About')}}>
+              <Text style={{textAlign: 'center'}}>About Our Voice</Text>
+            </TouchableOpacity>
+          </View>
 
         </View>
 

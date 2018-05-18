@@ -6,6 +6,7 @@ import {
   Alert,
   Dimensions,
   Text,
+  Linking,
   View,
   ScrollView,
   Image,
@@ -155,6 +156,12 @@ export default class App extends PureComponent {
 
   sessionExpired() {
     Alert.alert('Logged Out', 'Your login session has expired. Please login again to update your profile.', [{text: 'OK'}], { cancelable: false });
+  }
+
+  openVote = () => this.openURL('https://www.eac.gov/voters/register-and-vote-in-your-state/');
+
+  openURL = (url) => {
+    return Linking.openURL(url).catch(() => null);
   }
 
   render() {
@@ -380,6 +387,14 @@ export default class App extends PureComponent {
              We use your party affiliation to better categorize information for you.
              If not set, we assume you are an Independent.
           </Text>
+        </View>
+
+        <View style={{marginLeft: 50, marginRight: 50, flexDirection: 'row', justifyContent: 'center', marginBottom: 15}}>
+          <TouchableOpacity
+            style={{backgroundColor: '#d7d7d7', flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', padding: 10, borderRadius: 20}}
+            onPress={() => {this.openVote()}}>
+            <Text>Register to Vote</Text>
+          </TouchableOpacity>
         </View>
 
         <View style={{
