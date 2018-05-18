@@ -622,7 +622,7 @@ export default class App extends PureComponent {
     return date.toLocaleDateString('en-us')+" "+date.toLocaleTimeString('en-us');
   }
 
-  strifyNodes(nodes) {
+  _nodesToJtxt(nodes) {
     return base64.encode(pako.gzip(JSON.stringify({nodes: nodes}), { to: 'string' }));
   }
 
@@ -630,7 +630,7 @@ export default class App extends PureComponent {
     this.myNodes = nodes;
 
     try {
-      await storage.set(this.state.asyncStorageKey, this.strifyNodes(nodes));
+      await storage.set(this.state.asyncStorageKey, this._nodesToJtxt(nodes));
     } catch (error) {
       console.warn(error);
     }
@@ -709,7 +709,7 @@ export default class App extends PureComponent {
         allsrc.push(this._nodesFromJtxt(data.fileBlob));
       } catch (e) {}
 
-      await dbx.filesUpload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtxt', contents: encoding.convert(tr(this.strifyNodes(this.myNodes)), 'ISO-8859-1'), mute: true, mode: {'.tag': 'overwrite'} });
+      await dbx.filesUpload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtxt', contents: encoding.convert(tr(this._nodesToJtxt(this.myNodes)), 'ISO-8859-1'), mute: true, mode: {'.tag': 'overwrite'} });
       allsrc.push(this.myNodes);
 
       // extra sync stuff for the form owner
@@ -731,7 +731,7 @@ export default class App extends PureComponent {
           }
         }
 
-        let exportedFile = encoding.convert(tr(this.strifyNodes(this.mergeNodes(allsrc))), 'ISO-8859-1');
+        let exportedFile = encoding.convert(tr(this._nodesToJtxt(this.mergeNodes(allsrc))), 'ISO-8859-1');
         await dbx.filesUpload({ path: form.folder_path+'/exported.jtrf', contents: exportedFile, mute: true, mode: {'.tag': 'overwrite'} });
 
         // copy exported.jtrf to all sub-folders if configured in settings
