@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
+import sha1 from 'sha1';
 import Modal from 'react-native-simple-modal';
 import storage from 'react-native-storage-wrapper';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -91,9 +92,10 @@ export default class App extends PureComponent {
     }
 
     if (!user.dropbox && forms_local === null) {
+      // gendate a sample form for them
       forms_local = [{
-          "id": "abcdefghijjlmnopqrstuvwxyz0123456789abcd",
-          "created": 1524953684,
+          "id": sha1(new Date().getTime()),
+          "created": Math.floor(new Date().getTime() / 1000),
           "name": "Sample Canvassing Form",
           "author": "Our Voice USA",
           "author_id": "ovusa:ThisIsASongThatNeverEnds",
