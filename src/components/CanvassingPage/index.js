@@ -623,7 +623,10 @@ export default class App extends PureComponent {
   }
 
   _nodesToJtxt(nodes) {
-    return base64.encode(pako.gzip(JSON.stringify({nodes: nodes}), { to: 'string' }));
+    return base64.encode(pako.gzip(JSON.stringify({
+      formId: this.state.form.id,
+      nodes: nodes,
+    }), { to: 'string' }));
   }
 
   _saveNodes = async (nodes) => {
