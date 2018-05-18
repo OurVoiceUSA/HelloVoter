@@ -71,14 +71,6 @@ export default class App extends PureComponent {
         <View style={{margin: 5, flexDirection: 'row'}}>
           <TouchableOpacity
             style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20, maxWidth: 350}}
-            onPress={() => {navigate('Settings')}}>
-            <Text style={{textAlign: 'center'}}>Your Voice</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={{margin: 5, flexDirection: 'row'}}>
-          <TouchableOpacity
-            style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20, maxWidth: 350}}
             onPress={() => {navigate('CanvassingSetup')}}>
             <Text style={{textAlign: 'center'}}>Canvassing</Text>
           </TouchableOpacity>

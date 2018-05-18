@@ -14,6 +14,8 @@ import AboutPage from '../components/AboutPage';
 
 import { StackNavigator } from 'react-navigation';
 
+import SettingsButton from './settings-button';
+
 export default App = StackNavigator({
   HomeScreen: {
     screen: HomeScreenPage,
@@ -21,12 +23,13 @@ export default App = StackNavigator({
       title: 'OurVoice',
       headerBackTitle: ' ',
       headerTruncatedBackTitle: ' ',
+      headerRight: <SettingsButton nav={navigation} />,
     }),
   },
   Settings: {
     screen: SettingsPage,
     navigationOptions: ({navigation}) => ({
-      title: 'Your Voice',
+      title: 'Settings',
     }),
   },
   CanvassingSetup: {
@@ -69,18 +72,21 @@ export default App = StackNavigator({
     screen: YourRepsPage,
     navigationOptions: ({navigation}) => ({
       title: 'Your Representatives',
+      headerRight: <SettingsButton nav={navigation} />,
     }),
   },
   PolProfile: {
     screen: PolProfilePage,
     navigationOptions: ({navigation}) => ({
       title: 'Politician Profile',
+      headerRight: <SettingsButton nav={navigation} />,
     }),
   },
   About: {
     screen: AboutPage,
     navigationOptions: ({navigation}) => ({
       title: 'About Our Voice',
+      headerRight: <SettingsButton nav={navigation} />,
     }),
   },
 });
