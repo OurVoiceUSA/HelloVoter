@@ -3,6 +3,7 @@ import React, { PureComponent } from 'react';
 
 import {
   ActivityIndicator,
+  Alert,
   Dimensions,
   Linking,
   Text,
@@ -47,6 +48,13 @@ export default class App extends PureComponent {
 
     this.setState({loading: true});
 
+    try {
+      forms_local = JSON.parse(await storage.get('OV_CANVASS_FORMS'));
+    } catch (e) {
+      console.warn(e);
+      return;
+    }
+
     let user;
     let dbx;
     let forms = [];
@@ -62,14 +70,7 @@ export default class App extends PureComponent {
         folders.push(item.path_display);
       }
       this.setState({connected: true});
-    } catch (error) {
-      this.setState({connected: false});
-      // failed to load - look locally
-      try {
-        forms_local = JSON.parse(await storage.get('OV_CANVASS_FORMS'));
-      } catch (error) {
-        console.warn(error);
-      }
+    } catch (e) {
     }
 
     let pro = [];
@@ -84,11 +85,16 @@ export default class App extends PureComponent {
         item = objs[i];
         if (item.error) continue;
         let json = JSON.parse(item.fileBlob);
+        json.backend = "dropbox";
         json.folder_path = item.path_display.match('.*/')[0].slice(0, -1);
 
+        for (let idx in forms_local) {
+          if (forms_local[idx] === null || forms_local[idx].id === json.id) delete forms_local[idx];
+        }
+
         forms_local.push(json);
-      } catch(error) {
-        // nothing to do
+      } catch(e) {
+        console.warn(e);
       }
     }
 
@@ -100,6 +106,7 @@ export default class App extends PureComponent {
           "name": "Sample Canvassing Form",
           "author": "Our Voice USA",
           "author_id": "ovusa:ThisIsASongThatNeverEnds",
+          "backend": "local",
           "version": 1,
           "questions": {
             "FullName":{"type":"String","label":"Full Name","optional":true},
@@ -112,13 +119,33 @@ export default class App extends PureComponent {
 
     for (let i in forms_local) {
       let json = forms_local[i];
+      if (json === null) continue;
+
+      let icon = "archive";
+      let color = "black";
+
+      if (json.backend === "dropbox") {
+        icon = "dropbox";
+        color = "#3d9ae8";
+      }
+
       forms.push(
         <View key={i} style={{margin: 5, flexDirection: 'row'}}>
           <TouchableOpacity
             style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20, maxWidth: 350}}
-            onPress={() => {navigate('Canvassing', {dbx: dbx, form: json, user: user})}}>
-            <Text style={{fontWeight: 'bold'}}>{json.name}</Text>
-            <Text style={{fontSize: 12}}>Created by {json.author}</Text>
+            onPress={() => {
+              if (json.backend === "dropbox" && !user.dropbox)
+                this.setState({DropboxLoginScreen: true});
+              else
+                navigate('Canvassing', {dbx: (json.backend === "dropbox" ? dbx : null), form: json, user: user});
+            }}>
+            <View style={{flexDirection: 'row'}}>
+              <Icon style={{margin: 5}} name={icon} size={25} color={color} />
+              <View>
+                <Text style={{fontWeight: 'bold'}}>{json.name}</Text>
+                <Text style={{fontSize: 12}}>Created by {json.author}</Text>
+              </View>
+            </View>
           </TouchableOpacity>
         </View>
       );
@@ -223,8 +250,16 @@ export default class App extends PureComponent {
               onPress={() => {
                 if (user.dropbox)
                   navigate('CreateSurvey', {refer: this})
-                else
-                  this.setState({DropboxLoginScreen: true});
+                else {
+                  Alert.alert(
+                    'Choose Data Storage',
+                    'You can save your canvassing data on your device, or on a dropbox acccount. With Dropbox, you can share your form with others and collaborate as a team.',
+                    [
+                      {text: 'Use Device Storage', onPress: () => navigate('CreateSurvey', {refer: this})},
+                      {text: 'Use Dropbox', onPress: () => this.setState({DropboxLoginScreen: true})},
+                    ], { cancelable: false }
+                  );
+                }
               }}>
               Create Canvassing Form
             </Icon.Button>
