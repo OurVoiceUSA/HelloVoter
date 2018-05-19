@@ -31,6 +31,7 @@ export default class App extends PureComponent {
       dbx: null,
       connected: false,
       DropboxLoginScreen: false,
+      JoinFormScreen: false,
     };
 
   }
@@ -219,6 +220,22 @@ export default class App extends PureComponent {
               Create Canvassing Form
             </Icon.Button>
           </View>
+
+          <View style={{margin: 12, marginTop: 0, alignItems: 'center'}}>
+            <Icon.Button
+              name="check-square"
+              backgroundColor="#d7d7d7"
+              color="black"
+              onPress={() => {
+                if (user.dropbox)
+                  this.setState({JoinFormScreen: true});
+                else
+                  this.setState({DropboxLoginScreen: true});
+              }}>
+              Join an existing Form
+            </Icon.Button>
+          </View>
+
         </View>
 
         <View style={{
@@ -262,6 +279,34 @@ export default class App extends PureComponent {
           closeOnTouchOutside={true}
           disableOnBackPress={false}>
           <DropboxLoginPage refer={this} />
+        </Modal>
+
+        <Modal
+          open={this.state.JoinFormScreen}
+          modalStyle={{width: 335, height: 400, backgroundColor: "transparent"}}
+          style={{alignItems: 'center'}}
+          overlayBackground={'rgba(0, 0, 0, 0.75)'}
+          animationDuration={200}
+          animationTension={40}
+          modalDidOpen={() => undefined}
+          modalDidClose={() => this.setState({JoinFormScreen: false})}
+          closeOnTouchOutside={true}
+          disableOnBackPress={false}>
+          <View style={{flex: 1, alignItems: 'center'}} ref="backgroundWrapper">
+            <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: 335}}>
+              <View style={{backgroundColor: 'white', padding: 40, borderRadius: 40, borderWidth: 10, borderColor: '#d7d7d7'}}>
+                <View style={{margin: 10}}>
+                  <Text style={{textAlign: 'justify'}}>
+                    To join an existing form, ask the creator of that form to
+                    shair it with you. They can do so by pressing the
+                    "Share Form" button in the canvassing settings and entering
+                    the email address you use for Dropbox. Then, accept the folder
+                    share with Dropbox and reload this app.
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </View>
         </Modal>
 
       </ScrollView>
