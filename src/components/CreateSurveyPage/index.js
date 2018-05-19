@@ -30,7 +30,7 @@ var mainForm = t.struct({
 
 const FTYPE = t.enums({
   'String': 'Text Input',
-  'TEXTBOX': 'Text Box',
+  'TEXTBOX': 'Large Text Box',
   'Number': 'Number',
   'Boolean': 'On/Off Switch',
   'SAND': 'Agree/Disagree',
