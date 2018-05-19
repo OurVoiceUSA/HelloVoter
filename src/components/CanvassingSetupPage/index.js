@@ -17,7 +17,7 @@ import storage from 'react-native-storage-wrapper';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import DropboxLoginPage from '../DropboxLoginPage';
 import { Dropbox } from 'dropbox';
-import { _loginPing } from '../../common';
+import { _loginPing, _saveUser } from '../../common';
 
 export default class App extends PureComponent {
 
@@ -143,6 +143,14 @@ export default class App extends PureComponent {
     return Linking.openURL(url).catch(() => null);
   }
 
+  dropboxLogout() {
+    let { user } = this.state;
+    if (user.dropbox)
+      new Dropbox({ accessToken: user.dropbox.accessToken }).authTokenRevoke();
+    delete user.dropbox;
+    _saveUser(user, false);
+  }
+
   render() {
     const { loading, connected, user, forms } = this.state;
     const { navigate } = this.props.navigation;
@@ -235,6 +243,28 @@ export default class App extends PureComponent {
               Join an existing Form
             </Icon.Button>
           </View>
+
+          {user.dropbox &&
+          <View style={{margin: 12, marginTop: 0, alignItems: 'center'}}>
+            <Icon.Button
+              name="dropbox"
+              backgroundColor="#3d9ae8"
+              color="#ffffff"
+              onPress={() => this.dropboxLogout()}>
+              Dropbox Logout
+            </Icon.Button>
+          </View>
+          ||
+          <View style={{margin: 12, marginTop: 0, alignItems: 'center'}}>
+            <Icon.Button
+              name="dropbox"
+              backgroundColor="#3d9ae8"
+              color="#ffffff"
+              onPress={() => this.setState({DropboxLoginScreen: true})}>
+              Login with Dropbox
+            </Icon.Button>
+          </View>
+          }
 
         </View>
 
