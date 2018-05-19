@@ -121,12 +121,14 @@ export default class App extends PureComponent {
       let json = forms_local[i];
       if (json === null) continue;
 
-      let icon = "archive";
+      let icon = "mobile";
       let color = "black";
+      let size = 30;
 
       if (json.backend === "dropbox") {
         icon = "dropbox";
         color = "#3d9ae8";
+        size = 25;
       }
 
       forms.push(
@@ -140,7 +142,7 @@ export default class App extends PureComponent {
                 navigate('Canvassing', {dbx: (json.backend === "dropbox" ? dbx : null), form: json, user: user});
             }}>
             <View style={{flexDirection: 'row'}}>
-              <Icon style={{margin: 5}} name={icon} size={25} color={color} />
+              <Icon style={{margin: 5, marginRight: 10}} name={icon} size={size} color={color} />
               <View>
                 <Text style={{fontWeight: 'bold'}}>{json.name}</Text>
                 <Text style={{fontSize: 12}}>Created by {json.author}</Text>
