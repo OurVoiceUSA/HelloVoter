@@ -29,13 +29,13 @@ export default class App extends PureComponent {
       <ScrollView style={{flex: 1, backgroundColor: 'white'}}>
 
         <Text style={{margin: 5, fontSize: 18, color: 'black', fontWeight: 'bold'}}>
-            Who We Are
+          Who We Are
         </Text>
 
         <Text style={{margin: 15, fontSize: 18, color: 'dimgray'}}>
-            OurVoice Initiative is a non-partisan organization registered as a 501(c)(4)
-            non-profit. We provide access to tools, resources, and collaboration that
-            enables every day people to be politically engaged. Check us out on social media!
+          Our Voice USA is a non-partisan organization registered as a 501(c)(4)
+          non-profit. We provide access to tools, resources, and collaboration that
+          enables every day people to be politically engaged. Check us out on social media!
         </Text>
 
         <View style={{flexDirection: 'row', justifyContent: 'center', marginBottom: 15}}>
@@ -65,14 +65,15 @@ export default class App extends PureComponent {
         </View>
 
         <Text style={{margin: 5, fontSize: 18, color: 'black', fontWeight: 'bold'}}>
-            Our Mission
+          Our Mission
         </Text>
 
         <Text style={{margin: 15, fontSize: 18, color: 'dimgray'}}>
-            We are committed to change the political landscape. For too long, money
-            has had a corrupting influence in politics. We believe that by building
-            a network through easy to use tools, such as this mobile app, we can give
-            grassroots candidates a fighting chance against their monied rivals.
+          We are committed to level the political landscape. For too long, money
+          has had a corrupting influence in politics. We believe that by providing
+          all citizens easy-to-use tools, such as this mobile app, an informed
+          electorate will emerge prepared to vote wisely and bypass the financial
+          barriers to running for office themselves.
         </Text>
 
         <View style={{marginLeft: 50, marginRight: 50, flexDirection: 'row', justifyContent: 'center', marginBottom: 15}}>
@@ -89,9 +90,9 @@ export default class App extends PureComponent {
         </Text>
 
         <Text style={{margin: 15, fontSize: 18, color: 'dimgray'}}>
-            This mobile app is open source! Your code contribution is welcome.
-            Our goal is to update occasionally with new features that help every day
-            people get involved with the political process.
+          This mobile app is open source! Your code contribution is welcome.
+          Our goal is to update occasionally with new features that help every day
+          people get involved with the political process.
         </Text>
 
         <View style={{flexDirection: 'row', justifyContent: 'center'}}>
@@ -126,9 +127,9 @@ export default class App extends PureComponent {
         </Text>
 
         <Text style={{margin: 15, fontSize: 18, color: 'dimgray'}}>
-            No matter your political views - your voice matters! Speak it to the world
-            by sharing this app with your family and friends. Together, let's raise
-            our demands so loud that the people in power can no longer ignore us.
+          No matter your political views - your voice matters! Speak it to the world
+          by sharing this app with your family and friends. Together, let us raise
+          our demands so loud that the people in power can no longer ignore us.
         </Text>
 
       </ScrollView>
