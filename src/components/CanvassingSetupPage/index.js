@@ -15,6 +15,7 @@ import {
 import sha1 from 'sha1';
 import Modal from 'react-native-simple-modal';
 import storage from 'react-native-storage-wrapper';
+import Swipeout from 'react-native-swipeout';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import DropboxLoginPage from '../DropboxLoginPage';
 import { Dropbox } from 'dropbox';
@@ -131,24 +132,75 @@ export default class App extends PureComponent {
         size = 25;
       }
 
+      let swipeoutBtns = [
+/*
+        {
+          text: 'Edit',
+          type: 'primary',
+        },
+*/
+        {
+          text: 'Delete',
+          type: 'delete',
+          onPress: () => {
+            Alert.alert(
+              'Delete Form',
+              'Are you sure you wish to delete this form? All related canvassing data will be lost.',
+              [
+                {text: 'Yes', onPress: async () => {
+                  try {
+                    if (json.backend === "dropbox") {
+                      await dbx.filesDeleteV2({path: json.folder_path});
+                    }
+                    delete forms_local[i];
+                    await storage.del('OV_CANVASS_PINS@'+json.id);
+                    await storage.set('OV_CANVASS_FORMS', JSON.stringify(forms_local));
+                    Alert.alert(
+                      'Delete Success',
+                      'You have deleted the form: '+json.name,
+                      [{text: 'OK'}],
+                      { cancelable: false }
+                    );
+                    this._loadDBData();
+                  } catch (e) {
+                    Alert.alert(
+                      'Delete Failed',
+                      'There was an error deleting the form: '+json.name,
+                      [{text: 'OK'}],
+                      { cancelable: false }
+                    );
+                    console.warn(e);
+                  }
+                }},
+                {text: 'No'},
+              ], { cancelable: false }
+            );
+          },
+        },
+      ];
+
       forms.push(
         <View key={i} style={{margin: 5, flexDirection: 'row'}}>
-          <TouchableOpacity
+          <Swipeout
             style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20, maxWidth: 350}}
-            onPress={() => {
-              if (json.backend === "dropbox" && !user.dropbox)
-                this.setState({DropboxLoginScreen: true});
-              else
-                navigate('Canvassing', {dbx: (json.backend === "dropbox" ? dbx : null), form: json, user: user});
-            }}>
-            <View style={{flexDirection: 'row'}}>
-              <Icon style={{margin: 5, marginRight: 10}} name={icon} size={size} color={color} />
-              <View>
-                <Text style={{fontWeight: 'bold'}}>{json.name}</Text>
-                <Text style={{fontSize: 12}}>Created by {json.author}</Text>
+            right={swipeoutBtns}
+            autoClose={true}>
+            <TouchableOpacity
+              onPress={() => {
+                if (json.backend === "dropbox" && !user.dropbox)
+                  this.setState({DropboxLoginScreen: true});
+                else
+                  navigate('Canvassing', {dbx: (json.backend === "dropbox" ? dbx : null), form: json, user: user});
+              }}>
+              <View style={{flexDirection: 'row'}}>
+                <Icon style={{margin: 5, marginRight: 10}} name={icon} size={size} color={color} />
+                <View>
+                  <Text style={{fontWeight: 'bold'}}>{json.name}</Text>
+                  <Text style={{fontSize: 12}}>Created by {json.author}</Text>
+                </View>
               </View>
-            </View>
-          </TouchableOpacity>
+            </TouchableOpacity>
+          </Swipeout>
         </View>
       );
     }
@@ -196,7 +248,7 @@ export default class App extends PureComponent {
     if (!loading && !forms.length) {
       forms.push(
         <View key={1}>
-          <Text>No Canvassing forms found in your Dropbox. Ask someone who created one to share their form with you, or create a new one.</Text>
+          <Text>No Canvassing forms. Ask someone who created one to share their form with you, or create a new one.</Text>
         </View>
       );
     }

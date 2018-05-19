@@ -27,6 +27,7 @@
 		"react-native-safari-view": "^2.1.0",
 		"react-native-simple-modal": "^7.0.0",
 		"react-native-storage-wrapper": "0.1.0",
+		"react-native-swipeout": "^2.3.3",
 		"react-native-vector-icons": "^4.4.3",
 		"react-navigation": "^1.0.0-beta.23",
 		"sha1": "^1.1.1",
