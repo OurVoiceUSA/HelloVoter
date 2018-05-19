@@ -286,7 +286,16 @@ export default class App extends PureComponent {
               name="dropbox"
               backgroundColor="#3d9ae8"
               color="#ffffff"
-              onPress={() => this.dropboxLogout()}>
+              onPress={() => {
+                Alert.alert(
+                  'Dropbox Logout',
+                  'Are you sure you wish to logout of Dropbox?',
+                  [
+                    {text: 'Yes', onPress: () => this.dropboxLogout()},
+                    {text: 'No'},
+                  ], { cancelable: false }
+                );
+              }}>
               Dropbox Logout
             </Icon.Button>
           </View>
