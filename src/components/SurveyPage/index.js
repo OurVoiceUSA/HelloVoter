@@ -79,7 +79,10 @@ export default class App extends PureComponent {
     let newStruct = {};
     let newOptions = { fields: {} };
 
-    let keys = Object.keys(form.questions);
+    let keys;
+
+    if (form.questions_order) keys = form.questions_order;
+    else keys = Object.keys(form.questions);
     for (let k in keys) {
       let value;
       let boxflag = false;
