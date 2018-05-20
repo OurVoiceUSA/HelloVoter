@@ -59,11 +59,11 @@ var options = {
   },
 };
 
-var premade = [
-  { key: 'FullName', label: 'Full Name', type: 'String' },
-  { key: 'Email', label: 'Email Address', type: 'String' },
-  { key: 'RegisteredToVote', label: 'Are you registered to vote?', type: 'Boolean' },
-  { key: 'PartyAffiliation', label: 'Party Affiliation', type: 'List',
+var premade = {
+  'FullName': { label: 'Full Name', type: 'String', optional: true },
+  'Email': { label: 'Email Address', type: 'String', optional: true },
+  'RegisteredToVote': { label: 'Are you registered to vote?', type: 'Boolean', optional: true },
+  'PartyAffiliation': { label: 'Party Affiliation', type: 'List', optional: true,
     options: [
       'No Party Preference',
       'Democrat',
@@ -72,7 +72,7 @@ var premade = [
       'Libertarian',
       'Other',
     ]},
-];
+};
 
 export default class App extends PureComponent {
   constructor(props) {
@@ -80,10 +80,7 @@ export default class App extends PureComponent {
 
     const { state } = this.props.navigation;
 
-    // initialize state with a subset of premade questions
-    let fields = [];
-    for (let p in premade)
-      fields.push(premade[p]);
+    let fields = premade;
 
     this.state = {
       refer: props.navigation.state.params.refer,
@@ -110,18 +107,19 @@ export default class App extends PureComponent {
   doAddCustom() {
     let { fields } = this.state;
 
-    let json = this.refs.customForm.getValue();
-    if (json == null) return;
+    let ref = this.refs.customForm.getValue();
+    if (ref === null) return;
+    let json = JSON.parse(JSON.stringify(ref)); // deep copy
+
+    let key = json.key;
+    delete json.key;
+    json.optional = true; // backwards compatability
 
     // check for duplicate keys
-    let keys = [json.key];
-    for (let f in fields) {
-      if (keys.indexOf(fields[f].key) !== -1)
-        return Alert.alert('Error', 'Duplicate Input Key. Change your Input Key to add this item.', [{text: 'OK'}], { cancelable: false });
-      keys.push(fields[f].key);
-    }
+    if (fields[key])
+      return Alert.alert('Error', 'Duplicate Input Key. Change your Input Key to add this item.', [{text: 'OK'}], { cancelable: false });
 
-    fields.push(json);
+    fields[key] = json;
 
     this.setState({customForm: null, fields: fields});
 
@@ -172,13 +170,8 @@ export default class App extends PureComponent {
           author: (user.dropbox ? user.dropbox.name.display_name : 'You'),
           author_id: ( user.dropbox ? user.dropbox.account_id : id ),
           version: 1,
-          questions: {}
+          questions: fields,
         };
-
-        // fields is an array of objects with key, label, type. Need to convert it to a hash with key as the name and type and label as props
-        for (let f in fields) {
-          obj.questions[fields[f].key] = {type: fields[f].type, label: fields[f].label, options: fields[f].options, optional: true};
-        }
 
         try {
           let forms;
@@ -233,9 +226,9 @@ export default class App extends PureComponent {
     return type;
   }
 
-  rmField(idx) {
+  rmField(key) {
     let { fields } = this.state;
-    fields.splice(idx, 1);
+    delete fields[key];
     this.setState({fields: fields});
     this.forceUpdate();
   }
