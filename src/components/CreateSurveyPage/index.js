@@ -233,10 +233,13 @@ export default class App extends PureComponent {
   rmField(obj) {
     let { fields, order } = this.state;
     for (let f in fields) {
-      if (fields[f] === obj) delete fields[f];
+      if (fields[f] === obj) {
+        delete fields[f];
+        order.splice(order.indexOf(f), 1);
+      }
     }
-    order = Object.keys(fields);
     this.setState({fields, order});
+    this.forceUpdate();
   }
 
   render() {
