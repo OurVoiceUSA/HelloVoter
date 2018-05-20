@@ -16,6 +16,7 @@ import {
 
 import t from 'tcomb-form-native';
 import storage from 'react-native-storage-wrapper';
+import SortableListView from 'react-native-sortable-listview'
 import Icon from 'react-native-vector-icons/FontAwesome';
 import sha1 from 'sha1';
 import encoding from 'encoding';
@@ -80,7 +81,7 @@ export default class App extends PureComponent {
 
     const { state } = this.props.navigation;
 
-    let fields = premade;
+    let fields = JSON.parse(JSON.stringify(premade)); // deep copy
 
     this.state = {
       refer: props.navigation.state.params.refer,
@@ -89,6 +90,7 @@ export default class App extends PureComponent {
       name: null,
       customForm: null,
       fields: fields,
+      order: Object.keys(fields),
       saving: false,
     };
 
@@ -105,7 +107,7 @@ export default class App extends PureComponent {
   }
 
   doAddCustom() {
-    let { fields } = this.state;
+    let { fields, order } = this.state;
 
     let ref = this.refs.customForm.getValue();
     if (ref === null) return;
@@ -120,8 +122,9 @@ export default class App extends PureComponent {
       return Alert.alert('Error', 'Duplicate Input Key. Change your Input Key to add this item.', [{text: 'OK'}], { cancelable: false });
 
     fields[key] = json;
+    order = Object.keys(fields);
 
-    this.setState({customForm: null, fields: fields});
+    this.setState({customForm: null, fields: fields, order: order});
 
   }
 
@@ -171,6 +174,7 @@ export default class App extends PureComponent {
           author_id: ( user.dropbox ? user.dropbox.account_id : id ),
           version: 1,
           questions: fields,
+          question_order: order,
         };
 
         try {
@@ -226,16 +230,18 @@ export default class App extends PureComponent {
     return type;
   }
 
-  rmField(key) {
-    let { fields } = this.state;
-    delete fields[key];
-    this.setState({fields: fields});
-    this.forceUpdate();
+  rmField(obj) {
+    let { fields, order } = this.state;
+    for (let f in fields) {
+      if (fields[f] === obj) delete fields[f];
+    }
+    order = Object.keys(fields);
+    this.setState({fields, order});
   }
 
   render() {
 
-    let { name, form, customForm, fields, saving } = this.state;
+    let { name, form, customForm, fields, order, saving } = this.state;
     let items = [];
     let defaultList = [];
 
@@ -247,54 +253,71 @@ export default class App extends PureComponent {
         </View>
       );
 
-    for (let i in fields) items.push(
-        <View key={i}>
-          <View style={{width: Dimensions.get('window').width, height: 1, backgroundColor: 'lightgray' }} />
-          <View style={{flexDirection: 'row'}}>
-            <View style={{width: (Dimensions.get('window').width*.6)-5}}>
-              <Text style={{margin: 5}}>
-                {fields[i].label+(fields[i].required?' *':'')}
-              </Text>
-            </View>
-            <View style={{width: (Dimensions.get('window').width*.35)-5}}>
-              <Text style={{margin: 5}}>
-                : {this.inputTypeToReadable(fields[i].type)}
-              </Text>
-            </View>
-            <View style={{width: Dimensions.get('window').width*.05, justifyContent: 'center'}}>
-              <Icon
-                name="times-circle"
-                backgroundColor="#d7d7d7"
-                color="#ff0000"
-                size={20}
-                onPress={() => {
-                  Alert.alert(
-                    'Delete Item',
-                    'Are you sure you wish to delete the item "'+fields[i].label+'"?',
-                    [
-                      {text: 'OK', onPress: () => this.rmField(i)},
-                      {text: 'Cancel'}
-                    ],
-                    { cancelable: false }
-                  );
-                }}>
-              </Icon>
-            </View>
-          </View>
-        </View>
-      )
-
     return (
-      <ScrollView style={{flex: 1, backgroundColor: 'white'}}>
+      <View style={{flex: 1, backgroundColor: 'white'}}>
 
-        <View style={{flex: 1, flexDirection: 'row', margin: 20, alignItems: 'center'}}>
+        <View style={{flexDirection: 'row', margin: 20, alignItems: 'center'}}>
           <Text>Your Canvassing form will have these items:</Text>
         </View>
 
-        <View style={{margin: 5, marginTop: 0}}>
-          { items }
-          <View style={{width: Dimensions.get('window').width, height: 1, backgroundColor: 'lightgray' }} />
-        </View>
+        <SortableListView
+          style={{ flex: 1, margin: 5, marginTop: 0 }}
+          data={fields}
+          order={order}
+          onRowMoved={e => {
+            let { order } = this.state;
+            order.splice(e.to, 0, order.splice(e.from, 1)[0]);
+            this.setState(order);
+          }}
+          renderRow={row => {
+            return (
+              <TouchableHighlight
+                underlayColor={'#eee'}
+                style={{
+                  padding: 5,
+                  backgroundColor: '#F8F8F8',
+                  borderBottomWidth: 1,
+                  borderColor: '#eee',
+                }}
+                {...this.props.sortHandlers}
+                >
+                <View>
+                  <View style={{flexDirection: 'row'}}>
+                    <View style={{width: (Dimensions.get('window').width*.6)-5}}>
+                      <Text style={{margin: 5}}>
+                        {row.label+(row.required?' *':'')}
+                      </Text>
+                    </View>
+                    <View style={{width: (Dimensions.get('window').width*.35)-5}}>
+                      <Text style={{margin: 5}}>
+                        : {this.inputTypeToReadable(row.type)}
+                      </Text>
+                    </View>
+                    <View style={{width: Dimensions.get('window').width*.05, justifyContent: 'center'}}>
+                      <Icon
+                        name="times-circle"
+                        backgroundColor="#d7d7d7"
+                        color="#ff0000"
+                        size={20}
+                        onPress={() => {
+                          Alert.alert(
+                            'Delete Item',
+                            'Are you sure you wish to delete the item "'+row.label+'"?',
+                            [
+                              {text: 'OK', onPress: () => this.rmField(row)},
+                              {text: 'Cancel'}
+                            ],
+                            { cancelable: false }
+                          );
+                        }}>
+                      </Icon>
+                    </View>
+                  </View>
+                </View>
+              </TouchableHighlight>
+            );
+          }}
+        />
 
         {customForm &&
         <View style={styles.container}>
@@ -328,9 +351,7 @@ export default class App extends PureComponent {
           <Text style={styles.buttonText}>Save Form</Text>
         </TouchableHighlight>
 
-        <View style={{width: Dimensions.get('window').width, height: 1, marginBottom: 250}} />
-
-      </ScrollView>
+      </View>
     );
   }
 }

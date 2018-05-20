@@ -26,6 +26,7 @@
 		"react-native-permissions": "^1.0.6",
 		"react-native-safari-view": "^2.1.0",
 		"react-native-simple-modal": "^7.0.0",
+		"react-native-sortable-listview": "^0.2.8",
 		"react-native-storage-wrapper": "0.1.0",
 		"react-native-swipeout": "^2.3.3",
 		"react-native-vector-icons": "^4.4.3",
