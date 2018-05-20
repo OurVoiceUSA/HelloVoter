@@ -101,12 +101,13 @@ export default class App extends PureComponent {
 
     if (!user.dropbox && forms_local === null) {
       // gendate a sample form for them
+      let id = sha1(new Date().getTime());
       forms_local = [{
-          "id": sha1(new Date().getTime()),
+          "id": id,
           "created": Math.floor(new Date().getTime() / 1000),
           "name": "Sample Canvassing Form",
           "author": "Our Voice USA",
-          "author_id": "ovusa:ThisIsASongThatNeverEnds",
+          "author_id": id,
           "backend": "local",
           "version": 1,
           "questions": {
@@ -133,12 +134,17 @@ export default class App extends PureComponent {
       }
 
       let swipeoutBtns = [
-/*
         {
           text: 'Edit',
           type: 'primary',
+          onPress: () => {
+            if (json.backend === "dropbox" && !user.dropbox) {
+              this.setState({DropboxLoginScreen: true});
+              return;
+            }
+            navigate('CreateSurvey', {refer: this, form: json});
+          },
         },
-*/
         {
           text: 'Delete',
           type: 'delete',
@@ -178,6 +184,10 @@ export default class App extends PureComponent {
           },
         },
       ];
+
+      if (user.dropbox && json.backend === "dropbox")
+        if (this.state.connected !== true || user.dropbox.account_id !== json.author_id)
+          swipeoutBtns.shift();
 
       forms.push(
         <View key={i} style={{margin: 5, flexDirection: 'row'}}>
@@ -303,13 +313,13 @@ export default class App extends PureComponent {
               color="black"
               onPress={() => {
                 if (user.dropbox)
-                  navigate('CreateSurvey', {refer: this})
+                  navigate('CreateSurvey', {refer: this, form: null})
                 else {
                   Alert.alert(
                     'Choose Data Storage',
                     'You can save your canvassing data on your device, or on a dropbox acccount. With Dropbox, you can share your form with others and collaborate as a team.',
                     [
-                      {text: 'Use Device Storage', onPress: () => navigate('CreateSurvey', {refer: this})},
+                      {text: 'Use Device Storage', onPress: () => navigate('CreateSurvey', {refer: this, form: null})},
                       {text: 'Use Dropbox', onPress: () => this.setState({DropboxLoginScreen: true})},
                     ], { cancelable: false }
                   );

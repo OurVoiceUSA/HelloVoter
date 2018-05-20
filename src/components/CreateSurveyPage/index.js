@@ -81,7 +81,20 @@ export default class App extends PureComponent {
 
     const { state } = this.props.navigation;
 
-    let fields = JSON.parse(JSON.stringify(premade)); // deep copy
+    let fields;
+    let order;
+    let edit = false;
+
+    if (props.navigation.state.params.form !== null) {
+      fields = props.navigation.state.params.form.questions;
+      order = props.navigation.state.params.form.questions_order;
+      if (!order) order = Object.keys(fields);
+      edit = true;
+      mainForm = t.struct({});
+    } else {
+      fields = JSON.parse(JSON.stringify(premade)); // deep copy
+      order = Object.keys(fields);
+    }
 
     this.state = {
       refer: props.navigation.state.params.refer,
@@ -89,8 +102,10 @@ export default class App extends PureComponent {
       dbx: props.navigation.state.params.refer.state.dbx,
       name: null,
       customForm: null,
+      form: props.navigation.state.params.form,
       fields: fields,
-      order: Object.keys(fields),
+      order: order,
+      edit: edit,
       saving: false,
     };
 
@@ -129,21 +144,28 @@ export default class App extends PureComponent {
   }
 
   doSave = async () => {
-    let { fields, order, refer, user, dbx } = this.state;
+    let { fields, order, edit, form, refer, user, dbx } = this.state;
 
     let msg = null;
 
     let json = this.refs.mainForm.getValue();
-    if (json == null) msg = 'Please name this form.';
+    if (edit === false && json === null) msg = 'Please name this form.';
     else {
-      // get rid of ending whitespace
-      let formName = json.name.trim();
 
-      // disallow anything other than alphanumeric and a few other chars
-      if (!formName.match(/^[a-zA-Z0-9\-_ ]+$/)) msg = 'From name can only contain alphanumeric characters, and spaces and dashes.';
+      let formName;
 
-      // max length
-      if (formName.length > 255) msg = 'Form name cannot be longer than 255 characters.';
+      if (edit === false) {
+        // get rid of ending whitespace
+        formName = json.name.trim();
+
+        // disallow anything other than alphanumeric and a few other chars
+        if (!formName.match(/^[a-zA-Z0-9\-_ ]+$/)) msg = 'From name can only contain alphanumeric characters, and spaces and dashes.';
+
+        // max length
+        if (formName.length > 255) msg = 'Form name cannot be longer than 255 characters.';
+      } else {
+        formName = form.name;
+      }
 
       this.setState({saving: true});
 
@@ -152,7 +174,7 @@ export default class App extends PureComponent {
       // make sure this name doesn't exist as a dropbox folder
       try {
 
-        if (dbx) {
+        if (edit === false && dbx) {
           let res = await dbx.filesListFolder({path: ''});
           for (let i in res.entries) {
             item = res.entries[i];
@@ -166,16 +188,26 @@ export default class App extends PureComponent {
         let epoch = Math.floor(new Date().getTime() / 1000);
         let id = sha1(epoch+":"+formName);
 
-        let obj = {
-          id: id,
-          created: epoch,
-          name: formName,
-          author: (user.dropbox ? user.dropbox.name.display_name : 'You'),
-          author_id: ( user.dropbox ? user.dropbox.account_id : id ),
-          version: 1,
-          questions: fields,
-          questions_order: order,
-        };
+        let obj;
+
+        if (edit === false) {
+          obj = {
+            id: id,
+            created: epoch,
+            updated: epoch,
+            name: formName,
+            author: (user.dropbox ? user.dropbox.name.display_name : 'You'),
+            author_id: ( user.dropbox ? user.dropbox.account_id : id ),
+            version: 1,
+            questions: fields,
+            questions_order: order,
+          };
+        } else {
+          obj = form;
+          obj.questions = fields;
+          obj.questions_order = order;
+          obj.updated = epoch;
+        }
 
         try {
           let forms;
@@ -186,6 +218,10 @@ export default class App extends PureComponent {
 
           if (!forms) forms = [];
 
+          for (let idx in forms) {
+            if (forms[idx] === null || forms[idx].id === obj.id) delete forms[idx];
+          }
+
           forms.push(obj);
 
           await storage.set('OV_CANVASS_FORMS', JSON.stringify(forms));
@@ -195,7 +231,7 @@ export default class App extends PureComponent {
         }
 
         if (dbx && msg === null) {
-          await dbx.filesCreateFolderV2({path: '/'+formName, autorename: false});
+          if (edit === false) await dbx.filesCreateFolderV2({path: '/'+formName, autorename: false});
           await dbx.filesUpload({ path: '/'+formName+'/canvassingform.json', contents: encoding.convert(tr(JSON.stringify(obj)), 'ISO-8859-1'), mute: true, mode: {'.tag': 'overwrite'} });
         }
 
