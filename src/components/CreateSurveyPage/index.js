@@ -286,12 +286,12 @@ export default class App extends PureComponent {
                 >
                 <View>
                   <View style={{flexDirection: 'row'}}>
-                    <View style={{width: (Dimensions.get('window').width*.6)-5}}>
+                    <View style={{width: (Dimensions.get('window').width*.62)-5}}>
                       <Text style={{margin: 5}}>
                         {row.label+(row.required?' *':'')}
                       </Text>
                     </View>
-                    <View style={{width: (Dimensions.get('window').width*.35)-5}}>
+                    <View style={{width: (Dimensions.get('window').width*.32)-5}}>
                       <Text style={{margin: 5}}>
                         : {this.inputTypeToReadable(row.type)}
                       </Text>
