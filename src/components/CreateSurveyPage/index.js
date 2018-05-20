@@ -231,8 +231,24 @@ export default class App extends PureComponent {
         }
 
         if (dbx && msg === null) {
-          if (edit === false) await dbx.filesCreateFolderV2({path: '/'+formName, autorename: false});
-          await dbx.filesUpload({ path: '/'+formName+'/canvassingform.json', contents: encoding.convert(tr(JSON.stringify(obj)), 'ISO-8859-1'), mute: true, mode: {'.tag': 'overwrite'} });
+          if (!obj.folder_path) obj.folder_path = '/'+formName;
+          let canvassingform = encoding.convert(tr(JSON.stringify(obj)), 'ISO-8859-1');
+          if (edit === false) await dbx.filesCreateFolderV2({path: obj.folder_path, autorename: false});
+          await dbx.filesUpload({ path: obj.folder_path+'/canvassingform.json', contents: canvassingform, mute: true, mode: {'.tag': 'overwrite'} });
+          // copy the updated form to all sub-folders
+          if (edit === true) {
+            let res = await dbx.filesListFolder({path: obj.folder_path});
+            for (let i in res.entries) {
+              let item = res.entries[i];
+              if (item['.tag'] === 'folder' && item.path_display.match(/@/)) {
+                try {
+                  await dbx.filesUpload({ path: item.path_display+'/canvassingform.json', contents: canvassingform, mute: true, mode: {'.tag': 'overwrite'} });
+                } catch (e) {
+                  console.warn(e);
+                }
+              }
+            }
+          }
         }
 
       } catch (error) {
