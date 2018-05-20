@@ -315,8 +315,22 @@ export default class App extends PureComponent {
     return (
       <View style={{flex: 1, backgroundColor: 'white'}}>
 
-        <View style={{flexDirection: 'row', margin: 20, alignItems: 'center'}}>
-          <Text>Your Canvassing form will have these items:</Text>
+        <Form
+          ref="mainForm"
+          type={this.mainForm}
+        />
+
+        <View style={{flexDirection: 'row', marginLeft: 20, alignItems: 'center'}}>
+          <Text>Items in your Canvassing form:</Text>
+          <View style={{margin: 12}}>
+            <Icon.Button
+              name="plus-circle"
+              backgroundColor="#d7d7d7"
+              color="black"
+              onPress={this.doShowCustom}>
+              Add Item
+            </Icon.Button>
+          </View>
         </View>
 
         <SortableListView
@@ -376,17 +390,6 @@ export default class App extends PureComponent {
               </TouchableHighlight>
             );
           }}
-        />
-
-        <View style={styles.container}>
-          <TouchableHighlight style={styles.button} onPress={this.doShowCustom} underlayColor='#99d9f4'>
-            <Text style={styles.buttonText}>Add custom field</Text>
-          </TouchableHighlight>
-        </View>
-
-        <Form
-          ref="mainForm"
-          type={this.mainForm}
         />
 
         <TouchableHighlight style={styles.button} onPress={this.doSave} underlayColor='#99d9f4'>
