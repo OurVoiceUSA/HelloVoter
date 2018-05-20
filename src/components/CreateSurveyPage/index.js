@@ -129,7 +129,7 @@ export default class App extends PureComponent {
   }
 
   doSave = async () => {
-    let { fields, refer, user, dbx } = this.state;
+    let { fields, order, refer, user, dbx } = this.state;
 
     let msg = null;
 
@@ -174,7 +174,7 @@ export default class App extends PureComponent {
           author_id: ( user.dropbox ? user.dropbox.account_id : id ),
           version: 1,
           questions: fields,
-          question_order: order,
+          questions_order: order,
         };
 
         try {
