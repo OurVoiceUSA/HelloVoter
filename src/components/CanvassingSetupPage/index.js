@@ -118,8 +118,11 @@ export default class App extends PureComponent {
           "Bad Puppy preferences":{"type":"SAND","label":"When puppies misbehave, I often shrug it off because hey, they're cute puppies.","optional":true},
           "Puppy breeds":{"type":"TEXTBOX","label":"Please list as many breeds of puppies you would like to have for your very own.","optional":true},
           "Puppy breed specify":{"type":"String","label":"Of the breeds you've listed, which style of puppy is your favorite? (There can be only one)","optional":true},
-          "Number of puppies":{"type":"Number","label":"How many puppies can you hold in your arms without dropping any?","optional":true},"Puppy puddles":{"type":"Boolean","label":"Turn this switch ON if you dont mind mopping up puppy puddles.","optional":true},"Puppy trees":{"type":"String","label":"If your favorite breed of puppy could be any type of tree, what type of tree would your favorite fuzzy little puddle-making puppy choose?","optional":true},
-        }
+          "Number of puppies":{"type":"Number","label":"How many puppies can you hold in your arms without dropping any?","optional":true},
+          "Puppy puddles":{"type":"Boolean","label":"Turn this switch ON if you dont mind mopping up puppy puddles.","optional":true},
+          "Puppy trees":{"type":"String","label":"If your favorite breed of puppy could be any type of tree, what type of tree would your favorite fuzzy little puddle-making puppy choose?","optional":true},
+        },
+        "questions_order":["FullName","Email","Puppy breed preferences","Puppy preferences","Bad Puppy preferences","Puppy breeds","Puppy breed specify","Number of puppies","Puppy puddles","Puppy trees"],
       }];
     }
 
