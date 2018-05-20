@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 
 import t from 'tcomb-form-native';
+import Modal from 'react-native-simple-modal';
 import storage from 'react-native-storage-wrapper';
 import SortableListView from 'react-native-sortable-listview'
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -44,7 +45,7 @@ var options = {
   fields: {
     key: {
       label: 'Input Key',
-      help: 'Column name in spreadsheet.',
+      help: 'The spreadsheet column name.',
     },
     label: {
       label: 'Input Label',
@@ -377,28 +378,11 @@ export default class App extends PureComponent {
           }}
         />
 
-        {customForm &&
-        <View style={styles.container}>
-          <Form
-            ref="customForm"
-            type={customForm}
-            options={options}
-            onChange={this.onChange}
-          />
-          <TouchableHighlight style={styles.button} onPress={this.doAddCustom} underlayColor='#99d9f4'>
-            <Text style={styles.buttonText}>Add this item</Text>
-          </TouchableHighlight>
-          <TouchableHighlight style={styles.button} onPress={() => this.setState({customForm: null})} underlayColor='#99d9f4'>
-            <Text style={styles.buttonText}>Undo</Text>
-          </TouchableHighlight>
-        </View>
-        ||
         <View style={styles.container}>
           <TouchableHighlight style={styles.button} onPress={this.doShowCustom} underlayColor='#99d9f4'>
             <Text style={styles.buttonText}>Add custom field</Text>
           </TouchableHighlight>
         </View>
-        }
 
         <Form
           ref="mainForm"
@@ -408,6 +392,35 @@ export default class App extends PureComponent {
         <TouchableHighlight style={styles.button} onPress={this.doSave} underlayColor='#99d9f4'>
           <Text style={styles.buttonText}>Save Form</Text>
         </TouchableHighlight>
+
+        <Modal
+          open={(customForm !== null)}
+          modalStyle={{width: 350, height: 450, backgroundColor: "transparent",
+            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
+          style={{alignItems: 'center'}}
+          offset={0}
+          overlayBackground={'rgba(0, 0, 0, 0.75)'}
+          animationDuration={200}
+          animationTension={40}
+          modalDidOpen={() => undefined}
+          modalDidClose={() => this.setState({customForm: null})}
+          closeOnTouchOutside={true}
+          disableOnBackPress={false}>
+          <View style={styles.container}>
+            <Form
+              ref="customForm"
+              type={customForm}
+              options={options}
+              onChange={this.onChange}
+            />
+            <TouchableHighlight style={styles.button} onPress={this.doAddCustom} underlayColor='#99d9f4'>
+              <Text style={styles.buttonText}>Add this item</Text>
+            </TouchableHighlight>
+            <TouchableHighlight style={styles.button} onPress={() => this.setState({customForm: null})} underlayColor='#99d9f4'>
+              <Text style={styles.buttonText}>Undo</Text>
+            </TouchableHighlight>
+          </View>
+        </Modal>
 
       </View>
     );
