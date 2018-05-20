@@ -12,6 +12,8 @@ We do, however, provide an import tool so you can import your own data that you 
 
 Talk to your County or State Clerk/Secretary for information on how to obtain voter data from the Government. Political parties often provide data to their own candidates, and you can sometimes buy data from various for-profit entities.
 
+You can also just start knocking on doors! Not having any data to start with doesn't prevent you from recording data as you go. The app allows you to add pins and edit the address yourself.
+
 ### Why do you integrate with Dropbox?
 
 As Our Voice USA is a non-profit, we aren't able to host data for you for three reasons:
@@ -24,7 +26,7 @@ Dropbox is a cloud-storage solution which meets our criteria for ease of use and
 
 ### Does Our Voice USA see my data?
 
-No. Your data goes directly from your device to your Dropbox account. You have full control over with whom you share it with.
+No. Your data goes directly from your device to your Dropbox account. You have full control over your data and with whom you choose to share it.
 
 ### Will you integrate with cloud storage other than Dropbox?
 
