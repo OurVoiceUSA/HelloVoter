@@ -247,7 +247,7 @@ export default class App extends PureComponent {
       new Dropbox({ accessToken: user.dropbox.accessToken }).authTokenRevoke();
     delete user.dropbox;
     _saveUser(user, false);
-    this.setState({connected: false});
+    this.props.navigation.goBack();
   }
 
   render() {
