@@ -122,7 +122,7 @@ export default class App extends PureComponent {
       return Alert.alert('Error', 'Duplicate Input Key. Change your Input Key to add this item.', [{text: 'OK'}], { cancelable: false });
 
     fields[key] = json;
-    order = Object.keys(fields);
+    order[order.length] = key;
 
     this.setState({customForm: null, fields: fields, order: order});
 
