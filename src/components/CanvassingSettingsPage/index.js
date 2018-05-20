@@ -69,7 +69,7 @@ export default class App extends PureComponent {
     if (refer.state.canvassSettings.share_progress !== true && canvassSettings.share_progress === true) {
       Alert.alert(
         'Data Sharing',
-        '"Share progress" enables anyone who you shared your canvassing form with to see everyone\'s progress. Local laws in your area may govern with whom you may share name and address information with. It is your responsibility to make sure you are in compliance with the law. Are you sure you wish to enable this option?',
+        '"Share progress" enables anyone who you shared your canvassing form with to see everyone\'s progress. Local laws in your area may govern with whom you may share name and address information. It is your responsibility to make sure you are in compliance with the law. Are you sure you wish to enable this option?',
         [
           {text: 'Yes', onPress: () => {
             refer._setCanvassSettings(canvassSettings);
