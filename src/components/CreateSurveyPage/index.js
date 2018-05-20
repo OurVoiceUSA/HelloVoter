@@ -220,11 +220,14 @@ export default class App extends PureComponent {
 
           for (let idx in forms) {
             if (forms[idx] === null || forms[idx].id === obj.id) delete forms[idx];
+            if (forms[idx] && forms[idx].name.toLowerCase() === obj.name.toLowerCase())
+              msg = 'A form named ""'+obj.name+'"" already exists. Please choose a different name.';
           }
 
-          forms.push(obj);
-
-          await storage.set('OV_CANVASS_FORMS', JSON.stringify(forms));
+          if (msg === null) {
+            forms.push(obj);
+            await storage.set('OV_CANVASS_FORMS', JSON.stringify(forms));
+          }
         } catch (e) {
           console.warn(""+e);
           msg = "Unable to save form data.";
