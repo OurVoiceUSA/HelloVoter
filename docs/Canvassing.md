@@ -4,6 +4,10 @@
 
 First and foremost, please give our [Canvassing Guidelines](Canvassing-Guidelines.md) a read.
 
+## FAQ
+
+Check out our [Frequently Asked Questions](Canvassing-Guidelines.md).
+
 ## Demo Video
 
 Watch the latest version of our [Canvassing Demo Video](https://www.youtube.com/watch?v=rDPaKRpkznY&list=PLW00vkhdHDY_NHBCLwGP8h_aWymtUk1x3). It needs an update, but the core functionality is the same.
