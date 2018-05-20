@@ -103,19 +103,23 @@ export default class App extends PureComponent {
       // gendate a sample form for them
       let id = sha1(new Date().getTime());
       forms_local = [{
-          "id": id,
-          "created": Math.floor(new Date().getTime() / 1000),
-          "name": "Sample Canvassing Form",
-          "author": "Our Voice USA",
-          "author_id": id,
-          "backend": "local",
-          "version": 1,
-          "questions": {
-            "FullName":{"type":"String","label":"Full Name","optional":true},
-            "Email":{"type":"String","label":"Email","optional":true},
-            "Phone Number":{"type":"Number","label":"Phone","optional":true},
-            "Notes":{"type":"TEXTBOX","label":"Notes","optional":true},
-          },
+        "id": id,
+        "created": Math.floor(new Date().getTime() / 1000),
+        "name": "Sample Canvassing Form",
+        "author": "Our Voice USA",
+        "author_id": id,
+        "backend": "local",
+        "version": 1,
+        "questions":{
+          "FullName":{"type":"String","label":"Full Name","optional":true},
+          "Email":{"type":"String","label":"Email Address","optional":true},
+          "Puppy breed preferences":{"type":"SAND","label":"I prefer my puppies to be fuzzy and cute.","optional":true},
+          "Puppy preferences":{"type":"Boolean","label":"Turn this switch ON if you prefer puppies stay outside.","optional":true},
+          "Bad Puppy preferences":{"type":"SAND","label":"When puppies misbehave, I often shrug it off because hey, they're cute puppies.","optional":true},
+          "Puppy breeds":{"type":"TEXTBOX","label":"Please list as many breeds of puppies you would like to have for your very own.","optional":true},
+          "Puppy breed specify":{"type":"String","label":"Of the breeds you've listed, which style of puppy is your favorite? (There can be only one)","optional":true},
+          "Number of puppies":{"type":"Number","label":"How many puppies can you hold in your arms without dropping any?","optional":true},"Puppy puddles":{"type":"Boolean","label":"Turn this switch ON if you dont mind mopping up puppy puddles.","optional":true},"Puppy trees":{"type":"String","label":"If your favorite breed of puppy could be any type of tree, what type of tree would your favorite fuzzy little puddle-making puppy choose?","optional":true},
+        }
       }];
     }
 
