@@ -25,10 +25,6 @@ import { Dropbox } from 'dropbox';
 
 var Form = t.form.Form;
 
-var mainForm = t.struct({
-  'name': t.String,
-});
-
 const FTYPE = t.enums({
   'String': 'Text Input',
   'TEXTBOX': 'Large Text Box',
@@ -76,6 +72,7 @@ var premade = {
 };
 
 export default class App extends PureComponent {
+
   constructor(props) {
     super(props);
 
@@ -90,10 +87,13 @@ export default class App extends PureComponent {
       order = props.navigation.state.params.form.questions_order;
       if (!order) order = Object.keys(fields);
       edit = true;
-      mainForm = t.struct({});
+      this.mainForm = t.struct({});
     } else {
       fields = JSON.parse(JSON.stringify(premade)); // deep copy
       order = Object.keys(fields);
+      this.mainForm = t.struct({
+        'name': t.String,
+      });
     }
 
     this.state = {
@@ -383,7 +383,7 @@ export default class App extends PureComponent {
 
         <Form
           ref="mainForm"
-          type={mainForm}
+          type={this.mainForm}
         />
 
         <TouchableHighlight style={styles.button} onPress={this.doSave} underlayColor='#99d9f4'>
