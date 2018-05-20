@@ -417,7 +417,7 @@ export default class App extends PureComponent {
               <Text style={styles.buttonText}>Add this item</Text>
             </TouchableHighlight>
             <TouchableHighlight style={styles.button} onPress={() => this.setState({customForm: null})} underlayColor='#99d9f4'>
-              <Text style={styles.buttonText}>Undo</Text>
+              <Text style={styles.buttonText}>Dismiss</Text>
             </TouchableHighlight>
           </View>
         </Modal>
