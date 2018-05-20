@@ -275,7 +275,15 @@ export default class App extends PureComponent {
                 color="#ff0000"
                 size={20}
                 onPress={() => {
-                  this.rmField(i);
+                  Alert.alert(
+                    'Delete Item',
+                    'Are you sure you wish to delete the item "'+fields[i].label+'"?',
+                    [
+                      {text: 'OK', onPress: () => this.rmField(i)},
+                      {text: 'Cancel'}
+                    ],
+                    { cancelable: false }
+                  );
                 }}>
               </Icon>
             </View>
