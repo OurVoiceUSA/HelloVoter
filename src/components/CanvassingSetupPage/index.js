@@ -108,7 +108,6 @@ export default class App extends PureComponent {
         "name": "Sample Canvassing Form",
         "author": "Our Voice USA",
         "author_id": id,
-        "backend": "local",
         "version": 1,
         "questions":{
           "FullName":{"type":"String","label":"Full Name","optional":true},

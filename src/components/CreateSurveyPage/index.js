@@ -147,6 +147,7 @@ export default class App extends PureComponent {
   doSave = async () => {
     let { fields, order, edit, form, refer, user, dbx } = this.state;
 
+    this.setState({saving: true});
     let msg = null;
 
     let json = this.refs.mainForm.getValue();
@@ -168,12 +169,33 @@ export default class App extends PureComponent {
         formName = form.name;
       }
 
-      this.setState({saving: true});
-
       let forms = [];
 
       // make sure this name doesn't exist as a dropbox folder
       try {
+
+        let epoch = Math.floor(new Date().getTime() / 1000);
+        let id = sha1(epoch+":"+formName);
+
+        let obj;
+
+        obj = {
+          id: id,
+          created: epoch,
+          updated: epoch,
+          name: formName,
+          author: (user.dropbox ? user.dropbox.name.display_name : 'You'),
+          author_id: ( user.dropbox ? user.dropbox.account_id : id ),
+          version: 1,
+          questions: fields,
+          questions_order: order,
+        };
+
+        if (edit === true) {
+          obj.id = form.id;
+          obj.created = form.created;
+          obj.name = form.name;
+        }
 
         if (edit === false && dbx) {
           let res = await dbx.filesListFolder({path: ''});
@@ -181,33 +203,9 @@ export default class App extends PureComponent {
             item = res.entries[i];
             if (item['.tag'] != 'folder') continue;
             let name = item.path_display.substr(1).toLowerCase();
-            if (name == formName.toLowerCase())
+            if (name == obj.name.toLowerCase())
               msg = 'Dropbox folder name '+name+' already exists. Please choose a different name.';
           }
-        }
-
-        let epoch = Math.floor(new Date().getTime() / 1000);
-        let id = sha1(epoch+":"+formName);
-
-        let obj;
-
-        if (edit === false) {
-          obj = {
-            id: id,
-            created: epoch,
-            updated: epoch,
-            name: formName,
-            author: (user.dropbox ? user.dropbox.name.display_name : 'You'),
-            author_id: ( user.dropbox ? user.dropbox.account_id : id ),
-            version: 1,
-            questions: fields,
-            questions_order: order,
-          };
-        } else {
-          obj = form;
-          obj.questions = fields;
-          obj.questions_order = order;
-          obj.updated = epoch;
         }
 
         try {
@@ -235,9 +233,8 @@ export default class App extends PureComponent {
         }
 
         if (dbx && msg === null) {
-          if (!obj.folder_path) obj.folder_path = '/'+formName;
+          if (!obj.folder_path) obj.folder_path = '/'+obj.name;
           let canvassingform = encoding.convert(tr(JSON.stringify(obj)), 'ISO-8859-1');
-          if (edit === false) await dbx.filesCreateFolderV2({path: obj.folder_path, autorename: false});
           await dbx.filesUpload({ path: obj.folder_path+'/canvassingform.json', contents: canvassingform, mute: true, mode: {'.tag': 'overwrite'} });
           // copy the updated form to all sub-folders
           if (edit === true) {
