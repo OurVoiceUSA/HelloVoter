@@ -6,7 +6,7 @@ First and foremost, please give our [Canvassing Guidelines](Canvassing-Guideline
 
 ## FAQ
 
-Check out our [Frequently Asked Questions](Canvassing-Guidelines.md).
+Check out our [Frequently Asked Questions](Canvassing-FAQ.md).
 
 ## Demo Video
 
