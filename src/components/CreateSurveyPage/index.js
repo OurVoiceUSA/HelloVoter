@@ -101,7 +101,7 @@ export default class App extends PureComponent {
       refer: props.navigation.state.params.refer,
       user: props.navigation.state.params.refer.state.user,
       dbx: props.navigation.state.params.refer.state.dbx,
-      name: null,
+      info: {},
       customForm: null,
       form: props.navigation.state.params.form,
       fields: fields,
@@ -111,15 +111,18 @@ export default class App extends PureComponent {
     };
 
     this.onChange = this.onChange.bind(this);
+    this.onChangeName = this.onChangeName.bind(this);
     this.doAddCustom = this.doAddCustom.bind(this);
     this.doSave = this.doSave.bind(this);
     this.doShowCustom = this.doShowCustom.bind(this);
   }
 
   onChange(value) {
-    const { typeList } = this.state;
-
     if (value.type == 'List') value = t.String; // do something...
+  }
+
+  onChangeName(info) {
+    this.setState({info});
   }
 
   doAddCustom() {
@@ -315,6 +318,8 @@ export default class App extends PureComponent {
         <Form
           ref="mainForm"
           type={this.mainForm}
+          onChange={this.onChangeName}
+          value={this.state.info}
         />
 
         <View style={{flexDirection: 'row', marginLeft: 20, alignItems: 'center'}}>
