@@ -230,6 +230,24 @@ export default class App extends PureComponent {
     );
   }
 
+  cutTurf = async (markers) => {
+    const { dbx, form } = this.state;
+
+    let turf = {};
+
+    for (let m in markers) {
+      let marker = markers[m];
+      turf[marker.id] = marker;
+      nodes = this.getChildNodesDeep(marker.id);
+      for (let n in nodes) {
+        let node = nodes[n];
+        turf[node.id] = node;
+      }
+    }
+
+    await dbx.filesUpload({ path: form.folder_path+'/cut.jtrf', contents: encoding.convert(tr(this._nodesToJtxt(turf)), 'ISO-8859-1'), mute: true, mode: {'.tag': 'overwrite'} });
+  }
+
   showConfirmAddress() {
     const { myPosition } = this.state;
 
@@ -782,6 +800,22 @@ export default class App extends PureComponent {
     await this._saveNodes(this.myNodes);
   }
 
+  // TODO: warning ... if there's node whos a parent of its parent, infinite loop here
+  //       for safety -- global idx or pass a reference idx and bail if node.id is in it
+  getChildNodesDeep(id) {
+    let nodes = [];
+
+    if (!this.family[id]) return nodes;
+
+    for (let c in this.family[id]) {
+      let node = this.family[id][c];
+      nodes.unshift(node);
+      nodes = nodes.concat(this.getChildNodesDeep(node.id));
+    }
+
+    return nodes;
+  }
+
   getChildNodesByIdTypes(id, types) {
     let nodes = [];
 
@@ -1045,6 +1079,17 @@ export default class App extends PureComponent {
               color="#8b4513"
               {...iconStyles} />
           </TouchableOpacity>
+
+          {dbx && __DEV__ &&
+          <TouchableOpacity style={styles.iconContainer}
+            onPress={() => {this.cutTurf(markersInView);}}>
+            <Icon
+              name="street-view"
+              size={50}
+              color="#8b4513"
+              {...iconStyles} />
+          </TouchableOpacity>
+          }
 
           {nomap_content.length == 0 &&
           <TouchableOpacity style={styles.iconContainer}
