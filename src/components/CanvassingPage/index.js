@@ -1017,6 +1017,19 @@ export default class App extends PureComponent {
       }
     }
 
+    let landmarks = [];
+
+    if (region.longitudeDelta < 0.035) landmarks = [{
+      id: "spacex",
+      landmark: true,
+      image: "../../../img/spacexfh.png",
+      latlng: {
+        latitude: 33.9208231,
+        longitude: -118.3281370,
+      },
+      address: ["1 Rocket Road", "Hawthorne", "CA", "90250"],
+    }];
+
     return (
       <View style={styles.container}>
 
@@ -1037,17 +1050,20 @@ export default class App extends PureComponent {
           followsUserLocation={false}
           keyboardShouldPersistTaps={true}
           {...this.props}>
-          {markersInView.map((marker) => {
+          {markersInView.concat(landmarks).map((marker) => {
             return (
               <MapView.Marker
                 key={marker.id}
                 coordinate={marker.latlng}
-                draggable={this.state.canvassSettings.draggable_pins}
+                image={(marker.landmark?require("../../../img/spacexfh.png"):null)}
+                draggable={(marker.image?false:this.state.canvassSettings.draggable_pins)}
                 onDragEnd={(e) => {
                   this.updateNodeById(marker.id, 'latlng', e.nativeEvent.coordinate);
                 }}
                 pinColor={this.getPinColor(marker)}>
-                  <MapView.Callout onPress={() => {this.doMarkerPress(marker);}}>
+                  <MapView.Callout onPress={() => {
+                    if (!marker.landmark) this.doMarkerPress(marker);
+                  }}>
                     <View style={{backgroundColor: '#FFFFFF', padding: 5, width: 175}}>
                       <Text style={{fontWeight: 'bold'}}>{marker.address.join("\n")}</Text>
                       <Text>{(marker.multi_unit ? 'Multi-unit address' : this.getLastInteraction(marker.id))}</Text>
