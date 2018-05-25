@@ -1080,7 +1080,7 @@ export default class App extends PureComponent {
               {...iconStyles} />
           </TouchableOpacity>
 
-          {dbx && __DEV__ &&
+          {__DEV__ && dbx && user.dropbox.account_id === form.author_id &&
           <TouchableOpacity style={styles.iconContainer}
             onPress={() => {this.cutTurf(markersInView);}}>
             <Icon
