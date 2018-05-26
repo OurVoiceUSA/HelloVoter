@@ -12,7 +12,7 @@ Check out our [Frequently Asked Questions](Canvassing-FAQ.md).
 
 ## Demo Video
 
-Watch the latest version of our [Canvassing Demo Video](https://www.youtube.com/watch?v=rDPaKRpkznY&list=PLW00vkhdHDY_NHBCLwGP8h_aWymtUk1x3). It needs an update, but the core functionality is the same.
+Watch the latest version of our [Canvassing Mobile App Walkthrough](https://www.youtube.com/watch?v=seMrSoTrCJ0).
 
 ## Other Helpful Tips
 
