@@ -22,7 +22,7 @@
 		"react-native-geocoder": "^0.5.0",
 		"react-native-google-location": "^0.2.0",
 		"react-native-google-places": "^2.4.2",
-		"react-native-maps": "^0.16.4",
+		"react-native-maps": "^0.21.0",
 		"react-native-modal-selector": "0.0.27",
 		"react-native-permissions": "^1.0.6",
 		"react-native-safari-view": "^2.1.0",
