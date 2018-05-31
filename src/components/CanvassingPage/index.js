@@ -3,6 +3,7 @@ import React, { PureComponent } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Dimensions,
   StyleSheet,
   NetInfo,
   Text,
@@ -28,7 +29,8 @@ import sha1 from 'sha1';
 import Permissions from 'react-native-permissions';
 import RNGLocation from 'react-native-google-location';
 import RNGooglePlaces from 'react-native-google-places';
-import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
+import { Marker, Callout, PROVIDER_GOOGLE } from 'react-native-maps'
+import MapView from 'react-native-maps-super-cluster'
 import encoding from 'encoding';
 import { transliterate as tr } from 'transliteration/src/main/browser';
 import { _doGeocode } from '../../common';
@@ -921,6 +923,46 @@ export default class App extends PureComponent {
     return Linking.openURL(url).catch(() => null);
   }
 
+  renderMarker = (marker) =>
+    <Marker
+      key={marker.id}
+      coordinate={marker.latlng}
+      image={(marker.landmark?require("../../../img/spacexfh.png"):null)}
+      draggable={(marker.image?false:this.state.canvassSettings.draggable_pins)}
+      onDragEnd={(e) => {
+        this.updateNodeById(marker.id, 'latlng', e.nativeEvent.coordinate);
+      }}
+      pinColor={this.getPinColor(marker)}>
+      <Callout onPress={() => {
+        if (!marker.landmark) this.doMarkerPress(marker);
+      }}>
+        <View style={{backgroundColor: '#FFFFFF', padding: 5, width: 175}}>
+          <Text style={{fontWeight: 'bold'}}>{marker.address.join("\n")}</Text>
+          <Text>{(marker.multi_unit ? 'Multi-unit address' : this.getLastInteraction(marker.id))}</Text>
+        </View>
+      </Callout>
+    </Marker>
+
+  renderCluster = (cluster, onPress) => {
+    const pointCount = cluster.pointCount,
+      coordinate = cluster.coordinate,
+      clusterId = cluster.clusterId
+
+    return (
+      <Marker key={Math.random()} coordinate={coordinate}>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={{
+            backgroundColor: '#ffffff', width: 33, height: 33, borderRadius: 33,
+            borderWidth: 1, borderColor: '#000000',
+            alignItems: 'center', justifyContent: 'center', margin: 2.5,
+            }}>
+            <Text>{pointCount}</Text>
+          </TouchableOpacity>
+        </View>
+      </Marker>
+    )
+  }
+
   render() {
     const { navigate } = this.props.navigation;
     const {
@@ -1003,18 +1045,11 @@ export default class App extends PureComponent {
 
     // toggle pin horizon based on zoom level
     let markersInView = [];
-    let tooManyMarkers = false;
 
     for (let m in this.markers) {
       let marker = this.markers[m];
-      if (marker.latlng && marker.latlng.longitude !== null &&
-        Math.hypot(region.longitude-marker.latlng.longitude, region.latitude-marker.latlng.latitude) < region.longitudeDelta/1.75)
+      if (marker.latlng && marker.latlng.longitude !== null)
         markersInView.push(marker);
-
-      if (markersInView.length >= 500) {
-        tooManyMarkers = true;
-        break;
-      }
     }
 
     let landmarks = [];
@@ -1041,37 +1076,18 @@ export default class App extends PureComponent {
         <MapView
           ref={component => this.map = component}
           initialRegion={{latitude: myPosition.latitude, longitude: myPosition.longitude, latitudeDelta: region.latitudeDelta, longitudeDelta: region.longitudeDelta}}
-          onRegionChangeComplete={(region) => {
-            this.setState({region});
-          }}
+          onRegionChangeComplete={(region) => this.setState({region})}
           provider={PROVIDER_GOOGLE}
           style={styles.map}
           showsUserLocation={true}
           followsUserLocation={false}
           keyboardShouldPersistTaps={true}
-          {...this.props}>
-          {markersInView.concat(landmarks).map((marker) => {
-            return (
-              <MapView.Marker
-                key={marker.id}
-                coordinate={marker.latlng}
-                image={(marker.landmark?require("../../../img/spacexfh.png"):null)}
-                draggable={(marker.image?false:this.state.canvassSettings.draggable_pins)}
-                onDragEnd={(e) => {
-                  this.updateNodeById(marker.id, 'latlng', e.nativeEvent.coordinate);
-                }}
-                pinColor={this.getPinColor(marker)}>
-                  <MapView.Callout onPress={() => {
-                    if (!marker.landmark) this.doMarkerPress(marker);
-                  }}>
-                    <View style={{backgroundColor: '#FFFFFF', padding: 5, width: 175}}>
-                      <Text style={{fontWeight: 'bold'}}>{marker.address.join("\n")}</Text>
-                      <Text>{(marker.multi_unit ? 'Multi-unit address' : this.getLastInteraction(marker.id))}</Text>
-                    </View>
-                  </MapView.Callout>
-                </MapView.Marker>
-          )})}
-        </MapView>
+          data={markersInView.concat(landmarks)}
+          renderMarker={this.renderMarker}
+          renderCluster={this.renderCluster}
+          radius={Dimensions.get('window').width*0.2}
+          extent={2048}
+          {...this.props} />
         }
 
         <View style={{alignSelf: 'flex-end', alignItems: 'flex-end', marginRight: 5}}>
@@ -1081,7 +1097,6 @@ export default class App extends PureComponent {
             }}>
             <View>
               <Text>{this.markers.length} pins</Text>
-              <Text>{(tooManyMarkers ? 'clustering' : markersInView.length+' in view')}</Text>
             </View>
           </View>
         </View>
@@ -1095,17 +1110,6 @@ export default class App extends PureComponent {
               color="#8b4513"
               {...iconStyles} />
           </TouchableOpacity>
-
-          {__DEV__ && dbx && user.dropbox.account_id === form.author_id &&
-          <TouchableOpacity style={styles.iconContainer}
-            onPress={() => {this.cutTurf(markersInView);}}>
-            <Icon
-              name="street-view"
-              size={50}
-              color="#8b4513"
-              {...iconStyles} />
-          </TouchableOpacity>
-          }
 
           {nomap_content.length == 0 &&
           <TouchableOpacity style={styles.iconContainer}

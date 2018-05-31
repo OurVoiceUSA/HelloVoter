@@ -23,6 +23,7 @@
 		"react-native-google-location": "^0.2.0",
 		"react-native-google-places": "^2.4.2",
 		"react-native-maps": "^0.20.1",
+		"react-native-maps-super-cluster": "^1.4.1",
 		"react-native-modal-selector": "0.0.27",
 		"react-native-permissions": "^1.0.6",
 		"react-native-safari-view": "^2.1.0",
