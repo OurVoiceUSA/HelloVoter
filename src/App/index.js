@@ -1,7 +1,12 @@
 import React from 'react';
 
 import { YellowBox } from 'react-native';
-YellowBox.ignoreWarnings(['Warning: isMounted(...) is deprecated', 'Module RCTImageLoader', 'The StackNavigator function']);
+YellowBox.ignoreWarnings([
+  'Warning: isMounted(...) is deprecated',
+  'Module RCTImageLoader',
+  'The StackNavigator function',
+  'Class RCTCxxModule was not exported',
+]);
 
 import HomeScreenPage from '../components/HomeScreenPage';
 import YourRepsPage from '../components/YourRepsPage';
