@@ -852,6 +852,24 @@ export default class App extends PureComponent {
     return "#8b4513";
   }
 
+  getLastStatus(node) {
+    if (node.multi_unit) return "multi-unit";
+
+    nodes = this.getChildNodesByIdTypes(node.id, ["survey"]);
+
+    // no interactions
+    if (nodes.length === 0) return "not visited";
+
+    switch (nodes[0].status) {
+      case 'home':
+      case 'not home':
+      case 'not interested':
+        return nodes[0].status;
+    }
+
+    return "not visited";
+  }
+
   doExport = async (refer) => {
     let { dbx, form } = this.state;
 
@@ -937,7 +955,19 @@ export default class App extends PureComponent {
   renderCluster = (cluster, onPress) => {
     const pointCount = cluster.pointCount,
       coordinate = cluster.coordinate,
-      clusterId = cluster.clusterId
+      clusterId = cluster.clusterId;
+
+    const clusteringEngine = this.map.getClusteringEngine(),
+      leaves = clusteringEngine.getLeaves(clusterId, Infinity);
+
+    let status = {
+      home: 0, 'not home': 0, 'not interested': 0, 'not visited': 0, 'multi-unit': 0,
+    };
+
+    for (let l in leaves) {
+      let stat = this.getLastStatus(leaves[l].properties.item);
+      status[stat]++;
+    }
 
     const size = 25 + ((pointCount+"").length*5);
 
@@ -952,6 +982,15 @@ export default class App extends PureComponent {
             <Text>{pointCount}</Text>
           </TouchableOpacity>
         </View>
+        <Callout>
+          <View style={{backgroundColor: '#FFFFFF', padding: 5, width: 175}}>
+            <Text>Home: {status.home}</Text>
+            <Text>Not Home: {status['not home']}</Text>
+            <Text>Not Interested: {status['not interested']}</Text>
+            <Text>Not Visited: {status['not visited']}</Text>
+            <Text>Multi-Unit: {status['multi-unit']}</Text>
+          </View>
+        </Callout>
       </Marker>
     )
   }
