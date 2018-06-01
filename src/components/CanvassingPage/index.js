@@ -948,11 +948,13 @@ export default class App extends PureComponent {
       coordinate = cluster.coordinate,
       clusterId = cluster.clusterId
 
+    const size = 25 + ((pointCount+"").length*5);
+
     return (
-      <Marker key={Math.random()} coordinate={coordinate}>
+      <Marker key={clusterId} coordinate={coordinate}>
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={{
-            backgroundColor: '#ffffff', width: 33, height: 33, borderRadius: 33,
+            backgroundColor: '#ffffff', width: size, height: size, borderRadius: size,
             borderWidth: 1, borderColor: '#000000',
             alignItems: 'center', justifyContent: 'center', margin: 2.5,
             }}>
