@@ -961,12 +961,26 @@ export default class App extends PureComponent {
       leaves = clusteringEngine.getLeaves(clusterId, Infinity);
 
     let status = {
-      home: 0, 'not home': 0, 'not interested': 0, 'not visited': 0, 'multi-unit': 0,
+      house: {
+        home: 0, 'not home': 0, 'not interested': 0, 'not visited': 0,
+      },
+      'multi-unit': {
+        home: 0, 'not home': 0, 'not interested': 0, 'not visited': 0,
+      }
     };
 
     for (let l in leaves) {
-      let stat = this.getLastStatus(leaves[l].properties.item);
-      status[stat]++;
+      let node = leaves[l].properties.item;
+      if (node.multi_unit) {
+        let units = this.getChildNodesByIdTypes(node.id, ["unit"]);
+        for (let u in units) {
+          let stat = this.getLastStatus(units[u]);
+          status['multi-unit'][stat]++;
+        }
+      } else {
+        let stat = this.getLastStatus(node);
+        status['house'][stat]++;
+      }
     }
 
     const size = 25 + ((pointCount+"").length*5);
@@ -983,12 +997,32 @@ export default class App extends PureComponent {
           </TouchableOpacity>
         </View>
         <Callout>
-          <View style={{backgroundColor: '#FFFFFF', padding: 5, width: 175}}>
-            <Text>Home: {status.home}</Text>
-            <Text>Not Home: {status['not home']}</Text>
-            <Text>Not Interested: {status['not interested']}</Text>
-            <Text>Not Visited: {status['not visited']}</Text>
-            <Text>Multi-Unit: {status['multi-unit']}</Text>
+          <View style={{backgroundColor: '#FFFFFF', padding: 5, width: 225}}>
+            <View style={{flex: 1, alignItems: 'center'}}>
+              <View style={{flex: 1, flexDirection: 'row'}}>
+                <View style={{marginRight: 5}}>
+                  <Text style={{fontSize: 13, textDecorationLine: 'underline'}}>Status</Text>
+                  <Text style={{fontSize: 13}}>Home:</Text>
+                  <Text style={{fontSize: 13}}>Not Home:</Text>
+                  <Text style={{fontSize: 13}}>Not Interested:</Text>
+                  <Text style={{fontSize: 13}}>Not Visited:</Text>
+                </View>
+                <View style={{marginRight: 5}}>
+                  <Text style={{fontSize: 13, textDecorationLine: 'underline'}}>House</Text>
+                  <Text style={{fontSize: 13}}>{status['house']['home']}</Text>
+                  <Text style={{fontSize: 13}}>{status['house']['not home']}</Text>
+                  <Text style={{fontSize: 13}}>{status['house']['not interested']}</Text>
+                  <Text style={{fontSize: 13}}>{status['house']['not visited']}</Text>
+                </View>
+                <View>
+                  <Text style={{fontSize: 13, textDecorationLine: 'underline'}}>Multi-Unit</Text>
+                  <Text style={{fontSize: 13}}>{status['multi-unit']['home']}</Text>
+                  <Text style={{fontSize: 13}}>{status['multi-unit']['not home']}</Text>
+                  <Text style={{fontSize: 13}}>{status['multi-unit']['not interested']}</Text>
+                  <Text style={{fontSize: 13}}>{status['multi-unit']['not visited']}</Text>
+                </View>
+              </View>
+            </View>
           </View>
         </Callout>
       </Marker>
