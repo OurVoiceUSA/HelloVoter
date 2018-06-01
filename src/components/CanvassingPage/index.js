@@ -85,6 +85,7 @@ export default class App extends PureComponent {
       myPosition: {latitude: null, longitude: null},
       region: {latitudeDelta: 0.004, longitudeDelta: 0.004},
       currentNode: null,
+      markers: [],
       fAddress: {},
       pAddress: {},
       asyncStorageKey: 'OV_CANVASS_PINS@'+props.navigation.state.params.form.id,
@@ -100,7 +101,6 @@ export default class App extends PureComponent {
       user: props.navigation.state.params.user,
     };
 
-    this.markers = [];
     this.myNodes = {};
     this.turfNodes = {};
     this.allNodes = {};
@@ -533,8 +533,7 @@ export default class App extends PureComponent {
         nodes.push(node);
     }
 
-    this.markers = nodes;
-    this.forceUpdate();
+    this.setState({markers: nodes});
   }
 
   nodeHasSurvey(node) {
@@ -1047,8 +1046,8 @@ export default class App extends PureComponent {
     // toggle pin horizon based on zoom level
     let markersInView = [];
 
-    for (let m in this.markers) {
-      let marker = this.markers[m];
+    for (let m in this.state.markers) {
+      let marker = this.state.markers[m];
       if (marker.latlng && marker.latlng.longitude !== null) {
         let m = marker;
         m.location = m.latlng; // supercluster expects latlng to be "location"
@@ -1098,7 +1097,7 @@ export default class App extends PureComponent {
               borderColor: '#000000', borderWidth: 2, borderRadius: 10, width: 100, height: 60,
             }}>
             <View>
-              <Text>{this.markers.length} pin{(this.markers.length > 1 ? 's' : '')}</Text>
+              <Text>{this.state.markers.length} pin{(this.state.markers.length !== 1 ? 's' : '')}</Text>
             </View>
           </View>
         </View>
