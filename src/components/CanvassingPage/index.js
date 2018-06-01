@@ -917,14 +917,15 @@ export default class App extends PureComponent {
     <Marker
       key={marker.id}
       coordinate={marker.latlng}
-      image={(marker.landmark?require("../../../img/spacexfh.png"):null)}
+      //image={(marker.landmark?require("../../../img/spacexfh.png"):null)}
       draggable={(marker.image?false:this.state.canvassSettings.draggable_pins)}
       onDragEnd={(e) => {
         this.updateNodeById(marker.id, 'latlng', e.nativeEvent.coordinate);
       }}
       pinColor={this.getPinColor(marker)}>
       <Callout onPress={() => {
-        if (!marker.landmark) this.doMarkerPress(marker);
+        //if (!marker.landmark)
+        this.doMarkerPress(marker);
       }}>
         <View style={{backgroundColor: '#FFFFFF', padding: 5, width: 175}}>
           <Text style={{fontWeight: 'bold'}}>{marker.address.join("\n")}</Text>
@@ -1035,6 +1036,9 @@ export default class App extends PureComponent {
       );
     }
 
+/*
+    // TODO: onRegionChangeComplete() to update region lags supercluster real bad,
+             so omitting this for now
     let landmarks = [];
 
     if (region.longitudeDelta < 0.035) landmarks = [{
@@ -1045,6 +1049,7 @@ export default class App extends PureComponent {
       location: { latitude: 33.9208231, longitude: -118.3281370 },
       address: ["1 Rocket Road", "Hawthorne", "CA", "90250"],
     }];
+*/
 
     return (
       <View style={styles.container}>
@@ -1063,13 +1068,12 @@ export default class App extends PureComponent {
             latitudeDelta: region.latitudeDelta,
             longitudeDelta: region.longitudeDelta,
           })}
-          onRegionChangeComplete={(region) => this.setState({region})}
           provider={PROVIDER_GOOGLE}
           style={styles.map}
           showsUserLocation={true}
           followsUserLocation={false}
           keyboardShouldPersistTaps={true}
-          data={this.state.markers.concat(landmarks)}
+          data={this.state.markers}
           renderMarker={this.renderMarker}
           renderCluster={this.renderCluster}
           radius={Dimensions.get('window').width*0.2}
