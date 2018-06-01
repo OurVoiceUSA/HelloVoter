@@ -1,6 +1,6 @@
 ## Introduction
 
-This is the mobile app for Our Voice Initiative, a 501(c)(4) non-profit, non-partisian organization for the civic education. We are writing tools to engage everyday citizens with the political process by providing easy access to civic information that's relevant to the individual.
+This is the mobile app for Our Voice Initiative, a 501(c)(4) non-profit, non-partisian organization for the civic education. We are writing tools to engage everyday citizens with the political process by providing easy access to civic information that's relevant to the individual, and tools to take action.
 
 Find the app on the [Google Play Store (Android)](https://play.google.com/store/apps/details?id=org.ourvoiceinitiative.ourvoice) and the [Apple Store (iPhone)](https://itunes.apple.com/us/app/our-voice-usa/id1275301651?ls=1&mt=8).
 
@@ -8,15 +8,14 @@ Find the app on the [Google Play Store (Android)](https://play.google.com/store/
 
 ## Features
 
-Our Voice is a mobile app for civic education and engagement. You can view information on the politicians in office who represent you, contact them, and rate them.
+Our Voice is a mobile app for civic education and engagement. You can:
+* View information on the politicians in office who represent you, contact them, and rate them.
+* Canvass for any cause at zero cost.
 
 ## Future Development Goals
 
-What's next is to let candidates, no matter what office they are running for, define who they are. Voters will be able to easily find who is running in their area by seeing them as challengers to the incumbents, and know where they stand on the issues compared to their own policy beliefs.
-
-For voters, finding out information about candidates running for office is disjointed and unorganized. There is no clear, cohesive system by which candidates up and down the ballot can register and define their thoughts on policy. This puts a large burden on voters to do research in their limited free time, and many vote for a candidate without knowing a thing about him or her - other than perhaps their political party affiliation. Our app will bring all this information into a single place and displayed in an unbiased, non-partisan manner.
-
-Likewise for candidates, the only option to accomplish canvassing and outreach needs as they gathered voter data door-to-door was sold to them by a couple of companies. Unfortunately, those canvassing companies charge people thousands of dollars to use their services which hinders people from accessing much needed information to run for office. This creates a high barrier to entry to run for office. Our app has a canvassing tool that's free to use - but in order to be viable, needs lots of work.
+* Move the "Your Representatives" functionality from Native to React.js and call the web version.
+* Further expand the Canvassing tool feature set
 
 ## Development Setup
 
@@ -31,7 +30,7 @@ Set up your `.env` file:
     EOF
 
 * The `GOOGLE_API_KEY_` values are credentials created by visiting http://console.developers.google.com/. If you plan on releasing this app, or a fork of it yourself, be sure you lock down the API key to the assosiated platform device specified to avoid quota theft.
-* Without these keys, address searches won't function, which limits functionality
+* Without these keys, address searches and geocoding won't function, which limits functionality
 
 Install https://nodejs.org/en/download/ if you havne't already, and run:
 
