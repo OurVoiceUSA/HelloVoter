@@ -504,7 +504,6 @@ export default class App extends PureComponent {
     // even if sycn isn't OK over cellular - do the initial sync anyway
     if (this.state.dbx) await this._syncNodes(false);
 
-    this.updateMarkers();
   }
 
   updateMarkers() {
@@ -518,8 +517,10 @@ export default class App extends PureComponent {
 
     for (let n in nodeList) {
       let node = nodeList[n];
-      if (node.type === "address")
+      if (node.type === "address" && node.latlng && node.latlng.longitude !== null) {
+        node.location = node.latlng; // supercluster expects latlng to be "location"
         nodes.push(node);
+      }
     }
 
     this.setState({markers: nodes});
@@ -1034,18 +1035,6 @@ export default class App extends PureComponent {
       );
     }
 
-    // toggle pin horizon based on zoom level
-    let markersInView = [];
-
-    for (let m in this.state.markers) {
-      let marker = this.state.markers[m];
-      if (marker.latlng && marker.latlng.longitude !== null) {
-        let m = marker;
-        m.location = m.latlng; // supercluster expects latlng to be "location"
-        markersInView.push(m);
-      }
-    }
-
     let landmarks = [];
 
     if (region.longitudeDelta < 0.035) landmarks = [{
@@ -1080,7 +1069,7 @@ export default class App extends PureComponent {
           showsUserLocation={true}
           followsUserLocation={false}
           keyboardShouldPersistTaps={true}
-          data={markersInView.concat(landmarks)}
+          data={this.state.markers.concat(landmarks)}
           renderMarker={this.renderMarker}
           renderCluster={this.renderCluster}
           radius={Dimensions.get('window').width*0.2}
