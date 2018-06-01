@@ -239,6 +239,7 @@ export default class App extends PureComponent {
 
     for (let m in markers) {
       let marker = markers[m];
+      delete marker.location; // remove duplicate of latlng
       turf[marker.id] = marker;
       nodes = this.getChildNodesDeep(marker.id);
       for (let n in nodes) {
@@ -1048,8 +1049,11 @@ export default class App extends PureComponent {
 
     for (let m in this.markers) {
       let marker = this.markers[m];
-      if (marker.latlng && marker.latlng.longitude !== null)
-        markersInView.push(marker);
+      if (marker.latlng && marker.latlng.longitude !== null) {
+        let m = marker;
+        m.location = m.latlng; // supercluster expects latlng to be "location"
+        markersInView.push(m);
+      }
     }
 
     let landmarks = [];
@@ -1058,10 +1062,8 @@ export default class App extends PureComponent {
       id: "spacex",
       landmark: true,
       image: "../../../img/spacexfh.png",
-      latlng: {
-        latitude: 33.9208231,
-        longitude: -118.3281370,
-      },
+      latlng: { latitude: 33.9208231, longitude: -118.3281370 },
+      location: { latitude: 33.9208231, longitude: -118.3281370 },
       address: ["1 Rocket Road", "Hawthorne", "CA", "90250"],
     }];
 
@@ -1096,7 +1098,7 @@ export default class App extends PureComponent {
               borderColor: '#000000', borderWidth: 2, borderRadius: 10, width: 100, height: 60,
             }}>
             <View>
-              <Text>{this.markers.length} pins</Text>
+              <Text>{this.markers.length} pin{(this.markers.length > 1 ? 's' : '')}</Text>
             </View>
           </View>
         </View>
