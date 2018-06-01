@@ -1121,17 +1121,6 @@ export default class App extends PureComponent {
           {...this.props} />
         }
 
-        <View style={{alignSelf: 'flex-end', alignItems: 'flex-end', marginRight: 5}}>
-          <View style={{
-              backgroundColor: '#FFFFFF', alignItems: 'flex-end', padding: 8,
-              borderColor: '#000000', borderWidth: 2, borderRadius: 10, width: 100, height: 60,
-            }}>
-            <View>
-              <Text>{this.state.markers.length} pin{(this.state.markers.length !== 1 ? 's' : '')}</Text>
-            </View>
-          </View>
-        </View>
-
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.iconContainer}
             onPress={() => {this.showConfirmAddress();}}>
