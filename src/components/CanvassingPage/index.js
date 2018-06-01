@@ -1076,8 +1076,9 @@ export default class App extends PureComponent {
           data={this.state.markers}
           renderMarker={this.renderMarker}
           renderCluster={this.renderCluster}
-          radius={Dimensions.get('window').width*0.2}
-          extent={2048}
+          radius={50}
+          minZoom={0}
+          maxZoom={15}
           {...this.props} />
         }
 
