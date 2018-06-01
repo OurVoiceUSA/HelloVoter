@@ -161,17 +161,6 @@ export default class App extends PureComponent {
 
   getLocation() {
     navigator.geolocation.getCurrentPosition((position) => {
-      // if this was the first call to getLocation (previous state null), an iOS bug renders in the ocean
-      // force the map to center to the correct place
-      try {
-        if (position.coords.latitude !== null && this.state.myPosition.latitude === null)
-          setTimeout(() => {
-            try {
-              this.map.animateToRegion((Object.assign({}, this.state.region, position.coords)), 1);
-            } catch (e) {}
-          }, 100);
-      } catch(e) {}
-
       this.setState({ myPosition: position.coords });
     },
     (error) => { },
@@ -306,7 +295,7 @@ export default class App extends PureComponent {
     if (jsonStreet === null || jsonCity === null || jsonState === null) return;
 
     try {
-      await this.map.animateToCoordinate(myPosition, 500)
+      await this.map.getMapRef().animateToCoordinate(myPosition, 500)
     } catch (error) {}
 
     let epoch = this.getEpoch();
@@ -1079,6 +1068,12 @@ export default class App extends PureComponent {
         <MapView
           ref={component => this.map = component}
           initialRegion={{latitude: myPosition.latitude, longitude: myPosition.longitude, latitudeDelta: region.latitudeDelta, longitudeDelta: region.longitudeDelta}}
+          onMapReady={() => this.map.getMapRef().animateToRegion({
+            latitude: myPosition.latitude,
+            longitude: myPosition.longitude,
+            latitudeDelta: region.latitudeDelta,
+            longitudeDelta: region.longitudeDelta,
+          })}
           onRegionChangeComplete={(region) => this.setState({region})}
           provider={PROVIDER_GOOGLE}
           style={styles.map}
@@ -1116,7 +1111,7 @@ export default class App extends PureComponent {
 
           {nomap_content.length == 0 &&
           <TouchableOpacity style={styles.iconContainer}
-            onPress={() => this.map.animateToCoordinate(myPosition, 1000)}>
+            onPress={() => this.map.getMapRef().animateToCoordinate(myPosition, 1000)}>
             <Icon
               name="location-arrow"
               size={50}
