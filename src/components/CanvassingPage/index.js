@@ -94,7 +94,6 @@ export default class App extends PureComponent {
       DisclosureKey : 'OV_DISCLOUSER',
       isModalVisible: false,
       isKnockMenuVisible: false,
-      isAlertMenuVisible: false,
       showDisclosure: "true",
       dbx: props.navigation.state.params.dbx,
       form: props.navigation.state.params.form,
@@ -108,7 +107,10 @@ export default class App extends PureComponent {
     this.family = {};
     this.fidx = [];
 
-    this.alerts = [];
+    this.alerts = {
+      active: false,
+      queue: [],
+    };
 
     this.onChange = this.onChange.bind(this);
     this.handleConnectivityChange = this.handleConnectivityChange.bind(this);
@@ -127,8 +129,15 @@ export default class App extends PureComponent {
     access = false;
 
     try {
+      // Permissions calls out an Alert we can't queue up. A bit hacky...
+      this.alerts.active = true;
+      this.alerts.queue.push({});
+
       res = await Permissions.request('location');
       if (res === "authorized") access = true;
+
+      // clean up after Permissions Alert
+      this.alertFinish();
     } catch(error) {}
 
     if (access === true) {
@@ -533,15 +542,30 @@ export default class App extends PureComponent {
   }
 
   alertPush(spec) {
-    this.alerts.push(spec);
-    this.setState({isAlertMenuVisible: true});
+    this.alerts.queue.push(spec);
+    if (this.alerts.active === false) {
+      this.alerts.active = true;
+      this.alertDo();
+    }
   }
 
-  alertOnPress(func) {
-    func();
-    this.setState({isAlertMenuVisible: false});
-    this.alerts.shift();
-    if (this.alerts.length) setTimeout(() => this.setState({isAlertMenuVisible: true}), 500);
+  alertDo() {
+    let alert = this.alerts.queue[0];
+    Alert.alert(
+      alert.title,
+      alert.description,
+      alert.funcs,
+      { cancelable: false }
+    );
+  }
+
+  alertFinish() {
+    this.alerts.queue.shift();
+    if (this.alerts.queue.length > 0) {
+      this.alertDo();
+    } else {
+      this.alerts.active = false;
+    }
   }
 
   _getCanvassSettings = async () => {
@@ -569,11 +593,13 @@ export default class App extends PureComponent {
             canvassSettings.asked_sync_on_cellular = true;
             canvassSettings.sync_on_cellular = true;
             await this._setCanvassSettings(canvassSettings);
+            this.alertFinish();
           }},
           {text: 'No', onPress: async () => {
             let { canvassSettings } = this.state;
             canvassSettings.asked_sync_on_cellular = true;
             await this._setCanvassSettings(canvassSettings);
+            this.alertFinish();
           }},
         ]
       });
@@ -1300,40 +1326,6 @@ export default class App extends PureComponent {
           closeOnTouchOutside={true}
           disableOnBackPress={false}>
           <KnockPage refer={this} funcs={this} />
-        </Modal>
-
-        <Modal
-          open={this.state.isAlertMenuVisible}
-          modalStyle={{width: 335, height: 350, backgroundColor: "transparent",
-            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
-          style={{alignItems: 'center'}}
-          offset={0}
-          overlayBackground={'rgba(0, 0, 0, 0.75)'}
-          animationDuration={200}
-          animationTension={40}
-          modalDidOpen={() => undefined}
-          modalDidClose={() => this.setState({isAlertMenuVisible: false})}
-          closeOnTouchOutside={false}
-          disableOnBackPress={true}>
-          <View style={{flexDirection: 'column'}}>
-            <View style={{width: 325, backgroundColor: 'white', marginTop: 5, borderRadius: 15, padding: 10, alignItems: 'center'}}>
-              {this.alerts.length &&
-              <View>
-              <Text style={{fontWeight: 'bold', fontSize: 20, marginBottom: 10}}>{this.alerts[0].title}</Text>
-              <Text>{this.alerts[0].description}</Text>
-              <View style={{flexDirection: 'row'}}>
-                {this.alerts[0].funcs.map((spec) => (
-                  <TouchableOpacity key={spec.text}
-                    style={{backgroundColor: '#d7d7d7', flexDirection: 'row', alignItems: 'center', padding: 10, borderRadius: 20, margin: 10, width: 75}}
-                    onPress={() => this.alertOnPress(spec.onPress)}>
-                    <Text>{spec.text}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-              </View>
-            }
-            </View>
-          </View>
         </Modal>
 
       </View>
