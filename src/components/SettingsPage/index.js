@@ -15,7 +15,7 @@ import {
   TouchableWithoutFeedback,
 } from 'react-native';
 
-import { NavigationActions } from 'react-navigation'
+import { StackActions, NavigationActions } from 'react-navigation'
 import Permissions from 'react-native-permissions';
 import RNGooglePlaces from 'react-native-google-places';
 import ModalPicker from 'react-native-modal-selector';
@@ -63,7 +63,7 @@ export default class App extends PureComponent {
     } catch (error) {
       console.warn("error: "+error);
     }
-    const resetAction = NavigationActions.reset({
+    const resetAction = StackActions.reset({
       index: 0,
       actions: [
         NavigationActions.navigate({ routeName: 'HomeScreen'})
