@@ -83,7 +83,7 @@ export async function _getApiToken() {
       },
       body: JSON.stringify({apiKey: DeviceInfo.getUniqueID()})
     });
-    jwt = JSON.parse(res._bodyInit).jwt;
+    jwt = JSON.parse(await res.text()).jwt;
     _saveJWT(jwt);
   }
   return jwt;
