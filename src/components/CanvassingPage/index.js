@@ -29,7 +29,7 @@ import sha1 from 'sha1';
 import Permissions from 'react-native-permissions';
 import RNGLocation from 'react-native-google-location';
 import RNGooglePlaces from 'react-native-google-places';
-import { Marker, Callout, PROVIDER_GOOGLE } from 'react-native-maps'
+import { Marker, Callout, Polygon, PROVIDER_GOOGLE } from 'react-native-maps'
 import MapView from 'react-native-maps-super-cluster'
 import encoding from 'encoding';
 import { transliterate as tr } from 'transliteration/src/main/browser';
@@ -38,6 +38,7 @@ import KnockPage from '../KnockPage';
 import Modal from 'react-native-simple-modal';
 import TimeAgo from 'javascript-time-ago'
 import pako from 'pako';
+import pip from 'point-in-polygon';
 import base64 from 'base-64';
 import en from 'javascript-time-ago/locale/en'
 import t from 'tcomb-form-native';
@@ -98,6 +99,7 @@ export default class App extends PureComponent {
       dbx: props.navigation.state.params.dbx,
       form: props.navigation.state.params.form,
       user: props.navigation.state.params.user,
+      geolock: [],
     };
 
     this.myNodes = {};
@@ -528,7 +530,8 @@ export default class App extends PureComponent {
       let node = nodeList[n];
       if (node.type === "address" && node.latlng && node.latlng.longitude !== null) {
         node.location = node.latlng; // supercluster expects latlng to be "location"
-        nodes.push(node);
+        if (this.state.geolock.length === 0 || pip([node.location.latitude, node.location.longitude], this.state.geolock))
+          nodes.push(node);
       }
     }
 
@@ -1150,6 +1153,14 @@ export default class App extends PureComponent {
     }];
 */
 
+    let geolock = [];
+    for (let g in this.state.geolock) {
+      geolock.push({
+        latitude: this.state.geolock[g][0],
+        longitude: this.state.geolock[g][1],
+      });
+    }
+
     return (
       <View style={styles.container}>
 
@@ -1178,7 +1189,13 @@ export default class App extends PureComponent {
           radius={50}
           minZoom={0}
           maxZoom={15}
-          {...this.props} />
+          {...this.props}>
+          {this.state.geolock.length &&
+          <Polygon coordinates={geolock} strokeWidth={2} />
+          ||
+          <Text></Text> // empty tag, because we can't have an empty polygon, and can't have no children
+          }
+        </MapView>
         }
 
         <View style={styles.buttonContainer}>
