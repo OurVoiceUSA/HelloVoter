@@ -285,6 +285,13 @@ export default class App extends PureComponent {
       return;
     }
 
+    if (myPosition.latitude !== null && myPosition.longitude !== null) {
+      if (this.state.geofence && !pip([myPosition.latitude, myPosition.longitude], this.state.geofence)) {
+        Alert.alert('Outside District', 'You are outside the district boundary for this canvassing form.', [{text: 'OK'}], { cancelable: false });
+        return;
+      }
+    }
+
     this.setState({
       loading: true,
       isModalVisible: true,
@@ -556,8 +563,7 @@ export default class App extends PureComponent {
       let node = nodeList[n];
       if (node.type === "address" && node.latlng && node.latlng.longitude !== null) {
         node.location = node.latlng; // supercluster expects latlng to be "location"
-        if (!this.state.geofence || pip([node.location.latitude, node.location.longitude], this.state.geofence))
-          nodes.push(node);
+        nodes.push(node);
       }
     }
 
