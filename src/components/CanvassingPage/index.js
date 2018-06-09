@@ -99,7 +99,7 @@ export default class App extends PureComponent {
       dbx: props.navigation.state.params.dbx,
       form: props.navigation.state.params.form,
       user: props.navigation.state.params.user,
-      geolock: [],
+      geofence: props.navigation.state.params.form.geofence,
     };
 
     this.myNodes = {};
@@ -237,14 +237,40 @@ export default class App extends PureComponent {
 
     let turf = {};
 
-    for (let m in markers) {
-      let marker = markers[m];
-      delete marker.location; // remove duplicate of latlng
-      turf[marker.id] = marker;
-      nodes = this.getChildNodesDeep(marker.id);
-      for (let n in nodes) {
-        let node = nodes[n];
-        turf[node.id] = node;
+    nodeList = this.mergeNodes([this.allNodes]);
+
+    for (let n in nodeList) {
+      let node = nodeList[n];
+      let skip = true;
+      if (node.type === "survey" && node.status === "home") {
+        if (node.survey) {
+          switch (node.survey.Support) {
+            case 'SA':
+            case 'A':
+            case 'N':
+            case null:
+              skip = false;
+              break;
+          }
+        }
+
+        if (skip) continue;
+
+        let nodes = this.getParentNodesDeep(node.id);
+        if (nodes.length) {
+          let addr = nodes[nodes.length-1];
+          for (let m in markers) {
+            let marker = markers[m];
+            if (marker.id === addr.id) {
+              turf[marker.id] = marker;
+              for (let n in nodes) {
+                let node = nodes[n];
+                turf[node.id] = node;
+              }
+              break;
+            }
+          }
+        }
       }
     }
 
@@ -530,7 +556,7 @@ export default class App extends PureComponent {
       let node = nodeList[n];
       if (node.type === "address" && node.latlng && node.latlng.longitude !== null) {
         node.location = node.latlng; // supercluster expects latlng to be "location"
-        if (this.state.geolock.length === 0 || pip([node.location.latitude, node.location.longitude], this.state.geolock))
+        if (!this.state.geofence || pip([node.location.latitude, node.location.longitude], this.state.geofence))
           nodes.push(node);
       }
     }
@@ -833,6 +859,21 @@ export default class App extends PureComponent {
       nodes.unshift(node);
       nodes = nodes.concat(this.getChildNodesDeep(node.id));
     }
+
+    return nodes;
+  }
+
+  getParentNodesDeep(id) {
+
+    let node = this.getNodeById(id);
+
+    if (!node.id) return [];
+
+    let nodes = [node];
+
+    if (!node.parent_id) return nodes;
+
+    nodes = nodes.concat(this.getParentNodesDeep(node.parent_id));
 
     return nodes;
   }
@@ -1153,11 +1194,11 @@ export default class App extends PureComponent {
     }];
 */
 
-    let geolock = [];
-    for (let g in this.state.geolock) {
-      geolock.push({
-        latitude: this.state.geolock[g][0],
-        longitude: this.state.geolock[g][1],
+    let geofence = [];
+    for (let g in this.state.geofence) {
+      geofence.push({
+        latitude: this.state.geofence[g][0],
+        longitude: this.state.geofence[g][1],
       });
     }
 
@@ -1190,8 +1231,8 @@ export default class App extends PureComponent {
           minZoom={0}
           maxZoom={15}
           {...this.props}>
-          {this.state.geolock.length &&
-          <Polygon coordinates={geolock} strokeWidth={2} />
+          {geofence.length &&
+          <Polygon coordinates={geofence} strokeWidth={2} />
           ||
           <Text></Text> // empty tag, because we can't have an empty polygon, and can't have no children
           }

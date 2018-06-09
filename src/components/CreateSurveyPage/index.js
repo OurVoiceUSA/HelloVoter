@@ -198,6 +198,7 @@ export default class App extends PureComponent {
           obj.id = form.id;
           obj.created = form.created;
           obj.name = form.name;
+          obj.geofence = form.geofence;
         }
 
         if (edit === false && dbx) {
