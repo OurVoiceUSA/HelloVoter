@@ -110,6 +110,7 @@ export default class App extends PureComponent {
       info: {},
       customForm: null,
       geofence: null,
+      geofencename: null,
       geofenceModal: false,
       loading: false,
       myPosition: {
@@ -294,6 +295,8 @@ export default class App extends PureComponent {
           created: epoch,
           updated: epoch,
           name: formName,
+          geofence: this.state.geofence,
+          geofencename: this.state.geofencename,
           author: (user.dropbox ? user.dropbox.name.display_name : 'You'),
           author_id: ( user.dropbox ? user.dropbox.account_id : id ),
           version: 1,
@@ -305,7 +308,6 @@ export default class App extends PureComponent {
           obj.id = form.id;
           obj.created = form.created;
           obj.name = form.name;
-          obj.geofence = form.geofence;
         }
 
         if (edit === false && dbx) {
@@ -420,6 +422,14 @@ export default class App extends PureComponent {
         </View>
       );
 
+    let geoicon = "unlock";
+    let geotext = "Tap to set";
+
+    if (this.state.geofence) {
+      geoicon = "lock";
+      geotext = this.state.geofencename;
+    }
+
     return (
       <View style={{flex: 1, backgroundColor: 'white'}}>
 
@@ -434,11 +444,11 @@ export default class App extends PureComponent {
           <Text>Limit canvassing to a specific area:</Text>
           <View style={{margin: 12}}>
             <Icon.Button
-              name="unlock"
+              name={geoicon}
               backgroundColor="#d7d7d7"
               color="black"
               onPress={() => this.showGeofenceModal()}>
-              Tap to set
+              {geotext}
             </Icon.Button>
           </View>
         </View>
@@ -576,7 +586,7 @@ export default class App extends PureComponent {
                   backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20,
                   height: 100, maxWidth: 275, justifyContent: 'center', margin: 10,
                 }}
-                onPress={() => this.setState({geofence: this.state.stategeo})}>
+                onPress={() => this.setState({geofenceModal: false, geofence: this.state.stategeo, geofencename: 'State of '+this.state.state})}>
                 <Text style={{textAlign: 'center'}}>State of {this.state.state}</Text>
               </TouchableOpacity>
 
@@ -585,7 +595,7 @@ export default class App extends PureComponent {
                   backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20,
                   height: 100, maxWidth: 275, justifyContent: 'center', margin: 10,
                 }}
-                onPress={() => this.setState({geofence: this.state.cdgeo})}>
+                onPress={() => this.setState({geofenceModal: false, geofence: this.state.cdgeo, geofencename: this.state.state+' CD-'+this.state.cd})}>
                 <Text style={{textAlign: 'center'}}>Congressional Distrcit {this.state.state}-{this.state.cd}</Text>
               </TouchableOpacity>
 
@@ -594,7 +604,7 @@ export default class App extends PureComponent {
                   backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20,
                   height: 100, maxWidth: 275, justifyContent: 'center', margin: 10,
                 }}
-                onPress={() => this.setState({geofenceModal: false})}>
+                onPress={() => this.setState({geofenceModal: false, geofence: null, geofencename: null})}>
                 <Text style={{textAlign: 'center'}}>None</Text>
               </TouchableOpacity>
 
