@@ -88,10 +88,14 @@ export default class App extends PureComponent {
     let fields;
     let order;
     let edit = false;
+    let geofence;
+    let geofencename;
 
     if (props.navigation.state.params.form !== null) {
       fields = props.navigation.state.params.form.questions;
       order = props.navigation.state.params.form.questions_order;
+      geofence = props.navigation.state.params.form.geofence;
+      geofencename = props.navigation.state.params.form.geofencename;
       if (!order) order = Object.keys(fields);
       edit = true;
       this.mainForm = t.struct({});
@@ -109,8 +113,8 @@ export default class App extends PureComponent {
       dbx: props.navigation.state.params.refer.state.dbx,
       info: {},
       customForm: null,
-      geofence: null,
-      geofencename: null,
+      geofence: geofence,
+      geofencename: geofencename,
       geofenceModal: false,
       loading: false,
       myPosition: {
