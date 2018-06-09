@@ -10,6 +10,9 @@ import {
   FlatList,
   Text,
   View,
+  DeviceEventEmitter,
+  PermissionsAndroid,
+  Platform,
   StyleSheet,
   ScrollView,
 } from 'react-native';
@@ -18,11 +21,14 @@ import t from 'tcomb-form-native';
 import Modal from 'react-native-simple-modal';
 import storage from 'react-native-storage-wrapper';
 import SortableListView from 'react-native-sortable-listview'
+import Permissions from 'react-native-permissions';
+import RNGLocation from 'react-native-google-location';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import sha1 from 'sha1';
 import encoding from 'encoding';
 import { transliterate as tr } from 'transliteration/src/main/browser';
 import { Dropbox } from 'dropbox';
+import { _apiCall } from '../../common';
 
 var Form = t.form.Form;
 
@@ -103,6 +109,17 @@ export default class App extends PureComponent {
       dbx: props.navigation.state.params.refer.state.dbx,
       info: {},
       customForm: null,
+      geofence: null,
+      geofenceModal: false,
+      loading: false,
+      myPosition: {
+        latitude: null,
+        longitude: null,
+      },
+      state: null,
+      stategeo: null,
+      cd: null,
+      cdgeo: null,
       form: props.navigation.state.params.form,
       fields: fields,
       order: order,
@@ -115,6 +132,96 @@ export default class App extends PureComponent {
     this.doAddCustom = this.doAddCustom.bind(this);
     this.doSave = this.doSave.bind(this);
     this.doShowCustom = this.doShowCustom.bind(this);
+  }
+
+  componentWillUnmount() {
+    if (Platform.OS === 'android' && this.evEmitter) {
+      RNGLocation.disconnect();
+      this.evEmitter.remove();
+    }
+  }
+
+  onLocationChange (e: Event) {
+    this.setLocation(e.Longitude, e.Latitude);
+  }
+
+  getLocation() {
+    navigator.geolocation.getCurrentPosition((position) => {
+      this.setLocation(position.coords.longitude, position.coords.latitude);
+    },
+    (error) => { this._genericServiceError(error, "Unable to retrieve your location from your device."); },
+    { enableHighAccuracy: true, timeout: 2000, maximumAge: 1000 });
+  }
+
+  setLocation = async (lng, lat) => {
+    let state;
+    let stategeo;
+    let cd;
+    let cdgeo;
+
+    try {
+      let res = await _apiCall('/api/v1/whorepme?lng='+lng+'&lat='+lat, {});
+      let body = await res.json();
+
+      if (body.cd && body.cd[0]) {
+        state = body.cd[0].state;
+        cd = body.cd[0].district;
+
+        res = await fetch('https://raw.githubusercontent.com/OurVoiceUSA/districts/gh-pages/states/'+state+'/shape.geojson');
+        stategeo = await res.json();
+
+        res = await fetch('https://raw.githubusercontent.com/OurVoiceUSA/districts/gh-pages/cds/2016/'+state+'-'+cd+'/shape.geojson');
+        cdgeo = await res.json();
+      }
+
+    } catch (e) {
+      console.warn(e);
+    }
+
+    this.setState({
+      state, stategeo, cd, cdgeo,
+      myPosition: {
+        latitude: lat,
+        longitude: lng,
+      },
+      loading: false,
+    });
+
+    if (this.evEmitter) {
+      RNGLocation.disconnect();
+      this.evEmitter.remove();
+      this.evEmitter = null;
+    }
+  }
+
+  showGeofenceModal = async () => {
+    access = false;
+
+    this.setState({geofenceModal: true, loading: true});
+
+    try {
+      res = await Permissions.request('location');
+      if (res === "authorized") access = true;
+    } catch(error) {
+      // nothing we can do about it
+    }
+    if (access === true) {
+      if (Platform.OS === 'android') {
+        if (RNGLocation.available() !== false) {
+          if (!this.evEmitter) {
+            this.evEmitter = DeviceEventEmitter.addListener('updateLocation', this.onLocationChange.bind(this));
+            RNGLocation.reconnect();
+            RNGLocation.getLocation();
+          }
+        }
+      } else {
+        this.getLocation();
+      }
+      return;
+    }
+
+    this.setState({geofenceModal: false, loading: false});
+    Alert.alert('Current Location', 'To use your current location, go into your phone settings and enable location access for Our Voice.', [{text: 'OK'}], { cancelable: false });
   }
 
   onChange(value) {
@@ -324,6 +431,19 @@ export default class App extends PureComponent {
         />
 
         <View style={{flexDirection: 'row', marginLeft: 20, alignItems: 'center'}}>
+          <Text>Limit canvassing to a specific area:</Text>
+          <View style={{margin: 12}}>
+            <Icon.Button
+              name="unlock"
+              backgroundColor="#d7d7d7"
+              color="black"
+              onPress={() => this.showGeofenceModal()}>
+              Tap to set
+            </Icon.Button>
+          </View>
+        </View>
+
+        <View style={{flexDirection: 'row', marginLeft: 20, alignItems: 'center'}}>
           <Text>Items in your Canvassing form:</Text>
           <View style={{margin: 12}}>
             <Icon.Button
@@ -425,6 +545,61 @@ export default class App extends PureComponent {
             <TouchableHighlight style={styles.button} onPress={() => this.setState({customForm: null})} underlayColor='#99d9f4'>
               <Text style={styles.buttonText}>Dismiss</Text>
             </TouchableHighlight>
+          </View>
+        </Modal>
+
+        <Modal
+          open={this.state.geofenceModal}
+          modalStyle={{width: 350, height: 450, backgroundColor: "transparent",
+            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
+          style={{alignItems: 'center'}}
+          offset={0}
+          overlayBackground={'rgba(0, 0, 0, 0.75)'}
+          animationDuration={200}
+          animationTension={40}
+          modalDidOpen={() => undefined}
+          modalDidClose={() => this.setState({geofenceModal: false})}
+          closeOnTouchOutside={true}
+          disableOnBackPress={false}>
+          <View style={styles.container}>
+            {this.state.loading &&
+            <View style={{flexDirection: 'row'}}>
+              <ActivityIndicator />
+              <Text style={{fontStyle: 'italic'}}> loading distrcit information</Text>
+            </View>
+            ||
+            <View>
+              <Text>Choose area to limit canvassing to:</Text>
+
+              <TouchableOpacity
+                style={{
+                  backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20,
+                  height: 100, maxWidth: 275, justifyContent: 'center', margin: 10,
+                }}
+                onPress={() => this.setState({geofence: this.state.stategeo})}>
+                <Text style={{textAlign: 'center'}}>State of {this.state.state}</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={{
+                  backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20,
+                  height: 100, maxWidth: 275, justifyContent: 'center', margin: 10,
+                }}
+                onPress={() => this.setState({geofence: this.state.cdgeo})}>
+                <Text style={{textAlign: 'center'}}>Congressional Distrcit {this.state.state}-{this.state.cd}</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={{
+                  backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20,
+                  height: 100, maxWidth: 275, justifyContent: 'center', margin: 10,
+                }}
+                onPress={() => this.setState({geofenceModal: false})}>
+                <Text style={{textAlign: 'center'}}>None</Text>
+              </TouchableOpacity>
+
+            </View>
+            }
           </View>
         </Modal>
 
