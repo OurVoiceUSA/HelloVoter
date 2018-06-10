@@ -65,12 +65,13 @@ var options = {
 
 var premade = {
   'FullName': { label: 'Full Name', type: 'String', optional: true },
+  'Phone': { label: 'Phone Number', type: 'Number', optional: true },
   'Email': { label: 'Email Address', type: 'String', optional: true },
   'RegisteredToVote': { label: 'Are you registered to vote?', type: 'Boolean', optional: true },
   'PartyAffiliation': { label: 'Party Affiliation', type: 'List', optional: true,
     options: [
       'No Party Preference',
-      'Democrat',
+      'Democratic',
       'Republican',
       'Green',
       'Libertarian',
