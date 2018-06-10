@@ -602,8 +602,7 @@ export default class App extends PureComponent {
 
         <Modal
           open={this.state.geofenceModal}
-          modalStyle={{width: 350, height: 450, backgroundColor: "transparent",
-            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
+          modalStyle={{width: 350, height: 450, backgroundColor: "transparent"}}
           style={{alignItems: 'center'}}
           offset={0}
           overlayBackground={'rgba(0, 0, 0, 0.75)'}
@@ -637,11 +636,11 @@ export default class App extends PureComponent {
                   return (
                     <TouchableOpacity key={idx}
                       style={{
-                        backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20,
-                        height: 100, maxWidth: 275, justifyContent: 'center', margin: 10,
+                        backgroundColor: '#d7d7d7', padding: 10, borderRadius: 20,
+                        maxWidth: 275, justifyContent: 'center', margin: 10,
                       }}
                       onPress={() => this.setState({geofenceModal: false, geofence: geo.geometry, geofencename: geofencename})}>
-                      <Text style={{textAlign: 'center'}}>{geofencename}</Text>
+                      <Text style={{textAlign: 'center', color: 'black'}}>{geofencename}</Text>
                     </TouchableOpacity>
                   );
                 })
@@ -649,8 +648,8 @@ export default class App extends PureComponent {
 
               <TouchableOpacity
                 style={{
-                  backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20,
-                  height: 100, maxWidth: 275, justifyContent: 'center', margin: 10,
+                  backgroundColor: '#d7d7d7', padding: 10, borderRadius: 20,
+                  maxWidth: 275, justifyContent: 'center', margin: 10,
                 }}
                 onPress={() => this.setState({geofenceModal: false, geofence: null, geofencename: null})}>
                 <Text style={{textAlign: 'center'}}>None</Text>

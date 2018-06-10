@@ -124,7 +124,7 @@ export default class App extends PureComponent {
         <View>
           {message &&
           <View>
-            <View style={{flex: 1, flexDirection: 'row', margin: 20, alignItems: 'center'}}>
+            <View style={{flexDirection: 'row', margin: 20, alignItems: 'center'}}>
               <Text style={{margin: 10}}>{message}</Text>
             </View>
 
@@ -138,7 +138,7 @@ export default class App extends PureComponent {
         </View>
         ||
         <View>
-          <View style={{flex: 1, flexDirection: 'row', margin: 20, alignItems: 'center'}}>
+          <View style={{flexDirection: 'row', margin: 20, alignItems: 'center'}}>
             <Text>Share your Canvassing form with someone:</Text>
           </View>
 
