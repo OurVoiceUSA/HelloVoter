@@ -1211,11 +1211,15 @@ export default class App extends PureComponent {
 
     let geofence = [];
     if (this.state.geofence) {
-      for (let g in this.state.geofence.coordinates[0][0]) {
-        geofence.push({
-          longitude: this.state.geofence.coordinates[0][0][g][0],
-          latitude: this.state.geofence.coordinates[0][0][g][1],
-        });
+      for (let c in this.state.geofence.coordinates) {
+        let polygon = this.state.geofence.coordinates[c][0];
+        geofence[c] = [];
+        for (let g in polygon) {
+          geofence[c].push({
+            longitude: polygon[g][0],
+            latitude: polygon[g][1],
+          });
+        }
       }
     }
 
@@ -1249,7 +1253,7 @@ export default class App extends PureComponent {
           maxZoom={15}
           {...this.props}>
           {geofence.length &&
-          <Polygon coordinates={geofence} strokeWidth={2} />
+            geofence.map((polygon, idx) => <Polygon key={idx} coordinates={polygon} strokeWidth={2} />)
           ||
           <Text></Text> // empty tag, because we can't have an empty polygon, and can't have no children
           }
