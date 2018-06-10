@@ -159,6 +159,7 @@ export default class App extends PureComponent {
   }
 
   setLocation = async (lng, lat) => {
+    let geo;
     let state;
     let stategeo;
     let cd;
@@ -173,10 +174,14 @@ export default class App extends PureComponent {
         cd = body.cd[0].district;
 
         res = await fetch('https://raw.githubusercontent.com/OurVoiceUSA/districts/gh-pages/states/'+state+'/shape.geojson');
-        stategeo = await res.json();
+        geo = await res.json();
+        if (geo.geometry) stategeo = geo.geometry;
+        else stategeo = geo;
 
         res = await fetch('https://raw.githubusercontent.com/OurVoiceUSA/districts/gh-pages/cds/2016/'+state+'-'+cd+'/shape.geojson');
-        cdgeo = await res.json();
+        geo = await res.json();
+        if (geo.geometry) cdgeo = geo.geometry;
+        else cdgeo = geo;
       }
 
     } catch (e) {

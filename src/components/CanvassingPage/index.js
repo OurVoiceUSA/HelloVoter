@@ -286,7 +286,7 @@ export default class App extends PureComponent {
     }
 
     if (myPosition.latitude !== null && myPosition.longitude !== null) {
-      if (this.state.geofence && !pip([myPosition.longitude, myPosition.latitude], this.state.geofence.geometry.coordinates[0][0])) {
+      if (this.state.geofence && !pip([myPosition.longitude, myPosition.latitude], this.state.geofence.coordinates[0][0])) {
         Alert.alert('Outside District', 'You are outside the district boundary for this canvassing form.', [{text: 'OK'}], { cancelable: false });
         return;
       }
@@ -1201,11 +1201,13 @@ export default class App extends PureComponent {
 */
 
     let geofence = [];
-    for (let g in this.state.geofence.geometry.coordinates[0][0]) {
-      geofence.push({
-        longitude: this.state.geofence.geometry.coordinates[0][0][g][0],
-        latitude: this.state.geofence.geometry.coordinates[0][0][g][1],
-      });
+    if (this.state.geofence) {
+      for (let g in this.state.geofence.coordinates[0][0]) {
+        geofence.push({
+          longitude: this.state.geofence.coordinates[0][0][g][0],
+          latitude: this.state.geofence.coordinates[0][0][g][1],
+        });
+      }
     }
 
     return (
