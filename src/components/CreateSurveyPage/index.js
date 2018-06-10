@@ -584,7 +584,7 @@ export default class App extends PureComponent {
             {this.state.loading &&
             <View style={{flexDirection: 'row'}}>
               <ActivityIndicator />
-              <Text style={{fontStyle: 'italic'}}> loading distrcit information</Text>
+              <Text style={{fontStyle: 'italic'}}> loading district information</Text>
             </View>
             ||
             <View>
