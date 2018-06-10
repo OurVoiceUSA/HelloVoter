@@ -286,9 +286,18 @@ export default class App extends PureComponent {
     }
 
     if (myPosition.latitude !== null && myPosition.longitude !== null) {
-      if (this.state.geofence && !pip([myPosition.longitude, myPosition.latitude], this.state.geofence.coordinates[0][0])) {
-        Alert.alert('Outside District', 'You are outside the district boundary for this canvassing form.', [{text: 'OK'}], { cancelable: false });
-        return;
+      if (this.state.geofence) {
+        let inside = false;
+        // TODO: we're assuming multipolygon
+        for (let p in this.state.geofence.coordinates) {
+          if (pip([myPosition.longitude, myPosition.latitude], this.state.geofence.coordinates[p][0])) {
+            inside = true;
+          }
+        }
+        if (inside === false) {
+          Alert.alert('Outside District', 'You are outside the district boundary for this canvassing form.', [{text: 'OK'}], { cancelable: false });
+          return;
+        }
       }
     }
 
