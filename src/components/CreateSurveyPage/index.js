@@ -121,10 +121,7 @@ export default class App extends PureComponent {
         latitude: null,
         longitude: null,
       },
-      state: null,
-      stategeo: null,
-      cd: null,
-      cdgeo: null,
+      geos: [],
       form: props.navigation.state.params.form,
       fields: fields,
       order: order,
@@ -159,37 +156,73 @@ export default class App extends PureComponent {
   }
 
   setLocation = async (lng, lat) => {
+    let body;
+    let geos = [];
+    let obj;
     let geo;
     let state;
-    let stategeo;
     let cd;
-    let cdgeo;
+    let sldl;
+    let sldu;
 
     try {
       let res = await _apiCall('/api/v1/whorepme?lng='+lng+'&lat='+lat, {});
-      let body = await res.json();
-
-      if (body.cd && body.cd[0]) {
-        state = body.cd[0].state;
-        cd = body.cd[0].district;
-
-        res = await fetch('https://raw.githubusercontent.com/OurVoiceUSA/districts/gh-pages/states/'+state+'/shape.geojson');
-        geo = await res.json();
-        if (geo.geometry) stategeo = geo.geometry;
-        else stategeo = geo;
-
-        res = await fetch('https://raw.githubusercontent.com/OurVoiceUSA/districts/gh-pages/cds/2016/'+state+'-'+cd+'/shape.geojson');
-        geo = await res.json();
-        if (geo.geometry) cdgeo = geo.geometry;
-        else cdgeo = geo;
-      }
-
+      body = await res.json();
     } catch (e) {
       console.warn(e);
+      return;
+    }
+
+    if (body.cd && body.cd[0]) {
+      state = body.cd[0].state;
+      cd = body.cd[0].district;
+      sldl = body.sldl[0].district;
+      sldu = body.sldu[0].district;
+
+      if (state) {
+        try {
+          res = await fetch('https://raw.githubusercontent.com/OurVoiceUSA/districts/gh-pages/states/'+state+'/shape.geojson');
+          obj = await res.json();
+          if (obj.geometry) geo = obj.geometry;
+          else geo = obj;
+          geos.push({state: state, type: 'state', geometry: geo})
+        } catch (e) {}
+      }
+
+      if (cd) {
+        try {
+          res = await fetch('https://raw.githubusercontent.com/OurVoiceUSA/districts/gh-pages/cds/2016/'+state+'-'+cd+'/shape.geojson');
+          obj = await res.json();
+          if (obj.geometry) geo = obj.geometry;
+          else geo = obj;
+          geos.push({state: state, type: 'cd', district: cd, geometry: geo})
+        } catch (e) {}
+      }
+
+      if (sldl) {
+        try {
+          res = await fetch('https://raw.githubusercontent.com/OurVoiceUSA/districts/gh-pages/states/'+state+'/sldl/'+sldl+'.geojson');
+          obj = await res.json();
+          if (obj.geometry) geo = obj.geometry;
+          else geo = obj;
+          geos.push({state: state, type: 'sldl', district: sldl, geometry: geo})
+        } catch (e) {}
+      }
+
+      if (sldu) {
+        try {
+          res = await fetch('https://raw.githubusercontent.com/OurVoiceUSA/districts/gh-pages/states/'+state+'/sldu/'+sldu+'.geojson');
+          obj = await res.json();
+          if (obj.geometry) geo = obj.geometry;
+          else geo = obj;
+          geos.push({state: state, type: 'sldu', district: sldu, geometry: geo})
+        } catch (e) {}
+      }
+
     }
 
     this.setState({
-      state, stategeo, cd, cdgeo,
+      state, cd, sldl, sldu, geos,
       myPosition: {
         latitude: lat,
         longitude: lng,
@@ -590,23 +623,29 @@ export default class App extends PureComponent {
             <View>
               <Text>Choose area to limit canvassing to:</Text>
 
-              <TouchableOpacity
-                style={{
-                  backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20,
-                  height: 100, maxWidth: 275, justifyContent: 'center', margin: 10,
-                }}
-                onPress={() => this.setState({geofenceModal: false, geofence: this.state.stategeo, geofencename: 'State of '+this.state.state})}>
-                <Text style={{textAlign: 'center'}}>State of {this.state.state}</Text>
-              </TouchableOpacity>
+              {this.state.geos.length &&
+                this.state.geos.map((geo, idx) => {
+                  let geofencename;
 
-              <TouchableOpacity
-                style={{
-                  backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20,
-                  height: 100, maxWidth: 275, justifyContent: 'center', margin: 10,
-                }}
-                onPress={() => this.setState({geofenceModal: false, geofence: this.state.cdgeo, geofencename: this.state.state+' CD-'+this.state.cd})}>
-                <Text style={{textAlign: 'center'}}>Congressional Distrcit {this.state.state}-{this.state.cd}</Text>
-              </TouchableOpacity>
+                  switch (geo.type) {
+                    case 'state': geofencename = 'State of '+geo.state; break;
+                    case 'cd': geofencename = geo.state+' CD-'+geo.district; break;
+                    case 'sldl': geofencename = geo.state+' sldl '+geo.district; break;
+                    case 'sldu': geofencename = geo.state+' sldu '+geo.district; break;
+                  }
+
+                  return (
+                    <TouchableOpacity key={idx}
+                      style={{
+                        backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20,
+                        height: 100, maxWidth: 275, justifyContent: 'center', margin: 10,
+                      }}
+                      onPress={() => this.setState({geofenceModal: false, geofence: geo.geometry, geofencename: geofencename})}>
+                      <Text style={{textAlign: 'center'}}>{geofencename}</Text>
+                    </TouchableOpacity>
+                  );
+                })
+              }
 
               <TouchableOpacity
                 style={{
