@@ -1253,7 +1253,7 @@ export default class App extends PureComponent {
           maxZoom={15}
           {...this.props}>
           {geofence.length &&
-            geofence.map((polygon, idx) => <Polygon key={idx} coordinates={polygon} strokeWidth={2} />)
+            geofence.map((polygon, idx) => <Polygon key={idx} coordinates={polygon} strokeWidth={2} fillColor="rgba(0,0,0,0)" />)
           ||
           <Text></Text> // empty tag, because we can't have an empty polygon, and can't have no children
           }
