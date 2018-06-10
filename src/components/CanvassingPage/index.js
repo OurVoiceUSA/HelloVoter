@@ -100,6 +100,7 @@ export default class App extends PureComponent {
       form: props.navigation.state.params.form,
       user: props.navigation.state.params.user,
       geofence: props.navigation.state.params.form.geofence,
+      geofencename: props.navigation.state.params.form.geofencename,
     };
 
     this.myNodes = {};
@@ -295,7 +296,7 @@ export default class App extends PureComponent {
           }
         }
         if (inside === false) {
-          Alert.alert('Outside District', 'You are outside the district boundary for this canvassing form.', [{text: 'OK'}], { cancelable: false });
+          Alert.alert('Outside District', 'You are outside the district boundary for this canvassing form. You need to be within the boundaries of '+this.state.geofencename+'.', [{text: 'OK'}], { cancelable: false });
           return;
         }
       }
