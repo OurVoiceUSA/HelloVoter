@@ -30,6 +30,7 @@ export default class App extends PureComponent {
       refer: this.props.refer,
       form: this.props.funcs.state.form,
       dbx: this.props.funcs.state.dbx,
+      funcs: this.props.funcs,
       message: null,
       submitted: false,
     };
@@ -38,7 +39,7 @@ export default class App extends PureComponent {
   }
 
   doShare = async () => {
-    let { dbx, form } = this.state;
+    let { dbx, form, funcs } = this.state;
 
     let json = this.refs.mainForm.getValue();
     if (json == null) return;
@@ -105,6 +106,11 @@ export default class App extends PureComponent {
       });
 
       await dbx.filesUpload({ path: form.folder_path+'/'+email+'/canvassingform.json', contents: encoding.convert(JSON.stringify(form), 'ISO-8859-1'), mute: true, mode: {'.tag': 'overwrite'} });
+
+      // if share progress, force a sync
+      if (funcs.state.canvassSettings.share_progress === true) {
+        funcs._syncNodes(false);
+      }
 
     } catch(error) {
       console.warn(error);
