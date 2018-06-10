@@ -620,7 +620,7 @@ export default class App extends PureComponent {
             </View>
             ||
             <View>
-              <Text>Choose area to limit canvassing to:</Text>
+              <Text style={{textAlign: 'center'}}>Choose area to limit canvassing to:</Text>
 
               {this.state.geos.length &&
                 this.state.geos.map((geo, idx) => {
@@ -640,7 +640,7 @@ export default class App extends PureComponent {
                         maxWidth: 275, justifyContent: 'center', margin: 10,
                       }}
                       onPress={() => this.setState({geofenceModal: false, geofence: geo.geometry, geofencename: geofencename})}>
-                      <Text style={{textAlign: 'center', color: 'black'}}>{geofencename}</Text>
+                      <Text style={{textAlign: 'center'}}>{geofencename}</Text>
                     </TouchableOpacity>
                   );
                 })
