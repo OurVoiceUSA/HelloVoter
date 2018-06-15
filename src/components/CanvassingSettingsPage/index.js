@@ -21,15 +21,21 @@ import t from 'tcomb-form-native';
 
 var Form = t.form.Form;
 
+const CZOOM = t.enums({
+  'medium': 'Medium',
+  'low': 'Low',
+}, 'CZOOM');
+
 var options = {
   fields: {
     draggable_pins: {
       label: 'Pins can be moved',
       help: 'Your device\'s GPS may drop pins with low accuracy. Enabling this allows you to drag-and-drop pins.',
     },
-    disable_pin_clustering: {
-      label: 'Disable Pin Clustering',
-      help: 'This turns off the clustering of the pins. If there are a lot, this may make the map very slow.',
+    pin_clustering_zoom: {
+      label: 'Pin Clustering Zoom',
+      help: 'The zoom level of the map in which the pins start to cluster together. Lowering this may cause the map to be slow.',
+      nullOption: {value: '', text: 'High'},
     },
     show_only_my_turf: {
       label: 'Show only my turf',
@@ -100,7 +106,7 @@ export default class App extends PureComponent {
 
     let formOpt = {
       'draggable_pins': t.Boolean,
-      'disable_pin_clustering': t.Boolean,
+      'pin_clustering_zoom': CZOOM,
     };
 
     if (refer.state.dbx) {

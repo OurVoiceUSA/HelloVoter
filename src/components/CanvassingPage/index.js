@@ -1224,6 +1224,13 @@ export default class App extends PureComponent {
       }
     }
 
+    let maxZoom = 15; // high (default)
+
+    switch (this.state.canvassSettings.pin_clustering_zoom) {
+      case 'medium': maxZoom = 14; break;
+      case 'low': maxZoom = 13; break;
+    }
+
     return (
       <View style={styles.container}>
 
@@ -1251,8 +1258,7 @@ export default class App extends PureComponent {
           renderCluster={this.renderCluster}
           radius={50}
           minZoom={0}
-          maxZoom={15}
-          clusteringEnabled={(this.state.canvassSettings.disable_pin_clustering?false:true)}
+          maxZoom={maxZoom}
           {...this.props}>
           {geofence.length &&
             geofence.map((polygon, idx) => <Polygon key={idx} coordinates={polygon} strokeWidth={2} fillColor="rgba(0,0,0,0)" />)
