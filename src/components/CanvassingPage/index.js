@@ -695,7 +695,7 @@ export default class App extends PureComponent {
       } catch (e) {}
     }
 
-    if (this.state.canvassSettings.show_only_my_turf !== canvassSettings.show_only_my_turf) this.updateMarkers();
+    this.updateMarkers();
   }
 
   timeFormat(epoch) {
@@ -1252,6 +1252,7 @@ export default class App extends PureComponent {
           radius={50}
           minZoom={0}
           maxZoom={15}
+          clusteringEnabled={(this.state.canvassSettings.disable_pin_clustering?false:true)}
           {...this.props}>
           {geofence.length &&
             geofence.map((polygon, idx) => <Polygon key={idx} coordinates={polygon} strokeWidth={2} fillColor="rgba(0,0,0,0)" />)
