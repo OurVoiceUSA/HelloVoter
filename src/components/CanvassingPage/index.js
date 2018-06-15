@@ -572,7 +572,8 @@ export default class App extends PureComponent {
 
     for (let n in nodeList) {
       let node = nodeList[n];
-      if (node.type === "address" && node.latlng && node.latlng.longitude !== null) {
+      if (node.type === "address" && node.latlng
+        && !Number.isNaN(node.latlng.longitude) && !Number.isNaN(node.latlng.latitude)) {
         node.location = node.latlng; // supercluster expects latlng to be "location"
         nodes.push(node);
       }
