@@ -79,6 +79,9 @@ android {
             }
         }
     }
+    repositories {
+        google()
+    }
 }
 
 dependencies {
@@ -89,10 +92,9 @@ dependencies {
     implementation(project(':react-native-device-info')){ exclude group: 'com.google.android.gms' }
     implementation(project(':react-native-google-places')){ exclude group: 'com.google.android.gms' }
     implementation(project(':react-native-google-location')){ exclude group: 'com.google.android.gms' }
-    implementation 'com.google.android.gms:play-services-base:10.2.4'
-    implementation 'com.google.android.gms:play-services-gcm:10.2.4'
-    implementation 'com.google.android.gms:play-services-places:10.2.4'
-    implementation 'com.google.android.gms:play-services-location:10.2.4'
+    implementation 'com.google.android.gms:play-services-gcm:15.0.1'
+    implementation 'com.google.android.gms:play-services-places:15.0.1'
+    implementation 'com.google.android.gms:play-services-location:15.0.1'
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "com.android.support:appcompat-v7:23.0.1"
     implementation("com.facebook.react:react-native:0.55.4"){force = true;} // From node_modules
