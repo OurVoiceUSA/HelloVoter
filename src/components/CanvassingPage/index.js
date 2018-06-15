@@ -85,6 +85,7 @@ export default class App extends PureComponent {
       locationAccess: null,
       myPosition: {latitude: null, longitude: null},
       region: {latitudeDelta: 0.004, longitudeDelta: 0.004},
+      mapReady: false,
       currentNode: null,
       markers: [],
       fAddress: {},
@@ -1242,19 +1243,22 @@ export default class App extends PureComponent {
         <MapView
           ref={component => this.map = component}
           initialRegion={{latitude: myPosition.latitude, longitude: myPosition.longitude, latitudeDelta: region.latitudeDelta, longitudeDelta: region.longitudeDelta}}
-          onMapReady={() => this.map.getMapRef().animateToRegion({
-            latitude: myPosition.latitude,
-            longitude: myPosition.longitude,
-            latitudeDelta: region.latitudeDelta,
-            longitudeDelta: region.longitudeDelta,
-          })}
+          onMapReady={() => {
+            this.map.getMapRef().animateToRegion({
+              latitude: myPosition.latitude,
+              longitude: myPosition.longitude,
+              latitudeDelta: region.latitudeDelta,
+              longitudeDelta: region.longitudeDelta,
+            });
+            this.setState({mapReady: true});
+          }}
           provider={PROVIDER_GOOGLE}
           style={styles.map}
           showsUserLocation={true}
           followsUserLocation={false}
           keyboardShouldPersistTaps={true}
           data={this.state.markers}
-          renderMarker={this.renderMarker}
+          renderMarker={(this.state.mapReady ? this.renderMarker : () => {})}
           renderCluster={this.renderCluster}
           radius={50}
           minZoom={0}
