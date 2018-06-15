@@ -169,12 +169,9 @@ export default class App extends PureComponent {
     try {
       let res = await _apiCall('/api/v1/whorepme?lng='+lng+'&lat='+lat, {});
       body = await res.json();
-    } catch (e) {
-      console.warn(e);
-      return;
-    }
+    } catch (e) {}
 
-    if (body.cd && body.cd[0]) {
+    if (body && body.cd && body.cd[0]) {
       state = body.cd[0].state;
       cd = body.cd[0].district;
       sldl = body.sldl[0].district;
