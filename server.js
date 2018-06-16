@@ -59,9 +59,10 @@ function getClientIP(req) {
 
 async function poke(req, res) {
   try {
-    var pong = await dbwrap('pingAsync', 'pong');
-    if (pong == 'pong') return res.sendStatus(200);
+    let date = await db.cypherQueryAsync('return datetime()');
+    return res.sendStatus(200);
   } catch (e) {
+    console.log(e);
   }
   return res.sendStatus(500);
 }
