@@ -9,7 +9,6 @@ import fetch from 'node-fetch';
 import jwt from 'jsonwebtoken';
 import bodyParser from 'body-parser';
 import pifall from 'pifall';
-import fs from 'fs';
 import http from 'http';
 import sha1 from 'sha1';
 
