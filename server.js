@@ -4,44 +4,30 @@ import expressLogging from 'express-logging';
 import expressAsync from 'express-async-await';
 import cors from 'cors';
 import logger from 'logops';
-import redis from 'redis';
 import fetch from 'node-fetch';
 import jwt from 'jsonwebtoken';
 import bodyParser from 'body-parser';
-import pifall from 'pifall';
 import http from 'http';
 import sha1 from 'sha1';
+import neo4j from 'neo4j-driver';
+import BoltAdapter from 'node-neo4j-bolt-adapter';
 
 const ovi_config = {
   server_port: ( process.env.SERVER_PORT ? process.env.SERVER_PORT : 8080 ),
   wsbase: ( process.env.WSBASE ? process.env.WSBASE : 'http://localhost:8080' ),
   ip_header: ( process.env.CLIENT_IP_HEADER ? process.env.CLIENT_IP_HEADER : null ),
-  redis_host: ( process.env.REDIS_HOST ? process.env.REDIS_HOST : 'localhost' ),
-  redis_port: ( process.env.REDIS_PORT ? process.env.REDIS_PORT : 6379 ),
+  neo4j_host: ( process.env.NEO4J_HOST ? process.env.NEO4J_HOST : 'localhost' ),
+  neo4j_user: ( process.env.NEO4J_USER ? process.env.NEO4J_USER : 'neo4j' ),
+  neo4j_pass: ( process.env.NEO4J_PASS ? process.env.NEO4J_PASS : 'neo4j' ),
   jwt_pub_key: ( process.env.JWS_PUB_KEY ? process.env.JWS_PUT_KEY : missingConfig("JWS_PUB_KEY") ),
   jwt_iss: ( process.env.JWS_ISS ? process.env.JWS_ISS : 'example.com' ),
   require_auth: ( process.env.AUTH_OPTIONAL ? false : true ),
   DEBUG: ( process.env.DEBUG ? true : false ),
 };
 
-// async'ify redis
-pifall(redis.RedisClient.prototype);
-pifall(redis.Multi.prototype);
-
-// redis connection
-var rc = redis.createClient(ovi_config.redis_port, ovi_config.redis_host,
-  {
-    // endlessly retry the database connection
-    retry_strategy: function (options) {
-      console.log('redis connection failed to "'+ovi_config.redis_host+'", retrying: this is attempt # '+options.attempt);
-      return Math.min(options.attempt * 100, 3000);
-    }
-  }
-);
-
-rc.on('connect', async function() {
-    console.log('Connected to redis at host "'+ovi_config.redis_host+'"');
-});
+// async'ify neo4j
+const authToken = neo4j.auth.basic('neo4j', 'redis');
+const db = new BoltAdapter(neo4j.driver('bolt://'+ovi_config.neo4j_host, authToken));
 
 function missingConfig(item) {
   let msg = "Missing config: "+item;
@@ -71,19 +57,6 @@ function getClientIP(req) {
   else return req.connection.remoteAddress;
 }
 
-function wslog(req, ws, log) {
-  log['user_id'] = req.user.id;
-  log['client_ip'] = getClientIP(req);
-  log['time'] = (new Date).getTime();
-  let str = JSON.stringify(log);
-  if (ovi_config.DEBUG) console.log('DEBUG: '+ws+': '+str);
-  try {
-    rc.lpush('wslog:'+ws, str);
-  } catch (error) {
-    console.log(error);
-  }
-}
-
 async function poke(req, res) {
   try {
     var pong = await dbwrap('pingAsync', 'pong');
@@ -94,9 +67,15 @@ async function poke(req, res) {
 }
 
 async function hello(req, res) {
-  let msg = "Hello, world!";
-  wslog(req, 'hello', {msg: msg});
-  res.send({msg: msg});
+  let p;
+
+  try {
+    p = await db.cypherQueryAsync('match (n:person) return n')
+  } catch(e) {
+    console.warn(e);
+  }
+
+  res.send({msg: p});
 }
 
 // Initialize http server
