@@ -40,7 +40,7 @@ async function dbwrap() {
     var func = params.shift();
     if (ovi_config.DEBUG) {
       let funcName = func.replace('Async', '');
-      console.log('DEBUG: '+funcName+' '+params.join(' '));
+      console.log('DEBUG: '+funcName+' '+params[0]+';'+(params[1]?' params: '+JSON.stringify(params[1]):''));
     }
     return db[func](params[0], params[1]);
 }
