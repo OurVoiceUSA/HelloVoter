@@ -42,7 +42,7 @@ async function dbwrap() {
       let funcName = func.replace('Async', '');
       console.log('DEBUG: '+funcName+' '+params.join(' '));
     }
-    return rc[func](params);
+    return db[func](params[0], params[1]);
 }
 
 function cleanobj(obj) {
@@ -59,7 +59,7 @@ function getClientIP(req) {
 
 async function poke(req, res) {
   try {
-    let date = await db.cypherQueryAsync('return datetime()');
+    let date = await dbwrap('cypherQueryAsync', 'return datetime()');
     return res.sendStatus(200);
   } catch (e) {
     console.log(e);
@@ -71,12 +71,12 @@ async function hello(req, res) {
   let p;
 
   try {
-    p = await db.cypherQueryAsync('match (n:person) return n')
+    p = await dbwrap('cypherQueryAsync', 'match (n {name:{name}}) return n', {name:req.query.name});
   } catch(e) {
     console.warn(e);
   }
 
-  res.send({msg: p});
+  res.send(p);
 }
 
 // Initialize http server
