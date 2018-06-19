@@ -1028,26 +1028,58 @@ export default class App extends PureComponent {
     return Linking.openURL(url).catch(() => null);
   }
 
-  renderMarker = (marker) =>
-    <Marker
-      key={marker.id}
-      coordinate={marker.latlng}
-      //image={(marker.landmark?require("../../../img/spacexfh.png"):null)}
-      draggable={(marker.image?false:this.state.canvassSettings.draggable_pins)}
-      onDragEnd={(e) => {
-        this.updateNodeById(marker.id, 'latlng', e.nativeEvent.coordinate);
-      }}
-      pinColor={this.getPinColor(marker)}>
-      <Callout onPress={() => {
-        //if (!marker.landmark)
-        this.doMarkerPress(marker);
-      }}>
-        <View style={{backgroundColor: '#FFFFFF', padding: 5, width: 175}}>
-          <Text style={{fontWeight: 'bold'}}>{marker.address.join("\n")}</Text>
-          <Text>{(marker.multi_unit ? 'Multi-unit address' : this.getLastInteraction(marker.id))}</Text>
-        </View>
-      </Callout>
-    </Marker>
+  renderMarker = (marker) => {
+
+    let status = {
+        home: 0, 'not home': 0, 'not interested': 0, 'not visited': 0,
+    };
+
+    if (marker.multi_unit) {
+      let units = this.getChildNodesByIdTypes(marker.id, ["unit"]);
+      for (let u in units) {
+        let stat = this.getLastStatus(units[u]);
+        status[stat]++;
+      }
+    }
+
+    return (
+      <Marker
+        key={marker.id}
+        coordinate={marker.latlng}
+        //image={(marker.landmark?require("../../../img/spacexfh.png"):null)}
+        draggable={(marker.image?false:this.state.canvassSettings.draggable_pins)}
+        onDragEnd={(e) => {
+          this.updateNodeById(marker.id, 'latlng', e.nativeEvent.coordinate);
+        }}
+        pinColor={this.getPinColor(marker)}>
+        <Callout onPress={() => {
+          //if (!marker.landmark)
+          this.doMarkerPress(marker);
+        }}>
+          <View style={{backgroundColor: '#FFFFFF', padding: 5, width: 175}}>
+            <Text style={{fontWeight: 'bold'}}>{marker.address.join("\n")}</Text>
+            <Text>{(marker.multi_unit ? 'Multi-unit address' : this.getLastInteraction(marker.id))}</Text>
+            {marker.multi_unit &&
+              <View style={{flex: 1, flexDirection: 'row'}}>
+                <View style={{marginRight: 5}}>
+                  <Text style={{fontSize: 13}}>Home:</Text>
+                  <Text style={{fontSize: 13}}>Not Home:</Text>
+                  <Text style={{fontSize: 13}}>Not Interested:</Text>
+                  <Text style={{fontSize: 13}}>Not Visited:</Text>
+                </View>
+                <View style={{marginRight: 5}}>
+                  <Text style={{fontSize: 13}}>{status['home']}</Text>
+                  <Text style={{fontSize: 13}}>{status['not home']}</Text>
+                  <Text style={{fontSize: 13}}>{status['not interested']}</Text>
+                  <Text style={{fontSize: 13}}>{status['not visited']}</Text>
+                </View>
+              </View>
+            }
+          </View>
+        </Callout>
+      </Marker>
+    );
+  }
 
   renderCluster = (cluster, onPress) => {
     const pointCount = cluster.pointCount,
