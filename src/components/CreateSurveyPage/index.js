@@ -171,11 +171,18 @@ export default class App extends PureComponent {
       body = await res.json();
     } catch (e) {}
 
-    if (body && body.cd && body.cd[0]) {
-      state = body.cd[0].state;
-      cd = body.cd[0].district;
-      sldl = body.sldl[0].district;
-      sldu = body.sldu[0].district;
+    if (body) {
+
+      if (body.cd && body.cd[0]) {
+        state = body.cd[0].state;
+        cd = body.cd[0].district;
+      }
+
+      // no state? try getting it from senate
+      if (!state && body.sen && body.sen[0]) state = body.sen[0];
+
+      if (body.sldl && body.sldl[0]) sldl = body.sldl[0].district;
+      if (body.sldu && body.sldu[0]) sldu = body.sldu[0].district;
 
       if (state) {
         try {
@@ -218,6 +225,9 @@ export default class App extends PureComponent {
       }
 
     }
+
+    // add "None"
+    geos.push({state: null, type: null, district: null, geometry: null});
 
     this.setState({
       state, cd, sldl, sldu, geos,
@@ -638,20 +648,11 @@ export default class App extends PureComponent {
                         maxWidth: 275, justifyContent: 'center', margin: 10,
                       }}
                       onPress={() => this.setState({geofenceModal: false, geofence: geo.geometry, geofencename: geofencename})}>
-                      <Text style={{textAlign: 'center'}}>{geofencename}</Text>
+                      <Text style={{textAlign: 'center'}}>{(geofencename?geofencename:'None')}</Text>
                     </TouchableOpacity>
                   );
                 })
               }
-
-              <TouchableOpacity
-                style={{
-                  backgroundColor: '#d7d7d7', padding: 10, borderRadius: 20,
-                  maxWidth: 275, justifyContent: 'center', margin: 10,
-                }}
-                onPress={() => this.setState({geofenceModal: false, geofence: null, geofencename: null})}>
-                <Text style={{textAlign: 'center'}}>None</Text>
-              </TouchableOpacity>
 
             </View>
             }
