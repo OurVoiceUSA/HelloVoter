@@ -25,7 +25,7 @@ const ovi_config = {
 };
 
 // async'ify neo4j
-const authToken = neo4j.auth.basic('neo4j', 'redis');
+const authToken = neo4j.auth.basic(ovi_config.neo4j_user, ovi_config.neo4j_pass);
 const db = new BoltAdapter(neo4j.driver('bolt://'+ovi_config.neo4j_host, authToken));
 
 function missingConfig(item) {
