@@ -1300,11 +1300,25 @@ export default class App extends PureComponent {
           ref={component => this.map = component}
           initialRegion={{latitude: myPosition.latitude, longitude: myPosition.longitude, latitudeDelta: region.latitudeDelta, longitudeDelta: region.longitudeDelta}}
           onMapReady={() => {
+            let latitudeDelta = region.latitudeDelta;
+            let longitudeDelta = region.longitudeDelta;
+
+            switch (this.state.canvassSettings.pin_clustering_zoom) {
+              case "medium":
+                latitudeDelta = 0.0085;
+                longitudeDelta = 0.0085;
+                break;
+              case "low":
+                latitudeDelta = 0.0175;
+                longitudeDelta = 0.0175;
+                break;
+            }
+
             this.map.getMapRef().animateToRegion({
               latitude: myPosition.latitude,
               longitude: myPosition.longitude,
-              latitudeDelta: region.latitudeDelta,
-              longitudeDelta: region.longitudeDelta,
+              latitudeDelta: latitudeDelta,
+              longitudeDelta: longitudeDelta,
             });
             this.setState({mapReady: true});
           }}
