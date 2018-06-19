@@ -290,11 +290,20 @@ export default class App extends PureComponent {
     if (myPosition.latitude !== null && myPosition.longitude !== null) {
       if (this.state.geofence) {
         let inside = false;
-        // TODO: we're assuming multipolygon
-        for (let p in this.state.geofence.coordinates) {
-          if (pip([myPosition.longitude, myPosition.latitude], this.state.geofence.coordinates[p][0])) {
-            inside = true;
-          }
+        switch (this.state.geofence.type) {
+          case "Polygon":
+            if (pip([myPosition.longitude, myPosition.latitude], this.state.geofence.coordinates[0])) {
+              inside = true;
+            }
+            break;
+          case "MultiPolygon":
+            for (let p in this.state.geofence.coordinates) {
+              if (pip([myPosition.longitude, myPosition.latitude], this.state.geofence.coordinates[p][0])) {
+                inside = true;
+              }
+            }
+            break;
+          default: inside = true; break; // don't know how to handle this file - don't restrict marker drop
         }
         if (inside === false) {
           Alert.alert('Outside District', 'You are outside the district boundary for this canvassing form. You need to be within the boundaries of '+this.state.geofencename+'.', [{text: 'OK'}], { cancelable: false });
@@ -1214,15 +1223,29 @@ export default class App extends PureComponent {
 
     let geofence = [];
     if (this.state.geofence) {
-      for (let c in this.state.geofence.coordinates) {
-        let polygon = this.state.geofence.coordinates[c][0];
-        geofence[c] = [];
-        for (let g in polygon) {
-          geofence[c].push({
-            longitude: polygon[g][0],
-            latitude: polygon[g][1],
-          });
-        }
+      switch (this.state.geofence.type) {
+        case "Polygon":
+          let polygon = this.state.geofence.coordinates[0];
+          geofence[0] = [];
+          for (let g in polygon) {
+            geofence[0].push({
+              longitude: polygon[g][0],
+              latitude: polygon[g][1],
+            });
+          }
+          break;
+        case "MultiPolygon":
+          for (let c in this.state.geofence.coordinates) {
+            let polygon = this.state.geofence.coordinates[c][0];
+            geofence[c] = [];
+            for (let g in polygon) {
+              geofence[c].push({
+                longitude: polygon[g][0],
+                latitude: polygon[g][1],
+              });
+            }
+          }
+          break;
       }
     }
 
