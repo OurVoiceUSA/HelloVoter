@@ -14,7 +14,6 @@ import BoltAdapter from 'node-neo4j-bolt-adapter';
 
 const ovi_config = {
   server_port: ( process.env.SERVER_PORT ? process.env.SERVER_PORT : 8080 ),
-  wsbase: ( process.env.WSBASE ? process.env.WSBASE : 'http://localhost:8080' ),
   ip_header: ( process.env.CLIENT_IP_HEADER ? process.env.CLIENT_IP_HEADER : null ),
   neo4j_host: ( process.env.NEO4J_HOST ? process.env.NEO4J_HOST : 'localhost' ),
   neo4j_user: ( process.env.NEO4J_USER ? process.env.NEO4J_USER : 'neo4j' ),

@@ -11,9 +11,9 @@ This is the API backend to the OVMobile canvass functions.
 Start by configuring the `.env` file:
 
     cat << EOF > .env
-    export REDIS_HOST=localhost
-    export REDIS_PORT=6379
-    export WSBASE=http://localhost:8080
+    export NEO4J_HOST=<your neo4j server>
+    export NEO4J_USER=<your neo4j user>
+    export NEO4J_PASS=<your neo4j password>
     export DEBUG=1
     EOF
 
