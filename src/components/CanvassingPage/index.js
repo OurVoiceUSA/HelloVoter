@@ -1305,12 +1305,12 @@ export default class App extends PureComponent {
 
             switch (this.state.canvassSettings.pin_clustering_zoom) {
               case "medium":
-                latitudeDelta = 0.0085;
-                longitudeDelta = 0.0085;
+                latitudeDelta = 0.0075;
+                longitudeDelta = 0.0075;
                 break;
               case "low":
-                latitudeDelta = 0.0175;
-                longitudeDelta = 0.0175;
+                latitudeDelta = 0.015;
+                longitudeDelta = 0.015;
                 break;
             }
 
