@@ -58,7 +58,7 @@ function getClientIP(req) {
 
 async function poke(req, res) {
   try {
-    let date = await dbwrap('cypherQueryAsync', 'return datetime()');
+    let date = await dbwrap('cypherQueryAsync', 'return timestamp()');
     return res.sendStatus(200);
   } catch (e) {
     console.log(e);
