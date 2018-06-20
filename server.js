@@ -47,6 +47,10 @@ async function dbwrap() {
     return db[func](params[0], params[1]);
 }
 
+async function cqa(q, p) {
+  return dbwrap('cypherQueryAsync', q, p);
+}
+
 function cleanobj(obj) {
   for (var propName in obj) {
     if (obj[propName] == '' || obj[propName] == null)
@@ -61,7 +65,7 @@ function getClientIP(req) {
 
 async function poke(req, res) {
   try {
-    let date = await dbwrap('cypherQueryAsync', 'return timestamp()');
+    let date = await cqa('return timestamp()');
     return res.sendStatus(200);
   } catch (e) {
     console.log(e);
@@ -73,7 +77,7 @@ async function hello(req, res) {
   let p;
 
   try {
-    p = await dbwrap('cypherQueryAsync', 'match (n {name:{name}}) return n', {name:req.query.name});
+    p = await cqa('match (n {name:{name}}) return n', {name:req.user.name});
   } catch(e) {
     console.warn(e);
   }
@@ -100,7 +104,7 @@ if (!ovi_config.DEBUG && ovi_config.ip_header) {
 }
 
 // add req.user if there's a valid JWT
-app.use(function (req, res, next) {
+app.use(async function (req, res, next) {
   if (req.method == 'OPTIONS') return next(); // skip OPTIONS requests
 
   req.user = {};
@@ -108,16 +112,35 @@ app.use(function (req, res, next) {
   // uri whitelist
   if (req.url == '/poke') return next();
 
-  if (ovi_config.require_auth && !req.header('authorization')) return res.status(401).send();
-
   try {
-    let token = req.header('authorization').split(' ')[1];
-    req.user = jwt.verify(token, public_key);
-  } catch (e) {
+    let u;
     if (ovi_config.require_auth) {
-      console.log(e);
-      return res.status(401).send();
+      if (!req.header('authorization')) return res.status(401).send();
+      u = jwt.verify(req.header('authorization').split(' ')[1]);
+    } else {
+      u = jwt.decode(req.query.jwt);
     }
+
+    // verify props
+    if (!u.id) return res.status(401).send();
+
+    // check for this user in the database
+    let a = await cqa('match (a:Canvasser {id:{id}}) return a', u);
+    if (a.data.length === 1) {
+      req.user = a.data[0];
+      // TODO: check req.user vs. u to update name or email or avatar props
+    } else {
+      // attempt to create the user, some props are optional
+      if (!u.email) u.email = "";
+      if (!u.avatar) u.avatar = "";
+      await cqa('create (a:Canvasser {created: timestamp(), id:{id}, name:{name}, email:{email}, avatar:{avatar}})', u);
+      a = await cqa('match (a:Canvasser {id:{id}}) return a', u);
+      req.user = a.data[0];
+    }
+
+  } catch (e) {
+    console.log(e);
+    return res.status(401).send();
   }
   next();
 });
