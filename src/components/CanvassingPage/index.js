@@ -1029,6 +1029,7 @@ export default class App extends PureComponent {
   }
 
   renderMarker = (marker) => {
+    if (this.state.mapReady !== true) return null;
 
     let status = {
         home: 0, 'not home': 0, 'not interested': 0, 'not visited': 0,
@@ -1082,6 +1083,8 @@ export default class App extends PureComponent {
   }
 
   renderCluster = (cluster, onPress) => {
+    if (this.state.mapReady !== true) return null;
+
     const pointCount = cluster.pointCount,
       coordinate = cluster.coordinate,
       clusterId = cluster.clusterId;
@@ -1328,7 +1331,7 @@ export default class App extends PureComponent {
           followsUserLocation={false}
           keyboardShouldPersistTaps={true}
           data={this.state.markers}
-          renderMarker={(this.state.mapReady ? this.renderMarker : () => {})}
+          renderMarker={this.renderMarker}
           renderCluster={this.renderCluster}
           radius={50}
           minZoom={0}
