@@ -3,6 +3,7 @@ import express from 'express';
 import expressLogging from 'express-logging';
 import expressAsync from 'express-async-await';
 import cors from 'cors';
+import fs from 'fs';
 import logger from 'logops';
 import fetch from 'node-fetch';
 import jwt from 'jsonwebtoken';
@@ -18,11 +19,13 @@ const ovi_config = {
   neo4j_host: ( process.env.NEO4J_HOST ? process.env.NEO4J_HOST : 'localhost' ),
   neo4j_user: ( process.env.NEO4J_USER ? process.env.NEO4J_USER : 'neo4j' ),
   neo4j_pass: ( process.env.NEO4J_PASS ? process.env.NEO4J_PASS : 'neo4j' ),
-  jwt_pub_key: ( process.env.JWS_PUB_KEY ? process.env.JWS_PUT_KEY : missingConfig("JWS_PUB_KEY") ),
-  jwt_iss: ( process.env.JWS_ISS ? process.env.JWS_ISS : 'example.com' ),
+  jwt_pub_key: ( process.env.JWT_PUB_KEY ? process.env.JWT_PUB_KEY : missingConfig("JWT_PUB_KEY") ),
+  jwt_iss: ( process.env.JWT_ISS ? process.env.JWT_ISS : 'example.com' ),
   require_auth: ( process.env.AUTH_OPTIONAL ? false : true ),
   DEBUG: ( process.env.DEBUG ? true : false ),
 };
+
+var public_key = fs.readFileSync(ovi_config.jwt_pub_key);
 
 // async'ify neo4j
 const authToken = neo4j.auth.basic(ovi_config.neo4j_user, ovi_config.neo4j_pass);
@@ -109,8 +112,7 @@ app.use(function (req, res, next) {
 
   try {
     let token = req.header('authorization').split(' ')[1];
-    // TODO: verify with public key
-    req.user = jwt.decode(token);
+    req.user = jwt.verify(token, public_key);
   } catch (e) {
     if (ovi_config.require_auth) {
       console.log(e);
