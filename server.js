@@ -246,7 +246,7 @@ function formAssignedRemove(req, res) {
 async function questionGet(req, res) {
   let q = {};
 
-  let a = await cqa('match (a:Question {id:{id}})-[:AUTHOR]-(b:Canvasser) return a,b', req.query);
+  let a = await cqa('match (a:Question {key:{key}})-[:AUTHOR]-(b:Canvasser) return a,b', req.query);
 
   if (a.data.length === 1) {
     q = a.data[0][0];
