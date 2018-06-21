@@ -99,20 +99,38 @@ function poke(req, res) {
 // they say that time's supposed to heal ya but i ain't done much healin'
 
 async function hello(req, res) {
+  let ref;
+  let obj = {
+    msg: "Awaiting assignment",
+    ready: false,
+    turf: [],
+    teams: [],
+    forms: [],
+  };
+
   // Butterfly in the sky, I can go twice as high.
-  if (req.user.admin === true) return res.send({msg: "Welcome, admin!", ready: true, admin: true});
+  if (req.user.admin === true) obj.admin = true;
 
-  // direct assignment to a form and turf
-  let a = await cqa('match (c:Form)-[:ASSIGNED]-(a:Canvasser {id:{id}})-[:ASSIGNED]-(b:Turf) return a,b', req.user);
-  if (a.data.length > 0)
-    return res.send({msg: "You are assigned to turf and ready to canvass!", ready: true});
+  try {
+    // direct assignment to a form and turf
+    ref = await cqa('match (c:Form)-[:ASSIGNED]-(a:Canvasser {id:{id}})-[:ASSIGNED]-(b:Turf) return b,c', req.user);
+    if (ref.data.length > 0) {
+      obj.msg = "You are assigned to turf and ready to canvass!";
+      obj.ready = true;
+    }
 
-  // team assignment
-  let b = await cqa('match (a:Canvasser {id:{id}})-[:MEMBERS]-(b:Team)-[:ASSIGNED]-(c:Turf) match (d:Form)-[:ASSIGNED]-(b) return b,c,d', req.user);
-  if (b.data.length > 0)
-    return res.send({msg: "You are assigned to a team and ready to canvass!", ready: true});
+    // team assignment
+    ref = await cqa('match (a:Canvasser {id:{id}})-[:MEMBERS]-(b:Team)-[:ASSIGNED]-(c:Turf) match (d:Form)-[:ASSIGNED]-(b) return b,c,d', req.user);
+    if (ref.data.length > 0) {
+      obj.msg = "You are assigned to a team and ready to canvass!"
+      obj.ready = true;
+    }
+  } catch (e) {
+    console.warn(e);
+    return res.status(500).send();
+  }
 
-  return res.send({msg: "Awaiting assignment", ready: false});
+  return res.send(obj);
 }
 
 // canvassers
