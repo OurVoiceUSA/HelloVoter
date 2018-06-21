@@ -90,6 +90,14 @@ function teamDelete(req, res) {
   return cqdo(req, res, 'match (a:Team {name:{name}}) detach delete a', {name:req.query.name}, true);
 }
 
+function teamMembersAdd(req, res) {
+  return cqdo(req, res, 'match (a:Canvasser {id:{cId}}), (b:Team {name:{teamName}}) merge (b)-[:MEMBERS]->(a)', req.query, true);
+}
+
+function teamMembersRemove(req, res) {
+  return cqdo(req, res, 'match (a:Canvasser {id:{cId}})-[r:MEMBERS]-(b:Team {name:{teamName}}) delete r', req.query, true);
+}
+
 // Initialize http server
 const app = expressAsync(express());
 app.disable('x-powered-by');
@@ -158,6 +166,8 @@ app.get('/poke', poke);
 // ws routes
 app.get('/canvass/v1/team/create', teamCreate);
 app.get('/canvass/v1/team/delete', teamDelete);
+app.get('/canvass/v1/team/members/add', teamMembersAdd);
+app.get('/canvass/v1/team/members/remove', teamMembersRemove);
 
 // Launch the server
 const server = app.listen(ovi_config.server_port, () => {
