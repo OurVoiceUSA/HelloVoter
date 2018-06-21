@@ -206,7 +206,10 @@ app.use(async function (req, res, next) {
       if (!req.header('authorization')) return res.status(401).send();
       u = jwt.verify(req.header('authorization').split(' ')[1]);
     } else {
-      u = jwt.decode(req.query.jwt);
+      let token;
+      if (req.header('authorization')) token = req.header('authorization');
+      else token = req.query.jwt;
+      u = jwt.decode(token);
     }
 
     // verify props
