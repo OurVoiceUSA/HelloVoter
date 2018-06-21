@@ -66,7 +66,7 @@ function getClientIP(req) {
 // just do a query and either return OK or ERROR
 
 async function cqdo(req, res, q, p, a) {
-  if (a === true && req.user.admin !== true) return res.status(401).send();
+  if (a === true && ovi_config.require_auth === true && req.user.admin !== true) return res.status(401).send();
 
   try {
     await cqa(q, p);
