@@ -269,21 +269,21 @@ function questionCreate(req, res) {
 }
 
 function questionDelete(req, res) {
-  return cqdo(req, res, 'match (a:Question {id:{id}}) detach delete a', req.query, true);
+  return cqdo(req, res, 'match (a:Question {key:{key}}) detach delete a', req.query, true);
 }
 
 async function questionAssignedList(req, res) {
-  let a = await cqa('match (a:Question {id:{qId}})-[:ASSIGNED]-(b:Form) return b', req.query);
+  let a = await cqa('match (a:Question {key:{key}})-[:ASSIGNED]-(b:Form) return b', req.query);
 
   return res.send(a.data);
 }
 
 function questionAssignedAdd(req, res) {
-  return cqdo(req, res, 'match (a:Question {id:{qId}}), (b:Form {id:{fId}}) merge (a)-[:ASSIGNED]->(b)', req.query, true);
+  return cqdo(req, res, 'match (a:Question {key:{key}}), (b:Form {id:{fId}}) merge (a)-[:ASSIGNED]->(b)', req.query, true);
 }
 
 function questionAssignedRemove(req, res) {
-  return cqdo(req, res, 'match (a:Question {id:{qId}})-[r:ASSIGNED]-(b:Form {id:{fId}}) delete r', req.query, true);
+  return cqdo(req, res, 'match (a:Question {key:{key}})-[r:ASSIGNED]-(b:Form {id:{fId}}) delete r', req.query, true);
 }
 
 // Initialize http server
