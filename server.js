@@ -4,6 +4,7 @@ import expressLogging from 'express-logging';
 import expressAsync from 'express-async-await';
 import cors from 'cors';
 import fs from 'fs';
+import uuidv4 from 'uuid/v4';
 import logger from 'logops';
 import fetch from 'node-fetch';
 import jwt from 'jsonwebtoken';
@@ -186,6 +187,40 @@ function turfAssignedRemove(req, res) {
   return cqdo(req, res, 'match (a:Turf {name:{turfName}})-[r:ASSIGNED]-(b:Team {name:{teamName}}) delete r', req.query, true);
 }
 
+// form
+
+async function formList(req, res) {
+  let a = await cqa('match (a:Form) return a');
+
+  return res.send(a.data);
+}
+
+function formCreate(req, res) {
+   req.query.id = uuidv4();
+   req.query.author = req.user.name;
+   req.query.author_id = req.user.id;
+   return cqdo(req, res, 'create (a:Form {created: timestamp(), id:{id}, name:{name}, version:1, author:{author}, author_id:{author_id}})', req.query);
+}
+
+function formDelete(req, res) {
+  return cqdo(req, res, 'match (a:Form {id:{id}}) detach delete a', req.query, true);
+}
+
+async function formAssignedList(req, res) {
+  let a = await cqa('match (a:Form {id:{fId}})-[:ASSIGNED]-(b:Team) return b', req.query);
+
+  return res.send(a.data);
+}
+
+function formAssignedAdd(req, res) {
+  return cqdo(req, res, 'match (a:Form {id:{fId}}), (b:Team {name:{teamName}}) merge (a)-[:ASSIGNED]->(b)', req.query, true);
+}
+
+function formAssignedRemove(req, res) {
+  return cqdo(req, res, 'match (a:Form {id:{fId}})-[r:ASSIGNED]-(b:Team {name:{teamName}}) delete r', req.query, true);
+}
+
+
 // Initialize http server
 const app = expressAsync(express());
 app.disable('x-powered-by');
@@ -271,6 +306,12 @@ app.get('/canvass/v1/turf/delete', turfDelete);
 app.get('/canvass/v1/turf/assigned/list', turfAssignedList);
 app.get('/canvass/v1/turf/assigned/add', turfAssignedAdd);
 app.get('/canvass/v1/turf/assigned/remove', turfAssignedRemove);
+app.get('/canvass/v1/form/list', formList);
+app.get('/canvass/v1/form/create', formCreate);
+app.get('/canvass/v1/form/delete', formDelete);
+app.get('/canvass/v1/form/assigned/list', formAssignedList);
+app.get('/canvass/v1/form/assigned/add', formAssignedAdd);
+app.get('/canvass/v1/form/assigned/remove', formAssignedRemove);
 
 // Launch the server
 const server = app.listen(ovi_config.server_port, () => {
