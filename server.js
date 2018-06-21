@@ -85,6 +85,19 @@ async function hello(req, res) {
   res.send(p);
 }
 
+async function teamCreate(req, res) {
+  if (req.user.admin !== true) return res.status(401).send();
+
+  try {
+    await cqa('create (a:Team {created: timestamp(), name:{name}})', {name:req.query.name});
+  } catch (e) {
+    console.warn(e);
+    return res.status(500).send();
+  }
+
+  return res.status(200).send();
+}
+
 // Initialize http server
 const app = expressAsync(express());
 app.disable('x-powered-by');
@@ -141,7 +154,7 @@ app.use(async function (req, res, next) {
     if (req.user.unauthorized) return res.status(401).send();
 
   } catch (e) {
-    console.log(e);
+    console.warn(e);
     return res.status(401).send();
   }
   next();
@@ -152,6 +165,7 @@ app.get('/poke', poke);
 
 // ws routes
 app.get('/canvass/v1/hello', hello);
+app.get('/canvass/v1/team/create', teamCreate);
 
 // Launch the server
 const server = app.listen(ovi_config.server_port, () => {
