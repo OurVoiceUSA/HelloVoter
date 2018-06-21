@@ -97,6 +97,16 @@ async function hello(req, res) {
   return res.send({msg: msg});
 }
 
+// canvassers
+
+function canvasserLock(req, res) {
+  return cqdo(req, res, 'match (a:Canvasser {id:{id}}) set a.unauthorized=true', req.query, true);
+}
+
+function canvasserUnlock(req, res) {
+  return cqdo(req, res, 'match (a:Canvasser {id:{id}}) remove a.unauthorized', req.query, true);
+}
+
 // teams
 
 function teamCreate(req, res) {
@@ -200,6 +210,8 @@ app.get('/poke', poke);
 
 // ws routes
 app.get('/canvass/v1/hello', hello);
+app.get('/canvass/v1/canvasser/lock', canvasserLock);
+app.get('/canvass/v1/canvasser/unlock', canvasserUnlock);
 app.get('/canvass/v1/team/create', teamCreate);
 app.get('/canvass/v1/team/delete', teamDelete);
 app.get('/canvass/v1/team/members/add', teamMembersAdd);
