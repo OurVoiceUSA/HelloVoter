@@ -99,6 +99,12 @@ async function hello(req, res) {
 
 // canvassers
 
+async function canvasserList(req, res) {
+  let a = await cqa('match (a:Canvasser) return a');
+
+  return res.send(a.data);
+}
+
 function canvasserLock(req, res) {
   return cqdo(req, res, 'match (a:Canvasser {id:{id}}) set a.unauthorized=true', req.query, true);
 }
@@ -109,12 +115,24 @@ function canvasserUnlock(req, res) {
 
 // teams
 
+async function teamList(req, res) {
+  let a = await cqa('match (a:Team) return a');
+
+  return res.send(a.data);
+}
+
 function teamCreate(req, res) {
   return cqdo(req, res, 'create (a:Team {created: timestamp(), name:{name}})', req.query, true);
 }
 
 function teamDelete(req, res) {
   return cqdo(req, res, 'match (a:Team {name:{name}}) detach delete a', req.query, true);
+}
+
+async function teamMembersList(req, res) {
+  let a = await cqa('match (a:Canvasser)-[:MEMBERS]-(b:Team {name:{teamName}}) return a', req.query);
+
+  return res.send(a.data);
 }
 
 function teamMembersAdd(req, res) {
@@ -127,12 +145,24 @@ function teamMembersRemove(req, res) {
 
 // turf
 
+async function turfList(req, res) {
+  let a = await cqa('match (a:Turf) return a');
+
+  return res.send(a.data);
+}
+
 function turfCreate(req, res) {
   return cqdo(req, res, 'create (a:Turf {created: timestamp(), name:{name}})', req.query, true);
 }
 
 function turfDelete(req, res) {
   return cqdo(req, res, 'match (a:Turf {name:{name}}) detach delete a', req.query, true);
+}
+
+async function turfAssignedList(req, res) {
+  let a = await cqa('match (a:Turf {name:{turfName}})-[:ASSIGNED]-(b:Team) return b', req.query);
+
+  return res.send(a.data);
 }
 
 function turfAssignedAdd(req, res) {
@@ -210,14 +240,19 @@ app.get('/poke', poke);
 
 // ws routes
 app.get('/canvass/v1/hello', hello);
+app.get('/canvass/v1/canvasser/list', canvasserList);
 app.get('/canvass/v1/canvasser/lock', canvasserLock);
 app.get('/canvass/v1/canvasser/unlock', canvasserUnlock);
+app.get('/canvass/v1/team/list', teamList);
 app.get('/canvass/v1/team/create', teamCreate);
 app.get('/canvass/v1/team/delete', teamDelete);
+app.get('/canvass/v1/team/members/list', teamMembersList);
 app.get('/canvass/v1/team/members/add', teamMembersAdd);
 app.get('/canvass/v1/team/members/remove', teamMembersRemove);
+app.get('/canvass/v1/turf/list', turfList);
 app.get('/canvass/v1/turf/create', turfCreate);
 app.get('/canvass/v1/turf/delete', turfDelete);
+app.get('/canvass/v1/turf/assigned/list', turfAssignedList);
 app.get('/canvass/v1/turf/assigned/add', turfAssignedAdd);
 app.get('/canvass/v1/turf/assigned/remove', turfAssignedRemove);
 
