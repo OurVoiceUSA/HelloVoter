@@ -99,16 +99,20 @@ function poke(req, res) {
 // they say that time's supposed to heal ya but i ain't done much healin'
 
 async function hello(req, res) {
+  if (req.user.admin === true) return res.send({msg: "Welcome, admin!", ready: true, admin: true});
+
   let msg;
+  let ready = false;
   let a = await cqa('match (a:Canvasser {id:{id}})-[:MEMBERS]-(b:Team) return b', req.user);
 
   if (a.data.length > 0) {
     msg = "You are assigned to a team and ready to canvass!";
+    ready = true;
   } else {
     msg = "Awaiting assignment";
   }
 
-  return res.send({msg: msg});
+  return res.send({msg: msg, ready: ready});
 }
 
 // canvassers
