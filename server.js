@@ -348,7 +348,7 @@ app.use(async function (req, res, next) {
       req.user = a.data[0];
     }
 
-    if (req.user.locked) return res.status(401).send();
+    if (req.user.locked) return res.status(403).send();
 
   } catch (e) {
     console.warn(e);
