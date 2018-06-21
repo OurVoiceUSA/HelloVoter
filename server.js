@@ -320,7 +320,7 @@ app.use(async function (req, res, next) {
       u = jwt.verify(req.header('authorization').split(' ')[1]);
     } else {
       let token;
-      if (req.header('authorization')) token = req.header('authorization');
+      if (req.header('authorization')) token = req.header('authorization').split(' ')[1];
       else token = req.query.jwt;
       u = jwt.decode(token);
     }
