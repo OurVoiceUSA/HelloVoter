@@ -112,22 +112,36 @@ async function hello(req, res) {
   if (req.user.admin === true) obj.admin = true;
 
   try {
-    // direct assignment to a form and turf
-    ref = await cqa('match (c:Form)-[:ASSIGNED]-(a:Canvasser {id:{id}})-[:ASSIGNED]-(b:Turf) return b,c', req.user);
+    // direct assignment to a form
+    ref = await cqa('match (a:Canvasser {id:{id}})-[:ASSIGNED]-(b:Form) return b', req.user)
     if (ref.data.length > 0) {
-      obj.msg = "You are assigned to turf and ready to canvass!";
-      obj.ready = true;
+      obj.forms = obj.forms.concat(ref.data);
     }
 
-    // team assignment
-    ref = await cqa('match (a:Canvasser {id:{id}})-[:MEMBERS]-(b:Team)-[:ASSIGNED]-(c:Turf) match (d:Form)-[:ASSIGNED]-(b) return b,c,d', req.user);
+    // direct assignment to turf
+    ref = await cqa('match (a:Canvasser {id:{id}})-[:ASSIGNED]-(b:Turf) return b', req.user)
     if (ref.data.length > 0) {
-      obj.msg = "You are assigned to a team and ready to canvass!"
-      obj.ready = true;
+      obj.turf = obj.turf.concat(ref.data);
+    }
+
+    // assingment to form/turf via team
+    ref = await cqa('match (a:Canvasser {id:{id}})-[:MEMBERS]-(b:Team)-[:ASSIGNED]-(c:Turf) match (d:Form)-[:ASSIGNED]-(b) return collect(distinct(b)), collect(distinct(c)), collect(distinct(d))', req.user);
+    if (ref.data[0][0].length > 0) {
+      obj.teams = obj.teams.concat(ref.data[0][0]);
+      obj.turf = obj.turf.concat(ref.data[0][1]);
+      obj.forms = obj.forms.concat(ref.data[0][2]);
     }
   } catch (e) {
     console.warn(e);
     return res.status(500).send();
+  }
+
+  // TODO: dedupe, someone can be assigned directly to turf/forms and indirectly via a team
+  // TODO: add questions to forms, like in formGet()
+
+  if (obj.turf.length > 0 && obj.forms.length > 0) {
+    obj.msg = "You are assigned turf and ready to canvass!";
+    obj.ready = true;
   }
 
   return res.send(obj);
