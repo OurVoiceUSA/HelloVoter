@@ -99,20 +99,20 @@ function poke(req, res) {
 // they say that time's supposed to heal ya but i ain't done much healin'
 
 async function hello(req, res) {
+  // Butterfly in the sky, I can go twice as high.
   if (req.user.admin === true) return res.send({msg: "Welcome, admin!", ready: true, admin: true});
 
-  let msg;
-  let ready = false;
-  let a = await cqa('match (a:Canvasser {id:{id}})-[:MEMBERS]-(b:Team) return b', req.user);
+  // direct assignment to a form and turf
+  let a = await cqa('match (c:Form)-[:ASSIGNED]-(a:Canvasser {id:{id}})-[:ASSIGNED]-(b:Turf) return a,b', req.user);
+  if (a.data.length > 0)
+    return res.send({msg: "You are assigned to turf and ready to canvass!", ready: true});
 
-  if (a.data.length > 0) {
-    msg = "You are assigned to a team and ready to canvass!";
-    ready = true;
-  } else {
-    msg = "Awaiting assignment";
-  }
+  // team assignment
+  let b = await cqa('match (a:Canvasser {id:{id}})-[:MEMBERS]-(b:Team)-[:ASSIGNED]-(c:Turf) match (d:Form)-[:ASSIGNED]-(b) return b,c,d', req.user);
+  if (b.data.length > 0)
+    return res.send({msg: "You are assigned to a team and ready to canvass!", ready: true});
 
-  return res.send({msg: msg, ready: ready});
+  return res.send({msg: "Awaiting assignment", ready: false});
 }
 
 // canvassers
