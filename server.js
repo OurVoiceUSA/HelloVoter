@@ -122,11 +122,11 @@ async function canvasserList(req, res) {
 function canvasserLock(req, res) {
   if (req.query.id === req.user.id) return res.status(400).send({msg: "You can't lock yourself"});
 
-  return cqdo(req, res, 'match (a:Canvasser {id:{id}}) set a.unauthorized=true', req.query, true);
+  return cqdo(req, res, 'match (a:Canvasser {id:{id}}) set a.locked=true', req.query, true);
 }
 
 function canvasserUnlock(req, res) {
-  return cqdo(req, res, 'match (a:Canvasser {id:{id}}) remove a.unauthorized', req.query, true);
+  return cqdo(req, res, 'match (a:Canvasser {id:{id}}) remove a.locked', req.query, true);
 }
 
 // teams
@@ -344,7 +344,7 @@ app.use(async function (req, res, next) {
       req.user = a.data[0];
     }
 
-    if (req.user.unauthorized) return res.status(401).send();
+    if (req.user.locked) return res.status(401).send();
 
   } catch (e) {
     console.warn(e);
