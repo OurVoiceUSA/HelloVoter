@@ -189,6 +189,22 @@ function turfAssignedRemove(req, res) {
 
 // form
 
+async function formGet(req, res) {
+  let form = {};
+
+  let a = await cqa('match (a:Form {id:{id}})-[:AUTHOR]-(b:Canvasser) return a,b', req.query);
+
+  if (a.data.length === 1) {
+    form = a.data[0][0];
+    form.author_id = a.data[0][1].id;
+    form.author = a.data[0][1].name;
+    let b = await cqa('match (a:Question)-[:ASSIGNED]-(b:Form {id:{id}}) return a', req.query);
+    form.questions = b.data;
+  }
+
+  return res.send(form);
+}
+
 async function formList(req, res) {
   let a = await cqa('match (a:Form) return a');
 
@@ -197,9 +213,8 @@ async function formList(req, res) {
 
 function formCreate(req, res) {
    req.query.id = uuidv4();
-   req.query.author = req.user.name;
    req.query.author_id = req.user.id;
-   return cqdo(req, res, 'create (a:Form {created: timestamp(), id:{id}, name:{name}, version:1, author:{author}, author_id:{author_id}})', req.query);
+   return cqdo(req, res, 'match (a:Canvasser {id:{author_id}}) create (b:Form {created: timestamp(), id:{id}, name:{name}, version:1})-[:AUTHOR]->(a)', req.query);
 }
 
 function formDelete(req, res) {
@@ -220,6 +235,51 @@ function formAssignedRemove(req, res) {
   return cqdo(req, res, 'match (a:Form {id:{fId}})-[r:ASSIGNED]-(b:Team {name:{teamName}}) delete r', req.query, true);
 }
 
+// question
+
+async function questionGet(req, res) {
+  let q = {};
+
+  let a = await cqa('match (a:Question {id:{id}})-[:AUTHOR]-(b:Canvasser) return a,b', req.query);
+
+  if (a.data.length === 1) {
+    q = a.data[0][0];
+    q.author_id = a.data[0][1].id;
+    q.author = a.data[0][1].name;
+  }
+
+  return res.send(q);
+}
+
+async function questionList(req, res) {
+  let a = await cqa('match (a:Question) return a');
+
+  return res.send(a.data);
+}
+
+function questionCreate(req, res) {
+   req.query.id = uuidv4();
+   req.query.author_id = req.user.id;
+   return cqdo(req, res, 'match (a:Canvasser {id:{author_id}}) create (b:Question {created: timestamp(), id:{id}, key:{key}, label:{label}, type:{type}})-[:AUTHOR]->(a)', req.query);
+}
+
+function questionDelete(req, res) {
+  return cqdo(req, res, 'match (a:Question {id:{id}}) detach delete a', req.query, true);
+}
+
+async function questionAssignedList(req, res) {
+  let a = await cqa('match (a:Question {id:{qId}})-[:ASSIGNED]-(b:Form) return b', req.query);
+
+  return res.send(a.data);
+}
+
+function questionAssignedAdd(req, res) {
+  return cqdo(req, res, 'match (a:Question {id:{qId}}), (b:Form {id:{fId}}) merge (a)-[:ASSIGNED]->(b)', req.query, true);
+}
+
+function questionAssignedRemove(req, res) {
+  return cqdo(req, res, 'match (a:Question {id:{qId}})-[r:ASSIGNED]-(b:Form {id:{fId}}) delete r', req.query, true);
+}
 
 // Initialize http server
 const app = expressAsync(express());
@@ -306,12 +366,20 @@ app.get('/canvass/v1/turf/delete', turfDelete);
 app.get('/canvass/v1/turf/assigned/list', turfAssignedList);
 app.get('/canvass/v1/turf/assigned/add', turfAssignedAdd);
 app.get('/canvass/v1/turf/assigned/remove', turfAssignedRemove);
+app.get('/canvass/v1/form/get', formGet);
 app.get('/canvass/v1/form/list', formList);
 app.get('/canvass/v1/form/create', formCreate);
 app.get('/canvass/v1/form/delete', formDelete);
 app.get('/canvass/v1/form/assigned/list', formAssignedList);
 app.get('/canvass/v1/form/assigned/add', formAssignedAdd);
 app.get('/canvass/v1/form/assigned/remove', formAssignedRemove);
+app.get('/canvass/v1/question/get', questionGet);
+app.get('/canvass/v1/question/list', questionList);
+app.get('/canvass/v1/question/create', questionCreate);
+app.get('/canvass/v1/question/delete', questionDelete);
+app.get('/canvass/v1/question/assigned/list', questionAssignedList);
+app.get('/canvass/v1/question/assigned/add', questionAssignedAdd);
+app.get('/canvass/v1/question/assigned/remove', questionAssignedRemove);
 
 // Launch the server
 const server = app.listen(ovi_config.server_port, () => {
