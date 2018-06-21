@@ -211,10 +211,16 @@ async function formList(req, res) {
   return res.send(a.data);
 }
 
-function formCreate(req, res) {
+async function formCreate(req, res) {
    req.query.id = uuidv4();
    req.query.author_id = req.user.id;
-   return cqdo(req, res, 'match (a:Canvasser {id:{author_id}}) create (b:Form {created: timestamp(), id:{id}, name:{name}, version:1})-[:AUTHOR]->(a)', req.query);
+   try {
+     await cqa('match (a:Canvasser {id:{author_id}}) create (b:Form {created: timestamp(), id:{id}, name:{name}, version:1})-[:AUTHOR]->(a)', req.query);
+   } catch (e) {
+     console.log(e);
+     return res.status(500).send();
+   }
+   return res.send({id:req.query.id});
 }
 
 function formDelete(req, res) {
@@ -258,9 +264,8 @@ async function questionList(req, res) {
 }
 
 function questionCreate(req, res) {
-   req.query.id = uuidv4();
    req.query.author_id = req.user.id;
-   return cqdo(req, res, 'match (a:Canvasser {id:{author_id}}) create (b:Question {created: timestamp(), id:{id}, key:{key}, label:{label}, type:{type}})-[:AUTHOR]->(a)', req.query);
+   return cqdo(req, res, 'match (a:Canvasser {id:{author_id}}) create (b:Question {created: timestamp(), key:{key}, label:{label}, type:{type}})-[:AUTHOR]->(a)', req.query);
 }
 
 function questionDelete(req, res) {
