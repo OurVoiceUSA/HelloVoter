@@ -82,6 +82,8 @@ function poke(req, res) {
   return cqdo(req, res, 'return timestamp()', false);
 }
 
+// teams
+
 function teamCreate(req, res) {
   return cqdo(req, res, 'create (a:Team {created: timestamp(), name:{name}})', {name:req.query.name}, true);
 }
@@ -96,6 +98,24 @@ function teamMembersAdd(req, res) {
 
 function teamMembersRemove(req, res) {
   return cqdo(req, res, 'match (a:Canvasser {id:{cId}})-[r:MEMBERS]-(b:Team {name:{teamName}}) delete r', req.query, true);
+}
+
+// turf
+
+function turfCreate(req, res) {
+  return cqdo(req, res, 'create (a:Turf {created: timestamp(), name:{name}})', {name:req.query}, true);
+}
+
+function turfDelete(req, res) {
+  return cqdo(req, res, 'match (a:Turf {name:{name}}) detach delete a', {name:req.query}, true);
+}
+
+function turfAssignedAdd(req, res) {
+  return cqdo(req, res, 'match (a:Turf {name:{turfName}}), (b:Team {name:{teamName}}) merge (a)-[:ASSIGNED]->(b)', req.query, true);
+}
+
+function turfAssignedRemove(req, res) {
+  return cqdo(req, res, 'match (a:Turf {name:{turfName}})-[r:ASSIGNED]-(b:Team {name:{teamName}}) delete r', req.query, true);
 }
 
 // Initialize http server
@@ -168,6 +188,10 @@ app.get('/canvass/v1/team/create', teamCreate);
 app.get('/canvass/v1/team/delete', teamDelete);
 app.get('/canvass/v1/team/members/add', teamMembersAdd);
 app.get('/canvass/v1/team/members/remove', teamMembersRemove);
+app.get('/canvass/v1/turf/create', turfCreate);
+app.get('/canvass/v1/turf/delete', turfDelete);
+app.get('/canvass/v1/turf/assigned/add', turfAssignedAdd);
+app.get('/canvass/v1/turf/assigned/remove', turfAssignedRemove);
 
 // Launch the server
 const server = app.listen(ovi_config.server_port, () => {
