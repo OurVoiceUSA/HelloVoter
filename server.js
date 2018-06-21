@@ -82,6 +82,21 @@ function poke(req, res) {
   return cqdo(req, res, 'return timestamp()', false);
 }
 
+// they say that time's supposed to heal ya but i ain't done much healin'
+
+async function hello(req, res) {
+  let msg;
+  let a = await cqa('match (a:Canvasser {id:{id}})-[:MEMBERS]-(b:Team) return b', req.user);
+
+  if (a.data.length > 0) {
+    msg = "You are assigned to a team and ready to canvass!";
+  } else {
+    msg = "Awaiting assignment";
+  }
+
+  return res.send({msg: msg});
+}
+
 // teams
 
 function teamCreate(req, res) {
@@ -184,6 +199,7 @@ app.use(async function (req, res, next) {
 app.get('/poke', poke);
 
 // ws routes
+app.get('/canvass/v1/hello', hello);
 app.get('/canvass/v1/team/create', teamCreate);
 app.get('/canvass/v1/team/delete', teamDelete);
 app.get('/canvass/v1/team/members/add', teamMembersAdd);
