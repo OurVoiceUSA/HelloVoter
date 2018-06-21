@@ -85,11 +85,11 @@ function poke(req, res) {
 // teams
 
 function teamCreate(req, res) {
-  return cqdo(req, res, 'create (a:Team {created: timestamp(), name:{name}})', {name:req.query.name}, true);
+  return cqdo(req, res, 'create (a:Team {created: timestamp(), name:{name}})', req.query, true);
 }
 
 function teamDelete(req, res) {
-  return cqdo(req, res, 'match (a:Team {name:{name}}) detach delete a', {name:req.query.name}, true);
+  return cqdo(req, res, 'match (a:Team {name:{name}}) detach delete a', req.query, true);
 }
 
 function teamMembersAdd(req, res) {
@@ -103,11 +103,11 @@ function teamMembersRemove(req, res) {
 // turf
 
 function turfCreate(req, res) {
-  return cqdo(req, res, 'create (a:Turf {created: timestamp(), name:{name}})', {name:req.query}, true);
+  return cqdo(req, res, 'create (a:Turf {created: timestamp(), name:{name}})', req.query, true);
 }
 
 function turfDelete(req, res) {
-  return cqdo(req, res, 'match (a:Turf {name:{name}}) detach delete a', {name:req.query}, true);
+  return cqdo(req, res, 'match (a:Turf {name:{name}}) detach delete a', req.query, true);
 }
 
 function turfAssignedAdd(req, res) {
