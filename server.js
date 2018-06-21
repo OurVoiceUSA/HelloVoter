@@ -120,6 +120,8 @@ async function canvasserList(req, res) {
 }
 
 function canvasserLock(req, res) {
+  if (req.query.id === req.user.id) return res.status(400).send({msg: "You can't lock yourself"});
+
   return cqdo(req, res, 'match (a:Canvasser {id:{id}}) set a.unauthorized=true', req.query, true);
 }
 
