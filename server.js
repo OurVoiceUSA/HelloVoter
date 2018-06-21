@@ -63,39 +63,31 @@ function getClientIP(req) {
   else return req.connection.remoteAddress;
 }
 
-async function poke(req, res) {
-  try {
-    let date = await cqa('return timestamp()');
-    return res.sendStatus(200);
-  } catch (e) {
-    console.log(e);
-  }
-  return res.sendStatus(500);
-}
+// just do a query and either return OK or ERROR
 
-async function hello(req, res) {
-  let p;
+async function cqdo(req, res, q, p, a) {
+  if (a === true && req.user.admin !== true) return res.status(401).send();
 
   try {
-    p = await cqa('match (n {name:{name}}) return n', {name:req.user.name});
-  } catch(e) {
-    console.warn(e);
-  }
-
-  res.send(p);
-}
-
-async function teamCreate(req, res) {
-  if (req.user.admin !== true) return res.status(401).send();
-
-  try {
-    await cqa('create (a:Team {created: timestamp(), name:{name}})', {name:req.query.name});
+    await cqa(q, p);
   } catch (e) {
     console.warn(e);
     return res.status(500).send();
   }
 
   return res.status(200).send();
+}
+
+function poke(req, res) {
+  return cqdo(req, res, 'return timestamp()', false);
+}
+
+function teamCreate(req, res) {
+  return cqdo(req, res, 'create (a:Team {created: timestamp(), name:{name}})', {name:req.query.name}, true);
+}
+
+function teamDelete(req, res) {
+  return cqdo(req, res, 'match (a:Team {name:{name}}) detach delete a', {name:req.query.name}, true);
 }
 
 // Initialize http server
@@ -164,8 +156,8 @@ app.use(async function (req, res, next) {
 app.get('/poke', poke);
 
 // ws routes
-app.get('/canvass/v1/hello', hello);
 app.get('/canvass/v1/team/create', teamCreate);
+app.get('/canvass/v1/team/delete', teamDelete);
 
 // Launch the server
 const server = app.listen(ovi_config.server_port, () => {
