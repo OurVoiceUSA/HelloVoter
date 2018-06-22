@@ -96,22 +96,6 @@ function poke(req, res) {
   return cqdo(req, res, 'return timestamp()', false);
 }
 
-// all your base are belong to us
-
-async function setup(req, res) {
-  try {
-    // if there are no admins, make this one an admin
-    let ref = await cqa('match (a:Canvasser {admin:true}) return count(a)');
-    if (ref.data[0] === 0) {
-      return cqdo(req, res, 'match (a:Canvasser {id:{id}}) set a.admin=true', req.user)
-    }
-  } catch (e) {
-    console.warn(e);
-    return res.status(500).send();
-  }
-  return res.status(403).send();
-}
-
 // they say that time's supposed to heal ya but i ain't done much healin'
 
 async function hello(req, res) {
@@ -124,10 +108,17 @@ async function hello(req, res) {
     forms: [],
   };
 
-  // Butterfly in the sky, I can go twice as high.
-  if (req.user.admin === true) obj.admin = true;
-
   try {
+    // if there are no admins, make this one an admin
+    let ref = await cqa('match (a:Canvasser {admin:true}) return count(a)');
+    if (ref.data[0] === 0) {
+      await cqa('match (a:Canvasser {id:{id}}) set a.admin=true', req.user)
+      req.user.admin = true;
+    }
+
+    // Butterfly in the sky, I can go twice as high.
+    if (req.user.admin === true) obj.admin = true;
+
     // direct assignment to a form
     ref = await cqa('match (a:Canvasser {id:{id}})-[:ASSIGNED]-(b:Form) return b', req.user)
     if (ref.data.length > 0) {
@@ -459,7 +450,6 @@ app.use(async function (req, res, next) {
 
 // internal routes
 app.get('/poke', poke);
-app.get('/setup', setup);
 
 // ws routes
 app.get('/canvass/v1/hello', hello);
