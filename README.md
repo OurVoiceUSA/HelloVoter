@@ -4,8 +4,6 @@ This is the mobile app for Our Voice Initiative, a 501(c)(4) non-profit, non-par
 
 Find the app on the [Google Play Store (Android)](https://play.google.com/store/apps/details?id=org.ourvoiceinitiative.ourvoice) and the [Apple Store (iPhone)](https://itunes.apple.com/us/app/our-voice-usa/id1275301651?ls=1&mt=8).
 
-![App Preview](https://ourvoiceusa.org/wp-content/uploads/2018/02/RNgif.gif)
-
 ## Features
 
 Our Voice is a mobile app for civic education and engagement. You can:
@@ -15,7 +13,10 @@ Our Voice is a mobile app for civic education and engagement. You can:
 ## Future Development Goals
 
 * Move the "Your Representatives" functionality from Native to React.js and call the web version.
-* Further expand the Canvassing tool feature set
+* Further expand the Canvassing tool feature set:
+  * signature gathering
+  * turf management
+  * scale to support national canvassing operations
 
 ## Development Setup
 
