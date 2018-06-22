@@ -50,6 +50,12 @@ if (ovi_config.jwt_pub_key.match(/^http/)) {
 const authToken = neo4j.auth.basic(ovi_config.neo4j_user, ovi_config.neo4j_pass);
 const db = new BoltAdapter(neo4j.driver('bolt://'+ovi_config.neo4j_host, authToken));
 
+function valid(str) {
+  if (!str) return false;
+  if (!str.match(/^[0-9a-zA-Z\- '"]+$/)) return false;
+  return true;
+}
+
 async function dbwrap() {
     var params = Array.prototype.slice.call(arguments);
     var func = params.shift();
@@ -167,7 +173,7 @@ async function canvasserLock(req, res) {
 
   try {
     let ref = await cqa("match (a:Canvasser {id:{id}}) return a", req.body);
-    if (ref.data[0].admin === true)
+    if (ref.data[0] && ref.data[0].admin === true)
       return res.status(403).send({error: true, msg: "Permission denied."});
   } catch(e) {
     console.warn(e);
@@ -178,7 +184,7 @@ async function canvasserLock(req, res) {
 }
 
 function canvasserUnlock(req, res) {
-  if (!req.body.id) return res.status(400).send({error: true, msg: "Missing parameter 'id'."});
+  if (!valid(req.body.id)) return res.status(400).send({error: true, msg: "Invalid value to parameter 'id'."});
   return cqdo(req, res, 'match (a:Canvasser {id:{id}}) remove a.locked', req.body, true);
 }
 
@@ -189,27 +195,27 @@ function teamList(req, res) {
 }
 
 function teamCreate(req, res) {
-  if (!req.body.name) return res.status(400).send({error: true, msg: "Missing parameter 'name'."});
+  if (!valid(req.body.name)) return res.status(400).send({error: true, msg: "Invalid value to parameter 'name'."});
   return cqdo(req, res, 'create (a:Team {created: timestamp(), name:{name}})', req.body, true);
 }
 
 function teamDelete(req, res) {
-  if (!req.body.name) return res.status(400).send({error: true, msg: "Missing parameter 'name'."});
+  if (!valid(req.body.name)) return res.status(400).send({error: true, msg: "Invalid value to parameter 'name'."});
   return cqdo(req, res, 'match (a:Team {name:{name}}) detach delete a', req.body, true);
 }
 
 function teamMembersList(req, res) {
-  if (!req.query.teamName) return res.status(400).send({error: true, msg: "Missing parameter 'teamName'."});
+  if (!valid(req.query.teamName)) return res.status(400).send({error: true, msg: "Invalid value to parameter 'teamName'."});
   return cqdo(req, res, 'match (a:Canvasser)-[:MEMBERS]-(b:Team {name:{teamName}}) return a', req.query);
 }
 
 function teamMembersAdd(req, res) {
-  if (!req.body.teamName || !req.body.cId) return res.status(400).send({error: true, msg: "Missing parameter 'teamName' or 'cId'."});
+  if (!valid(req.body.teamName) || !valid(req.body.cId)) return res.status(400).send({error: true, msg: "Invalid value to parameter 'teamName' or 'cId'."});
   return cqdo(req, res, 'match (a:Canvasser {id:{cId}}), (b:Team {name:{teamName}}) merge (b)-[:MEMBERS]->(a)', req.body, true);
 }
 
 function teamMembersRemove(req, res) {
-  if (!req.body.teamName || !req.body.cId) return res.status(400).send({error: true, msg: "Missing parameter 'teamName' or 'cId'."});
+  if (!valid(req.body.teamName) || valid(!req.body.cId)) return res.status(400).send({error: true, msg: "Invalid value to parameter 'teamName' or 'cId'."});
   return cqdo(req, res, 'match (a:Canvasser {id:{cId}})-[r:MEMBERS]-(b:Team {name:{teamName}}) delete r', req.body, true);
 }
 
@@ -220,42 +226,42 @@ function turfList(req, res) {
 }
 
 function turfCreate(req, res) {
-  if (!req.body.name) return res.status(400).send({error: true, msg: "Missing parameter 'name'."});
+  if (!valid(req.body.name)) return res.status(400).send({error: true, msg: "Invalid value to parameter 'name'."});
   return cqdo(req, res, 'create (a:Turf {created: timestamp(), name:{name}})', req.body, true);
 }
 
 function turfDelete(req, res) {
-  if (!req.body.name) return res.status(400).send({error: true, msg: "Missing parameter 'name'."});
+  if (!valid(req.body.name)) return res.status(400).send({error: true, msg: "Invalid value to parameter 'name'."});
   return cqdo(req, res, 'match (a:Turf {name:{name}}) detach delete a', req.body, true);
 }
 
 function turfAssignedTeamList(req, res) {
-  if (!req.query.turfName) return res.status(400).send({error: true, msg: "Missing parameter 'turfName'."});
+  if (!valid(req.query.turfName)) return res.status(400).send({error: true, msg: "Invalid value to parameter 'turfName'."});
   return cqdo(req, res, 'match (a:Turf {name:{turfName}})-[:ASSIGNED]-(b:Team) return b', req.query);
 }
 
 function turfAssignedTeamAdd(req, res) {
-  if (!req.body.turfName || !req.body.teamName) return res.status(400).send({error: true, msg: "Missing parameter 'turfName' or 'teamName'."});
+  if (!valid(req.body.turfName) || !valid(req.body.teamName)) return res.status(400).send({error: true, msg: "Invalid value to parameter 'turfName' or 'teamName'."});
   return cqdo(req, res, 'match (a:Turf {name:{turfName}}), (b:Team {name:{teamName}}) merge (a)-[:ASSIGNED]->(b)', req.body, true);
 }
 
 function turfAssignedTeamRemove(req, res) {
-  if (!req.body.turfName || !req.body.teamName) return res.status(400).send({error: true, msg: "Missing parameter 'turfName' or 'teamName'."});
+  if (!valid(req.body.turfName) || !valid(req.body.teamName)) return res.status(400).send({error: true, msg: "Invalid value to parameter 'turfName' or 'teamName'."});
   return cqdo(req, res, 'match (a:Turf {name:{turfName}})-[r:ASSIGNED]-(b:Team {name:{teamName}}) delete r', req.body, true);
 }
 
 function turfAssignedCanvasserList(req, res) {
-  if (!req.query.turfName) return res.status(400).send({error: true, msg: "Missing parameter 'turfName'."});
+  if (!valid(req.query.turfName)) return res.status(400).send({error: true, msg: "Invalid value to parameter 'turfName'."});
   return cqdo(req, res, 'match (a:Turf {name:{turfName}})-[:ASSIGNED]-(b:Canvasser) return b', req.query);
 }
 
 function turfAssignedCanvasserAdd(req, res) {
-  if (!req.body.turfName || !req.body.cId) return res.status(400).send({error: true, msg: "Missing parameter 'turfName' or 'cId'."});
+  if (!valid(req.body.turfName) || !valid(req.body.cId)) return res.status(400).send({error: true, msg: "Invalid value to parameter 'turfName' or 'cId'."});
   return cqdo(req, res, 'match (a:Turf {name:{turfName}}), (b:Canvasser {id:{cId}}) merge (a)-[:ASSIGNED]->(b)', req.body, true);
 }
 
 function turfAssignedCanvasserRemove(req, res) {
-  if (!req.body.turfName || !req.body.cId) return res.status(400).send({error: true, msg: "Missing parameter 'turfName' or 'cId'."});
+  if (!valid(req.body.turfName) || !valid(req.body.cId)) return res.status(400).send({error: true, msg: "Invalid value to parameter 'turfName' or 'cId'."});
   return cqdo(req, res, 'match (a:Turf {name:{turfName}})-[r:ASSIGNED]-(b:Canvasser {id:{cId}}) delete r', req.body, true);
 }
 
@@ -294,43 +300,45 @@ function formCreate(req, res) {
 }
 
 function formDelete(req, res) {
-  if (!req.body.id) return res.status(400).send({error: true, msg: "Missing parameter 'id'."});
+  if (!valid(req.body.id)) return res.status(400).send({error: true, msg: "Invalid value to parameter 'id'."});
   return cqdo(req, res, 'match (a:Form {id:{id}}) detach delete a', req.body, true);
 }
 
 function formAssignedTeamList(req, res) {
-  if (!req.query.id) return res.status(400).send({error: true, msg: "Missing parameter 'id'."});
+  if (!valid(req.query.id)) return res.status(400).send({error: true, msg: "Invalid value to parameter 'id'."});
   return cqdo(req, res, 'match (a:Form {id:{id}})-[:ASSIGNED]-(b:Team) return b', req.query);
 }
 
 function formAssignedTeamAdd(req, res) {
-  if (!req.body.fId || !req.body.teamName) return res.status(400).send({error: true, msg: "Missing parameter 'fId' or 'teamName'."});
+  if (!valid(req.body.fId) || !valid(req.body.teamName)) return res.status(400).send({error: true, msg: "Invalid value to parameter 'fId' or 'teamName'."});
   return cqdo(req, res, 'match (a:Form {id:{fId}}), (b:Team {name:{teamName}}) merge (a)-[:ASSIGNED]->(b)', req.body, true);
 }
 
 function formAssignedTeamRemove(req, res) {
-  if (!req.body.fId || !req.body.teamName) return res.status(400).send({error: true, msg: "Missing parameter 'fId' or 'teamName'."});
+  if (!valid(req.body.fId) || !valid(req.body.teamName)) return res.status(400).send({error: true, msg: "Invalid value to parameter 'fId' or 'teamName'."});
   return cqdo(req, res, 'match (a:Form {id:{fId}})-[r:ASSIGNED]-(b:Team {name:{teamName}}) delete r', req.body, true);
 }
 
 function formAssignedCanvasserList(req, res) {
-  if (!req.query.id) return res.status(400).send({error: true, msg: "Missing parameter 'id'."});
+  if (!valid(req.query.id)) return res.status(400).send({error: true, msg: "Invalid value to parameter 'id'."});
   return cqdo(req, res, 'match (a:Form {id:{id}})-[:ASSIGNED]-(b:Canvasser) return b', req.query);
 }
 
 function formAssignedCanvasserAdd(req, res) {
-  if (!req.body.fId || !req.body.cId) return res.status(400).send({error: true, msg: "Missing parameter 'fId' or 'cId'."});
+  if (!valid(req.body.fId) || !valid(req.body.cId)) return res.status(400).send({error: true, msg: "Invalid value to parameter 'fId' or 'cId'."});
   return cqdo(req, res, 'match (a:Form {id:{fId}}), (b:Canvasser {id:{cId}}) merge (a)-[:ASSIGNED]->(b)', req.body, true);
 }
 
 function formAssignedCanvasserRemove(req, res) {
-  if (!req.body.fId || !req.body.cId) return res.status(400).send({error: true, msg: "Missing parameter 'fId' or 'cId'."});
+  if (!valid(req.body.fId) || !valid(req.body.cId)) return res.status(400).send({error: true, msg: "Invalid value to parameter 'fId' or 'cId'."});
   return cqdo(req, res, 'match (a:Form {id:{fId}})-[r:ASSIGNED]-(b:Canvasser {id:{cId}}) delete r', req.body, true);
 }
 
 // question
 
 async function questionGet(req, res) {
+  if (!valid(req.body.key)) return res.status(400).send({error: true, msg: "Invalid value to parameter 'key'."});
+
   let q = {};
 
   try {
@@ -355,28 +363,28 @@ function questionList(req, res) {
 }
 
 function questionCreate(req, res) {
-   if (!req.body.key || !req.body.label || !req.body.type) return res.status(400).send({error: true, msg: "Missing parameter 'key' or 'label' or 'type'."});
+   if (!valid(req.body.key) || !valid(req.body.label) || !valid(req.body.type)) return res.status(400).send({error: true, msg: "Invalid value to parameter 'key' or 'label' or 'type'."});
    req.body.author_id = req.user.id;
    return cqdo(req, res, 'match (a:Canvasser {id:{author_id}}) create (b:Question {created: timestamp(), key:{key}, label:{label}, type:{type}})-[:AUTHOR]->(a)', req.body);
 }
 
 function questionDelete(req, res) {
-  if (!req.body.key) return res.status(400).send({error: true, msg: "Missing parameter 'key'."});
+  if (!valid(req.body.key)) return res.status(400).send({error: true, msg: "Invalid value to parameter 'key'."});
   return cqdo(req, res, 'match (a:Question {key:{key}}) detach delete a', req.body, true);
 }
 
 function questionAssignedList(req, res) {
-  if (!req.query.key) return res.status(400).send({error: true, msg: "Missing parameter 'key'."});
+  if (!valid(req.query.key)) return res.status(400).send({error: true, msg: "Invalid value to parameter 'key'."});
   return cqdo(req, res, 'match (a:Question {key:{key}})-[:ASSIGNED]-(b:Form) return b', req.query);
 }
 
 function questionAssignedAdd(req, res) {
-  if (!req.body.key || !req.body.fId) return res.status(400).send({error: true, msg: "Missing parameter 'key' or 'fId'."});
+  if (!valid(req.body.key) || !valid(req.body.fId)) return res.status(400).send({error: true, msg: "Invalid value to parameter 'key' or 'fId'."});
   return cqdo(req, res, 'match (a:Question {key:{key}}), (b:Form {id:{fId}}) merge (a)-[:ASSIGNED]->(b)', req.body, true);
 }
 
 function questionAssignedRemove(req, res) {
-  if (!req.body.key || !req.body.fId) return res.status(400).send({error: true, msg: "Missing parameter 'key' or 'fId'."});
+  if (!valid(req.body.key) || !valid(req.body.fId)) return res.status(400).send({error: true, msg: "Invalid value to parameter 'key' or 'fId'."});
   return cqdo(req, res, 'match (a:Question {key:{key}})-[r:ASSIGNED]-(b:Form {id:{fId}}) delete r', req.body, true);
 }
 
