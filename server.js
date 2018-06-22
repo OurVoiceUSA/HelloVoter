@@ -422,6 +422,7 @@ app.use(async function (req, res, next) {
 
     // verify props
     if (!u.id) return res.status(400).send({error: true, msg: "Your token is missing a required parameter."});
+    if (u.iss !== ovi_config.jwt_iss) return res.status(403).send({error: true, msg: "Your token was issued for a different domain."});
 
     // check for this user in the database
     let a = await cqa('match (a:Canvasser {id:{id}}) return a', u);
