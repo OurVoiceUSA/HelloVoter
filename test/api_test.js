@@ -35,19 +35,33 @@ describe('User', function () {
   it('should return a 401 response', function (done) {
     api.get('/canvass/v1/hello')
       .expect(401)
-      .expect(401, done);
+      .end(function (err, res) {
+        expect(res.body.error).to.equal(true);
+        expect(res.body.msg).to.equal("Invalid token.");
+        done();
+      });
   });
 
   it('should return a 400 response', function (done) {
     api.get('/canvass/v1/hello')
       .set('Authorization', 'Bearer '+jwt_bad)
-      .expect(400, done);
+      .expect(400)
+      .end(function (err, res) {
+        expect(res.body.error).to.equal(true);
+        expect(res.body.msg).to.equal("Your token is missing a required parameter.");
+        done();
+      });
   });
 
   it('should return a 403 response', function (done) {
     api.get('/canvass/v1/hello')
       .set('Authorization', 'Bearer '+jwt_inval)
-      .expect(403, done);
+      .expect(403)
+      .end(function (err, res) {
+        expect(res.body.error).to.equal(true);
+        expect(res.body).to.have.property("msg");
+        done();
+      });
   });
 
   it('should return a hello payload, awaiting assignment', function (done) {
