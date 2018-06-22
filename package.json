@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "JUNIT_REPORT_PATH=test-result/result.xml JUNIT_REPORT_STACK=1 mocha --timeout 25000 --colors --reporter mocha-jenkins-reporter || true",
     "start": "node_modules/nodemon/bin/nodemon.js -- node_modules/babel-cli/bin/babel-node.js server.js"
   },
   "author": "Our Voice USA",
@@ -17,7 +17,10 @@
     "nodemon": "^1.14.6"
   },
   "dependencies": {
-    "bluebird": "^3.5.1",
+    "chai": "^3.5.0",
+    "mocha": "^3.2.0",
+    "mocha-jenkins-reporter": "^0.3.7",
+    "supertest": "^3.0.0",
     "body-parser": "^1.18.2",
     "cors": "^2.8.4",
     "express": "^4.16.2",
@@ -30,7 +33,6 @@
     "neo4j-driver": "^1.6.1",
     "node-fetch": "^2.1.2",
     "node-neo4j-bolt-adapter": "^1.0.6",
-    "sha1": "^1.1.1",
     "uuid": "^3.2.1"
   }
 }

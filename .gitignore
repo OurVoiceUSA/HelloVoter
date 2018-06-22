@@ -40,6 +40,7 @@ local.properties
 # node.js
 #
 node_modules/
+test-result/
 npm-debug.log
 yarn-error.log
 

@@ -10,7 +10,6 @@ import fetch from 'node-fetch';
 import jwt from 'jsonwebtoken';
 import bodyParser from 'body-parser';
 import http from 'http';
-import sha1 from 'sha1';
 import neo4j from 'neo4j-driver';
 import BoltAdapter from 'node-neo4j-bolt-adapter';
 
