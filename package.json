@@ -17,8 +17,8 @@
     "nodemon": "^1.14.6"
   },
   "dependencies": {
-    "chai": "^3.5.0",
-    "mocha": "^3.2.0",
+    "chai": "^4.1.2",
+    "mocha": "^5.2.0",
     "mocha-jenkins-reporter": "^0.3.7",
     "supertest": "^3.0.0",
     "body-parser": "^1.18.2",
