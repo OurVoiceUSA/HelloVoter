@@ -81,7 +81,7 @@ function getClientIP(req) {
 
 async function cqdo(req, res, q, p, a) {
   if (a === true && ovi_config.require_auth === true && req.user.admin !== true)
-    return res.status(401).send({error: true, msg: "Permission denied."});
+    return res.status(403).send({error: true, msg: "Permission denied."});
 
   try {
     await cqa(q, p);
@@ -164,7 +164,7 @@ async function canvasserList(req, res) {
 }
 
 async function canvasserLock(req, res) {
-  if (req.query.id === req.user.id) return res.status(400).send({error: true, msg: "You can't lock yourself."});
+  if (req.query.id === req.user.id) return res.status(403).send({error: true, msg: "You can't lock yourself."});
 
   try {
     let ref = await cqa("match (a:Canvasser {id:{id}}) return a", req.query);
@@ -423,7 +423,7 @@ app.use(async function (req, res, next) {
   try {
     let u;
     if (ovi_config.require_auth) {
-      if (!req.header('authorization')) return res.status(401).send({error: true, msg: "Missing required header."});
+      if (!req.header('authorization')) return res.status(400).send({error: true, msg: "Missing required header."});
       u = jwt.verify(req.header('authorization').split(' ')[1]);
     } else {
       let token;
