@@ -159,7 +159,7 @@ async function hello(req, res) {
 
 // canvassers
 
-async function canvasserList(req, res) {
+function canvasserList(req, res) {
   return cqdo(req, res, 'match (a:Canvasser) return a');
 }
 
@@ -185,7 +185,7 @@ function canvasserUnlock(req, res) {
 
 // teams
 
-async function teamList(req, res) {
+function teamList(req, res) {
   return cqdo(req, res, 'match (a:Team) return a');
 }
 
@@ -199,7 +199,7 @@ function teamDelete(req, res) {
   return cqdo(req, res, 'match (a:Team {name:{name}}) detach delete a', req.body, true);
 }
 
-async function teamMembersList(req, res) {
+function teamMembersList(req, res) {
   if (!req.query.teamName) return res.status(400).send({error: true, msg: "Missing parameter 'teamName'."});
   return cqdo(req, res, 'match (a:Canvasser)-[:MEMBERS]-(b:Team {name:{teamName}}) return a', req.query);
 }
@@ -216,7 +216,7 @@ function teamMembersRemove(req, res) {
 
 // turf
 
-async function turfList(req, res) {
+function turfList(req, res) {
   return cqdo(req, res, 'match (a:Turf) return a');
 }
 
@@ -230,7 +230,7 @@ function turfDelete(req, res) {
   return cqdo(req, res, 'match (a:Turf {name:{name}}) detach delete a', req.body, true);
 }
 
-async function turfAssignedTeamList(req, res) {
+function turfAssignedTeamList(req, res) {
   if (!req.query.turfName) return res.status(400).send({error: true, msg: "Missing parameter 'turfName'."});
   return cqdo(req, res, 'match (a:Turf {name:{turfName}})-[:ASSIGNED]-(b:Team) return b', req.query);
 }
@@ -245,7 +245,7 @@ function turfAssignedTeamRemove(req, res) {
   return cqdo(req, res, 'match (a:Turf {name:{turfName}})-[r:ASSIGNED]-(b:Team {name:{teamName}}) delete r', req.body, true);
 }
 
-async function turfAssignedCanvasserList(req, res) {
+function turfAssignedCanvasserList(req, res) {
   if (!req.query.turfName) return res.status(400).send({error: true, msg: "Missing parameter 'turfName'."});
   return cqdo(req, res, 'match (a:Turf {name:{turfName}})-[:ASSIGNED]-(b:Canvasser) return b', req.query);
 }
@@ -284,11 +284,11 @@ async function formGet(req, res) {
   return res.send(form);
 }
 
-async function formList(req, res) {
+function formList(req, res) {
   return cqdo(req, res, 'match (a:Form) return a');
 }
 
-async function formCreate(req, res) {
+function formCreate(req, res) {
   req.body.id = uuidv4();
   req.body.author_id = req.user.id;
   return cqdo(req, res, 'match (a:Canvasser {id:{author_id}}) create (b:Form {created: timestamp(), id:{id}, name:{name}, version:1})-[:AUTHOR]->(a) return b', req.body);
@@ -299,7 +299,7 @@ function formDelete(req, res) {
   return cqdo(req, res, 'match (a:Form {id:{id}}) detach delete a', req.body, true);
 }
 
-async function formAssignedTeamList(req, res) {
+function formAssignedTeamList(req, res) {
   if (!req.query.id) return res.status(400).send({error: true, msg: "Missing parameter 'id'."});
   return cqdo(req, res, 'match (a:Form {id:{id}})-[:ASSIGNED]-(b:Team) return b', req.query);
 }
@@ -314,7 +314,7 @@ function formAssignedTeamRemove(req, res) {
   return cqdo(req, res, 'match (a:Form {id:{fId}})-[r:ASSIGNED]-(b:Team {name:{teamName}}) delete r', req.body, true);
 }
 
-async function formAssignedCanvasserList(req, res) {
+function formAssignedCanvasserList(req, res) {
   if (!req.query.id) return res.status(400).send({error: true, msg: "Missing parameter 'id'."});
   return cqdo(req, res, 'match (a:Form {id:{id}})-[:ASSIGNED]-(b:Canvasser) return b', req.query);
 }
@@ -351,7 +351,7 @@ async function questionGet(req, res) {
   return res.send(q);
 }
 
-async function questionList(req, res) {
+function questionList(req, res) {
   return cqdo(req, res, 'match (a:Question) return a');
 }
 
@@ -366,7 +366,7 @@ function questionDelete(req, res) {
   return cqdo(req, res, 'match (a:Question {key:{key}}) detach delete a', req.body, true);
 }
 
-async function questionAssignedList(req, res) {
+function questionAssignedList(req, res) {
   if (!req.query.key) return res.status(400).send({error: true, msg: "Missing parameter 'key'."});
   return cqdo(req, res, 'match (a:Question {key:{key}})-[:ASSIGNED]-(b:Form) return b', req.query);
 }
