@@ -80,16 +80,17 @@ function getClientIP(req) {
 // just do a query and either return OK or ERROR
 
 async function cqdo(req, res, q, p, a) {
-  if (a === true && ovi_config.require_auth === true && req.user.admin !== true) return res.status(401).send();
+  if (a === true && ovi_config.require_auth === true && req.user.admin !== true)
+    return res.status(401).send({error: true, msg: "Permission denied."});
 
   try {
     await cqa(q, p);
   } catch (e) {
     console.warn(e);
-    return res.status(500).send();
+    return res.status(500).send({error: true, msg: "Internal server error."});
   }
 
-  return res.status(200).send();
+  return res.status(200).send({msg: "OK"});
 }
 
 function poke(req, res) {
@@ -140,7 +141,7 @@ async function hello(req, res) {
     }
   } catch (e) {
     console.warn(e);
-    return res.status(500).send();
+    return res.status(500).send({error: true, msg: "Internal server error."});
   }
 
   // TODO: dedupe, someone can be assigned directly to turf/forms and indirectly via a team
@@ -163,15 +164,15 @@ async function canvasserList(req, res) {
 }
 
 async function canvasserLock(req, res) {
-  if (req.query.id === req.user.id) return res.status(400).send({msg: "You can't lock yourself"});
+  if (req.query.id === req.user.id) return res.status(400).send({error: true, msg: "You can't lock yourself."});
 
   try {
     let ref = await cqa("match (a:Canvasser {id:{id}}) return a", req.query);
     if (ref.data[0].admin === true)
-      return res.status(403).send({msg: "You can't lock an admin user"});
+      return res.status(403).send({error: true, msg: "Permission denied."});
   } catch(e) {
     console.warn(e);
-    return res.status(500).send();
+    return res.status(500).send({error: true, msg: "Internal server error."});
   }
 
   return cqdo(req, res, 'match (a:Canvasser {id:{id}}) set a.locked=true', req.query, true);
@@ -190,29 +191,29 @@ async function teamList(req, res) {
 }
 
 function teamCreate(req, res) {
-  if (!req.query.name) return res.status(400).send();
+  if (!req.query.name) return res.status(400).send({error: true, msg: "Missing parameter 'name'"});
   return cqdo(req, res, 'create (a:Team {created: timestamp(), name:{name}})', req.query, true);
 }
 
 function teamDelete(req, res) {
-  if (!req.query.name) return res.status(400).send();
+  if (!req.query.name) return res.status(400).send({error: true, msg: "Missing parameter 'name'"});
   return cqdo(req, res, 'match (a:Team {name:{name}}) detach delete a', req.query, true);
 }
 
 async function teamMembersList(req, res) {
-  if (!req.query.teamName) return res.status(400).send();
+  if (!req.query.teamName) return res.status(400).send({error: true, msg: "Missing parameter 'teamName'"});
   let a = await cqa('match (a:Canvasser)-[:MEMBERS]-(b:Team {name:{teamName}}) return a', req.query);
 
   return res.send(a.data);
 }
 
 function teamMembersAdd(req, res) {
-  if (!req.query.teamName || !req.query.cId) return res.status(400).send();
+  if (!req.query.teamName || !req.query.cId) return res.status(400).send({error: true, msg: "Missing parameters 'teamName' or 'cId'"});
   return cqdo(req, res, 'match (a:Canvasser {id:{cId}}), (b:Team {name:{teamName}}) merge (b)-[:MEMBERS]->(a)', req.query, true);
 }
 
 function teamMembersRemove(req, res) {
-  if (!req.query.teamName || !req.query.cId) return res.status(400).send();
+  if (!req.query.teamName || !req.query.cId) return res.status(400).send({error: true, msg: "Missing parameter 'teamName' or 'cId'"});
   return cqdo(req, res, 'match (a:Canvasser {id:{cId}})-[r:MEMBERS]-(b:Team {name:{teamName}}) delete r', req.query, true);
 }
 
@@ -225,17 +226,17 @@ async function turfList(req, res) {
 }
 
 function turfCreate(req, res) {
-  if (!req.query.name) return res.status(400).send();
+  if (!req.query.name) return res.status(400).send({error: true, msg: "Missing parameter 'name'"});
   return cqdo(req, res, 'create (a:Turf {created: timestamp(), name:{name}})', req.query, true);
 }
 
 function turfDelete(req, res) {
-  if (!req.query.name) return res.status(400).send();
+  if (!req.query.name) return res.status(400).send({error: true, msg: "Missing parameter 'name'"});
   return cqdo(req, res, 'match (a:Turf {name:{name}}) detach delete a', req.query, true);
 }
 
 async function turfAssignedTeamList(req, res) {
-  if (!req.query.turfName) res.status(400).send();
+  if (!req.query.turfName) res.status(400).send({error: true, msg: "Missing parameter 'turfName'"});
 
   let a = await cqa('match (a:Turf {name:{turfName}})-[:ASSIGNED]-(b:Team) return b', req.query);
 
@@ -243,17 +244,17 @@ async function turfAssignedTeamList(req, res) {
 }
 
 function turfAssignedTeamAdd(req, res) {
-  if (!req.query.turfName || !req.query.teamName) res.status(400).send();
+  if (!req.query.turfName || !req.query.teamName) res.status(400).send({error: true, msg: "Missing parameter 'turfName' or 'teamName'"});
   return cqdo(req, res, 'match (a:Turf {name:{turfName}}), (b:Team {name:{teamName}}) merge (a)-[:ASSIGNED]->(b)', req.query, true);
 }
 
 function turfAssignedTeamRemove(req, res) {
-  if (!req.query.turfName || (!req.query.cId && !req.query.teamName)) res.status(400).send();
+  if (!req.query.turfName || !req.query.teamName) res.status(400).send({error: true, msg: "Missing parameter 'turfName' or 'teamName'"});
   return cqdo(req, res, 'match (a:Turf {name:{turfName}})-[r:ASSIGNED]-(b:Team {name:{teamName}}) delete r', req.query, true);
 }
 
 async function turfAssignedCanvasserList(req, res) {
-  if (!req.query.turfName) res.status(400).send();
+  if (!req.query.turfName) res.status(400).send({error: true, msg: "Missing parameter 'turfName'"});
 
   let a = await cqa('match (a:Turf {name:{turfName}})-[:ASSIGNED]-(b:Canvasser) return b', req.query);
 
@@ -261,12 +262,12 @@ async function turfAssignedCanvasserList(req, res) {
 }
 
 function turfAssignedCanvasserAdd(req, res) {
-  if (!req.query.turfName || !req.query.cId) res.status(400).send();
+  if (!req.query.turfName || !req.query.cId) res.status(400).send({error: true, msg: "Missing parameter 'turfName' or 'cId'"});
   return cqdo(req, res, 'match (a:Turf {name:{turfName}}), (b:Canvasser {id:{cId}}) merge (a)-[:ASSIGNED]->(b)', req.query, true);
 }
 
 function turfAssignedCanvasserRemove(req, res) {
-  if (!req.query.turfName || !req.query.cId) res.status(400).send();
+  if (!req.query.turfName || !req.query.cId) res.status(400).send({error: true, msg: "Missing parameter 'turfName' or 'cId'"});
   return cqdo(req, res, 'match (a:Turf {name:{turfName}})-[r:ASSIGNED]-(b:Canvasser {id:{cId}}) delete r', req.query, true);
 }
 
@@ -301,49 +302,49 @@ async function formCreate(req, res) {
      await cqa('match (a:Canvasser {id:{author_id}}) create (b:Form {created: timestamp(), id:{id}, name:{name}, version:1})-[:AUTHOR]->(a)', req.query);
    } catch (e) {
      console.log(e);
-     return res.status(500).send();
+     return res.status(500).send({error: true, msg: "Internal server error."});
    }
    return res.send({id:req.query.id});
 }
 
 function formDelete(req, res) {
-  if (!req.query.fId) res.status(400).send();
+  if (!req.query.id) res.status(400).send({error: true, msg: "Missing parameter 'id'"});
   return cqdo(req, res, 'match (a:Form {id:{id}}) detach delete a', req.query, true);
 }
 
 async function formAssignedTeamList(req, res) {
-  if (!req.query.fId) res.status(400).send();
+  if (!req.query.id) res.status(400).send({error: true, msg: "Missing parameter 'id'"});
 
-  let a = await cqa('match (a:Form {id:{fId}})-[:ASSIGNED]-(b:Team) return b', req.query);
+  let a = await cqa('match (a:Form {id:{id}})-[:ASSIGNED]-(b:Team) return b', req.query);
 
   return res.send(a.data);
 }
 
 function formAssignedTeamAdd(req, res) {
-  if (!req.query.fId || !req.query.teamName) res.status(400).send();
+  if (!req.query.fId || !req.query.teamName) res.status(400).send({error: true, msg: "Missing parameter 'fId' or 'teamName'"});
   return cqdo(req, res, 'match (a:Form {id:{fId}}), (b:Team {name:{teamName}}) merge (a)-[:ASSIGNED]->(b)', req.query, true);
 }
 
 function formAssignedTeamRemove(req, res) {
-  if (!req.query.fId || !req.query.teamName) res.status(400).send();
+  if (!req.query.fId || !req.query.teamName) res.status(400).send({error: true, msg: "Missing parameter 'fId' or 'teamName"});
   return cqdo(req, res, 'match (a:Form {id:{fId}})-[r:ASSIGNED]-(b:Team {name:{teamName}}) delete r', req.query, true);
 }
 
 async function formAssignedCanvasserList(req, res) {
-  if (!req.query.fId) res.status(400).send();
+  if (!req.query.id) res.status(400).send({error: true, msg: "Missing parameter 'id'"});
 
-  let a = await cqa('match (a:Form {id:{fId}})-[:ASSIGNED]-(b:Canvasser) return b', req.query);
+  let a = await cqa('match (a:Form {id:{id}})-[:ASSIGNED]-(b:Canvasser) return b', req.query);
 
   return res.send(a.data);
 }
 
 function formAssignedCanvasserAdd(req, res) {
-  if (!req.query.fId || !req.query.cId) res.status(400).send();
+  if (!req.query.fId || !req.query.cId) res.status(400).send({error: true, msg: "Missing parameter 'fId' or 'cId'"});
   return cqdo(req, res, 'match (a:Form {id:{fId}}), (b:Canvasser {id:{cId}}) merge (a)-[:ASSIGNED]->(b)', req.query, true);
 }
 
 function formAssignedCanvasserRemove(req, res) {
-  if (!req.query.fId || !req.query.cId) res.status(400).send();
+  if (!req.query.fId || !req.query.cId) res.status(400).send({error: true, msg: "Missing parameter 'fId' or 'cId'"});
   return cqdo(req, res, 'match (a:Form {id:{fId}})-[r:ASSIGNED]-(b:Canvasser {id:{cId}}) delete r', req.query, true);
 }
 
@@ -404,7 +405,7 @@ if (!ovi_config.DEBUG && ovi_config.ip_header) {
   app.use(function (req, res, next) {
     if (!req.header(ovi_config.ip_header)) {
       console.log('Connection without '+ovi_config.ip_header+' header');
-      res.status(400).send();
+      res.status(400).send({error: true, msg: "Missing required header."});
     }
     else next();
   });
@@ -422,7 +423,7 @@ app.use(async function (req, res, next) {
   try {
     let u;
     if (ovi_config.require_auth) {
-      if (!req.header('authorization')) return res.status(401).send();
+      if (!req.header('authorization')) return res.status(401).send({error: true, msg: "Missing required header."});
       u = jwt.verify(req.header('authorization').split(' ')[1]);
     } else {
       let token;
@@ -432,7 +433,7 @@ app.use(async function (req, res, next) {
     }
 
     // verify props
-    if (!u.id) return res.status(401).send();
+    if (!u.id) return res.status(400).send({error: true, msg: "Your token is missing a required parameter."});
 
     // check for this user in the database
     let a = await cqa('match (a:Canvasser {id:{id}}) return a', u);
@@ -448,11 +449,11 @@ app.use(async function (req, res, next) {
       req.user = a.data[0];
     }
 
-    if (req.user.locked) return res.status(403).send();
+    if (req.user.locked) return res.status(403).send({error: true, msg: "Your account is locked."});
 
   } catch (e) {
     console.warn(e);
-    return res.status(401).send();
+    return res.status(401).send({error: true, msg: "Invalid token."});
   }
   next();
 });
