@@ -174,24 +174,29 @@ async function teamList(req, res) {
 }
 
 function teamCreate(req, res) {
+  if (!req.query.name) return res.status(400).send();
   return cqdo(req, res, 'create (a:Team {created: timestamp(), name:{name}})', req.query, true);
 }
 
 function teamDelete(req, res) {
+  if (!req.query.name) return res.status(400).send();
   return cqdo(req, res, 'match (a:Team {name:{name}}) detach delete a', req.query, true);
 }
 
 async function teamMembersList(req, res) {
+  if (!req.query.teamName) return res.status(400).send();
   let a = await cqa('match (a:Canvasser)-[:MEMBERS]-(b:Team {name:{teamName}}) return a', req.query);
 
   return res.send(a.data);
 }
 
 function teamMembersAdd(req, res) {
+  if (!req.query.teamName || !req.query.cId) return res.status(400).send();
   return cqdo(req, res, 'match (a:Canvasser {id:{cId}}), (b:Team {name:{teamName}}) merge (b)-[:MEMBERS]->(a)', req.query, true);
 }
 
 function teamMembersRemove(req, res) {
+  if (!req.query.teamName || !req.query.cId) return res.status(400).send();
   return cqdo(req, res, 'match (a:Canvasser {id:{cId}})-[r:MEMBERS]-(b:Team {name:{teamName}}) delete r', req.query, true);
 }
 
@@ -204,10 +209,12 @@ async function turfList(req, res) {
 }
 
 function turfCreate(req, res) {
+  if (!req.query.name) return res.status(400).send();
   return cqdo(req, res, 'create (a:Turf {created: timestamp(), name:{name}})', req.query, true);
 }
 
 function turfDelete(req, res) {
+  if (!req.query.name) return res.status(400).send();
   return cqdo(req, res, 'match (a:Turf {name:{name}}) detach delete a', req.query, true);
 }
 
