@@ -211,18 +211,40 @@ function turfDelete(req, res) {
   return cqdo(req, res, 'match (a:Turf {name:{name}}) detach delete a', req.query, true);
 }
 
-async function turfAssignedList(req, res) {
+async function turfAssignedTeamList(req, res) {
+  if (!req.query.turfName) res.status(400).send();
+
   let a = await cqa('match (a:Turf {name:{turfName}})-[:ASSIGNED]-(b:Team) return b', req.query);
 
   return res.send(a.data);
 }
 
-function turfAssignedAdd(req, res) {
+function turfAssignedTeamAdd(req, res) {
+  if (!req.query.turfName || !req.query.teamName) res.status(400).send();
   return cqdo(req, res, 'match (a:Turf {name:{turfName}}), (b:Team {name:{teamName}}) merge (a)-[:ASSIGNED]->(b)', req.query, true);
 }
 
-function turfAssignedRemove(req, res) {
+function turfAssignedTeamRemove(req, res) {
+  if (!req.query.turfName || (!req.query.cId && !req.query.teamName)) res.status(400).send();
   return cqdo(req, res, 'match (a:Turf {name:{turfName}})-[r:ASSIGNED]-(b:Team {name:{teamName}}) delete r', req.query, true);
+}
+
+async function turfAssignedCanvasserList(req, res) {
+  if (!req.query.turfName) res.status(400).send();
+
+  let a = await cqa('match (a:Turf {name:{turfName}})-[:ASSIGNED]-(b:Canvasser) return b', req.query);
+
+  return res.send(a.data);
+}
+
+function turfAssignedCanvasserAdd(req, res) {
+  if (!req.query.turfName || !req.query.cId) res.status(400).send();
+  return cqdo(req, res, 'match (a:Turf {name:{turfName}}), (b:Canvasser {id:{cId}}) merge (a)-[:ASSIGNED]->(b)', req.query, true);
+}
+
+function turfAssignedCanvasserRemove(req, res) {
+  if (!req.query.turfName || !req.query.cId) res.status(400).send();
+  return cqdo(req, res, 'match (a:Turf {name:{turfName}})-[r:ASSIGNED]-(b:Canvasser {id:{cId}}) delete r', req.query, true);
 }
 
 // form
@@ -262,21 +284,44 @@ async function formCreate(req, res) {
 }
 
 function formDelete(req, res) {
+  if (!req.query.fId) res.status(400).send();
   return cqdo(req, res, 'match (a:Form {id:{id}}) detach delete a', req.query, true);
 }
 
-async function formAssignedList(req, res) {
+async function formAssignedTeamList(req, res) {
+  if (!req.query.fId) res.status(400).send();
+
   let a = await cqa('match (a:Form {id:{fId}})-[:ASSIGNED]-(b:Team) return b', req.query);
 
   return res.send(a.data);
 }
 
-function formAssignedAdd(req, res) {
+function formAssignedTeamAdd(req, res) {
+  if (!req.query.fId || !req.query.teamName) res.status(400).send();
   return cqdo(req, res, 'match (a:Form {id:{fId}}), (b:Team {name:{teamName}}) merge (a)-[:ASSIGNED]->(b)', req.query, true);
 }
 
-function formAssignedRemove(req, res) {
+function formAssignedTeamRemove(req, res) {
+  if (!req.query.fId || !req.query.teamName) res.status(400).send();
   return cqdo(req, res, 'match (a:Form {id:{fId}})-[r:ASSIGNED]-(b:Team {name:{teamName}}) delete r', req.query, true);
+}
+
+async function formAssignedCanvasserList(req, res) {
+  if (!req.query.fId) res.status(400).send();
+
+  let a = await cqa('match (a:Form {id:{fId}})-[:ASSIGNED]-(b:Canvasser) return b', req.query);
+
+  return res.send(a.data);
+}
+
+function formAssignedCanvasserAdd(req, res) {
+  if (!req.query.fId || !req.query.cId) res.status(400).send();
+  return cqdo(req, res, 'match (a:Form {id:{fId}}), (b:Canvasser {id:{cId}}) merge (a)-[:ASSIGNED]->(b)', req.query, true);
+}
+
+function formAssignedCanvasserRemove(req, res) {
+  if (!req.query.fId || !req.query.cId) res.status(400).send();
+  return cqdo(req, res, 'match (a:Form {id:{fId}})-[r:ASSIGNED]-(b:Canvasser {id:{cId}}) delete r', req.query, true);
 }
 
 // question
@@ -406,16 +451,22 @@ app.get('/canvass/v1/team/members/remove', teamMembersRemove);
 app.get('/canvass/v1/turf/list', turfList);
 app.get('/canvass/v1/turf/create', turfCreate);
 app.get('/canvass/v1/turf/delete', turfDelete);
-app.get('/canvass/v1/turf/assigned/list', turfAssignedList);
-app.get('/canvass/v1/turf/assigned/add', turfAssignedAdd);
-app.get('/canvass/v1/turf/assigned/remove', turfAssignedRemove);
+app.get('/canvass/v1/turf/assigned/team/list', turfAssignedTeamList);
+app.get('/canvass/v1/turf/assigned/team/add', turfAssignedTeamAdd);
+app.get('/canvass/v1/turf/assigned/team/remove', turfAssignedTeamRemove);
+app.get('/canvass/v1/turf/assigned/canvasser/list', turfAssignedCanvasserList);
+app.get('/canvass/v1/turf/assigned/canvasser/add', turfAssignedCanvasserAdd);
+app.get('/canvass/v1/turf/assigned/canvasser/remove', turfAssignedCanvasserRemove);
 app.get('/canvass/v1/form/get', formGet);
 app.get('/canvass/v1/form/list', formList);
 app.get('/canvass/v1/form/create', formCreate);
 app.get('/canvass/v1/form/delete', formDelete);
-app.get('/canvass/v1/form/assigned/list', formAssignedList);
-app.get('/canvass/v1/form/assigned/add', formAssignedAdd);
-app.get('/canvass/v1/form/assigned/remove', formAssignedRemove);
+app.get('/canvass/v1/form/assigned/team/list', formAssignedTeamList);
+app.get('/canvass/v1/form/assigned/team/add', formAssignedTeamAdd);
+app.get('/canvass/v1/form/assigned/team/remove', formAssignedTeamRemove);
+app.get('/canvass/v1/form/assigned/canvasser/list', formAssignedCanvasserList);
+app.get('/canvass/v1/form/assigned/canvasser/add', formAssignedCanvasserAdd);
+app.get('/canvass/v1/form/assigned/canvasser/remove', formAssignedCanvasserRemove);
 app.get('/canvass/v1/question/get', questionGet);
 app.get('/canvass/v1/question/list', questionList);
 app.get('/canvass/v1/question/create', questionCreate);
