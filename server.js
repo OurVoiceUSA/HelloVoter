@@ -162,8 +162,17 @@ async function canvasserList(req, res) {
   return res.send(a.data);
 }
 
-function canvasserLock(req, res) {
+async function canvasserLock(req, res) {
   if (req.query.id === req.user.id) return res.status(400).send({msg: "You can't lock yourself"});
+
+  try {
+    let ref = await cqa("match (a:Canvasser {id:{id}}) return a", req.query);
+    if (ref.data[0].admin === true)
+      return res.status(403).send({msg: "You can't lock an admin user"});
+  } catch(e) {
+    console.warn(e);
+    return res.status(500).send();
+  }
 
   return cqdo(req, res, 'match (a:Canvasser {id:{id}}) set a.locked=true', req.query, true);
 }
