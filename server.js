@@ -50,6 +50,12 @@ if (ovi_config.jwt_pub_key.match(/^http/)) {
 const authToken = neo4j.auth.basic(ovi_config.neo4j_user, ovi_config.neo4j_pass);
 const db = new BoltAdapter(neo4j.driver('bolt://'+ovi_config.neo4j_host, authToken));
 
+cqa('create constraint on (a:Canvasser) assert a.id is unique');
+cqa('create constraint on (a:Team) assert a.name is unique');
+cqa('create constraint on (a:Turf) assert a.name is unique');
+cqa('create constraint on (a:Form) assert a.id is unique');
+cqa('create constraint on (a:Question) assert a.key is unique');
+
 function valid(str) {
   if (!str) return false;
   if (!str.match(/^[0-9a-zA-Z\- '"]+$/)) return false;
