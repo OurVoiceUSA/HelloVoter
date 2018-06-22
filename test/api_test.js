@@ -2,23 +2,22 @@ var should = require('chai').should(),
   expect = require('chai').expect,
   supertest = require('supertest'),
   api = supertest('http://localhost:8080');
+  live = supertest('https://wsdev.ourvoiceusa.org');
 
 var fs = require('fs');
-var jwt_inval;
 var jwt;
+var jwt_bad;
+var jwt_inval;
 
 describe('User', function () {
 
   before(function (done) {
 
+    // TODO: call an endpoint to get these tokens
     jwt = fs.readFileSync('jwt').toString().trim();
     jwt_inval = fs.readFileSync('jwt_inval').toString().trim();
-    done();
 
-/*
-    TODO: call and endpoint to get a valid and an invalid JWT token
-
-    api.post('/auth/jwt')
+    live.post('/auth/jwt')
       .set('Content-Type', 'application/json')
       .set('User-Agent', 'OurVoiceUSA/test')
       .send({
@@ -27,17 +26,22 @@ describe('User', function () {
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
-        jwt_inval = res.body;
+        jwt_bad = res.body.jwt;
         done();
       });
-*/
-  });
 
+  });
 
   it('should return a 401 response', function (done) {
     api.get('/canvass/v1/hello')
       .expect(401)
       .expect(401, done);
+  });
+
+  it('should return a 400 response', function (done) {
+    api.get('/canvass/v1/hello')
+      .set('Authorization', 'Bearer '+jwt_bad)
+      .expect(400, done);
   });
 
   it('should return a 403 response', function (done) {
