@@ -96,6 +96,22 @@ function poke(req, res) {
   return cqdo(req, res, 'return timestamp()', false);
 }
 
+// all your base are belong to us
+
+async function setup(req, res) {
+  try {
+    // if there are no admins, make this one an admin
+    let ref = await cqa('match (a:Canvasser {admin:true}) return count(a)');
+    if (ref.data[0] === 0) {
+      return cqdo(req, res, 'match (a:Canvasser {id:{id}}) set a.admin=true', req.user)
+    }
+  } catch (e) {
+    console.warn(e);
+    return res.status(500).send();
+  }
+  return res.status(403).send();
+}
+
 // they say that time's supposed to heal ya but i ain't done much healin'
 
 async function hello(req, res) {
@@ -443,6 +459,7 @@ app.use(async function (req, res, next) {
 
 // internal routes
 app.get('/poke', poke);
+app.get('/setup', setup);
 
 // ws routes
 app.get('/canvass/v1/hello', hello);
