@@ -4,7 +4,7 @@ Our Voice Initiative is a 501(c)(4) non-profit, non-partisian organization for c
 
 ## Features
 
-This is the API backend to the OVMobile canvass functions.
+This is in development, and will be the API backend to the OVMobile canvass functions for large operations. The current production mobile app uses Dropbox for data sharing and storage.
 
 ## Development Setup
 
