@@ -19,7 +19,7 @@ const ovi_config = {
   neo4j_host: ( process.env.NEO4J_HOST ? process.env.NEO4J_HOST : 'localhost' ),
   neo4j_user: ( process.env.NEO4J_USER ? process.env.NEO4J_USER : 'neo4j' ),
   neo4j_pass: ( process.env.NEO4J_PASS ? process.env.NEO4J_PASS : 'neo4j' ),
-  jwt_pub_key: ( process.env.JWT_PUB_KEY ? process.env.JWT_PUB_KEY : 'https://raw.githubusercontent.com/OurVoiceUSA/sm-oauth/master/public.key' ),
+  jwt_pub_key: ( process.env.JWT_PUB_KEY ? process.env.JWT_PUB_KEY : 'https://ws.ourvoiceusa.org/auth/pubkey' ),
   jwt_iss: ( process.env.JWT_ISS ? process.env.JWT_ISS : 'example.com' ),
   DEBUG: ( process.env.DEBUG ? true : false ),
 };
