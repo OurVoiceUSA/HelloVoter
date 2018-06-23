@@ -21,7 +21,6 @@ const ovi_config = {
   neo4j_pass: ( process.env.NEO4J_PASS ? process.env.NEO4J_PASS : 'neo4j' ),
   jwt_pub_key: ( process.env.JWT_PUB_KEY ? process.env.JWT_PUB_KEY : 'https://raw.githubusercontent.com/OurVoiceUSA/sm-oauth/master/public.key' ),
   jwt_iss: ( process.env.JWT_ISS ? process.env.JWT_ISS : 'example.com' ),
-  require_auth: ( process.env.AUTH_OPTIONAL ? false : true ),
   DEBUG: ( process.env.DEBUG ? true : false ),
 };
 
@@ -45,6 +44,8 @@ if (ovi_config.jwt_pub_key.match(/^http/)) {
 } else {
   public_key = fs.readFileSync(ovi_config.jwt_pub_key);
 }
+
+console.log('Read public key from '+ovi_config.jwt_pub_key);
 
 // async'ify neo4j
 const authToken = neo4j.auth.basic(ovi_config.neo4j_user, ovi_config.neo4j_pass);
@@ -93,7 +94,7 @@ function getClientIP(req) {
 // just do a query and either return OK or ERROR
 
 async function cqdo(req, res, q, p, a) {
-  if (a === true && ovi_config.require_auth === true && req.user.admin !== true)
+  if (a === true && req.user.admin !== true)
     return res.status(403).send({error: true, msg: "Permission denied."});
 
   let ref;
@@ -425,15 +426,8 @@ app.use(async function (req, res, next) {
 
   try {
     let u;
-    if (ovi_config.require_auth) {
-      if (!req.header('authorization')) return res.status(400).send({error: true, msg: "Missing required header."});
-      u = jwt.verify(req.header('authorization').split(' ')[1]);
-    } else {
-      let token;
-      if (req.header('authorization')) token = req.header('authorization').split(' ')[1];
-      else token = (req.body.jwt?req.body.jwt:req.query.jwt);
-      u = jwt.decode(token);
-    }
+    if (!req.header('authorization')) return res.status(400).send({error: true, msg: "Missing required header."});
+    u = jwt.verify(req.header('authorization').split(' ')[1], public_key);
 
     // verify props
     if (!u.id) return res.status(400).send({error: true, msg: "Your token is missing a required parameter."});
