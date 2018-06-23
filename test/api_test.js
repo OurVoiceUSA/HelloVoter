@@ -2,12 +2,12 @@
 var neo4j = require('neo4j-driver').v1;
 var BoltAdapter = require('node-neo4j-bolt-adapter');
 
-var should = require('chai').should(),
-  expect = require('chai').expect,
-  supertest = require('supertest'),
-  api = supertest('http://localhost:8080');
-  liveprd = supertest(process.env.BASE_URI_PROD);
-  livedev = supertest(process.env.BASE_URI_DEV);
+var should = require('chai').should();
+var expect = require('chai').expect;
+var supertest = require('supertest');
+var api = supertest('http://localhost:8080');
+var liveprd = supertest(process.env.BASE_URI_PROD);
+var livedev = supertest(process.env.BASE_URI_DEV);
 
 var fs = require('fs');
 var jwt_admin;
