@@ -212,7 +212,7 @@ describe('API smoke', function () {
 
   // TODO: check admin full list vs. non-admin only see your own teams
 
-  it('team/create,list,members/add,members/delete,delete', async () => {
+  it('team/create & members add/list/remove & team/delete', async () => {
     let teamName = tpx+Math.ceil(Math.random()*10000000);
     let r;
 
@@ -259,10 +259,19 @@ describe('API smoke', function () {
     expect(r.statusCode).to.equal(200);
     expect(r.body.data.length).to.equal(2);
 
-    r = await api.post('/canvass/v1/team/delete')
+    r = await api.post('/canvass/v1/team/members/remove')
       .set('Authorization', 'Bearer '+admin.jwt)
       .send({
-        name: teamName,
+        teamName: teamName,
+        cId: bob.id,
+      });
+    expect(r.statusCode).to.equal(200);
+
+    r = await api.post('/canvass/v1/team/members/remove')
+      .set('Authorization', 'Bearer '+admin.jwt)
+      .send({
+        teamName: teamName,
+        cId: sally.id,
       });
     expect(r.statusCode).to.equal(200);
 
@@ -270,6 +279,13 @@ describe('API smoke', function () {
       .set('Authorization', 'Bearer '+admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.data.length).to.equal(0);
+
+    r = await api.post('/canvass/v1/team/delete')
+      .set('Authorization', 'Bearer '+admin.jwt)
+      .send({
+        name: teamName,
+      });
+    expect(r.statusCode).to.equal(200);
 
   });
 
