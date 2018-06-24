@@ -16,8 +16,6 @@ var sally = {};
 var authToken;
 var db;
 
-let teamName = "I'm a little tea-pot";
-
 describe('API smoke', function () {
 
   before(async () => {
@@ -197,15 +195,16 @@ describe('API smoke', function () {
     const r = await api.post('/canvass/v1/team/create')
       .set('Authorization', 'Bearer '+admin.jwt)
       .send({
-        name: "_",
+        name: "*",
       });
     expect(r.statusCode).to.equal(400);
     expect(r.body).to.have.property("error");
   });
 
-  // TODO: list to check that it's there, and again to see it missing
+  // TODO: check admin full list vs. non-admin only see your own teams
 
-  it('team/create team/delete', async () => {
+  it('team/create,list,members/add,members/delete,delete', async () => {
+    let teamName = "I'm a little teapot";
     let r;
 
     r = await api.post('/canvass/v1/team/create')
@@ -226,6 +225,32 @@ describe('API smoke', function () {
     expect(r.body.error).to.equal(true);
     expect(r.body.msg).to.be.an('string');
 
+    r = await api.get('/canvass/v1/team/members/list?teamName='+teamName)
+      .set('Authorization', 'Bearer '+admin.jwt);
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.data.length).to.equal(0);
+
+    r = await api.post('/canvass/v1/team/members/add')
+      .set('Authorization', 'Bearer '+admin.jwt)
+      .send({
+        teamName: teamName,
+        cId: bob.id,
+      });
+    expect(r.statusCode).to.equal(200);
+
+    r = await api.post('/canvass/v1/team/members/add')
+      .set('Authorization', 'Bearer '+admin.jwt)
+      .send({
+        teamName: teamName,
+        cId: sally.id,
+      });
+    expect(r.statusCode).to.equal(200);
+
+    r = await api.get('/canvass/v1/team/members/list?teamName='+teamName)
+      .set('Authorization', 'Bearer '+admin.jwt);
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.data.length).to.equal(2);
+
     r = await api.post('/canvass/v1/team/delete')
       .set('Authorization', 'Bearer '+admin.jwt)
       .send({
@@ -233,18 +258,12 @@ describe('API smoke', function () {
       });
     expect(r.statusCode).to.equal(200);
     expect(r.body).to.not.have.property("error");
-    expect(r.body.data).to.be.an('array');
 
-  });
-
-  // TODO: check admin full list vs. non-admin only see your own teams
-
-  it('team/member/list 200 array', async () => {
-    const r = await api.get('/canvass/v1/team/members/list?teamName='+teamName)
+    r = await api.get('/canvass/v1/team/members/list?teamName='+teamName)
       .set('Authorization', 'Bearer '+admin.jwt);
     expect(r.statusCode).to.equal(200);
-    expect(r.body).to.not.have.property("error");
-    expect(r.body.data).to.be.an('array');
+    expect(r.body.data.length).to.equal(0);
+
   });
 
 });

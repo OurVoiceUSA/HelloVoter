@@ -61,7 +61,7 @@ cqa('return timestamp()').catch((e) => {console.error("Unable to connect to data
 
 function valid(str) {
   if (!str) return false;
-  if (!str.match(/^[0-9a-zA-Z\- '"]+$/)) return false;
+  if (!str.match(/^[0-9a-zA-Z:_\- '"]+$/)) return false;
   return true;
 }
 
