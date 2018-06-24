@@ -47,6 +47,12 @@ describe('API smoke', function () {
 
   after(async () => {
     db.close();
+
+    // confirm that we're all set
+    const r = await api.get('/canvass/v1/uncle')
+      .set('Authorization', 'Bearer '+admin.jwt);
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.name).to.equal("Bob");
   });
 
   it('poke 200 timestamp', async () => {

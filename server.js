@@ -171,6 +171,10 @@ async function hello(req, res) {
   return res.send({msg: msg, data: obj});
 }
 
+function uncle(req, res) {
+  return res.send({name: "Bob"});
+}
+
 // canvassers
 
 function canvasserList(req, res) {
@@ -461,6 +465,7 @@ app.get('/poke', poke);
 
 // ws routes
 app.get('/canvass/v1/hello', hello);
+app.get('/canvass/v1/uncle', uncle);
 app.get('/canvass/v1/canvasser/list', canvasserList);
 app.post('/canvass/v1/canvasser/lock', canvasserLock);
 app.post('/canvass/v1/canvasser/unlock', canvasserUnlock);
