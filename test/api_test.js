@@ -7,15 +7,12 @@ var expect = require('chai').expect;
 var supertest = require('supertest');
 var jwt = require('jsonwebtoken');
 var api = supertest('http://localhost:8080');
-var liveprd = supertest(process.env.BASE_URI_PROD);
 var livedev = supertest(process.env.BASE_URI_DEV);
 
 var fs = require('fs');
 var admin = {};
 var bob = {};
 var sally = {};
-var jwt_bad;
-var jwt_inval;
 
 var authToken;
 var db;
@@ -31,24 +28,6 @@ describe('API smoke', function () {
     authToken = neo4j.auth.basic(process.env.NEO4J_USER, process.env.NEO4J_PASS);
     db = new BoltAdapter(neo4j.driver('bolt://'+process.env.NEO4J_HOST, authToken));
     await db.cypherQueryAsync('match (a:Canvasser) where a.id =~ "test:.*" detach delete a');
-
-    r = await liveprd.post('/auth/jwt')
-      .set('Content-Type', 'application/json')
-      .set('User-Agent', 'OurVoiceUSA/test')
-      .send({
-        apiKey: "12345678765432",
-      });
-    expect(r.statusCode).to.equal(200);
-    jwt_inval = r.body.jwt;
-
-    r = await livedev.post('/auth/jwt')
-      .set('Content-Type', 'application/json')
-      .set('User-Agent', 'OurVoiceUSA/test')
-      .send({
-        apiKey: "12345678765432",
-      });
-    expect(r.statusCode).to.equal(200);
-    jwt_bad = r.body.jwt;
 
     r = await livedev.get('/auth/tokentest');
     expect(r.statusCode).to.equal(200);
@@ -90,14 +69,34 @@ describe('API smoke', function () {
   });
 
   it('hello 400 bad jwt', async () => {
-    const r = await api.get('/canvass/v1/hello')
+    let r;
+
+    r = await livedev.post('/auth/jwt')
+      .set('Content-Type', 'application/json')
+      .set('User-Agent', 'OurVoiceUSA/test')
+      .send({
+        apiKey: "12345678765432",
+      });
+    expect(r.statusCode).to.equal(200);
+
+    let jwt_bad = r.body.jwt; // this lacks an ID
+
+    r = await api.get('/canvass/v1/hello')
       .set('Authorization', 'Bearer '+jwt_bad);
     expect(r.statusCode).to.equal(400);
     expect(r.body.error).to.equal(true);
     expect(r.body.msg).to.equal("Your token is missing a required parameter.");
   });
 
-  it('hello 401 invalid jwt', async () => {
+  it('hello 401 wrong jwt algorithm', async () => {
+    let jwt_inval = jwt.sign(JSON.stringify({
+      sub: 12345,
+      id: 12345,
+      iss: 'example.com',
+      iat: Math.floor(new Date().getTime() / 1000)-60,
+      exp: Math.floor(new Date().getTime() / 1000)+60,
+    }), Math.random().toString());
+
     const r = await api.get('/canvass/v1/hello')
       .set('Authorization', 'Bearer '+jwt_inval);
     expect(r.statusCode).to.equal(401);
