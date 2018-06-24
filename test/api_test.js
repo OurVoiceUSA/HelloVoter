@@ -157,44 +157,38 @@ describe('API smoke', function () {
     expect(r.body.data.admin).to.equal(true);
   });
 
-  it('hello 200 bob awaiting assignment', async () => {
-    const r = await api.get('/canvass/v1/hello')
+  it('hello 200 canvassers awaiting assignment', async () => {
+    let r;
+
+    r = await api.get('/canvass/v1/hello')
       .set('Authorization', 'Bearer '+bob.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.msg).to.equal("Awaiting assignment");
     expect(r.body.data.ready).to.equal(false);
     expect(r.body.data).to.not.have.property("admin");
-  });
 
-  it('hello 200 sally awaiting assignment', async () => {
-    const r = await api.get('/canvass/v1/hello')
+    r = await api.get('/canvass/v1/hello')
       .set('Authorization', 'Bearer '+sally.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.msg).to.equal("Awaiting assignment");
     expect(r.body.data.ready).to.equal(false);
     expect(r.body.data).to.not.have.property("admin");
-  });
 
-  it('hello 200 rich awaiting assignment', async () => {
-    const r = await api.get('/canvass/v1/hello')
+    r = await api.get('/canvass/v1/hello')
       .set('Authorization', 'Bearer '+rich.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.msg).to.equal("Awaiting assignment");
     expect(r.body.data.ready).to.equal(false);
     expect(r.body.data).to.not.have.property("admin");
-  });
 
-  it('hello 200 jane awaiting assignment', async () => {
-    const r = await api.get('/canvass/v1/hello')
+    r = await api.get('/canvass/v1/hello')
       .set('Authorization', 'Bearer '+jane.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.msg).to.equal("Awaiting assignment");
     expect(r.body.data.ready).to.equal(false);
     expect(r.body.data).to.not.have.property("admin");
-  });
 
-  it('hello 200 mike awaiting assignment', async () => {
-    const r = await api.get('/canvass/v1/hello')
+    r = await api.get('/canvass/v1/hello')
       .set('Authorization', 'Bearer '+mike.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.msg).to.equal("Awaiting assignment");
