@@ -13,6 +13,8 @@ var admin = {};
 var bob = {};
 var sally = {};
 
+var tpx = "Test: ";
+
 var authToken;
 var db;
 
@@ -21,10 +23,12 @@ describe('API smoke', function () {
   before(async () => {
     let r;
 
-    // clean up test data before we begin
     authToken = neo4j.auth.basic(process.env.NEO4J_USER, process.env.NEO4J_PASS);
     db = new BoltAdapter(neo4j.driver('bolt://'+process.env.NEO4J_HOST, authToken));
+
+    // clean up test data before we begin
     await db.cypherQueryAsync('match (a:Canvasser) where a.id =~ "test:.*" detach delete a');
+    await db.cypherQueryAsync('match (a) where a.name =~ "'+tpx+'.*" detach delete a');
 
     r = await sm_oauth.get('/auth/tokentest');
     expect(r.statusCode).to.equal(200);
@@ -44,7 +48,16 @@ describe('API smoke', function () {
   });
 
   after(async () => {
+    // clean up test users
+    await db.cypherQueryAsync('match (a:Canvasser) where a.id =~ "test:.*" detach delete a');
+
+    // any left over test data??
+    let ref = await db.cypherQueryAsync('match (a) where a.name =~ "'+tpx+'.*" return count(a)');
+
     db.close();
+
+    // check query after close, so we don't hang the test on failure
+    expect(ref.data[0]).to.equal(0);
 
     // confirm that we're all set
     const r = await api.get('/canvass/v1/uncle')
@@ -213,7 +226,7 @@ describe('API smoke', function () {
   // TODO: check admin full list vs. non-admin only see your own teams
 
   it('team/create,list,members/add,members/delete,delete', async () => {
-    let teamName = "I'm a little teapot";
+    let teamName = tpx+Math.ceil(Math.random()*10000000);
     let r;
 
     r = await api.post('/canvass/v1/team/create')
