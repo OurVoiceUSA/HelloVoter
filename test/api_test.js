@@ -12,11 +12,20 @@ var fs = require('fs');
 var admin = {};
 var bob = {};
 var sally = {};
+var rich = {};
+var jane = {};
+var mike = {};
 
 var tpx = "Test: ";
 
 var authToken;
 var db;
+
+var teamName1 = tpx+Math.ceil(Math.random()*10000000);
+var turfName1 = tpx+Math.ceil(Math.random()*10000000);
+
+var teamName2 = tpx+Math.ceil(Math.random()*10000000);
+var turfName2 = tpx+Math.ceil(Math.random()*10000000);
 
 describe('API smoke', function () {
 
@@ -44,6 +53,21 @@ describe('API smoke', function () {
     expect(r.statusCode).to.equal(200);
     sally = jwt.decode(r.body.jwt);
     sally.jwt = r.body.jwt;
+
+    r = await sm_oauth.get('/auth/tokentest');
+    expect(r.statusCode).to.equal(200);
+    rich = jwt.decode(r.body.jwt);
+    rich.jwt = r.body.jwt;
+
+    r = await sm_oauth.get('/auth/tokentest');
+    expect(r.statusCode).to.equal(200);
+    jane = jwt.decode(r.body.jwt);
+    jane.jwt = r.body.jwt;
+
+    r = await sm_oauth.get('/auth/tokentest');
+    expect(r.statusCode).to.equal(200);
+    mike = jwt.decode(r.body.jwt);
+    mike.jwt = r.body.jwt;
 
   });
 
@@ -151,6 +175,33 @@ describe('API smoke', function () {
     expect(r.body.data).to.not.have.property("admin");
   });
 
+  it('hello 200 rich awaiting assignment', async () => {
+    const r = await api.get('/canvass/v1/hello')
+      .set('Authorization', 'Bearer '+rich.jwt);
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.msg).to.equal("Awaiting assignment");
+    expect(r.body.data.ready).to.equal(false);
+    expect(r.body.data).to.not.have.property("admin");
+  });
+
+  it('hello 200 jane awaiting assignment', async () => {
+    const r = await api.get('/canvass/v1/hello')
+      .set('Authorization', 'Bearer '+jane.jwt);
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.msg).to.equal("Awaiting assignment");
+    expect(r.body.data.ready).to.equal(false);
+    expect(r.body.data).to.not.have.property("admin");
+  });
+
+  it('hello 200 mike awaiting assignment', async () => {
+    const r = await api.get('/canvass/v1/hello')
+      .set('Authorization', 'Bearer '+mike.jwt);
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.msg).to.equal("Awaiting assignment");
+    expect(r.body.data.ready).to.equal(false);
+    expect(r.body.data).to.not.have.property("admin");
+  });
+
   // TODO: check admin full list vs. non-admin only see your own team
 
   it('canvasser/list 200 array', async () => {
@@ -212,28 +263,25 @@ describe('API smoke', function () {
 
   // TODO: check admin full list vs. non-admin only see your own teams
 
-  it('team/create & members add/list/remove & team/delete', async () => {
-    let teamName = tpx+Math.ceil(Math.random()*10000000);
+  it('team/create & team/members/add team 1', async () => {
     let r;
 
     r = await api.post('/canvass/v1/team/create')
       .set('Authorization', 'Bearer '+admin.jwt)
       .send({
-        name: teamName,
+        name: teamName1,
       });
     expect(r.statusCode).to.equal(200);
-    expect(r.body.data).to.be.an('array');
 
     r = await api.post('/canvass/v1/team/create')
       .set('Authorization', 'Bearer '+admin.jwt)
       .send({
-        name: teamName,
+        name: teamName1,
       });
     expect(r.statusCode).to.equal(500);
     expect(r.body.error).to.equal(true);
-    expect(r.body.msg).to.be.an('string');
 
-    r = await api.get('/canvass/v1/team/members/list?teamName='+teamName)
+    r = await api.get('/canvass/v1/team/members/list?teamName='+teamName1)
       .set('Authorization', 'Bearer '+admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.data.length).to.equal(0);
@@ -241,7 +289,7 @@ describe('API smoke', function () {
     r = await api.post('/canvass/v1/team/members/add')
       .set('Authorization', 'Bearer '+admin.jwt)
       .send({
-        teamName: teamName,
+        teamName: teamName1,
         cId: bob.id,
       });
     expect(r.statusCode).to.equal(200);
@@ -249,20 +297,87 @@ describe('API smoke', function () {
     r = await api.post('/canvass/v1/team/members/add')
       .set('Authorization', 'Bearer '+admin.jwt)
       .send({
-        teamName: teamName,
+        teamName: teamName1,
         cId: sally.id,
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.get('/canvass/v1/team/members/list?teamName='+teamName)
+    r = await api.get('/canvass/v1/team/members/list?teamName='+teamName1)
       .set('Authorization', 'Bearer '+admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.data.length).to.equal(2);
 
+  });
+
+  it('team/create & team/members/add team 2', async () => {
+    let r;
+
+    r = await api.post('/canvass/v1/team/create')
+      .set('Authorization', 'Bearer '+admin.jwt)
+      .send({
+        name: teamName2,
+      });
+    expect(r.statusCode).to.equal(200);
+
+    r = await api.get('/canvass/v1/team/members/list?teamName='+teamName2)
+      .set('Authorization', 'Bearer '+admin.jwt);
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.data.length).to.equal(0);
+
+    r = await api.post('/canvass/v1/team/members/add')
+      .set('Authorization', 'Bearer '+admin.jwt)
+      .send({
+        teamName: teamName2,
+        cId: rich.id,
+      });
+    expect(r.statusCode).to.equal(200);
+
+    r = await api.post('/canvass/v1/team/members/add')
+      .set('Authorization', 'Bearer '+admin.jwt)
+      .send({
+        teamName: teamName2,
+        cId: jane.id,
+      });
+    expect(r.statusCode).to.equal(200);
+
+    r = await api.get('/canvass/v1/team/members/list?teamName='+teamName1)
+      .set('Authorization', 'Bearer '+admin.jwt);
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.data.length).to.equal(2);
+
+    r = await api.get('/canvass/v1/team/members/list?teamName='+teamName2)
+      .set('Authorization', 'Bearer '+admin.jwt);
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.data.length).to.equal(2);
+
+  });
+
+  it('turf/create & turf/assigned/team', async () => {
+    let r;
+
+    r = await api.post('/canvass/v1/turf/create')
+      .set('Authorization', 'Bearer '+admin.jwt)
+      .send({
+        name: turfName1,
+      });
+    expect(r.statusCode).to.equal(200);
+
+    r = await api.post('/canvass/v1/turf/create')
+      .set('Authorization', 'Bearer '+admin.jwt)
+      .send({
+        name: turfName2,
+      });
+    expect(r.statusCode).to.equal(200);
+
+  });
+
+  it('team/members/remove & team/delete', async () => {
+    let r;
+
     r = await api.post('/canvass/v1/team/members/remove')
       .set('Authorization', 'Bearer '+admin.jwt)
       .send({
-        teamName: teamName,
+        teamName: teamName1,
         cId: bob.id,
       });
     expect(r.statusCode).to.equal(200);
@@ -270,12 +385,12 @@ describe('API smoke', function () {
     r = await api.post('/canvass/v1/team/members/remove')
       .set('Authorization', 'Bearer '+admin.jwt)
       .send({
-        teamName: teamName,
+        teamName: teamName1,
         cId: sally.id,
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.get('/canvass/v1/team/members/list?teamName='+teamName)
+    r = await api.get('/canvass/v1/team/members/list?teamName='+teamName1)
       .set('Authorization', 'Bearer '+admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.data.length).to.equal(0);
@@ -283,7 +398,38 @@ describe('API smoke', function () {
     r = await api.post('/canvass/v1/team/delete')
       .set('Authorization', 'Bearer '+admin.jwt)
       .send({
-        name: teamName,
+        name: teamName1,
+      });
+    expect(r.statusCode).to.equal(200);
+
+    r = await api.post('/canvass/v1/team/delete')
+      .set('Authorization', 'Bearer '+admin.jwt)
+      .send({
+        name: teamName2,
+      });
+    expect(r.statusCode).to.equal(200);
+
+  });
+
+  it('turf/delete', async () => {
+    let r;
+
+    r = await api.get('/canvass/v1/turf/assigned/team/list?turfName='+turfName1)
+      .set('Authorization', 'Bearer '+admin.jwt);
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.data.length).to.equal(0);
+
+    r = await api.post('/canvass/v1/turf/delete')
+      .set('Authorization', 'Bearer '+admin.jwt)
+      .send({
+        name: turfName1,
+      });
+    expect(r.statusCode).to.equal(200);
+
+    r = await api.post('/canvass/v1/turf/delete')
+      .set('Authorization', 'Bearer '+admin.jwt)
+      .send({
+        name: turfName2,
       });
     expect(r.statusCode).to.equal(200);
 
