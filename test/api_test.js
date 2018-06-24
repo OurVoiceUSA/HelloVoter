@@ -92,7 +92,7 @@ describe('API smoke', function () {
     let jwt_inval = jwt.sign(JSON.stringify({
       sub: 12345,
       id: 12345,
-      iss: 'example.com',
+      iss: admin.iss,
       iat: Math.floor(new Date().getTime() / 1000)-60,
       exp: Math.floor(new Date().getTime() / 1000)+60,
     }), Math.random().toString());
