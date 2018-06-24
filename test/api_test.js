@@ -157,28 +157,37 @@ describe('API smoke', function () {
     expect(r.body.data).to.be.an('array');
   });
 
-  // TODO: lock a user from above, make sure that user gets a 403, unlock it, then 200
-
   it('canvasser/lock 200 array', async () => {
-    const r = await api.post('/canvass/v1/canvasser/lock')
+    let r;
+
+    r = await api.post('/canvass/v1/canvasser/lock')
       .set('Authorization', 'Bearer '+admin.jwt)
       .send({
-        id: "12345678765432",
+        id: bob.id,
       });
     expect(r.statusCode).to.equal(200);
     expect(r.body).to.not.have.property("error");
-    expect(r.body.data).to.be.an('array');
+
+    r = await api.get('/canvass/v1/hello')
+      .set('Authorization', 'Bearer '+bob.jwt);
+    expect(r.statusCode).to.equal(403);
+    expect(r.body.msg).to.equal("Your account is locked.");
   });
 
   it('canvasser/unlock 200 array', async () => {
-    const r = await api.post('/canvass/v1/canvasser/unlock')
+    let r;
+
+    r = await api.post('/canvass/v1/canvasser/unlock')
       .set('Authorization', 'Bearer '+admin.jwt)
       .send({
-        id: "12345678765432",
+        id: bob.id,
       });
     expect(r.statusCode).to.equal(200);
     expect(r.body).to.not.have.property("error");
-    expect(r.body.data).to.be.an('array');
+
+    r = await api.get('/canvass/v1/hello')
+      .set('Authorization', 'Bearer '+bob.jwt);
+    expect(r.statusCode).to.equal(200);
   });
 
   // TODO: check admin full list vs. non-admin only see your own teams
