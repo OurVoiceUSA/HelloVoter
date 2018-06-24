@@ -69,8 +69,6 @@ describe('API smoke', function () {
   it('poke 200 timestamp', async () => {
     const r = await api.get('/poke');
     expect(r.statusCode).to.equal(200);
-    expect(r.body).to.not.have.property("error");
-    expect(r.body.data).to.be.an('array');
     expect(r.body.data[0]).to.satisfy(Number.isInteger);
   });
 
@@ -123,10 +121,7 @@ describe('API smoke', function () {
     r = await api.get('/canvass/v1/hello')
       .set('Authorization', 'Bearer '+admin.jwt);
     expect(r.statusCode).to.equal(200);
-    expect(r.body).to.not.have.property("error");
-    expect(r.body).to.have.property("msg");
     expect(r.body.msg).to.equal("Awaiting assignment");
-    expect(r.body.data).to.have.property("ready");
     expect(r.body.data.ready).to.equal(false);
 
     // make admin an admin
@@ -142,8 +137,6 @@ describe('API smoke', function () {
     const r = await api.get('/canvass/v1/hello')
       .set('Authorization', 'Bearer '+bob.jwt);
     expect(r.statusCode).to.equal(200);
-    expect(r.body).to.not.have.property("error");
-    expect(r.body).to.have.property("msg");
     expect(r.body.msg).to.equal("Awaiting assignment");
     expect(r.body.data.ready).to.equal(false);
     expect(r.body.data).to.not.have.property("admin");
@@ -153,8 +146,6 @@ describe('API smoke', function () {
     const r = await api.get('/canvass/v1/hello')
       .set('Authorization', 'Bearer '+sally.jwt);
     expect(r.statusCode).to.equal(200);
-    expect(r.body).to.not.have.property("error");
-    expect(r.body).to.have.property("msg");
     expect(r.body.msg).to.equal("Awaiting assignment");
     expect(r.body.data.ready).to.equal(false);
     expect(r.body.data).to.not.have.property("admin");
@@ -166,7 +157,6 @@ describe('API smoke', function () {
     const r = await api.get('/canvass/v1/canvasser/list')
       .set('Authorization', 'Bearer '+admin.jwt);
     expect(r.statusCode).to.equal(200);
-    expect(r.body).to.not.have.property("error");
     expect(r.body.data).to.be.an('array');
   });
 
@@ -179,7 +169,6 @@ describe('API smoke', function () {
         id: bob.id,
       });
     expect(r.statusCode).to.equal(200);
-    expect(r.body).to.not.have.property("error");
 
     r = await api.get('/canvass/v1/hello')
       .set('Authorization', 'Bearer '+bob.jwt);
@@ -196,7 +185,6 @@ describe('API smoke', function () {
         id: bob.id,
       });
     expect(r.statusCode).to.equal(200);
-    expect(r.body).to.not.have.property("error");
 
     r = await api.get('/canvass/v1/hello')
       .set('Authorization', 'Bearer '+bob.jwt);
@@ -209,7 +197,6 @@ describe('API smoke', function () {
     const r = await api.get('/canvass/v1/team/list')
       .set('Authorization', 'Bearer '+admin.jwt);
     expect(r.statusCode).to.equal(200);
-    expect(r.body).to.not.have.property("error");
     expect(r.body.data).to.be.an('array');
   });
 
@@ -235,7 +222,6 @@ describe('API smoke', function () {
         name: teamName,
       });
     expect(r.statusCode).to.equal(200);
-    expect(r.body).to.not.have.property("error");
     expect(r.body.data).to.be.an('array');
 
     r = await api.post('/canvass/v1/team/create')
@@ -279,7 +265,6 @@ describe('API smoke', function () {
         name: teamName,
       });
     expect(r.statusCode).to.equal(200);
-    expect(r.body).to.not.have.property("error");
 
     r = await api.get('/canvass/v1/team/members/list?teamName='+teamName)
       .set('Authorization', 'Bearer '+admin.jwt);
