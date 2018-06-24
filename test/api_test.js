@@ -157,7 +157,7 @@ describe('API smoke', function () {
     expect(r.body.data).to.be.an('array');
   });
 
-  it('canvasser/lock 200 array', async () => {
+  it('canvasser/lock 200 bob', async () => {
     let r;
 
     r = await api.post('/canvass/v1/canvasser/lock')
@@ -174,7 +174,7 @@ describe('API smoke', function () {
     expect(r.body.msg).to.equal("Your account is locked.");
   });
 
-  it('canvasser/unlock 200 array', async () => {
+  it('canvasser/unlock 200 bob', async () => {
     let r;
 
     r = await api.post('/canvass/v1/canvasser/unlock')
