@@ -43,9 +43,6 @@ describe('API smoke', function () {
     sally = jwt.decode(r.body.jwt);
     sally.jwt = r.body.jwt;
 
-    // make admin an admin
-    await db.cypherQueryAsync('match (a:Canvasser {id:{id}}) set a.admin=true', admin);
-
   });
 
   after(async () => {
@@ -112,6 +109,9 @@ describe('API smoke', function () {
     expect(r.body.msg).to.equal("Awaiting assignment");
     expect(r.body.data).to.have.property("ready");
     expect(r.body.data.ready).to.equal(false);
+
+    // make admin an admin
+    await db.cypherQueryAsync('match (a:Canvasser {id:{id}}) set a.admin=true', admin);
   });
 
   it('hello 200 bob awaiting assignment', async () => {
