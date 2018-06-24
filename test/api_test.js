@@ -7,7 +7,7 @@ var expect = require('chai').expect;
 var supertest = require('supertest');
 var jwt = require('jsonwebtoken');
 var api = supertest('http://localhost:8080');
-var livedev = supertest(process.env.BASE_URI_DEV);
+var sm_oauth = supertest(process.env.URL_SM_OAUTH);
 
 var fs = require('fs');
 var admin = {};
@@ -29,17 +29,17 @@ describe('API smoke', function () {
     db = new BoltAdapter(neo4j.driver('bolt://'+process.env.NEO4J_HOST, authToken));
     await db.cypherQueryAsync('match (a:Canvasser) where a.id =~ "test:.*" detach delete a');
 
-    r = await livedev.get('/auth/tokentest');
+    r = await sm_oauth.get('/auth/tokentest');
     expect(r.statusCode).to.equal(200);
     admin = jwt.decode(r.body.jwt);
     admin.jwt = r.body.jwt;
 
-    r = await livedev.get('/auth/tokentest');
+    r = await sm_oauth.get('/auth/tokentest');
     expect(r.statusCode).to.equal(200);
     bob = jwt.decode(r.body.jwt);
     bob.jwt = r.body.jwt;
 
-    r = await livedev.get('/auth/tokentest');
+    r = await sm_oauth.get('/auth/tokentest');
     expect(r.statusCode).to.equal(200);
     sally = jwt.decode(r.body.jwt);
     sally.jwt = r.body.jwt;
@@ -71,7 +71,7 @@ describe('API smoke', function () {
   it('hello 400 bad jwt', async () => {
     let r;
 
-    r = await livedev.post('/auth/jwt')
+    r = await sm_oauth.post('/auth/jwt')
       .set('Content-Type', 'application/json')
       .set('User-Agent', 'OurVoiceUSA/test')
       .send({
