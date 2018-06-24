@@ -2,7 +2,6 @@
 var neo4j = require('neo4j-driver').v1;
 var BoltAdapter = require('node-neo4j-bolt-adapter');
 
-var should = require('chai').should();
 var expect = require('chai').expect;
 var supertest = require('supertest');
 var jwt = require('jsonwebtoken');
