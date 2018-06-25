@@ -39,34 +39,38 @@ describe('API smoke', function () {
     await db.cypherQueryAsync('match (a:Canvasser) where a.id =~ "test:.*" detach delete a');
     await db.cypherQueryAsync('match (a) where a.name =~ "'+tpx+'.*" detach delete a');
 
+    r = await sm_oauth.get('/pubkey');
+    expect(r.statusCode).to.equal(200);
+    let public_key = r.body.toString();
+
     r = await sm_oauth.get('/tokentest');
     expect(r.statusCode).to.equal(200);
-    admin = jwt.decode(r.body.jwt);
+    admin = jwt.verify(r.body.jwt, public_key);
     admin.jwt = r.body.jwt;
 
     r = await sm_oauth.get('/tokentest');
     expect(r.statusCode).to.equal(200);
-    bob = jwt.decode(r.body.jwt);
+    bob = jwt.verify(r.body.jwt, public_key);
     bob.jwt = r.body.jwt;
 
     r = await sm_oauth.get('/tokentest');
     expect(r.statusCode).to.equal(200);
-    sally = jwt.decode(r.body.jwt);
+    sally = jwt.verify(r.body.jwt, public_key);
     sally.jwt = r.body.jwt;
 
     r = await sm_oauth.get('/tokentest');
     expect(r.statusCode).to.equal(200);
-    rich = jwt.decode(r.body.jwt);
+    rich = jwt.verify(r.body.jwt, public_key);
     rich.jwt = r.body.jwt;
 
     r = await sm_oauth.get('/tokentest');
     expect(r.statusCode).to.equal(200);
-    jane = jwt.decode(r.body.jwt);
+    jane = jwt.verify(r.body.jwt, public_key);
     jane.jwt = r.body.jwt;
 
     r = await sm_oauth.get('/tokentest');
     expect(r.statusCode).to.equal(200);
-    mike = jwt.decode(r.body.jwt);
+    mike = jwt.verify(r.body.jwt, public_key);
     mike.jwt = r.body.jwt;
 
   });
