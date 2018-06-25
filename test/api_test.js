@@ -6,7 +6,7 @@ var expect = require('chai').expect;
 var supertest = require('supertest');
 var jwt = require('jsonwebtoken');
 var api = supertest('http://localhost:8080');
-var sm_oauth = supertest(process.env.URL_SM_OAUTH);
+var sm_oauth = supertest(process.env.SM_OAUTH_URL);
 
 var fs = require('fs');
 var admin = {};
@@ -39,32 +39,32 @@ describe('API smoke', function () {
     await db.cypherQueryAsync('match (a:Canvasser) where a.id =~ "test:.*" detach delete a');
     await db.cypherQueryAsync('match (a) where a.name =~ "'+tpx+'.*" detach delete a');
 
-    r = await sm_oauth.get('/auth/tokentest');
+    r = await sm_oauth.get('/tokentest');
     expect(r.statusCode).to.equal(200);
     admin = jwt.decode(r.body.jwt);
     admin.jwt = r.body.jwt;
 
-    r = await sm_oauth.get('/auth/tokentest');
+    r = await sm_oauth.get('/tokentest');
     expect(r.statusCode).to.equal(200);
     bob = jwt.decode(r.body.jwt);
     bob.jwt = r.body.jwt;
 
-    r = await sm_oauth.get('/auth/tokentest');
+    r = await sm_oauth.get('/tokentest');
     expect(r.statusCode).to.equal(200);
     sally = jwt.decode(r.body.jwt);
     sally.jwt = r.body.jwt;
 
-    r = await sm_oauth.get('/auth/tokentest');
+    r = await sm_oauth.get('/tokentest');
     expect(r.statusCode).to.equal(200);
     rich = jwt.decode(r.body.jwt);
     rich.jwt = r.body.jwt;
 
-    r = await sm_oauth.get('/auth/tokentest');
+    r = await sm_oauth.get('/tokentest');
     expect(r.statusCode).to.equal(200);
     jane = jwt.decode(r.body.jwt);
     jane.jwt = r.body.jwt;
 
-    r = await sm_oauth.get('/auth/tokentest');
+    r = await sm_oauth.get('/tokentest');
     expect(r.statusCode).to.equal(200);
     mike = jwt.decode(r.body.jwt);
     mike.jwt = r.body.jwt;
@@ -106,7 +106,7 @@ describe('API smoke', function () {
   it('hello 400 bad jwt', async () => {
     let r;
 
-    r = await sm_oauth.post('/auth/jwt')
+    r = await sm_oauth.post('/jwt')
       .set('Content-Type', 'application/json')
       .set('User-Agent', 'OurVoiceUSA/test')
       .send({

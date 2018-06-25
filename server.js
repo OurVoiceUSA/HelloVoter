@@ -3,7 +3,6 @@ import express from 'express';
 import expressLogging from 'express-logging';
 import expressAsync from 'express-async-await';
 import cors from 'cors';
-import fs from 'fs';
 import uuidv4 from 'uuid/v4';
 import logger from 'logops';
 import fetch from 'node-fetch';
@@ -19,33 +18,29 @@ const ovi_config = {
   neo4j_host: ( process.env.NEO4J_HOST ? process.env.NEO4J_HOST : 'localhost' ),
   neo4j_user: ( process.env.NEO4J_USER ? process.env.NEO4J_USER : 'neo4j' ),
   neo4j_pass: ( process.env.NEO4J_PASS ? process.env.NEO4J_PASS : 'neo4j' ),
-  jwt_pub_key: ( process.env.JWT_PUB_KEY ? process.env.JWT_PUB_KEY : 'https://ws.ourvoiceusa.org/auth/pubkey' ),
-  jwt_iss: ( process.env.JWT_ISS ? process.env.JWT_ISS : 'example.com' ),
+  sm_oauth: ( process.env.SM_OAUTH_URL ? process.env.SM_OAUTH_URL : 'https://ws.ourvoiceusa.org/auth' ),
   DEBUG: ( process.env.DEBUG ? true : false ),
 };
 
 var public_key;
+var jwt_iss;
 
-// if public key starts with http, use node-fetch
-if (ovi_config.jwt_pub_key.match(/^http/)) {
-  fetch(ovi_config.jwt_pub_key)
-    .then(res => {
-      if (res.status !== 200) throw "http code "+res.status;
-      return res.text()
-    })
-    .then(body => {
-      public_key = body;
-    })
-    .catch((e) => {
-      console.log("Unable to read JWT_PUB_KEY of "+ovi_config.jwt_pub_key);
-      console.log(e);
-      process.exit(1);
-    });
-} else {
-  public_key = fs.readFileSync(ovi_config.jwt_pub_key);
-}
+fetch(ovi_config.sm_oauth+'/pubkey')
+.then(res => {
+  if (res.status !== 200) throw "http code "+res.status;
+  jwt_iss = res.headers.get('x-jwt-iss');
+  return res.text()
+})
+.then(body => {
+  public_key = body;
+})
+.catch((e) => {
+  console.log("Unable to read SM_OAUTH_URL "+ovi_config.sm_oauth);
+  console.log(e);
+  process.exit(1);
+});
 
-console.log('Read public key from '+ovi_config.jwt_pub_key);
+console.log('Read public key from '+ovi_config.sm_oauth+'/pubkey');
 
 // async'ify neo4j
 const authToken = neo4j.auth.basic(ovi_config.neo4j_user, ovi_config.neo4j_pass);
@@ -421,6 +416,8 @@ if (!ovi_config.DEBUG && ovi_config.ip_header) {
 
 // add req.user if there's a valid JWT
 app.use(async function (req, res, next) {
+  res.set('x-sm-oauth-url', ovi_config.sm_oauth);
+
   if (req.method == 'OPTIONS') return next(); // skip OPTIONS requests
 
   req.user = {};
@@ -435,7 +432,7 @@ app.use(async function (req, res, next) {
 
     // verify props
     if (!u.id) return res.status(400).send({error: true, msg: "Your token is missing a required parameter."});
-    if (u.iss !== ovi_config.jwt_iss) return res.status(403).send({error: true, msg: "Your token was issued for a different domain."});
+    if (u.iss !== jwt_iss) return res.status(403).send({error: true, msg: "Your token was issued for a different domain."});
 
     // check for this user in the database
     let a = await cqa('match (a:Canvasser {id:{id}}) return a', u);
