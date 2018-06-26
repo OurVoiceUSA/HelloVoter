@@ -257,15 +257,10 @@ describe('API smoke', function () {
       .set('Authorization', 'Bearer '+sally.jwt)
       .send({
         id: bob.id,
-        name: "Bobby",
+        name: "Bestie",
         avatar: "http://example.com/avatar.jpg",
       });
     expect(r.statusCode).to.equal(403);
-
-    r = await api.get('/canvass/v1/canvasser/get?id='+bob.id)
-      .set('Authorization', 'Bearer '+sally.jwt)
-    expect(r.statusCode).to.equal(403);
-    expect(r.body).to.not.have.property("data");
 
   });
 
@@ -407,6 +402,43 @@ describe('API smoke', function () {
       .set('Authorization', 'Bearer '+admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.data.length).to.equal(2);
+
+  });
+
+  it('canvasser/get same team', async () => {
+    let r;
+
+    r = await api.get('/canvass/v1/canvasser/get?id='+bob.id)
+      .set('Authorization', 'Bearer '+admin.jwt)
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.data.length).to.equal(1);
+    expect(r.body.data[0].id).to.equal(bob.id);
+    expect(r.body.data[0].display_name).to.equal("Bobby");
+    expect(r.body.data[0].display_avatar).to.equal("http://example.com/avatar.jpg");
+
+    r = await api.get('/canvass/v1/canvasser/get?id='+bob.id)
+      .set('Authorization', 'Bearer '+sally.jwt)
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.data.length).to.equal(1);
+    expect(r.body.data[0].id).to.equal(bob.id);
+    expect(r.body.data[0].display_name).to.equal("Bobby");
+    expect(r.body.data[0].display_avatar).to.equal("http://example.com/avatar.jpg");
+
+    r = await api.get('/canvass/v1/canvasser/get?id='+bob.id)
+      .set('Authorization', 'Bearer '+rich.jwt)
+    expect(r.statusCode).to.equal(403);
+    expect(r.body).to.not.have.property("data");
+
+    r = await api.get('/canvass/v1/canvasser/get?id='+jane.id)
+      .set('Authorization', 'Bearer '+rich.jwt)
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.data.length).to.equal(1);
+    expect(r.body.data[0].id).to.equal(jane.id);
+
+    r = await api.get('/canvass/v1/canvasser/get?id='+jane.id)
+      .set('Authorization', 'Bearer '+mike.jwt)
+    expect(r.statusCode).to.equal(403);
+    expect(r.body).to.not.have.property("data");
 
   });
 

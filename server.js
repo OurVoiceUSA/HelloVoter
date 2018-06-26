@@ -108,6 +108,21 @@ function poke(req, res) {
   return cqdo(req, res, 'return timestamp()', false);
 }
 
+async function sameTeam(ida, idb) {
+  if (ida === idb) return true;
+
+  try {
+    let ref = await cqa('match (a:Canvasser {id:{ida}})-[:MEMBERS]-(c:Team)-[:MEMBERS]-(b:Canvasser {id:{idb}}) return c;', {ida: ida, idb: idb});
+    if (ref.data.length === 1)
+      return true;
+  } catch (e) {
+    console.warn(e);
+  }
+
+  return false;
+}
+
+
 // they say that time's supposed to heal ya but i ain't done much healin'
 
 async function hello(req, res) {
@@ -177,12 +192,12 @@ function canvasserList(req, res) {
 }
 
 async function canvasserGet(req, res) {
-  if (!req.user.admin && req.query.id !== req.user.id) return res.status(403).send({error: true, msg: "Permission denied."});
+  if (!req.user.admin && req.query.id !== req.user.id && !await sameTeam(req.query.id, req.user.id)) return res.status(403).send({error: true, msg: "Permission denied."});
 
   return cqdo(req, res, 'match (a:Canvasser {id:{id}}) return a', req.query);
 }
 
-async function canvasserUpdate(req, res) {
+function canvasserUpdate(req, res) {
   if (!req.user.admin && req.body.id !== req.user.id) return res.status(403).send({error: true, msg: "Permission denied."});
   // TODO: need looser valid function for avatar
   if (!valid(req.body.name) || !valid(req.body.id)) return res.status(400).send({error: true, msg: "Invalid value to parameter 'id' or 'name' or 'avatar'."});
