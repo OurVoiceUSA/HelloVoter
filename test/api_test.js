@@ -8,6 +8,8 @@ var jwt = require('jsonwebtoken');
 var api = supertest('http://localhost:8080');
 var sm_oauth = supertest(process.env.SM_OAUTH_URL);
 
+var keep = (process.env.KEEP_TEST_DATA ? true : false);
+
 var fs = require('fs');
 var admin = {};
 var bob = {};
@@ -76,16 +78,21 @@ describe('API smoke', function () {
   });
 
   after(async () => {
-    // clean up test users
-    await db.cypherQueryAsync('match (a:Canvasser) where a.id =~ "test:.*" detach delete a');
+    let ref;
 
-    // any left over test data??
-    let ref = await db.cypherQueryAsync('match (a) where a.name =~ "'+tpx+'.*" return count(a)');
+    if (!keep) {
+      // clean up test users
+      await db.cypherQueryAsync('match (a:Canvasser) where a.id =~ "test:.*" detach delete a');
+      // any left over test data??
+      ref = await db.cypherQueryAsync('match (a) where a.name =~ "'+tpx+'.*" return count(a)');
+    }
 
     db.close();
 
-    // check query after close, so we don't hang the test on failure
-    expect(ref.data[0]).to.equal(0);
+    if (!keep) {
+      // check query after close, so we don't hang the test on failure
+      expect(ref.data[0]).to.equal(0);
+    }
 
     // confirm that we're all set
     const r = await api.get('/canvass/v1/uncle')
@@ -369,7 +376,7 @@ describe('API smoke', function () {
 
   });
 
-  it('team/members/remove & team/delete', async () => {
+  (keep?it.skip:it)('team/members/remove & team/delete', async () => {
     let r;
 
     r = await api.post('/canvass/v1/team/members/remove')
@@ -409,7 +416,7 @@ describe('API smoke', function () {
 
   });
 
-  it('turf/delete', async () => {
+  (keep?it.skip:it)('turf/delete', async () => {
     let r;
 
     r = await api.get('/canvass/v1/turf/assigned/team/list?turfName='+turfName1)
