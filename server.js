@@ -176,6 +176,20 @@ function canvasserList(req, res) {
   return cqdo(req, res, 'match (a:Canvasser) return a');
 }
 
+async function canvasserGet(req, res) {
+  if (!req.user.admin && req.query.id !== req.user.id) return res.status(403).send({error: true, msg: "Permission denied."});
+
+  return cqdo(req, res, 'match (a:Canvasser {id:{id}}) return a', req.query);
+}
+
+async function canvasserUpdate(req, res) {
+  if (!req.user.admin && req.body.id !== req.user.id) return res.status(403).send({error: true, msg: "Permission denied."});
+  // TODO: need looser valid function for avatar
+  if (!valid(req.body.name) || !valid(req.body.id)) return res.status(400).send({error: true, msg: "Invalid value to parameter 'id' or 'name' or 'avatar'."});
+
+  return cqdo(req, res, 'match (a:Canvasser {id:{id}}) set a.display_name={name}, a.display_avatar={avatar}', req.body);
+}
+
 async function canvasserLock(req, res) {
   if (req.body.id === req.user.id) return res.status(403).send({error: true, msg: "You can't lock yourself."});
 
@@ -464,6 +478,8 @@ app.get('/poke', poke);
 app.get('/canvass/v1/hello', hello);
 app.get('/canvass/v1/uncle', uncle);
 app.get('/canvass/v1/canvasser/list', canvasserList);
+app.get('/canvass/v1/canvasser/get', canvasserGet);
+app.post('/canvass/v1/canvasser/update', canvasserUpdate);
 app.post('/canvass/v1/canvasser/lock', canvasserLock);
 app.post('/canvass/v1/canvasser/unlock', canvasserUnlock);
 app.get('/canvass/v1/team/list', teamList);

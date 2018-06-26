@@ -216,6 +216,59 @@ describe('API smoke', function () {
     expect(r.body.data).to.be.an('array');
   });
 
+  it('canvasser/get & update', async () => {
+    let r;
+
+    r = await api.post('/canvass/v1/canvasser/update')
+      .set('Authorization', 'Bearer '+admin.jwt)
+      .send({
+        id: bob.id,
+        name: "Robert",
+        avatar: "http://example.com/avatar.jpg",
+      });
+    expect(r.statusCode).to.equal(200);
+
+    r = await api.get('/canvass/v1/canvasser/get?id='+bob.id)
+      .set('Authorization', 'Bearer '+admin.jwt)
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.data.length).to.equal(1);
+    expect(r.body.data[0].id).to.equal(bob.id);
+    expect(r.body.data[0].display_name).to.equal("Robert");
+    expect(r.body.data[0].display_avatar).to.equal("http://example.com/avatar.jpg");
+
+    r = await api.post('/canvass/v1/canvasser/update')
+      .set('Authorization', 'Bearer '+bob.jwt)
+      .send({
+        id: bob.id,
+        name: "Bobby",
+        avatar: "http://example.com/avatar.jpg",
+      });
+    expect(r.statusCode).to.equal(200);
+
+    r = await api.get('/canvass/v1/canvasser/get?id='+bob.id)
+      .set('Authorization', 'Bearer '+bob.jwt)
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.data.length).to.equal(1);
+    expect(r.body.data[0].id).to.equal(bob.id);
+    expect(r.body.data[0].display_name).to.equal("Bobby");
+    expect(r.body.data[0].display_avatar).to.equal("http://example.com/avatar.jpg");
+
+    r = await api.post('/canvass/v1/canvasser/update')
+      .set('Authorization', 'Bearer '+sally.jwt)
+      .send({
+        id: bob.id,
+        name: "Bobby",
+        avatar: "http://example.com/avatar.jpg",
+      });
+    expect(r.statusCode).to.equal(403);
+
+    r = await api.get('/canvass/v1/canvasser/get?id='+bob.id)
+      .set('Authorization', 'Bearer '+sally.jwt)
+    expect(r.statusCode).to.equal(403);
+    expect(r.body).to.not.have.property("data");
+
+  });
+
   it('canvasser/lock 200 bob', async () => {
     let r;
 
