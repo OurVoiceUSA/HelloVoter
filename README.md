@@ -59,10 +59,27 @@ Finally, build the app:
     $ npm -v
     5.6.0
     $ node -v
-    v9.3.0
+    v8.11.1
     $ react-native -v
     react-native-cli: 2.0.1
-    react-native: 0.51.0
+    react-native: 0.55.4
+
+## Test Automation
+
+For testing we use `mocha` and `detox` on `ios`. Run the below to get setup with that:
+
+    npm install -g detox-cli mocha-cli
+    brew tap wix/brew
+    brew install wix/brew/applesimutils
+    brew tap facebook/fb
+    brew install fbsimctl --HEAD
+    detox build -c ios.sim.debug
+
+Execute tests with:
+
+    detox test -c ios.sim.debug
+
+Test Automation for Android is waiting on them to support a newer version of react native, see https://github.com/wix/detox/issues/608
 
 ## Contributing
 
