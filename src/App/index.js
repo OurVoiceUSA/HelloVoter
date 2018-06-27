@@ -29,8 +29,7 @@ export default App = StackNavigator({
     screen: HomeScreenPage,
     navigationOptions: ({navigation}) => ({
       title: 'OurVoice',
-      headerBackTitle: ' ',
-      headerTruncatedBackTitle: ' ',
+      headerBackTitle: 'Back',
       headerRight: <SettingsButton nav={navigation} />,
     }),
   },

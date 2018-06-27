@@ -22,5 +22,10 @@ describe('Example', () => {
     await expect(element(by.text('Who We Are'))).toBeVisible();
   });
 
+  it('navigate back from about to homescreen', async () => {
+    await element(by.text('Back')).tap();
+    await expect(element(by.text('About Our Voice'))).toBeVisible();
+  });
+
 })
 
