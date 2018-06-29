@@ -85,7 +85,6 @@ export default class App extends PureComponent {
       locationAccess: null,
       myPosition: {latitude: null, longitude: null},
       region: {latitudeDelta: 0.004, longitudeDelta: 0.004},
-      mapReady: false,
       currentNode: null,
       markers: [],
       fAddress: {},
@@ -1029,8 +1028,6 @@ export default class App extends PureComponent {
   }
 
   renderMarker = (marker) => {
-    if (this.state.mapReady !== true) return null;
-
     let status = {
         home: 0, 'not home': 0, 'not interested': 0, 'not visited': 0,
     };
@@ -1083,8 +1080,6 @@ export default class App extends PureComponent {
   }
 
   renderCluster = (cluster, onPress) => {
-    if (this.state.mapReady !== true) return null;
-
     const pointCount = cluster.pointCount,
       coordinate = cluster.coordinate,
       clusterId = cluster.clusterId;
@@ -1323,7 +1318,6 @@ export default class App extends PureComponent {
               latitudeDelta: latitudeDelta,
               longitudeDelta: longitudeDelta,
             });
-            this.setState({mapReady: true});
           }}
           provider={PROVIDER_GOOGLE}
           style={styles.map}
@@ -1340,7 +1334,7 @@ export default class App extends PureComponent {
           {geofence.length &&
             geofence.map((polygon, idx) => <Polygon key={idx} coordinates={polygon} strokeWidth={2} fillColor="rgba(0,0,0,0)" />)
           ||
-          <Text></Text> // empty tag, because we can't have an empty polygon, and can't have no children
+          <View></View> // empty view, because we can't have an empty polygon, and can't have no children
           }
         </MapView>
         }
