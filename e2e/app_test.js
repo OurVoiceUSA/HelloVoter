@@ -60,7 +60,70 @@ describe('App smoke', () => {
     await element(by.text('Back')).tap();
     await expect(element(by.text('About Our Voice'))).toBeVisible();
   });
-  
+
+
+  it('navigate to canvassing', async () => {
+    await element(by.text('Canvassing')).tap();
+    await expect(element(by.text('Not connected to Dropbox.'))).toBeVisible();
+  });
+
+  it('navigate to sample form', async () => {
+    await element(by.text('Sample Canvassing Form')).tap();
+    await expect(element(by.text('I understand & agree to the guidelines'))).toBeVisible();
+  });
+
+  it('do not agree', async () => {
+    await element(by.text('I do not agree to this! Take me back!')).tap();
+    await expect(element(by.text('Not connected to Dropbox.'))).toBeVisible();
+  });
+
+  it('navigate to sample form again', async () => {
+    await element(by.text('Sample Canvassing Form')).tap();
+    await expect(element(by.text('I understand & agree to the guidelines'))).toBeVisible();
+  });
+
+  it('agree to the guidelines', async () => {
+    await element(by.text('I understand & agree to the guidelines')).tap();
+    await expect(element(by.id('map-marker'))).toBeVisible();
+  });
+
+  it('open menu confirm the address', async () => {
+    await element(by.id('map-marker')).tap();
+    await expect(element(by.text('Multi unit'))).toBeVisible();
+  });
+
+  it('add marker', async () => {
+    await element(by.text('Add')).tap();
+    await expect(element(by.text('Take Survey'))).toBeVisible();
+  });
+
+  it('not home', async () => {
+    await element(by.text('Not Home')).tap();
+    await expect(element(by.id('map-marker'))).toBeVisible();
+  });
+
+  it('add marker again', async () => {
+    await element(by.id('map-marker')).tap();
+    await expect(element(by.text('Multi unit'))).toBeVisible();
+    await element(by.text('Add')).tap();
+    await expect(element(by.text('Take Survey'))).toBeVisible();
+  });
+
+  it('not interested', async () => {
+    await element(by.text('Not Interested')).tap();
+    await expect(element(by.id('map-marker'))).toBeVisible();
+  });
+
+  it('navigate back canvassing setup', async () => {
+    await element(by.text('Back')).atIndex(0).tap();
+    await expect(element(by.text('Not connected to Dropbox.'))).toBeVisible();
+  });
+
+  it('navigate back to home screen', async () => {
+    await element(by.text('Back')).tap();
+    await expect(element(by.text('About Our Voice'))).toBeVisible();
+  });
+
   it('navigate about our voice', async () => {
     await element(by.text('About Our Voice')).tap();
     await expect(element(by.text('Who We Are'))).toBeVisible();

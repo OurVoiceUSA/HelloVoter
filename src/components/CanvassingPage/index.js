@@ -1340,6 +1340,7 @@ export default class App extends PureComponent {
             onPress={() => {this.showConfirmAddress();}}>
             <Icon
               name="map-marker"
+              testID="map-marker"
               size={50}
               color="#8b4513"
               {...iconStyles} />
