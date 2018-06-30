@@ -38,10 +38,17 @@ describe('App smoke', () => {
     await expect(element(by.text('U.S. House of Representatives'))).toBeVisible();
   });
 
-  it('change show rep to home address', async () => {
+  it('tap to change change show reps', async () => {
     await element(by.text('Based on your approximate address. Tap to change.')).tap();
     await expect(element(by.text('Show Representatives by:'))).toBeVisible();
+  });
+
+  it('change show reps by home address', async () => {
     await element(by.text('Home Address')).tap();
+    await expect(element(by.text('Cancel'))).toBeVisible();
+  });
+
+  it('enter home address and search', async () => {
     await element(by.text('Search')).typeText('1 Rocket Rd Haw');
     await element(by.text('1 Rocket Rd Haw')).tapAtPoint({x: 5, y:50});
     await expect(element(by.text('U.S. House of Representatives'))).toBeVisible();
