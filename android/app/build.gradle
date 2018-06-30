@@ -33,7 +33,7 @@ android {
         applicationId "org.ourvoiceinitiative.ourvoice"
         minSdkVersion 16
         targetSdkVersion 26
-        versionName "1.8.0"
+        versionName "1.7.8"
         versionCode 33
         renderscriptTargetApi 26
         renderscriptSupportModeEnabled true
