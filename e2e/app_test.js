@@ -14,20 +14,6 @@ after(async () => {
 
 describe('App smoke', () => {
 
-  it('should have about button', async () => {
-    await expect(element(by.text('About Our Voice'))).toBeVisible();
-  });
-  
-  it('navigate about our voice', async () => {
-    await element(by.text('About Our Voice')).tap();
-    await expect(element(by.text('Who We Are'))).toBeVisible();
-  });
-
-  it('navigate back from about to homescreen', async () => {
-    await element(by.text('Back')).tap();
-    await expect(element(by.text('About Our Voice'))).toBeVisible();
-  });
-
   it('navigate your representatives', async () => {
     await element(by.text('Your Representatives')).tap();
     await expect(element(by.text('Show Representatives by:'))).toBeVisible();
@@ -63,6 +49,31 @@ describe('App smoke', () => {
   it('U.S. Senate PolProfile', async () => {
     await element(by.text('U.S. Senate')).tapAtPoint({x: 250, y:50});
     await expect(element(by.text('United States Senate'))).toBeVisible();
+  });
+
+  it('navigate back from PolProfile', async () => {
+    await element(by.text('Back')).atIndex(0).tap();
+    await expect(element(by.text('U.S. Senate'))).toBeVisible();
+  });
+
+  it('navigate back from your reps', async () => {
+    await element(by.text('Back')).tap();
+    await expect(element(by.text('About Our Voice'))).toBeVisible();
+  });
+  
+  it('navigate about our voice', async () => {
+    await element(by.text('About Our Voice')).tap();
+    await expect(element(by.text('Who We Are'))).toBeVisible();
+  });
+
+  it('scroll to bottom of about screen', async () => {
+    await element(by.id('scrollView')).scrollTo('bottom');
+    await expect(element(by.text('You'))).toBeVisible();
+  });
+
+  it('navigate back from about to homescreen', async () => {
+    await element(by.text('Back')).tap();
+    await expect(element(by.text('About Our Voice'))).toBeVisible();
   });
 
 })

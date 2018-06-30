@@ -26,7 +26,7 @@ export default class App extends PureComponent {
 
   render() {
     return (
-      <ScrollView style={{flex: 1, backgroundColor: 'white'}}>
+      <ScrollView style={{flex: 1, backgroundColor: 'white'}} testID="scrollView">
 
         <Text style={{margin: 5, fontSize: 18, color: 'black', fontWeight: 'bold'}}>
           Who We Are
