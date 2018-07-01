@@ -442,6 +442,14 @@ describe('API smoke', function () {
 
   });
 
+  it('sync', async () => {
+    let r;
+
+    r = await api.post('/canvass/v1/sync')
+      .set('Authorization', 'Bearer '+mike.jwt)
+    expect(r.statusCode).to.equal(403);
+  });
+
   it('turf/create & turf/assigned/team', async () => {
     let r;
 

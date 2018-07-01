@@ -114,10 +114,6 @@ async function cqdo(req, res, q, p, a) {
   return res.status(200).send({msg: "OK", data: ref.data});
 }
 
-function poke(req, res) {
-  return cqdo(req, res, 'return timestamp()', false);
-}
-
 async function sameTeam(ida, idb) {
   if (ida === idb) return true;
 
@@ -132,12 +128,8 @@ async function sameTeam(ida, idb) {
   return false;
 }
 
-
-// they say that time's supposed to heal ya but i ain't done much healin'
-
-async function hello(req, res) {
+async function canvassAssignments(id) {
   let ref;
-  let msg = "Awaiting assignment";
   let obj = {
     ready: false,
     turf: [],
@@ -146,30 +138,20 @@ async function hello(req, res) {
   };
 
   try {
-    // if there are no admins, make this one an admin
-    let ref = await cqa('match (a:Canvasser {admin:true}) return count(a)');
-    if (ref.data[0] === 0) {
-      await cqa('match (a:Canvasser {id:{id}}) set a.admin=true', req.user)
-      req.user.admin = true;
-    }
-
-    // Butterfly in the sky, I can go twice as high.
-    if (req.user.admin === true) obj.admin = true;
-
     // direct assignment to a form
-    ref = await cqa('match (a:Canvasser {id:{id}})-[:ASSIGNED]-(b:Form) return b', req.user)
+    ref = await cqa('match (a:Canvasser {id:{id}})-[:ASSIGNED]-(b:Form) return b', {id: id});
     if (ref.data.length > 0) {
       obj.forms = obj.forms.concat(ref.data);
     }
 
     // direct assignment to turf
-    ref = await cqa('match (a:Canvasser {id:{id}})-[:ASSIGNED]-(b:Turf) return b', req.user)
+    ref = await cqa('match (a:Canvasser {id:{id}})-[:ASSIGNED]-(b:Turf) return b', {id: id});
     if (ref.data.length > 0) {
       obj.turf = obj.turf.concat(ref.data);
     }
 
     // assingment to form/turf via team
-    ref = await cqa('match (a:Canvasser {id:{id}})-[:MEMBERS]-(b:Team)-[:ASSIGNED]-(c:Turf) match (d:Form)-[:ASSIGNED]-(b) return collect(distinct(b)), collect(distinct(c)), collect(distinct(d))', req.user);
+    ref = await cqa('match (a:Canvasser {id:{id}})-[:MEMBERS]-(b:Team)-[:ASSIGNED]-(c:Turf) match (d:Form)-[:ASSIGNED]-(b) return collect(distinct(b)), collect(distinct(c)), collect(distinct(d))', {id: id});
     if (ref.data[0][0].length > 0) {
       obj.teams = obj.teams.concat(ref.data[0][0]);
       obj.turf = obj.turf.concat(ref.data[0][1]);
@@ -177,18 +159,48 @@ async function hello(req, res) {
     }
   } catch (e) {
     console.warn(e);
-    return res.status(500).send({error: true, msg: "Internal server error."});
   }
 
   // TODO: dedupe, someone can be assigned directly to turf/forms and indirectly via a team
   // TODO: add questions to forms, like in formGet()
 
-  if (obj.turf.length > 0 && obj.forms.length > 0) {
-    msg = "You are assigned turf and ready to canvass!";
+  if (obj.turf.length > 0 && obj.forms.length > 0)
     obj.ready = true;
+
+  return obj;
+}
+
+// API function calls
+
+function poke(req, res) {
+  return cqdo(req, res, 'return timestamp()', false);
+}
+
+// they say that time's supposed to heal ya but i ain't done much healin'
+
+async function hello(req, res) {
+  let msg = "Awaiting assignment";
+  let ass = await canvassAssignments(req.user.id);
+
+  try {
+    // if there are no admins, make this one an admin
+    let ref = await cqa('match (a:Canvasser {admin:true}) return count(a)');
+    if (ref.data[0] === 0) {
+      await cqa('match (a:Canvasser {id:{id}}) set a.admin=true', req.user);
+      req.user.admin = true;
+    }
+
+    // Butterfly in the sky, I can go twice as high.
+    if (req.user.admin === true) ass.admin = true;
+  } catch (e) {
+    console.warn(e);
+    return res.status(500).send({error: true, msg: "Internal server error."});
   }
 
-  return res.send({msg: msg, data: obj});
+  if (ass.ready)
+    msg = "You are assigned turf and ready to canvass!";
+
+  return res.send({msg: msg, data: ass});
 }
 
 function uncle(req, res) {
@@ -438,9 +450,14 @@ function questionAssignedRemove(req, res) {
 // sync
 
 async function sync(req, res) {
+  let ass = await canvassAssignments(req.user.id);
+  if (!ass.ready) return res.status(403).send({error: true, msg: "Canvasser is not assigned."});
+
   let nodes = Object.keys(req.body);
   for (let n in nodes) {
     let node = req.body[nodes[n]];
+
+    // if no created or updated, add it here
 
     try {
       switch (node.type) {
