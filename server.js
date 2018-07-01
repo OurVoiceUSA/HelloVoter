@@ -54,9 +54,15 @@ cqa('return timestamp()').catch((e) => {console.error("Unable to connect to data
   cqa('create constraint on (a:Question) assert a.key is unique');
 });
 
+// TODO: safe input for generic safety vs. valid input on a data type basis
+
+function safe_input(str) {
+  if (!str.match(/^[0-9a-zA-Z:_\-\/\. '"]+$/)) return false;
+  return true;
+}
+
 function valid(str) {
   if (!str) return false;
-  if (!str.match(/^[0-9a-zA-Z:_\- '"]+$/)) return false;
   return true;
 }
 
@@ -483,6 +489,13 @@ app.use(async function (req, res, next) {
     console.warn(e);
     return res.status(401).send({error: true, msg: "Invalid token."});
   }
+
+  // validate all keys in req.body and req.query
+  let kb = Object.keys(req.body);
+  for (let i in kb) if (!safe_input(req.body[kb[i]])) return res.status(400).send({error: true, msg: "Invalid input."});
+  let kq = Object.keys(req.query);
+  for (let i in kq) if (!safe_input(req.query[kq[i]])) return res.status(400).send({error: true, msg: "Invalid input."});
+
   next();
 });
 
