@@ -479,7 +479,7 @@ async function sync(req, res) {
 const app = expressAsync(express());
 app.disable('x-powered-by');
 app.use(expressLogging(logger));
-app.use(bodyParser.json());
+app.use(bodyParser.json({limit: '5mb'}));
 app.use(cors());
 
 // require ip_header if config for it is set
