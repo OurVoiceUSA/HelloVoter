@@ -448,6 +448,7 @@ describe('API smoke', function () {
     r = await api.post('/canvass/v1/sync')
       .set('Authorization', 'Bearer '+mike.jwt)
     expect(r.statusCode).to.equal(403);
+    expect(r.body.msg).to.equal("Canvasser is not assigned.");
   });
 
   it('turf/create & turf/assigned/team', async () => {
