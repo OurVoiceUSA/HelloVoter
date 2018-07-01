@@ -52,11 +52,15 @@ cqa('return timestamp()').catch((e) => {console.error("Unable to connect to data
   cqa('create constraint on (a:Turf) assert a.name is unique');
   cqa('create constraint on (a:Form) assert a.id is unique');
   cqa('create constraint on (a:Question) assert a.key is unique');
+  cqa('create constraint on (a:Address) assert a.id is unique');
+  cqa('create constraint on (a:Unit) assert a.id is unique');
+  cqa('create constraint on (a:Survey) assert a.id is unique');
 });
 
 // TODO: safe input for generic safety vs. valid input on a data type basis
 
 function safe_input(str) {
+  if (typeof str === "object") return true;
   if (!str.match(/^[0-9a-zA-Z:_\-\/\. '"]+$/)) return false;
   return true;
 }
@@ -431,6 +435,46 @@ function questionAssignedRemove(req, res) {
   return cqdo(req, res, 'match (a:Question {key:{key}})-[r:ASSIGNED]-(b:Form {id:{fId}}) delete r', req.body, true);
 }
 
+// sync
+
+async function sync(req, res) {
+  let nodes = Object.keys(req.body);
+  for (let n in nodes) {
+    let node = req.body[nodes[n]];
+
+    try {
+      switch (node.type) {
+        case 'address':
+          node.longitude = node.latlng.longitude;
+          node.latitude = node.latlng.latitude;
+          node.street = node.address[0];
+          node.city = node.address[1];
+          node.state = node.address[2]
+          node.zip = node.address[3];
+          await cqa('merge (a:Address {id:{id}}) on create set a += {created:{created},updated:{updated},longitude:{longitude},latitude:{latitude},street:{street},city:{city},state:{state},zip:{zip},multi_unit:{multi_unit}} on match set a += {created:{created},updated:{updated},longitude:{longitude},latitude:{latitude},street:{street},city:{city},state:{state},zip:{zip},multi_unit:{multi_unit}}', node);
+          break;
+        case 'unit':
+          await cqa('merge (a:Unit {id:{id}}) on create set a += {created:{created},updated:{updated},unit:{unit}} on match set a += {created:{created},updated:{updated},unit:{unit}}', node);
+          break;
+        case 'survey':
+          await cqa('merge (a:Survey {id:{id}}) on create set a += {created:{created},updated:{updated},status:{status}} on match set a += {created:{created},updated:{updated},status:{status}}', node);
+          // TODO: survey: object of question keys and answers
+          break;
+        default:
+          console.warn("Unknown type: "+node.type);
+          console.warn(node);
+      }
+
+      if (node.parent_id) await cqa('MATCH (a {id:{id}}), (b {id:{parent_id}}) merge (a)-[:PARENT]->(b)', node);
+      // TODO: link to canvasser
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  return res.send("OK");
+}
+
 // Initialize http server
 const app = expressAsync(express());
 app.disable('x-powered-by');
@@ -542,6 +586,7 @@ app.post('/canvass/v1/question/delete', questionDelete);
 app.get('/canvass/v1/question/assigned/list', questionAssignedList);
 app.post('/canvass/v1/question/assigned/add', questionAssignedAdd);
 app.post('/canvass/v1/question/assigned/remove', questionAssignedRemove);
+app.post('/canvass/v1/sync', sync);
 
 // Launch the server
 const server = app.listen(ovi_config.server_port, () => {
