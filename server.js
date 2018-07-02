@@ -530,19 +530,13 @@ app.use(async function (req, res, next) {
     if (!u.id) return res.status(400).send({error: true, msg: "Your token is missing a required parameter."});
     if (u.iss !== jwt_iss) return res.status(403).send({error: true, msg: "Your token was issued for a different domain."});
 
-    // check for this user in the database
-    let a = await cqa('match (a:Canvasser {id:{id}}) return a', u);
+    if (!u.email) u.email = "";
+    if (!u.avatar) u.avatar = "";
+
+    let a = await cqa('merge (a:Canvasser {id:{id}}) on match set a += {last_seen: timestamp(), name:{name}, email:{email}, avatar:{avatar}} on create set a += {created: timestamp(), name:{name}, email:{email}, avatar:{avatar}} return a', u);
     if (a.data.length === 1) {
       req.user = a.data[0];
-      // TODO: check req.user vs. u to update name or email or avatar props
-    } else {
-      // attempt to create the user, some props are optional
-      if (!u.email) u.email = "";
-      if (!u.avatar) u.avatar = "";
-      await cqa('create (a:Canvasser {created: timestamp(), id:{id}, name:{name}, email:{email}, avatar:{avatar}})', u);
-      a = await cqa('match (a:Canvasser {id:{id}}) return a', u);
-      req.user = a.data[0];
-    }
+    } else return res.status(500).send({error: true, msg: "Internal server error."});
 
     if (req.user.locked) return res.status(403).send({error: true, msg: "Your account is locked."});
 
