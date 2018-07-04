@@ -33,7 +33,7 @@ import { Marker, Callout, Polygon, PROVIDER_GOOGLE } from 'react-native-maps'
 import MapView from 'react-native-maps-super-cluster'
 import encoding from 'encoding';
 import { transliterate as tr } from 'transliteration/src/main/browser';
-import { _doGeocode } from '../../common';
+import { _doGeocode, _getApiToken } from '../../common';
 import KnockPage from '../KnockPage';
 import Modal from 'react-native-simple-modal';
 import TimeAgo from 'javascript-time-ago'
@@ -43,6 +43,7 @@ import base64 from 'base-64';
 import en from 'javascript-time-ago/locale/en'
 import t from 'tcomb-form-native';
 import _ from 'lodash';
+import { wsbase } from '../../config';
 
 TimeAgo.locale(en);
 
@@ -77,6 +78,7 @@ export default class App extends PureComponent {
     super(props);
 
     this.state = {
+      server: props.navigation.state.params.server,
       loading: false,
       netInfo: 'none',
       exportRunning: false,
@@ -212,6 +214,11 @@ export default class App extends PureComponent {
     this.setState({netInfo: state});
   }
 
+  _syncable() {
+    if (this.state.dbx) return true;
+    return this.state.server;
+  }
+
   syncingOk() {
     if (this.state.netInfo === 'none') return false;
     if (this.state.canvassSettings.sync_on_cellular !== true && this.state.netInfo !== 'wifi') return false;
@@ -231,51 +238,6 @@ export default class App extends PureComponent {
       'connectionChange',
       this.handleConnectivityChange
     );
-  }
-
-  cutTurf = async (markers) => {
-    const { dbx, form } = this.state;
-
-    let turf = {};
-
-    nodeList = this.mergeNodes([this.allNodes]);
-
-    for (let n in nodeList) {
-      let node = nodeList[n];
-      let skip = true;
-      if (node.type === "survey" && node.status === "home") {
-        if (node.survey) {
-          switch (node.survey.Support) {
-            case 'SA':
-            case 'A':
-            case 'N':
-            case null:
-              skip = false;
-              break;
-          }
-        }
-
-        if (skip) continue;
-
-        let nodes = this.getParentNodesDeep(node.id);
-        if (nodes.length) {
-          let addr = nodes[nodes.length-1];
-          for (let m in markers) {
-            let marker = markers[m];
-            if (marker.id === addr.id) {
-              turf[marker.id] = marker;
-              for (let n in nodes) {
-                let node = nodes[n];
-                turf[node.id] = node;
-              }
-              break;
-            }
-          }
-        }
-      }
-    }
-
-    await dbx.filesUpload({ path: form.folder_path+'/cut.jtrf', contents: encoding.convert(tr(this._nodesToJtxt(turf)), 'ISO-8859-1'), mute: true, mode: {'.tag': 'overwrite'} });
   }
 
   showConfirmAddress() {
@@ -565,7 +527,7 @@ export default class App extends PureComponent {
     this.updateMarkers();
 
     // even if sycn isn't OK over cellular - do the initial sync anyway
-    if (this.state.dbx) await this._syncNodes(false);
+    if (this._syncable()) await this._syncNodes(false);
 
   }
 
@@ -636,7 +598,7 @@ export default class App extends PureComponent {
       return;
     }
 
-    if (!this.state.dbx) return;
+    if (!this._syncable()) return;
 
     if (canvassSettings.sync_on_cellular !== true && canvassSettings.asked_sync_on_cellular !== true)
       this.alertPush({
@@ -766,13 +728,54 @@ export default class App extends PureComponent {
   }
 
   _syncNodes = async (flag) => {
-    let { dbx, form, user } = this.state;
-    let folders = [];
-    let allsrc = [this.allNodes];
+    let error;
 
     if (this.state.syncRunning === true) return;
 
     this.setState({syncRunning: true});
+
+    if (this.state.server) error = await this._syncServer();
+    else error = await this._syncDropbox();
+
+    this.setState({syncRunning: false});
+    this.updateMarkers();
+
+    if (flag) {
+      if (error) {
+        Alert.alert('Error', 'Unable to sync with the server.', [{text: 'OK'}], { cancelable: false });
+      } else {
+        Alert.alert('Success', 'Data sync successful!', [{text: 'OK'}], { cancelable: false });
+      }
+    }
+
+  }
+
+  _syncServer = async () => {
+    let allsrc = [this.allNodes, this.myNodes];
+    error = false;
+
+    try {
+      let res = await fetch(wsbase+'/canvass/v1/sync', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer '+await _getApiToken(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(this.mergeNodes(allsrc))
+      });
+    } catch (e) {
+      error = true;
+      console.warn("fetch err:" +e);
+    }
+
+    return error;
+  }
+
+  _syncDropbox = async () => {
+    let { dbx, form, user } = this.state;
+    let folders = [];
+    let allsrc = [this.allNodes];
+    let error = false;
 
     try {
       // download other jtxt files on this account
@@ -843,16 +846,13 @@ export default class App extends PureComponent {
         }
       }
 
-      if (flag) Alert.alert('Success', 'Data sync successful!', [{text: 'OK'}], { cancelable: false });
-    } catch (error) {
-      if (flag) Alert.alert('Error', 'Unable to sync with the server.', [{text: 'OK'}], { cancelable: false });
+    } catch (e) {
+      error = true;
     }
-
-    this.setState({syncRunning: false});
 
     this.allNodes = this.mergeNodes(allsrc);
 
-    this.updateMarkers();
+    return error;
   }
 
   getNodeById(id) {
@@ -871,37 +871,6 @@ export default class App extends PureComponent {
     this.allNodes[id] = node;
 
     await this._saveNodes(this.myNodes);
-  }
-
-  // TODO: warning ... if there's node whos a parent of its parent, infinite loop here
-  //       for safety -- global idx or pass a reference idx and bail if node.id is in it
-  getChildNodesDeep(id) {
-    let nodes = [];
-
-    if (!this.family[id]) return nodes;
-
-    for (let c in this.family[id]) {
-      let node = this.family[id][c];
-      nodes.unshift(node);
-      nodes = nodes.concat(this.getChildNodesDeep(node.id));
-    }
-
-    return nodes;
-  }
-
-  getParentNodesDeep(id) {
-
-    let node = this.getNodeById(id);
-
-    if (!node.id) return [];
-
-    let nodes = [node];
-
-    if (!node.parent_id) return nodes;
-
-    nodes = nodes.concat(this.getParentNodesDeep(node.parent_id));
-
-    return nodes;
   }
 
   getChildNodesByIdTypes(id, types) {
