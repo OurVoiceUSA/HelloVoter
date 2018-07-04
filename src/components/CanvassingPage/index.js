@@ -307,7 +307,7 @@ export default class App extends PureComponent {
   }
 
   getEpoch() {
-    return Math.floor(new Date().getTime() / 1000)
+    return Math.floor(new Date().getTime())
   }
 
   doConfirmAddress = async () => {
@@ -392,8 +392,12 @@ export default class App extends PureComponent {
 
     if (nodes.length)  {
       let last = nodes[0];
-      if (last.type === "survey")
-        str = this.ucFirst(last.status)+' '+timeAgo.format(new Date(last.updated*1000));
+      if (last.type === "survey") {
+        // App was released in early 2018 with timestamps in seconds
+        // If the timestamp is earlier than that, assume it's in seconds and convert to milliseconds
+        if (last.updated < 1514764801000) last.updated *= 1000;
+        str = this.ucFirst(last.status)+' '+timeAgo.format(new Date(last.updated));
+      }
       else
         str = "Haven't visited";
     } else {
@@ -671,7 +675,7 @@ export default class App extends PureComponent {
   }
 
   timeFormat(epoch) {
-    let date = new Date(epoch*1000);
+    let date = new Date(epoch);
     return date.toLocaleDateString('en-us')+" "+date.toLocaleTimeString('en-us');
   }
 

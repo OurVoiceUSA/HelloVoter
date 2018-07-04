@@ -222,7 +222,7 @@ export async function _getJWT(remote) {
         if (!user.profile.home_lat && localuser.profile.home_lat) { user.profile.home_lat = localuser.profile.home_lat; remote = true; }
       }
     }
-    user.lastsmlogin = Math.floor(new Date().getTime() / 1000);
+    user.lastsmlogin = Math.floor(new Date().getTime());
     user.loggedin = true;
     _saveUser(user, remote);
   } else {

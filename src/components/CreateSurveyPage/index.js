@@ -335,7 +335,7 @@ export default class App extends PureComponent {
       // make sure this name doesn't exist as a dropbox folder
       try {
 
-        let epoch = Math.floor(new Date().getTime() / 1000);
+        let epoch = Math.floor(new Date().getTime());
         let id = sha1(epoch+":"+formName);
 
         let obj;

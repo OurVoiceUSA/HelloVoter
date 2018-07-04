@@ -104,7 +104,7 @@ export default class App extends PureComponent {
       let id = sha1(new Date().getTime());
       forms_local = [{
         "id": id,
-        "created": Math.floor(new Date().getTime() / 1000),
+        "created": Math.floor(new Date().getTime()),
         "name": "Sample Canvassing Form",
         "author": "Our Voice USA",
         "author_id": id,
