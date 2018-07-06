@@ -79,6 +79,7 @@ export default class App extends PureComponent {
 
     this.state = {
       server: props.navigation.state.params.server,
+      last_sync: 0,
       loading: false,
       netInfo: 'none',
       exportRunning: false,
@@ -700,7 +701,7 @@ export default class App extends PureComponent {
     if (this.state.canvassSettings.auto_sync && this.syncingOk() && !this.state.syncRunning) this._syncNodes(false);
   }
 
-  mergeNodes(stores) {
+  mergeNodes(stores, time) {
     let nodes = {};
 
     for (let s in stores) {
@@ -722,6 +723,9 @@ export default class App extends PureComponent {
         }
       }
     }
+
+    // if given a time, sort out everything older than it
+    if (time) for (let n in nodes) if (nodes[n].updated < time) delete nodes[n];
 
     // sort everything in family
     for (let f in this.family) {
@@ -755,7 +759,11 @@ export default class App extends PureComponent {
   }
 
   _syncServer = async () => {
-    let allsrc = [this.allNodes, this.myNodes];
+    let store = {
+      formId: this.state.form.id,
+      last_sync: this.state.last_sync,
+      nodes: this.mergeNodes([this.myNodes], this.state.last_sync)
+    };
     error = false;
 
     try {
@@ -765,11 +773,15 @@ export default class App extends PureComponent {
           'Authorization': 'Bearer '+await _getApiToken(),
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(this.mergeNodes(allsrc))
+        body: JSON.stringify(store)
       });
+
+      if (res.status !== 200) throw "Sync error"
+
+      this.allNodes = this.mergeNodes([this.allNodes,this.myNodes,await res.json()]);
+      this.setState({last_sync: new Date().getTime()});
     } catch (e) {
       error = true;
-      console.warn("fetch err:" +e);
     }
 
     return error;
