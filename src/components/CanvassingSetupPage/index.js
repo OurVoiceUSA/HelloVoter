@@ -293,12 +293,23 @@ export default class App extends PureComponent {
     return Linking.openURL(url).catch(() => null);
   }
 
-  dropboxLogout() {
+  dropboxLogout = async () => {
     let { user } = this.state;
     if (user.dropbox)
       new Dropbox({ accessToken: user.dropbox.accessToken }).authTokenRevoke();
     delete user.dropbox;
     _saveUser(user, false);
+    try {
+      forms_local = JSON.parse(await storage.get('OV_CANVASS_FORMS'));
+      if (forms_local !== null) {
+        for (let idx in forms_local) {
+          if (forms_local[idx] === null || forms_local[idx].backend === "dropbox") delete forms_local[idx];
+        }
+        await storage.set('OV_CANVASS_FORMS', JSON.stringify(forms_local));
+      }
+    } catch (e) {
+      console.warn("error: "+e)
+    }
     this.props.navigation.goBack();
   }
 
