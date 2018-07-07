@@ -346,7 +346,7 @@ export default class App extends PureComponent {
         <View style={{flexDirection: 'row', margin: 20, marginTop: 0}}>
             {loading &&
             <View style={{flex: 1, margin: 20, alignItems: 'center'}}>
-               <Text>Loading data from Dropbox...</Text>
+               <Text>Loading data...</Text>
               <ActivityIndicator size="large" />
             </View>
             ||
