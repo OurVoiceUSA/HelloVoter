@@ -125,6 +125,7 @@ export default class App extends PureComponent {
 
     try {
       forms_local = JSON.parse(await storage.get('OV_CANVASS_FORMS'));
+      if (forms_local === null) forms_local = [];
     } catch (e) {
       console.warn("error: "+e);
       return;
