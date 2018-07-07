@@ -14,6 +14,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
+import t from 'tcomb-form-native';
 import sha1 from 'sha1';
 import Modal from 'react-native-simple-modal';
 import storage from 'react-native-storage-wrapper';
@@ -22,8 +23,10 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import SafariView from 'react-native-safari-view';
 import jwt_decode from 'jwt-decode';
 import { Dropbox } from 'dropbox';
-import { _loginPing, _saveUser } from '../../common';
+import { _loginPing, _saveUser, _getApiToken } from '../../common';
 import { wsbase } from '../../config';
+
+var Form = t.form.Form;
 
 var sampleForm = {
   "id": "sampleForm",
@@ -60,7 +63,60 @@ export default class App extends PureComponent {
       dbxformfound: false,
       SelectModeScreen: false,
       ConnectServerScreen: false,
+      server: null,
     };
+
+    this.onChange = this.onChange.bind(this);
+    this.doSave = this.doSave.bind(this);
+  }
+
+  onChange(server) {
+    this.setState({server})
+  }
+
+  doSave = async () => {
+    let json = this.refs.mainForm.getValue();
+    if (json === null) return;
+
+    try {
+      res = await fetch('https://'+json.server+'/canvass/v1/hello', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer '+await _getApiToken(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({longitude: -118, latitude: 40}),
+      });
+
+      let auth_location = res.headers.get('x-sm-oauth-url');
+
+      if (!auth_location || !auth_location.match(/^https:.*auth$/)) {
+        console.warn("Invalid x-sm-oauth-url header")
+        return;
+      }
+
+      if (auth_location !== 'https://'+wsbase+'/auth') {
+        console.warn("Auth location other than wsbase")
+      }
+
+      switch (res.status) {
+        case 200:
+          console.warn("WELCOME!!")
+          break;
+        case 401:
+          console.warn("NEED TO SIGN IN")
+          break;
+        case 403:
+          console.warn("FORBIDDEN")
+          break;
+        default:
+          console.warn("WTF???")
+          break;
+      }
+
+    } catch (e) {
+      console.warn("error: "+e)
+    }
 
   }
 
@@ -561,6 +617,18 @@ export default class App extends PureComponent {
                 <Text style={styles.header}>
                   Connect to Server
                 </Text>
+
+                <Form
+                  ref="mainForm"
+                  type={t.struct({'server': t.String})}
+                  onChange={this.onChange}
+                  value={this.state.server}
+                />
+
+                <TouchableOpacity style={styles.button} onPress={this.doSave} underlayColor='#99d9f4'>
+                  <Text style={styles.buttonText}>Save Form</Text>
+                </TouchableOpacity>
+
               </View>
             </View>
           </View>
