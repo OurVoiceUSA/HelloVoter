@@ -165,7 +165,7 @@ export default class App extends PureComponent {
   }
 
   render() {
-    const { user, permissionLocation, permissionNotification, SmLoginScreen, DropboxLoginScreen,
+    const { user, permissionLocation, permissionNotification, SmLoginScreen,
             surveyComplete, surveyPartial, party, myPosition } = this.state;
     const { navigate } = this.props.navigation;
 

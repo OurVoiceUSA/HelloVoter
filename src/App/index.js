@@ -72,7 +72,7 @@ export default App = StackNavigator({
   CreateSurvey: {
     screen: CreateSurveyPage,
     navigationOptions: ({navigation}) => ({
-      title: 'Create Form',
+      title: `${navigation.state.params.title}`,
     }),
    },
   YourReps: {

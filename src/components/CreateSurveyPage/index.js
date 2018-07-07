@@ -111,7 +111,7 @@ export default class App extends PureComponent {
     this.state = {
       refer: props.navigation.state.params.refer,
       user: props.navigation.state.params.refer.state.user,
-      dbx: props.navigation.state.params.refer.state.dbx,
+      dbx: props.navigation.state.params.dbx,
       info: {},
       customForm: null,
       geofence: geofence,
@@ -416,12 +416,14 @@ export default class App extends PureComponent {
         }
 
       } catch (error) {
+        console.warn("err: "+error);
         msg = 'Unable to save form, an unknown error occurred.';
       }
     }
 
     if (msg === null) {
-      refer._loadDBData();
+      refer.setState({SelectModeScreen: false})
+      refer._loadForms();
       this.props.navigation.goBack();
     } else {
       Alert.alert('Error', msg, [{text: 'OK'}], { cancelable: false });
@@ -663,6 +665,12 @@ export default class App extends PureComponent {
     );
   }
 }
+
+const iconStyles = {
+  borderRadius: 10,
+  paddingLeft: 25,
+  padding: 10,
+};
 
 var styles = StyleSheet.create({
   container: {

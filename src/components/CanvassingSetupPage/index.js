@@ -8,7 +8,9 @@ import {
   Linking,
   Text,
   View,
+  Platform,
   ScrollView,
+  StyleSheet,
   TouchableOpacity,
 } from 'react-native';
 
@@ -17,9 +19,33 @@ import Modal from 'react-native-simple-modal';
 import storage from 'react-native-storage-wrapper';
 import Swipeout from 'react-native-swipeout';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import DropboxLoginPage from '../DropboxLoginPage';
+import SafariView from 'react-native-safari-view';
+import jwt_decode from 'jwt-decode';
 import { Dropbox } from 'dropbox';
 import { _loginPing, _saveUser } from '../../common';
+import { wsbase } from '../../config';
+
+var sampleForm = {
+  "id": "sampleForm",
+  "created": (new Date().getTime()),
+  "name": "Sample Canvassing Form",
+  "author": "Our Voice USA",
+  "author_id": "sampleForm",
+  "version": 1,
+  "questions":{
+    "FullName":{"type":"String","label":"Full Name","optional":true},
+    "Email":{"type":"String","label":"Email Address","optional":true},
+    "Puppy breed preferences":{"type":"SAND","label":"I prefer my puppies to be fuzzy and cute.","optional":true},
+    "Puppy preferences":{"type":"Boolean","label":"Turn this switch ON if you prefer puppies stay outside.","optional":true},
+    "Bad Puppy preferences":{"type":"SAND","label":"When puppies misbehave, I often shrug it off because hey, they're cute puppies.","optional":true},
+    "Puppy breeds":{"type":"TEXTBOX","label":"Please list as many breeds of puppies you would like to have for your very own.","optional":true},
+    "Puppy breed specify":{"type":"String","label":"Of the breeds you've listed, which style of puppy is your favorite? (There can be only one)","optional":true},
+    "Number of puppies":{"type":"Number","label":"How many puppies can you hold in your arms without dropping any?","optional":true},
+    "Puppy puddles":{"type":"Boolean","label":"Turn this switch ON if you dont mind mopping up puppy puddles.","optional":true},
+    "Puppy trees":{"type":"String","label":"If your favorite breed of puppy could be any type of tree, what type of tree would your favorite fuzzy little puddle-making puppy choose?","optional":true},
+  },
+  "questions_order":["FullName","Email","Puppy breed preferences","Puppy preferences","Bad Puppy preferences","Puppy breeds","Puppy breed specify","Number of puppies","Puppy puddles","Puppy trees"],
+}
 
 export default class App extends PureComponent {
 
@@ -31,28 +57,75 @@ export default class App extends PureComponent {
       user: null,
       forms: [],
       dbx: null,
-      connected: false,
-      DropboxLoginScreen: false,
-      JoinFormScreen: false,
+      dbxformfound: false,
+      SelectModeScreen: false,
     };
 
   }
 
   componentDidMount() {
-    this._loadDBData();
+    // Add event listener to handle OAuthLogin:// URLs
+    Linking.addEventListener('url', this.handleOpenURL);
+    // Launched from an external URL
+    Linking.getInitialURL().then((url) => {
+      if (url) this.handleOpenURL({ url });
+    });
+
+    this._loadForms();
   }
 
-  _loadDBData = async () => {
+  componentWillUnmount() {
+    // Remove event listener
+    Linking.removeEventListener('url', this.handleOpenURL);
+  };
+
+  handleOpenURL = async ({ url }) => {
+    // Extract jwt token out of the URL
+    const [, token] = url.match(/dropbox=([^#]+)/);
+    try {
+      let user = await _loginPing(this, false);
+      user.dropbox = jwt_decode(token);
+      await _saveUser(user, false);
+
+      // TODO: handle the navigate that would have been tapped had we already been logged in
+    } catch(e) {
+      console.warn("error: "+e);
+    }
+
+    if (Platform.OS === 'ios') {
+      SafariView.dismiss();
+    }
+
+    this._loadForms();
+  }
+
+  // Open URL in a browser
+  openURL = (url) => {
+    // Use SafariView on iOS
+    if (Platform.OS === 'ios') {
+      SafariView.show({
+        url: url,
+        fromBottom: true,
+      });
+    }
+    // Or Linking.openURL on Android
+    else {
+      Linking.openURL(url);
+    }
+  };
+
+  _loadForms = async () => {
     const { navigate } = this.props.navigation;
     let folders = [];
     let forms_local = [];
+    let dbxformfound = false;
 
     this.setState({loading: true});
 
     try {
       forms_local = JSON.parse(await storage.get('OV_CANVASS_FORMS'));
     } catch (e) {
-      console.warn(e);
+      console.warn("error: "+e);
       return;
     }
 
@@ -95,34 +168,13 @@ export default class App extends PureComponent {
 
         forms_local.push(json);
       } catch(e) {
-        console.warn(e);
+        console.warn("error: "+e);
       }
     }
 
     if (!user.dropbox && forms_local === null) {
       // gendate a sample form for them
       let id = sha1(new Date().getTime());
-      forms_local = [{
-        "id": id,
-        "created": Math.floor(new Date().getTime()),
-        "name": "Sample Canvassing Form",
-        "author": "Our Voice USA",
-        "author_id": id,
-        "version": 1,
-        "questions":{
-          "FullName":{"type":"String","label":"Full Name","optional":true},
-          "Email":{"type":"String","label":"Email Address","optional":true},
-          "Puppy breed preferences":{"type":"SAND","label":"I prefer my puppies to be fuzzy and cute.","optional":true},
-          "Puppy preferences":{"type":"Boolean","label":"Turn this switch ON if you prefer puppies stay outside.","optional":true},
-          "Bad Puppy preferences":{"type":"SAND","label":"When puppies misbehave, I often shrug it off because hey, they're cute puppies.","optional":true},
-          "Puppy breeds":{"type":"TEXTBOX","label":"Please list as many breeds of puppies you would like to have for your very own.","optional":true},
-          "Puppy breed specify":{"type":"String","label":"Of the breeds you've listed, which style of puppy is your favorite? (There can be only one)","optional":true},
-          "Number of puppies":{"type":"Number","label":"How many puppies can you hold in your arms without dropping any?","optional":true},
-          "Puppy puddles":{"type":"Boolean","label":"Turn this switch ON if you dont mind mopping up puppy puddles.","optional":true},
-          "Puppy trees":{"type":"String","label":"If your favorite breed of puppy could be any type of tree, what type of tree would your favorite fuzzy little puddle-making puppy choose?","optional":true},
-        },
-        "questions_order":["FullName","Email","Puppy breed preferences","Puppy preferences","Bad Puppy preferences","Puppy breeds","Puppy breed specify","Number of puppies","Puppy puddles","Puppy trees"],
-      }];
     }
 
     for (let i in forms_local) {
@@ -137,6 +189,7 @@ export default class App extends PureComponent {
         icon = "dropbox";
         color = "#3d9ae8";
         size = 25;
+        dbxformfound = true;
       }
 
       let swipeoutBtns = [
@@ -145,10 +198,10 @@ export default class App extends PureComponent {
           type: 'primary',
           onPress: () => {
             if (json.backend === "dropbox" && !user.dropbox) {
-              this.setState({DropboxLoginScreen: true});
+              this.openURL(wsbase+'/auth/dm');
               return;
             }
-            navigate('CreateSurvey', {refer: this, form: json});
+            navigate('CreateSurvey', {title: 'Edit Form', dbx: dbx, form: json, refer: this});
           },
         },
         {
@@ -173,7 +226,7 @@ export default class App extends PureComponent {
                       [{text: 'OK'}],
                       { cancelable: false }
                     );
-                    this._loadDBData();
+                    this._loadForms();
                   } catch (e) {
                     Alert.alert(
                       'Delete Failed',
@@ -181,7 +234,7 @@ export default class App extends PureComponent {
                       [{text: 'OK'}],
                       { cancelable: false }
                     );
-                    console.warn(e);
+                    console.warn("error: "+e);
                   }
                 }},
                 {text: 'No'},
@@ -204,7 +257,7 @@ export default class App extends PureComponent {
             <TouchableOpacity
               onPress={() => {
                 if (json.backend === "dropbox" && !user.dropbox)
-                  this.setState({DropboxLoginScreen: true});
+                  this.setState({SelectModeScreen: true});
                 else
                   navigate('Canvassing', {dbx: (json.backend === "dropbox" ? dbx : null), form: json, user: user});
               }}>
@@ -227,7 +280,7 @@ export default class App extends PureComponent {
     } catch (error) {
     }
 
-    this.setState({ loading: false, forms: forms, dbx: dbx });
+    this.setState({dbxformfound, dbx, forms, loading: false, SelectModeScreen: (forms.length === 0)});
   }
 
   _canvassGuidelinesUrlHandler() {
@@ -250,7 +303,7 @@ export default class App extends PureComponent {
   }
 
   render() {
-    const { loading, connected, user, forms } = this.state;
+    const { connected, dbx, dbxformfound, loading, user, forms } = this.state;
     const { navigate } = this.props.navigation;
 
     // wait for user object to become available
@@ -272,19 +325,6 @@ export default class App extends PureComponent {
     return (
       <ScrollView style={{flex: 1, backgroundColor: 'white'}} contentContainerStyle={{flexGrow:1}}>
 
-        {user.dropbox &&
-        <View style={{margin: 20, alignItems: 'center'}}>
-          <Text>You are logged into Dropbox as:</Text>
-          <Text>{user.dropbox.name.display_name}</Text>
-        </View>
-        ||
-        <View style={{flexDirection: 'row', margin: 20}}>
-          <Text>
-            Canvass for any cause at zero cost! Use this tool to organize a canvassing campaign, or join an existing one.
-          </Text>
-        </View>
-        }
-
         <View style={{
             width: Dimensions.get('window').width,
             height: 1,
@@ -300,9 +340,6 @@ export default class App extends PureComponent {
             </View>
             ||
             <View style={{flex: 1, alignItems: 'center'}}>
-              {!connected &&
-              <Text style={{margin: 10, color: '#ff0000'}}>Not connected to Dropbox.</Text>
-              }
               <Text style={{margin: 10}}>Select a canvassing campaign:</Text>
               { forms }
             </View>
@@ -317,41 +354,26 @@ export default class App extends PureComponent {
               name="plus-circle"
               backgroundColor="#d7d7d7"
               color="black"
-              onPress={() => {
-                if (user.dropbox)
-                  navigate('CreateSurvey', {refer: this, form: null})
-                else {
-                  Alert.alert(
-                    'Choose Data Storage',
-                    'You can save your canvassing data on your device, or on a dropbox acccount. With Dropbox, you can share your form with others and collaborate as a team.',
-                    [
-                      {text: 'Use Device Storage', onPress: () => navigate('CreateSurvey', {refer: this, form: null})},
-                      {text: 'Use Dropbox', onPress: () => this.setState({DropboxLoginScreen: true})},
-                    ], { cancelable: false }
-                  );
-                }
-              }}>
-              Create Canvassing Form
-            </Icon.Button>
-          </View>
-
-          <View style={{margin: 12, marginTop: 0, alignItems: 'center'}}>
-            <Icon.Button
-              name="check-square"
-              backgroundColor="#d7d7d7"
-              color="black"
-              onPress={() => {
-                if (user.dropbox)
-                  this.setState({JoinFormScreen: true});
-                else
-                  this.setState({DropboxLoginScreen: true});
-              }}>
-              Join an existing Form
+              onPress={() => this.setState({SelectModeScreen: true})}>
+              Start a new Canvassing Activity
             </Icon.Button>
           </View>
 
           {user.dropbox &&
           <View style={{margin: 12, marginTop: 0, alignItems: 'center'}}>
+
+            <View style={{
+                width: Dimensions.get('window').width,
+                height: 1,
+                backgroundColor: 'lightgray'
+              }}
+            />
+
+            <View style={{margin: 20, alignItems: 'center'}}>
+              <Text>You are logged into Dropbox as:</Text>
+              <Text>{user.dropbox.name.display_name}</Text>
+            </View>
+
             <Icon.Button
               name="dropbox"
               backgroundColor="#3d9ae8"
@@ -369,13 +391,15 @@ export default class App extends PureComponent {
               Dropbox Logout
             </Icon.Button>
           </View>
-          ||
+          }
+
+          {!user.dropbox && dbxformfound &&
           <View style={{margin: 12, marginTop: 0, alignItems: 'center'}}>
             <Icon.Button
               name="dropbox"
               backgroundColor="#3d9ae8"
               color="#ffffff"
-              onPress={() => this.setState({DropboxLoginScreen: true})}>
+              onPress={() => this.setState({SelectModeScreen: true})}>
               Login with Dropbox
             </Icon.Button>
           </View>
@@ -413,43 +437,97 @@ export default class App extends PureComponent {
         </View>
 
         <Modal
-          open={this.state.DropboxLoginScreen}
-          modalStyle={{width: 335, height: 400, backgroundColor: "transparent"}}
-          style={{alignItems: 'center'}}
+          open={this.state.SelectModeScreen}
+          modalStyle={{width: 335, height: 500, backgroundColor: "transparent"}}
           overlayBackground={'rgba(0, 0, 0, 0.75)'}
           animationDuration={200}
           animationTension={40}
           modalDidOpen={() => undefined}
-          modalDidClose={() => this.setState({DropboxLoginScreen: false})}
-          closeOnTouchOutside={true}
-          disableOnBackPress={false}>
-          <DropboxLoginPage refer={this} />
-        </Modal>
-
-        <Modal
-          open={this.state.JoinFormScreen}
-          modalStyle={{width: 335, height: 400, backgroundColor: "transparent"}}
-          style={{alignItems: 'center'}}
-          overlayBackground={'rgba(0, 0, 0, 0.75)'}
-          animationDuration={200}
-          animationTension={40}
-          modalDidOpen={() => undefined}
-          modalDidClose={() => this.setState({JoinFormScreen: false})}
+          modalDidClose={() => this.setState({SelectModeScreen: false})}
           closeOnTouchOutside={true}
           disableOnBackPress={false}>
           <View style={{flex: 1, alignItems: 'center'}} ref="backgroundWrapper">
             <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: 335}}>
-              <View style={{backgroundColor: 'white', padding: 40, borderRadius: 40, borderWidth: 10, borderColor: '#d7d7d7'}}>
-                <View style={{margin: 10}}>
-                  <Text style={{textAlign: 'justify'}}>
-                    To join an existing form, ask the creator of that form to
-                    shair it with you. They can do so by pressing the
-                    "Share Form" button in the canvassing settings and entering
-                    the email address you use for Dropbox. Then, accept the folder
-                    share with Dropbox and reload this app.
+              <View style={{backgroundColor: 'white', padding: 20, borderRadius: 40, borderWidth: 10, borderColor: '#d7d7d7'}}>
+                <Text style={styles.header}>
+                  Select Canvassing Mode
+                </Text>
+
+                <View style={{margin: 5}}>
+                  <Icon.Button
+                    name="forward"
+                    backgroundColor="#d7d7d7"
+                    color="#000000"
+                    onPress={() => navigate('Canvassing', {dbx: null, form: sampleForm})}
+                    {...iconStyles}>
+                    Demo with a Sample Form
+                  </Icon.Button>
+                </View>
+
+                <View style={{margin: 5, marginTop: 0}}>
+                  <Text style={{fontSize: 10, textAlign: 'justify'}}>
+                    Jump right into the map with a pre-made form to get a feel for how this canvassing tool works.
                   </Text>
                 </View>
+
+                <View style={{margin: 5}}>
+                  <Icon.Button
+                    name="user-circle"
+                    backgroundColor="#d7d7d7"
+                    color="#000000"
+                    onPress={() => navigate('CreateSurvey', {title: 'Solo Project', dbx: null, form: null, refer: this})}
+                    {...iconStyles}>
+                    Solo Project
+                  </Icon.Button>
+                </View>
+
+                <View style={{margin: 5, marginTop: 0}}>
+                  <Text style={{fontSize: 10, textAlign: 'justify'}}>
+                    No login required; use the canvassing tool by yourself for a solo project. Uses your device for data storage.
+                  </Text>
+                </View>
+
+                <View style={{margin: 5}}>
+                  <Icon.Button
+                    name="dropbox"
+                    backgroundColor="#d7d7d7"
+                    color="#000000"
+                    onPress={() => {
+                      if (user.dropbox) navigate('CreateSurvey', {title: 'Dropbox Project', dbx: dbx, form: null, refer: this})
+                      else this.openURL(wsbase+'/auth/dm');
+                    }}
+                    {...iconStyles}>
+                    Collaborate with Dropbox
+                  </Icon.Button>
+                </View>
+
+                <View style={{margin: 5, marginTop: 0}}>
+                  <Text style={{fontSize: 10, textAlign: 'justify'}}>
+                    Login with a Dropbox account and share data with a small team. Uses Dropbox for data sharing & storage.
+                  </Text>
+                </View>
+
+                <View style={{margin: 5}}>
+                  <Icon.Button
+                    name="cloud-upload"
+                    backgroundColor="#d7d7d7"
+                    color="#000000"
+                    onPress={() => {
+
+                    }}
+                    {...iconStyles}>
+                    Connect to Server
+                  </Icon.Button>
+                </View>
+
+                <View style={{margin: 5, marginTop: 0}}>
+                  <Text style={{fontSize: 10, textAlign: 'justify'}}>
+                    Join a large canvassing operation. Uses their server for data storage.
+                  </Text>
+                </View>
+
               </View>
+
             </View>
           </View>
         </Modal>
@@ -461,7 +539,24 @@ export default class App extends PureComponent {
 }
 
 const iconStyles = {
-  justifyContent: 'center',
   borderRadius: 10,
+  paddingLeft: 25,
   padding: 10,
 };
+
+const styles = StyleSheet.create({
+  header: {
+    fontSize: 16,
+    textAlign: 'center',
+    margin: 10,
+  },
+  text: {
+    textAlign: 'center',
+  },
+  buttons: {
+    justifyContent: 'space-between',
+    flexDirection: 'row',
+    margin: 20,
+    marginBottom: 30,
+  },
+});
