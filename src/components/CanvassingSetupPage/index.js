@@ -22,6 +22,7 @@ import Swipeout from 'react-native-swipeout';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import SafariView from 'react-native-safari-view';
 import jwt_decode from 'jwt-decode';
+import SmLoginPage from '../SmLoginPage';
 import { Dropbox } from 'dropbox';
 import { _loginPing, _saveUser, _getApiToken } from '../../common';
 import { wsbase } from '../../config';
@@ -63,11 +64,32 @@ export default class App extends PureComponent {
       dbxformfound: false,
       SelectModeScreen: false,
       ConnectServerScreen: false,
+      SmLoginScreen: false,
       server: null,
     };
 
     this.onChange = this.onChange.bind(this);
     this.doSave = this.doSave.bind(this);
+
+    this.formServerItems = t.struct({
+      server: t.String,
+      ack: t.Boolean,
+    });
+
+    this.formServerOptions = {
+      fields: {
+        server: {
+          label: 'Server Domain Name',
+          help: 'Enter the domain name of the server you wish to connect to.',
+          error: 'You must enter a domain name.',
+        },
+        ack: {
+          label: 'Terms of Use',
+          help: 'By checking this you acknowledge that the server to which you are connecting is not affiliated with Our Voice USA and the data you send and receive is governed by that server\'s terms of use.',
+          error: 'You must acknowledge the terms of use.',
+        },
+      },
+    };
   }
 
   onChange(server) {
@@ -78,11 +100,25 @@ export default class App extends PureComponent {
     let json = this.refs.mainForm.getValue();
     if (json === null) return;
 
+    if (json.ack !== true) {
+      // need to correctly trigger this.formServerOptions.fields.ack.hasError
+      return;
+    }
+
+    this.singHello(json.server);
+  }
+
+  singHello = async (server) => {
+    const { navigate } = this.props.navigation;
+
     try {
-      res = await fetch('https://'+json.server+'/canvass/v1/hello', {
+
+      let jwt = await storage.get('OV_JWT');
+
+      res = await fetch('https://'+server+'/canvass/v1/hello', {
         method: 'POST',
         headers: {
-          'Authorization': 'Bearer '+await _getApiToken(),
+          'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({longitude: -118, latitude: 40}),
@@ -91,31 +127,51 @@ export default class App extends PureComponent {
       let auth_location = res.headers.get('x-sm-oauth-url');
 
       if (!auth_location || !auth_location.match(/^https:.*auth$/)) {
-        console.warn("Invalid x-sm-oauth-url header")
+        // Invalid x-sm-oauth-url header means it's not a validy configured canvass-broker
+        Alert.alert('Error', "That server is not running software compatible with this mobile app.", [{text: 'OK'}], { cancelable: false });
         return;
       }
 
-      if (auth_location !== 'https://'+wsbase+'/auth') {
-        console.warn("Auth location other than wsbase")
+      if (auth_location !== wsbase+'/auth') {
+        Alert.alert('Error', "Custom authentication not yet supported.", [{text: 'OK'}], { cancelable: false });
+        return;
       }
 
       switch (res.status) {
         case 200:
-          console.warn("WELCOME!!")
+          // valid - break to proceed
           break;
+/*
+TODO: accept a 302 redirect to where the server really is - to make things simple for the end-user
+        case 302:
+          console.warn("Re-featch based on Location header")
+          break;
+*/
+        case 400:
         case 401:
-          console.warn("NEED TO SIGN IN")
-          break;
+          this.setState({ConnectServerScreen: false}, () => setTimeout(() => this.setState({SmLoginScreen: true}), 500))
+          return;
         case 403:
-          console.warn("FORBIDDEN")
-          break;
+          Alert.alert('Error', "We're sorry, but your request to canvass with this server has been rejected.", [{text: 'OK'}], { cancelable: false });
+          return;
         default:
-          console.warn("WTF???")
-          break;
+          Alert.alert('Error', "Unknown error connecting to server.", [{text: 'OK'}], { cancelable: false });
+          return;
       }
 
+      let body = await res.json();
+
+      this.setState({ConnectServerScreen: false});
+
+      if (body.data.ready !== true) Alert.alert('Connection Successful', "The server said: "+body.msg, [{text: 'OK'}], { cancelable: false });
+      else {
+        // TODO: use form data from body.data.forms[0] and save it in the forms_local cache
+        // TODO: if there's more than one form in body.data.forms - don't navigate
+        navigate('Canvassing', {server: server, dbx: null, form: sampleForm, user: this.state.user});
+      }
     } catch (e) {
-      console.warn("error: "+e)
+      console.warn("error:"+e);
+      Alert.alert('Error', "Unable to make a connection to target server", [{text: 'OK'}], { cancelable: false });
     }
 
   }
@@ -135,6 +191,13 @@ export default class App extends PureComponent {
     // Remove event listener
     Linking.removeEventListener('url', this.handleOpenURL);
   };
+
+  componentDidUpdate(prevProps, prevState) {
+    const { SmLoginScreen, user } = this.state;
+    if (prevState.SmLoginScreen && !SmLoginScreen && user.loggedin) {
+      this.singHello(this.state.server.server);
+    }
+  }
 
   handleOpenURL = async ({ url }) => {
     // Extract jwt token out of the URL
@@ -603,7 +666,7 @@ export default class App extends PureComponent {
 
         <Modal
           open={this.state.ConnectServerScreen}
-          modalStyle={{width: 335, height: 335, backgroundColor: "transparent"}}
+          modalStyle={{width: 335, height: 500, backgroundColor: "transparent"}}
           overlayBackground={'rgba(0, 0, 0, 0.75)'}
           animationDuration={200}
           animationTension={40}
@@ -614,24 +677,42 @@ export default class App extends PureComponent {
           <View style={{flex: 1, alignItems: 'center'}} ref="backgroundWrapper">
             <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: 335}}>
               <View style={{backgroundColor: 'white', padding: 20, borderRadius: 40, borderWidth: 10, borderColor: '#d7d7d7'}}>
-                <Text style={styles.header}>
-                  Connect to Server
-                </Text>
 
                 <Form
                   ref="mainForm"
-                  type={t.struct({'server': t.String})}
+                  type={this.formServerItems}
+                  options={this.formServerOptions}
                   onChange={this.onChange}
                   value={this.state.server}
                 />
 
-                <TouchableOpacity style={styles.button} onPress={this.doSave} underlayColor='#99d9f4'>
-                  <Text style={styles.buttonText}>Save Form</Text>
+                <TouchableOpacity style={{
+                    backgroundColor: '#d7d7d7', padding: 10, borderRadius: 20,
+                    alignItems: 'center',
+                  }}
+                  onPress={this.doSave}>
+                  <Text>Connect to Server</Text>
                 </TouchableOpacity>
 
               </View>
             </View>
           </View>
+        </Modal>
+
+        <Modal
+          open={this.state.SmLoginScreen}
+          modalStyle={{width: 335, height: 400, backgroundColor: "transparent",
+            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
+          style={{alignItems: 'center'}}
+          offset={0}
+          overlayBackground={'rgba(0, 0, 0, 0.75)'}
+          animationDuration={200}
+          animationTension={40}
+          modalDidOpen={() => undefined}
+          modalDidClose={() => this.setState({SmLoginScreen: false})}
+          closeOnTouchOutside={true}
+          disableOnBackPress={false}>
+          <SmLoginPage refer={this} />
         </Modal>
 
       </ScrollView>

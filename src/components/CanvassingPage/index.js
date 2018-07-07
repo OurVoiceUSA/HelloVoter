@@ -43,7 +43,6 @@ import base64 from 'base-64';
 import en from 'javascript-time-ago/locale/en'
 import t from 'tcomb-form-native';
 import _ from 'lodash';
-import { wsbase } from '../../config';
 
 TimeAgo.locale(en);
 
@@ -217,7 +216,7 @@ export default class App extends PureComponent {
 
   _syncable() {
     if (this.state.dbx) return true;
-    return this.state.server;
+    return (this.state.server?true:false);
   }
 
   syncingOk() {
@@ -767,7 +766,7 @@ export default class App extends PureComponent {
     error = false;
 
     try {
-      let res = await fetch(wsbase+'/canvass/v1/sync', {
+      let res = await fetch('https://'+this.state.server+'/canvass/v1/sync', {
         method: 'POST',
         headers: {
           'Authorization': 'Bearer '+await _getApiToken(),
@@ -1342,7 +1341,7 @@ export default class App extends PureComponent {
           </TouchableOpacity>
           }
 
-          {dbx &&
+          {this._syncable() &&
           <View>
             {this.state.syncRunning &&
             <View style={styles.iconContainer}>

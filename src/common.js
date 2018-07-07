@@ -267,6 +267,7 @@ export async function _rmUser() {
         await storage.del('OV_CANVASS_PINS@'+forms[i].id);
       }
     } catch (error) {}
+    await storage.del('OV_CANVASS_PINS@sampleForm');
     await storage.del('OV_CANVASS_FORMS');
   } catch (error) {
     console.warn(error);
