@@ -59,6 +59,7 @@ export default class App extends PureComponent {
       dbx: null,
       dbxformfound: false,
       SelectModeScreen: false,
+      ConnectServerScreen: false,
     };
 
   }
@@ -524,7 +525,7 @@ export default class App extends PureComponent {
                     backgroundColor="#d7d7d7"
                     color="#000000"
                     onPress={() => {
-
+                      this.setState({SelectModeScreen: false}, () => setTimeout(() => this.setState({ConnectServerScreen: true}), 500))
                     }}
                     {...iconStyles}>
                     Connect to Server
@@ -539,6 +540,27 @@ export default class App extends PureComponent {
 
               </View>
 
+            </View>
+          </View>
+        </Modal>
+
+        <Modal
+          open={this.state.ConnectServerScreen}
+          modalStyle={{width: 335, height: 335, backgroundColor: "transparent"}}
+          overlayBackground={'rgba(0, 0, 0, 0.75)'}
+          animationDuration={200}
+          animationTension={40}
+          modalDidOpen={() => undefined}
+          modalDidClose={() => this.setState({ConnectServerScreen: false})}
+          closeOnTouchOutside={true}
+          disableOnBackPress={false}>
+          <View style={{flex: 1, alignItems: 'center'}} ref="backgroundWrapper">
+            <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: 335}}>
+              <View style={{backgroundColor: 'white', padding: 20, borderRadius: 40, borderWidth: 10, borderColor: '#d7d7d7'}}>
+                <Text style={styles.header}>
+                  Connect to Server
+                </Text>
+              </View>
             </View>
           </View>
         </Modal>
