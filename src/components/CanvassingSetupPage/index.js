@@ -670,7 +670,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
 
         <Modal
           open={this.state.ConnectServerScreen}
-          modalStyle={{width: 335, height: 500, backgroundColor: "transparent"}}
+          modalStyle={{width: 335, height: 450, backgroundColor: "transparent"}}
           overlayBackground={'rgba(0, 0, 0, 0.75)'}
           animationDuration={200}
           animationTension={40}
@@ -699,7 +699,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
 
                   <TouchableOpacity style={{
                       backgroundColor: '#d7d7d7', padding: 10, borderRadius: 20,
-                      alignItems: 'center', marginTop: 20,
+                      alignItems: 'center', marginTop: 10,
                     }}
                     onPress={this.doSave}>
                     <Text>Connect to Server</Text>
