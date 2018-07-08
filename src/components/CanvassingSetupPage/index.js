@@ -66,6 +66,7 @@ export default class App extends PureComponent {
       ConnectServerScreen: false,
       SmLoginScreen: false,
       server: (__DEV__?{server: wsbase.replace('https://','')}:null),
+      serverLoading: false,
     };
 
     this.onChange = this.onChange.bind(this);
@@ -105,9 +106,13 @@ export default class App extends PureComponent {
       return;
     }
 
+    this.setState({serverLoading: true});
+
     let ret = await this.singHello(json.server);
 
     if (ret.flag !== true) Alert.alert((ret.error?'Error':'Connection Successful'), ret.msg, [{text: 'OK'}], { cancelable: false });
+
+    this.setState({serverLoading: false});
   }
 
   singHello = async (server) => {
@@ -115,7 +120,6 @@ export default class App extends PureComponent {
     let ret;
 
     try {
-
       let jwt = await storage.get('OV_JWT');
 
       res = await fetch('https://'+server+'/canvass/v1/hello', {
@@ -467,7 +471,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
         <View style={{flexDirection: 'row', margin: 20, marginTop: 0}}>
             {loading &&
             <View style={{flex: 1, margin: 20, alignItems: 'center'}}>
-               <Text>Loading data...</Text>
+              <Text>Loading data...</Text>
               <ActivityIndicator size="large" />
             </View>
             ||
@@ -675,24 +679,33 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
           closeOnTouchOutside={true}
           disableOnBackPress={false}>
           <View style={{flex: 1, alignItems: 'center'}} ref="backgroundWrapper">
-            <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: 335}}>
-              <View style={{backgroundColor: 'white', padding: 20, borderRadius: 40, borderWidth: 10, borderColor: '#d7d7d7'}}>
+            <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
+              <View style={{width: 325, backgroundColor: 'white', padding: 20, borderRadius: 40, borderWidth: 10, borderColor: '#d7d7d7'}}>
 
-                <Form
-                  ref="mainForm"
-                  type={this.formServerItems}
-                  options={this.formServerOptions}
-                  onChange={this.onChange}
-                  value={this.state.server}
-                />
+                {this.state.serverLoading &&
+                <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+                  <Text>Contacting server...</Text>
+                  <ActivityIndicator size="large" />
+                </View>
+                ||
+                <View style={{flex: 1}}>
+                  <Form
+                    ref="mainForm"
+                    type={this.formServerItems}
+                    options={this.formServerOptions}
+                    onChange={this.onChange}
+                    value={this.state.server}
+                  />
 
-                <TouchableOpacity style={{
-                    backgroundColor: '#d7d7d7', padding: 10, borderRadius: 20,
-                    alignItems: 'center',
-                  }}
-                  onPress={this.doSave}>
-                  <Text>Connect to Server</Text>
-                </TouchableOpacity>
+                  <TouchableOpacity style={{
+                      backgroundColor: '#d7d7d7', padding: 10, borderRadius: 20,
+                      alignItems: 'center', marginTop: 20,
+                    }}
+                    onPress={this.doSave}>
+                    <Text>Connect to Server</Text>
+                  </TouchableOpacity>
+                </View>
+                }
 
               </View>
             </View>
