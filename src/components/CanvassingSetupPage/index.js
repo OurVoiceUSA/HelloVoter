@@ -153,6 +153,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
           break;
 */
         case 400:
+          return {error: true, msg: "The server didn't understand the request sent from this device."};
         case 401:
           this.setState({ConnectServerScreen: false}, () => setTimeout(() => this.setState({SmLoginScreen: true}), 500))
           return {error: false, flag: true};
