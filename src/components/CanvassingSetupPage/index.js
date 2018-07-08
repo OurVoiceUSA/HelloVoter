@@ -112,7 +112,7 @@ export default class App extends PureComponent {
 
     if (ret.flag !== true) Alert.alert((ret.error?'Error':'Connection Successful'), ret.msg, [{text: 'OK'}], { cancelable: false });
 
-    this.setState({serverLoading: false});
+    this.setState({serverLoading: false, server: null});
   }
 
   singHello = async (server) => {
