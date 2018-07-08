@@ -735,21 +735,21 @@ export default class App extends PureComponent {
   }
 
   _syncNodes = async (flag) => {
-    let error;
+    let ret;
 
     if (this.state.syncRunning === true) return;
 
     this.setState({syncRunning: true});
 
-    if (this.state.server) error = await this._syncServer();
-    else error = await this._syncDropbox();
+    if (this.state.server) ret = await this._syncServer();
+    else ret = await this._syncDropbox();
 
     this.setState({syncRunning: false});
     this.updateMarkers();
 
     if (flag) {
-      if (error) {
-        Alert.alert('Error', 'Unable to sync with the server.', [{text: 'OK'}], { cancelable: false });
+      if (ret.error) {
+        Alert.alert('Error', 'Unable to sync with the server'+(ret.msg?': '+ret.msg:'.'), [{text: 'OK'}], { cancelable: false });
       } else {
         Alert.alert('Success', 'Data sync successful!', [{text: 'OK'}], { cancelable: false });
       }
@@ -758,12 +758,13 @@ export default class App extends PureComponent {
   }
 
   _syncServer = async () => {
+    let ret = {error: false};
+
     let store = {
       formId: this.state.form.id,
       last_sync: this.state.last_sync,
       nodes: this.mergeNodes([this.myNodes], this.state.last_sync)
     };
-    error = false;
 
     try {
       let res = await fetch('https://'+this.state.server+'/canvass/v1/sync', {
@@ -775,22 +776,27 @@ export default class App extends PureComponent {
         body: JSON.stringify(store)
       });
 
-      if (res.status !== 200) throw "Sync error"
+      let json = await res.json();
 
-      this.allNodes = this.mergeNodes([this.allNodes,this.myNodes,await res.json()]);
+      if (res.status !== 200 || json.error === true) {
+        if (json.msg) ret.msg = json.msg;
+        throw "Sync error";
+      }
+
+      this.allNodes = this.mergeNodes([this.allNodes,this.myNodes,json]);
       this.setState({last_sync: new Date().getTime()});
     } catch (e) {
-      error = true;
+      ret.error = true;
     }
 
-    return error;
+    return ret;
   }
 
   _syncDropbox = async () => {
     let { dbx, form, user } = this.state;
     let folders = [];
     let allsrc = [this.allNodes];
-    let error = false;
+    let ret = {error: false};
 
     try {
       // download other jtxt files on this account
@@ -862,12 +868,12 @@ export default class App extends PureComponent {
       }
 
     } catch (e) {
-      error = true;
+      ret.error = true;
     }
 
     this.allNodes = this.mergeNodes(allsrc);
 
-    return error;
+    return ret;
   }
 
   getNodeById(id) {

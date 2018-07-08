@@ -65,7 +65,7 @@ export default class App extends PureComponent {
       SelectModeScreen: false,
       ConnectServerScreen: false,
       SmLoginScreen: false,
-      server: null,
+      server: (__DEV__?{server: wsbase.replace('https://','')}:null),
     };
 
     this.onChange = this.onChange.bind(this);
@@ -105,11 +105,14 @@ export default class App extends PureComponent {
       return;
     }
 
-    this.singHello(json.server);
+    let ret = await this.singHello(json.server);
+
+    if (ret.flag !== true) Alert.alert((ret.error?'Error':'Connection Successful'), ret.msg, [{text: 'OK'}], { cancelable: false });
   }
 
   singHello = async (server) => {
     const { navigate } = this.props.navigation;
+    let ret;
 
     try {
 
@@ -128,13 +131,11 @@ export default class App extends PureComponent {
 
       if (!auth_location || !auth_location.match(/^https:.*auth$/)) {
         // Invalid x-sm-oauth-url header means it's not a validy configured canvass-broker
-        Alert.alert('Error', "That server is not running software compatible with this mobile app.", [{text: 'OK'}], { cancelable: false });
-        return;
+        return {error: true, msg: "That server is not running software compatible with this mobile app."};
       }
 
       if (auth_location !== wsbase+'/auth') {
-        Alert.alert('Error', "Custom authentication not yet supported.", [{text: 'OK'}], { cancelable: false });
-        return;
+        return {error: true, msg: "Custom authentication not yet supported."};
       }
 
       switch (res.status) {
@@ -150,28 +151,27 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
         case 400:
         case 401:
           this.setState({ConnectServerScreen: false}, () => setTimeout(() => this.setState({SmLoginScreen: true}), 500))
-          return;
+          return {error: false, flag: true};
         case 403:
-          Alert.alert('Error', "We're sorry, but your request to canvass with this server has been rejected.", [{text: 'OK'}], { cancelable: false });
-          return;
+          return {error: true, msg: "We're sorry, but your request to canvass with this server has been rejected."};
         default:
-          Alert.alert('Error', "Unknown error connecting to server.", [{text: 'OK'}], { cancelable: false });
-          return;
+          return {error: true, msg: "Unknown error connecting to server."};
       }
 
       let body = await res.json();
 
       this.setState({ConnectServerScreen: false});
 
-      if (body.data.ready !== true) Alert.alert('Connection Successful', "The server said: "+body.msg, [{text: 'OK'}], { cancelable: false });
+      if (body.data.ready !== true) return {error: false, msg: "The server said: "+body.msg};
       else {
         // TODO: use form data from body.data.forms[0] and save it in the forms_local cache
         // TODO: if there's more than one form in body.data.forms - don't navigate
         navigate('Canvassing', {server: server, dbx: null, form: sampleForm, user: this.state.user});
+        return {error: false, flag: true};
       }
     } catch (e) {
       console.warn("error:"+e);
-      Alert.alert('Error', "Unable to make a connection to target server", [{text: 'OK'}], { cancelable: false });
+      return {error: true, msg: "Unable to make a connection to target server"};
     }
 
   }
