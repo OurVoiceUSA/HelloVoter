@@ -74,7 +74,7 @@ export default class App extends PureComponent {
 
     this.formServerItems = t.struct({
       server: t.String,
-      ack: t.Boolean,
+      ack: t.subtype(t.Boolean, function (s) { return s }), // boolean that fails validation if not selected
     });
 
     this.formServerOptions = {
@@ -98,11 +98,14 @@ export default class App extends PureComponent {
   }
 
   doSave = async () => {
+    let { server } = this.state;
+
     let json = this.refs.mainForm.getValue();
     if (json === null) return;
 
     if (json.ack !== true) {
       // need to correctly trigger this.formServerOptions.fields.ack.hasError
+      this.formServerOptions.fields.ack.hasError = true;
       return;
     }
 
@@ -111,8 +114,9 @@ export default class App extends PureComponent {
     let ret = await this.singHello(json.server);
 
     if (ret.flag !== true) Alert.alert((ret.error?'Error':'Connection Successful'), ret.msg, [{text: 'OK'}], { cancelable: false });
+    if (ret.error !== true) server = null;
 
-    this.setState({serverLoading: false, server: null});
+    this.setState({serverLoading: false, server});
   }
 
   singHello = async (server) => {
@@ -575,7 +579,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
 
         <Modal
           open={this.state.SelectModeScreen}
-          modalStyle={{width: 335, height: 500, backgroundColor: "transparent"}}
+          modalStyle={{flex: 1, backgroundColor: "transparent"}}
           overlayBackground={'rgba(0, 0, 0, 0.75)'}
           animationDuration={200}
           animationTension={40}
@@ -584,7 +588,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
           closeOnTouchOutside={true}
           disableOnBackPress={false}>
           <View style={{flex: 1, alignItems: 'center'}} ref="backgroundWrapper">
-            <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: 335}}>
+            <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
               <View style={{backgroundColor: 'white', padding: 20, borderRadius: 40, borderWidth: 10, borderColor: '#d7d7d7'}}>
                 <Text style={styles.header}>
                   Select Canvassing Mode
@@ -671,7 +675,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
 
         <Modal
           open={this.state.ConnectServerScreen}
-          modalStyle={{width: 335, height: 450, backgroundColor: "transparent"}}
+          modalStyle={{flex: 1, backgroundColor: "transparent"}}
           overlayBackground={'rgba(0, 0, 0, 0.75)'}
           animationDuration={200}
           animationTension={40}
@@ -681,31 +685,29 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
           disableOnBackPress={false}>
           <View style={{flex: 1, alignItems: 'center'}} ref="backgroundWrapper">
             <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
-              <View style={{width: 325, backgroundColor: 'white', padding: 20, borderRadius: 40, borderWidth: 10, borderColor: '#d7d7d7'}}>
+              <View style={{backgroundColor: 'white', padding: 20, borderRadius: 40, borderWidth: 10, borderColor: '#d7d7d7'}}>
+
+                <Form
+                  ref="mainForm"
+                  type={this.formServerItems}
+                  options={this.formServerOptions}
+                  onChange={this.onChange}
+                  value={this.state.server}
+                />
 
                 {this.state.serverLoading &&
-                <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+                <View style={{alignItems: 'center'}}>
                   <Text>Contacting server...</Text>
                   <ActivityIndicator size="large" />
                 </View>
                 ||
-                <View style={{flex: 1}}>
-                  <Form
-                    ref="mainForm"
-                    type={this.formServerItems}
-                    options={this.formServerOptions}
-                    onChange={this.onChange}
-                    value={this.state.server}
-                  />
-
-                  <TouchableOpacity style={{
-                      backgroundColor: '#d7d7d7', padding: 10, borderRadius: 20,
-                      alignItems: 'center', marginTop: 10,
-                    }}
-                    onPress={this.doSave}>
-                    <Text>Connect to Server</Text>
-                  </TouchableOpacity>
-                </View>
+                <TouchableOpacity style={{
+                    backgroundColor: '#d7d7d7', padding: 10, borderRadius: 20,
+                    alignItems: 'center', marginTop: 10,
+                  }}
+                  onPress={this.doSave}>
+                  <Text>Connect to Server</Text>
+                </TouchableOpacity>
                 }
 
               </View>
@@ -715,7 +717,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
 
         <Modal
           open={this.state.SmLoginScreen}
-          modalStyle={{width: 335, height: 400, backgroundColor: "transparent",
+          modalStyle={{flex: 1, backgroundColor: "transparent",
             position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
           style={{alignItems: 'center'}}
           offset={0}
