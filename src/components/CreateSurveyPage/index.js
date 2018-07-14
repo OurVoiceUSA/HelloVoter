@@ -17,6 +17,8 @@ import {
   ScrollView,
 } from 'react-native';
 
+import OVComponent from '../OVComponent';
+
 import t from 'tcomb-form-native';
 import Modal from 'react-native-simple-modal';
 import storage from 'react-native-storage-wrapper';
@@ -79,7 +81,7 @@ var premade = {
     ]},
 };
 
-export default class App extends PureComponent {
+export default class App extends OVComponent {
 
   constructor(props) {
     super(props);
@@ -138,22 +140,13 @@ export default class App extends PureComponent {
   }
 
   componentWillUnmount() {
-    if (Platform.OS === 'android' && this.evEmitter) {
-      RNGLocation.disconnect();
-      this.evEmitter.remove();
-    }
+    this.cleanupLocation();
   }
 
-  onLocationChange (e: Event) {
-    this.setLocation(e.Longitude, e.Latitude);
-  }
-
-  getLocation() {
-    navigator.geolocation.getCurrentPosition((position) => {
-      this.setLocation(position.coords.longitude, position.coords.latitude);
-    },
-    (error) => { this._genericServiceError(error, "Unable to retrieve your location from your device."); },
-    { enableHighAccuracy: true, timeout: 2000, maximumAge: 1000 });
+  componentDidUpdate(prevProps, prevState) {
+    const { myPosition } = this.state;
+    if (prevState.myPosition !== myPosition)
+      this.setLocation(myPosition.longitude, myPosition.latitude);
   }
 
   setLocation = async (lng, lat) => {
@@ -231,45 +224,17 @@ export default class App extends PureComponent {
 
     this.setState({
       state, cd, sldl, sldu, geos,
-      myPosition: {
-        latitude: lat,
-        longitude: lng,
-      },
       loading: false,
     });
 
-    if (this.evEmitter) {
-      RNGLocation.disconnect();
-      this.evEmitter.remove();
-      this.evEmitter = null;
-    }
+    this.cleanupLocation();
   }
 
   showGeofenceModal = async () => {
-    access = false;
-
     this.setState({geofenceModal: true, loading: true});
 
-    try {
-      res = await Permissions.request('location');
-      if (res === "authorized") access = true;
-    } catch(error) {
-      // nothing we can do about it
-    }
-    if (access === true) {
-      if (Platform.OS === 'android') {
-        if (RNGLocation.available() !== false) {
-          if (!this.evEmitter) {
-            this.evEmitter = DeviceEventEmitter.addListener('updateLocation', this.onLocationChange.bind(this));
-            RNGLocation.reconnect();
-            RNGLocation.getLocation();
-          }
-        }
-      } else {
-        this.getLocation();
-      }
-      return;
-    }
+    let access = await this.requestLocationPermission();
+    if (access) return;
 
     this.setState({geofenceModal: false, loading: false});
     Alert.alert('Current Location', 'To use your current location, go into your phone settings and enable location access for Our Voice.', [{text: 'OK'}], { cancelable: false });

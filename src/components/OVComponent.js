@@ -16,6 +16,10 @@ export default class OVComponent extends PureComponent {
   constructor(props) {
     super(props);
 
+    this.state = {
+      myPosition: {latitude: null, longitude: null},
+    }
+
     this.alerts = {
       active: false,
       queue: [],
@@ -31,7 +35,7 @@ export default class OVComponent extends PureComponent {
     this.setState({ myPosition });
   }
 
-  requestLocationPermission = async () => {
+  requestLocationPermission = async (callback) => {
     access = false;
 
     try {
@@ -64,6 +68,8 @@ export default class OVComponent extends PureComponent {
     }
 
     this.setState({ locationAccess: access });
+
+    return access;
   }
 
   getLocation() {
@@ -74,7 +80,7 @@ export default class OVComponent extends PureComponent {
     { enableHighAccuracy: true, timeout: 2000, maximumAge: 1000 });
   }
 
-  componentWillUnmount() {
+  cleanupLocation() {
     if (Platform.OS === 'ios') {
       clearInterval(this.timerID);
     } else {

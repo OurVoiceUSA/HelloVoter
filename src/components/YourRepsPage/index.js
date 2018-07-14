@@ -5,9 +5,6 @@ import {
   Image,
   ScrollView,
   StyleSheet,
-  DeviceEventEmitter,
-  PermissionsAndroid,
-  Platform,
   Text,
   View,
   FlatList,
@@ -16,16 +13,16 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
+import OVComponent from '../OVComponent';
+
 import Icon from 'react-native-vector-icons/FontAwesome';
-import Permissions from 'react-native-permissions';
-import RNGLocation from 'react-native-google-location';
 import RNGooglePlaces from 'react-native-google-places';
 import Modal from 'react-native-simple-modal';
 import DisplayRep from './display-rep';
 import { wsbase } from '../../config'
 import { _apiCall, _loginPing, _doGeocode, _saveUser, _specificAddress } from '../../common';
 
-export default class App extends PureComponent {
+export default class App extends OVComponent {
 
   locationIcon = null;
 
@@ -51,7 +48,7 @@ export default class App extends PureComponent {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const { user } = this.state;
+    const { user, myPosition } = this.state;
     if (!prevState.user && user && !user.profile.home_address) {
       this.setState({ loading: false, modalIsOpen: true });
     }
@@ -65,13 +62,13 @@ export default class App extends PureComponent {
     if (!prevState.user && user && !user.lastsearchpos) {
       this.setState({ loading: false, modalIsOpen: true });
     }
+    if (prevState.myPosition.longitude !== myPosition.longitude && prevState.myPosition.latitude !== myPosition.latitude) {
+      this.doGeocode(myPosition.longitude, myPosition.latitude);
+    }
   }
 
   componentWillUnmount() {
-    if (Platform.OS === 'android' && this.evEmitter) {
-      RNGLocation.disconnect();
-      this.evEmitter.remove();
-    }
+    this.cleanupLocation();
   }
 
   _genericServiceError(error, msg) {
@@ -164,28 +161,10 @@ export default class App extends PureComponent {
     .catch(error => console.log(error.message));
   }
 
-  onLocationChange (e: Event) {
-    this.doGeocode(e.Longitude, e.Latitude);
-  }
-
-  getLocation() {
-    navigator.geolocation.getCurrentPosition((position) => {
-      this.doGeocode(position.coords.longitude, position.coords.latitude);
-    },
-    (error) => { this._genericServiceError(error, "Unable to retrieve your location from your device."); },
-    { enableHighAccuracy: true, timeout: 2000, maximumAge: 1000 });
-  }
-
   doGeocode = async (lng, lat) => {
     let position = await _doGeocode(lng, lat);
-
     this._whorepme(position);
-
-    if (this.evEmitter) {
-      RNGLocation.disconnect();
-      this.evEmitter.remove();
-      this.evEmitter = null;
-    }
+    this.cleanupLocation();
   }
 
   doCurrentLocation = async () => {
@@ -194,29 +173,10 @@ export default class App extends PureComponent {
       modalIsOpen: false,
       myPosition: {icon: 'map-marker'},
     });
-    access = false;
-    try {
-      res = await Permissions.request('location');
-      if (res === "authorized") access = true;
-    } catch(error) {
-      // nothing we can do about it
-    }
-    if (access === true) {
-      if (Platform.OS === 'android') {
-        if (RNGLocation.available() === false) {
-          this._genericServiceError(null, "Location services not available on your device.");
-        } else {
-          if (!this.evEmitter) {
-            this.evEmitter = DeviceEventEmitter.addListener('updateLocation', this.onLocationChange.bind(this));
-            RNGLocation.reconnect();
-            RNGLocation.getLocation();
-          }
-        }
-      } else {
-        this.getLocation();
-      }
-      return;
-    }
+
+    let access = await this.requestLocationPermission();
+    if (access) return;
+
     this.setState({loading: false, myPosition: {icon: 'map-marker', address: 'location access denied', error: true}, apiData: null});
     Alert.alert('Current Location', 'To use your current location, go into your phone settings and enable location access for Our Voice.', [{text: 'OK'}], { cancelable: false });
   }
