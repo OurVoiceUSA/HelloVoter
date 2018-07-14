@@ -11,24 +11,20 @@ import {
   View,
   Linking,
   ScrollView,
-  PermissionsAndroid,
-  Platform,
   TouchableHighlight,
   TouchableOpacity,
   TouchableWithoutFeedback,
   Keyboard,
-  DeviceEventEmitter,
 } from 'react-native';
 
-import { NavigationActions } from 'react-navigation'
+import OVComponent from '../OVComponent';
+
+import { NavigationActions } from 'react-navigation';
 import { Dropbox } from 'dropbox';
 import DeviceInfo from 'react-native-device-info';
 import storage from 'react-native-storage-wrapper';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import sha1 from 'sha1';
-import Permissions from 'react-native-permissions';
-import RNGLocation from 'react-native-google-location';
-import RNGooglePlaces from 'react-native-google-places';
 import { Marker, Callout, Polygon, PROVIDER_GOOGLE } from 'react-native-maps'
 import MapView from 'react-native-maps-super-cluster'
 import encoding from 'encoding';
@@ -71,7 +67,7 @@ const formOptRow = {
   stylesheet: formStyleRow,
 };
 
-export default class App extends PureComponent {
+export default class App extends OVComponent {
 
   constructor(props) {
     super(props);
@@ -112,57 +108,8 @@ export default class App extends PureComponent {
     this.family = {};
     this.fidx = [];
 
-    this.alerts = {
-      active: false,
-      queue: [],
-    };
-
     this.onChange = this.onChange.bind(this);
     this.handleConnectivityChange = this.handleConnectivityChange.bind(this);
-  }
-
-  onLocationChange (e: Event) {
-    let { myPosition } = this.state;
-    myPosition = {
-      latitude: e.Latitude,
-      longitude: e.Longitude,
-    };
-    this.setState({ myPosition });
-  }
-
-  requestLocationPermission = async () => {
-    access = false;
-
-    try {
-      // Permissions calls out an Alert we can't queue up. A bit hacky...
-      this.alerts.active = true;
-      this.alerts.queue.push({});
-
-      res = await Permissions.request('location');
-      if (res === "authorized") access = true;
-
-      // clean up after Permissions Alert
-      this.alertFinish();
-    } catch(error) {}
-
-    if (access === true) {
-      if (Platform.OS === 'android') {
-        if (!this.evEmitter) {
-          if (RNGLocation.available() === false) {
-            this.setState({ serviceError: true });
-          } else {
-            this.evEmitter = DeviceEventEmitter.addListener('updateLocation', this.onLocationChange.bind(this));
-            RNGLocation.reconnect();
-            RNGLocation.getLocation();
-          }
-        }
-      } else {
-        this.getLocation();
-        this.timerID = setInterval(() => this.getLocation(), 5000);
-      }
-    }
-
-    this.setState({ locationAccess: access });
   }
 
   componentDidMount() {
@@ -171,14 +118,6 @@ export default class App extends PureComponent {
     this._getCanvassSettings();
     this._getNodesAsyncStorage();
     this.LoadDisclosure(); //Updates showDisclosure state if the user previously accepted
-  }
-
-  getLocation() {
-    navigator.geolocation.getCurrentPosition((position) => {
-      this.setState({ myPosition: position.coords });
-    },
-    (error) => { },
-    { enableHighAccuracy: true, timeout: 2000, maximumAge: 1000 });
   }
 
   setupConnectionListener = async () => {
@@ -226,14 +165,7 @@ export default class App extends PureComponent {
   }
 
   componentWillUnmount() {
-    if (Platform.OS === 'ios') {
-      clearInterval(this.timerID);
-    } else {
-      if (this.evEmitter) {
-        RNGLocation.disconnect();
-        this.evEmitter.remove();
-      }
-    }
+    super.componentWillUnmount();
     NetInfo.removeEventListener(
       'connectionChange',
       this.handleConnectivityChange
@@ -560,33 +492,6 @@ export default class App extends PureComponent {
     let children = this.getChildNodesByIdTypes(node.id, ["survey"]);
     if (children.length === 0) return false;
     return true;
-  }
-
-  alertPush(spec) {
-    this.alerts.queue.push(spec);
-    if (this.alerts.active === false) {
-      this.alerts.active = true;
-      this.alertDo();
-    }
-  }
-
-  alertDo() {
-    let alert = this.alerts.queue[0];
-    Alert.alert(
-      alert.title,
-      alert.description,
-      alert.funcs,
-      { cancelable: false }
-    );
-  }
-
-  alertFinish() {
-    this.alerts.queue.shift();
-    if (this.alerts.queue.length > 0) {
-      this.alertDo();
-    } else {
-      this.alerts.active = false;
-    }
   }
 
   _getCanvassSettings = async () => {
