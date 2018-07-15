@@ -29,6 +29,7 @@ export default class App extends OVComponent {
   constructor(props) {
     super(props);
     this.state = {
+      awaitPosition: false,
       loading: true,
       user: null,
       apiData: null,
@@ -48,7 +49,7 @@ export default class App extends OVComponent {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const { user, myPosition } = this.state;
+    const { awaitPosition, myPosition, user } = this.state;
     if (!prevState.user && user && !user.profile.home_address) {
       this.setState({ loading: false, modalIsOpen: true });
     }
@@ -62,8 +63,11 @@ export default class App extends OVComponent {
     if (!prevState.user && user && !user.lastsearchpos) {
       this.setState({ loading: false, modalIsOpen: true });
     }
-    if (prevState.myPosition.longitude !== myPosition.longitude && prevState.myPosition.latitude !== myPosition.latitude) {
+    if (awaitPosition === true &&
+      prevState.myPosition.longitude !== myPosition.longitude &&
+      prevState.myPosition.latitude !== myPosition.latitude) {
       this.doGeocode(myPosition.longitude, myPosition.latitude);
+      this.setState({ awaitPosition: false });
     }
   }
 
@@ -172,6 +176,7 @@ export default class App extends OVComponent {
       loading: true,
       modalIsOpen: false,
       myPosition: {icon: 'map-marker'},
+      awaitPosition: true,
     });
 
     let access = await this.requestLocationPermission();

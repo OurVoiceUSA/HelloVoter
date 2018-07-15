@@ -28,14 +28,12 @@ export default class OVComponent extends PureComponent {
 
   onLocationChange (e: Event) {
     let { myPosition } = this.state;
-    myPosition = {
-      latitude: e.Latitude,
-      longitude: e.Longitude,
-    };
+    myPosition.latitude = e.Latitude;
+    myPosition.longitude = e.Longitude;
     this.setState({ myPosition });
   }
 
-  requestLocationPermission = async (callback) => {
+  requestLocationPermission = async () => {
     access = false;
 
     try {
@@ -73,8 +71,11 @@ export default class OVComponent extends PureComponent {
   }
 
   getLocation() {
+    let { myPosition } = this.state;
     navigator.geolocation.getCurrentPosition((position) => {
-      this.setState({ myPosition: position.coords });
+      myPosition.latitude = position.coords.latitude;
+      myPosition.longitude = position.coords.longitude;
+      this.setState({ myPosition });
     },
     (error) => { },
     { enableHighAccuracy: true, timeout: 2000, maximumAge: 1000 });
