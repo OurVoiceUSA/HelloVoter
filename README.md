@@ -1,6 +1,6 @@
 ## Introduction
 
-This is the mobile app for Our Voice Initiative, a 501(c)(4) non-profit, non-partisian organization for the civic education. We are writing tools to engage everyday citizens with the political process by providing easy access to civic information that's relevant to the individual, and tools to take action.
+This is the mobile app for Our Voice USA, a 501(c)(3) non-profit, non-partisian organization for the civic education. We are writing tools to engage everyday citizens with the political process by providing easy access to civic information that's relevant to the individual, and tools to take action.
 
 Find the app on the [Google Play Store (Android)](https://play.google.com/store/apps/details?id=org.ourvoiceinitiative.ourvoice) and the [Apple Store (iPhone)](https://itunes.apple.com/us/app/our-voice-usa/id1275301651?ls=1&mt=8).
 
@@ -89,7 +89,7 @@ Thank you for your interest in contributing to us! To avoid potential legal head
 
 	Software License Agreement (GPLv3+)
 	
-	Copyright (c) 2018, Our Voice Initiative. All rights reserved.
+	Copyright (c) 2018, Our Voice USA. All rights reserved.
 	
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by

@@ -38,7 +38,7 @@ By importing data into the canvassing tool, and sharing a form with others, user
 
 Our Voice provides this canvassing tool for free for you to use for your own purposes. You will be talking to real people and asking real questions about policy positions that matter, and hopefully also collaborating with other canvassers.
 
-By using this tool you acknowledge that you are acting on your own behalf, do not represent Our Voice Initiative or our affiliates, and have read our canvassing guidelines.
+By using this tool you acknowledge that you are acting on your own behalf, do not represent Our Voice USA or our affiliates, and have read our canvassing guidelines.
 
 ## Be Courteous
 

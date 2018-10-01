@@ -1000,7 +1000,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 610;
-				ORGANIZATIONNAME = "Our Voice Initiative, Inc";
+				ORGANIZATIONNAME = "Our Voice USA";
 				TargetAttributes = {
 					00E356ED1AD99517003FC87E = {
 						CreatedOnToolsVersion = 6.2;
