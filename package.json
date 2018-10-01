@@ -46,7 +46,7 @@
 		"babel-preset-es2015": "^6.24.1",
 		"babel-preset-react-native": "^4.0.0",
 		"babel-preset-stage-0": "^6.24.1",
-		"detox": "^7.4.3",
+		"detox": "^9.0.4",
 		"jest": "^23.2.0",
 		"mocha": "^5.2.0",
 		"nodemon": "^1.14.8",
