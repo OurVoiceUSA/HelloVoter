@@ -1,6 +1,6 @@
 ## Introduction
 
-Our Voice Initiative is a 501(c)(4) non-profit, non-partisian organization for civic education. We are writing tools to engage everyday citizens with the political process by providing easy access to civic information that's relevant to the individual.
+Our Voice USA is a 501(c)(3) non-profit, non-partisian organization for civic education. We are writing tools to engage everyday citizens with the political process by providing easy access to civic information that's relevant to the individual.
 
 ## Features
 
@@ -34,7 +34,7 @@ Thank you for your interest in contributing to us! To avoid potential legal head
 
 	Software License Agreement (AGPLv3+)
 	
-	Copyright (c) 2018, Our Voice Initiative. All rights reserved.
+	Copyright (c) 2018, Our Voice USA. All rights reserved.
 
         This program is free software; you can redistribute it and/or
         modify it under the terms of the GNU Affero General Public License
