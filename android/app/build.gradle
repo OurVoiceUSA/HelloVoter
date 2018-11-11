@@ -33,8 +33,8 @@ android {
         applicationId "org.ourvoiceinitiative.ourvoice"
         minSdkVersion 16
         targetSdkVersion 26
-        versionName "1.7.8"
-        versionCode 33
+        versionName "1.7.9"
+        versionCode 34
         renderscriptTargetApi 26
         renderscriptSupportModeEnabled true
         ndk {
