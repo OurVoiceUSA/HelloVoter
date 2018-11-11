@@ -17,7 +17,7 @@
     "nodemon": "^1.14.6",
     "chai": "^4.1.2",
     "mocha": "^5.2.0",
-    "mocha-jenkins-reporter": "^0.3.7",
+    "mocha-jenkins-reporter": "^0.4.1",
     "supertest": "^3.0.0"
   },
   "dependencies": {
