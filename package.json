@@ -5,20 +5,20 @@
   "main": "index.js",
   "scripts": {
     "test": "JUNIT_REPORT_PATH=test-result/result.xml JUNIT_REPORT_STACK=1 mocha --timeout 25000 --colors --reporter mocha-jenkins-reporter || true",
-    "start": "node_modules/nodemon/bin/nodemon.js -- node_modules/babel-cli/bin/babel-node.js server.js"
+    "start": "node_modules/nodemon/bin/nodemon.js --exec babel-node server.js"
   },
   "author": "Our Voice USA",
   "license": "AGPL-3.0",
   "devDependencies": {
-    "babel": "^6.23.0",
-    "babel-cli": "^6.26.0",
-    "babel-preset-es2015": "^6.24.1",
-    "babel-preset-stage-0": "^6.24.1",
-    "nodemon": "^1.14.6",
-    "chai": "^4.1.2",
+    "@babel/cli": "^7.0.0",
+    "@babel/core": "^7.0.0",
+    "@babel/node": "^7.0.0",
+    "@babel/preset-env": "^7.0.0",
+    "nodemon": "^1.18.6",
+    "chai": "^4.2.0",
     "mocha": "^5.2.0",
     "mocha-jenkins-reporter": "^0.4.1",
-    "supertest": "^3.0.0"
+    "supertest": "^3.3.0"
   },
   "dependencies": {
     "body-parser": "^1.18.2",
