@@ -66,20 +66,25 @@ Finally, build the app:
 
 ## Test Automation
 
-For testing we use `mocha` and `detox` on `ios`. Run the below to get setup with that:
+For testing we use `mocha` and `detox`. Run the below to get setup with that:
 
     npm install -g detox-cli mocha-cli
     brew tap wix/brew
     brew install wix/brew/applesimutils
     brew tap facebook/fb
     brew install fbsimctl --HEAD
+
+Then build/execute the tests:
+
+* for iOS:
     detox build -c ios.sim.debug
-
-Execute tests with:
-
     detox test -c ios.sim.debug
 
-Test Automation for Android is waiting on them to support a newer version of react native, see https://github.com/wix/detox/issues/608
+* for Android:
+    detox build -c android.emu.debug
+    detox test -c android.emu.debug
+
+Test Automation for Android may have issues due to a newer version of react native, see https://github.com/wix/detox/issues/608
 
 ## Contributing
 
