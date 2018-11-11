@@ -22,9 +22,9 @@ Then, install dependancies with `npm install`, source in the configuration with 
 **NOTE:** At the time of this writing, the tool versions are as follows:
 
     $ npm -v
-    5.6.0
+    6.4.1
     $ node -v
-    v8.11.3
+    v8.12.0
 
 ## Contributing
 
