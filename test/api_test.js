@@ -6,7 +6,7 @@ var expect = require('chai').expect;
 var supertest = require('supertest');
 var jwt = require('jsonwebtoken');
 var fetch = require('node-fetch');
-var api = supertest('http://localhost:8080');
+var api = supertest((process.env.WSBASE?process.env.WSBASE:'http://localhost:8080'));
 var sm_oauth = supertest(process.env.SM_OAUTH_URL);
 var fs = require('fs');
 
