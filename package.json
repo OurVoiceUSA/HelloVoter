@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "docker": "babel-node server.js",
     "test": "JUNIT_REPORT_PATH=test-result/result.xml JUNIT_REPORT_STACK=1 mocha --timeout 25000 --colors --reporter mocha-jenkins-reporter || true",
     "start": "node_modules/nodemon/bin/nodemon.js --exec babel-node server.js"
   },
