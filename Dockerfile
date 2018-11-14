@@ -6,6 +6,7 @@ WORKDIR /app
 COPY .babelrc .
 COPY package.json .
 COPY package-lock.json .
+ENV NODE_ENV=production
 RUN npm install
 RUN mkdir /app/node_modules/.cache && chown node:node /app/node_modules/.cache
 
