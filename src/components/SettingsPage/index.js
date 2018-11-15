@@ -59,7 +59,7 @@ export default class App extends PureComponent {
   _logout() {
     const { user } = this.state;
     try {
-      if (user.dropbox) new Dropbox({ accessToken: user.dropbox.accessToken }).authTokenRevoke();
+      if (user.dropbox) new Dropbox({ fetch: fetch, accessToken: user.dropbox.accessToken }).authTokenRevoke();
     } catch (error) {
       console.warn("error: "+error);
     }

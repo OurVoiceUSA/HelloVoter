@@ -266,7 +266,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
     // look for canvassing forms
     try {
       user = await _loginPing(this, false);
-      dbx = new Dropbox({ accessToken: user.dropbox.accessToken });
+      dbx = new Dropbox({ fetch: fetch, accessToken: user.dropbox.accessToken });
       let res = await dbx.filesListFolder({path: ''});
       for (let i in res.entries) {
         item = res.entries[i];
@@ -426,7 +426,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
   dropboxLogout = async () => {
     let { user } = this.state;
     if (user.dropbox)
-      new Dropbox({ accessToken: user.dropbox.accessToken }).authTokenRevoke();
+      new Dropbox({ fetch: fetch, accessToken: user.dropbox.accessToken }).authTokenRevoke();
     delete user.dropbox;
     _saveUser(user, false);
     try {
