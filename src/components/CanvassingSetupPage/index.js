@@ -179,7 +179,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
         return {error: false, flag: true};
       }
     } catch (e) {
-      console.warn("error:"+e);
+      console.warn("singHello: "+e);
       return {error: true, msg: "Unable to make a connection to target server"};
     }
 
@@ -218,7 +218,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
 
       // TODO: handle the navigate that would have been tapped had we already been logged in
     } catch(e) {
-      console.warn("error: "+e);
+      console.warn("handleOpenURL: "+e);
     }
 
     if (Platform.OS === 'ios') {
@@ -255,7 +255,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
       forms_local = JSON.parse(await storage.get('OV_CANVASS_FORMS'));
       if (forms_local === null) forms_local = [];
     } catch (e) {
-      console.warn("error: "+e);
+      console.warn("_loadForms 1: "+e);
       return;
     }
 
@@ -298,7 +298,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
 
         forms_local.push(json);
       } catch(e) {
-        console.warn("error: "+e);
+        console.warn("_loadForms 2: "+e);
       }
     }
 
@@ -364,7 +364,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
                       [{text: 'OK'}],
                       { cancelable: false }
                     );
-                    console.warn("error: "+e);
+                    console.warn("_loadForms 3: "+e);
                   }
                 }},
                 {text: 'No'},
@@ -438,7 +438,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
         await storage.set('OV_CANVASS_FORMS', JSON.stringify(forms_local));
       }
     } catch (e) {
-      console.warn("error: "+e)
+      console.warn("dropboxLogout: "+e)
     }
     this.props.navigation.goBack();
   }
