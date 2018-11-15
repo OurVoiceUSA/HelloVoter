@@ -111,3 +111,5 @@ Thank you for your interest in contributing to us! To avoid potential legal head
 
 **NOTE:** We relicense this code for the purposes of distribution on the App Store. For details, read our CLA Rationale. 
 
+Logos, icons, and other artwork depicting the Our Voice bird are copyright and not for redistribution without express written permission by Our Voice USA.
+
