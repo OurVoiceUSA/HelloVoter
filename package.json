@@ -8,7 +8,7 @@
 	},
 	"dependencies": {
 		"base-64": "^0.1.0",
-		"dropbox": "^4.0.12",
+		"dropbox": "^4.0.13",
 		"encoding": "^0.1.12",
 		"eslint": "^3.19.0",
 		"javascript-time-ago": "^1.0.32",
@@ -46,12 +46,12 @@
 		"babel-preset-es2015": "^6.24.1",
 		"babel-preset-react-native": "^4.0.1",
 		"babel-preset-stage-0": "^6.24.1",
-		"detox": "^9.0.6",
+		"detox": "^9.0.7",
 		"jest": "^23.6.0",
 		"mocha": "^5.2.0",
 		"nodemon": "^1.18.6",
 		"react-native-cli": "^2.0.1",
-		"react-test-renderer": "^16.6.1"
+		"react-test-renderer": "^16.6.3"
 	},
 	"jest": {
 		"preset": "react-native"
