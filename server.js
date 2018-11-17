@@ -12,15 +12,18 @@ import http from 'http';
 import pip from 'point-in-polygon';
 import neo4j from 'neo4j-driver';
 import BoltAdapter from 'node-neo4j-bolt-adapter';
+import * as secrets from "docker-secrets-nodejs";
+
+secrets.setupSecretsDir();
 
 const ovi_config = {
-  server_port: ( process.env.SERVER_PORT ? process.env.SERVER_PORT : 8080 ),
-  ip_header: ( process.env.CLIENT_IP_HEADER ? process.env.CLIENT_IP_HEADER : null ),
-  neo4j_host: ( process.env.NEO4J_HOST ? process.env.NEO4J_HOST : 'localhost' ),
-  neo4j_user: ( process.env.NEO4J_USER ? process.env.NEO4J_USER : 'neo4j' ),
-  neo4j_pass: ( process.env.NEO4J_PASS ? process.env.NEO4J_PASS : 'neo4j' ),
-  sm_oauth: ( process.env.SM_OAUTH_URL ? process.env.SM_OAUTH_URL : 'https://ws.ourvoiceusa.org/auth' ),
-  DEBUG: ( process.env.DEBUG ? true : false ),
+  server_port: getConfig("server_port", false, 8080),
+  ip_header: getConfig("client_ip_header", false, null),
+  neo4j_host: getConfig("neo4j_host", false, 'localhost'),
+  neo4j_user: getConfig("neo4j_user", false, 'neo4j'),
+  neo4j_pass: getConfig("neo4j_pass", false, 'neo4j'),
+  sm_oauth: getConfig("sm_oauth_url", false, 'https://ws.ourvoiceusa.org/auth'),
+  DEBUG: getConfig("debug", false, false),
 };
 
 var public_key;
@@ -57,6 +60,20 @@ cqa('return timestamp()').catch((e) => {console.error("Unable to connect to data
   cqa('create constraint on (a:Unit) assert a.id is unique');
   cqa('create constraint on (a:Survey) assert a.id is unique');
 });
+
+function getConfig(item, required, def) {
+  let value = secrets.get(item);
+  if (!value) {
+    if (required) {
+      let msg = "Missing config: "+item.toUpperCase();
+      console.log(msg);
+      throw msg;
+    } else {
+      return def;
+    }
+  }
+  return value;
+}
 
 // TODO: safe input for generic safety vs. valid input on a data type basis
 
