@@ -17,14 +17,11 @@ COPY poke.js .
 HEALTHCHECK --interval=15s --timeout=5s --start-period=5s CMD node /app/poke.js
 COPY server.js .
 
-# scrub busybox down to a bare minimum
-RUN rm -f /usr/bin/env \
-        && echo -e "#!/bin/sh\n\nexec /usr/local/bin/\$@" > /usr/bin/env \
-        && chmod +x /usr/bin/env \
-        && mv /bin/busybox /bin/sh
+# scrub busybox and npm
+RUN rm -rf /bin/busybox /usr/local/lib/node_modules/
 
 EXPOSE 8080
 USER node
 
-CMD [ "npm", "run", "docker" ]
+CMD [ "node", "node_modules/.bin/babel-node", "server.js" ]
 
