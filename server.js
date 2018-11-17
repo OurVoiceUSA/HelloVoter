@@ -14,8 +14,6 @@ import neo4j from 'neo4j-driver';
 import BoltAdapter from 'node-neo4j-bolt-adapter';
 import * as secrets from "docker-secrets-nodejs";
 
-secrets.setupSecretsDir();
-
 const ovi_config = {
   server_port: getConfig("server_port", false, 8080),
   ip_header: getConfig("client_ip_header", false, null),
