@@ -785,6 +785,10 @@ app.post('/canvass/v1/question/assigned/add', questionAssignedAdd);
 app.post('/canvass/v1/question/assigned/remove', questionAssignedRemove);
 app.post('/canvass/v1/sync', sync);
 
+Object.keys(ovi_config).forEach((k) => {
+  delete process.env[k.toUpperCase()];
+});
+
 // Launch the server
 const server = app.listen(ovi_config.server_port, () => {
   const { address, port } = server.address();
