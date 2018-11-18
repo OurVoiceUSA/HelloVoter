@@ -789,6 +789,13 @@ Object.keys(ovi_config).forEach((k) => {
   delete process.env[k.toUpperCase()];
 });
 
+if (!ovi_config.DEBUG) {
+  process.on('SIGUSR1', () => {
+    //process.exit(1);
+    throw "Caught SIGUSR1, exiting."
+  });
+}
+
 // Launch the server
 const server = app.listen(ovi_config.server_port, () => {
   const { address, port } = server.address();
