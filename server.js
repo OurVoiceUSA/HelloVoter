@@ -788,6 +788,7 @@ app.post('/canvass/v1/sync', sync);
 Object.keys(ovi_config).forEach((k) => {
   delete process.env[k.toUpperCase()];
 });
+require = null;
 
 if (!ovi_config.DEBUG) {
   process.on('SIGUSR1', () => {
