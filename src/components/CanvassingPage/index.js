@@ -81,6 +81,7 @@ export default class App extends OVComponent {
       syncRunning: false,
       serviceError: null,
       locationAccess: null,
+      myPosition: {latitude: null, longitude: null},
       region: {latitudeDelta: 0.004, longitudeDelta: 0.004},
       currentNode: null,
       markers: [],
