@@ -24,7 +24,7 @@ import SafariView from 'react-native-safari-view';
 import jwt_decode from 'jwt-decode';
 import SmLoginPage from '../SmLoginPage';
 import { Dropbox } from 'dropbox';
-import { _loginPing, _saveUser, _getApiToken } from '../../common';
+import { _loginPing, _saveUser, _getApiToken, _fileReaderAsync } from '../../common';
 import { wsbase } from '../../config';
 
 var Form = t.form.Form;
@@ -288,7 +288,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
       try {
         item = objs[i];
         if (item.error) continue;
-        let json = JSON.parse(item.fileBlob);
+        let json = JSON.parse(await _fileReaderAsync(item.fileBlob));
         json.backend = "dropbox";
         json.folder_path = item.path_display.match('.*/')[0].slice(0, -1);
 

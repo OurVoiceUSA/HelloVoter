@@ -29,7 +29,7 @@ import { Marker, Callout, Polygon, PROVIDER_GOOGLE } from 'react-native-maps'
 import MapView from 'react-native-maps-super-cluster'
 import encoding from 'encoding';
 import { transliterate as tr } from 'transliteration/src/main/browser';
-import { _doGeocode, _getApiToken } from '../../common';
+import { _doGeocode, _getApiToken, _fileReaderAsync } from '../../common';
 import KnockPage from '../KnockPage';
 import Modal from 'react-native-simple-modal';
 import TimeAgo from 'javascript-time-ago'
@@ -714,7 +714,7 @@ export default class App extends OVComponent {
         if (item.path_display.match(/\.jtxt$/) && !item.path_display.match(DeviceInfo.getUniqueID())) {
           try {
             let data = await dbx.filesDownload({ path: item.path_display });
-            allsrc.push(this._nodesFromJtxt(data.fileBlob));
+            allsrc.push(this._nodesFromJtxt(await _fileReaderAsync(data.fileBlob)));
           } catch (e) {}
         }
       }
@@ -722,14 +722,14 @@ export default class App extends OVComponent {
       // download "turf" for this device
       try {
         let data = await dbx.filesDownload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtrf' });
-        this.turfNodes = this._nodesFromJtxt(data.fileBlob);
+        this.turfNodes = this._nodesFromJtxt(await _fileReaderAsync(data.fileBlob));
         allsrc.push(this.turfNodes);
       } catch (e) {}
 
       // download exported "turf" for this account
       try {
         let data = await dbx.filesDownload({ path: form.folder_path+'/exported.jtrf' });
-        allsrc.push(this._nodesFromJtxt(data.fileBlob));
+        allsrc.push(this._nodesFromJtxt(await _fileReaderAsync(data.fileBlob)));
       } catch (e) {}
 
       await dbx.filesUpload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtxt', contents: encoding.convert(tr(this._nodesToJtxt(this.myNodes)), 'ISO-8859-1'), mute: true, mode: {'.tag': 'overwrite'} });
@@ -746,7 +746,7 @@ export default class App extends OVComponent {
               let item = res.entries[i];
               if (item.path_display.match(/\.jtxt$/)) {
                 let data = await dbx.filesDownload({ path: item.path_display });
-                allsrc.push(this._nodesFromJtxt(data.fileBlob));
+                allsrc.push(this._nodesFromJtxt(await _fileReaderAsync(data.fileBlob)));
               }
             }
           } catch (e) {

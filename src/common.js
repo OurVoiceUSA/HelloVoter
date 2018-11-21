@@ -9,6 +9,21 @@ import { wsbase } from './config';
 const JWT = 'OV_JWT';
 const USERLOCAL = 'OV_USER';
 
+export const _fileReaderAsync = (blob) => {
+  const fr = new FileReader();
+
+  return new Promise((resolve, reject) => {
+    fr.onerror = () => {
+      fr.abort();
+      reject(new DOMException("Problem parsing input file."));
+    };
+    fr.onload = () => {
+      resolve(fr.result);
+    };
+    fr.readAsText(blob);
+  });
+};
+
 export async function _loginPing(refer, remote) {
   let user = await _getJWT(remote);
   if (user !== null)
