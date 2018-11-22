@@ -54,16 +54,6 @@ Finally, build the app:
 
 `react-native run-ios` or `react-native run-android`
 
-**NOTE:** At the time of this writing, the tool versions are as follows:
-
-    $ npm -v
-    5.6.0
-    $ node -v
-    v8.11.1
-    $ react-native -v
-    react-native-cli: 2.0.1
-    react-native: 0.55.4
-
 ## Test Automation
 
 For testing we use `mocha` and `detox`. Run the below to get setup with that:
