@@ -42,6 +42,10 @@ The install may overwrite some dependancy overrides or other configuration - rev
 
 `git checkout -f`
 
+**NOTE**: Due to a bug in how iOS handles `fetch` different from Android, Dropbox integration needs a tweak. See issue https://github.com/dropbox/dropbox-sdk-js/issues/224 -- and the hackish fix is:
+
+`perl -pi -e "s/t\.blob\(\)/typeof t.blob==='function'?t.blob():t.text()/" node_modules/dropbox/dist/Dropbox-sdk.min.js`
+
 If you're developing the **Android** app - install https://developer.android.com/studio/releases/ if you haven't already, import the `OVMobile/android` project, and follow the prompts to download all the build and runtime dependancies. You'll also have to run this command:
 
 `echo "sdk.dir = $HOME/Library/Android/sdk" > android/local.properties`
