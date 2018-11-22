@@ -11,6 +11,7 @@ const USERLOCAL = 'OV_USER';
 
 export const _fileReaderAsync = (blob) => {
   const fr = new FileReader();
+  const to = typeof blob;
 
   return new Promise((resolve, reject) => {
     fr.onerror = () => {
@@ -20,7 +21,10 @@ export const _fileReaderAsync = (blob) => {
     fr.onload = () => {
       resolve(fr.result);
     };
-    fr.readAsText(blob);
+    if (to === 'string')
+      resolve(blob);
+    else
+      fr.readAsText(blob);
   });
 };
 
