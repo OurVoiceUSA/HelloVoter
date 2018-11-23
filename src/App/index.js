@@ -6,6 +6,7 @@ YellowBox.ignoreWarnings([
   'Module RCTImageLoader',
   'The StackNavigator function',
   'Class RCTCxxModule was not exported',
+  'Require cycle:',
 ]);
 
 import HomeScreenPage from '../components/HomeScreenPage';
