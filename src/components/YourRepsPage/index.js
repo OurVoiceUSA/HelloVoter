@@ -64,6 +64,7 @@ export default class App extends OVComponent {
       this.setState({ loading: false, modalIsOpen: true });
     }
     if (awaitPosition === true &&
+      myPosition.longitude !== undefined && myPosition.latitude !== undefined &&
       prevState.myPosition.longitude !== myPosition.longitude &&
       prevState.myPosition.latitude !== myPosition.latitude) {
       this.doGeocode(myPosition.longitude, myPosition.latitude);
