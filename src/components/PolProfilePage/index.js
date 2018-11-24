@@ -3,7 +3,6 @@ import {
   ActivityIndicator,
   Alert,
   Dimensions,
-  ListView,
   Linking,
   TouchableOpacity,
   Text,
