@@ -28,7 +28,7 @@ export default class App extends PureComponent {
   }
 
   _policyUrlHandler() {
-    const url = "https://ourvoiceusa.org/mobile-app-privacy-policy/";
+    const url = "https://ourvoiceusa.org/wp-content/uploads/2018/10/Privacy-Policy1.pdf";
     return Linking.openURL(url).catch(() => null);
   }
 
