@@ -14,6 +14,7 @@ import {
   TouchableHighlight,
   TouchableOpacity,
   TouchableWithoutFeedback,
+  Platform,
   Keyboard,
 } from 'react-native';
 
@@ -1293,7 +1294,7 @@ export default class App extends OVComponent {
         <Modal
           open={this.state.isModalVisible}
           modalStyle={{width: 350, height: 400, backgroundColor: "transparent",
-            position: 'absolute', top: 100, left: 0, right: 0, bottom: 0}}
+            position: 'absolute', top: (Platform.OS === 'android'?0:100), left: 0, right: 0, bottom: 0}}
           style={{alignItems: 'center'}}
           offset={0}
           overlayBackground={'rgba(0, 0, 0, 0.75)'}
@@ -1365,7 +1366,7 @@ export default class App extends OVComponent {
         <Modal
           open={this.state.isKnockMenuVisible}
           modalStyle={{width: 335, height: 350, backgroundColor: "transparent",
-            position: 'absolute', top: 100, left: 0, right: 0, bottom: 0}}
+            position: 'absolute', top: (Platform.OS === 'android'?0:100), left: 0, right: 0, bottom: 0}}
           style={{alignItems: 'center'}}
           offset={0}
           overlayBackground={'rgba(0, 0, 0, 0.75)'}
