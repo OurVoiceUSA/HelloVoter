@@ -152,6 +152,7 @@ export default class App extends PureComponent {
           break;
 /*
 TODO: accept a 302 redirect to where the server really is - to make things simple for the end-user
+      Prompt something like: "This server uses its own user login system. You'll be taken to their site to sign in. 1. Ok, let's go! 2. Nevermind"
         case 302:
           console.warn("Re-featch based on Location header")
           break;
