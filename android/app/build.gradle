@@ -34,7 +34,7 @@ android {
         minSdkVersion 18
         targetSdkVersion 26
         versionName "1.7.9"
-        versionCode 34
+        versionCode 35
         renderscriptTargetApi 26
         renderscriptSupportModeEnabled true
         ndk {
