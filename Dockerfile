@@ -23,5 +23,5 @@ RUN rm -rf /bin/busybox /usr/local/lib/node_modules/
 EXPOSE 8080
 USER node
 
-CMD [ "node", "node_modules/.bin/babel-node", "server.js" ]
+CMD [ "node", "node_modules/@babel/node/lib/_babel-node", "server.js" ]
 
