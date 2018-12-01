@@ -139,6 +139,12 @@ export default class App extends OVComponent {
     this.doShowCustom = this.doShowCustom.bind(this);
   }
 
+  componentDidMount() {
+    setTimeout(() => {
+      this.map.scrollTo({x: 1, y: 1, animated: true}); // fix wierd bug where doesn't initially load on iOS
+    }, 100);
+  }
+
   componentWillUnmount() {
     this.cleanupLocation();
   }
@@ -484,6 +490,7 @@ export default class App extends OVComponent {
         </View>
 
         <SortableListView
+          ref={component => this.map = component}
           style={{ flex: 1, margin: 5, marginTop: 0 }}
           data={fields}
           order={order}
