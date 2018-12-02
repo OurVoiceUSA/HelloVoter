@@ -9,6 +9,7 @@ import fetch from 'node-fetch';
 import jwt from 'jsonwebtoken';
 import bodyParser from 'body-parser';
 import http from 'http';
+import fs from 'fs';
 import pip from 'point-in-polygon';
 import neo4j from 'neo4j-driver';
 import BoltAdapter from 'node-neo4j-bolt-adapter';
@@ -20,29 +21,33 @@ const ovi_config = {
   neo4j_host: getConfig("neo4j_host", false, 'localhost'),
   neo4j_user: getConfig("neo4j_user", false, 'neo4j'),
   neo4j_pass: getConfig("neo4j_pass", false, 'neo4j'),
+  jwt_pub_key: getConfig("jwt_pub_key", false, null),
   sm_oauth: getConfig("sm_oauth_url", false, 'https://ws.ourvoiceusa.org/auth'),
   DEBUG: getConfig("debug", false, false),
 };
 
 var public_key;
-var jwt_iss;
+var jwt_iss = 'ourvoiceusa.org';
 
-fetch(ovi_config.sm_oauth+'/pubkey')
-.then(res => {
-  if (res.status !== 200) throw "http code "+res.status;
-  jwt_iss = res.headers.get('x-jwt-iss');
-  return res.text()
-})
-.then(body => {
-  public_key = body;
-})
-.catch((e) => {
-  console.log("Unable to read SM_OAUTH_URL "+ovi_config.sm_oauth);
-  console.log(e);
-  process.exit(1);
-});
-
-console.log('Read public key from '+ovi_config.sm_oauth+'/pubkey');
+if (ovi_config.jwt_pub_key) {
+  public_key = fs.readFileSync(ovi_config.jwt_pub_key);
+} else {
+  console.log("JWT_PUB_KEY not defined, attempting to fetch from "+ovi_config.sm_oauth+'/pubkey');
+  fetch(ovi_config.sm_oauth+'/pubkey')
+  .then(res => {
+    jwt_iss = res.headers.get('x-jwt-iss');
+    if (res.status !== 200) throw "http code "+res.status;
+    return res.text()
+  })
+  .then(body => {
+    public_key = body;
+  })
+  .catch((e) => {
+    console.log("Unable to read SM_OAUTH_URL "+ovi_config.sm_oauth);
+    console.log(e);
+    process.exit(1);
+  });
+}
 
 // async'ify neo4j
 const authToken = neo4j.auth.basic(ovi_config.neo4j_user, ovi_config.neo4j_pass);
