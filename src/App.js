@@ -1,8 +1,15 @@
 import React, { Component } from 'react';
-import './App.css';
 
 import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
 import t from 'tcomb-form';
+
+import Dashboard from './components/Dashboard';
+import Canvassers from './components/Canvassers';
+import Teams from './components/Teams';
+import Turf from './components/Turf';
+import Questions from './components/Questions';
+import Forms from './components/Forms';
+import Addresses from './components/Addresses';
 
 import { ack, jwt, wsbase } from './config.js';
 
@@ -165,13 +172,13 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
           <SidebarItem><Link to={'/addresses/'}>Addresses</Link></SidebarItem>
         </Sidebar>
         <Main>
-          <Route exact={true} path="/" render={() => (<div>Dashboard</div>)} />
-          <Route path="/canvassers/" render={() => (<div>Canvassers</div>)} />
-          <Route path="/teams/" render={() => (<div>Teams</div>)} />
-          <Route path="/turf/" render={() => (<div>Turf</div>)} />
-          <Route path="/questions/" render={() => (<div>Questions</div>)} />
-          <Route path="/forms/" render={() => (<div>Forms</div>)} />
-          <Route path="/addresses/" render={() => (<div>Addresses</div>)} />
+          <Route exact={true} path="/" component={Dashboard} />
+          <Route path="/canvassers/" component={Canvassers} />
+          <Route path="/teams/" component={Teams} />
+          <Route path="/turf/" component={Turf} />
+          <Route path="/questions/" component={Questions} />
+          <Route path="/forms/" component={Forms} />
+          <Route path="/addresses/" component={Addresses} />
         </Main>
       </Root>
     </Router>
