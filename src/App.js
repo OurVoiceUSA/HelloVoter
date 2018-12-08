@@ -170,6 +170,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
     <Router>
       <Root>
         <Sidebar>
+          <div>Welcome, {jwt_decode(jwt).name}!</div>
           <SidebarItem><Link to={'/'}>Dashboard</Link></SidebarItem>
           <SidebarItem><Link to={'/canvassers/'}>Canvassers</Link></SidebarItem>
           <SidebarItem><Link to={'/teams/'}>Teams</Link></SidebarItem>
