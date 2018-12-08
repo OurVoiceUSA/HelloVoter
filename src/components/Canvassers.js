@@ -33,7 +33,7 @@ export default class App extends Component {
 
   render() {
     return (
-      <div>Canvassers Component ...
+      <div>
         {(this.state.loading?'loading':this.state.canvassers.map(c => <Canvasser canvasser={c} />))}
       </div>);
   }
@@ -41,7 +41,9 @@ export default class App extends Component {
 
 const Canvasser = (props) => (
   <div>
-    {JSON.stringify(props.canvasser)}
+    Name: {props.canvasser.name} <br />
+    Admin: {(props.canvasser.admin?'Yes':'No')}
+  <hr />
   </div>
 )
 
