@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 
+import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
 import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en';
 
@@ -38,9 +39,17 @@ export default class App extends Component {
 
   render() {
     return (
-      <div>
-        {(this.state.loading?'loading':this.state.canvassers.map(c => <Canvasser key={c.id} canvasser={c} />))}
-      </div>);
+      <Router>
+        <div>
+          <Route exact={true} path="/canvassers/" render={() => {
+            return (this.state.loading?'loading':this.state.canvassers.map(c => <Canvasser key={c.id} canvasser={c} />))
+          }} />
+          <Route path="/canvassers/:id" render={(props) => {
+            return (<div>{props.match.params.id}</div>)
+          }} />
+        </div>
+      </Router>
+    );
   }
 }
 
@@ -48,7 +57,7 @@ const Canvasser = (props) => {
   const timeAgo = new TimeAgo('en-US')
   return (
     <div>
-      Name: {props.canvasser.name} <br />
+      Name: {props.canvasser.name} (<Link to={'/canvassers/'+props.canvasser.id}>view profile</Link>)<br />
       Email: {props.canvasser.email} <br />
       Last Login: {timeAgo.format(new Date(props.canvasser.last_seen))} <br />
       Admin: {(props.canvasser.admin?'Yes':'No')}

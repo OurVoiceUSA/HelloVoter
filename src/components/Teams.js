@@ -98,6 +98,11 @@ export default class App extends Component {
               </button>
             </div>
           )} />
+          <Route path="/teams/edit" render={() => (
+            <div>
+              LIST / EDIT / etc
+            </div>
+          )} />
         </div>
       </Router>
     );
@@ -106,7 +111,7 @@ export default class App extends Component {
 
 const Team = (props) => (
   <div>
-    Name: {props.team.name} <br />
+    Name: {props.team.name} (<Link to={'/teams/edit/'+props.team.name}>edit</Link>)<br />
   <hr />
   </div>
 )
