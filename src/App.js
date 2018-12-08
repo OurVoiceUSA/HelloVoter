@@ -1,16 +1,19 @@
 import React, { Component } from 'react';
 import './App.css';
 
+import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
 import t from 'tcomb-form';
 
-var Form = t.form.Form;
+import { wsbase } from './config';
 
 class App extends Component {
 
   constructor(props) {
     super(props);
 
-    this.state = {};
+    this.state = {
+      connectForm: {server: wsbase, ack: true},
+    };
 
     this.formServerItems = t.struct({
       server: t.String,
@@ -46,44 +49,137 @@ class App extends Component {
     let json = this.refs.mainForm.getValue();
     if (json === null) return;
 
-console.warn("hi there: "+JSON.stringify(this.state.connectForm));
-
     if (json.ack !== true) {
       // need to correctly trigger this.formServerOptions.fields.ack.hasError
-      console.warn("FOOBAR")
       return;
     }
 
     this.setState({serverLoading: true});
 
-//    let ret = await this.singHello(json.server);
+    let ret = await this.singHello(json.server);
 
-//    if (ret.flag !== true) Alert.alert((ret.error?'Error':'Connection Successful'), ret.msg, [{text: 'OK'}], { cancelable: false });
-//    if (ret.error !== true) server = null;
+    if (ret.flag !== true) console.warn((ret.error?'Error':'Connection Successful'), ret.msg, [{text: 'OK'}], { cancelable: false });
+    else console.warn(ret)
+
+  }
+
+  singHello = async (server) => {
+    let res;
+
+    try {
+      let jwt = 'test';
+
+      res = await fetch('https://'+server+'/canvass/v1/hello', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({longitude: -118, latitude: 40}),
+      });
+
+/*
+      let auth_location = res.headers.get('x-sm-oauth-url');
+
+      if (!auth_location || !auth_location.match(/^https:.*auth$/)) {
+        // Invalid x-sm-oauth-url header means it's not a validy configured canvass-broker
+        return {error: true, msg: "That server is not running software compatible with this mobile app."};
+      }
+
+      if (auth_location !== wsbase+'/auth') {
+        return {error: true, msg: "Custom authentication not yet supported."};
+      }
+*/
+
+      switch (res.status) {
+        case 200:
+          // valid - break to proceed
+          break;
+/*
+TODO: accept a 302 redirect to where the server really is - to make things simple for the end-user
+      Prompt something like: "This server uses its own user login system. You'll be taken to their site to sign in. 1. Ok, let's go! 2. Nevermind"
+        case 302:
+          console.warn("Re-featch based on Location header")
+          break;
+*/
+        case 400:
+          return {error: true, msg: "The server didn't understand the request sent from this device."};
+        case 401:
+          this.setState({ConnectServerScreen: false}, () => setTimeout(() => this.setState({SmLoginScreen: true}), 500))
+          return {error: false, flag: true};
+        case 403:
+          return {error: true, msg: "We're sorry, but your request to canvass with this server has been rejected."};
+        default:
+          return {error: true, msg: "Unknown error connecting to server."};
+      }
+
+      let body = await res.json();
+
+      console.warn(body);
+
+      if (body.data.ready !== true) return {error: false, msg: "The server said: "+body.msg};
+      else {
+        // TODO: use form data from body.data.forms[0] and save it in the forms_local cache
+        // TODO: if there's more than one form in body.data.forms - don't navigate
+        console.warn({server: server, dbx: null, user: this.state.user});
+        return {error: false, flag: true};
+      }
+    } catch (e) {
+      console.warn("singHello: "+e);
+      return {error: true, msg: "Unable to make a connection to target server"};
+    }
 
   }
 
   render() {
     return (
-      <div className="App">
-        <header className="App-header">
-
-          <Form
-            ref="mainForm"
-            type={this.formServerItems}
-            options={this.formServerOptions}
-            onChange={this.onChange}
-            value={this.state.connectForm}
-          />
-
-          <button onClick={this.doSave}>
-            Connect to Server
-          </button>
-
-        </header>
-      </div>
+    <Router>
+      <Root>
+        <Sidebar>
+          <SidebarItem><Link to={'/'}>Home</Link></SidebarItem>
+          <SidebarItem><Link to={'/hello/'}>Hello</Link></SidebarItem>
+          <SidebarItem><Link to={'/itsme/'}>It is me</Link></SidebarItem>
+        </Sidebar>
+        <Main>
+          <Route exact={true} path="/" render={() => (
+            <div>
+              <t.form.Form
+                ref="mainForm"
+                type={this.formServerItems}
+                options={this.formServerOptions}
+                onChange={this.onChange}
+                value={this.state.connectForm}
+              />
+              <button onClick={this.doSave}>
+                Connect to Server
+              </button>
+              </div>
+          )} />
+          <Route path="/hello/" render={() => (<div>Hello</div>)} />
+          <Route path="/itsme/" render={() => (<div>It is me</div>)} />
+        </Main>
+      </Root>
+    </Router>
     );
   }
 }
+
+const Root = (props) => (
+  <div style={{display: 'flex'}} {...props}/>
+)
+
+const Sidebar = (props) => (
+  <div style={{width: '22vw', height: '100vh', overlow: 'auto', background: '#eee'}} {...props}/>
+)
+
+const SidebarItem = (props) => (
+  <div style={{whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', padding: '5px 10px'}} {...props}/>
+)
+
+const Main = (props) => (
+  <div style={{flex: 1, height: '100vh', overflow: 'auto'}}>
+    <div style={{padding: '20px'}} {...props}/>
+  </div>
+)
 
 export default App;
