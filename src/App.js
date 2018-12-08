@@ -10,7 +10,7 @@ import Teams from './components/Teams';
 import Turf from './components/Turf';
 import Questions from './components/Questions';
 import Forms from './components/Forms';
-import Addresses from './components/Addresses';
+import Map from './components/Map';
 
 import { ack, jwt, wsbase } from './config.js';
 
@@ -177,7 +177,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
           <SidebarItem><Link to={'/turf/'}>Turf</Link></SidebarItem>
           <SidebarItem><Link to={'/questions/'}>Questions</Link></SidebarItem>
           <SidebarItem><Link to={'/forms/'}>Forms</Link></SidebarItem>
-          <SidebarItem><Link to={'/addresses/'}>Addresses</Link></SidebarItem>
+          <SidebarItem><Link to={'/map/'}>Map</Link></SidebarItem>
           <SidebarItem><button onClick={() => this._logout()}>Logout</button></SidebarItem>
         </Sidebar>
         <Main>
@@ -187,7 +187,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
           <Route path="/turf/" component={Turf} />
           <Route path="/questions/" component={Questions} />
           <Route path="/forms/" component={Forms} />
-          <Route path="/addresses/" component={Addresses} />
+          <Route path="/map/" component={Map} />
         </Main>
       </Root>
     </Router>
