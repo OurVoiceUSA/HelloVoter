@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
 
+import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
+import t from 'tcomb-form';
+
 import { jwt } from '../config.js';
 
 export default class App extends Component {
@@ -11,7 +14,47 @@ export default class App extends Component {
       loading: true,
     };
 
+    this.formServerItems = t.struct({
+      name: t.String,
+    });
+
+    this.formServerOptions = {
+      fields: {
+        server: {
+          label: 'Team Name',
+          error: 'You must enter a team name.',
+        },
+      },
+    };
+
   }
+
+  onChangeTeam(addTeamForm) {
+    this.setState({addTeamForm})
+  }
+
+  doCreateTeam = async () => {
+
+    let json = this.addTeamForm.getValue();
+    if (json === null) return;
+
+    try {
+      let res = await fetch('https://'+this.props.server+'/canvass/v1/team/create', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({name: json.name}),
+      });
+
+      console.warn(res);
+    } catch (e) {
+      console.warn(e);
+    }
+
+  }
+
 
   componentDidMount = async () => {
     let teams = {};
@@ -33,9 +76,31 @@ export default class App extends Component {
 
   render() {
     return (
-      <div>
-        {(this.state.loading?'loading':this.state.teams.map(t => <Team key={t.id} team={t} />))}
-      </div>);
+      <Router>
+        <div>
+          <Route exact={true} path="/teams/" render={() => (
+            <div>
+              {(this.state.loading?'loading':this.state.teams.map(t => <Team key={t.name} team={t} />))}
+              <Link to={'/teams/add'}><button>Add Team</button></Link>
+            </div>
+          )} />
+          <Route exact={true} path="/teams/add" render={() => (
+            <div>
+              <t.form.Form
+                ref={(ref) => this.addTeamForm = ref}
+                type={this.formServerItems}
+                options={this.formServerOptions}
+                onChange={(e) => this.onChangeTeam(e)}
+                value={this.state.addTeamForm}
+              />
+              <button onClick={() => this.doCreateTeam()}>
+                Submit
+              </button>
+            </div>
+          )} />
+        </div>
+      </Router>
+    );
   }
 }
 
