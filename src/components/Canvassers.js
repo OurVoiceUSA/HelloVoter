@@ -34,7 +34,7 @@ export default class App extends Component {
   render() {
     return (
       <div>
-        {(this.state.loading?'loading':this.state.canvassers.map(c => <Canvasser canvasser={c} />))}
+        {(this.state.loading?'loading':this.state.canvassers.map(c => <Canvasser key={c.id} canvasser={c} />))}
       </div>);
   }
 }
