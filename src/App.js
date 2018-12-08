@@ -157,7 +157,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
       <Root>
         <Sidebar>
           <SidebarItem><Link to={'/'}>Dashboard</Link></SidebarItem>
-          <SidebarItem><Link to={'/cannvassers/'}>Canvassers</Link></SidebarItem>
+          <SidebarItem><Link to={'/canvassers/'}>Canvassers</Link></SidebarItem>
           <SidebarItem><Link to={'/teams/'}>Teams</Link></SidebarItem>
           <SidebarItem><Link to={'/turf/'}>Turf</Link></SidebarItem>
           <SidebarItem><Link to={'/questions/'}>Questions</Link></SidebarItem>
