@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 
 import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
 import t from 'tcomb-form';
+import jwt_decode from 'jwt-decode';
 
 import Dashboard from './components/Dashboard';
 import Canvassers from './components/Canvassers';
@@ -19,7 +20,7 @@ class App extends Component {
     super(props);
 
     this.state = {
-      server: null,
+      server: localStorage.getItem('server'),
       connectForm: {server: wsbase, ack: ack},
     };
 
@@ -127,6 +128,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
       console.warn(body);
 
       this.setState({server: server});
+      localStorage.setItem('server', server);
 
       if (body.data.ready !== true) return {error: false, msg: "The server said: "+body.msg};
       else {
