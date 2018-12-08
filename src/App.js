@@ -153,6 +153,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
     const { server } = this.state;
     if (!server) return (
             <div>
+              <h3>HelloVoter</h3>
               <t.form.Form
                 ref="mainForm"
                 type={this.formServerItems}
