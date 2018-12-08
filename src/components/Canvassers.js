@@ -1,6 +1,11 @@
 import React, { Component } from 'react';
 
+import TimeAgo from 'javascript-time-ago';
+import en from 'javascript-time-ago/locale/en';
+
 import { jwt } from '../config.js';
+
+TimeAgo.locale(en);
 
 export default class App extends Component {
 
@@ -39,11 +44,15 @@ export default class App extends Component {
   }
 }
 
-const Canvasser = (props) => (
-  <div>
-    Name: {props.canvasser.name} <br />
-    Admin: {(props.canvasser.admin?'Yes':'No')}
-  <hr />
-  </div>
-)
+const Canvasser = (props) => {
+  const timeAgo = new TimeAgo('en-US')
+  return (
+    <div>
+      Name: {props.canvasser.name} <br />
+      Last Login: {timeAgo.format(new Date(props.canvasser.last_seen))} <br />
+      Admin: {(props.canvasser.admin?'Yes':'No')}
+    <hr />
+    </div>
+  );
+}
 
