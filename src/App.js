@@ -4,7 +4,7 @@ import './App.css';
 import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
 import t from 'tcomb-form';
 
-import { wsbase } from './config';
+import { ack, jwt, wsbase } from './config.js';
 
 class App extends Component {
 
@@ -12,7 +12,8 @@ class App extends Component {
     super(props);
 
     this.state = {
-      connectForm: {server: wsbase, ack: true},
+      server: null,
+      connectForm: {server: wsbase, ack: ack},
     };
 
     this.formServerItems = t.struct({
@@ -38,6 +39,9 @@ class App extends Component {
     this.onChange = this.onChange.bind(this);
     this.doSave = this.doSave.bind(this);
 
+  }
+
+  componentDidMount() {
   }
 
   onChange(connectForm) {
@@ -67,8 +71,6 @@ class App extends Component {
     let res;
 
     try {
-      let jwt = 'test';
-
       res = await fetch('https://'+server+'/canvass/v1/hello', {
         method: 'POST',
         headers: {
@@ -117,6 +119,8 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
 
       console.warn(body);
 
+      this.setState({server: server});
+
       if (body.data.ready !== true) return {error: false, msg: "The server said: "+body.msg};
       else {
         // TODO: use form data from body.data.forms[0] and save it in the forms_local cache
@@ -132,16 +136,8 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
   }
 
   render() {
-    return (
-    <Router>
-      <Root>
-        <Sidebar>
-          <SidebarItem><Link to={'/'}>Home</Link></SidebarItem>
-          <SidebarItem><Link to={'/hello/'}>Hello</Link></SidebarItem>
-          <SidebarItem><Link to={'/itsme/'}>It is me</Link></SidebarItem>
-        </Sidebar>
-        <Main>
-          <Route exact={true} path="/" render={() => (
+    const { server } = this.state;
+    if (!server) return (
             <div>
               <t.form.Form
                 ref="mainForm"
@@ -154,9 +150,28 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
                 Connect to Server
               </button>
               </div>
-          )} />
-          <Route path="/hello/" render={() => (<div>Hello</div>)} />
-          <Route path="/itsme/" render={() => (<div>It is me</div>)} />
+          );
+
+    return (
+    <Router>
+      <Root>
+        <Sidebar>
+          <SidebarItem><Link to={'/'}>Dashboard</Link></SidebarItem>
+          <SidebarItem><Link to={'/cannvassers/'}>Canvassers</Link></SidebarItem>
+          <SidebarItem><Link to={'/teams/'}>Teams</Link></SidebarItem>
+          <SidebarItem><Link to={'/turf/'}>Turf</Link></SidebarItem>
+          <SidebarItem><Link to={'/questions/'}>Questions</Link></SidebarItem>
+          <SidebarItem><Link to={'/forms/'}>Forms</Link></SidebarItem>
+          <SidebarItem><Link to={'/addresses/'}>Addresses</Link></SidebarItem>
+        </Sidebar>
+        <Main>
+          <Route exact={true} path="/" render={() => (<div>Dashboard</div>)} />
+          <Route path="/canvassers/" render={() => (<div>Canvassers</div>)} />
+          <Route path="/teams/" render={() => (<div>Teams</div>)} />
+          <Route path="/turf/" render={() => (<div>Turf</div>)} />
+          <Route path="/questions/" render={() => (<div>Questions</div>)} />
+          <Route path="/forms/" render={() => (<div>Forms</div>)} />
+          <Route path="/addresses/" render={() => (<div>Addresses</div>)} />
         </Main>
       </Root>
     </Router>
