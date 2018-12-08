@@ -12,7 +12,7 @@ import Questions from './components/Questions';
 import Forms from './components/Forms';
 import Map from './components/Map';
 
-import { ack, jwt, wsbase } from './config.js';
+import { ack, devjwt, wsbase } from './config.js';
 
 class App extends Component {
 
@@ -22,6 +22,7 @@ class App extends Component {
     this.state = {
       server: localStorage.getItem('server'),
       connectForm: {server: wsbase, ack: ack},
+      jwt: devjwt,
     };
 
     this.formServerItems = t.struct({
@@ -66,12 +67,7 @@ class App extends Component {
     let json = this.refs.mainForm.getValue();
     if (json === null) return;
 
-    if (json.ack !== true) {
-      // need to correctly trigger this.formServerOptions.fields.ack.hasError
-      return;
-    }
-
-    this.setState({serverLoading: true});
+    if (json.ack !== true) return;
 
     let ret = await this.singHello(json.server);
 
@@ -87,36 +83,15 @@ class App extends Component {
       res = await fetch('https://'+server+'/canvass/v1/hello', {
         method: 'POST',
         headers: {
-          'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
+          'Authorization': 'Bearer '+(this.state.jwt?this.state.jwt:"of the one ring"),
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({longitude: -118, latitude: 40}),
       });
 
-/*
-      let auth_location = res.headers.get('x-sm-oauth-url');
-
-      if (!auth_location || !auth_location.match(/^https:.*auth$/)) {
-        // Invalid x-sm-oauth-url header means it's not a validy configured canvass-broker
-        return {error: true, msg: "That server is not running software compatible with this mobile app."};
-      }
-
-      if (auth_location !== wsbase+'/auth') {
-        return {error: true, msg: "Custom authentication not yet supported."};
-      }
-*/
-
       switch (res.status) {
         case 200:
-          // valid - break to proceed
-          break;
-/*
-TODO: accept a 302 redirect to where the server really is - to make things simple for the end-user
-      Prompt something like: "This server uses its own user login system. You'll be taken to their site to sign in. 1. Ok, let's go! 2. Nevermind"
-        case 302:
-          console.warn("Re-featch based on Location header")
-          break;
-*/
+          break; // valid - break to proceed
         case 400:
           return {error: true, msg: "The server didn't understand the request sent from this device."};
         case 401:
@@ -150,22 +125,31 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
   }
 
   render() {
-    const { server } = this.state;
-    if (!server) return (
-            <div align="center">
-              <h3>HelloVoter</h3>
-              <t.form.Form
-                ref="mainForm"
-                type={this.formServerItems}
-                options={this.formServerOptions}
-                onChange={this.onChange}
-                value={this.state.connectForm}
-              />
-              <button onClick={this.doSave}>
-                Connect to Server
-              </button>
-              </div>
-          );
+    const { server, jwt } = this.state;
+
+    if (!server) {
+      return (
+        <div align="center">
+          <h3>HelloVoter</h3>
+          <t.form.Form
+            ref="mainForm"
+            type={this.formServerItems}
+            options={this.formServerOptions}
+            onChange={this.onChange}
+            value={this.state.connectForm}
+          />
+          <button onClick={this.doSave}>
+            Connect to Server
+          </button>
+        </div>
+      );
+    }
+
+    if (!jwt) {
+      return (
+        <div>SM Login Screen</div>
+      );
+    }
 
     return (
     <Router>
@@ -183,9 +167,9 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
         </Sidebar>
         <Main>
           <Route exact={true} path="/" component={Dashboard} />
-          <Route path="/canvassers/" render={() => <Canvassers server={this.state.server} />} />
-          <Route path="/teams/" render={() => <Teams server={this.state.server} />} />
-          <Route path="/turf/" render={() => <Turf server={this.state.server} />} />
+          <Route path="/canvassers/" render={() => <Canvassers server={server} jwt={jwt} />} />
+          <Route path="/teams/" render={() => <Teams server={server} jwt={jwt} />} />
+          <Route path="/turf/" render={() => <Turf server={server} jwt={jwt} />} />
           <Route path="/questions/" component={Questions} />
           <Route path="/forms/" component={Forms} />
           <Route path="/map/" component={Map} />
