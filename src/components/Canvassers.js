@@ -49,6 +49,7 @@ const Canvasser = (props) => {
   return (
     <div>
       Name: {props.canvasser.name} <br />
+      Email: {props.canvasser.email} <br />
       Last Login: {timeAgo.format(new Date(props.canvasser.last_seen))} <br />
       Admin: {(props.canvasser.admin?'Yes':'No')}
     <hr />
