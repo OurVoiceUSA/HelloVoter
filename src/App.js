@@ -182,7 +182,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
         </Sidebar>
         <Main>
           <Route exact={true} path="/" component={Dashboard} />
-          <Route path="/canvassers/" component={Canvassers} />
+          <Route path="/canvassers/" render={() => <Canvassers server={this.state.server} />} />
           <Route path="/teams/" component={Teams} />
           <Route path="/turf/" component={Turf} />
           <Route path="/questions/" component={Questions} />

@@ -1,7 +1,47 @@
 import React, { Component } from 'react';
 
+import { jwt } from '../config.js';
+
 export default class App extends Component {
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      loading: true,
+    };
+
+  }
+
+  componentDidMount = async () => {
+    let canvassers = {};
+
+    try {
+      let res = await fetch('https://'+this.props.server+'/canvass/v1/canvasser/list', {
+        headers: {
+          'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
+          'Content-Type': 'application/json',
+        },
+      });
+      canvassers = await res.json();
+    } catch (e) {
+      console.warn(e);
+    }
+
+    this.setState({loading: false, canvassers: canvassers.data});
+  }
+
   render() {
-    return (<div>Canvassers Component</div>);
+    return (
+      <div>Canvassers Component ...
+        {(this.state.loading?'loading':this.state.canvassers.map(c => <Canvasser canvasser={c} />))}
+      </div>);
   }
 }
+
+const Canvasser = (props) => (
+  <div>
+    {JSON.stringify(props.canvasser)}
+  </div>
+)
+
