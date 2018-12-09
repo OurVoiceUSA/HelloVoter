@@ -177,7 +177,7 @@ class App extends Component {
           <SidebarItem><Icon icon={faSignOutAlt} /> <button onClick={() => this._logout()}>Logout</button></SidebarItem>
         </Sidebar>
         <Main>
-          <Route exact={true} path="/" component={Dashboard} />
+          <Route exact={true} path="/" render={() => <Dashboard server={server} jwt={jwt} />} />
           <Route path="/canvassers/" render={() => <Canvassers server={server} jwt={jwt} />} />
           <Route path="/teams/" render={() => <Teams server={server} jwt={jwt} />} />
           <Route path="/turf/" render={() => <Turf server={server} jwt={jwt} />} />
