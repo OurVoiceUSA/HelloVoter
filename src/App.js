@@ -11,8 +11,9 @@ import Turf from './components/Turf';
 import Questions from './components/Questions';
 import Forms from './components/Forms';
 import Map from './components/Map';
+import Jwt from './components/Jwt';
 
-import { ack, devjwt, wsbase } from './config.js';
+import { ack, wsbase } from './config.js';
 
 class App extends Component {
 
@@ -20,9 +21,9 @@ class App extends Component {
     super(props);
 
     this.state = {
+      jwt: localStorage.getItem('jwt'),
       server: localStorage.getItem('server'),
       connectForm: {server: wsbase, ack: ack},
-      jwt: devjwt,
     };
 
     this.formServerItems = t.struct({
@@ -47,7 +48,6 @@ class App extends Component {
 
     this.onChange = this.onChange.bind(this);
     this.doSave = this.doSave.bind(this);
-
   }
 
   componentDidMount() {
@@ -57,8 +57,21 @@ class App extends Component {
     this.setState({connectForm})
   }
 
+  getName() {
+    let name;
+
+    try {
+      name = jwt_decode(this.state.jwt).name;
+    } catch (e) {
+      console.warn(e);
+    }
+
+    return name;
+  }
+
   _logout() {
     localStorage.removeItem('server');
+    localStorage.removeItem('jwt');
     this.setState({server: null});
   }
 
@@ -79,6 +92,8 @@ class App extends Component {
   singHello = async (server) => {
     let res;
 
+    localStorage.setItem('server', server);
+
     try {
       res = await fetch('https://'+server+'/canvass/v1/hello', {
         method: 'POST',
@@ -95,7 +110,7 @@ class App extends Component {
         case 400:
           return {error: true, msg: "The server didn't understand the request sent from this device."};
         case 401:
-          this.setState({ConnectServerScreen: false}, () => setTimeout(() => this.setState({SmLoginScreen: true}), 500))
+          window.location.href = "https://wsdev.ourvoiceusa.org/auth/gm";
           return {error: false, flag: true};
         case 403:
           return {error: true, msg: "We're sorry, but your request to canvass with this server has been rejected."};
@@ -145,17 +160,11 @@ class App extends Component {
       );
     }
 
-    if (!jwt) {
-      return (
-        <div>SM Login Screen</div>
-      );
-    }
-
     return (
     <Router>
       <Root>
         <Sidebar>
-          <div>Welcome, {jwt_decode(jwt).name}!</div>
+          <div>Welcome, {this.getName()}!</div>
           <SidebarItem><Link to={'/'}>Dashboard</Link></SidebarItem>
           <SidebarItem><Link to={'/canvassers/'}>Canvassers</Link></SidebarItem>
           <SidebarItem><Link to={'/teams/'}>Teams</Link></SidebarItem>
@@ -173,6 +182,7 @@ class App extends Component {
           <Route path="/questions/" component={Questions} />
           <Route path="/forms/" component={Forms} />
           <Route path="/map/" component={Map} />
+          <Route path="/jwt/" component={Jwt} />
         </Main>
       </Root>
     </Router>
