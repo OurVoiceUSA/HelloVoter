@@ -39,7 +39,7 @@ export default class App extends Component {
 
   render() {
     return (
-      <Router>
+      <Router basename="/HelloVoter/">
         <div>
           <Route exact={true} path="/canvassers/" render={() => {
             return (this.state.loading?'loading':this.state.canvassers.map(c => <Canvasser key={c.id} canvasser={c} />))

@@ -2,6 +2,7 @@
   "name": "hellovoter",
   "version": "0.1.0",
   "private": true,
+  "homepage": "/HelloVoter",
   "dependencies": {
     "google-map-react": "^1.1.1",
     "javascript-time-ago": "^1.0.34",

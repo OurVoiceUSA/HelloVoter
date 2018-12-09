@@ -74,7 +74,7 @@ export default class App extends Component {
 
   render() {
     return (
-      <Router>
+      <Router basename="/HelloVoter/">
         <div>
           <Route exact={true} path="/teams/" render={() => (
             <div>

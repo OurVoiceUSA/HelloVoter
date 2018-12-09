@@ -105,7 +105,7 @@ class App extends Component {
         case 400:
           return {error: true, msg: "The server didn't understand the request sent from this device."};
         case 401:
-          window.location.href = "https://"+server+"/auth/gm";
+          window.location.href = "https://"+server+"/auth/gm?app=HelloVoter";
           return {error: false, flag: true};
         case 403:
           return {error: true, msg: "We're sorry, but your request to canvass with this server has been rejected."};
@@ -159,7 +159,7 @@ class App extends Component {
     if (!jwt) window.location.reload();
 
     return (
-    <Router>
+    <Router basename="/HelloVoter/">
       <Root>
         <Sidebar>
           <div>Welcome, {this.getName()}!</div>
