@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
 
-import { jwt } from '../config.js';
-
 export default class App extends Component {
 
   constructor(props) {
@@ -19,7 +17,7 @@ export default class App extends Component {
     try {
       let res = await fetch('https://'+this.props.server+'/canvass/v1/turf/list', {
         headers: {
-          'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
+          'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
           'Content-Type': 'application/json',
         },
       });

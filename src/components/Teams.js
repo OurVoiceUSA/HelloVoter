@@ -3,8 +3,6 @@ import React, { Component } from 'react';
 import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
 import t from 'tcomb-form';
 
-import { jwt } from '../config.js';
-
 export default class App extends Component {
 
   constructor(props) {
@@ -42,7 +40,7 @@ export default class App extends Component {
       let res = await fetch('https://'+this.props.server+'/canvass/v1/team/create', {
         method: 'POST',
         headers: {
-          'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
+          'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({name: json.name}),
@@ -62,7 +60,7 @@ export default class App extends Component {
     try {
       let res = await fetch('https://'+this.props.server+'/canvass/v1/team/list', {
         headers: {
-          'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
+          'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
           'Content-Type': 'application/json',
         },
       });

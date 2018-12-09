@@ -4,8 +4,6 @@ import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
 import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en';
 
-import { jwt } from '../config.js';
-
 TimeAgo.locale(en);
 
 export default class App extends Component {
@@ -20,12 +18,12 @@ export default class App extends Component {
   }
 
   componentDidMount = async () => {
-    let canvassers = {};
+    let canvassers = {data: {}};
 
     try {
       let res = await fetch('https://'+this.props.server+'/canvass/v1/canvasser/list', {
         headers: {
-          'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
+          'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
           'Content-Type': 'application/json',
         },
       });
