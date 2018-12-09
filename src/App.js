@@ -50,9 +50,6 @@ class App extends Component {
     this.doSave = this.doSave.bind(this);
   }
 
-  componentDidMount() {
-  }
-
   onChange(connectForm) {
     this.setState({connectForm})
   }
@@ -159,6 +156,9 @@ class App extends Component {
         </div>
       );
     }
+
+    // TODO: this is a hack to load the new session from the /jwt/ redirect back to here. Need a cleaner way
+    if (!jwt) window.location.reload();
 
     return (
     <Router>
