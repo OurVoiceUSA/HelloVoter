@@ -728,7 +728,7 @@ app.use(async function (req, res, next) {
     if (!u.email) u.email = "";
     if (!u.avatar) u.avatar = "";
 
-    let a = await cqa('merge (a:Canvasser {id:{id}}) on match set a += {last_seen: timestamp(), name:{name}, email:{email}, avatar:{avatar}} on create set a += {created: timestamp(), name:{name}, email:{email}, avatar:{avatar}} return a', u);
+    let a = await cqa('merge (a:Canvasser {id:{id}}) on match set a += {last_seen: timestamp(), name:{name}, email:{email}, avatar:{avatar}} on create set a += {created: timestamp(), last_seen: timestamp(), name:{name}, email:{email}, avatar:{avatar}} return a', u);
     if (a.data.length === 1) {
       req.user = a.data[0];
     } else return res.status(500).json({error: true, msg: "Internal server error."});
