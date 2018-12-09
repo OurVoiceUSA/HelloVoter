@@ -258,6 +258,17 @@ function uncle(req, res) {
   return res.json({name: "Bob"});
 }
 
+async function dashboard(req, res) {
+  return res.json({
+    canvassers: (await cqa('match (a:Canvasser) return count(a)')).data[0],
+    teams: (await cqa('match (a:Team) return count(a)')).data[0],
+    turfs: (await cqa('match (a:Turf) return count(a)')).data[0],
+    questions: (await cqa('match (a:Question) return count(a)')).data[0],
+    forms: (await cqa('match (a:Form) return count(a)')).data[0],
+    addresses: (await cqa('match (a:Address) return count(a)')).data[0],
+  });
+}
+
 function google_maps_key(req, res) {
   return res.json({google_maps_key: ovi_config.google_maps_key });
 }
@@ -755,6 +766,7 @@ app.get('/poke', poke);
 // ws routes
 app.post('/canvass/v1/hello', hello);
 app.get('/canvass/v1/uncle', uncle);
+app.get('/canvass/v1/dashboard', dashboard);
 app.get('/canvass/v1/google_maps_key', google_maps_key);
 app.get('/canvass/v1/canvasser/list', canvasserList);
 app.get('/canvass/v1/canvasser/get', canvasserGet);
