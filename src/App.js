@@ -13,8 +13,6 @@ import Forms from './components/Forms';
 import Map from './components/Map';
 import Jwt from './components/Jwt';
 
-import { ack, wsbase } from './config.js';
-
 class App extends Component {
 
   constructor(props) {
@@ -23,7 +21,6 @@ class App extends Component {
     this.state = {
       jwt: sessionStorage.getItem('jwt'),
       server: sessionStorage.getItem('server'),
-      connectForm: {server: wsbase, ack: ack},
     };
 
     this.formServerItems = t.struct({
@@ -107,7 +104,7 @@ class App extends Component {
         case 400:
           return {error: true, msg: "The server didn't understand the request sent from this device."};
         case 401:
-          window.location.href = "https://"+wsbase+"/auth/gm";
+          window.location.href = "https://"+this.state.server+"/auth/gm";
           return {error: false, flag: true};
         case 403:
           return {error: true, msg: "We're sorry, but your request to canvass with this server has been rejected."};
