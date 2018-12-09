@@ -32,7 +32,7 @@ export default class App extends Component {
   render() {
     return (
       <div>
-        {(this.state.loading?'loading':this.state.turf.map(t => <Turf key={t.id} turf={t} />))}
+        {(this.state.loading?'loading':this.state.turf.map(t => <Turf key={t.name} turf={t} />))}
       </div>);
   }
 }
