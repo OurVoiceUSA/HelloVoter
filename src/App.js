@@ -181,8 +181,8 @@ class App extends Component {
           <Route path="/canvassers/" render={() => <Canvassers server={server} jwt={jwt} />} />
           <Route path="/teams/" render={() => <Teams server={server} jwt={jwt} />} />
           <Route path="/turf/" render={() => <Turf server={server} jwt={jwt} />} />
-          <Route path="/questions/" component={Questions} />
-          <Route path="/forms/" component={Forms} />
+          <Route path="/questions/" render={() => <Questions server={server} jwt={jwt} />} />
+          <Route path="/forms/" render={() => <Forms server={server} jwt={jwt} />} />
           <Route path="/map/" render={() => <Map server={server} jwt={jwt} />} />
           <Route path="/import/" render={() => <ImportData server={server} jwt={jwt} />} />
           <Route path="/jwt/" component={Jwt} />
