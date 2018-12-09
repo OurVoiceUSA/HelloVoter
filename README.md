@@ -1,44 +1,37 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Introduction
 
-## Available Scripts
+Our Voice USA is a 501(c)(3) non-profit, non-partisian organization for civic education. We are writing tools to engage everyday citizens with the political process by providing easy access to civic information that's relevant to the individual.
 
-In the project directory, you can run:
+## Features
 
-### `npm start`
+This is an administrative user interface for OVMobile and canvass-broker. Create teams, manage users, cut turf, and import data.
 
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Development Setup
 
-The page will reload if you make edits.<br>
-You will also see any lint errors in the console.
+Unlike most of our projects, this doesn't require a `.env` file. Instead, it gets its configuration from the server you login with.
 
-### `npm test`
+Install dependencies with `npm install` and start with `npm start`.
 
-Launches the test runner in the interactive watch mode.<br>
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Contributing
 
-### `npm run build`
+Thank you for your interest in contributing to us! To avoid potential legal headaches please sign our CLA (Contributors License Agreement). We handle this via pull request hooks on GitHub provided by https://cla-assistant.io/
 
-Builds the app for production to the `build` folder.<br>
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## License
 
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
+        Software License Agreement (AGPLv3+)
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+        Copyright (c) 2018, Our Voice USA. All rights reserved.
 
-### `npm run eject`
+        This program is free software; you can redistribute it and/or
+        modify it under the terms of the GNU Affero General Public License
+        as published by the Free Software Foundation; either version 3
+        of the License, or (at your option) any later version.
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+        This program is distributed in the hope that it will be useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        GNU Affero General Public License for more details.
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+        You should have received a copy of the GNU Affero General Public License
+        along with this program; if not, write to the Free Software
+        Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
