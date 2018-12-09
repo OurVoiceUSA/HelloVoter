@@ -181,7 +181,7 @@ class App extends Component {
           <Route path="/turf/" render={() => <Turf server={server} jwt={jwt} />} />
           <Route path="/questions/" component={Questions} />
           <Route path="/forms/" component={Forms} />
-          <Route path="/map/" component={Map} />
+          <Route path="/map/" render={() => <Map server={server} jwt={jwt} />} />
           <Route path="/jwt/" component={Jwt} />
         </Main>
       </Root>
