@@ -692,7 +692,7 @@ const app = expressAsync(express());
 app.disable('x-powered-by');
 app.use(expressLogging(logger));
 app.use(bodyParser.json({limit: '5mb'}));
-app.use(cors());
+app.use(cors({exposedHeaders: ['x-sm-oauth-url']}));
 
 // require ip_header if config for it is set
 if (!ovi_config.DEBUG && ovi_config.ip_header) {
