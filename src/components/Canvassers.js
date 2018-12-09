@@ -59,7 +59,7 @@ const Canvasser = (props) => {
     <div>
       Name: {props.canvasser.name} (<Link to={'/canvassers/'+props.canvasser.id}>view profile</Link>)<br />
       Email: {props.canvasser.email} <br />
-      Last Login: {timeAgo.format(new Date(props.canvasser.last_seen))} <br />
+      Last Login: {timeAgo.format(new Date(props.canvasser.last_seen-30000))} <br />
       Admin: {(props.canvasser.admin?'Yes':'No')}
     <hr />
     </div>
