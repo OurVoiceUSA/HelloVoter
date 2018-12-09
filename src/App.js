@@ -14,8 +14,8 @@ import Map from './components/Map';
 import ImportData from './components/ImportData';
 import Jwt from './components/Jwt';
 
-import { FontAwesomeIcon as Icon } from '@fortawesome/react-fontawesome';
-import { faCoffee } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faColumns, faUser, faUsers, faMap, faGlobe, faClipboard, faBalanceScale, faFileUpload, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 
 class App extends Component {
 
@@ -165,16 +165,16 @@ class App extends Component {
     <Router basename="/HelloVoter/">
       <Root>
         <Sidebar>
-          <div>Welcome, {this.getName()}! <Icon icon={faCoffee} /></div>
-          <SidebarItem><Link to={'/'}>Dashboard</Link></SidebarItem>
-          <SidebarItem><Link to={'/canvassers/'}>Canvassers</Link></SidebarItem>
-          <SidebarItem><Link to={'/teams/'}>Teams</Link></SidebarItem>
-          <SidebarItem><Link to={'/turf/'}>Turf</Link></SidebarItem>
-          <SidebarItem><Link to={'/questions/'}>Questions</Link></SidebarItem>
-          <SidebarItem><Link to={'/forms/'}>Forms</Link></SidebarItem>
-          <SidebarItem><Link to={'/map/'}>Map</Link></SidebarItem>
-          <SidebarItem><Link to={'/import/'}>Import Data</Link></SidebarItem>
-          <SidebarItem><button onClick={() => this._logout()}>Logout</button></SidebarItem>
+          <div style={{margin: 10}}>Welcome, {this.getName()}!</div>
+          <SidebarItem><Icon icon={faColumns} /> <Link to={'/'}>Dashboard</Link></SidebarItem>
+          <SidebarItem><Icon icon={faUser} /> <Link to={'/canvassers/'}>Canvassers</Link></SidebarItem>
+          <SidebarItem><Icon icon={faUsers} /> <Link to={'/teams/'}>Teams</Link></SidebarItem>
+          <SidebarItem><Icon icon={faMap} /> <Link to={'/turf/'}>Turf</Link></SidebarItem>
+          <SidebarItem><Icon icon={faBalanceScale} /> <Link to={'/questions/'}>Questions</Link></SidebarItem>
+          <SidebarItem><Icon icon={faClipboard} /> <Link to={'/forms/'}>Forms</Link></SidebarItem>
+          <SidebarItem><Icon icon={faGlobe} /> <Link to={'/map/'}>Map</Link></SidebarItem>
+          <SidebarItem><Icon icon={faFileUpload} /> <Link to={'/import/'}>Import Data</Link></SidebarItem>
+          <SidebarItem><Icon icon={faSignOutAlt} /> <button onClick={() => this._logout()}>Logout</button></SidebarItem>
         </Sidebar>
         <Main>
           <Route exact={true} path="/" component={Dashboard} />
@@ -209,6 +209,10 @@ const Main = (props) => (
   <div style={{flex: 1, height: '100vh', overflow: 'auto'}}>
     <div style={{padding: '20px'}} {...props}/>
   </div>
+)
+
+const Icon = (props) => (
+  <FontAwesomeIcon style={{width: 25}} icon={props.icon} />
 )
 
 export default App;
