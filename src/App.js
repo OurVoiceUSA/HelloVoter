@@ -11,6 +11,7 @@ import Turf from './components/Turf';
 import Questions from './components/Questions';
 import Forms from './components/Forms';
 import Map from './components/Map';
+import ImportData from './components/ImportData';
 import Jwt from './components/Jwt';
 
 class App extends Component {
@@ -169,6 +170,7 @@ class App extends Component {
           <SidebarItem><Link to={'/questions/'}>Questions</Link></SidebarItem>
           <SidebarItem><Link to={'/forms/'}>Forms</Link></SidebarItem>
           <SidebarItem><Link to={'/map/'}>Map</Link></SidebarItem>
+          <SidebarItem><Link to={'/import/'}>Import Data</Link></SidebarItem>
           <SidebarItem><button onClick={() => this._logout()}>Logout</button></SidebarItem>
         </Sidebar>
         <Main>
@@ -179,6 +181,7 @@ class App extends Component {
           <Route path="/questions/" component={Questions} />
           <Route path="/forms/" component={Forms} />
           <Route path="/map/" render={() => <Map server={server} jwt={jwt} />} />
+          <Route path="/import/" render={() => <ImportData server={server} jwt={jwt} />} />
           <Route path="/jwt/" component={Jwt} />
         </Main>
       </Root>
