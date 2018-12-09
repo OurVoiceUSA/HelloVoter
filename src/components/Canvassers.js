@@ -4,6 +4,9 @@ import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
 import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en';
 
+import { FontAwesomeIcon as Icon } from '@fortawesome/react-fontawesome';
+import { faCrown } from '@fortawesome/free-solid-svg-icons';
+
 TimeAgo.locale(en);
 
 export default class App extends Component {
@@ -57,10 +60,9 @@ const Canvasser = (props) => {
   const timeAgo = new TimeAgo('en-US')
   return (
     <div>
-      Name: {props.canvasser.name} (<Link to={'/canvassers/'+props.canvasser.id}>view profile</Link>)<br />
+      Name: {props.canvasser.name} (<Link to={'/canvassers/'+props.canvasser.id}>view profile</Link>) {(props.canvasser.admin?<Icon icon={faCrown} color="gold" />:'')}<br />
       Email: {props.canvasser.email} <br />
       Last Login: {timeAgo.format(new Date(props.canvasser.last_seen-30000))} <br />
-      Admin: {(props.canvasser.admin?'Yes':'No')}
     <hr />
     </div>
   );

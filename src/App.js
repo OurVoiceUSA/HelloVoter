@@ -14,6 +14,9 @@ import Map from './components/Map';
 import ImportData from './components/ImportData';
 import Jwt from './components/Jwt';
 
+import { FontAwesomeIcon as Icon } from '@fortawesome/react-fontawesome';
+import { faCoffee } from '@fortawesome/free-solid-svg-icons';
+
 class App extends Component {
 
   constructor(props) {
@@ -162,7 +165,7 @@ class App extends Component {
     <Router basename="/HelloVoter/">
       <Root>
         <Sidebar>
-          <div>Welcome, {this.getName()}!</div>
+          <div>Welcome, {this.getName()}! <Icon icon={faCoffee} /></div>
           <SidebarItem><Link to={'/'}>Dashboard</Link></SidebarItem>
           <SidebarItem><Link to={'/canvassers/'}>Canvassers</Link></SidebarItem>
           <SidebarItem><Link to={'/teams/'}>Teams</Link></SidebarItem>
