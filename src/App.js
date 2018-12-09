@@ -21,8 +21,8 @@ class App extends Component {
     super(props);
 
     this.state = {
-      jwt: localStorage.getItem('jwt'),
-      server: localStorage.getItem('server'),
+      jwt: sessionStorage.getItem('jwt'),
+      server: sessionStorage.getItem('server'),
       connectForm: {server: wsbase, ack: ack},
     };
 
@@ -70,8 +70,8 @@ class App extends Component {
   }
 
   _logout() {
-    localStorage.removeItem('server');
-    localStorage.removeItem('jwt');
+    sessionStorage.removeItem('server');
+    sessionStorage.removeItem('jwt');
     this.setState({server: null});
   }
 
@@ -92,7 +92,7 @@ class App extends Component {
   singHello = async (server) => {
     let res;
 
-    localStorage.setItem('server', server);
+    sessionStorage.setItem('server', server);
 
     try {
       res = await fetch('https://'+server+'/canvass/v1/hello', {
@@ -110,7 +110,7 @@ class App extends Component {
         case 400:
           return {error: true, msg: "The server didn't understand the request sent from this device."};
         case 401:
-          window.location.href = "https://wsdev.ourvoiceusa.org/auth/gm";
+          window.location.href = "https://"+wsbase+"/auth/gm";
           return {error: false, flag: true};
         case 403:
           return {error: true, msg: "We're sorry, but your request to canvass with this server has been rejected."};
@@ -123,7 +123,7 @@ class App extends Component {
       console.warn(body);
 
       this.setState({server: server});
-      localStorage.setItem('server', server);
+      sessionStorage.setItem('server', server);
 
       if (body.data.ready !== true) return {error: false, msg: "The server said: "+body.msg};
       else {

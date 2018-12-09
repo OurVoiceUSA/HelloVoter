@@ -13,12 +13,13 @@ export default class App extends Component {
 
     this.state = {
       loading: true,
+      canvassers: [],
     };
 
   }
 
   componentDidMount = async () => {
-    let canvassers = {data: {}};
+    let canvassers = [];
 
     try {
       let res = await fetch('https://'+this.props.server+'/canvass/v1/canvasser/list', {
@@ -27,12 +28,13 @@ export default class App extends Component {
           'Content-Type': 'application/json',
         },
       });
-      canvassers = await res.json();
+      let data = await res.json();
+      canvassers = (data.data?data.data:[]);
     } catch (e) {
       console.warn(e);
     }
 
-    this.setState({loading: false, canvassers: canvassers.data});
+    this.setState({loading: false, canvassers: canvassers});
   }
 
   render() {

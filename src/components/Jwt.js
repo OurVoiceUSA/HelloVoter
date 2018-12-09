@@ -6,7 +6,7 @@ export default class App extends Component {
 
   componentDidMount() {
     try {
-      localStorage.setItem('jwt', this.props.location.pathname.split('/')[2]);
+      sessionStorage.setItem('jwt', this.props.location.pathname.split('/')[2]);
     } catch (e) {
       console.warn("Unable to save jwt");
     }
