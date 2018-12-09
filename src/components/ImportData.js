@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 
+/*
 import t from 'tcomb-form';
 
 const HEADER = t.enums({
@@ -9,6 +10,7 @@ const HEADER = t.enums({
   'state': 'State',
   'zip': 'Zip Code',
 }, 'HEADER');
+*/
 
 export default class App extends Component {
   render() {
