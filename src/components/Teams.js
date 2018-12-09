@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
+import { HashRouter as Router, Route, Link } from 'react-router-dom';
 import t from 'tcomb-form';
 
 export default class App extends Component {
@@ -74,7 +74,7 @@ export default class App extends Component {
 
   render() {
     return (
-      <Router basename="/HelloVoter/">
+      <Router>
         <div>
           <Route exact={true} path="/teams/" render={() => (
             <div>

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
+import { HashRouter as Router, Route, Link } from 'react-router-dom';
 import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en';
 
@@ -42,7 +42,7 @@ export default class App extends Component {
 
   render() {
     return (
-      <Router basename="/HelloVoter/">
+      <Router>
         <div>
           <Route exact={true} path="/canvassers/" render={() => {
             return (this.state.loading?'loading':this.state.canvassers.map(c => <Canvasser key={c.id} canvasser={c} />))

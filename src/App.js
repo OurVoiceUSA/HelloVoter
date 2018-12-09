@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
+import { HashRouter as Router, Route, Link } from 'react-router-dom';
 import t from 'tcomb-form';
 import jwt_decode from 'jwt-decode';
 
@@ -162,7 +162,7 @@ class App extends Component {
     if (!jwt) window.location.reload();
 
     return (
-    <Router basename="/HelloVoter/">
+    <Router>
       <Root>
         <Sidebar>
           <div style={{margin: 10}}>Welcome, {this.getName()}!</div>
