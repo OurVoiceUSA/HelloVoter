@@ -72,7 +72,7 @@ class App extends Component {
   _logout() {
     sessionStorage.removeItem('server');
     sessionStorage.removeItem('jwt');
-    this.setState({server: null});
+    this.setState({server: null, jwt: null});
   }
 
   doSave = async () => {
