@@ -19,7 +19,7 @@ export default class App extends Component {
     }
 
     this.state = {jwt: jwt};
-
+    this.props.refer.setState({jwt: jwt});
     sessionStorage.setItem('jwt', jwt);
   }
 

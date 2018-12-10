@@ -162,9 +162,6 @@ class App extends Component {
       );
     }
 
-    // TODO: this is a hack to load the new session from the /jwt/ redirect back to here. Need a cleaner way
-    if (!jwt) window.location.reload();
-
     return (
     <Router>
       <Root>
@@ -189,7 +186,7 @@ class App extends Component {
           <Route path="/forms/" render={() => <Forms server={server} jwt={jwt} />} />
           <Route path="/map/" render={() => <Map server={server} jwt={jwt} />} />
           <Route path="/import/" render={() => <ImportData server={server} jwt={jwt} />} />
-          <Route path="/jwt/" component={Jwt} />
+          <Route path="/jwt/" render={(props) => <Jwt {...props} refer={this} />} />
         </Main>
       </Root>
     </Router>
