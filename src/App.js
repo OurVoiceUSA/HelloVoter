@@ -23,8 +23,8 @@ class App extends Component {
     super(props);
 
     this.state = {
-      jwt: sessionStorage.getItem('jwt'),
-      server: sessionStorage.getItem('server'),
+      jwt: localStorage.getItem('jwt'),
+      server: localStorage.getItem('server'),
     };
 
     this.formServerItems = t.struct({
@@ -68,8 +68,8 @@ class App extends Component {
   }
 
   _logout() {
-    sessionStorage.removeItem('server');
-    sessionStorage.removeItem('jwt');
+    localStorage.removeItem('server');
+    localStorage.removeItem('jwt');
     this.setState({server: null, jwt: null});
   }
 
@@ -90,7 +90,7 @@ class App extends Component {
   singHello = async (server) => {
     let res;
 
-    sessionStorage.setItem('server', server);
+    localStorage.setItem('server', server);
 
     try {
       res = await fetch('https://'+server+'/canvass/v1/hello', {
@@ -125,7 +125,7 @@ class App extends Component {
       console.warn(body);
 
       this.setState({server: server});
-      sessionStorage.setItem('server', server);
+      localStorage.setItem('server', server);
 
       if (body.data.ready !== true) return {error: false, msg: "The server said: "+body.msg};
       else {
