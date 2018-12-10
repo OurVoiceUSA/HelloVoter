@@ -102,13 +102,17 @@ class App extends Component {
         body: JSON.stringify({longitude: -118, latitude: 40}),
       });
 
+      let sm_oauth_url = res.headers.get('x-sm-oauth-url');
+
+      if (!sm_oauth_url) return {error: true, msg: "Missing required header."}
+
       switch (res.status) {
         case 200:
           break; // valid - break to proceed
         case 400:
           return {error: true, msg: "The server didn't understand the request sent from this device."};
         case 401:
-          window.location.href = "https://"+server+"/auth/gm?app=HelloVoter";
+          window.location.href = sm_oauth_url+"/gm?app=HelloVoter";
           return {error: false, flag: true};
         case 403:
           return {error: true, msg: "We're sorry, but your request to canvass with this server has been rejected."};
