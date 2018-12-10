@@ -23,7 +23,7 @@ const ovi_config = {
   neo4j_pass: getConfig("neo4j_pass", false, 'neo4j'),
   jwt_pub_key: getConfig("jwt_pub_key", false, null),
   google_maps_key: getConfig("google_maps_key", false, null),
-  sm_oauth: getConfig("sm_oauth_url", false, 'https://ws.ourvoiceusa.org/auth'),
+  sm_oauth_url: getConfig("sm_oauth_url", false, 'https://ws.ourvoiceusa.org/auth'),
   DEBUG: getConfig("debug", false, false),
 };
 
@@ -33,8 +33,8 @@ var jwt_iss = 'ourvoiceusa.org';
 if (ovi_config.jwt_pub_key) {
   public_key = fs.readFileSync(ovi_config.jwt_pub_key);
 } else {
-  console.log("JWT_PUB_KEY not defined, attempting to fetch from "+ovi_config.sm_oauth+'/pubkey');
-  fetch(ovi_config.sm_oauth+'/pubkey')
+  console.log("JWT_PUB_KEY not defined, attempting to fetch from "+ovi_config.sm_oauth_url+'/pubkey');
+  fetch(ovi_config.sm_oauth_url+'/pubkey')
   .then(res => {
     jwt_iss = res.headers.get('x-jwt-iss');
     if (res.status !== 200) throw "http code "+res.status;
@@ -44,7 +44,7 @@ if (ovi_config.jwt_pub_key) {
     public_key = body;
   })
   .catch((e) => {
-    console.log("Unable to read SM_OAUTH_URL "+ovi_config.sm_oauth);
+    console.log("Unable to read SM_OAUTH_URL "+ovi_config.sm_oauth_url);
     console.log(e);
     process.exit(1);
   });
@@ -719,7 +719,7 @@ app.use(async function (req, res, next) {
     } catch (e) {}
   }
 
-  res.set('x-sm-oauth-url', ovi_config.sm_oauth);
+  res.set('x-sm-oauth-url', ovi_config.sm_oauth_url);
   res.on('finish', logIt, req, res);
 
   req.user = {};
