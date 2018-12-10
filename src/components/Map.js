@@ -15,6 +15,7 @@ export default class App extends Component {
 
   componentDidMount = async () => {
     let key;
+    let error = false;
     try {
       let res = await fetch('https://'+this.props.server+'/canvass/v1/google_maps_key', {
         headers: {
@@ -25,15 +26,18 @@ export default class App extends Component {
 
       let body = await res.json();
       key = body.google_maps_key;
+      if (body.error) error = true;
+
     } catch (e) {
       console.warn(e);
     }
 
-    this.setState({google_maps_key: (key?{key: key}:null), loading: false});
+    this.setState({google_maps_key: (key?{key: key}:null), loading: false, error: error});
   }
 
   render() {
     if (this.state.loading) return (<div>loading</div>);
+    if (this.state.error) return (<div>Awaiting assignment</div>);
 
     return (
       <div style={{ height: '100vh', width: '100%' }}>
@@ -57,4 +61,3 @@ const Pin = (props) => (
     FOOBAR
   </div>
 )
-
