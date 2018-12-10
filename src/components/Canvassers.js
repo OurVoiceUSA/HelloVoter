@@ -3,9 +3,11 @@ import React, { Component } from 'react';
 import { HashRouter as Router, Route, Link } from 'react-router-dom';
 import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en';
+import Loader from 'react-loader-spinner';
+import Img from 'react-image';
 
 import { FontAwesomeIcon as Icon } from '@fortawesome/react-fontawesome';
-import { faCrown } from '@fortawesome/free-solid-svg-icons';
+import { faCrown, faUser } from '@fortawesome/free-solid-svg-icons';
 
 TimeAgo.locale(en);
 
@@ -57,14 +59,17 @@ export default class App extends Component {
 }
 
 const Canvasser = (props) => {
-  const timeAgo = new TimeAgo('en-US')
+  const timeAgo = new TimeAgo('en-US');
   return (
-    <div>
-      Name: {props.canvasser.name} (<Link to={'/canvassers/'+props.canvasser.id}>view profile</Link>) {(props.canvasser.admin?<Icon icon={faCrown} color="gold" />:'')}<br />
-      Email: {props.canvasser.email} <br />
-      Last Login: {timeAgo.format(new Date(props.canvasser.last_seen-30000))} <br />
-    <hr />
+    <div style={{display: 'flex', padding: '10px'}}>
+      <div style={{padding: '5px 10px'}}>
+        <Img width={50} src={props.canvasser.avatar} loader={<Loader width={50} type="ThreeDots" />} unloader={<Icon style={{width: 50, height: 50, color: "gray"}} icon={faUser} />} />
+      </div>
+      <div style={{flex: 1, overflow: 'auto'}}>
+        Name: {props.canvasser.name} (<Link to={'/canvassers/'+props.canvasser.id}>view profile</Link>) {(props.canvasser.admin?<Icon icon={faCrown} color="gold" />:'')}<br />
+        Email: {props.canvasser.email} <br />
+        Last Login: {timeAgo.format(new Date(props.canvasser.last_seen-30000))}
+      </div>
     </div>
   );
 }
-
