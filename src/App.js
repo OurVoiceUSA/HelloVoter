@@ -166,7 +166,7 @@ class App extends Component {
     <Router>
       <Root>
         <Sidebar>
-          <div style={{margin: 10}}>Welcome, {this.getName()}!</div>
+          <div style={{margin: 10}}>Welcome, {this.getName()}!<br />Server: {this.state.server}</div>
           <SidebarItem><Icon icon={faColumns} /> <Link to={'/'}>Dashboard</Link></SidebarItem>
           <SidebarItem><Icon icon={faUser} /> <Link to={'/canvassers/'}>Canvassers</Link></SidebarItem>
           <SidebarItem><Icon icon={faUsers} /> <Link to={'/teams/'}>Teams</Link></SidebarItem>
