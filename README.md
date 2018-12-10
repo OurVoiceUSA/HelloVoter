@@ -8,7 +8,7 @@ This is an administrative user interface for OVMobile and canvass-broker. Create
 
 ## Development Setup
 
-Unlike most of our projects, this doesn't require a `.env` file. Instead, it gets its configuration from the server you login with.
+This App is designed to be static and get all its configuration and data from the server you enter at the login screen. Customizing a `.env` file is not required.
 
 Install dependencies with `npm install` and start with `npm start`.
 

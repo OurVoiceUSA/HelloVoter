@@ -49,6 +49,7 @@ class App extends Component {
 
     this.onChange = this.onChange.bind(this);
     this.doSave = this.doSave.bind(this);
+
   }
 
   onChange(connectForm) {
@@ -147,7 +148,10 @@ class App extends Component {
     if (!server) {
       return (
         <div align="center">
-          <h3>HelloVoter</h3>
+          <br />
+          <strong>{process.env.REACT_APP_NAME}</strong>
+          <div>Version {process.env.REACT_APP_VERSION}</div>
+          <br />
           <t.form.Form
             ref="mainForm"
             type={this.formServerItems}
