@@ -7,7 +7,7 @@ import Loader from 'react-loader-spinner';
 import Img from 'react-image';
 
 import { FontAwesomeIcon as Icon } from '@fortawesome/react-fontawesome';
-import { faCrown, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faCrown, faUser, faSync } from '@fortawesome/free-solid-svg-icons';
 
 TimeAgo.locale(en);
 
@@ -23,8 +23,14 @@ export default class App extends Component {
 
   }
 
-  componentDidMount = async () => {
+  componentDidMount() {
+    this._loadData();
+  }
+
+  _loadData = async () => {
     let canvassers = [];
+
+    this.setState({loading: true})
 
     try {
       let res = await fetch('https://'+this.props.server+'/canvass/v1/canvasser/list', {
@@ -46,6 +52,7 @@ export default class App extends Component {
     return (
       <Router>
         <div>
+          <Icon icon={faSync} color="green" onClick={() => this._loadData()} />
           <Route exact={true} path="/canvassers/" render={() => {
             return (this.state.loading?'loading':this.state.canvassers.map(c => <Canvasser key={c.id} canvasser={c} />))
           }} />
