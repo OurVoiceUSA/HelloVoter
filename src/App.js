@@ -13,9 +13,12 @@ import Forms from './components/Forms';
 import Map from './components/Map';
 import ImportData from './components/ImportData';
 import Jwt from './components/Jwt';
+import About from './components/About';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faColumns, faUser, faUsers, faMap, faGlobe, faClipboard, faBalanceScale, faFileUpload, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
+import { faColumns, faUser, faUsers, faMap, faGlobe, faClipboard,
+         faBalanceScale, faFileUpload, faSignOutAlt, faAward } from '@fortawesome/free-solid-svg-icons';
+import { faGithub } from '@fortawesome/free-brands-svg-icons';
 
 class App extends Component {
 
@@ -171,6 +174,7 @@ class App extends Component {
       <Root>
         <Sidebar>
           <div style={{margin: 10}}>Welcome, {this.getName()}!<br />Server: {this.state.server}</div>
+          <hr />
           <SidebarItem><Icon icon={faColumns} /> <Link to={'/'}>Dashboard</Link></SidebarItem>
           <SidebarItem><Icon icon={faUser} /> <Link to={'/canvassers/'}>Canvassers</Link></SidebarItem>
           <SidebarItem><Icon icon={faUsers} /> <Link to={'/teams/'}>Teams</Link></SidebarItem>
@@ -180,6 +184,9 @@ class App extends Component {
           <SidebarItem><Icon icon={faGlobe} /> <Link to={'/map/'}>Map</Link></SidebarItem>
           <SidebarItem><Icon icon={faFileUpload} /> <Link to={'/import/'}>Import Data</Link></SidebarItem>
           <SidebarItem><Icon icon={faSignOutAlt} /> <button onClick={() => this._logout()}>Logout</button></SidebarItem>
+          <hr />
+          <SidebarItem><Icon icon={faAward} /> <Link to={'/about/'}>About</Link></SidebarItem>
+          <SidebarItem><Icon icon={faGithub} /> <a target="_blank" href="https://github.com/OurVoiceUSA/HelloVoter/tree/master/docs/">Help</a></SidebarItem>
         </Sidebar>
         <Main>
           <Route exact={true} path="/" render={() => <Dashboard server={server} jwt={jwt} />} />
@@ -191,6 +198,8 @@ class App extends Component {
           <Route path="/map/" render={() => <Map server={server} jwt={jwt} />} />
           <Route path="/import/" render={() => <ImportData server={server} jwt={jwt} />} />
           <Route path="/jwt/" render={(props) => <Jwt {...props} refer={this} />} />
+          <Route path="/import/" render={() => <ImportData server={server} jwt={jwt} />} />
+          <Route path="/about/" render={() => <About server={server} jwt={jwt} />} />
         </Main>
       </Root>
     </Router>
