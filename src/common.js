@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
+import LoaderSpinner from 'react-loader-spinner';
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSync } from '@fortawesome/free-solid-svg-icons';
 
 export const Root = (props) => (
   <div style={{display: 'flex'}} {...props}/>
@@ -22,3 +25,17 @@ export const Main = (props) => (
 export const Icon = (props) => (
   <FontAwesomeIcon style={{width: 25}} {...props} />
 )
+
+export const Loader = (props) => (
+  <LoaderSpinner type="ThreeDots" {...props} />
+)
+
+export const RootLoader = (props) => {
+  if (props.flag) return (<Loader />);
+  else return (
+    <div>
+      <Icon icon={faSync} color="green" onClick={props.func} />
+      <div {...props} />
+    </div>
+  );
+}
