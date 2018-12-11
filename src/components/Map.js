@@ -12,6 +12,11 @@ export default class App extends Component {
     this.state = {
       loading: true,
       google_maps_key: null,
+      pins: [
+        {lat:33.9218230, lng:-118.3281371},
+        {lat:33.9328242, lng:-118.3381376},
+        {lat:33.9438254, lng:-118.3481379},
+      ],
     };
   }
 
@@ -48,10 +53,7 @@ export default class App extends Component {
           defaultCenter={{lat: 33.9208231, lng: -118.3281370}}
           defaultZoom={11}
         >
-          <MapMarker
-            lat={33.9208231}
-            lng={-118.3281370}
-          />
+          {this.state.pins.map((c) => (<MapMarker lat={c.lat} lng={c.lng} />))}
         </GoogleMaps>
       </div>
     );
