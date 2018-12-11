@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import LoaderSpinner from 'react-loader-spinner';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSync } from '@fortawesome/free-solid-svg-icons';
+import { faSync, faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
 
 export const Root = (props) => (
   <div style={{display: 'flex'}} {...props}/>
@@ -24,6 +24,10 @@ export const Main = (props) => (
 
 export const Icon = (props) => (
   <FontAwesomeIcon style={{width: 25}} {...props} />
+)
+
+export const MapMarker = (props) => (
+  <FontAwesomeIcon color="red" size="2x" icon={faMapMarkerAlt} {...props} />
 )
 
 export const Loader = (props) => (

@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 
 import GoogleMaps from 'google-map-react';
 
+import { MapMarker } from '../common.js';
+
 export default class App extends Component {
 
   constructor(props) {
@@ -46,18 +48,12 @@ export default class App extends Component {
           defaultCenter={{lat: 33.9208231, lng: -118.3281370}}
           defaultZoom={11}
         >
-          <Pin
-            lat={59.955413}
-            lng={30.337844}
+          <MapMarker
+            lat={33.9208231}
+            lng={-118.3281370}
           />
         </GoogleMaps>
       </div>
     );
   }
 }
-
-const Pin = (props) => (
-  <div>
-    FOOBAR
-  </div>
-)
