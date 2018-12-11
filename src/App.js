@@ -15,7 +15,8 @@ import ImportData from './components/ImportData';
 import Jwt from './components/Jwt';
 import About from './components/About';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Root, Sidebar, SidebarItem, Main, Icon } from './common.js';
+
 import { faColumns, faUser, faUsers, faMap, faGlobe, faClipboard,
          faBalanceScale, faFileUpload, faSignOutAlt, faAward } from '@fortawesome/free-solid-svg-icons';
 import { faGithub } from '@fortawesome/free-brands-svg-icons';
@@ -206,27 +207,5 @@ class App extends Component {
     );
   }
 }
-
-const Root = (props) => (
-  <div style={{display: 'flex'}} {...props}/>
-)
-
-const Sidebar = (props) => (
-  <div style={{width: '22vw', height: '100vh', overlow: 'auto', background: '#eee'}} {...props}/>
-)
-
-const SidebarItem = (props) => (
-  <div style={{whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', padding: '5px 10px'}} {...props}/>
-)
-
-const Main = (props) => (
-  <div style={{flex: 1, height: '100vh', overflow: 'auto'}}>
-    <div style={{padding: '20px'}} {...props}/>
-  </div>
-)
-
-const Icon = (props) => (
-  <FontAwesomeIcon style={{width: 25}} icon={props.icon} />
-)
 
 export default App;

@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 
 import Loader from 'react-loader-spinner';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Icon } from '../common.js';
+
 import { faGlobe } from '@fortawesome/free-solid-svg-icons';
 import { faTwitter, faFacebook } from '@fortawesome/free-brands-svg-icons';
 
@@ -48,7 +49,3 @@ export default class App extends Component {
     );
   }
 }
-
-const Icon = (props) => (
-  <FontAwesomeIcon style={{width: 25}} icon={props.icon} />
-)

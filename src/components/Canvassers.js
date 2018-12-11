@@ -6,7 +6,8 @@ import en from 'javascript-time-ago/locale/en';
 import Loader from 'react-loader-spinner';
 import Img from 'react-image';
 
-import { FontAwesomeIcon as Icon } from '@fortawesome/react-fontawesome';
+import { Icon } from '../common.js';
+
 import { faCrown, faUser, faSync } from '@fortawesome/free-solid-svg-icons';
 
 TimeAgo.locale(en);
