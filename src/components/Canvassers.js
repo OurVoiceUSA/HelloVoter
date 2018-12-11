@@ -101,7 +101,7 @@ const Canvasser = (props) => {
       </div>
       <div style={{flex: 1, overflow: 'auto'}}>
         Name: {props.canvasser.name} (<Link to={'/canvassers/'+props.canvasser.id} onClick={() => props.refer.setState({thisCanvasser: props.canvasser})}>view profile</Link>) {(props.canvasser.admin?<Icon icon={faCrown} color="gold" />:'')}<br />
-        Email: {props.canvasser.email} <br />
+        Location: {(props.canvasser.location?props.canvasser.location:'N/A')} <br />
         Last Login: {timeAgo.format(new Date(props.canvasser.last_seen-30000))}
       </div>
     </div>
