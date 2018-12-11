@@ -193,7 +193,7 @@ class App extends Component {
         </Sidebar>
         <Main>
           <Route exact={true} path="/" render={() => <Dashboard server={server} jwt={jwt} />} />
-          <Route path="/canvassers/" render={() => <Canvassers server={server} jwt={jwt} />} />
+          <Route path="/canvassers/" render={(props) => <Canvassers server={server} jwt={jwt} {...props} />} />
           <Route path="/teams/" render={() => <Teams server={server} jwt={jwt} />} />
           <Route path="/turf/" render={() => <Turf server={server} jwt={jwt} />} />
           <Route path="/questions/" render={() => <Questions server={server} jwt={jwt} />} />
