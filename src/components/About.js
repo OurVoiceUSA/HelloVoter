@@ -29,7 +29,6 @@ export default class App extends Component {
 
     this.setState({cb_version: data.version});
   }
-//      <div>{(this.state.cb_version?'canvass-broker version '+this.state.cb_version:<Loader />)}</div>
 
   render() {
     return (
