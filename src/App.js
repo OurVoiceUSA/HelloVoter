@@ -186,7 +186,7 @@ class App extends Component {
           <SidebarItem><Icon icon={faSignOutAlt} /> <button onClick={() => this._logout()}>Logout</button></SidebarItem>
           <hr />
           <SidebarItem><Icon icon={faAward} /> <Link to={'/about/'}>About</Link></SidebarItem>
-          <SidebarItem><Icon icon={faGithub} /> <a target="_blank" href="https://github.com/OurVoiceUSA/HelloVoter/tree/master/docs/">Help</a></SidebarItem>
+          <SidebarItem><Icon icon={faGithub} /> <a target="_blank" rel="noopener noreferrer" href="https://github.com/OurVoiceUSA/HelloVoter/tree/master/docs/">Help</a></SidebarItem>
         </Sidebar>
         <Main>
           <Route exact={true} path="/" render={() => <Dashboard server={server} jwt={jwt} />} />
