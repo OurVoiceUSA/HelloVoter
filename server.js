@@ -261,7 +261,7 @@ function uncle(req, res) {
 }
 
 async function dashboard(req, res) {
-  return res.json({
+  if (req.user.admin === true) return res.json({
     canvassers: (await cqa('match (a:Canvasser) return count(a)')).data[0],
     teams: (await cqa('match (a:Team) return count(a)')).data[0],
     turfs: (await cqa('match (a:Turf) return count(a)')).data[0],
@@ -270,6 +270,8 @@ async function dashboard(req, res) {
     addresses: (await cqa('match (a:Address) return count(a)')).data[0],
     version: version,
   });
+
+  return res.json({});
 }
 
 async function google_maps_key(req, res) {
