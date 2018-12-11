@@ -12,13 +12,14 @@ import Questions from './components/Questions';
 import Forms from './components/Forms';
 import Map from './components/Map';
 import ImportData from './components/ImportData';
+import Settings from './components/Settings';
 import Jwt from './components/Jwt';
 import About from './components/About';
 
 import { Root, Sidebar, SidebarItem, Main, Icon } from './common.js';
 
 import { faColumns, faUser, faUsers, faMap, faGlobe, faClipboard,
-         faBalanceScale, faFileUpload, faSignOutAlt, faAward } from '@fortawesome/free-solid-svg-icons';
+         faBalanceScale, faFileUpload, faSignOutAlt, faAward, faCog } from '@fortawesome/free-solid-svg-icons';
 import { faGithub } from '@fortawesome/free-brands-svg-icons';
 
 class App extends Component {
@@ -184,6 +185,7 @@ class App extends Component {
           <SidebarItem><Icon icon={faClipboard} /> <Link to={'/forms/'}>Forms</Link></SidebarItem>
           <SidebarItem><Icon icon={faGlobe} /> <Link to={'/map/'}>Map</Link></SidebarItem>
           <SidebarItem><Icon icon={faFileUpload} /> <Link to={'/import/'}>Import Data</Link></SidebarItem>
+          <SidebarItem><Icon icon={faCog} /> <Link to={'/settings/'}>Settings</Link></SidebarItem>
           <SidebarItem><Icon icon={faSignOutAlt} /> <button onClick={() => this._logout()}>Logout</button></SidebarItem>
           <hr />
           <SidebarItem><Icon icon={faAward} /> <Link to={'/about/'}>About</Link></SidebarItem>
@@ -198,6 +200,7 @@ class App extends Component {
           <Route path="/forms/" render={() => <Forms server={server} jwt={jwt} />} />
           <Route path="/map/" render={() => <Map server={server} jwt={jwt} />} />
           <Route path="/import/" render={() => <ImportData server={server} jwt={jwt} />} />
+          <Route path="/settings/" render={() => <Settings server={server} jwt={jwt} />} />
           <Route path="/jwt/" render={(props) => <Jwt {...props} refer={this} />} />
           <Route path="/import/" render={() => <ImportData server={server} jwt={jwt} />} />
           <Route path="/about/" render={() => <About server={server} jwt={jwt} />} />
