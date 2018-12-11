@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import LoaderSpinner from 'react-loader-spinner';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
