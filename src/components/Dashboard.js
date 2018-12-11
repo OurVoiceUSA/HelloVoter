@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 
+import { RootLoader } from '../common.js';
+
 export default class App extends Component {
 
   constructor(props) {
@@ -10,8 +12,15 @@ export default class App extends Component {
     };
   }
 
-  componentDidMount = async () => {
+  componentDidMount() {
+    this._loadData();
+  }
+
+  _loadData = async () => {
     let data = {};
+
+    this.setState({loading: true})
+
     try {
       let res = await fetch('https://'+this.props.server+'/canvass/v1/dashboard', {
         headers: {
@@ -29,13 +38,10 @@ export default class App extends Component {
   }
 
   render() {
-    if (this.state.loading) return (<div>loading</div>);
-
     return (
-      <div>
+      <RootLoader flag={this.state.loading} func={this._loadData}>
         {JSON.stringify(this.state.data)}
-      </div>
+      </RootLoader>
     );
   }
 }
-

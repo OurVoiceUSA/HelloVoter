@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 
+import { RootLoader } from '../common.js';
+
 export default class App extends Component {
 
   constructor(props) {
@@ -7,12 +9,19 @@ export default class App extends Component {
 
     this.state = {
       loading: true,
+      turf: [],
     };
 
   }
 
-  componentDidMount = async () => {
+  componentDidMount() {
+    this._loadData();
+  }
+
+  _loadData = async () => {
     let turf = {};
+
+    this.setState({loading: true});
 
     try {
       let res = await fetch('https://'+this.props.server+'/canvass/v1/turf/list', {
@@ -31,9 +40,10 @@ export default class App extends Component {
 
   render() {
     return (
-      <div>
-        {(this.state.loading?'loading':this.state.turf.map(t => <Turf key={t.name} turf={t} />))}
-      </div>);
+      <RootLoader flag={this.state.loading} func={this._loadData}>
+        {this.state.turf.map(t => <Turf key={t.name} turf={t} />)}
+      </RootLoader>
+    );
   }
 }
 
@@ -43,4 +53,3 @@ const Turf = (props) => (
   <hr />
   </div>
 )
-

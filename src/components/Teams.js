@@ -3,6 +3,8 @@ import React, { Component } from 'react';
 import { HashRouter as Router, Route, Link } from 'react-router-dom';
 import t from 'tcomb-form';
 
+import { RootLoader } from '../common.js';
+
 export default class App extends Component {
 
   constructor(props) {
@@ -53,9 +55,14 @@ export default class App extends Component {
 
   }
 
+  componentDidMount() {
+    this._loadData();
+  }
 
-  componentDidMount = async () => {
+  _loadData = async () => {
     let teams = {};
+
+    this.setState({loading: true})
 
     try {
       let res = await fetch('https://'+this.props.server+'/canvass/v1/team/list', {
@@ -75,7 +82,7 @@ export default class App extends Component {
   render() {
     return (
       <Router>
-        <div>
+        <RootLoader flag={this.state.loading} func={this._loadData}>
           <Route exact={true} path="/teams/" render={() => (
             <div>
               {(this.state.loading?'loading':this.state.teams.map(t => <Team key={t.name} team={t} />))}
@@ -101,7 +108,7 @@ export default class App extends Component {
               LIST / EDIT / etc
             </div>
           )} />
-        </div>
+        </RootLoader>
       </Router>
     );
   }
@@ -113,4 +120,3 @@ const Team = (props) => (
   <hr />
   </div>
 )
-
