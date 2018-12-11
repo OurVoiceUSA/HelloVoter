@@ -27,6 +27,8 @@ const ovi_config = {
   DEBUG: getConfig("debug", false, false),
 };
 
+var version = require('./package.json').version;
+
 var public_key;
 var jwt_iss = 'ourvoiceusa.org';
 
@@ -266,6 +268,7 @@ async function dashboard(req, res) {
     questions: (await cqa('match (a:Question) return count(a)')).data[0],
     forms: (await cqa('match (a:Form) return count(a)')).data[0],
     addresses: (await cqa('match (a:Address) return count(a)')).data[0],
+    version: version,
   });
 }
 
