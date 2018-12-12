@@ -225,7 +225,7 @@ function poke(req, res) {
 
 function towebapp(req, res) {
   let host = req.header('host');
-  res.redirect(ovi_config.wabase+'/HelloVoter/'+(host?'#/entry/?server='+host:''));
+  res.redirect(ovi_config.wabase+'/HelloVoter/'+(host?'?server='+host:''));
 }
 
 // they say that time's supposed to heal ya but i ain't done much healin'
