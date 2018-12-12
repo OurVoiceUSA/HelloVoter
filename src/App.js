@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import { HashRouter as Router, Route, Link } from 'react-router-dom';
 import t from 'tcomb-form';
 import jwt_decode from 'jwt-decode';
+import queryString from 'query-string';
 
 import Dashboard from './components/Dashboard';
 import Canvassers from './components/Canvassers';
@@ -28,9 +29,17 @@ class App extends Component {
   constructor(props) {
     super(props);
 
+    let server;
+
+    const v = queryString.parse(window.location.search);
+
+    if (v.server) server = v.server;
+    else if (localStorage.getItem('server')) server = localStorage.getItem('server');
+
     this.state = {
       jwt: localStorage.getItem('jwt'),
-      server: localStorage.getItem('server'),
+      server: server,
+      connectForm: {server: server},
     };
 
     this.formServerItems = t.struct({
@@ -149,9 +158,9 @@ class App extends Component {
   }
 
   render() {
-    const { server, jwt } = this.state;
+    let { server, jwt } = this.state;
 
-    if (!server) {
+    if (!jwt) {
       return (
         <div align="center">
           <br />
