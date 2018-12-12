@@ -24,6 +24,7 @@ const ovi_config = {
   jwt_pub_key: getConfig("jwt_pub_key", false, null),
   google_maps_key: getConfig("google_maps_key", false, null),
   sm_oauth_url: getConfig("sm_oauth_url", false, 'https://ws.ourvoiceusa.org/auth'),
+  wabase: getConfig("wabase", false, 'https://apps.ourvoiceusa.org'),
   DEBUG: getConfig("debug", false, false),
 };
 
@@ -220,6 +221,10 @@ async function canvassAssignments(id) {
 
 function poke(req, res) {
   return cqdo(req, res, 'return timestamp()', false);
+}
+
+function towebapp(req, res) {
+  res.redirect(ovi_config.wabase+'/HelloVoter/#/entry/?server='+req.header.host);
 }
 
 // they say that time's supposed to heal ya but i ain't done much healin'
@@ -777,6 +782,8 @@ app.use(async function (req, res, next) {
 app.get('/poke', poke);
 
 // ws routes
+app.get('/', towebapp);
+app.get('/canvass/', towebapp);
 app.post('/canvass/v1/hello', hello);
 app.get('/canvass/v1/uncle', uncle);
 app.get('/canvass/v1/dashboard', dashboard);
