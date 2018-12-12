@@ -70,7 +70,7 @@ export default class App extends Component {
 
     this.setState({loading: true});
     // fake data loaded after 3 seconds
-    setTimeout(() => this.setState({loading: false}), 3000);
+    setTimeout(() => this.setState({loading: false, headers: []}), 3000);
 
   }
 
