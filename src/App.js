@@ -29,8 +29,6 @@ class App extends Component {
   constructor(props) {
     super(props);
 
-    let server;
-
     const v = queryString.parse(window.location.search);
 
     this.state = {
@@ -171,9 +169,9 @@ class App extends Component {
             onChange={this.onChange}
             value={this.state.connectForm}
           />
-          <button onClick={this.doSave}>
-            Connect to Server
-          </button>
+          <div className="form-group">
+            <button type="submit" className="btn btn-primary" onClick={this.doSave}>Connect to Server</button>
+          </div>
         </div>
       );
     }
@@ -211,7 +209,6 @@ class App extends Component {
           <Route path="/analytics/" render={() => <Analytics server={server} jwt={jwt} />} />
           <Route path="/settings/" render={() => <Settings server={server} jwt={jwt} />} />
           <Route path="/jwt/" render={(props) => <Jwt {...props} refer={this} />} />
-          <Route path="/import/" render={() => <ImportData server={server} jwt={jwt} />} />
           <Route path="/about/" render={() => <About server={server} jwt={jwt} />} />
         </Main>
       </Root>
