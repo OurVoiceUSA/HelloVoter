@@ -33,13 +33,10 @@ class App extends Component {
 
     const v = queryString.parse(window.location.search);
 
-    if (v.server) server = v.server;
-    else if (localStorage.getItem('server')) server = localStorage.getItem('server');
-
     this.state = {
       jwt: localStorage.getItem('jwt'),
-      server: server,
-      connectForm: {server: server},
+      server: localStorage.getItem('server'),
+      connectForm: {server: v.server},
     };
 
     this.formServerItems = t.struct({
@@ -160,7 +157,7 @@ class App extends Component {
   render() {
     let { server, jwt } = this.state;
 
-    if (!jwt) {
+    if (!server) {
       return (
         <div align="center">
           <br />
