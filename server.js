@@ -224,7 +224,8 @@ function poke(req, res) {
 }
 
 function towebapp(req, res) {
-  res.redirect(ovi_config.wabase+'/HelloVoter/#/entry/?server='+req.header.host);
+  let host = req.header('host');
+  res.redirect(ovi_config.wabase+'/HelloVoter/'+(host?'#/entry/?server='+host:''));
 }
 
 // they say that time's supposed to heal ya but i ain't done much healin'
@@ -743,7 +744,14 @@ app.use(async function (req, res, next) {
   req.user = {};
 
   // uri whitelist
-  if (req.url == '/poke') return next();
+  switch (req.url) {
+    case '/':
+    case '/poke':
+    case '/canvass/':
+      return next();
+    default:
+      break;
+  }
 
   try {
     let u;
