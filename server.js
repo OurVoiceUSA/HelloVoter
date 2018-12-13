@@ -378,6 +378,11 @@ function teamMembersRemove(req, res) {
   return cqdo(req, res, 'match (a:Canvasser {id:{cId}})-[r:MEMBERS]-(b:Team {name:{teamName}}) delete r', req.body, true);
 }
 
+function teamMembersWipe(req, res) {
+  if (!valid(req.body.teamName)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'teamName'."});
+  return cqdo(req, res, 'match (a:Canvasser)-[r:MEMBERS]-(b:Team {name:{teamName}}) delete r', req.body, true);
+}
+
 // turf
 
 function turfList(req, res) {
@@ -808,6 +813,7 @@ app.post('/canvass/v1/team/delete', teamDelete);
 app.get('/canvass/v1/team/members/list', teamMembersList);
 app.post('/canvass/v1/team/members/add', teamMembersAdd);
 app.post('/canvass/v1/team/members/remove', teamMembersRemove);
+app.post('/canvass/v1/team/members/wipe', teamMembersWipe);
 app.get('/canvass/v1/turf/list', turfList);
 app.post('/canvass/v1/turf/create', turfCreate);
 app.post('/canvass/v1/turf/delete', turfDelete);
