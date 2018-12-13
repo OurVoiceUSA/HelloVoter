@@ -273,7 +273,7 @@ async function dashboard(req, res) {
     turfs: (await cqa('match (a:Turf) return count(a)')).data[0],
     questions: (await cqa('match (a:Question) return count(a)')).data[0],
     forms: (await cqa('match (a:Form) return count(a)')).data[0],
-    addresses: (await cqa('match (a:Address) return count(a)')).data[0],
+    addresses: (await cqa('match (a:Address) where not a.multi_unit = true return count(a)')).data[0]+(await cqa('match (a:Unit) return count(a)')).data[0],
     version: version,
   });
 
@@ -283,7 +283,7 @@ async function dashboard(req, res) {
 async function google_maps_key(req, res) {
   let ass = await canvassAssignments(req.user.id);
   if (ass.ready) return res.json({google_maps_key: ovi_config.google_maps_key });
-  else return res.status(401).jsoin({error: true, msg: "No soup for you"});
+  else return res.status(401).json({error: true, msg: "No soup for you"});
 }
 
 // canvassers
