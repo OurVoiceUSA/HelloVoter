@@ -151,12 +151,12 @@ export default class App extends Component {
   render() {
     return (
       <Router>
-        <RootLoader flag={this.state.loading} func={this._loadTeams}>
+        <div>
           <Route exact={true} path="/teams/" render={() => (
-            <div>
+            <RootLoader flag={this.state.loading} func={this._loadTeams}>
               {(this.state.loading?'loading':this.state.teams.map(t => <Team key={t.name} team={t} refer={this} />))}
               <Link to={'/teams/add'}><button>Add Team</button></Link>
-            </div>
+            </RootLoader>
           )} />
           <Route exact={true} path="/teams/add" render={() => (
             <div>
@@ -174,7 +174,7 @@ export default class App extends Component {
           )} />
           <Route path="/teams/edit/:name" render={() => (
             <div>
-              This Team: {this.state.thisTeam} <br />
+              <h3>{this.state.thisTeam}</h3>
               <Select
                 value={this.state.selectedOption}
                 onChange={this.handleChange}
@@ -191,7 +191,7 @@ export default class App extends Component {
               <button onClick={() => this._deleteTeam()}>Delete Team</button>
             </div>
           )} />
-        </RootLoader>
+        </div>
       </Router>
     );
   }
