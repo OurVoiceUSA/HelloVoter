@@ -67,13 +67,16 @@ export const CardCanvasser = (props) => {
   );
 }
 
-export async function _loadCanvassers(refer) {
+export async function _loadCanvassers(refer, teamName) {
   let canvassers = [];
 
   refer.setState({loading: true})
 
   try {
-    let res = await fetch('https://'+refer.props.server+'/canvass/v1/canvasser/list', {
+    let call = 'canvasser/list';
+    if (teamName) call = 'team/members/list?teamName='+teamName;
+
+    let res = await fetch('https://'+refer.props.server+'/canvass/v1/'+call, {
       headers: {
         'Authorization': 'Bearer '+(refer.props.jwt?refer.props.jwt:"of the one ring"),
         'Content-Type': 'application/json',

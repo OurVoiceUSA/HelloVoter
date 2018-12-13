@@ -15,9 +15,12 @@ export default class App extends Component {
 
     this.state = {
       loading: true,
+      saving: false,
       selectedOption: null,
       teams: [],
       options: [{ value: 'loading', label: (<Loader />) }],
+      thisTeam: null,
+      thisTeamMembers: [],
     };
 
     this.formServerItems = t.struct({
@@ -43,53 +46,76 @@ export default class App extends Component {
     this.setState({ selectedOption });
   }
 
-  doCreateTeam = async () => {
+  _saveTeam = async () => {
 
-    let json = this.addTeamForm.getValue();
-    if (json === null) return;
+    this.setState({saving: true});
 
     try {
-      let res = await fetch('https://'+this.props.server+'/canvass/v1/team/create', {
+      let res = await fetch('https://'+this.props.server+'/canvass/v1/team/members/wipe', {
         method: 'POST',
         headers: {
           'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({name: json.name}),
+        body: JSON.stringify({teamName: this.state.thisTeam}),
       });
-
-      console.warn(res);
     } catch (e) {
       console.warn(e);
     }
 
+    this.state.selectedOption.map(async (c) => {
+      try {
+        let res = await fetch('https://'+this.props.server+'/canvass/v1/team/members/add', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({teamName: this.state.thisTeam, cId: c.id}),
+        });
+      } catch (e) {
+        console.warn(e);
+      }
+    });
+
+    this.setState({saving: false});
   }
 
-  componentDidMount() {
-    this._loadTeams();
-  }
-
-  _loadSingle = async () => {
-    let c = {};
-
-    this.setState({loading: true})
-
+  _deleteTeam = async () => {
     try {
-      let id = this.props.location.pathname.split('/').pop();
-
-      let res = await fetch('https://'+this.props.server+'/canvass/v1/team/members?name='+this.state.thisTeam, {
+      let res = await fetch('https://'+this.props.server+'/canvass/v1/team/delete', {
+        method: 'POST',
         headers: {
           'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({name: this.state.thisTeam}),
       });
-      let data = await res.json();
-      c = (data.data?data.data:{});
     } catch (e) {
       console.warn(e);
     }
+    window.location.href = "/HelloVoter/#/teams/";
+    this._loadTeams();
+  }
 
-    this.setState({loading: false, thisTeam: c});
+  _createTeam = async () => {
+    let json = this.addTeamForm.getValue();
+    if (json === null) return;
+
+    let res = await fetch('https://'+this.props.server+'/canvass/v1/team/create', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({name: json.name}),
+    });
+    window.location.href = "/HelloVoter/#/teams/";
+    this._loadTeams();
+  }
+
+  componentDidMount() {
+    this._loadTeams();
   }
 
   _loadTeams = async () => {
@@ -116,7 +142,7 @@ export default class App extends Component {
     let options = [];
 
     canvassers.map((c) => {
-      options.push({value: c.id+"="+c.name, label: (<CardCanvasser key={c.id} canvasser={c} refer={this} />)})
+      options.push({value: c.name+c.email+c.location, id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={this} />)})
     });
 
     this.setState({options: options})
@@ -141,13 +167,14 @@ export default class App extends Component {
                 onChange={(e) => this.onChangeTeam(e)}
                 value={this.state.addTeamForm}
               />
-              <button onClick={() => this.doCreateTeam()}>
+              <button onClick={() => this._createTeam()}>
                 Submit
               </button>
             </div>
           )} />
           <Route path="/teams/edit/:name" render={() => (
             <div>
+              This Team: {this.state.thisTeam} <br />
               <Select
                 value={this.state.selectedOption}
                 onChange={this.handleChange}
@@ -157,7 +184,11 @@ export default class App extends Component {
                 placeholder="Select team members to add"
               />
               <br />
-              <button>Submit</button>
+              {(this.state.saving?<Loader />:<button onClick={() => this._saveTeam()}>Save Team</button>)}
+              <br />
+              <br />
+              <br />
+              <button onClick={() => this._deleteTeam()}>Delete Team</button>
             </div>
           )} />
         </RootLoader>
@@ -173,8 +204,19 @@ const Team = (props) => {
         <Icon style={{width: 35, height: 35, color: "gray"}} icon={faUsers} />
       </div>
       <div style={{flex: 1, overflow: 'auto'}}>
-        {props.team.name} (<Link to={'/teams/edit/'+props.team.name} onClick={() => props.refer.setState({thisTeam: props.team.name})}>edit</Link>)<br />
-        # of members: N/A
+        {props.team.name} (<Link to={'/teams/edit/'+props.team.name} onClick={async () => {
+          props.refer.setState({thisTeam: props.team.name});
+
+          let options = [];
+          let canvassers = await _loadCanvassers(props.refer, props.team.name);
+
+          canvassers.map((c) => {
+            options.push({value: c.name+c.email+c.location, id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={props.refer} />)})
+          });
+
+          props.refer.setState({selectedOption: options})
+
+        }}>edit</Link>)
       </div>
     </div>
   );
