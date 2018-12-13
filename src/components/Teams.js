@@ -209,6 +209,7 @@ export default class App extends Component {
           <Route path="/teams/edit/:name" render={() => (
             <div>
               <h3>{this.state.thisTeam}</h3>
+              Canvassers:
               <Select
                 value={this.state.selectedMembersOption}
                 onChange={this.handleMembersChange}
@@ -218,6 +219,7 @@ export default class App extends Component {
                 placeholder="Select team members to add"
               />
               <br />
+              Turf:
               <Select
                 value={this.state.selectedTurfOption}
                 onChange={this.handleTurfChange}

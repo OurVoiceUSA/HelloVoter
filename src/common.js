@@ -2,7 +2,7 @@ import React from 'react';
 import LoaderSpinner from 'react-loader-spinner';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSync, faMapMarkerAlt, faUser, faCrown } from '@fortawesome/free-solid-svg-icons';
+import { faSync, faMapMarkerAlt, faUser, faCrown, faStreetView } from '@fortawesome/free-solid-svg-icons';
 
 import Img from 'react-image';
 import { Link } from 'react-router-dom';
@@ -10,6 +10,68 @@ import { Link } from 'react-router-dom';
 import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en';
 TimeAgo.locale(en);
+
+export const us_states = {
+    "AL": "Alabama",
+    "AK": "Alaska",
+    "AS": "American Samoa",
+    "AZ": "Arizona",
+    "AR": "Arkansas",
+    "CA": "California",
+    "CO": "Colorado",
+    "CT": "Connecticut",
+    "DE": "Delaware",
+    "DC": "District Of Columbia",
+    "FM": "Federated States Of Micronesia",
+    "FL": "Florida",
+    "GA": "Georgia",
+    "GU": "Guam",
+    "HI": "Hawaii",
+    "ID": "Idaho",
+    "IL": "Illinois",
+    "IN": "Indiana",
+    "IA": "Iowa",
+    "KS": "Kansas",
+    "KY": "Kentucky",
+    "LA": "Louisiana",
+    "ME": "Maine",
+    "MH": "Marshall Islands",
+    "MD": "Maryland",
+    "MA": "Massachusetts",
+    "MI": "Michigan",
+    "MN": "Minnesota",
+    "MS": "Mississippi",
+    "MO": "Missouri",
+    "MT": "Montana",
+    "NE": "Nebraska",
+    "NV": "Nevada",
+    "NH": "New Hampshire",
+    "NJ": "New Jersey",
+    "NM": "New Mexico",
+    "NY": "New York",
+    "NC": "North Carolina",
+    "ND": "North Dakota",
+    "MP": "Northern Mariana Islands",
+    "OH": "Ohio",
+    "OK": "Oklahoma",
+    "OR": "Oregon",
+    "PW": "Palau",
+    "PA": "Pennsylvania",
+    "PR": "Puerto Rico",
+    "RI": "Rhode Island",
+    "SC": "South Carolina",
+    "SD": "South Dakota",
+    "TN": "Tennessee",
+    "TX": "Texas",
+    "UT": "Utah",
+    "VT": "Vermont",
+    "VI": "Virgin Islands",
+    "VA": "Virginia",
+    "WA": "Washington",
+    "WV": "West Virginia",
+    "WI": "Wisconsin",
+    "WY": "Wyoming"
+};
 
 export const Root = (props) => (
   <div style={{display: 'flex'}} {...props}/>
@@ -95,7 +157,9 @@ export async function _loadCanvassers(refer, teamName) {
 
 export const CardTurf = (props) => (
   <div>
-    Name: {props.turf.name} <br />
+    <Icon icon={faStreetView} /> {props.turf.name} (<Link to={'/turf/edit/'+props.turf.name} onClick={() => {
+      props.refer.setState({thisTurf: props.turf})
+    }}>edit</Link>)<br />
   <hr />
   </div>
 )
