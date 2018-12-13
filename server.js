@@ -383,6 +383,31 @@ function teamMembersWipe(req, res) {
   return cqdo(req, res, 'match (a:Canvasser)-[r:MEMBERS]-(b:Team {name:{teamName}}) delete r', req.body, true);
 }
 
+function teamTurfList(req, res) {
+  if (!valid(req.query.teamName)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'teamName'."});
+  if (req.user.admin)
+    return cqdo(req, res, 'match (a:Turf)-[:ASSIGNED]-(b:Team {name:{teamName}}) return a', req.query);
+  else {
+    req.query.id = req.user.id;
+    return cqdo(req, res, 'match (a:Turf {name:{turfName}})-[:ASSIGNED]-(b:Team {name:{teamName}}) return a', req.query);
+  }
+}
+
+function teamTurfAdd(req, res) {
+  if (!valid(req.body.teamName) || !valid(req.body.turfName)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'teamName' or 'turfName'."});
+  return cqdo(req, res, 'match (a:Turf {name:{turfName}}), (b:Team {name:{teamName}}) merge (b)-[:ASSIGNED]->(a)', req.body, true);
+}
+
+function teamTurfRemove(req, res) {
+  if (!valid(req.body.teamName) || valid(!req.body.turfName)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'teamName' or 'turfName'."});
+  return cqdo(req, res, 'match (a:Turf {name:{turfName}})-[r:ASSIGNED]-(b:Team {name:{teamName}}) delete r', req.body, true);
+}
+
+function teamTurfWipe(req, res) {
+  if (!valid(req.body.teamName)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'teamName'."});
+  return cqdo(req, res, 'match (a:Turf)-[r:ASSIGNED]-(b:Team {name:{teamName}}) delete r', req.body, true);
+}
+
 // turf
 
 function turfList(req, res) {
@@ -814,6 +839,10 @@ app.get('/canvass/v1/team/members/list', teamMembersList);
 app.post('/canvass/v1/team/members/add', teamMembersAdd);
 app.post('/canvass/v1/team/members/remove', teamMembersRemove);
 app.post('/canvass/v1/team/members/wipe', teamMembersWipe);
+app.get('/canvass/v1/team/turf/list', teamTurfList);
+app.post('/canvass/v1/team/turf/add', teamTurfAdd);
+app.post('/canvass/v1/team/turf/remove', teamTurfRemove);
+app.post('/canvass/v1/team/turf/wipe', teamTurfWipe);
 app.get('/canvass/v1/turf/list', turfList);
 app.post('/canvass/v1/turf/create', turfCreate);
 app.post('/canvass/v1/turf/delete', turfDelete);
