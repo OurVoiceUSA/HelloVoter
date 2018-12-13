@@ -205,7 +205,7 @@ const Team = (props) => {
       </div>
       <div style={{flex: 1, overflow: 'auto'}}>
         {props.team.name} (<Link to={'/teams/edit/'+props.team.name} onClick={async () => {
-          props.refer.setState({thisTeam: props.team.name});
+          props.refer.setState({thisTeam: props.team.name, selectedOption: null});
 
           let options = [];
           let canvassers = await _loadCanvassers(props.refer, props.team.name);
