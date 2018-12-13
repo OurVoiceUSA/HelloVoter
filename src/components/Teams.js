@@ -2,10 +2,11 @@ import React, { Component } from 'react';
 
 import { HashRouter as Router, Route, Link } from 'react-router-dom';
 import t from 'tcomb-form';
+import Select from 'react-select';
 
 import { faUsers } from '@fortawesome/free-solid-svg-icons';
 
-import { RootLoader, Icon } from '../common.js';
+import { RootLoader, Loader, Icon, CardCanvasser, _loadCanvassers } from '../common.js';
 
 export default class App extends Component {
 
@@ -14,6 +15,9 @@ export default class App extends Component {
 
     this.state = {
       loading: true,
+      selectedOption: null,
+      teams: [],
+      options: [{ value: 'loading', label: (<Loader />) }],
     };
 
     this.formServerItems = t.struct({
@@ -33,6 +37,10 @@ export default class App extends Component {
 
   onChangeTeam(addTeamForm) {
     this.setState({addTeamForm})
+  }
+
+  handleChange = (selectedOption) => {
+    this.setState({ selectedOption });
   }
 
   doCreateTeam = async () => {
@@ -101,7 +109,17 @@ export default class App extends Component {
       console.warn(e);
     }
 
-    this.setState({loading: false, teams: teams.data});
+    this.setState({teams: teams.data});
+
+    // also load canvassers
+    let canvassers = await _loadCanvassers(this);
+    let options = [];
+
+    canvassers.map((c) => {
+      options.push({value: c.id+"="+c.name, label: (<CardCanvasser key={c.id} canvasser={c} refer={this} />)})
+    });
+
+    this.setState({options: options})
   }
 
   render() {
@@ -130,7 +148,16 @@ export default class App extends Component {
           )} />
           <Route path="/teams/edit/:name" render={() => (
             <div>
-              LIST / EDIT / etc
+              <Select
+                value={this.state.selectedOption}
+                onChange={this.handleChange}
+                options={this.state.options}
+                isMulti={true}
+                isSearchable={true}
+                placeholder="Select team members to add"
+              />
+              <br />
+              <button>Submit</button>
             </div>
           )} />
         </RootLoader>
