@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 
-import { RootLoader } from '../common.js';
+import { HashRouter as Router, Route, Link } from 'react-router-dom';
+
+import { RootLoader, CardTurf } from '../common.js';
 
 export default class App extends Component {
 
@@ -18,6 +20,7 @@ export default class App extends Component {
     this._loadData();
   }
 
+  // TODO: use _loadTurf()
   _loadData = async () => {
     let turf = {};
 
@@ -41,15 +44,8 @@ export default class App extends Component {
   render() {
     return (
       <RootLoader flag={this.state.loading} func={this._loadData}>
-        {this.state.turf.map(t => <Turf key={t.name} turf={t} />)}
+        {this.state.turf.map(t => <CardTurf key={t.name} turf={t} />)}
       </RootLoader>
     );
   }
 }
-
-const Turf = (props) => (
-  <div>
-    Name: {props.turf.name} <br />
-  <hr />
-  </div>
-)

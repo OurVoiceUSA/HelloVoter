@@ -6,7 +6,7 @@ import Select from 'react-select';
 
 import { faUsers } from '@fortawesome/free-solid-svg-icons';
 
-import { RootLoader, Loader, Icon, CardCanvasser, _loadCanvassers } from '../common.js';
+import { RootLoader, Loader, Icon, CardCanvasser, _loadCanvassers, CardTurf, _loadTurf } from '../common.js';
 
 export default class App extends Component {
 
@@ -16,9 +16,10 @@ export default class App extends Component {
     this.state = {
       loading: true,
       saving: false,
-      selectedOption: null,
+      selectedMembersOption: null,
+      selectedTurfOption: null,
       teams: [],
-      options: [{ value: 'loading', label: (<Loader />) }],
+      MemberOptions: [{ value: 'loading', label: (<Loader />) }],
       thisTeam: null,
       thisTeamMembers: [],
     };
@@ -42,8 +43,12 @@ export default class App extends Component {
     this.setState({addTeamForm})
   }
 
-  handleChange = (selectedOption) => {
-    this.setState({ selectedOption });
+  handleMembersChange = (selectedMembersOption) => {
+    this.setState({ selectedMembersOption });
+  }
+
+  handleTurfChange = (selectedTurfOption) => {
+    this.setState({ selectedTurfOption });
   }
 
   _saveTeam = async () => {
@@ -59,11 +64,20 @@ export default class App extends Component {
         },
         body: JSON.stringify({teamName: this.state.thisTeam}),
       });
+
+      res = await fetch('https://'+this.props.server+'/canvass/v1/team/turf/wipe', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({teamName: this.state.thisTeam}),
+      });
     } catch (e) {
       console.warn(e);
     }
 
-    this.state.selectedOption.map(async (c) => {
+    this.state.selectedMembersOption.map(async (c) => {
       try {
         let res = await fetch('https://'+this.props.server+'/canvass/v1/team/members/add', {
           method: 'POST',
@@ -77,6 +91,19 @@ export default class App extends Component {
         console.warn(e);
       }
     });
+
+    try {
+      let res = await fetch('https://'+this.props.server+'/canvass/v1/team/turf/add', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({teamName: this.state.thisTeam, turfName: this.state.selectedTurfOption.value}),
+      });
+    } catch (e) {
+      console.warn(e);
+    }
 
     this.setState({saving: false});
   }
@@ -137,15 +164,22 @@ export default class App extends Component {
 
     this.setState({teams: teams.data});
 
-    // also load canvassers
+    // also load canvassers & turf
     let canvassers = await _loadCanvassers(this);
-    let options = [];
+    let turf = await _loadTurf(this);
+
+    let memberOptions = [];
+    let turfOptions = [];
 
     canvassers.map((c) => {
-      options.push({value: c.name+c.email+c.location, id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={this} />)})
+      memberOptions.push({value: c.name+c.email+c.location, id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={this} />)})
     });
 
-    this.setState({options: options})
+    turf.map((t) => {
+      turfOptions.push({value: t.name, label: (<CardTurf key={t.name} turf={t} />)})
+    })
+
+    this.setState({memberOptions: memberOptions, turfOptions: turfOptions})
   }
 
   render() {
@@ -176,12 +210,20 @@ export default class App extends Component {
             <div>
               <h3>{this.state.thisTeam}</h3>
               <Select
-                value={this.state.selectedOption}
-                onChange={this.handleChange}
-                options={this.state.options}
+                value={this.state.selectedMembersOption}
+                onChange={this.handleMembersChange}
+                options={this.state.memberOptions}
                 isMulti={true}
                 isSearchable={true}
                 placeholder="Select team members to add"
+              />
+              <br />
+              <Select
+                value={this.state.selectedTurfOption}
+                onChange={this.handleTurfChange}
+                options={this.state.turfOptions}
+                isSearchable={true}
+                placeholder="Select turf for this team"
               />
               <br />
               {(this.state.saving?<Loader />:<button onClick={() => this._saveTeam()}>Save Team</button>)}
@@ -205,16 +247,23 @@ const Team = (props) => {
       </div>
       <div style={{flex: 1, overflow: 'auto'}}>
         {props.team.name} (<Link to={'/teams/edit/'+props.team.name} onClick={async () => {
-          props.refer.setState({thisTeam: props.team.name, selectedOption: null});
+          props.refer.setState({thisTeam: props.team.name, selectedMembersOption: null, selectedTurfOption: null});
 
-          let options = [];
+          let memberOptions = [];
+          let turfOptions = [];
+
           let canvassers = await _loadCanvassers(props.refer, props.team.name);
+          let turf = await _loadTurf(props.refer, props.team.name);
 
           canvassers.map((c) => {
-            options.push({value: c.name+c.email+c.location, id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={props.refer} />)})
+            memberOptions.push({value: c.name+c.email+c.location, id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={props.refer} />)})
           });
 
-          props.refer.setState({selectedOption: options})
+          turf.map((t) => {
+            turfOptions.push({value: t.name, label: (<CardTurf key={t.name} turf={t} />)})
+          })
+
+          props.refer.setState({selectedMembersOption: memberOptions, selectedTurfOption: turfOptions});
 
         }}>edit</Link>)
       </div>

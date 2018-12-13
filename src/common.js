@@ -92,3 +92,35 @@ export async function _loadCanvassers(refer, teamName) {
 
   return canvassers;
 }
+
+export const CardTurf = (props) => (
+  <div>
+    Name: {props.turf.name} <br />
+  <hr />
+  </div>
+)
+
+export async function _loadTurf(refer, teamName) {
+  let turf = [];
+
+  refer.setState({loading: true})
+
+  try {
+    let call = 'turf/list';
+    if (teamName) call = 'team/turf/list?teamName='+teamName;
+    let res = await fetch('https://'+refer.props.server+'/canvass/v1/'+call, {
+      headers: {
+        'Authorization': 'Bearer '+(refer.props.jwt?refer.props.jwt:"of the one ring"),
+        'Content-Type': 'application/json',
+      },
+    });
+    let data = await res.json();
+    turf = (data.data?data.data:[]);
+  } catch (e) {
+    console.warn(e);
+  }
+
+  refer.setState({loading: false});
+
+  return turf;
+}
