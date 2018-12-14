@@ -272,6 +272,7 @@ export default class App extends Component {
           <Route path="/turf/view/:name" render={() => (
             <div>
               <h3>{this.state.thisTurf.name}</h3>
+              {this.state.thisTurf.geometry}
               <br />
               <br />
               <br />
