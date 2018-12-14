@@ -172,7 +172,7 @@ export default class App extends Component {
     let turfOptions = [];
 
     canvassers.map((c) => {
-      memberOptions.push({value: c.name+c.email+c.location, id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={this} />)})
+      memberOptions.push({value: c.name+c.email+c.location+(c.admin?"admin":""), id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={this} />)})
     });
 
     turf.map((t) => {
