@@ -60,13 +60,14 @@ export default class App extends Component {
       case 'sldu':
       case 'sldl':
         return true;
+      default:
+        return false;
     }
-    return false;
   }
 
   _deleteTurf = async () => {
     try {
-      let res = await fetch('https://'+this.props.server+'/canvass/v1/turf/delete', {
+      await fetch('https://'+this.props.server+'/canvass/v1/turf/delete', {
         method: 'POST',
         headers: {
           'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
@@ -105,7 +106,7 @@ export default class App extends Component {
         uri = 'states/'+state+'/sldl/'+this.state.selectedDistrictOption.value+'.geojson';
         break;
       default:
-        throw "unknown selectedTypeOption";
+        throw new Error("unknown selectedTypeOption");
     }
 
     try {
@@ -173,12 +174,13 @@ export default class App extends Component {
 
     switch (this.state.selectedTypeOption.value) {
       case 'cd':
-        objs.map((o) => {
+        objs.forEach((o) => {
           if (o.name.includes(this.state.selectedStateOption.value)) dist.push({value: o.name, label: o.name});
+          return;
         });
         break;
       default:
-        objs.map((o) => {
+        objs.forEach((o) => {
           let val = o.name.replace('.geojson', '');
           dist.push({value: val, label: val});
         });

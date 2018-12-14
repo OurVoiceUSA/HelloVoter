@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 
 import { HashRouter as Router, Route } from 'react-router-dom';
 
-import { Loader, RootLoader, CardCanvasser, _loadCanvassers } from '../common.js';
+import { RootLoader, CardCanvasser, _loadCanvassers } from '../common.js';
 
 export default class App extends Component {
 

@@ -56,7 +56,7 @@ export default class App extends Component {
     this.setState({saving: true});
 
     try {
-      let res = await fetch('https://'+this.props.server+'/canvass/v1/team/members/wipe', {
+      await fetch('https://'+this.props.server+'/canvass/v1/team/members/wipe', {
         method: 'POST',
         headers: {
           'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
@@ -65,7 +65,7 @@ export default class App extends Component {
         body: JSON.stringify({teamName: this.state.thisTeam}),
       });
 
-      res = await fetch('https://'+this.props.server+'/canvass/v1/team/turf/wipe', {
+      await fetch('https://'+this.props.server+'/canvass/v1/team/turf/wipe', {
         method: 'POST',
         headers: {
           'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
@@ -79,7 +79,7 @@ export default class App extends Component {
 
     this.state.selectedMembersOption.map(async (c) => {
       try {
-        let res = await fetch('https://'+this.props.server+'/canvass/v1/team/members/add', {
+        await fetch('https://'+this.props.server+'/canvass/v1/team/members/add', {
           method: 'POST',
           headers: {
             'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
@@ -93,7 +93,7 @@ export default class App extends Component {
     });
 
     try {
-      let res = await fetch('https://'+this.props.server+'/canvass/v1/team/turf/add', {
+      await fetch('https://'+this.props.server+'/canvass/v1/team/turf/add', {
         method: 'POST',
         headers: {
           'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
@@ -110,7 +110,7 @@ export default class App extends Component {
 
   _deleteTeam = async () => {
     try {
-      let res = await fetch('https://'+this.props.server+'/canvass/v1/team/delete', {
+      await fetch('https://'+this.props.server+'/canvass/v1/team/delete', {
         method: 'POST',
         headers: {
           'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
@@ -129,7 +129,7 @@ export default class App extends Component {
     let json = this.addTeamForm.getValue();
     if (json === null) return;
 
-    let res = await fetch('https://'+this.props.server+'/canvass/v1/team/create', {
+    await fetch('https://'+this.props.server+'/canvass/v1/team/create', {
       method: 'POST',
       headers: {
         'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
@@ -171,11 +171,11 @@ export default class App extends Component {
     let memberOptions = [];
     let turfOptions = [];
 
-    canvassers.map((c) => {
+    canvassers.forEach((c) => {
       memberOptions.push({value: c.name+c.email+c.location+(c.admin?"admin":""), id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={this} />)})
     });
 
-    turf.map((t) => {
+    turf.forEach((t) => {
       turfOptions.push({value: t.name, label: (<CardTurf key={t.name} turf={t} />)})
     })
 
@@ -257,11 +257,11 @@ const Team = (props) => {
           let canvassers = await _loadCanvassers(props.refer, props.team.name);
           let turf = await _loadTurf(props.refer, props.team.name);
 
-          canvassers.map((c) => {
+          canvassers.forEach((c) => {
             memberOptions.push({value: c.name+c.email+c.location, id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={props.refer} />)})
           });
 
-          turf.map((t) => {
+          turf.forEach((t) => {
             turfOptions.push({value: t.name, label: (<CardTurf key={t.name} turf={t} />)})
           })
 
