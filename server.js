@@ -293,7 +293,7 @@ async function canvasserList(req, res) {
     return cqdo(req, res, 'match (a:Canvasser) return a');
 
   // TODO: try / catch
-  let ct = await cqa('match (a:Canvasser {id:{id}})-[:ASSIGNED]-(b:Team)-[:ASSIGNED]-(c:Canvasser) return c', req.user);
+  let ct = await cqa('match (a:Canvasser {id:{id}})-[:MEMBERS]-(b:Team)-[:ASSIGNED]-(c:Canvasser) return c', req.user);
 
   if (ct.data.length === 0)
     ct = await cqa('match (a:Canvasser {id:{id}}) return a', req.user);
@@ -345,7 +345,7 @@ function teamList(req, res) {
   if (req.user.admin)
     return cqdo(req, res, 'match (a:Team) return a');
   else
-    return cqdo(req, res, 'match (a:Canvasser {id:{id}})-[:ASSIGNED]-(b:Team) return b', req.user);
+    return cqdo(req, res, 'match (a:Canvasser {id:{id}})-[:MEMBERS]-(b:Team) return b', req.user);
 }
 
 function teamCreate(req, res) {
@@ -364,7 +364,7 @@ function teamMembersList(req, res) {
     return cqdo(req, res, 'match (a:Canvasser)-[:MEMBERS]-(b:Team {name:{teamName}}) return a', req.query);
   else {
     req.query.id = req.user.id;
-    return cqdo(req, res, 'match (a:Canvasser {id:{id}})-[:MEMBERS]-(b:Team {name:{teamName}}) return a', req.query);
+    return cqdo(req, res, 'match (a:Canvasser {id:{id}})-[:MEMBERS]-(b:Team {name:{teamName}}) optional match (b)-[:MEMBERS]-(c:Canvasser) return c', req.query);
   }
 }
 
