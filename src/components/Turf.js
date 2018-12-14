@@ -210,7 +210,9 @@ export default class App extends Component {
   render() {
 
     let drawOptions = [
-      {value: 'select', label: 'Select from legislative boundary'}
+      {value: 'select', label: 'Select from legislative boundary'},
+      {value: 'radius', label: 'Area surrounding an address'},
+      {value: 'draw', label: 'Manually draw with your mouse'},
     ];
     let stateOptions = [];
     let typeOptions = [
@@ -251,7 +253,7 @@ export default class App extends Component {
                 placeholder="Select method"
               />
 
-              {this.state.selectedDrawOption?
+              {this.state.selectedDrawOption && this.state.selectedDrawOption.value === 'select'?
               <div><br />
                 State or region:
                 <Select
@@ -262,7 +264,7 @@ export default class App extends Component {
                   placeholder="Select state or region"
                 />
               </div>
-              :''}
+              :(this.state.selectedDrawOption?'This method is not currently available.':'')}
 
               {this.state.selectedStateOption?
               <div><br />
