@@ -32,7 +32,7 @@ export default class App extends Component {
       console.warn(e);
     }
 
-    this.setState({cb_version: data.version});
+    this.setState({cb_version: (data.version?data.version:'unknown')});
   }
 
   render() {
