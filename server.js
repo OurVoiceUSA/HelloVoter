@@ -291,14 +291,8 @@ async function google_maps_key(req, res) {
 async function canvasserList(req, res) {
   if (req.user.admin)
     return cqdo(req, res, 'match (a:Canvasser) return a');
-
-  // TODO: try / catch
-  let ct = await cqa('match (a:Canvasser {id:{id}})-[:MEMBERS]-(b:Team)-[:ASSIGNED]-(c:Canvasser) return c', req.user);
-
-  if (ct.data.length === 0)
-    ct = await cqa('match (a:Canvasser {id:{id}}) return a', req.user);
-
-  return res.json(ct);
+  else 
+    return cqdo(req, res, 'match (a:Canvasser {id:{id}})-[:MEMBERS]-(b:Team) optional match (b)-[:MEMBERS]-(c:Canvasser) return c', req.user);
 }
 
 async function canvasserGet(req, res) {
