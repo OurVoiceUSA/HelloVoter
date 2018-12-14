@@ -14,6 +14,7 @@ export default class App extends Component {
     this.state = {
       loading: true,
       saving: false,
+      selectedDrawOption: null,
       selectedStateOption: null,
       selectedTypeOption: null,
       selectedDistrictOption: null,
@@ -41,6 +42,10 @@ export default class App extends Component {
     this.setState({addTurfForm})
   }
 
+  handleDrawChange = (selectedDrawOption) => {
+    this.setState({ selectedDrawOption });
+  }
+
   handleStateChange = (selectedStateOption) => {
     this.setState({ selectedStateOption });
   }
@@ -63,6 +68,12 @@ export default class App extends Component {
       default:
         return false;
     }
+  }
+
+  _showSubmitButton() {
+    if (this.state.selectedTypeOption && !this._showDistrictOption()) return true;
+    if (this._showDistrictOption() && this.state.selectedDistrictOption) return true;
+    return false;
   }
 
   _deleteTurf = async () => {
@@ -198,6 +209,9 @@ export default class App extends Component {
 
   render() {
 
+    let drawOptions = [
+      {value: 'select', label: 'Select from legislative boundary'}
+    ];
     let stateOptions = [];
     let typeOptions = [
       {value: 'state', label: 'State'},
@@ -228,14 +242,27 @@ export default class App extends Component {
                 value={this.state.addTurfForm}
               />
 
-              State or region:
+              <br />
+              Method of generating turf:
               <Select
-                value={this.state.selectedStateOption}
-                onChange={this.handleStateChange}
-                options={stateOptions}
-                isSearchable={true}
-                placeholder="Select state or region"
+                value={this.state.selectedDrawOption}
+                onChange={this.handleDrawChange}
+                options={drawOptions}
+                placeholder="Select method"
               />
+
+              {this.state.selectedDrawOption?
+              <div><br />
+                State or region:
+                <Select
+                  value={this.state.selectedStateOption}
+                  onChange={this.handleStateChange}
+                  options={stateOptions}
+                  isSearchable={true}
+                  placeholder="Select state or region"
+                />
+              </div>
+              :''}
 
               {this.state.selectedStateOption?
               <div><br />
@@ -266,9 +293,13 @@ export default class App extends Component {
               </div>
               :''}
 
-              <button onClick={() => this._createTurf()}>
-                Submit
-              </button>
+              {this._showSubmitButton()?
+              <div><br />
+                <button onClick={() => this._createTurf()}>
+                  Submit
+                </button>
+              </div>
+              :''}
             </div>
           )} />
           <Route path="/turf/view/:name" render={() => (
