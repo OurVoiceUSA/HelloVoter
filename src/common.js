@@ -2,7 +2,7 @@ import React from 'react';
 import LoaderSpinner from 'react-loader-spinner';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSync, faMapMarkerAlt, faUser, faCrown, faStreetView } from '@fortawesome/free-solid-svg-icons';
+import { faSync, faMapMarkerAlt, faUser, faCrown, faStreetView, faClipboard } from '@fortawesome/free-solid-svg-icons';
 
 import Img from 'react-image';
 import { Link } from 'react-router-dom';
@@ -187,4 +187,41 @@ export async function _loadTurf(refer, teamName) {
   refer.setState({loading: false});
 
   return turf;
+}
+
+export const CardForm = (props) => (
+  <div>
+    <Icon icon={faClipboard} /> {props.form.name} (<Link to={'/forms/'+props.form.id} onClick={() => {
+      props.refer.setState({thisForm: props.form})
+    }}>view</Link>)<br />
+  <hr />
+  </div>
+)
+
+export async function _loadForms(refer, teamName) {
+  let forms = [];
+
+  refer.setState({loading: true})
+
+  try {
+    let uri;
+
+    if (teamName) uri = 'team/form/list?teamName='+teamName;
+    else uri = 'form/list';
+
+    let res = await fetch('https://'+refer.props.server+'/canvass/v1/'+uri, {
+      headers: {
+        'Authorization': 'Bearer '+(refer.props.jwt?refer.props.jwt:"of the one ring"),
+        'Content-Type': 'application/json',
+      },
+    });
+    let data = await res.json();
+    forms = (data.data?data.data:[]);
+  } catch (e) {
+    console.warn(e);
+  }
+
+  refer.setState({loading: false});
+
+  return forms;
 }

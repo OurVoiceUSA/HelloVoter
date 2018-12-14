@@ -6,7 +6,7 @@ import Select from 'react-select';
 
 import { faUsers } from '@fortawesome/free-solid-svg-icons';
 
-import { RootLoader, Loader, Icon, CardCanvasser, _loadCanvassers, CardTurf, _loadTurf } from '../common.js';
+import { RootLoader, Loader, Icon, CardCanvasser, _loadCanvassers, CardTurf, _loadTurf, CardForm, _loadForms } from '../common.js';
 
 export default class App extends Component {
 
@@ -18,10 +18,9 @@ export default class App extends Component {
       saving: false,
       selectedMembersOption: null,
       selectedTurfOption: null,
+      selectedFormOption: null,
       teams: [],
-      MemberOptions: [{ value: 'loading', label: (<Loader />) }],
       thisTeam: null,
-      thisTeamMembers: [],
     };
 
     this.formServerItems = t.struct({
@@ -51,6 +50,10 @@ export default class App extends Component {
     this.setState({ selectedTurfOption });
   }
 
+  handleFormChange = (selectedFormOption) => {
+    this.setState({ selectedFormOption });
+  }
+
   _saveTeam = async () => {
 
     this.setState({saving: true});
@@ -66,6 +69,15 @@ export default class App extends Component {
       });
 
       await fetch('https://'+this.props.server+'/canvass/v1/team/turf/wipe', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({teamName: this.state.thisTeam}),
+      });
+
+      await fetch('https://'+this.props.server+'/canvass/v1/team/form/wipe', {
         method: 'POST',
         headers: {
           'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
@@ -100,6 +112,19 @@ export default class App extends Component {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({teamName: this.state.thisTeam, turfName: this.state.selectedTurfOption.value}),
+      });
+    } catch (e) {
+      console.warn(e);
+    }
+
+    try {
+      await fetch('https://'+this.props.server+'/canvass/v1/team/form/add', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({teamName: this.state.thisTeam, fId: this.state.selectedFormOption.value}),
       });
     } catch (e) {
       console.warn(e);
@@ -164,12 +189,14 @@ export default class App extends Component {
 
     this.setState({teams: teams.data});
 
-    // also load canvassers & turf
+    // also load canvassers & turf & forms
     let canvassers = await _loadCanvassers(this);
     let turf = await _loadTurf(this);
+    let forms = await _loadForms(this);
 
     let memberOptions = [];
     let turfOptions = [];
+    let formOptions = [];
 
     canvassers.forEach((c) => {
       memberOptions.push({value: c.name+c.email+c.location+(c.admin?"admin":""), id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={this} />)})
@@ -179,7 +206,11 @@ export default class App extends Component {
       turfOptions.push({value: t.name, label: (<CardTurf key={t.name} turf={t} />)})
     })
 
-    this.setState({memberOptions: memberOptions, turfOptions: turfOptions})
+    forms.forEach((f) => {
+      formOptions.push({value: f.id, label: (<CardForm key={f.id} form={f} />)})
+    })
+
+    this.setState({memberOptions, turfOptions, formOptions});
   }
 
   render() {
@@ -228,6 +259,15 @@ export default class App extends Component {
                 placeholder="Select turf for this team"
               />
               <br />
+              Form:
+              <Select
+                value={this.state.selectedFormOption}
+                onChange={this.handleFormChange}
+                options={this.state.formOptions}
+                isSearchable={true}
+                placeholder="Select form for this team"
+              />
+              <br />
               {(this.state.saving?<Loader />:<button onClick={() => this._saveTeam()}>Save Team</button>)}
               <br />
               <br />
@@ -249,23 +289,29 @@ const Team = (props) => {
       </div>
       <div style={{flex: 1, overflow: 'auto'}}>
         {props.team.name} (<Link to={'/teams/edit/'+props.team.name} onClick={async () => {
-          props.refer.setState({thisTeam: props.team.name, selectedMembersOption: null, selectedTurfOption: null});
+          props.refer.setState({thisTeam: props.team.name, selectedMembersOption: null, selectedTurfOption: null, selectedFormOption: null});
 
           let memberOptions = [];
-          let turfOptions = [];
+          let turfOptions = {};
+          let formOptions = {};
 
           let canvassers = await _loadCanvassers(props.refer, props.team.name);
           let turf = await _loadTurf(props.refer, props.team.name);
+          let form = await _loadForms(props.refer, props.team.name);
 
           canvassers.forEach((c) => {
             memberOptions.push({value: c.name+c.email+c.location, id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={props.refer} />)})
           });
 
-          turf.forEach((t) => {
-            turfOptions.push({value: t.name, label: (<CardTurf key={t.name} turf={t} />)})
-          })
+          turfOptions = {value: turf[0].name, label: (<CardTurf key={turf[0].name} turf={turf[0]} />)};
 
-          props.refer.setState({selectedMembersOption: memberOptions, selectedTurfOption: turfOptions});
+          formOptions = {value: form[0].id, label: (<CardForm key={form[0].id} form={form[0]} />)};
+
+          props.refer.setState({
+            selectedMembersOption: memberOptions,
+            selectedTurfOption: turfOptions,
+            selectedFormOption: formOptions,
+          });
 
         }}>edit</Link>)
       </div>
