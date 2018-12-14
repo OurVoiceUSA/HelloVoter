@@ -157,9 +157,9 @@ export async function _loadCanvassers(refer, teamName) {
 
 export const CardTurf = (props) => (
   <div>
-    <Icon icon={faStreetView} /> {props.turf.name} (<Link to={'/turf/edit/'+props.turf.name} onClick={() => {
+    <Icon icon={faStreetView} /> {props.turf.name} (<Link to={'/turf/view/'+props.turf.name} onClick={() => {
       props.refer.setState({thisTurf: props.turf})
-    }}>edit</Link>)<br />
+    }}>view</Link>)<br />
   <hr />
   </div>
 )

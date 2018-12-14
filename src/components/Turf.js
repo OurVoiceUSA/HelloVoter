@@ -64,7 +64,26 @@ export default class App extends Component {
     return false;
   }
 
-  _saveTurf = async () => {
+  _deleteTurf = async () => {
+    try {
+      let res = await fetch('https://'+this.props.server+'/canvass/v1/turf/delete', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({name: this.state.thisTurf.name}),
+      });
+    } catch (e) {
+      console.warn(e);
+    }
+    this._loadTurf(this);
+    window.location.href = "/HelloVoter/#/turf/";
+  }
+
+  _createTurf = async () => {
+    let json = this.addTurfForm.getValue();
+    if (json === null) return;
 
     this.setState({saving: true});
 
@@ -92,7 +111,11 @@ export default class App extends Component {
     try {
 
       let res = await fetch ('https://raw.githubusercontent.com/OurVoiceUSA/districts/gh-pages/'+uri)
-      let geometry = await res.json();
+      let obj = await res.json();
+      let geometry;
+
+      if (obj.geometry) geometry = obj.geometry;
+      else geometry = obj;
 
       res = await fetch('https://'+this.props.server+'/canvass/v1/turf/create', {
         method: 'POST',
@@ -101,7 +124,7 @@ export default class App extends Component {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: this.state.thisTurf.name,
+          name: json.name,
           geometry: geometry,
         }),
       });
@@ -109,51 +132,8 @@ export default class App extends Component {
       console.warn(e);
     }
 
-    try {
-      let res = await fetch('https://'+this.props.server+'/canvass/v1/turf/add', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({name: this.state.selectedDistrictOption.value}),
-      });
-    } catch (e) {
-      console.warn(e);
-    }
-
     this.setState({saving: false});
-  }
 
-  _deleteTurf = async () => {
-    try {
-      let res = await fetch('https://'+this.props.server+'/canvass/v1/turf/delete', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({name: this.state.thisTurf}),
-      });
-    } catch (e) {
-      console.warn(e);
-    }
-    window.location.href = "/HelloVoter/#/turf/";
-    _loadTurf(this);
-  }
-
-  _createTurf = async () => {
-    let json = this.addTurfForm.getValue();
-    if (json === null) return;
-
-    let res = await fetch('https://'+this.props.server+'/canvass/v1/turf/create', {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({name: json.name}),
-    });
     window.location.href = "/HelloVoter/#/turf/";
     this._loadTurf();
   }
@@ -237,6 +217,7 @@ export default class App extends Component {
           )} />
           <Route exact={true} path="/turf/add" render={() => (
             <div>
+              Turf Name:
               <t.form.Form
                 ref={(ref) => this.addTurfForm = ref}
                 type={this.formServerItems}
@@ -244,14 +225,7 @@ export default class App extends Component {
                 onChange={(e) => this.onChangeTurf(e)}
                 value={this.state.addTurfForm}
               />
-              <button onClick={() => this._createTurf()}>
-                Submit
-              </button>
-            </div>
-          )} />
-          <Route path="/turf/edit/:name" render={() => (
-            <div>
-              <h3>{this.state.thisTurf.name}</h3>
+
               State or region:
               <Select
                 value={this.state.selectedStateOption}
@@ -290,8 +264,14 @@ export default class App extends Component {
               </div>
               :''}
 
-              <br />
-              {(this.state.saving?<Loader />:<button onClick={() => this._saveTurf()}>Save Turf</button>)}
+              <button onClick={() => this._createTurf()}>
+                Submit
+              </button>
+            </div>
+          )} />
+          <Route path="/turf/view/:name" render={() => (
+            <div>
+              <h3>{this.state.thisTurf.name}</h3>
               <br />
               <br />
               <br />
