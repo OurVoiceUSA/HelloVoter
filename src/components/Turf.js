@@ -68,14 +68,42 @@ export default class App extends Component {
 
     this.setState({saving: true});
 
+    let uri;
+    let state = this.state.selectedStateOption.value;
+
+    switch (this.state.selectedTypeOption.value) {
+      case 'state':
+        uri = 'states/'+state+'/shape.geojson';
+        break;
+      case 'cd':
+        // TODO: handle the fact there are new years with less in them
+        uri = 'cds/2016/'+this.state.selectedDistrictOption.value+'/shape.geojson';
+        break;
+      case 'sldu':
+        uri = 'states/'+state+'/sldu/'+this.state.selectedDistrictOption.value+'.geojson';
+        break;
+      case 'sldl':
+        uri = 'states/'+state+'/sldl/'+this.state.selectedDistrictOption.value+'.geojson';
+        break;
+      default:
+        throw "unknown selectedTypeOption";
+    }
+
     try {
-      let res = await fetch('https://'+this.props.server+'/canvass/v1/turf/wipe', {
+
+      let res = await fetch ('https://raw.githubusercontent.com/OurVoiceUSA/districts/gh-pages/'+uri)
+      let geometry = await res.json();
+
+      res = await fetch('https://'+this.props.server+'/canvass/v1/turf/create', {
         method: 'POST',
         headers: {
           'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({name: this.state.thisTurf.name}),
+        body: JSON.stringify({
+          name: this.state.thisTurf.name,
+          geometry: geometry,
+        }),
       });
     } catch (e) {
       console.warn(e);
@@ -261,7 +289,6 @@ export default class App extends Component {
                 :<Loader />}
               </div>
               :''}
-
 
               <br />
               {(this.state.saving?<Loader />:<button onClick={() => this._saveTurf()}>Save Turf</button>)}
