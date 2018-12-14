@@ -295,17 +295,31 @@ const Team = (props) => {
           let turfOptions = {};
           let formOptions = {};
 
-          let canvassers = await _loadCanvassers(props.refer, props.team.name);
-          let turf = await _loadTurf(props.refer, props.team.name);
-          let form = await _loadForms(props.refer, props.team.name);
+          try {
+            let canvassers = await _loadCanvassers(props.refer, props.team.name);
 
-          canvassers.forEach((c) => {
-            memberOptions.push({value: c.name+c.email+c.location, id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={props.refer} />)})
-          });
+            canvassers.forEach((c) => {
+              memberOptions.push({value: c.name+c.email+c.location, id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={props.refer} />)})
+            });
+          } catch (e) {
+            console.warn(e);
+          }
 
-          turfOptions = {value: turf[0].name, label: (<CardTurf key={turf[0].name} turf={turf[0]} />)};
+          try {
+            let turf = await _loadTurf(props.refer, props.team.name);
 
-          formOptions = {value: form[0].id, label: (<CardForm key={form[0].id} form={form[0]} />)};
+            turfOptions = {value: turf[0].name, label: (<CardTurf key={turf[0].name} turf={turf[0]} />)};
+          } catch (e) {
+            console.warn(e);
+          }
+
+          try {
+            let form = await _loadForms(props.refer, props.team.name);
+
+            formOptions = {value: form[0].id, label: (<CardForm key={form[0].id} form={form[0]} />)};
+          } catch (e) {
+            console.warn(e);
+          }
 
           props.refer.setState({
             selectedMembersOption: memberOptions,
