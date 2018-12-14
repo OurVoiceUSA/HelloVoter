@@ -108,7 +108,7 @@ export const RootLoader = (props) => {
   else return (
     <div>
       <Icon icon={faSync} color="green" onClick={props.func} />
-      <div {...props} />
+      <div>{props.children}</div>
     </div>
   );
 }
