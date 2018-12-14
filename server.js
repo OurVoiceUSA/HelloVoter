@@ -389,7 +389,10 @@ function teamTurfList(req, res) {
     return cqdo(req, res, 'match (a:Turf)-[:ASSIGNED]-(b:Team {name:{teamName}}) return a', req.query);
   else {
     req.query.id = req.user.id;
-    return cqdo(req, res, 'match (a:Turf {name:{turfName}})-[:ASSIGNED]-(b:Team {name:{teamName}}) return a', req.query);
+    return cqdo(req, res, 'match (a:Turf)-[:ASSIGNED]-(b:Team {name:{teamName}})-[:MEMBERS]-(c:Canvasser {id:{id}}) return a', {
+      teamName: req.query.teamName,
+      id: req.user.id,
+    });
   }
 }
 
@@ -414,7 +417,7 @@ function turfList(req, res) {
   if (req.user.admin)
     return cqdo(req, res, 'match (a:Turf) return a');
   else
-    return cqdo(req, res, 'match (a:Canvasser {id:{id}})-[:ASSIGNED]-(b:Team)-[:ASSIGNED]-(c:Turf) return c UNION match (a:Canvasser {id:{id}})-[:ASSIGNED]-(c:Turf) return c', req.user);
+    return cqdo(req, res, 'match (a:Canvasser {id:{id}})-[:MEMBERS]-(b:Team)-[:ASSIGNED]-(c:Turf) return c UNION match (a:Canvasser {id:{id}})-[:ASSIGNED]-(c:Turf) return c', req.user);
 }
 
 function turfCreate(req, res) {
