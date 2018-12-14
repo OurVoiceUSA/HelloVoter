@@ -9,7 +9,6 @@ import Dashboard from './components/Dashboard';
 import Canvassers from './components/Canvassers';
 import Teams from './components/Teams';
 import Turf from './components/Turf';
-import Questions from './components/Questions';
 import Forms from './components/Forms';
 import Map from './components/Map';
 import ImportData from './components/ImportData';
@@ -21,7 +20,7 @@ import About from './components/About';
 import { Root, Sidebar, SidebarItem, Main, Icon } from './common.js';
 
 import { faColumns, faUser, faUsers, faMap, faGlobe, faClipboard, faChartPie,
-         faBalanceScale, faFileUpload, faSignOutAlt, faAward, faCog } from '@fortawesome/free-solid-svg-icons';
+         faFileUpload, faSignOutAlt, faAward, faCog } from '@fortawesome/free-solid-svg-icons';
 import { faGithub } from '@fortawesome/free-brands-svg-icons';
 
 class App extends Component {
@@ -186,7 +185,6 @@ class App extends Component {
           <SidebarItem><Icon icon={faUser} /> <Link to={'/canvassers/'}>Canvassers</Link></SidebarItem>
           <SidebarItem><Icon icon={faUsers} /> <Link to={'/teams/'}>Teams</Link></SidebarItem>
           <SidebarItem><Icon icon={faMap} /> <Link to={'/turf/'}>Turf</Link></SidebarItem>
-          <SidebarItem><Icon icon={faBalanceScale} /> <Link to={'/questions/'}>Questions</Link></SidebarItem>
           <SidebarItem><Icon icon={faClipboard} /> <Link to={'/forms/'}>Forms</Link></SidebarItem>
           <SidebarItem><Icon icon={faGlobe} /> <Link to={'/map/'}>Map</Link></SidebarItem>
           <SidebarItem><Icon icon={faFileUpload} /> <Link to={'/import/'}>Import Data</Link></SidebarItem>
@@ -202,7 +200,6 @@ class App extends Component {
           <Route path="/canvassers/" render={(props) => <Canvassers server={server} jwt={jwt} {...props} />} />
           <Route path="/teams/" render={() => <Teams server={server} jwt={jwt} />} />
           <Route path="/turf/" render={() => <Turf server={server} jwt={jwt} />} />
-          <Route path="/questions/" render={() => <Questions server={server} jwt={jwt} />} />
           <Route path="/forms/" render={() => <Forms server={server} jwt={jwt} />} />
           <Route path="/map/" render={() => <Map server={server} jwt={jwt} />} />
           <Route path="/import/" render={() => <ImportData server={server} jwt={jwt} />} />
