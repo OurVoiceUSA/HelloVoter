@@ -234,8 +234,6 @@ async function hello(req, res) {
   let lng = req.body.longitude;
   let lat = req.body.latitude;
 
-  if (!lat || !lng || isNaN(lat) || isNaN(lng)) res.status(400).json({error: true, msg: "Parameters longitude and latitude must be set and numeric."});
-
   let msg = "Awaiting assignment";
   let ass = await canvassAssignments(req.user.id);
 
@@ -250,7 +248,9 @@ async function hello(req, res) {
     // Butterfly in the sky, I can go twice as high.
     if (req.user.admin === true) ass.admin = true;
 
-    await cqa('match (a:Canvasser {id:{id}}) set a.longitude={lng}, a.latitude={lat}', {id: req.user.id, lng: lng, lat: lat});
+    // web browser doesn't send this
+    if (lat && lng) 
+      await cqa('match (a:Canvasser {id:{id}}) set a.longitude={lng}, a.latitude={lat}', {id: req.user.id, lng: lng, lat: lat});
   } catch (e) {
     console.warn(e);
     return res.status(500).json({error: true, msg: "Internal server error."});
