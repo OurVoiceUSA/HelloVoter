@@ -18,7 +18,30 @@ export default class App extends Component {
   }
 
   componentDidMount = async () => {
+    this._loadCanvassers();
+  }
+
+  _loadCanvassers = async () => {
     this.setState({canvassers: await _loadCanvassers(this)});
+  }
+
+  _lockCanvasser = async (canvasser, flag) => {
+
+    try {
+      await fetch('https://'+this.props.server+'/canvass/v1/canvasser/'+(flag?'lock':'unlock'), {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({id: canvasser.id}),
+      });
+    } catch (e) {
+      console.warn(e);
+    }
+
+    this._loadCanvassers();
+    window.location.href = "/HelloVoter/#/canvassers/";
   }
 
   _loadSingle = async () => {
@@ -45,17 +68,35 @@ export default class App extends Component {
   }
 
   render() {
+
+    let active = [];
+    let denied = [];
+
+    this.state.canvassers.forEach(c => {
+      if (c.locked)
+        denied.push(<CardCanvasser key={c.id} canvasser={c} refer={this} />)
+      else
+        active.push(<CardCanvasser key={c.id} canvasser={c} refer={this} />)
+    });
+
     return (
       <Router>
         <div>
           <Route exact={true} path="/canvassers/" render={() => (
-            <RootLoader flag={this.state.loading} func={async () => this.setState({canvassers: await _loadCanvassers(this)})}>
-              {this.state.canvassers.map(c => (<CardCanvasser key={c.id} canvasser={c} refer={this} />))}
+            <RootLoader flag={this.state.loading} func={() => this._loadCanvassers()}>
+              <h3>Canvassers:</h3>
+              {active}
+              {denied.length?
+              <div>
+                <h3>Denied access:</h3>
+                {denied}
+              </div>
+              :''}
             </RootLoader>
           )} />
           <Route path="/canvassers/:id" render={(props) => (
             <RootLoader flag={this.state.loading} func={this._loadSingle}>
-              {JSON.stringify(this.state.thisCanvasser)}
+              <CardCanvasser key={this.state.thisCanvasser.id} canvasser={this.state.thisCanvasser} edit={true} refer={this} />
             </RootLoader>
           )} />
         </div>

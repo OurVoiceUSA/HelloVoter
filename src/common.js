@@ -121,10 +121,13 @@ export const CardCanvasser = (props) => {
         <Img width={50} src={props.canvasser.avatar} loader={<Loader width={50} />} unloader={<Icon style={{width: 50, height: 50, color: "gray"}} icon={faUser} />} />
       </div>
       <div style={{flex: 1, overflow: 'auto'}}>
-        Name: {props.canvasser.name} (<Link to={'/canvassers/'+props.canvasser.id} onClick={() => props.refer.setState({thisCanvasser: props.canvasser})}>view profile</Link>) {(props.canvasser.admin?<Icon icon={faCrown} color="gold" />:'')}<br />
+        Name: {props.canvasser.name} {(props.edit?'':(<Link to={'/canvassers/'+props.canvasser.id} onClick={() => props.refer.setState({thisCanvasser: props.canvasser})}>view profile</Link>))} {(props.canvasser.admin?<Icon icon={faCrown} color="gold" />:'')}<br />
         Location: {(props.canvasser.location?props.canvasser.location:'N/A')} <br />
         Last Login: {timeAgo.format(new Date(props.canvasser.last_seen-30000))}
       </div>
+      <br />
+      {props.edit && props.canvasser.locked?(<button onClick={() => props.refer._lockCanvasser(props.canvasser, false)}>Restore Access</button>):''}
+      {props.edit && !props.canvasser.locked?(<button onClick={() => props.refer._lockCanvasser(props.canvasser, true)}>Deny Access</button>):''}
     </div>
   );
 }
