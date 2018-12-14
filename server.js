@@ -292,7 +292,7 @@ async function canvasserList(req, res) {
   if (req.user.admin)
     return cqdo(req, res, 'match (a:Canvasser) return a');
   else 
-    return cqdo(req, res, 'match (a:Canvasser {id:{id}})-[:MEMBERS]-(b:Team) optional match (b)-[:MEMBERS]-(c:Canvasser) return c', req.user);
+    return cqdo(req, res, 'match (a:Canvasser {id:{id}})-[:MEMBERS]-(b:Team) optional match (b)-[:MEMBERS]-(c:Canvasser) return distinct(c)', req.user);
 }
 
 async function canvasserGet(req, res) {
@@ -358,7 +358,7 @@ function teamMembersList(req, res) {
     return cqdo(req, res, 'match (a:Canvasser)-[:MEMBERS]-(b:Team {name:{teamName}}) return a', req.query);
   else {
     req.query.id = req.user.id;
-    return cqdo(req, res, 'match (a:Canvasser {id:{id}})-[:MEMBERS]-(b:Team {name:{teamName}}) optional match (b)-[:MEMBERS]-(c:Canvasser) return c', req.query);
+    return cqdo(req, res, 'match (a:Canvasser {id:{id}})-[:MEMBERS]-(b:Team {name:{teamName}}) optional match (b)-[:MEMBERS]-(c:Canvasser) return distinct(c)', req.query);
   }
 }
 
