@@ -27,7 +27,7 @@ export class App extends Component {
     let addresses = [];
 
     let turfs = await _loadTurf(this);
-    let data = await _loadAddresses(this);
+    let data = (await _loadAddresses(this)).nodes;
 
     // only care about address objects
     Object.keys(data).forEach((d) => {
