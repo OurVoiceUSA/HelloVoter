@@ -94,7 +94,7 @@ export default class App extends PureComponent {
   }
 
   onChange(server) {
-    this.setState({server})
+    this.setState({server});
   }
 
   doSave = async () => {
@@ -116,7 +116,7 @@ export default class App extends PureComponent {
     if (ret.flag !== true) Alert.alert((ret.error?'Error':'Connection Successful'), ret.msg, [{text: 'OK'}], { cancelable: false });
     if (ret.error !== true) server = null;
 
-    this.setState({serverLoading: false, server});
+    this.setState({serverLoading: false, server: json.server});
   }
 
   singHello = async (server) => {
