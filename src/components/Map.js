@@ -33,7 +33,7 @@ export class App extends Component {
     let polygons = [];
 
     this.state.turfs.forEach((c) => {
-      geojson2polygons(c.geometry).forEach((p) => polygons.push(p));
+      geojson2polygons(JSON.parse(c.geometry)).forEach((p) => polygons.push(p));
     });
 
     return (
