@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import {Map, Marker, Polygon, GoogleApiWrapper} from 'google-maps-react';
+import {Map, InfoWindow, Marker, Polygon, GoogleApiWrapper} from 'google-maps-react';
 import {geojson2polygons} from 'ourvoiceusa-sdk-js';
 
 import { _loadTurf, _loadAddresses } from '../common.js';
@@ -13,6 +13,8 @@ export class App extends Component {
     this.state = {
       turfs: [],
       addresses: [],
+      showingInfoWindow: false,
+      selectedPlace: {},
     };
   }
 
@@ -36,6 +38,23 @@ export class App extends Component {
     this.setState({turfs, addresses});
   }
 
+  onMarkerClick = (props, marker, e) => {
+    this.setState({
+      selectedPlace: props,
+      activeMarker: marker,
+      showingInfoWindow: true
+    });
+  }
+
+  onMapClicked = (props) => {
+    if (this.state.showingInfoWindow) {
+      this.setState({
+        showingInfoWindow: false,
+        activeMarker: null
+      })
+    }
+  };
+
   render() {
     let polygons = [];
     const { addresses } = this.state;
@@ -45,10 +64,11 @@ export class App extends Component {
     });
 
     return (
-      <Map google={this.props.google} zoom={14} initialCenter={{lat:33.9218230, lng:-118.3281371}}>
+      <Map google={this.props.google} zoom={14} initialCenter={{lat:33.9218230, lng:-118.3281371}} onClick={this.onMapClicked}>
         {addresses.map((a, idx) => (
           <Marker
             key={idx}
+            onClick={this.onMarkerClick}
             title={a.address.join(" ")}
             position={{lat: a.latlng.latitude, lng: a.latlng.longitude}} />
         ))}
@@ -62,6 +82,13 @@ export class App extends Component {
             fillColor="#0000FF"
             fillOpacity={0.35} />
         ))}
+        <InfoWindow
+          marker={this.state.activeMarker}
+          visible={this.state.showingInfoWindow}>
+          <div>
+            <h1>{this.state.selectedPlace.title}</h1>
+          </div>
+        </InfoWindow>
       </Map>
     );
   }
