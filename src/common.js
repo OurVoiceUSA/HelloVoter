@@ -194,7 +194,7 @@ export async function _loadTurf(refer, teamName) {
 
 export const CardForm = (props) => (
   <div>
-    <Icon icon={faClipboard} /> {props.form.name} (<Link to={'/forms/'+props.form.id} onClick={() => {
+    <Icon icon={faClipboard} /> {props.form.name} (<Link to={'/forms/edit/'+props.form.id} onClick={() => {
       props.refer.setState({thisForm: props.form})
     }}>view</Link>)<br />
   <hr />
