@@ -97,6 +97,12 @@ export default class App extends Component {
           <Route path="/canvassers/:id" render={(props) => (
             <RootLoader flag={this.state.loading} func={this._loadSingle}>
               <CardCanvasser key={this.state.thisCanvasser.id} canvasser={this.state.thisCanvasser} edit={true} refer={this} />
+              <br />
+              Email: {(this.state.thisCanvasser.email?this.state.thisCanvasser.email:'N/A')}
+              <br />
+              Phone: {(this.state.thisCanvasser.phone?this.state.thisCanvasser.phone:'N/A')}
+              <br />
+              # of doors knocked: 0
             </RootLoader>
           )} />
         </div>
