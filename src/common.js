@@ -73,6 +73,12 @@ export const us_states = {
     "WY": "Wyoming"
 };
 
+export function _browserLocation(props) {
+  if (!props.isGeolocationAvailable || !props.isGeolocationEnabled) return {access: false};
+  if (props.coords) return {access: true, lng: props.coords.longitude, lat: props.coords.latitude};
+  return {access: true};
+}
+
 export const Root = (props) => (
   <div style={{display: 'flex'}} {...props}/>
 )

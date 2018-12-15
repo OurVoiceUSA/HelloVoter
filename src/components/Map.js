@@ -2,8 +2,9 @@ import React, { Component } from 'react';
 
 import {Map, InfoWindow, Marker, Polygon, GoogleApiWrapper} from 'google-maps-react';
 import {geojson2polygons} from 'ourvoiceusa-sdk-js';
+import {geolocated} from 'react-geolocated';
 
-import { _loadTurf, _loadAddresses } from '../common.js';
+import { _browserLocation, _loadTurf, _loadAddresses } from '../common.js';
 
 export class App extends Component {
 
@@ -59,12 +60,15 @@ export class App extends Component {
     let polygons = [];
     const { addresses } = this.state;
 
+    let location = _browserLocation(this.props);
+//    if (!location.lat || !location.lng) location = {};
+
     this.state.turfs.forEach((c) => {
       geojson2polygons(JSON.parse(c.geometry)).forEach((p) => polygons.push(p));
     });
 
     return (
-      <Map google={this.props.google} zoom={14} initialCenter={{lat:33.9218230, lng:-118.3281371}} onClick={this.onMapClicked}>
+      <Map google={this.props.google} zoom={14} center={location} onClick={this.onMapClicked}>
         {addresses.map((a, idx) => (
           <Marker
             key={idx}
@@ -94,4 +98,9 @@ export class App extends Component {
   }
 }
 
-export default GoogleApiWrapper((props) => ({apiKey: props.apiKey}))(App);
+export default GoogleApiWrapper((props) => ({apiKey: props.apiKey}))(geolocated({
+  positionOptions: {
+    enableHighAccuracy: false,
+  },
+  userDecisionTimeout: 5000,
+})(App));

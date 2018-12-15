@@ -16,6 +16,7 @@
     "react": "^16.6.3",
     "react-csv-reader": "^1.1.0",
     "react-dom": "^16.6.3",
+    "react-geolocated": "^2.4.0",
     "react-image": "^1.5.1",
     "react-loader-spinner": "^2.3.0",
     "react-router-dom": "^4.3.1",
