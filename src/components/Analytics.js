@@ -3,21 +3,17 @@ import React, { Component } from 'react';
 import {PieChart, Pie, Cell, Legend, Label, LabelList} from 'recharts';
 
 const data01 = [
-  { name: 'Group A', value: 400, v: 89 },
-  { name: 'Group B', value: 300, v: 100 },
-  { name: 'Group C', value: 200, v: 200 },
-  { name: 'Group D', value: 200, v: 20 },
-  { name: 'Group E', value: 278, v: 40 },
-  { name: 'Group F', value: 189, v: 60 },
+  { name: 'Republican', value: 400, v: 89, color: 'red' },
+  { name: 'Democratic', value: 300, v: 100 },
+  { name: 'UDP', value: 200, v: 200 },
+  { name: 'Unaffiliated', value: 200, v: 20 },
 ];
 
 const data02 = [
-  { name: 'Group A', value: 2400 },
-  { name: 'Group B', value: 4567 },
-  { name: 'Group C', value: 1398 },
-  { name: 'Group D', value: 9800 },
-  { name: 'Group E', value: 3908 },
-  { name: 'Group F', value: 4800 },
+  { name: 'Republican', value: 2400 },
+  { name: 'Democratic', value: 4567 },
+  { name: 'UDP', value: 1398 },
+  { name: 'Unaffiliated', value: 9800 },
 ];
 
 const renderLabelContent = (props) => {
@@ -59,7 +55,7 @@ export default class App extends Component {
           >
             {
               data01.map((entry, index) => (
-                <Cell key={`slice-${index}`} />
+                <Cell key={`slice-${index}`} fill={["red","blue","yellow","grey"][index]} />
               ))
             }
             <Label value="Canvassing" position="outside" />
@@ -80,14 +76,14 @@ export default class App extends Component {
           >
             {
               data02.map((entry, index) => (
-                <Cell key={`slice-${index}`} />
+                <Cell key={`slice-${index}`} fill={["red","blue","yellow","grey"][index]} />
               ))
             }
             <Label width={50} position="center">
-              Surveys
+              Agreed with you
             </Label>
           </Pie>
-</PieChart>
+        </PieChart>
       </div>
     );
   }
