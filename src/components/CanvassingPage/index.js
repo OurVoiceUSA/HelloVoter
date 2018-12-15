@@ -671,10 +671,11 @@ export default class App extends OVComponent {
         throw "Sync error";
       }
 
-      this.allNodes = this.mergeNodes([this.allNodes,this.myNodes,json]);
+      this.allNodes = this.mergeNodes([this.allNodes,this.myNodes,json.nodes]);
       this.setState({last_sync: new Date().getTime()});
     } catch (e) {
       ret.error = true;
+      console.warn('error: '+e);
     }
 
     return ret;
