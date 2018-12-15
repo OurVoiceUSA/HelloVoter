@@ -162,8 +162,7 @@ function pipNode(node, geom) {
 }
 
 function sendError(res, code, msg) {
-  obj.code = code;
-  obj.error = true;
+  let obj = {code: code, error: true, msg: msg};
   console.log('Returning http '+code+' error with msg: '+msg);
   return res.status(code).json(obj);
 }
