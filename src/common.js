@@ -224,3 +224,21 @@ export async function _loadForms(refer, teamName) {
 
   return forms;
 }
+
+export async function _loadAddresses(refer) {
+  let addresses = {};
+  try {
+    let res = await fetch('https://'+refer.props.server+'/canvass/v1/sync', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer '+(refer.props.jwt?refer.props.jwt:"of the one ring"),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({nodes: {}}),
+    });
+    addresses = await res.json();
+  } catch (e) {
+    console.warn(e)
+  }
+  return addresses;
+}

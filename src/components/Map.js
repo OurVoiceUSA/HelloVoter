@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 
-import {Map, Polygon, GoogleApiWrapper} from 'google-maps-react';
+import {Map, Marker, Polygon, GoogleApiWrapper} from 'google-maps-react';
 import {geojson2polygons} from 'ourvoiceusa-sdk-js';
 
-import { _loadTurf } from '../common.js';
+import { _loadTurf, _loadAddresses } from '../common.js';
 
 export class App extends Component {
 
@@ -12,11 +12,7 @@ export class App extends Component {
 
     this.state = {
       turfs: [],
-      pins: [
-        {lat:33.9218230, lng:-118.3281371},
-        {lat:33.9328242, lng:-118.3381376},
-        {lat:33.9438254, lng:-118.3481379},
-      ],
+      addresses: [],
     };
   }
 
@@ -25,19 +21,37 @@ export class App extends Component {
   }
 
   _loadData = async () => {
+    let addresses = [];
+
     let turfs = await _loadTurf(this);
-    this.setState({turfs});
+    let data = await _loadAddresses(this);
+
+    // only care about address objects
+    Object.keys(data).forEach((d) => {
+      if (data[d] && data[d].type === "address") {
+        addresses.push(data[d]);
+      }
+    })
+
+    this.setState({turfs, addresses});
   }
 
   render() {
     let polygons = [];
+    const { addresses } = this.state;
 
     this.state.turfs.forEach((c) => {
       geojson2polygons(JSON.parse(c.geometry)).forEach((p) => polygons.push(p));
     });
 
     return (
-      <Map google={this.props.google} zoom={5} initialCenter={{lat:33.9218230, lng:-118.3281371}}>
+      <Map google={this.props.google} zoom={14} initialCenter={{lat:33.9218230, lng:-118.3281371}}>
+        {addresses.map((a, idx) => (
+          <Marker
+            key={idx}
+            title={a.address.join(" ")}
+            position={{lat: a.latlng.latitude, lng: a.latlng.longitude}} />
+        ))}
         {polygons.map((p, idx) => (
           <Polygon
             key={idx}
