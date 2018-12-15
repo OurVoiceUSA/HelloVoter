@@ -668,9 +668,6 @@ async function sync(req, res) {
   let ass = await canvassAssignments(req.user.id);
   if (!ass.ready) return _403(res, "Canvasser is not assigned.");
 
-  let formId = req.body.formId;
-  if (!idInArrObj(ass.forms, formId)) return _403(res, "Canvasser is not assigned to this form.");
-
   let last_sync = req.body.last_sync;
   if (isNaN(last_sync)) last_sync = 0;
 
@@ -738,10 +735,7 @@ async function sync(req, res) {
     }
   }
 
-  let onodes = {
-    formId: formId,
-    nodes: {},
-  };
+  let onodes = {};
 
   // TODO: limit nodes based on relationship to Address, and whether address is pip Turf.geometry
   try {
@@ -782,7 +776,7 @@ async function sync(req, res) {
     return _500(res, "Internal server error.");
   }
 
-  return res.json(onodes);
+  return res.json({nodes: onodes});
 }
 
 // Initialize http server
