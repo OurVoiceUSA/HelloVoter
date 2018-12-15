@@ -2,7 +2,7 @@ import React from 'react';
 import LoaderSpinner from 'react-loader-spinner';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSync, faMapMarkerAlt, faUser, faCrown, faStreetView, faClipboard } from '@fortawesome/free-solid-svg-icons';
+import { faSync, faUser, faCrown, faStreetView, faClipboard } from '@fortawesome/free-solid-svg-icons';
 
 import Img from 'react-image';
 import { Link } from 'react-router-dom';
@@ -93,10 +93,6 @@ export const Main = (props) => (
 
 export const Icon = (props) => (
   <FontAwesomeIcon style={{width: 25}} {...props} />
-)
-
-export const MapMarker = (props) => (
-  <FontAwesomeIcon color="red" size="2x" icon={faMapMarkerAlt} {...props} />
 )
 
 export const Loader = (props) => (
