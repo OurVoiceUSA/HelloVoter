@@ -123,7 +123,7 @@ function getClientIP(req) {
 
 async function cqdo(req, res, q, p, a) {
   if (a === true && req.user.admin !== true)
-    return res.status(403).json({error: true, msg: "Permission denied."});
+    return 403(res, "Permission denied.");
 
   let ref;
 
@@ -131,7 +131,7 @@ async function cqdo(req, res, q, p, a) {
     ref = await cqa(q, p);
   } catch (e) {
     console.warn(e);
-    return res.status(500).json({error: true, msg: "Internal server error."});
+    return _500(res, "Internal server error.");
   }
 
   return res.status(200).json({msg: "OK", data: ref.data});
@@ -159,6 +159,29 @@ function pipNode(node, geom) {
       break;
   }
   return false;
+}
+
+function sendError(res, code, msg) {
+  obj.code = code;
+  obj.error = true;
+  console.log('Returning http '+code+' error with msg: '+msg);
+  return res.status(code).json(obj);
+}
+
+function _400(res, obj) {
+  return sendError(res, 400, obj);
+}
+
+function _401(res, obj) {
+  return sendError(res, 401, obj);
+}
+
+function _403(res, obj) {
+  return sendError(res, 403, obj);
+}
+
+function _500(res, obj) {
+  return sendError(res, 500, obj);
 }
 
 async function sameTeam(ida, idb) {
@@ -253,7 +276,7 @@ async function hello(req, res) {
       await cqa('match (a:Canvasser {id:{id}}) set a.longitude={lng}, a.latitude={lat}', {id: req.user.id, lng: lng, lat: lat});
   } catch (e) {
     console.warn(e);
-    return res.status(500).json({error: true, msg: "Internal server error."});
+    return _500(res, "Internal server error.");
   }
 
   if (ass.ready)
@@ -283,7 +306,7 @@ async function dashboard(req, res) {
 async function google_maps_key(req, res) {
   let ass = await canvassAssignments(req.user.id);
   if (ass.ready) return res.json({google_maps_key: ovi_config.google_maps_key });
-  else return res.status(401).json({error: true, msg: "No soup for you"});
+  else return _401(res, "No soup for you");
 }
 
 // canvassers
@@ -296,15 +319,15 @@ async function canvasserList(req, res) {
 }
 
 async function canvasserGet(req, res) {
-  if (!req.user.admin && req.query.id !== req.user.id && !await sameTeam(req.query.id, req.user.id)) return res.status(403).json({error: true, msg: "Permission denied."});
+  if (!req.user.admin && req.query.id !== req.user.id && !await sameTeam(req.query.id, req.user.id)) return _403(res, "Permission denied.");
 
   return cqdo(req, res, 'match (a:Canvasser {id:{id}}) return a', req.query);
 }
 
 function canvasserUpdate(req, res) {
-  if (!req.user.admin && req.body.id !== req.user.id) return res.status(403).json({error: true, msg: "Permission denied."});
+  if (!req.user.admin && req.body.id !== req.user.id) return _403(res, "Permission denied.");
   // TODO: need looser valid function for avatar
-  if (!valid(req.body.name) || !valid(req.body.id)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'id' or 'name' or 'avatar'."});
+  if (!valid(req.body.name) || !valid(req.body.id)) return _400(res, "Invalid value to parameter 'id' or 'name' or 'avatar'.");
 
   return cqdo(req, res, 'match (a:Canvasser {id:{id}}) set a.display_name={name}, a.display_avatar={avatar}', req.body);
 }
@@ -314,22 +337,22 @@ async function canvasserUnassigned(req, res) {
 }
 
 async function canvasserLock(req, res) {
-  if (req.body.id === req.user.id) return res.status(403).json({error: true, msg: "You can't lock yourself."});
+  if (req.body.id === req.user.id) return _403(res, "You can't lock yourself.");
 
   try {
     let ref = await cqa("match (a:Canvasser {id:{id}}) return a", req.body);
     if (ref.data[0] && ref.data[0].admin === true)
-      return res.status(403).json({error: true, msg: "Permission denied."});
+      return _403(res, "Permission denied.");
   } catch(e) {
     console.warn(e);
-    return res.status(500).json({error: true, msg: "Internal server error."});
+    return _500(res, "Internal server error.");
   }
 
   return cqdo(req, res, 'match (a:Canvasser {id:{id}}) set a.locked=true', req.body, true);
 }
 
 function canvasserUnlock(req, res) {
-  if (!valid(req.body.id)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'id'."});
+  if (!valid(req.body.id)) return _400(res, "Invalid value to parameter 'id'.");
   return cqdo(req, res, 'match (a:Canvasser {id:{id}}) remove a.locked', req.body, true);
 }
 
@@ -343,17 +366,17 @@ function teamList(req, res) {
 }
 
 function teamCreate(req, res) {
-  if (!valid(req.body.name)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'name'."});
+  if (!valid(req.body.name)) return _400(res, "Invalid value to parameter 'name'.");
   return cqdo(req, res, 'create (a:Team {created: timestamp(), name:{name}})', req.body, true);
 }
 
 function teamDelete(req, res) {
-  if (!valid(req.body.name)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'name'."});
+  if (!valid(req.body.name)) return _400(res, "Invalid value to parameter 'name'.");
   return cqdo(req, res, 'match (a:Team {name:{name}}) detach delete a', req.body, true);
 }
 
 function teamMembersList(req, res) {
-  if (!valid(req.query.teamName)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'teamName'."});
+  if (!valid(req.query.teamName)) return _400(res, "Invalid value to parameter 'teamName'.");
   if (req.user.admin)
     return cqdo(req, res, 'match (a:Canvasser)-[:MEMBERS]-(b:Team {name:{teamName}}) return a', req.query);
   else {
@@ -363,22 +386,22 @@ function teamMembersList(req, res) {
 }
 
 function teamMembersAdd(req, res) {
-  if (!valid(req.body.teamName) || !valid(req.body.cId)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'teamName' or 'cId'."});
+  if (!valid(req.body.teamName) || !valid(req.body.cId)) return _400(res, "Invalid value to parameter 'teamName' or 'cId'.");
   return cqdo(req, res, 'match (a:Canvasser {id:{cId}}), (b:Team {name:{teamName}}) merge (b)-[:MEMBERS]->(a)', req.body, true);
 }
 
 function teamMembersRemove(req, res) {
-  if (!valid(req.body.teamName) || valid(!req.body.cId)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'teamName' or 'cId'."});
+  if (!valid(req.body.teamName) || valid(!req.body.cId)) return _400(res, "Invalid value to parameter 'teamName' or 'cId'.");
   return cqdo(req, res, 'match (a:Canvasser {id:{cId}})-[r:MEMBERS]-(b:Team {name:{teamName}}) delete r', req.body, true);
 }
 
 function teamMembersWipe(req, res) {
-  if (!valid(req.body.teamName)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'teamName'."});
+  if (!valid(req.body.teamName)) return _400(res, "Invalid value to parameter 'teamName'.");
   return cqdo(req, res, 'match (a:Canvasser)-[r:MEMBERS]-(b:Team {name:{teamName}}) delete r', req.body, true);
 }
 
 function teamTurfList(req, res) {
-  if (!valid(req.query.teamName)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'teamName'."});
+  if (!valid(req.query.teamName)) return _400(res, "Invalid value to parameter 'teamName'.");
   if (req.user.admin)
     return cqdo(req, res, 'match (a:Turf)-[:ASSIGNED]-(b:Team {name:{teamName}}) return a', req.query);
   else {
@@ -391,22 +414,22 @@ function teamTurfList(req, res) {
 }
 
 function teamTurfAdd(req, res) {
-  if (!valid(req.body.teamName) || !valid(req.body.turfName)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'teamName' or 'turfName'."});
+  if (!valid(req.body.teamName) || !valid(req.body.turfName)) return _400(res, "Invalid value to parameter 'teamName' or 'turfName'.");
   return cqdo(req, res, 'match (a:Turf {name:{turfName}}), (b:Team {name:{teamName}}) merge (b)-[:ASSIGNED]->(a)', req.body, true);
 }
 
 function teamTurfRemove(req, res) {
-  if (!valid(req.body.teamName) || valid(!req.body.turfName)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'teamName' or 'turfName'."});
+  if (!valid(req.body.teamName) || valid(!req.body.turfName)) return _400(res, "Invalid value to parameter 'teamName' or 'turfName'.");
   return cqdo(req, res, 'match (a:Turf {name:{turfName}})-[r:ASSIGNED]-(b:Team {name:{teamName}}) delete r', req.body, true);
 }
 
 function teamTurfWipe(req, res) {
-  if (!valid(req.body.teamName)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'teamName'."});
+  if (!valid(req.body.teamName)) return _400(res, "Invalid value to parameter 'teamName'.");
   return cqdo(req, res, 'match (a:Turf)-[r:ASSIGNED]-(b:Team {name:{teamName}}) delete r', req.body, true);
 }
 
 function teamFormList(req, res) {
-  if (!valid(req.query.teamName)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'teamName'."});
+  if (!valid(req.query.teamName)) return _400(res, "Invalid value to parameter 'teamName'.");
   if (req.user.admin)
     return cqdo(req, res, 'match (a:Form)-[:ASSIGNED]-(b:Team {name:{teamName}}) return a', req.query);
   else {
@@ -419,17 +442,17 @@ function teamFormList(req, res) {
 }
 
 function teamFormAdd(req, res) {
-  if (!valid(req.body.teamName) || !valid(req.body.fId)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'teamName' or 'fId'."});
+  if (!valid(req.body.teamName) || !valid(req.body.fId)) return _400(res, "Invalid value to parameter 'teamName' or 'fId'.");
   return cqdo(req, res, 'match (a:Form {id:{fId}}), (b:Team {name:{teamName}}) merge (b)-[:ASSIGNED]->(a)', req.body, true);
 }
 
 function teamFormRemove(req, res) {
-  if (!valid(req.body.teamName) || valid(!req.body.fId)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'teamName' or 'fId'."});
+  if (!valid(req.body.teamName) || valid(!req.body.fId)) return _400(res, "Invalid value to parameter 'teamName' or 'fId'.");
   return cqdo(req, res, 'match (a:Form {id:{fId}})-[r:ASSIGNED]-(b:Team {name:{teamName}}) delete r', req.body, true);
 }
 
 function teamFormWipe(req, res) {
-  if (!valid(req.body.teamName)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'teamName'."});
+  if (!valid(req.body.teamName)) return _400(res, "Invalid value to parameter 'teamName'.");
   return cqdo(req, res, 'match (a:Form)-[r:ASSIGNED]-(b:Team {name:{teamName}}) delete r', req.body, true);
 }
 
@@ -444,40 +467,40 @@ function turfList(req, res) {
 }
 
 function turfCreate(req, res) {
-  if (!valid(req.body.name)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'name'."});
-  if (typeof req.body.geometry !== "object" || typeof req.body.geometry.coordinates !== "object") return res.status(400).json({error: true, msg: "Invalid value to parameter 'geometry'."});
+  if (!valid(req.body.name)) return _400(res, "Invalid value to parameter 'name'.");
+  if (typeof req.body.geometry !== "object" || typeof req.body.geometry.coordinates !== "object") return _400(res, "Invalid value to parameter 'geometry'.");
   req.body.geometry = JSON.stringify(req.body.geometry);
   return cqdo(req, res, 'create (a:Turf {created: timestamp(), name:{name}, geometry:{geometry}})', req.body, true);
 }
 
 function turfDelete(req, res) {
-  if (!valid(req.body.name)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'name'."});
+  if (!valid(req.body.name)) return _400(res, "Invalid value to parameter 'name'.");
   return cqdo(req, res, 'match (a:Turf {name:{name}}) detach delete a', req.body, true);
 }
 
 function turfAssignedTeamList(req, res) {
-  if (!valid(req.query.turfName)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'turfName'."});
+  if (!valid(req.query.turfName)) return _400(res, "Invalid value to parameter 'turfName'.");
   return cqdo(req, res, 'match (a:Turf {name:{turfName}})-[:ASSIGNED]-(b:Team) return b', req.query, true);
 }
 
 function turfAssignedTeamAdd(req, res) {
-  if (!valid(req.body.turfName) || !valid(req.body.teamName)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'turfName' or 'teamName'."});
+  if (!valid(req.body.turfName) || !valid(req.body.teamName)) return _400(res, "Invalid value to parameter 'turfName' or 'teamName'.");
   return cqdo(req, res, 'match (a:Turf {name:{turfName}}), (b:Team {name:{teamName}}) merge (a)-[:ASSIGNED]->(b)', req.body, true);
 }
 
 function turfAssignedTeamRemove(req, res) {
-  if (!valid(req.body.turfName) || !valid(req.body.teamName)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'turfName' or 'teamName'."});
+  if (!valid(req.body.turfName) || !valid(req.body.teamName)) return _400(res, "Invalid value to parameter 'turfName' or 'teamName'.");
   return cqdo(req, res, 'match (a:Turf {name:{turfName}})-[r:ASSIGNED]-(b:Team {name:{teamName}}) delete r', req.body, true);
 }
 
 function turfAssignedCanvasserList(req, res) {
-  if (!valid(req.query.turfName)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'turfName'."});
+  if (!valid(req.query.turfName)) return _400(res, "Invalid value to parameter 'turfName'.");
   return cqdo(req, res, 'match (a:Turf {name:{turfName}})-[:ASSIGNED]-(b:Canvasser) return b', req.query, true);
 }
 
 async function turfAssignedCanvasserAdd(req, res) {
-  if (!valid(req.body.turfName) || !valid(req.body.cId)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'turfName' or 'cId'."});
-  if (!req.user.admin) return res.status(403).json({error: true, msg: "Permission denied."});
+  if (!valid(req.body.turfName) || !valid(req.body.cId)) return _400(res, "Invalid value to parameter 'turfName' or 'cId'.");
+  if (!req.user.admin) return _403(res, "Permission denied.");
 
   if (!req.body.override) {
     try {
@@ -489,10 +512,10 @@ async function turfAssignedCanvasserAdd(req, res) {
       ret = await cqa('match (a:Turf {name:{turfName}}) return a', req.body);
       let t = ret.data[0];
 
-      if (!pipNode(c, JSON.parse(t.geometry))) return res.status(400).json({error: true, msg: "Canvasser location is not inside that turf."});
+      if (!pipNode(c, JSON.parse(t.geometry))) return _400(res, "Canvasser location is not inside that turf.");
     } catch (e) {
       console.warn(e);
-      return res.status(500).json({error: true, msg: "Internal server error."});
+      return _500(res, "Internal server error.");
     }
   }
 
@@ -500,7 +523,7 @@ async function turfAssignedCanvasserAdd(req, res) {
 }
 
 function turfAssignedCanvasserRemove(req, res) {
-  if (!valid(req.body.turfName) || !valid(req.body.cId)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'turfName' or 'cId'."});
+  if (!valid(req.body.turfName) || !valid(req.body.cId)) return _400(res, "Invalid value to parameter 'turfName' or 'cId'.");
   return cqdo(req, res, 'match (a:Turf {name:{turfName}})-[r:ASSIGNED]-(b:Canvasser {id:{cId}}) delete r', req.body, true);
 }
 
@@ -508,7 +531,7 @@ function turfAssignedCanvasserRemove(req, res) {
 
 async function formGet(req, res) {
   let ass = await canvassAssignments(req.user.id);
-  if (!req.user.admin && !idInArrObj(ass.forms, req.query.id)) return res.status(403).json({error: true, msg: "Canvasser is not assigned to this form."});
+  if (!req.user.admin && !idInArrObj(ass.forms, req.query.id)) return _403(res, "Canvasser is not assigned to this form.");
 
   let form = {};
 
@@ -520,7 +543,7 @@ async function formGet(req, res) {
     form.questions = b.data;
   } catch (e) {
     console.warn(e);
-    return res.status(500).json({error: true, msg: "Internal server error."});
+    return _500(res, "Internal server error.");
   }
 
   return res.json(form);
@@ -540,45 +563,45 @@ function formCreate(req, res) {
 }
 
 function formDelete(req, res) {
-  if (!valid(req.body.id)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'id'."});
+  if (!valid(req.body.id)) return _400(res, "Invalid value to parameter 'id'.");
   return cqdo(req, res, 'match (a:Form {id:{id}}) detach delete a', req.body, true);
 }
 
 function formAssignedTeamList(req, res) {
-  if (!valid(req.query.id)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'id'."});
+  if (!valid(req.query.id)) return _400(res, "Invalid value to parameter 'id'.");
   return cqdo(req, res, 'match (a:Form {id:{id}})-[:ASSIGNED]-(b:Team) return b', req.query, true);
 }
 
 function formAssignedTeamAdd(req, res) {
-  if (!valid(req.body.fId) || !valid(req.body.teamName)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'fId' or 'teamName'."});
+  if (!valid(req.body.fId) || !valid(req.body.teamName)) return _400(res, "Invalid value to parameter 'fId' or 'teamName'.");
   return cqdo(req, res, 'match (a:Form {id:{fId}}), (b:Team {name:{teamName}}) merge (a)-[:ASSIGNED]->(b)', req.body, true);
 }
 
 function formAssignedTeamRemove(req, res) {
-  if (!valid(req.body.fId) || !valid(req.body.teamName)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'fId' or 'teamName'."});
+  if (!valid(req.body.fId) || !valid(req.body.teamName)) return _400(res, "Invalid value to parameter 'fId' or 'teamName'.");
   return cqdo(req, res, 'match (a:Form {id:{fId}})-[r:ASSIGNED]-(b:Team {name:{teamName}}) delete r', req.body, true);
 }
 
 function formAssignedCanvasserList(req, res) {
-  if (!valid(req.query.id)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'id'."});
+  if (!valid(req.query.id)) return _400(res, "Invalid value to parameter 'id'.");
   return cqdo(req, res, 'match (a:Form {id:{id}})-[:ASSIGNED]-(b:Canvasser) return b', req.query, true);
 }
 
 function formAssignedCanvasserAdd(req, res) {
-  if (!valid(req.body.fId) || !valid(req.body.cId)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'fId' or 'cId'."});
+  if (!valid(req.body.fId) || !valid(req.body.cId)) return _400(res, "Invalid value to parameter 'fId' or 'cId'.");
   return cqdo(req, res, 'match (a:Form {id:{fId}}), (b:Canvasser {id:{cId}}) merge (a)-[:ASSIGNED]->(b)', req.body, true);
 }
 
 function formAssignedCanvasserRemove(req, res) {
-  if (!valid(req.body.fId) || !valid(req.body.cId)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'fId' or 'cId'."});
+  if (!valid(req.body.fId) || !valid(req.body.cId)) return _400(res, "Invalid value to parameter 'fId' or 'cId'.");
   return cqdo(req, res, 'match (a:Form {id:{fId}})-[r:ASSIGNED]-(b:Canvasser {id:{cId}}) delete r', req.body, true);
 }
 
 // question
 
 async function questionGet(req, res) {
-  if (!valid(req.query.key)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'key'."});
-  if (!req.user.admin) return res.status(403).json({error: true, msg: "Permission denied."});
+  if (!valid(req.query.key)) return _400(res, "Invalid value to parameter 'key'.");
+  if (!req.user.admin) return _403(res, "Permission denied.");
 
   let q = {};
 
@@ -593,7 +616,7 @@ async function questionGet(req, res) {
     }
   } catch (e) {
     console.warn(e);
-    return res.status(500).json({error: true, msg: "Internal server error."});
+    return _500(res, "Internal server error.");
   }
 
   return res.json(q);
@@ -604,7 +627,7 @@ function questionList(req, res) {
 }
 
 function questionCreate(req, res) {
-   if (!valid(req.body.key) || !valid(req.body.label) || !valid(req.body.type)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'key' or 'label' or 'type'."});
+   if (!valid(req.body.key) || !valid(req.body.label) || !valid(req.body.type)) return _400(res, "Invalid value to parameter 'key' or 'label' or 'type'.");
    req.body.author_id = req.user.id;
 
    switch (req.body.type) {
@@ -614,29 +637,29 @@ function questionCreate(req, res) {
      case 'Boolean':
      case 'SAND':
        break;
-     default: return res.status(400).json({error: true, msg: "Invalid value to parameter 'type'."});
+     default: return _400(res, "Invalid value to parameter 'type'.");
    }
 
    return cqdo(req, res, 'match (a:Canvasser {id:{author_id}}) create (b:Question {created: timestamp(), key:{key}, label:{label}, type:{type}})-[:AUTHOR]->(a)', req.body, true);
 }
 
 function questionDelete(req, res) {
-  if (!valid(req.body.key)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'key'."});
+  if (!valid(req.body.key)) return _400(res, "Invalid value to parameter 'key'.");
   return cqdo(req, res, 'match (a:Question {key:{key}}) detach delete a', req.body, true);
 }
 
 function questionAssignedList(req, res) {
-  if (!valid(req.query.key)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'key'."});
+  if (!valid(req.query.key)) return _400(res, "Invalid value to parameter 'key'.");
   return cqdo(req, res, 'match (a:Question {key:{key}})-[:ASSIGNED]-(b:Form) return b', req.query, true);
 }
 
 function questionAssignedAdd(req, res) {
-  if (!valid(req.body.key) || !valid(req.body.fId)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'key' or 'fId'."});
+  if (!valid(req.body.key) || !valid(req.body.fId)) return _400(res, "Invalid value to parameter 'key' or 'fId'.");
   return cqdo(req, res, 'match (a:Question {key:{key}}), (b:Form {id:{fId}}) merge (a)-[:ASSIGNED]->(b)', req.body, true);
 }
 
 function questionAssignedRemove(req, res) {
-  if (!valid(req.body.key) || !valid(req.body.fId)) return res.status(400).json({error: true, msg: "Invalid value to parameter 'key' or 'fId'."});
+  if (!valid(req.body.key) || !valid(req.body.fId)) return _400(res, "Invalid value to parameter 'key' or 'fId'.");
   return cqdo(req, res, 'match (a:Question {key:{key}})-[r:ASSIGNED]-(b:Form {id:{fId}}) delete r', req.body, true);
 }
 
@@ -644,15 +667,15 @@ function questionAssignedRemove(req, res) {
 
 async function sync(req, res) {
   let ass = await canvassAssignments(req.user.id);
-  if (!ass.ready) return res.status(403).json({error: true, msg: "Canvasser is not assigned."});
+  if (!ass.ready) return _403(res, "Canvasser is not assigned.");
 
   let formId = req.body.formId;
-  if (!idInArrObj(ass.forms, formId)) return res.status(403).json({error: true, msg: "Canvasser is not assigned to this form."});
+  if (!idInArrObj(ass.forms, formId)) return _403(res, "Canvasser is not assigned to this form.");
 
   let last_sync = req.body.last_sync;
   if (isNaN(last_sync)) last_sync = 0;
 
-  if (typeof req.body.nodes !== "object") return res.status(400).json({error: true, msg: "nodes must be an object."});
+  if (typeof req.body.nodes !== "object") return _400(res, "nodes must be an object.");
   let inodes = Object.keys(req.body.nodes);
 
   // get all turf geometries
@@ -667,7 +690,7 @@ async function sync(req, res) {
     }
   } catch (e) {
     console.warn(e);
-    return res.status(500).json({error: true, msg: "Internal server error."});
+    return _500(res, "Internal server error.");
   }
 
   for (let n in inodes) {
@@ -738,6 +761,7 @@ async function sync(req, res) {
         latlng: {longitude: node.longitude, latitude: node.latitude},
         address: [node.street, node.city, node.state, node.zip],
       };
+      //if (i > 200) break;
     }
 
     ret = await cqa('match (a:Address {multi_unit: true})-[]-(b:Unit) where b.last_seen > {last_sync} set b.parent_id = a.id return b', t);
@@ -756,7 +780,7 @@ async function sync(req, res) {
 
   } catch (e) {
     console.warn(e);
-    return res.status(500).json({error: true, msg: "Internal server error."});
+    return _500(res, "Internal server error.");
   }
 
   return res.json(onodes);
@@ -774,7 +798,7 @@ if (!ovi_config.DEBUG && ovi_config.ip_header) {
   app.use(function (req, res, next) {
     if (!req.header(ovi_config.ip_header)) {
       console.log('Connection without '+ovi_config.ip_header+' header');
-      res.status(400).json({error: true, msg: "Missing required header."});
+      _400(res, "Missing required header.");
     }
     else next();
   });
@@ -811,12 +835,12 @@ app.use(async function (req, res, next) {
 
   try {
     let u;
-    if (!req.header('authorization')) return res.status(400).json({error: true, msg: "Missing required header."});
+    if (!req.header('authorization')) return _400(res, "Missing required header.");
     u = jwt.verify(req.header('authorization').split(' ')[1], public_key);
 
     // verify props
-    if (!u.id) return res.status(400).json({error: true, msg: "Your token is missing a required parameter."});
-    if (u.iss !== jwt_iss) return res.status(403).json({error: true, msg: "Your token was issued for a different domain."});
+    if (!u.id) return _400(res, "Your token is missing a required parameter.");
+    if (u.iss !== jwt_iss) return _403(res, "Your token was issued for a different domain.");
 
     if (!u.email) u.email = "";
     if (!u.avatar) u.avatar = "";
@@ -824,20 +848,20 @@ app.use(async function (req, res, next) {
     let a = await cqa('merge (a:Canvasser {id:{id}}) on match set a += {last_seen: timestamp(), name:{name}, email:{email}, avatar:{avatar}} on create set a += {created: timestamp(), last_seen: timestamp(), name:{name}, email:{email}, avatar:{avatar}} return a', u);
     if (a.data.length === 1) {
       req.user = a.data[0];
-    } else return res.status(500).json({error: true, msg: "Internal server error."});
+    } else return _500(res, "Internal server error.");
 
-    if (req.user.locked) return res.status(403).json({error: true, msg: "Your account is locked."});
+    if (req.user.locked) return _403(res, "Your account is locked.");
 
   } catch (e) {
     console.warn(e);
-    return res.status(401).json({error: true, msg: "Invalid token."});
+    return _401(res, "Invalid token.");
   }
 
   // validate all keys in req.body and req.query
   let kb = Object.keys(req.body);
-  for (let i in kb) if (!safe_input(req.body[kb[i]])) return res.status(400).json({error: true, msg: "Invalid input."});
+  for (let i in kb) if (!safe_input(req.body[kb[i]])) return _400(res, "Invalid input.");
   let kq = Object.keys(req.query);
-  for (let i in kq) if (!safe_input(req.query[kq[i]])) return res.status(400).json({error: true, msg: "Invalid input."});
+  for (let i in kq) if (!safe_input(req.query[kq[i]])) return _400(res, "Invalid input.");
 
   next();
 });
