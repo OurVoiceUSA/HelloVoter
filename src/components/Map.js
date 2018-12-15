@@ -61,7 +61,6 @@ export class App extends Component {
     const { addresses } = this.state;
 
     let location = _browserLocation(this.props);
-//    if (!location.lat || !location.lng) location = {};
 
     this.state.turfs.forEach((c) => {
       geojson2polygons(JSON.parse(c.geometry)).forEach((p) => polygons.push(p));
@@ -81,10 +80,9 @@ export class App extends Component {
             key={idx}
             paths={p}
             strokeColor="#0000FF"
-            strokeOpacity={0.8}
-            strokeWeight={2}
-            fillColor="#0000FF"
-            fillOpacity={0.35} />
+            strokeWeight={5}
+            fillColor="#000000"
+            fillOpacity={0} />
         ))}
         <InfoWindow
           marker={this.state.activeMarker}
