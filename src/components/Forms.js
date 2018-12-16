@@ -87,12 +87,14 @@ export default class App extends Component {
       thisForm: {},
       fields: fields,
       order: order,
-      modalIsOpen: false,
+      customForm: null,
     };
 
     this.formServerItems = t.struct({
       name: t.String,
     });
+
+    this.customFormItems = t.struct(addItem);
 
     this.formServerOptions = {
       fields: {
@@ -103,23 +105,25 @@ export default class App extends Component {
       },
     };
 
+    this.onChange = this.onChange.bind(this);
     this.openModal = this.openModal.bind(this);
     this.closeModal = this.closeModal.bind(this);
+    this.doAddCustom = this.doAddCustom.bind(this);
   }
 
 
   openModal() {
-    this.setState({modalIsOpen: true});
+    this.setState({customForm: t.struct(addItem)})
   }
 
   closeModal() {
-    this.setState({modalIsOpen: false});
+    this.setState({customForm: null});
   }
 
   doAddCustom() {
     let { fields, order } = this.state;
 
-    let ref = this.refs.customForm.getValue();
+    let ref = this.customForm.getValue();
     if (ref === null) return;
     let json = JSON.parse(JSON.stringify(ref)); // deep copy
 
@@ -139,97 +143,6 @@ export default class App extends Component {
 
     this.setState({customForm: null, fields: fields, order: order});
 
-  }
-
-  doSave = async () => {
-    let { fields, order, edit, form, refer, user, dbx } = this.state;
-
-    this.setState({saving: true});
-    let msg = null;
-
-    let json = this.refs.mainForm.getValue();
-    if (edit === false && json === null) msg = 'Please name this form.';
-    else {
-
-      let formName;
-
-      if (edit === false) {
-        // get rid of ending whitespace
-        formName = json.name.trim();
-
-        // disallow anything other than alphanumeric and a few other chars
-        if (!formName.match(/^[a-zA-Z0-9\-_ ]+$/)) msg = 'From name can only contain alphanumeric characters, and spaces and dashes.';
-
-        // max length
-        if (formName.length > 255) msg = 'Form name cannot be longer than 255 characters.';
-      } else {
-        formName = form.name;
-      }
-
-      let forms = [];
-
-      // make sure this name doesn't exist as a dropbox folder
-      try {
-
-        let epoch = Math.floor(new Date().getTime());
-        let id = uuid();
-
-        let obj;
-
-        obj = {
-          id: id,
-          created: epoch,
-          updated: epoch,
-          name: formName,
-          geofence: this.state.geofence,
-          geofencename: this.state.geofencename,
-          author: (user.dropbox ? user.dropbox.name.display_name : 'You'),
-          author_id: ( user.dropbox ? user.dropbox.account_id : id ),
-          version: 1,
-          questions: fields,
-          questions_order: order,
-        };
-
-        if (edit === true) {
-          obj.id = form.id;
-          obj.created = form.created;
-          obj.name = form.name;
-        }
-
-        if (edit === false && dbx) {
-          let res = await dbx.filesListFolder({path: ''});
-          for (let i in res.entries) {
-            let item = res.entries[i];
-            if (item['.tag'] != 'folder') continue;
-            let name = item.path_display.substr(1).toLowerCase();
-            if (name == obj.name.toLowerCase())
-              msg = 'Dropbox folder name '+name+' already exists. Please choose a different name.';
-          }
-        }
-
-        try {
-          // fetch POST save form
-        } catch (e) {
-          console.warn(""+e);
-          msg = "Unable to save form data.";
-        }
-
-      } catch (error) {
-        console.warn("err: "+error);
-        msg = 'Unable to save form, an unknown error occurred.';
-      }
-    }
-
-    if (msg === null) {
-      refer.setState({SelectModeScreen: false})
-      refer._loadForms();
-      this.props.navigation.goBack();
-    } else {
-      //Alert.alert('Error', msg, [{text: 'OK'}], { cancelable: false });
-      console.warn("Error");
-    }
-
-    this.setState({saving: false});
   }
 
   doShowCustom() {
@@ -260,6 +173,9 @@ export default class App extends Component {
     this.forceUpdate();
   }
 
+  onChange(value) {
+    if (value.type == 'List') value = t.String; // do something...
+  }
 
   onChangeForm(addFormForm) {
     this.setState({addFormForm})
@@ -274,12 +190,58 @@ export default class App extends Component {
   }
 
   _createForm = async () => {
+    const { fields, order, edit, form } = this.state;
+
     let json = this.addFormForm.getValue();
     if (json === null) return;
+    let TformName = json.name;
 
     this.setState({saving: true});
 
+    this.setState({saving: true});
+    let msg = null;
+
+    json = this.customForm.getValue();
+    json.name = TformName;
+
+    // get rid of ending whitespace
+    let formName = json.name.trim();
+
+    // disallow anything other than alphanumeric and a few other chars
+    if (!formName.match(/^[a-zA-Z0-9\-_ ]+$/)) msg = 'From name can only contain alphanumeric characters, and spaces and dashes.';
+
+    // max length
+    if (formName.length > 255) msg = 'Form name cannot be longer than 255 characters.';
+
+    // make sure this name doesn't exist
     try {
+
+      let epoch = Math.floor(new Date().getTime());
+      let id = uuid();
+
+      let obj;
+
+      obj = {
+        id: id,
+        created: epoch,
+        updated: epoch,
+        name: formName,
+        geofence: this.state.geofence,
+        geofencename: this.state.geofencename,
+        author: 'You',
+        author_id: 'You',
+        version: 1,
+        questions: fields,
+        questions_order: order,
+      };
+
+      try {
+        // fetch POST save form
+      } catch (e) {
+        console.warn(""+e);
+        msg = "Unable to save form data.";
+      }
+
       fetch('https://'+this.props.server+'/canvass/v1/form/create', {
         method: 'POST',
         headers: {
@@ -301,7 +263,7 @@ export default class App extends Component {
   }
 
   render() {
-    let { name, form, customForm, fields, order, saving } = this.state;
+    let { name, form, fields, order, saving } = this.state;
 
     return (
       <Router>
@@ -327,7 +289,7 @@ export default class App extends Component {
               {Object.keys(fields).map((f) => {
                 let field = fields[f];
                 return (
-                  <li style={{marginLeft: 25}}>{field.label+(field.required?' *':'')} : {this.inputTypeToReadable(field.type)} <Icon icon={faTimesCircle} color="red" /></li>
+                  <li key={f} style={{marginLeft: 25}}>{field.label+(field.required?' *':'')} : {this.inputTypeToReadable(field.type)} <Icon icon={faTimesCircle} color="red" /></li>
                 );
               })}
 
@@ -336,13 +298,22 @@ export default class App extends Component {
               </button>
 
               <Modal
-                isOpen={this.state.modalIsOpen}
+                isOpen={(this.state.customForm !== null)}
                 onAfterOpen={this.afterOpenModal}
                 onRequestClose={this.closeModal}
                 style={customStyles}
-                contentLabel="Example Modal"
+                contentLabel="Add item to form"
               >
-                Add item form goes here
+              <t.form.Form
+                ref={(ref) => this.customForm = ref}
+                type={this.customFormItems}
+                options={options}
+                onChange={this.onChange}
+                value={this.state.customForm}
+              />
+                <button onClick={this.doAddCustom}>Add this item</button>
+                &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                <button onClick={() => this.setState({customForm: null})}>Dismiss</button>
               </Modal>
             </div>
           )} />
