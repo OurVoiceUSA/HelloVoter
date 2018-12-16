@@ -5,14 +5,14 @@ import {PieChart, Pie, Cell, Legend, Label, LabelList} from 'recharts';
 const data01 = [
   { name: 'Republican', value: 400, v: 89, color: 'red' },
   { name: 'Democratic', value: 300, v: 100 },
-  { name: 'UDP', value: 200, v: 200 },
+  { name: 'UUP', value: 200, v: 200 },
   { name: 'Unaffiliated', value: 200, v: 20 },
 ];
 
 const data02 = [
   { name: 'Republican', value: 2400 },
   { name: 'Democratic', value: 4567 },
-  { name: 'UDP', value: 1398 },
+  { name: 'UUP', value: 1398 },
   { name: 'Unaffiliated', value: 9800 },
 ];
 
