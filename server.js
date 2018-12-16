@@ -539,8 +539,14 @@ async function formGet(req, res) {
     form = a.data[0][0];
     form.author_id = a.data[0][1].id;
     form.author = a.data[0][1].name;
+    form.questions = {};
     let b = await cqa('match (a:Question)-[:ASSIGNED]-(b:Form {id:{id}}) return a', req.query);
-    form.questions = b.data;
+    // convert from an array of objects to an objects of objects
+    b.data.forEach((q) => {
+      let key = q.key;
+      form.questions[key] = q;
+      delete form.questions[key].key;
+    });
   } catch (e) {
     console.warn(e);
     return _500(res, "Internal server error.");
