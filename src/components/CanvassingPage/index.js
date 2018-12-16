@@ -182,7 +182,7 @@ export default class App extends OVComponent {
     }
 
     if (myPosition.latitude !== null && myPosition.longitude !== null) {
-      if (!ingeojson(this.state.geofence)) {
+      if (this.state.geofence && !ingeojson(this.state.geofence)) {
         Alert.alert('Outside District', 'You are outside the district boundary for this canvassing form. You need to be within the boundaries of '+this.state.geofencename+'.', [{text: 'OK'}], { cancelable: false });
         return;
       }
