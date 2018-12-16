@@ -555,10 +555,31 @@ function formList(req, res) {
     return cqdo(req, res, 'match (a:Canvasser {id:{id}})-[:ASSIGNED]-(b:Team)-[:ASSIGNED]-(c:Form) return c UNION match (a:Canvasser {id:{id}})-[:ASSIGNED]-(c:Form) return c', req.user)
 }
 
-function formCreate(req, res) {
+async function formCreate(req, res) {
+  if (!valid(req.body.name) || !valid(req.body.questions) || !valid(req.body.questions_order) ||
+    typeof req.body.questions !== "object" || typeof req.body.questions_order !== "object")
+    return _400(res, "Invalid value to parameter 'name' or 'questions' or 'questions_order'.");
+
   req.body.id = uuidv4();
   req.body.author_id = req.user.id;
-  return cqdo(req, res, 'match (a:Canvasser {id:{author_id}}) create (b:Form {created: timestamp(), id:{id}, name:{name}, version:1})-[:AUTHOR]->(a) return b', req.body, true);
+
+  try {
+    await cqa('match (a:Canvasser {id:{author_id}}) create (b:Form {created: timestamp(), updated: timestamp(), id:{id}, name:{name}, questions_order:{questions_order}, version:1})-[:AUTHOR]->(a)', req.body);
+
+    // question is an object of objects, whos schema is; key: {label: , optional: , type: }
+    Object.keys(req.body.questions).forEach(async (key) => {
+      let q = req.body.questions[key];
+      q.key = key;
+      q.author_id = req.user.id;
+      q.fId = req.body.id;
+      await cqa('match (a:Canvasser {id:{author_id}}) match (b:Form {id:{fId}}) create (b)<-[:ASSIGNED]-(c:Question {key:{key}, label:{label}, optional:{optional}, type:{type}})-[:AUTHOR]->(a)', q);
+    });
+  } catch (e) {
+    console.warn(e);
+    return _500(res, "Unable to create form.");
+  }
+
+  return res.json({id: req.body.id});
 }
 
 function formDelete(req, res) {
