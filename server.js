@@ -535,6 +535,7 @@ async function formGet(req, res) {
   let form = {};
 
   try {
+    let a = await cqa('match (a:Form {id:{id}})-[:AUTHOR]-(b:Canvasser) return a,b', req.query);
     form = a.data[0][0];
     form.author_id = a.data[0][1].id;
     form.author = a.data[0][1].name;
