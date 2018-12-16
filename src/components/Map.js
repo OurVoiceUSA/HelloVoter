@@ -29,6 +29,8 @@ export class App extends Component {
     let turfs = await _loadTurf(this);
     let data = (await _loadAddresses(this)).nodes;
 
+    if (!data) data = {};
+
     // only care about address objects
     Object.keys(data).forEach((d) => {
       if (data[d] && data[d].type === "address") {

@@ -61,6 +61,17 @@ class App extends Component {
 
   }
 
+  componentDidMount = async () => {
+    let res = await fetch('https://'+this.state.server+'/canvass/v1/google_maps_key', {
+      headers: {
+        'Authorization': 'Bearer '+(this.state.jwt?this.state.jwt:"of the one ring"),
+        'Content-Type': 'application/json',
+      },
+    });
+    let data = await res.json();
+    this.setState({google_maps_key: data.google_maps_key});
+  }
+
   onChange(connectForm) {
     this.setState({connectForm})
   }
@@ -201,7 +212,7 @@ class App extends Component {
           <Route path="/teams/" render={() => <Teams server={server} jwt={jwt} />} />
           <Route path="/turf/" render={() => <Turf server={server} jwt={jwt} />} />
           <Route path="/forms/" render={() => <Forms server={server} jwt={jwt} />} />
-          <Route path="/map/" render={() => <Map server={server} jwt={jwt} apiKey="" />} />
+          <Route path="/map/" render={() => <Map server={server} jwt={jwt} apiKey={this.state.google_maps_key} />} />
           <Route path="/import/" render={() => <ImportData server={server} jwt={jwt} />} />
           <Route path="/analytics/" render={() => <Analytics server={server} jwt={jwt} />} />
           <Route path="/settings/" render={() => <Settings server={server} jwt={jwt} />} />
