@@ -3,11 +3,10 @@ import React, { Component } from 'react';
 import { HashRouter as Router, Route, Link } from 'react-router-dom';
 import Modal from 'react-modal';
 import t from 'tcomb-form';
-import uuid from 'uuid';
 
 import { faTimesCircle, faPlusCircle } from '@fortawesome/free-solid-svg-icons';
 
-import { RootLoader, CardForm, Icon, _loadForms } from '../common.js';
+import { RootLoader, CardForm, Icon, Loader, _loadForms } from '../common.js';
 
 Modal.setAppElement(document.getElementById('root'));
 
@@ -111,7 +110,6 @@ export default class App extends Component {
     this.doAddCustom = this.doAddCustom.bind(this);
   }
 
-
   openModal() {
     this.setState({customForm: t.struct(addItem)})
   }
@@ -157,8 +155,8 @@ export default class App extends Component {
       case 'Boolean': return 'On/Off Switch';
       case 'SAND': return 'Agree/Disagree';
       case 'List': return 'Select from List';
+      default: return type;
     }
-    return type;
   }
 
   rmField(obj) {
@@ -174,7 +172,7 @@ export default class App extends Component {
   }
 
   onChange(value) {
-    if (value.type == 'List') value = t.String; // do something...
+    if (value.type === 'List') value = t.String; // do something...
   }
 
   onChangeForm(addFormForm) {
@@ -190,67 +188,44 @@ export default class App extends Component {
   }
 
   _createForm = async () => {
-    const { fields, order, edit, form } = this.state;
-
     let json = this.addFormForm.getValue();
     if (json === null) return;
-    let TformName = json.name;
 
     this.setState({saving: true});
-
-    this.setState({saving: true});
-    let msg = null;
-
-    json = this.customForm.getValue();
-    json.name = TformName;
 
     // get rid of ending whitespace
     let formName = json.name.trim();
 
     // disallow anything other than alphanumeric and a few other chars
-    if (!formName.match(/^[a-zA-Z0-9\-_ ]+$/)) msg = 'From name can only contain alphanumeric characters, and spaces and dashes.';
+    if (!formName.match(/^[a-zA-Z0-9\-_ ]+$/)) {
+      console.warn('From name can only contain alphanumeric characters, and spaces and dashes.');
+      return;
+    }
 
     // max length
-    if (formName.length > 255) msg = 'Form name cannot be longer than 255 characters.';
+    if (formName.length > 255) {
+      console.warn('Form name cannot be longer than 255 characters.');
+      return;
+    }
 
     // make sure this name doesn't exist
     try {
 
-      let epoch = Math.floor(new Date().getTime());
-      let id = uuid();
-
       let obj;
 
       obj = {
-        id: id,
-        created: epoch,
-        updated: epoch,
         name: formName,
-        geofence: this.state.geofence,
-        geofencename: this.state.geofencename,
-        author: 'You',
-        author_id: 'You',
-        version: 1,
-        questions: fields,
-        questions_order: order,
+        questions: this.state.fields,
+        questions_order: this.state.order,
       };
 
-      try {
-        // fetch POST save form
-      } catch (e) {
-        console.warn(""+e);
-        msg = "Unable to save form data.";
-      }
-
-      fetch('https://'+this.props.server+'/canvass/v1/form/create', {
+      await fetch('https://'+this.props.server+'/canvass/v1/form/create', {
         method: 'POST',
         headers: {
           'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          name: json.name,
-        }),
+        body: JSON.stringify(obj),
       });
     } catch (e) {
       console.warn(e);
@@ -263,8 +238,6 @@ export default class App extends Component {
   }
 
   render() {
-    let { name, form, fields, order, saving } = this.state;
-
     return (
       <Router>
         <div>
@@ -286,16 +259,20 @@ export default class App extends Component {
 
               <div style={{margin: 25}}>Items in your Canvassing form: <button onClick={this.openModal}><Icon icon={faPlusCircle} /> Add Item</button></div>
 
-              {Object.keys(fields).map((f) => {
-                let field = fields[f];
+              {Object.keys(this.state.fields).map((f) => {
+                let field = this.state.fields[f];
                 return (
                   <li key={f} style={{marginLeft: 25}}>{field.label+(field.required?' *':'')} : {this.inputTypeToReadable(field.type)} <Icon icon={faTimesCircle} color="red" /></li>
                 );
               })}
 
+              {this.state.saving?
+              <Loader />
+              :
               <button style={{margin: 25}} onClick={() => this._createForm()}>
                 Create Form
               </button>
+              }
 
               <Modal
                 isOpen={(this.state.customForm !== null)}
