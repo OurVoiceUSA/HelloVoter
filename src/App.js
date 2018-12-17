@@ -61,7 +61,11 @@ class App extends Component {
 
   }
 
-  componentDidMount = async () => {
+  componentDidMount() {
+    this._loadKeys();
+  }
+
+  _loadKeys = async () => {
     let res = await fetch('https://'+this.state.server+'/canvass/v1/google_maps_key', {
       headers: {
         'Authorization': 'Bearer '+(this.state.jwt?this.state.jwt:"of the one ring"),
@@ -69,6 +73,13 @@ class App extends Component {
       },
     });
     let data = await res.json();
+
+    // load google places API
+    var aScript = document.createElement('script');
+    aScript.type = 'text/javascript';
+    aScript.src = "https://maps.googleapis.com/maps/api/js?key="+data.google_maps_key+"&libraries=places";
+    document.head.appendChild(aScript);
+
     this.setState({google_maps_key: data.google_maps_key});
   }
 

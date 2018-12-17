@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 
 import { HashRouter as Router, Route, Link } from 'react-router-dom';
+import PlacesAutocomplete, {geocodeByAddress, getLatLng} from 'react-places-autocomplete';
+import circleToPolygon from 'circle-to-polygon';
 import t from 'tcomb-form';
 import Select from 'react-select';
 
@@ -22,6 +24,8 @@ export default class App extends Component {
       turf: [],
       thisTurf: {},
       importFileData: null,
+      address: "",
+      addressCoords: null,
     };
 
     this.formServerItems = t.struct({
@@ -37,6 +41,17 @@ export default class App extends Component {
       },
     };
 
+    this.onTypeAddress = (address) => this.setState({ address })
+  }
+
+  submitAddress = async (address) => {
+    try {
+      let res = await geocodeByAddress(address);
+      let pos = await getLatLng(res[0]);
+      this.setState({addressCoords: pos});
+    } catch (e) {
+      console.warn(e);
+    }
   }
 
   onChangeTurf(addTurfForm) {
@@ -80,9 +95,11 @@ export default class App extends Component {
   }
 
   _showSubmitButton() {
-    if (this.state.selectedTypeOption && !this._showDistrictOption()) return true;
+    if (!this.state.selectedDrawOption) return false;
+    if (!this._showDistrictOption()) return true;
     if (this._showDistrictOption() && this.state.selectedDistrictOption) return true;
     if (this.state.importFileData !== null) return true;
+    if (this.state.addressCoords !== null) return true;
     return false;
   }
 
@@ -117,6 +134,8 @@ export default class App extends Component {
         console.warn(e);
         return;
       }
+    } else if (this.state.selectedDrawOption.value === "radius") {
+      obj = circleToPolygon([this.state.addressCoords.lng,this.state.addressCoords.lat],1000);
     } else {
       let uri;
       let state = this.state.selectedStateOption.value;
@@ -361,8 +380,34 @@ const TurfOptions = (props) => {
         </div>
       );
     case "radius":
+      return (
+        <div><br />
+          Type your address:
+          <PlacesAutocomplete
+            debounce={500}
+            value={props.refer.state.address}
+            onChange={props.refer.onTypeAddress}
+            onSelect={props.refer.submitAddress}>
+            {addressSearch}
+            </PlacesAutocomplete>
+        </div>
+      );
     case "draw":
     default:
       return (<div>This method is not yet implemented.</div>);
   }
 }
+
+const addressSearch = ({ getInputProps, getSuggestionItemProps, suggestions, loading }) => (
+  <div className="autocomplete-root">
+    <input {...getInputProps()} />
+    <div className="autocomplete-dropdown-container">
+      {loading && <div>Loading...</div>}
+      {suggestions.map(suggestion => (
+        <div {...getSuggestionItemProps(suggestion)}>
+          <span>{suggestion.description}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+);
