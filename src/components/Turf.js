@@ -96,7 +96,7 @@ export default class App extends Component {
 
   _showSubmitButton() {
     if (!this.state.selectedDrawOption) return false;
-    if (!this._showDistrictOption()) return true;
+    if (this.state.selectedTypeOption && this.state.selectedTypeOption.value === "state") return true;
     if (this._showDistrictOption() && this.state.selectedDistrictOption) return true;
     if (this.state.importFileData !== null) return true;
     if (this.state.addressCoords !== null) return true;
