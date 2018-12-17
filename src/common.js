@@ -1,9 +1,13 @@
-import React from 'react';
-import LoaderSpinner from 'react-loader-spinner';
+import React, { Component } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSync, faUser, faCrown, faStreetView, faClipboard, faExclamationTriangle, faCheckCircle, faBan } from '@fortawesome/free-solid-svg-icons';
+import {
+  faSync, faUser, faUsers, faCrown, faStreetView, faClipboard,
+  faExclamationTriangle, faCheckCircle, faBan
+} from '@fortawesome/free-solid-svg-icons';
 
+import LoaderSpinner from 'react-loader-spinner';
+import Select from 'react-select';
 import Img from 'react-image';
 import { Link } from 'react-router-dom';
 
@@ -115,26 +119,132 @@ export const RootLoader = (props) => {
   );
 }
 
-export const CardCanvasser = (props) => {
-  const timeAgo = new TimeAgo('en-US');
-  return (
-    <div style={{display: 'flex', padding: '10px'}}>
-      <div style={{padding: '5px 10px'}}>
-        <Img width={50} src={props.canvasser.avatar} loader={<Loader width={50} />} unloader={<Icon style={{width: 50, height: 50, color: "gray"}} icon={faUser} />} />
-      </div>
-      <div style={{flex: 1, overflow: 'auto'}}>
-        Name: {props.canvasser.name} {(props.edit?'':(<Link to={'/canvassers/'+props.canvasser.id} onClick={() => props.refer.setState({thisCanvasser: props.canvasser})}>view profile</Link>))}
-        <CanvasserBadges canvasser={props.canvasser} />
-        <br />
-        Location: {(props.canvasser.location?props.canvasser.location:'N/A')} <br />
-        Last Login: {timeAgo.format(new Date(props.canvasser.last_seen-30000))}
-      </div>
-      <br />
-      {props.edit && props.canvasser.locked?(<button onClick={() => props.refer._lockCanvasser(props.canvasser, false)}>Restore Access</button>):''}
-      {props.edit && !props.canvasser.locked?(<button onClick={() => props.refer._lockCanvasser(props.canvasser, true)}>Deny Access</button>):''}
-    </div>
-  );
+export class CardCanvasser extends Component {
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      server: this.props.refer.props.server,
+      jwt: this.props.refer.props.jwt,
+      canvasser: this.props.canvasser,
+      selectedTeamsOption: null,
+    };
+  }
+
+  componentDidMount() {
+    if (!this.state.canvasser) this._loadData();
+  }
+
+  handleTeamsChange = (selectedTeamsOption) => {
+    this.setState({ selectedTeamsOption });
+  }
+
+  _loadData = async () => {
+    let canvasser = {};
+
+    this.setState({loading: true})
+
+    try {
+      let res = await fetch('https://'+this.state.server+'/canvass/v1/canvasser/get?id='+this.props.id, {
+        headers: {
+          'Authorization': 'Bearer '+(this.state.jwt?this.state.jwt:"of the one ring"),
+          'Content-Type': 'application/json',
+        },
+      });
+      canvasser = await res.json();
+    } catch (e) {
+      console.warn(e);
+    }
+
+    let teams = await _loadTeams(this.props.refer);
+
+    let teamOptions = [];
+
+    teams.forEach((t) => {
+      teamOptions.push({value: t.name, label: (
+        <div key={t.name}>
+          <Icon style={{width: 35, height: 35, color: "gray"}} icon={faUsers} /> {t.name}
+        </div>
+      )})
+    });
+
+    this.setState({canvasser, teamOptions, loading: false});
+  }
+
+  _lockCanvasser = async (canvasser, flag) => {
+
+    try {
+      await fetch('https://'+this.state.server+'/canvass/v1/canvasser/'+(flag?'lock':'unlock'), {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer '+(this.state.jwt?this.state.jwt:"of the one ring"),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({id: canvasser.id}),
+      });
+    } catch (e) {
+      console.warn(e);
+    }
+
+    this._loadData();
 }
+
+  render() {
+    const { canvasser } = this.state;
+
+    if (!canvasser || this.state.loading) {
+      return (<Loader />);
+    }
+
+    const timeAgo = new TimeAgo('en-US');
+    return (
+      <div>
+        <div style={{display: 'flex', padding: '10px'}}>
+          <div style={{padding: '5px 10px'}}>
+            <Img width={50} src={this.state.canvasser.avatar} loader={<Loader width={50} />} unloader={<Icon style={{width: 50, height: 50, color: "gray"}} icon={faUser} />} />
+          </div>
+          <div style={{flex: 1, overflow: 'auto'}}>
+            Name: {canvasser.name} {(this.props.edit?'':(<Link to={'/canvassers/'+canvasser.id} onClick={() => this.props.refer.setState({thisCanvasser: this.props.canvasser})}>view profile</Link>))}
+            <CanvasserBadges canvasser={canvasser} />
+            <br />
+            Location: {(canvasser.location?canvasser.location:'N/A')} <br />
+            Last Login: {timeAgo.format(new Date(canvasser.last_seen-30000))}
+          </div>
+        </div>
+        {this.props.edit?<CardCanvasserFull canvasser={canvasser} refer={this} />:''}
+      </div>
+    );
+  }
+}
+
+export const CardCanvasserFull = (props) => (
+  <div>
+    <br />
+    {props.canvasser.locked?
+      (<button onClick={() => props.refer._lockCanvasser(props.canvasser, false)}>Restore Access</button>)
+    :
+      (<button onClick={() => props.refer._lockCanvasser(props.canvasser, true)}>Deny Access</button>)
+    }
+    <br />
+    Email: {(props.canvasser.email?props.canvasser.email:'N/A')}
+    <br />
+    Phone: {(props.canvasser.phone?props.canvasser.phone:'N/A')}
+    <br />
+    # of doors knocked: 0
+    <br />
+    <br />
+    Teams this canvasser is apart of:
+    <Select
+      value={props.refer.state.selectedTeamsOption}
+      onChange={props.refer.handleTeamsChange}
+      options={props.refer.state.teamOptions}
+      isMulti={true}
+      isSearchable={true}
+      placeholder="Select teams to add this canvasser to"
+    />
+  </div>
+)
 
 export const CanvasserBadges = (props) => {
   let badges = [];
@@ -217,6 +327,24 @@ export const CardForm = (props) => (
   <hr />
   </div>
 )
+
+export async function _loadTeams(refer) {
+  let teams = [];
+
+  try {
+    let res = await fetch('https://'+refer.props.server+'/canvass/v1/team/list', {
+      headers: {
+        'Authorization': 'Bearer '+(refer.props.jwt?refer.props.jwt:"of the one ring"),
+        'Content-Type': 'application/json',
+      },
+    });
+    teams = await res.json();
+  } catch (e) {
+    console.warn(e);
+  }
+
+  return teams.data;
+}
 
 export async function _loadForms(refer, teamName) {
   let forms = [];

@@ -12,59 +12,15 @@ export default class App extends Component {
     this.state = {
       loading: true,
       canvassers: [],
-      thisCanvasser: {},
     };
-
   }
 
-  componentDidMount = async () => {
-    this._loadCanvassers();
+  componentDidMount() {
+    this._loadData();
   }
 
-  _loadCanvassers = async () => {
-    this.setState({canvassers: await _loadCanvassers(this)});
-  }
-
-  _lockCanvasser = async (canvasser, flag) => {
-
-    try {
-      await fetch('https://'+this.props.server+'/canvass/v1/canvasser/'+(flag?'lock':'unlock'), {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({id: canvasser.id}),
-      });
-    } catch (e) {
-      console.warn(e);
-    }
-
-    this._loadCanvassers();
-    window.location.href = "/HelloVoter/#/canvassers/";
-  }
-
-  _loadSingle = async () => {
-    let c = {};
-
-    this.setState({loading: true})
-
-    try {
-      let id = this.props.location.pathname.split('/').pop();
-
-      let res = await fetch('https://'+this.props.server+'/canvass/v1/canvasser/get?id='+id, {
-        headers: {
-          'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
-          'Content-Type': 'application/json',
-        },
-      });
-      let data = await res.json();
-      c = (data.data?data.data:{});
-    } catch (e) {
-      console.warn(e);
-    }
-
-    this.setState({loading: false, thisCanvasser: c});
+  _loadData = async () => {
+    this.setState({canvassers: await _loadCanvassers(this),});
   }
 
   render() {
@@ -88,7 +44,7 @@ export default class App extends Component {
       <Router>
         <div>
           <Route exact={true} path="/canvassers/" render={() => (
-            <RootLoader flag={this.state.loading} func={() => this._loadCanvassers()}>
+            <RootLoader flag={this.state.loading} func={() => this._loadData()}>
               {unassigned.length?
               <div>
                 <h3>Unassigned Canvassers ({unassigned.length})</h3>
@@ -106,15 +62,7 @@ export default class App extends Component {
             </RootLoader>
           )} />
           <Route path="/canvassers/:id" render={(props) => (
-            <RootLoader flag={this.state.loading} func={this._loadSingle}>
-              <CardCanvasser key={this.state.thisCanvasser.id} canvasser={this.state.thisCanvasser} edit={true} refer={this} />
-              <br />
-              Email: {(this.state.thisCanvasser.email?this.state.thisCanvasser.email:'N/A')}
-              <br />
-              Phone: {(this.state.thisCanvasser.phone?this.state.thisCanvasser.phone:'N/A')}
-              <br />
-              # of doors knocked: 0
-            </RootLoader>
+            <CardCanvasser key={props.match.params.id} id={props.match.params.id} edit={true} refer={this} />
           )} />
         </div>
       </Router>

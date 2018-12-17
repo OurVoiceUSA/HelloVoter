@@ -6,7 +6,7 @@ import Select from 'react-select';
 
 import { faUsers } from '@fortawesome/free-solid-svg-icons';
 
-import { RootLoader, Loader, Icon, CardCanvasser, _loadCanvassers, CardTurf, _loadTurf, CardForm, _loadForms } from '../common.js';
+import { RootLoader, Loader, Icon, CardCanvasser, _loadCanvassers, CardTurf, _loadTurf, CardForm, _loadForms, _loadTeams } from '../common.js';
 
 export default class App extends Component {
 
@@ -147,7 +147,7 @@ export default class App extends Component {
       console.warn(e);
     }
     window.location.href = "/HelloVoter/#/teams/";
-    this._loadTeams();
+    this._loadData();
   }
 
   _createTeam = async () => {
@@ -163,31 +163,19 @@ export default class App extends Component {
       body: JSON.stringify({name: json.name}),
     });
     window.location.href = "/HelloVoter/#/teams/";
-    this._loadTeams();
+    this._loadData();
   }
 
   componentDidMount() {
-    this._loadTeams();
+    this._loadData();
   }
 
-  _loadTeams = async () => {
-    let teams = {};
-
+  _loadData = async () => {
     this.setState({loading: true})
 
-    try {
-      let res = await fetch('https://'+this.props.server+'/canvass/v1/team/list', {
-        headers: {
-          'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
-          'Content-Type': 'application/json',
-        },
-      });
-      teams = await res.json();
-    } catch (e) {
-      console.warn(e);
-    }
+    let teams = await _loadTeams(this);
 
-    this.setState({teams: teams.data});
+    this.setState({teams: teams});
 
     // also load canvassers & turf & forms
     let canvassers = await _loadCanvassers(this);
@@ -219,7 +207,7 @@ export default class App extends Component {
       <Router>
         <div>
           <Route exact={true} path="/teams/" render={() => (
-            <RootLoader flag={this.state.loading} func={this._loadTeams}>
+            <RootLoader flag={this.state.loading} func={this._loadData}>
               {(this.state.loading?'loading':this.state.teams.map(t => <Team key={t.name} team={t} refer={this} />))}
               <Link to={'/teams/add'}><button>Add Team</button></Link>
             </RootLoader>
@@ -300,7 +288,8 @@ const Team = (props) => {
             let canvassers = await _loadCanvassers(props.refer, props.team.name);
 
             canvassers.forEach((c) => {
-              memberOptions.push({value: c.name+c.email+c.location, id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={props.refer} />)})
+              if (!c.locked)
+                memberOptions.push({value: c.name+c.email+c.location+(c.admin?"admin":""), id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={props.refer} />)})
             });
           } catch (e) {
             console.warn(e);
