@@ -211,6 +211,7 @@ export default class App extends Component {
 
     let drawOptions = [
       {value: 'select', label: 'Select from legislative boundary'},
+      {value: 'import', label: 'Import KML or GeoJSON shape file'},
       {value: 'radius', label: 'Area surrounding an address'},
       {value: 'draw', label: 'Manually draw with your mouse'},
     ];
