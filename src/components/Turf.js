@@ -59,7 +59,16 @@ export default class App extends Component {
   }
 
   handleDrawChange = (selectedDrawOption) => {
-    this.setState({ selectedDrawOption });
+    // reset other states
+    this.setState({
+      selectedDrawOption,
+      selectedStateOption: null,
+      selectedTypeOption: null,
+      selectedDistrictOption: null,
+      importFileData: null,
+      addressCoords: null,
+      address: "",
+     });
   }
 
   handleStateChange = (selectedStateOption) => {
