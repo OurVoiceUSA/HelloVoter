@@ -91,15 +91,15 @@ export default class App extends Component {
             <RootLoader flag={this.state.loading} func={() => this._loadCanvassers()}>
               {unassigned.length?
               <div>
-                <h3>Unassigned Canvassers</h3>
+                <h3>Unassigned Canvassers ({unassigned.length})</h3>
                 {unassigned}
               </div>
               :''}
-              <h3>Canvassers</h3>
+              <h3>Canvassers ({ready.length})</h3>
               {ready}
               {denied.length?
               <div>
-                <h3>Denied access</h3>
+                <h3>Denied access ({denied.length})</h3>
                 {denied}
               </div>
               :''}
