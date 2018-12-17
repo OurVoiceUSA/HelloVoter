@@ -21,6 +21,7 @@ export default class App extends Component {
       districtOptions: [],
       turf: [],
       thisTurf: {},
+      importFileData: null,
     };
 
     this.formServerItems = t.struct({
@@ -58,6 +59,14 @@ export default class App extends Component {
     this.setState({ selectedDistrictOption });
   }
 
+  handleImportFiles = (files: FileList) => {
+    let reader = new FileReader();
+    reader.onload = (event) => {
+      this.setState({importFileData: event.target.result});
+    };
+    reader.readAsText(files[0]);
+  }
+
   _showDistrictOption() {
     if (!this.state.selectedTypeOption) return false;
     switch (this.state.selectedTypeOption.value) {
@@ -73,6 +82,7 @@ export default class App extends Component {
   _showSubmitButton() {
     if (this.state.selectedTypeOption && !this._showDistrictOption()) return true;
     if (this._showDistrictOption() && this.state.selectedDistrictOption) return true;
+    if (this.state.importFileData !== null) return true;
     return false;
   }
 
@@ -98,38 +108,53 @@ export default class App extends Component {
     if (json === null) return;
 
     this.setState({saving: true});
+    let obj = {};
 
-    let uri;
-    let state = this.state.selectedStateOption.value;
+    if (this.state.importFileData !== null) {
+      try {
+        obj = JSON.parse(this.state.importFileData);
+      } catch (e) {
+        console.warn(e);
+        return;
+      }
+    } else {
+      let uri;
+      let state = this.state.selectedStateOption.value;
 
-    switch (this.state.selectedTypeOption.value) {
-      case 'state':
-        uri = 'states/'+state+'/shape.geojson';
-        break;
-      case 'cd':
-        // TODO: handle the fact there are new years with less in them
-        uri = 'cds/2016/'+this.state.selectedDistrictOption.value+'/shape.geojson';
-        break;
-      case 'sldu':
-        uri = 'states/'+state+'/sldu/'+this.state.selectedDistrictOption.value+'.geojson';
-        break;
-      case 'sldl':
-        uri = 'states/'+state+'/sldl/'+this.state.selectedDistrictOption.value+'.geojson';
-        break;
-      default:
-        throw new Error("unknown selectedTypeOption");
+      switch (this.state.selectedTypeOption.value) {
+        case 'state':
+          uri = 'states/'+state+'/shape.geojson';
+          break;
+        case 'cd':
+          // TODO: handle the fact there are new years with less in them
+          uri = 'cds/2016/'+this.state.selectedDistrictOption.value+'/shape.geojson';
+          break;
+        case 'sldu':
+          uri = 'states/'+state+'/sldu/'+this.state.selectedDistrictOption.value+'.geojson';
+          break;
+        case 'sldl':
+          uri = 'states/'+state+'/sldl/'+this.state.selectedDistrictOption.value+'.geojson';
+          break;
+        default:
+          throw new Error("unknown selectedTypeOption");
+      }
+
+      try {
+        let res = await fetch ('https://raw.githubusercontent.com/OurVoiceUSA/districts/gh-pages/'+uri)
+        obj = await res.json();
+      } catch (e) {
+        console.warn(e);
+        return;
+      }
     }
 
     try {
-
-      let res = await fetch ('https://raw.githubusercontent.com/OurVoiceUSA/districts/gh-pages/'+uri)
-      let obj = await res.json();
       let geometry;
 
       if (obj.geometry) geometry = obj.geometry;
       else geometry = obj;
 
-      res = await fetch('https://'+this.props.server+'/canvass/v1/turf/create', {
+      await fetch('https://'+this.props.server+'/canvass/v1/turf/create', {
         method: 'POST',
         headers: {
           'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
@@ -211,7 +236,7 @@ export default class App extends Component {
 
     let drawOptions = [
       {value: 'select', label: 'Select from legislative boundary'},
-      {value: 'import', label: 'Import KML or GeoJSON shape file'},
+      {value: 'import', label: 'Import GeoJSON shape file'},
       {value: 'radius', label: 'Area surrounding an address'},
       {value: 'draw', label: 'Manually draw with your mouse'},
     ];
@@ -330,6 +355,11 @@ const TurfOptions = (props) => {
         </div>
       );
     case "import":
+      return (
+        <div><br />
+          <input type="file" accept=".geojson" onChange={ (e) => props.refer.handleImportFiles(e.target.files) } />
+        </div>
+      );
     case "radius":
     case "draw":
     default:
