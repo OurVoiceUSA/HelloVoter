@@ -2,7 +2,7 @@ import React from 'react';
 import LoaderSpinner from 'react-loader-spinner';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSync, faUser, faCrown, faStreetView, faClipboard } from '@fortawesome/free-solid-svg-icons';
+import { faSync, faUser, faCrown, faStreetView, faClipboard, faExclamationTriangle, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
 
 import Img from 'react-image';
 import { Link } from 'react-router-dom';
@@ -123,7 +123,10 @@ export const CardCanvasser = (props) => {
         <Img width={50} src={props.canvasser.avatar} loader={<Loader width={50} />} unloader={<Icon style={{width: 50, height: 50, color: "gray"}} icon={faUser} />} />
       </div>
       <div style={{flex: 1, overflow: 'auto'}}>
-        Name: {props.canvasser.name} {(props.edit?'':(<Link to={'/canvassers/'+props.canvasser.id} onClick={() => props.refer.setState({thisCanvasser: props.canvasser})}>view profile</Link>))} {(props.canvasser.admin?<Icon icon={faCrown} color="gold" />:'')}<br />
+        Name: {props.canvasser.name} {(props.edit?'':(<Link to={'/canvassers/'+props.canvasser.id} onClick={() => props.refer.setState({thisCanvasser: props.canvasser})}>view profile</Link>))}
+        {(props.canvasser.admin?<Icon icon={faCrown} color="gold" />:'')}
+        {(props.canvasser.ass.ready?<Icon icon={faCheckCircle} color="green" />:<Icon icon={faExclamationTriangle} color="red" />)}
+        <br />
         Location: {(props.canvasser.location?props.canvasser.location:'N/A')} <br />
         Last Login: {timeAgo.format(new Date(props.canvasser.last_seen-30000))}
       </div>
@@ -149,8 +152,7 @@ export async function _loadCanvassers(refer, teamName) {
         'Content-Type': 'application/json',
       },
     });
-    let data = await res.json();
-    canvassers = (data.data?data.data:[]);
+    canvassers = await res.json();
   } catch (e) {
     console.warn(e);
   }
