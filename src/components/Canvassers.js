@@ -95,11 +95,11 @@ export default class App extends Component {
                 {unassigned}
               </div>
               :''}
-              <h3>Canvassers:</h3>
+              <h3>Canvassers</h3>
               {ready}
               {denied.length?
               <div>
-                <h3>Denied access:</h3>
+                <h3>Denied access</h3>
                 {denied}
               </div>
               :''}

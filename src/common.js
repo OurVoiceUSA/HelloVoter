@@ -2,7 +2,7 @@ import React from 'react';
 import LoaderSpinner from 'react-loader-spinner';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSync, faUser, faCrown, faStreetView, faClipboard, faExclamationTriangle, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
+import { faSync, faUser, faCrown, faStreetView, faClipboard, faExclamationTriangle, faCheckCircle, faBan } from '@fortawesome/free-solid-svg-icons';
 
 import Img from 'react-image';
 import { Link } from 'react-router-dom';
@@ -124,8 +124,7 @@ export const CardCanvasser = (props) => {
       </div>
       <div style={{flex: 1, overflow: 'auto'}}>
         Name: {props.canvasser.name} {(props.edit?'':(<Link to={'/canvassers/'+props.canvasser.id} onClick={() => props.refer.setState({thisCanvasser: props.canvasser})}>view profile</Link>))}
-        {(props.canvasser.admin?<Icon icon={faCrown} color="gold" />:'')}
-        {(props.canvasser.ass.ready?<Icon icon={faCheckCircle} color="green" />:<Icon icon={faExclamationTriangle} color="red" />)}
+        <CanvasserBadges canvasser={props.canvasser} />
         <br />
         Location: {(props.canvasser.location?props.canvasser.location:'N/A')} <br />
         Last Login: {timeAgo.format(new Date(props.canvasser.last_seen-30000))}
@@ -135,6 +134,20 @@ export const CardCanvasser = (props) => {
       {props.edit && !props.canvasser.locked?(<button onClick={() => props.refer._lockCanvasser(props.canvasser, true)}>Deny Access</button>):''}
     </div>
   );
+}
+
+export const CanvasserBadges = (props) => {
+  let badges = [];
+  let id = props.canvasser.id;
+
+  if (props.canvasser.admin) badges.push(<Icon icon={faCrown} color="gold" key={id+"admin"} />);
+  if (props.canvasser.locked) badges.push(<Icon icon={faBan} color="red" key={id+"locked"} />);
+  else {
+    if (props.canvasser.ass.ready) badges.push(<Icon icon={faCheckCircle} color="green" key={id+"ready"} />);
+    else badges.push(<Icon icon={faExclamationTriangle} color="red" key={id+"unassigned"} />);
+  }
+
+  return badges;
 }
 
 export async function _loadCanvassers(refer, teamName) {
