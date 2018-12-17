@@ -215,15 +215,6 @@ export default class App extends Component {
       {value: 'radius', label: 'Area surrounding an address'},
       {value: 'draw', label: 'Manually draw with your mouse'},
     ];
-    let stateOptions = [];
-    let typeOptions = [
-      {value: 'state', label: 'State'},
-      {value: 'cd', label: 'Congressional'},
-      {value: 'sldu', label: 'State Senate'},
-      {value: 'sldl', label: 'State House'},
-    ];
-
-    Object.keys(us_states).map((k) => stateOptions.push({value: k, label: us_states[k]}));
 
     return (
       <Router>
@@ -254,47 +245,7 @@ export default class App extends Component {
                 placeholder="Select method"
               />
 
-              {this.state.selectedDrawOption && this.state.selectedDrawOption.value === 'select'?
-              <div><br />
-                State or region:
-                <Select
-                  value={this.state.selectedStateOption}
-                  onChange={this.handleStateChange}
-                  options={stateOptions}
-                  isSearchable={true}
-                  placeholder="Select state or region"
-                />
-              </div>
-              :(this.state.selectedDrawOption?'This method is not currently available.':'')}
-
-              {this.state.selectedStateOption?
-              <div><br />
-                District Type:
-                <Select
-                  value={this.state.selectedTypeOption}
-                  onChange={this.handleTypeChange}
-                  onMenuClose={this.selectedTypeFetch}
-                  options={typeOptions}
-                  isSearchable={true}
-                  placeholder="Select district for this turf"
-                />
-              </div>
-              :''}
-
-              {this._showDistrictOption()?
-              <div><br />
-                District Number:
-                {this.state.districtOptions.length?
-                <Select
-                  value={this.state.selectedDistrictOption}
-                  onChange={this.handleDistrictChange}
-                  options={this.state.districtOptions}
-                  isSearchable={true}
-                  placeholder="Select district for this turf"
-                />
-                :<Loader />}
-              </div>
-              :''}
+              <TurfOptions refer={this} />
 
               {this._showSubmitButton()?
               <div><br />
@@ -318,5 +269,70 @@ export default class App extends Component {
         </div>
       </Router>
     );
+  }
+}
+
+const TurfOptions = (props) => {
+  if (!props.refer.state.selectedDrawOption) return (<br />);
+
+  let stateOptions = [];
+  Object.keys(us_states).map((k) => stateOptions.push({value: k, label: us_states[k]}));
+
+  let typeOptions = [
+    {value: 'state', label: 'State'},
+    {value: 'cd', label: 'Congressional'},
+    {value: 'sldu', label: 'State Senate'},
+    {value: 'sldl', label: 'State House'},
+  ];
+
+  switch (props.refer.state.selectedDrawOption.value) {
+    case "select":
+      return (
+        <div>
+          <div><br />
+            State or region:
+            <Select
+              value={props.refer.state.selectedStateOption}
+              onChange={props.refer.handleStateChange}
+              options={stateOptions}
+              isSearchable={true}
+              placeholder="Select state or region"
+            />
+          </div>
+          {props.refer.state.selectedStateOption?
+          <div><br />
+            District Type:
+            <Select
+              value={props.refer.state.selectedTypeOption}
+              onChange={props.refer.handleTypeChange}
+              onMenuClose={props.refer.selectedTypeFetch}
+              options={typeOptions}
+              isSearchable={true}
+              placeholder="Select district for this turf"
+            />
+          </div>
+          :''}
+
+          {props.refer._showDistrictOption()?
+          <div><br />
+            District Number:
+            {props.refer.state.districtOptions.length?
+            <Select
+              value={props.refer.state.selectedDistrictOption}
+              onChange={props.refer.handleDistrictChange}
+              options={props.refer.state.districtOptions}
+              isSearchable={true}
+              placeholder="Select district for this turf"
+            />
+            :<Loader />}
+          </div>
+          :''}
+        </div>
+      );
+    case "import":
+    case "radius":
+    case "draw":
+    default:
+      return (<div>This method is not yet implemented.</div>);
   }
 }
