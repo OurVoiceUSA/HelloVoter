@@ -45,6 +45,7 @@ export default class App extends Component {
   }
 
   submitAddress = async (address) => {
+    this.setState({address})
     try {
       let res = await geocodeByAddress(address);
       let pos = await getLatLng(res[0]);
