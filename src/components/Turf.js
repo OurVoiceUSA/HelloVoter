@@ -386,7 +386,7 @@ const TurfOptions = (props) => {
     case "import":
       return (
         <div><br />
-          <input type="file" accept=".geojson" onChange={ (e) => props.refer.handleImportFiles(e.target.files) } />
+          <input type="file" accept=".geojson,.json" onChange={ (e) => props.refer.handleImportFiles(e.target.files) } />
         </div>
       );
     case "radius":
@@ -403,8 +403,14 @@ const TurfOptions = (props) => {
         </div>
       );
     case "draw":
+      return (
+        <div><br />
+          Use a <a target="_blank" rel="noopener noreferrer" href="https://google-developers.appspot.com/maps/documentation/utils/geojson/">GeoJSON Draw Tool</a>,
+          save the file, and then select the "Import GeoJSON shape file" option.
+        </div>
+      );
     default:
-      return (<div>This method is not yet implemented.</div>);
+      return (<div>Unknown generation method.</div>);
   }
 }
 
