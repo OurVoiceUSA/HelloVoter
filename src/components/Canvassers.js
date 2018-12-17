@@ -69,14 +69,19 @@ export default class App extends Component {
 
   render() {
 
-    let active = [];
     let denied = [];
+    let ready = [];
+    let unassigned = [];
 
     this.state.canvassers.forEach(c => {
-      if (c.locked)
+      if (c.locked) {
         denied.push(<CardCanvasser key={c.id} canvasser={c} refer={this} />)
-      else
-        active.push(<CardCanvasser key={c.id} canvasser={c} refer={this} />)
+      } else {
+        if (c.ass.ready)
+          ready.push(<CardCanvasser key={c.id} canvasser={c} refer={this} />)
+        else
+          unassigned.push(<CardCanvasser key={c.id} canvasser={c} refer={this} />);
+      }
     });
 
     return (
@@ -84,8 +89,14 @@ export default class App extends Component {
         <div>
           <Route exact={true} path="/canvassers/" render={() => (
             <RootLoader flag={this.state.loading} func={() => this._loadCanvassers()}>
+              {unassigned.length?
+              <div>
+                <h3>Unassigned Canvassers</h3>
+                {unassigned}
+              </div>
+              :''}
               <h3>Canvassers:</h3>
-              {active}
+              {ready}
               {denied.length?
               <div>
                 <h3>Denied access:</h3>
