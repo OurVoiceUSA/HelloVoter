@@ -199,7 +199,8 @@ export default class App extends Component {
     let formOptions = [];
 
     canvassers.forEach((c) => {
-      memberOptions.push({value: c.name+c.email+c.location+(c.admin?"admin":""), id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={this} />)})
+      if (!c.locked)
+        memberOptions.push({value: c.name+c.email+c.location+(c.admin?"admin":""), id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={this} />)})
     });
 
     turf.forEach((t) => {
