@@ -130,8 +130,7 @@ async function cqdo(req, res, q, p, a) {
   try {
     ref = await cqa(q, p);
   } catch (e) {
-    console.warn(e);
-    return _500(res, "Internal server error.");
+    return _500(res, e);
   }
 
   return res.status(200).json({msg: "OK", data: ref.data});
@@ -167,20 +166,21 @@ function sendError(res, code, msg) {
   return res.status(code).json(obj);
 }
 
-function _400(res, obj) {
-  return sendError(res, 400, obj);
+function _400(res, msg) {
+  return sendError(res, 400, msg);
 }
 
-function _401(res, obj) {
-  return sendError(res, 401, obj);
+function _401(res, msg) {
+  return sendError(res, 401, msg);
 }
 
-function _403(res, obj) {
-  return sendError(res, 403, obj);
+function _403(res, msg) {
+  return sendError(res, 403, msg);
 }
 
 function _500(res, obj) {
-  return sendError(res, 500, obj);
+  console.warn(obj);
+  return sendError(res, 500, "Internal server error.");
 }
 
 async function sameTeam(ida, idb) {
@@ -274,8 +274,7 @@ async function hello(req, res) {
     if (lat && lng) 
       await cqa('match (a:Canvasser {id:{id}}) set a.longitude={lng}, a.latitude={lat}', {id: req.user.id, lng: lng, lat: lat});
   } catch (e) {
-    console.warn(e);
-    return _500(res, "Internal server error.");
+    return _500(res, e);
   }
 
   if (ass.ready)
@@ -310,17 +309,50 @@ async function google_maps_key(req, res) {
 
 // canvassers
 
+// get the canvassers from the given query, and populate relationships
+
+async function _canvassersFromCypher(query, args) {
+  let canvassers = [];
+
+  let ref = await cqa(query, args)
+  for (let i in ref.data) {
+    let c = ref.data[i];
+    c.ass = await canvassAssignments(c.id);
+    canvassers.push(c);
+  }
+
+  return canvassers;
+}
+
 async function canvasserList(req, res) {
-  if (req.user.admin)
-    return cqdo(req, res, 'match (a:Canvasser) return a');
-  else 
-    return cqdo(req, res, 'match (a:Canvasser {id:{id}})-[:MEMBERS]-(b:Team) optional match (b)-[:MEMBERS]-(c:Canvasser) return distinct(c)', req.user);
+  let canvassers = [];
+
+  try {
+    let ref;
+
+    if (req.user.admin)
+      canvassers = await _canvassersFromCypher('match (a:Canvasser) return a');
+    else
+      canvassers = await _canvassersFromCypher('match (a:Canvasser {id:{id}})-[:MEMBERS]-(b:Team) optional match (b)-[:MEMBERS]-(c:Canvasser) return distinct(c)', req.user);
+  } catch (e) {
+    return _500(res, e);
+  }
+
+  return res.json(canvassers);
 }
 
 async function canvasserGet(req, res) {
   if (!req.user.admin && req.query.id !== req.user.id && !await sameTeam(req.query.id, req.user.id)) return _403(res, "Permission denied.");
 
-  return cqdo(req, res, 'match (a:Canvasser {id:{id}}) return a', req.query);
+  let canvassers = [];
+
+  try {
+    canvassers = await _canvassersFromCypher('match (a:Canvasser {id:{id}}) return a', req.query);
+  } catch (e) {
+    return _500(res, e);
+  }
+
+  return res.json(canvassers[0]);
 }
 
 function canvasserUpdate(req, res) {
@@ -331,10 +363,6 @@ function canvasserUpdate(req, res) {
   return cqdo(req, res, 'match (a:Canvasser {id:{id}}) set a.display_name={name}, a.display_avatar={avatar}', req.body);
 }
 
-async function canvasserUnassigned(req, res) {
-  return cqdo(req, res, 'match (a:Canvasser) where a.locked is null and not (a)-[:MEMBERS]-(:Team) and not (a)-[:ASSIGNED]-(:Turf) return a', {}, true);
-}
-
 async function canvasserLock(req, res) {
   if (req.body.id === req.user.id) return _403(res, "You can't lock yourself.");
 
@@ -343,8 +371,7 @@ async function canvasserLock(req, res) {
     if (ref.data[0] && ref.data[0].admin === true)
       return _403(res, "Permission denied.");
   } catch(e) {
-    console.warn(e);
-    return _500(res, "Internal server error.");
+    return _500(res, e);
   }
 
   return cqdo(req, res, 'match (a:Canvasser {id:{id}}) set a.locked=true', req.body, true);
@@ -374,14 +401,23 @@ function teamDelete(req, res) {
   return cqdo(req, res, 'match (a:Team {name:{name}}) detach delete a', req.body, true);
 }
 
-function teamMembersList(req, res) {
+async function teamMembersList(req, res) {
   if (!valid(req.query.teamName)) return _400(res, "Invalid value to parameter 'teamName'.");
-  if (req.user.admin)
-    return cqdo(req, res, 'match (a:Canvasser)-[:MEMBERS]-(b:Team {name:{teamName}}) return a', req.query);
-  else {
-    req.query.id = req.user.id;
-    return cqdo(req, res, 'match (a:Canvasser {id:{id}})-[:MEMBERS]-(b:Team {name:{teamName}}) optional match (b)-[:MEMBERS]-(c:Canvasser) return distinct(c)', req.query);
+
+  let canvassers = [];
+
+  try {
+    if (req.user.admin)
+      canvassers = await _canvassersFromCypher('match (a:Canvasser)-[:MEMBERS]-(b:Team {name:{teamName}}) return a', req.query);
+    else {
+      req.query.id = req.user.id;
+      canvassers = await _canvassersFromCypher('match (a:Canvasser {id:{id}})-[:MEMBERS]-(b:Team {name:{teamName}}) optional match (b)-[:MEMBERS]-(c:Canvasser) return distinct(c)', req.query);
+    }
+  } catch (e) {
+    return _500(res, e);
   }
+
+  return res.json(canvassers);
 }
 
 function teamMembersAdd(req, res) {
@@ -492,9 +528,18 @@ function turfAssignedTeamRemove(req, res) {
   return cqdo(req, res, 'match (a:Turf {name:{turfName}})-[r:ASSIGNED]-(b:Team {name:{teamName}}) delete r', req.body, true);
 }
 
-function turfAssignedCanvasserList(req, res) {
+async function turfAssignedCanvasserList(req, res) {
   if (!valid(req.query.turfName)) return _400(res, "Invalid value to parameter 'turfName'.");
-  return cqdo(req, res, 'match (a:Turf {name:{turfName}})-[:ASSIGNED]-(b:Canvasser) return b', req.query, true);
+
+  let canvassers;
+
+  try {
+    canvassers = await _canvassersFromCypher('match (a:Turf {name:{turfName}})-[:ASSIGNED]-(b:Canvasser) return b', req.query, true);
+  } catch (e) {
+    return _500(res, e)
+  }
+
+  return res.json(canvassers);
 }
 
 async function turfAssignedCanvasserAdd(req, res) {
@@ -513,8 +558,7 @@ async function turfAssignedCanvasserAdd(req, res) {
 
       if (!pipNode(c, JSON.parse(t.geometry))) return _400(res, "Canvasser location is not inside that turf.");
     } catch (e) {
-      console.warn(e);
-      return _500(res, "Internal server error.");
+      return _500(res, e);
     }
   }
 
@@ -548,8 +592,7 @@ async function formGet(req, res) {
       delete form.questions[key].key;
     });
   } catch (e) {
-    console.warn(e);
-    return _500(res, "Internal server error.");
+    return _500(res, e);
   }
 
   return res.json(form);
@@ -582,8 +625,7 @@ async function formCreate(req, res) {
       await cqa('match (a:Canvasser {id:{author_id}}) match (b:Form {id:{fId}}) create (b)<-[:ASSIGNED]-(c:Question {key:{key}, label:{label}, optional:{optional}, type:{type}})-[:AUTHOR]->(a)', q);
     });
   } catch (e) {
-    console.warn(e);
-    return _500(res, "Unable to create form.");
+    return _500(res, e);
   }
 
   return res.json({id: req.body.id});
@@ -609,9 +651,18 @@ function formAssignedTeamRemove(req, res) {
   return cqdo(req, res, 'match (a:Form {id:{fId}})-[r:ASSIGNED]-(b:Team {name:{teamName}}) delete r', req.body, true);
 }
 
-function formAssignedCanvasserList(req, res) {
+async function formAssignedCanvasserList(req, res) {
   if (!valid(req.query.id)) return _400(res, "Invalid value to parameter 'id'.");
-  return cqdo(req, res, 'match (a:Form {id:{id}})-[:ASSIGNED]-(b:Canvasser) return b', req.query, true);
+
+  let canvassers;
+
+  try {
+    canvassers = await _canvassersFromCypher('match (a:Form {id:{id}})-[:ASSIGNED]-(b:Canvasser) return b', req.query, true);
+  } catch (e) {
+    return _500(res, e)
+  }
+
+  return res.json(canvassers);
 }
 
 function formAssignedCanvasserAdd(req, res) {
@@ -642,8 +693,7 @@ async function questionGet(req, res) {
       q.author = a.data[0][1].name;
     }
   } catch (e) {
-    console.warn(e);
-    return _500(res, "Internal server error.");
+    return _500(res, e);
   }
 
   return res.json(q);
@@ -713,8 +763,7 @@ async function sync(req, res) {
       turfs.push(turf);
     }
   } catch (e) {
-    console.warn(e);
-    return _500(res, "Internal server error.");
+    return _500(res, e);
   }
 
   for (let n in inodes) {
@@ -800,8 +849,7 @@ async function sync(req, res) {
     }
 
   } catch (e) {
-    console.warn(e);
-    return _500(res, "Internal server error.");
+    return _500(res, e);
   }
 
   return res.json({nodes: onodes});
@@ -869,7 +917,7 @@ app.use(async function (req, res, next) {
     let a = await cqa('merge (a:Canvasser {id:{id}}) on match set a += {last_seen: timestamp(), name:{name}, email:{email}, avatar:{avatar}} on create set a += {created: timestamp(), last_seen: timestamp(), name:{name}, email:{email}, avatar:{avatar}} return a', u);
     if (a.data.length === 1) {
       req.user = a.data[0];
-    } else return _500(res, "Internal server error.");
+    } else return _500(res, {});
 
     if (req.user.locked) return _403(res, "Your account is locked.");
 
@@ -900,7 +948,6 @@ app.get('/canvass/v1/google_maps_key', google_maps_key);
 app.get('/canvass/v1/canvasser/list', canvasserList);
 app.get('/canvass/v1/canvasser/get', canvasserGet);
 app.post('/canvass/v1/canvasser/update', canvasserUpdate);
-app.get('/canvass/v1/canvasser/unassigned', canvasserUnassigned);
 app.post('/canvass/v1/canvasser/lock', canvasserLock);
 app.post('/canvass/v1/canvasser/unlock', canvasserUnlock);
 app.get('/canvass/v1/team/list', teamList);
