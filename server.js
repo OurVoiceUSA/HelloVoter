@@ -304,7 +304,7 @@ async function dashboard(req, res) {
 
 async function google_maps_key(req, res) {
   let ass = await canvassAssignments(req.user.id);
-  if (ass.ready) return res.json({google_maps_key: ovi_config.google_maps_key });
+  if (ass.ready || req.user.admin) return res.json({google_maps_key: ovi_config.google_maps_key });
   else return _401(res, "No soup for you");
 }
 
