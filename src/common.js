@@ -165,6 +165,7 @@ export class CardCanvasser extends Component {
 
   componentDidMount() {
     if (!this.state.canvasser) this._loadData();
+    ReactTooltip.rebuild();
   }
 
   componentDidUpdate() {
