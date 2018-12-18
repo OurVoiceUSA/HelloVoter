@@ -373,7 +373,7 @@ export const CardCanvasserFull = (props) => (
     # of doors knocked: 0
     <br />
     <br />
-    {(props.refer.state.selectedFormsOption.value || props.refer.state.selectedTurfOption.value)?
+    {props.canvasser.direct?
     <div>
       This canvasser is not assigned to any teams. To do so, you must remove the direct form and turf assignments below.
     </div>
