@@ -133,7 +133,7 @@ export const RootLoader = (props) => {
   if (props.flag) return (<Loader />);
   else return (
     <div>
-      <Icon icon={faSync} color="green" onClick={props.func} />
+      <Icon icon={faSync} color="green" onClick={props.func} data-tip="Reload Data" />
       <div>{props.children}</div>
     </div>
   );
