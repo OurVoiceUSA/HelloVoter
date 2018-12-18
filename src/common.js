@@ -196,7 +196,7 @@ export class CardCanvasser extends Component {
       // refresh canvasser info
       let canvasser = await _loadCanvasser(this, this.props.id);
 
-      this.setState({ selectedTeamsOption, canvasser });
+      this.setState({ selectedTeamsOption, selectedFormsOption: null, selectedTurfOption: null, canvasser });
     } catch (e) {
 
     }
@@ -294,7 +294,7 @@ export class CardCanvasser extends Component {
 
     if (canvasser.ass.forms.length) {
       let f = canvasser.ass.forms[0];
-      selectedFormsOption.push({value: f.id, label: (<CardForm key={f.id} form={f} />)});
+      selectedFormsOption = {value: f.id, label: (<CardForm key={f.id} form={f} />)};
     }
 
     turf.forEach((t) => {
