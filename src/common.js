@@ -368,7 +368,9 @@ export const CardCanvasserFull = (props) => (
     {props.refer.state.selectedTeamsOption.length?
     <div>
       Forms / Turf this users sees based on the above team(s):
-      <br />{JSON.stringify(props.canvasser.ass)}
+      <br />
+      {props.canvasser.ass.forms.map((f) => (<CardForm form={f} />))}
+      {props.canvasser.ass.turf.map((t) => (<CardTurf turf={t} />))}
     </div>
     :
     <div>
