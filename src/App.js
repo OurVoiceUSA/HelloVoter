@@ -204,19 +204,19 @@ class App extends Component {
         <Sidebar>
           <div style={{margin: 10}}>Welcome, {this.getName()}!<br />Server: {this.state.server.hostname}</div>
           <hr />
-          <SidebarItem><Icon icon={faColumns} /> <Link to={'/'}>Dashboard</Link></SidebarItem>
-          <SidebarItem><Icon icon={faUser} /> <Link to={'/canvassers/'}>Canvassers</Link></SidebarItem>
-          <SidebarItem><Icon icon={faUsers} /> <Link to={'/teams/'}>Teams</Link></SidebarItem>
-          <SidebarItem><Icon icon={faMap} /> <Link to={'/turf/'}>Turf</Link></SidebarItem>
-          <SidebarItem><Icon icon={faClipboard} /> <Link to={'/forms/'}>Forms</Link></SidebarItem>
-          <SidebarItem><Icon icon={faGlobe} /> <Link to={'/map/'}>Map</Link></SidebarItem>
-          <SidebarItem><Icon icon={faFileUpload} /> <Link to={'/import/'}>Import Data</Link></SidebarItem>
-          <SidebarItem><Icon icon={faChartPie} /> <Link to={'/analytics/'}>Analytics</Link></SidebarItem>
-          <SidebarItem><Icon icon={faCog} /> <Link to={'/settings/'}>Settings</Link></SidebarItem>
-          <SidebarItem><Icon icon={faSignOutAlt} /> <button onClick={() => this._logout()}>Logout</button></SidebarItem>
+          <SidebarItem><Icon icon={faColumns} data-tip="Dashboard" /> <Link to={'/'}>Dashboard</Link></SidebarItem>
+          <SidebarItem><Icon icon={faUser} data-tip="Canvassers" /> <Link to={'/canvassers/'}>Canvassers</Link></SidebarItem>
+          <SidebarItem><Icon icon={faUsers} data-tip="Teams" /> <Link to={'/teams/'}>Teams</Link></SidebarItem>
+          <SidebarItem><Icon icon={faMap} data-tip="Turf" /> <Link to={'/turf/'}>Turf</Link></SidebarItem>
+          <SidebarItem><Icon icon={faClipboard} data-tip="Forms" /> <Link to={'/forms/'}>Forms</Link></SidebarItem>
+          <SidebarItem><Icon icon={faGlobe} data-tip="Map" /> <Link to={'/map/'}>Map</Link></SidebarItem>
+          <SidebarItem><Icon icon={faFileUpload} data-tip="Import Data" /> <Link to={'/import/'}>Import Data</Link></SidebarItem>
+          <SidebarItem><Icon icon={faChartPie} data-tip="Analytics" /> <Link to={'/analytics/'}>Analytics</Link></SidebarItem>
+          <SidebarItem><Icon icon={faCog} data-tip="Settings" /> <Link to={'/settings/'}>Settings</Link></SidebarItem>
+          <SidebarItem><Icon icon={faSignOutAlt} data-tip="Logout" /> <button onClick={() => this._logout()}>Logout</button></SidebarItem>
           <hr />
-          <SidebarItem><Icon icon={faAward} /> <Link to={'/about/'}>About</Link></SidebarItem>
-          <SidebarItem><Icon icon={faGithub} /> <a target="_blank" rel="noopener noreferrer" href="https://github.com/OurVoiceUSA/HelloVoter/tree/master/docs/">Help</a></SidebarItem>
+          <SidebarItem><Icon icon={faAward} data-tip="About" /> <Link to={'/about/'}>About</Link></SidebarItem>
+          <SidebarItem><Icon icon={faGithub} data-tip="Help" /> <a target="_blank" rel="noopener noreferrer" href="https://github.com/OurVoiceUSA/HelloVoter/tree/master/docs/">Help</a></SidebarItem>
         </Sidebar>
         <Main>
           <Route exact={true} path="/" render={() => <Dashboard server={server} />} />
