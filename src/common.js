@@ -204,19 +204,21 @@ export class CardCanvasser extends Component {
 
   handleFormsChange = async (selectedFormsOption) => {
     try {
-      if (this.state.selectedFormsOption.value) {
+      if (this.state.selectedFormsOption) {
         await _fetch(this.state.server, '/canvass/v1/form/assigned/canvasser/remove', 'POST', {
           fId: this.state.selectedFormsOption.value,
           cId: this.props.id,
         });
       }
-      if (selectedFormsOption.value) {
+      if (selectedFormsOption) {
         await _fetch(this.state.server, '/canvass/v1/form/assigned/canvasser/add', 'POST', {
           fId: selectedFormsOption.value,
           cId: this.props.id,
         });
       }
-      this.setState({selectedFormsOption});
+      // refresh canvasser info
+      let canvasser = await _loadCanvasser(this, this.props.id);
+      this.setState({canvasser, selectedFormsOption});
     } catch (e) {
       console.warn(e);
     }
@@ -224,19 +226,21 @@ export class CardCanvasser extends Component {
 
   handleTurfChange = async (selectedTurfOption) => {
     try {
-      if (this.state.selectedTurfOption.value) {
+      if (this.state.selectedTurfOption) {
         await _fetch(this.state.server, '/canvass/v1/turf/assigned/canvasser/remove', 'POST', {
           turfName: this.state.selectedTurfOption.value,
           cId: this.props.id,
         });
       }
-      if (selectedTurfOption.value) {
+      if (selectedTurfOption) {
         await _fetch(this.state.server, '/canvass/v1/turf/assigned/canvasser/add', 'POST', {
           turfName: selectedTurfOption.value,
           cId: this.props.id,
         });
       }
-      this.setState({selectedTurfOption});
+      // refresh canvasser info
+      let canvasser = await _loadCanvasser(this, this.props.id);
+      this.setState({canvasser, selectedTurfOption});
     } catch (e) {
       console.warn(e);
     }
@@ -259,8 +263,8 @@ export class CardCanvasser extends Component {
 
     let teamOptions = [];
     let selectedTeamsOption = [];
-    let selectedFormsOption = [];
-    let selectedTurfOption = [];
+    let selectedFormsOption = null;
+    let selectedTurfOption = null;
 
     let formOptions = [
       {value: '', label: "None"},
@@ -286,11 +290,21 @@ export class CardCanvasser extends Component {
 
     forms.forEach((f) => {
       formOptions.push({value: f.id, label: (<CardForm key={f.id} form={f} />)});
-    })
+    });
+
+    if (canvasser.ass.forms.length) {
+      let f = canvasser.ass.forms[0];
+      selectedFormsOption.push({value: f.id, label: (<CardForm key={f.id} form={f} />)});
+    }
 
     turf.forEach((t) => {
       turfOptions.push({value: t.name, label: (<CardTurf key={t.id} turf={t} />)})
-    })
+    });
+
+    if (canvasser.ass.turf.length) {
+      let t = canvasser.ass.turf[0];
+      selectedTurfOption = {value: t.name, label: (<CardTurf key={t.id} turf={t} />)};
+    }
 
     this.setState({canvasser, teamOptions, formOptions, turfOptions, selectedTeamsOption, selectedFormsOption, selectedTurfOption, loading: false});
   }
