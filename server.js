@@ -201,6 +201,7 @@ async function canvassAssignments(id) {
   let ref;
   let obj = {
     ready: false,
+    direct: false,
     turf: [],
     teams: [],
     forms: [],
@@ -211,12 +212,14 @@ async function canvassAssignments(id) {
     ref = await cqa('match (a:Canvasser {id:{id}})-[:ASSIGNED]-(b:Form) return b', {id: id});
     if (ref.data.length > 0) {
       obj.forms = obj.forms.concat(ref.data);
+      obj.direct = true;
     }
 
     // direct assignment to turf
     ref = await cqa('match (a:Canvasser {id:{id}})-[:ASSIGNED]-(b:Turf) return b', {id: id});
     if (ref.data.length > 0) {
       obj.turf = obj.turf.concat(ref.data);
+      obj.direct = true;
     }
 
     // assingment to form/turf via team
@@ -556,7 +559,8 @@ async function turfAssignedCanvasserAdd(req, res) {
       ret = await cqa('match (a:Turf {name:{turfName}}) return a', req.body);
       let t = ret.data[0];
 
-      if (!pipNode(c, JSON.parse(t.geometry))) return _400(res, "Canvasser location is not inside that turf.");
+      // TODO: config option for whether or not we care...
+      //if (!pipNode(c, JSON.parse(t.geometry))) return _400(res, "Canvasser location is not inside that turf.");
     } catch (e) {
       return _500(res, e);
     }
