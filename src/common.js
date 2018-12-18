@@ -286,11 +286,11 @@ export class CardCanvasser extends Component {
     });
 
     forms.forEach((f) => {
-      formOptions.push({value: f.id, label: f.name})
+      formOptions.push({value: f.id, label: (<CardForm key={f.id} form={f} />)});
     })
 
     turf.forEach((t) => {
-      turfOptions.push({value: t.name, label: t.name})
+      turfOptions.push({value: t.name, label: (<CardTurf key={t.id} turf={t} />)})
     })
 
     this.setState({canvasser, teamOptions, formOptions, turfOptions, selectedTeamsOption, selectedFormsOption, selectedTurfOption, loading: false});
@@ -334,8 +334,13 @@ export class CardCanvasser extends Component {
 }
 
 export const CardTeam = (props) => (
-  <div key={props.t.name}>
-    <Icon style={{width: 35, height: 35, color: "gray"}} icon={faUsers} /> {props.t.name}
+  <div style={{display: 'flex', padding: '10px'}}>
+    <div style={{padding: '5px 10px'}}>
+      <Icon style={{width: 50, height: 50, color: "gray"}} icon={faUsers} />
+    </div>
+    <div style={{flex: 1, overflow: 'auto'}}>
+      {props.t.name}
+    </div>
   </div>
 );
 
@@ -432,11 +437,13 @@ export async function _loadCanvassers(refer, teamName) {
 }
 
 export const CardTurf = (props) => (
-  <div>
-    <Icon icon={faStreetView} /> {props.turf.name} (<Link to={'/turf/view/'+props.turf.name} onClick={() => {
-      props.refer.setState({thisTurf: props.turf})
-    }}>view</Link>)<br />
-  <hr />
+  <div style={{display: 'flex', padding: '10px'}}>
+    <div style={{padding: '5px 10px'}}>
+      <Icon style={{width: 50, height: 50, color: "gray"}} icon={faStreetView} />
+    </div>
+    <div style={{flex: 1, overflow: 'auto'}}>
+      {props.turf.name}
+    </div>
   </div>
 )
 
@@ -461,11 +468,13 @@ export async function _loadTurf(refer, teamName) {
 }
 
 export const CardForm = (props) => (
-  <div>
-    <Icon icon={faClipboard} /> {props.form.name} (<Link to={'/forms/edit/'+props.form.id} onClick={() => {
-      props.refer.setState({thisForm: props.form})
-    }}>view</Link>)<br />
-  <hr />
+  <div style={{display: 'flex', padding: '10px'}}>
+    <div style={{padding: '5px 10px'}}>
+      <Icon style={{width: 50, height: 50, color: "gray"}} icon={faClipboard} />
+    </div>
+    <div style={{flex: 1, overflow: 'auto'}}>
+      {props.form.name}
+    </div>
   </div>
 )
 
