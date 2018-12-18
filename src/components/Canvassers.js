@@ -53,7 +53,7 @@ export default class App extends Component {
         <div>
           <Route exact={true} path="/canvassers/" render={() => (
             <RootLoader flag={this.state.loading} func={() => this._loadData()}>
-              Search: <input type="text" value={this.state.value} onChange={this.onTypeSearch} />
+              Search: <input type="text" value={this.state.value} onChange={this.onTypeSearch} data-tip="Search by name, email, location, or admin" />
               <br />
               {unassigned.length?
               <div>
