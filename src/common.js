@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faSync, faUser, faUsers, faCrown, faStreetView, faClipboard,
-  faExclamationTriangle, faCheckCircle, faBan
+  faExclamationTriangle, faCheckCircle, faBan, faHome,
 } from '@fortawesome/free-solid-svg-icons';
 
 import GooglePlacesAutocomplete, {geocodeByAddress, getLatLng} from 'react-places-autocomplete';
@@ -283,7 +283,7 @@ export class CardCanvasser extends Component {
 
     let turfOptions = [
       {value: '', label: "None"},
-      {value: 'auto', label: "Auto-cut turf with 1km of this canvasser's home address"},
+      {value: 'auto', label: (<CardTurf key="auto" turf={{name: "Area surrounnding this canvasser's home address"}} icon={faHome} />)},
     ];
 
     teams.forEach((t) => {
@@ -314,7 +314,7 @@ export class CardCanvasser extends Component {
 
     if (canvasser.ass.turf.length) {
       let t = canvasser.ass.turf[0];
-      selectedTurfOption = {value: t.name, label: (<CardTurf key={t.id} turf={t} />)};
+      selectedTurfOption = {value: t.name, label: (<CardTurf key={t.id} turf={t} icon={(canvasser.autoturf?faHome:null)} />)};
     }
 
     this.setState({canvasser, teamOptions, formOptions, turfOptions, selectedTeamsOption, selectedFormsOption, selectedTurfOption, loading: false});
@@ -519,7 +519,7 @@ export async function _loadCanvassers(refer, teamName) {
 export const CardTurf = (props) => (
   <div style={{display: 'flex', padding: '10px'}}>
     <div style={{padding: '5px 10px'}}>
-      <Icon style={{width: 50, height: 50, color: "gray"}} icon={faStreetView} />
+      <Icon style={{width: 50, height: 50, color: "gray"}} icon={(props.icon?props.icon:faStreetView)} />
     </div>
     <div style={{flex: 1, overflow: 'auto'}}>
       {props.turf.name}
