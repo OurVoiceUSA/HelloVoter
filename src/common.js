@@ -10,6 +10,7 @@ import LoaderSpinner from 'react-loader-spinner';
 import Select from 'react-select';
 import Img from 'react-image';
 import { Link } from 'react-router-dom';
+import ReactTooltip from 'react-tooltip';
 
 import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en';
@@ -328,6 +329,7 @@ export class CardCanvasser extends Component {
     const timeAgo = new TimeAgo('en-US');
     return (
       <div>
+      <ReactTooltip />
         <div style={{display: 'flex', padding: '10px'}}>
           <div style={{padding: '5px 10px'}}>
             <Img width={50} src={this.state.canvasser.avatar} loader={<Loader width={50} />} unloader={<Icon style={{width: 50, height: 50, color: "gray"}} icon={faUser} />} />
@@ -427,11 +429,11 @@ export const CanvasserBadges = (props) => {
   let badges = [];
   let id = props.canvasser.id;
 
-  if (props.canvasser.admin) badges.push(<Icon icon={faCrown} color="gold" key={id+"admin"} />);
-  if (props.canvasser.locked) badges.push(<Icon icon={faBan} color="red" key={id+"locked"} />);
+  if (props.canvasser.admin) badges.push(<Icon icon={faCrown} color="gold" key={id+"admin"} data-tip="Administrator" />);
+  if (props.canvasser.locked) badges.push(<Icon icon={faBan} color="red" key={id+"locked"} data-tip="Denied access" />);
   else {
-    if (props.canvasser.ass.ready) badges.push(<Icon icon={faCheckCircle} color="green" key={id+"ready"} />);
-    else badges.push(<Icon icon={faExclamationTriangle} color="red" key={id+"unassigned"} />);
+    if (props.canvasser.ass.ready) badges.push(<Icon icon={faCheckCircle} color="green" key={id+"ready"} data-tip="Ready to Canvass" />);
+    else badges.push(<Icon icon={faExclamationTriangle} color="red" key={id+"notready"} data-tip="Not ready to canvass, check assignments" />);
   }
 
   return badges;
