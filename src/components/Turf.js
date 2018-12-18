@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 
 import { HashRouter as Router, Route, Link } from 'react-router-dom';
-import PlacesAutocomplete, {geocodeByAddress, getLatLng} from 'react-places-autocomplete';
+import {geocodeByAddress, getLatLng} from 'react-places-autocomplete';
 import circleToPolygon from 'circle-to-polygon';
 import t from 'tcomb-form';
 import Select from 'react-select';
 
-import { _fetch, RootLoader, Loader, CardTurf, _loadTurf, us_states } from '../common.js';
+import { _fetch, PlacesAutocomplete, RootLoader, Loader, CardTurf, _loadTurf, us_states } from '../common.js';
 
 export default class App extends Component {
 
@@ -383,9 +383,8 @@ const TurfOptions = (props) => {
             debounce={500}
             value={props.refer.state.address}
             onChange={props.refer.onTypeAddress}
-            onSelect={props.refer.submitAddress}>
-            {addressSearch}
-            </PlacesAutocomplete>
+            onSelect={props.refer.submitAddress}
+          />
         </div>
       );
     case "draw":
@@ -399,17 +398,3 @@ const TurfOptions = (props) => {
       return (<div>Unknown generation method.</div>);
   }
 }
-
-const addressSearch = ({ getInputProps, getSuggestionItemProps, suggestions, loading }) => (
-  <div className="autocomplete-root">
-    <input {...getInputProps()} />
-    <div className="autocomplete-dropdown-container">
-      {loading && <div>Loading...</div>}
-      {suggestions.map(suggestion => (
-        <div {...getSuggestionItemProps(suggestion)}>
-          <span>{suggestion.description}</span>
-        </div>
-      ))}
-    </div>
-  </div>
-);

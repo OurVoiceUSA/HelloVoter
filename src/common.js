@@ -6,6 +6,7 @@ import {
   faExclamationTriangle, faCheckCircle, faBan
 } from '@fortawesome/free-solid-svg-icons';
 
+import GooglePlacesAutocomplete from 'react-places-autocomplete';
 import LoaderSpinner from 'react-loader-spinner';
 import Select from 'react-select';
 import Img from 'react-image';
@@ -551,3 +552,23 @@ export async function _loadAddresses(refer) {
   }
   return addresses;
 }
+
+export const PlacesAutocomplete = (props) => (
+  <GooglePlacesAutocomplete {...props}>
+    {addressSearch}
+  </GooglePlacesAutocomplete>
+)
+
+const addressSearch = ({ getInputProps, getSuggestionItemProps, suggestions, loading }) => (
+  <div className="autocomplete-root">
+    <input {...getInputProps()} />
+    <div className="autocomplete-dropdown-container">
+      {loading && <div>Loading...</div>}
+      {suggestions.map(suggestion => (
+        <div {...getSuggestionItemProps(suggestion)}>
+          <span>{suggestion.description}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+);
