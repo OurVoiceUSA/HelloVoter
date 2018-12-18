@@ -6,7 +6,7 @@ import {
   faExclamationTriangle, faCheckCircle, faBan
 } from '@fortawesome/free-solid-svg-icons';
 
-import GooglePlacesAutocomplete from 'react-places-autocomplete';
+import GooglePlacesAutocomplete, {geocodeByAddress, getLatLng} from 'react-places-autocomplete';
 import LoaderSpinner from 'react-loader-spinner';
 import Select from 'react-select';
 import Img from 'react-image';
@@ -140,7 +140,7 @@ export const RootLoader = (props) => {
 }
 
 export function _searchStringCanvasser(c) {
-    return (c.name+c.email+c.location+(c.admin?"admin":"")).toLowerCase();
+    return (c.name+c.email+c.homeaddress+(c.admin?"admin":"")).toLowerCase();
 }
 
 export async function _loadCanvasser(refer, id) {
@@ -347,7 +347,7 @@ export class CardCanvasser extends Component {
             Name: {canvasser.name} {(this.props.edit?'':(<Link to={'/canvassers/'+canvasser.id} onClick={() => this.props.refer.setState({thisCanvasser: this.props.canvasser})}>view profile</Link>))}
             <CanvasserBadges canvasser={canvasser} />
             <br />
-            Location: {(canvasser.location?canvasser.location:'N/A')} <br />
+            Location: {(canvasser.homeaddress?canvasser.homeaddress:'N/A')} <br />
             Last Login: {timeAgo.format(new Date(canvasser.last_seen-30000))}
           </div>
         </div>
@@ -380,6 +380,8 @@ export const CardCanvasserFull = (props) => (
     Email: {(props.canvasser.email?props.canvasser.email:'N/A')}
     <br />
     Phone: {(props.canvasser.phone?props.canvasser.phone:'N/A')}
+    <br />
+    Address: <CanvasserAddress refer={props.refer} canvasser={props.canvasser} />
     <br />
     # of doors knocked: 0
     <br />
@@ -433,6 +435,52 @@ export const CardCanvasserFull = (props) => (
 
   </div>
 )
+
+export class CanvasserAddress extends Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      edit: false,
+      address: (this.props.canvasser.homeaddress?this.props.canvasser.homeaddress:""),
+    };
+    this.onTypeAddress = (address) => this.setState({ address });
+  }
+
+  submitAddress = async (address) => {
+    this.setState({address})
+    try {
+      let res = await geocodeByAddress(address);
+      let pos = await getLatLng(res[0]);
+      await _fetch(this.props.refer.state.server, '/canvass/v1/canvasser/update', 'POST', {
+        id: this.props.canvasser.id,
+        address: address,
+        lat: pos.lat,
+        lng: pos.lng,
+      });
+      this.props.refer._loadData();
+    } catch (e) {
+      console.warn(e);
+    }
+  }
+
+  render() {
+    if (this.state.edit) return (
+      <PlacesAutocomplete
+        debounce={500}
+        value={this.state.address}
+        onChange={this.onTypeAddress}
+        onSelect={this.submitAddress}
+      />
+    );
+
+    return (
+      <div>
+        {this.state.address} <button onClick={() => this.setState({edit: true})}>click to edit</button>
+      </div>
+    );
+  }
+}
 
 export const CanvasserBadges = (props) => {
   let badges = [];

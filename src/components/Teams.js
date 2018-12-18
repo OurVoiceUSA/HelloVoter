@@ -240,7 +240,7 @@ const Team = (props) => {
 
             canvassers.forEach((c) => {
               if (!c.locked && !c.ass.direct)
-                memberOptions.push({value: c.name+c.email+c.location+(c.admin?"admin":""), id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={props.refer} />)})
+                memberOptions.push({value: _searchStringCanvasser(c), id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={props.refer} />)})
             });
           } catch (e) {
             console.warn(e);
