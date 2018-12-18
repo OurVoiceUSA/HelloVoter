@@ -261,7 +261,7 @@ export class CardCanvasser extends Component {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            fId: selectedTurfOption.value,
+            turfName: selectedTurfOption.value,
             cId: this.props.id,
             }),
         });
