@@ -155,7 +155,6 @@ export class CardCanvasser extends Component {
 
     this.state = {
       server: this.props.refer.props.server,
-      jwt: this.props.refer.props.jwt,
       canvasser: this.props.canvasser,
       selectedTeamsOption: null,
       selectedFormsOption: null,
