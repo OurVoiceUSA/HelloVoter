@@ -122,7 +122,7 @@ export const Main = (props) => (
 )
 
 export const Icon = (props) => (
-  <FontAwesomeIcon style={{width: 25}} {...props} />
+  <FontAwesomeIcon style={{width: 25}} data-tip={(props['data-tip']?props['data-tip']:props.icon.iconName)} {...props} />
 )
 
 export const Loader = (props) => (
