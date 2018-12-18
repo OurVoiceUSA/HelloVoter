@@ -209,25 +209,21 @@ async function canvassAssignments(id) {
 
   try {
     // direct assignment to a form
-    ref = await cqa('match (a:Canvasser {id:{id}})-[:ASSIGNED]-(b:Form) return b', {id: id});
-    if (ref.data.length > 0) {
-      obj.forms = obj.forms.concat(ref.data);
-      obj.direct = true;
-    }
-
-    // direct assignment to turf
-    ref = await cqa('match (a:Canvasser {id:{id}})-[:ASSIGNED]-(b:Turf) return b', {id: id});
-    if (ref.data.length > 0) {
-      obj.turf = obj.turf.concat(ref.data);
-      obj.direct = true;
-    }
-
-    // assingment to form/turf via team
-    ref = await cqa('match (a:Canvasser {id:{id}})-[:MEMBERS]-(b:Team)-[:ASSIGNED]-(c:Turf) match (d:Form)-[:ASSIGNED]-(b) return collect(distinct(b)), collect(distinct(c)), collect(distinct(d))', {id: id});
-    if (ref.data[0][0].length > 0) {
-      obj.teams = obj.teams.concat(ref.data[0][0]);
+    ref = await cqa('match (a:Canvasser {id:{id}}) optional match (a)-[:ASSIGNED]-(b:Form) optional match (a)-[:ASSIGNED]-(c:Turf) return collect(distinct(b)), collect(distinct(c))', {id: id});
+    if (ref.data[0][0].length > 0 || ref.data[0][1].length) {
+      obj.forms = obj.forms.concat(ref.data[0][0]);
       obj.turf = obj.turf.concat(ref.data[0][1]);
-      obj.forms = obj.forms.concat(ref.data[0][2]);
+      obj.direct = true;
+    }
+
+    // assingment to form/turf via team, but only bother checking if not directly assigned
+    if (!obj.direct) {
+      ref = await cqa('match (a:Canvasser {id:{id}}) optional match (a)-[:MEMBERS]-(b:Team) optional match (b)-[:ASSIGNED]-(c:Turf) optional match (d:Form)-[:ASSIGNED]-(b) return collect(distinct(b)), collect(distinct(c)), collect(distinct(d))', {id: id});
+      if (ref.data[0][0].length > 0 || ref.data[0][1].length > 0 || ref.data[0][2].length > 0) {
+        obj.teams = obj.teams.concat(ref.data[0][0]);
+        obj.turf = obj.turf.concat(ref.data[0][1]);
+        obj.forms = obj.forms.concat(ref.data[0][2]);
+      }
     }
   } catch (e) {
     console.warn(e);
