@@ -119,6 +119,22 @@ export const RootLoader = (props) => {
   );
 }
 
+export async function _loadCanvasser(refer, id) {
+  let canvasser = {};
+  try {
+    let res = await fetch('https://'+refer.state.server+'/canvass/v1/canvasser/get?id='+refer.props.id, {
+      headers: {
+        'Authorization': 'Bearer '+(refer.state.jwt?refer.state.jwt:"of the one ring"),
+        'Content-Type': 'application/json',
+      },
+    });
+    canvasser = await res.json();
+  } catch (e) {
+    console.warn(e);
+  }
+  return canvasser;
+}
+
 export class CardCanvasser extends Component {
 
   constructor(props) {
@@ -180,18 +196,7 @@ export class CardCanvasser extends Component {
       };
 
       // refresh canvasser info
-      let canvasser = [];
-      try {
-        let res = await fetch('https://'+this.state.server+'/canvass/v1/canvasser/get?id='+this.props.id, {
-          headers: {
-            'Authorization': 'Bearer '+(this.state.jwt?this.state.jwt:"of the one ring"),
-            'Content-Type': 'application/json',
-          },
-        });
-        canvasser = await res.json();
-      } catch (e) {
-        console.warn(e);
-      }
+      let canvasser = await _loadCanvasser(this, this.props.id);
 
       this.setState({ selectedTeamsOption, canvasser });
     } catch (e) {
@@ -200,9 +205,71 @@ export class CardCanvasser extends Component {
   }
 
   handleFormsChange = async (selectedFormsOption) => {
+    try {
+      if (this.state.selectedFormsOption.value) {
+              await fetch('https://'+this.state.server+'/canvass/v1/form/assigned/canvasser/remove', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer '+(this.state.jwt?this.state.jwt:"of the one ring"),
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            fId: this.state.selectedFormsOption.value,
+            cId: this.props.id,
+            }),
+        });
+      }
+      if (selectedFormsOption.value) {
+        await fetch('https://'+this.state.server+'/canvass/v1/form/assigned/canvasser/add', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer '+(this.state.jwt?this.state.jwt:"of the one ring"),
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            fId: selectedFormsOption.value,
+            cId: this.props.id,
+            }),
+        });
+      }
+      this.setState({selectedFormsOption});
+    } catch (e) {
+      console.warn(e);
+    }
   }
 
   handleTurfChange = async (selectedTurfOption) => {
+    try {
+      if (this.state.selectedTurfOption.value) {
+              await fetch('https://'+this.state.server+'/canvass/v1/turf/assigned/canvasser/remove', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer '+(this.state.jwt?this.state.jwt:"of the one ring"),
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            fId: this.state.selectedTurfOption.value,
+            cId: this.props.id,
+            }),
+        });
+      }
+      if (selectedTurfOption.value) {
+        await fetch('https://'+this.state.server+'/canvass/v1/turf/assigned/canvasser/add', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer '+(this.state.jwt?this.state.jwt:"of the one ring"),
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            fId: selectedTurfOption.value,
+            cId: this.props.id,
+            }),
+        });
+      }
+      this.setState({selectedTurfOption});
+    } catch (e) {
+      console.warn(e);
+    }
   }
 
   _loadData = async () => {
@@ -211,33 +278,28 @@ export class CardCanvasser extends Component {
     this.setState({loading: true})
 
     try {
-      let res = await fetch('https://'+this.state.server+'/canvass/v1/canvasser/get?id='+this.props.id, {
-        headers: {
-          'Authorization': 'Bearer '+(this.state.jwt?this.state.jwt:"of the one ring"),
-          'Content-Type': 'application/json',
-        },
-      });
-      canvasser = await res.json();
+       canvasser = await _loadCanvasser(this, this.props.id);
     } catch (e) {
       console.warn(e);
     }
 
-    try {
-      let res = await fetch('https://'+this.state.server+'/canvass/v1/canvasser/assigned/turf/list?cId='+this.props.id, {
-        headers: {
-          'Authorization': 'Bearer '+(this.state.jwt?this.state.jwt:"of the one ring"),
-          'Content-Type': 'application/json',
-        },
-      });
-      let turf = await res.json();
-    } catch (e) {
-      console.warn(e);
-    }
-
+    let forms = await _loadForms(this.props.refer);
+    let turf = await _loadTurf(this.props.refer);
     let teams = await _loadTeams(this.props.refer);
 
     let teamOptions = [];
     let selectedTeamsOption = [];
+    let selectedFormsOption = [];
+    let selectedTurfOption = [];
+
+    let formOptions = [
+      {value: '', label: "None"},
+    ];
+
+    let turfOptions = [
+      {value: '', label: "None"},
+      {value: 'auto', label: "Auto-cut turf with 1km of this canvasser's home address"},
+    ];
 
     teams.forEach((t) => {
       teamOptions.push({value: t.name, label: (
@@ -252,7 +314,15 @@ export class CardCanvasser extends Component {
       });
     });
 
-    this.setState({canvasser, teamOptions, selectedTeamsOption, loading: false});
+    forms.forEach((f) => {
+      formOptions.push({value: f.id, label: f.name})
+    })
+
+    turf.forEach((t) => {
+      turfOptions.push({value: t.name, label: t.name})
+    })
+
+    this.setState({canvasser, teamOptions, formOptions, turfOptions, selectedTeamsOption, selectedFormsOption, selectedTurfOption, loading: false});
   }
 
   _lockCanvasser = async (canvasser, flag) => {
@@ -330,7 +400,7 @@ export const CardCanvasserFull = (props) => (
       options={props.refer.state.teamOptions}
       isMulti={true}
       isSearchable={true}
-      placeholder="none"
+      placeholder="None"
     />
     <br />
     {props.refer.state.selectedTeamsOption.length?
@@ -345,9 +415,8 @@ export const CardCanvasserFull = (props) => (
         value={props.refer.state.selectedFormsOption}
         onChange={props.refer.handleFormsChange}
         options={props.refer.state.formOptions}
-        isMulti={true}
         isSearchable={true}
-        placeholder="none"
+        placeholder="None"
       />
       <br />
       Turf this canvasser is directly assigned to:
@@ -355,9 +424,8 @@ export const CardCanvasserFull = (props) => (
         value={props.refer.state.selectedTurfOption}
         onChange={props.refer.handleTurfChange}
         options={props.refer.state.turfOptions}
-        isMulti={true}
         isSearchable={true}
-        placeholder="none"
+        placeholder="None"
       />
     </div>
     }
