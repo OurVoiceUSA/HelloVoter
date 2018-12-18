@@ -6,7 +6,7 @@ import circleToPolygon from 'circle-to-polygon';
 import t from 'tcomb-form';
 import Select from 'react-select';
 
-import { RootLoader, Loader, CardTurf, _loadTurf, us_states } from '../common.js';
+import { _fetch, RootLoader, Loader, CardTurf, _loadTurf, us_states } from '../common.js';
 
 export default class App extends Component {
 
@@ -115,14 +115,7 @@ export default class App extends Component {
 
   _deleteTurf = async () => {
     try {
-      await fetch('https://'+this.props.server+'/canvass/v1/turf/delete', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({name: this.state.thisTurf.name}),
-      });
+      await _fetch(this.props.server, '/canvass/v1/turf/delete', 'POST', {name: this.state.thisTurf.name});
     } catch (e) {
       console.warn(e);
     }
@@ -183,16 +176,9 @@ export default class App extends Component {
       if (obj.geometry) geometry = obj.geometry;
       else geometry = obj;
 
-      await fetch('https://'+this.props.server+'/canvass/v1/turf/create', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: json.name,
-          geometry: geometry,
-        }),
+      await _fetch(this.props.server, '/canvass/v1/turf/create', 'POST', {
+        name: json.name,
+        geometry: geometry,
       });
     } catch (e) {
       console.warn(e);

@@ -6,7 +6,9 @@ import Select from 'react-select';
 
 import { faUsers } from '@fortawesome/free-solid-svg-icons';
 
-import { RootLoader, Loader, Icon, CardCanvasser, _loadCanvassers, CardTurf, _loadTurf, CardForm, _loadForms, _loadTeams } from '../common.js';
+import { _fetch, RootLoader, Loader, Icon, CardCanvasser, _loadCanvassers,
+  CardTurf, _loadTurf, CardForm, _loadForms, _loadTeams }
+from '../common.js';
 
 export default class App extends Component {
 
@@ -59,72 +61,34 @@ export default class App extends Component {
     this.setState({saving: true});
 
     try {
-      await fetch('https://'+this.props.server+'/canvass/v1/team/members/wipe', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({teamName: this.state.thisTeam}),
-      });
-
-      await fetch('https://'+this.props.server+'/canvass/v1/team/turf/wipe', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({teamName: this.state.thisTeam}),
-      });
-
-      await fetch('https://'+this.props.server+'/canvass/v1/team/form/wipe', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({teamName: this.state.thisTeam}),
-      });
+      await _fetch(this.props.server, '/canvass/v1/team/members/wipe', 'POST', {teamName: this.state.thisTeam});
+      await _fetch(this.props.server, '/canvass/v1/team/turf/wipe', 'POST', {teamName: this.state.thisTeam});
+      await _fetch(this.props.server, '/canvass/v1/team/form/wipe', 'POST', {teamName: this.state.thisTeam});
     } catch (e) {
       console.warn(e);
     }
 
     this.state.selectedMembersOption.map(async (c) => {
       try {
-        await fetch('https://'+this.props.server+'/canvass/v1/team/members/add', {
-          method: 'POST',
-          headers: {
-            'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({teamName: this.state.thisTeam, cId: c.id}),
-        });
+        await _fetch(this.props.server, '/canvass/v1/team/members/add', 'POST', {teamName: this.state.thisTeam, cId: c.id});
       } catch (e) {
         console.warn(e);
       }
     });
 
     try {
-      await fetch('https://'+this.props.server+'/canvass/v1/team/turf/add', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({teamName: this.state.thisTeam, turfName: this.state.selectedTurfOption.value}),
+      await _fetch(this.props.server, '/canvass/v1/team/turf/add', 'POST', {
+        teamName: this.state.thisTeam,
+        turfName: this.state.selectedTurfOption.value,
       });
     } catch (e) {
       console.warn(e);
     }
 
     try {
-      await fetch('https://'+this.props.server+'/canvass/v1/team/form/add', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({teamName: this.state.thisTeam, fId: this.state.selectedFormOption.value}),
+      await _fetch(this.props.server, '/canvass/v1/team/form/add', 'POST', {
+        teamName: this.state.thisTeam,
+        fId: this.state.selectedFormOption.value,
       });
     } catch (e) {
       console.warn(e);
@@ -135,14 +99,7 @@ export default class App extends Component {
 
   _deleteTeam = async () => {
     try {
-      await fetch('https://'+this.props.server+'/canvass/v1/team/delete', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({name: this.state.thisTeam}),
-      });
+      await _fetch(this.props.server, '/canvass/v1/team/delete', 'POST', {name: this.state.thisTeam});
     } catch (e) {
       console.warn(e);
     }
@@ -154,14 +111,8 @@ export default class App extends Component {
     let json = this.addTeamForm.getValue();
     if (json === null) return;
 
-    await fetch('https://'+this.props.server+'/canvass/v1/team/create', {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({name: json.name}),
-    });
+    await _fetch(this.props.server, '/canvass/v1/team/create', 'POST', {name: json.name});
+
     window.location.href = "/HelloVoter/#/teams/";
     this._loadData();
   }
@@ -281,8 +232,8 @@ const Team = (props) => {
           props.refer.setState({thisTeam: props.team.name, selectedMembersOption: null, selectedTurfOption: null, selectedFormOption: null});
 
           let memberOptions = [];
-          let turfOptions = {};
-          let formOptions = {};
+          let turfOptions = null;
+          let formOptions = null;
 
           try {
             let canvassers = await _loadCanvassers(props.refer, props.team.name);
@@ -297,16 +248,16 @@ const Team = (props) => {
 
           try {
             let turf = await _loadTurf(props.refer, props.team.name);
-
-            turfOptions = {value: turf[0].name, label: (<CardTurf key={turf[0].name} turf={turf[0]} />)};
+            if (turf.length)
+              turfOptions = {value: turf[0].name, label: (<CardTurf key={turf[0].name} turf={turf[0]} />)};
           } catch (e) {
             console.warn(e);
           }
 
           try {
             let form = await _loadForms(props.refer, props.team.name);
-
-            formOptions = {value: form[0].id, label: (<CardForm key={form[0].id} form={form[0]} />)};
+            if (form.length)
+              formOptions = {value: form[0].id, label: (<CardForm key={form[0].id} form={form[0]} />)};
           } catch (e) {
             console.warn(e);
           }

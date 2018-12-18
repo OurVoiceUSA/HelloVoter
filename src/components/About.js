@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 
 import Loader from 'react-loader-spinner';
 
-import { Icon } from '../common.js';
+import { _fetch, Icon } from '../common.js';
 
 import { faGlobe } from '@fortawesome/free-solid-svg-icons';
 import { faTwitter, faFacebook } from '@fortawesome/free-brands-svg-icons';
@@ -20,12 +20,7 @@ export default class App extends Component {
   componentDidMount = async () => {
     let data = {};
     try {
-      let res = await fetch('https://'+this.props.server+'/canvass/v1/dashboard', {
-        headers: {
-          'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
-          'Content-Type': 'application/json',
-        },
-      });
+      let res = await _fetch(this.props.server, '/canvass/v1/dashboard');
 
       data = await res.json();
     } catch (e) {

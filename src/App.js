@@ -17,7 +17,7 @@ import Settings from './components/Settings';
 import Jwt from './components/Jwt';
 import About from './components/About';
 
-import { Root, Sidebar, SidebarItem, Main, Icon } from './common.js';
+import { _fetch, Root, Sidebar, SidebarItem, Main, Icon } from './common.js';
 
 import { faColumns, faUser, faUsers, faMap, faGlobe, faClipboard, faChartPie,
          faFileUpload, faSignOutAlt, faAward, faCog } from '@fortawesome/free-solid-svg-icons';
@@ -31,8 +31,10 @@ class App extends Component {
     const v = queryString.parse(window.location.search);
 
     this.state = {
-      jwt: localStorage.getItem('jwt'),
-      server: localStorage.getItem('server'),
+      server: {
+        hostname: localStorage.getItem('server'),
+        jwt: localStorage.getItem('jwt'),
+      },
       connectForm: {server: v.server},
     };
 
@@ -66,12 +68,9 @@ class App extends Component {
   }
 
   _loadKeys = async () => {
-    let res = await fetch('https://'+this.state.server+'/canvass/v1/google_maps_key', {
-      headers: {
-        'Authorization': 'Bearer '+(this.state.jwt?this.state.jwt:"of the one ring"),
-        'Content-Type': 'application/json',
-      },
-    });
+    if (!this.state.server.hostname) return;
+
+    let res = await _fetch(this.state.server, '/canvass/v1/google_maps_key')
     let data = await res.json();
 
     // load google places API
@@ -91,7 +90,7 @@ class App extends Component {
     let name;
 
     try {
-      name = jwt_decode(this.state.jwt).name;
+      name = jwt_decode(this.state.server.jwt).name;
     } catch (e) {
       console.warn(e);
     }
@@ -102,7 +101,7 @@ class App extends Component {
   _logout() {
     localStorage.removeItem('server');
     localStorage.removeItem('jwt');
-    this.setState({server: null, jwt: null});
+    this.setState({server: {}});
   }
 
   doSave = async () => {
@@ -156,7 +155,7 @@ class App extends Component {
 
       console.warn(body);
 
-      this.setState({server: server});
+      this.setState({server: {hostname: server}});
       localStorage.setItem('server', server);
 
       if (body.data.ready !== true) return {error: false, msg: "The server said: "+body.msg};
@@ -174,9 +173,9 @@ class App extends Component {
   }
 
   render() {
-    let { server, jwt } = this.state;
+    let { server } = this.state;
 
-    if (!server) {
+    if (!server.hostname) {
       return (
         <div align="center">
           <br />
@@ -201,7 +200,7 @@ class App extends Component {
     <Router>
       <Root>
         <Sidebar>
-          <div style={{margin: 10}}>Welcome, {this.getName()}!<br />Server: {this.state.server}</div>
+          <div style={{margin: 10}}>Welcome, {this.getName()}!<br />Server: {this.state.server.hostname}</div>
           <hr />
           <SidebarItem><Icon icon={faColumns} /> <Link to={'/'}>Dashboard</Link></SidebarItem>
           <SidebarItem><Icon icon={faUser} /> <Link to={'/canvassers/'}>Canvassers</Link></SidebarItem>
@@ -218,17 +217,17 @@ class App extends Component {
           <SidebarItem><Icon icon={faGithub} /> <a target="_blank" rel="noopener noreferrer" href="https://github.com/OurVoiceUSA/HelloVoter/tree/master/docs/">Help</a></SidebarItem>
         </Sidebar>
         <Main>
-          <Route exact={true} path="/" render={() => <Dashboard server={server} jwt={jwt} />} />
-          <Route path="/canvassers/" render={(props) => <Canvassers server={server} jwt={jwt} {...props} />} />
-          <Route path="/teams/" render={() => <Teams server={server} jwt={jwt} />} />
-          <Route path="/turf/" render={() => <Turf server={server} jwt={jwt} />} />
-          <Route path="/forms/" render={() => <Forms server={server} jwt={jwt} />} />
-          <Route path="/map/" render={() => <Map server={server} jwt={jwt} apiKey={this.state.google_maps_key} />} />
-          <Route path="/import/" render={() => <ImportData server={server} jwt={jwt} />} />
-          <Route path="/analytics/" render={() => <Analytics server={server} jwt={jwt} />} />
-          <Route path="/settings/" render={() => <Settings server={server} jwt={jwt} />} />
+          <Route exact={true} path="/" render={() => <Dashboard server={server} />} />
+          <Route path="/canvassers/" render={(props) => <Canvassers server={server} {...props} />} />
+          <Route path="/teams/" render={() => <Teams server={server} />} />
+          <Route path="/turf/" render={() => <Turf server={server} />} />
+          <Route path="/forms/" render={() => <Forms server={server} />} />
+          <Route path="/map/" render={() => <Map server={server} apiKey={this.state.google_maps_key} />} />
+          <Route path="/import/" render={() => <ImportData server={server} />} />
+          <Route path="/analytics/" render={() => <Analytics server={server} />} />
+          <Route path="/settings/" render={() => <Settings server={server} />} />
           <Route path="/jwt/" render={(props) => <Jwt {...props} refer={this} />} />
-          <Route path="/about/" render={() => <About server={server} jwt={jwt} />} />
+          <Route path="/about/" render={() => <About server={server} />} />
         </Main>
       </Root>
     </Router>

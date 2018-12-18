@@ -6,7 +6,7 @@ import t from 'tcomb-form';
 
 import { faTimesCircle, faPlusCircle } from '@fortawesome/free-solid-svg-icons';
 
-import { RootLoader, CardForm, Icon, Loader, _loadForms } from '../common.js';
+import { _fetch, RootLoader, CardForm, Icon, Loader, _loadForms } from '../common.js';
 
 Modal.setAppElement(document.getElementById('root'));
 
@@ -219,14 +219,7 @@ export default class App extends Component {
         questions_order: this.state.order,
       };
 
-      await fetch('https://'+this.props.server+'/canvass/v1/form/create', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(obj),
-      });
+      await _fetch(this.props.server, '/canvass/v1/form/create', 'POST', obj);
     } catch (e) {
       console.warn(e);
     }

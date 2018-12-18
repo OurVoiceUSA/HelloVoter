@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import { RootLoader } from '../common.js';
+import { _fetch, RootLoader } from '../common.js';
 
 export default class App extends Component {
 
@@ -22,12 +22,7 @@ export default class App extends Component {
     this.setState({loading: true})
 
     try {
-      let res = await fetch('https://'+this.props.server+'/canvass/v1/dashboard', {
-        headers: {
-          'Authorization': 'Bearer '+(this.props.jwt?this.props.jwt:"of the one ring"),
-          'Content-Type': 'application/json',
-        },
-      });
+      let res = await _fetch(this.props.server, '/canvass/v1/dashboard');
 
       data = await res.json();
     } catch (e) {

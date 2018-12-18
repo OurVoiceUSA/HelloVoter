@@ -77,6 +77,24 @@ export const us_states = {
     "WY": "Wyoming"
 };
 
+export async function _fetch(server, uri, method, body) {
+  if (!method) method = 'GET';
+
+  if (!server.hostname) {
+    console.error("server is undefined in fetch");
+    return;
+  }
+
+  return fetch('https://'+server.hostname+uri, {
+    method: method,
+    headers: {
+      'Authorization': 'Bearer '+server.jwt,
+      'Content-Type': 'application/json',
+    },
+    body: (body?JSON.stringify(body):null),
+  });
+}
+
 export function _browserLocation(props) {
   if (!props.isGeolocationAvailable || !props.isGeolocationEnabled) return {access: false};
   if (props.coords) return {access: true, lng: props.coords.longitude, lat: props.coords.latitude};
@@ -122,12 +140,7 @@ export const RootLoader = (props) => {
 export async function _loadCanvasser(refer, id) {
   let canvasser = {};
   try {
-    let res = await fetch('https://'+refer.state.server+'/canvass/v1/canvasser/get?id='+refer.props.id, {
-      headers: {
-        'Authorization': 'Bearer '+(refer.state.jwt?refer.state.jwt:"of the one ring"),
-        'Content-Type': 'application/json',
-      },
-    });
+    let res = await _fetch(refer.state.server, '/canvass/v1/canvasser/get?id='+refer.props.id);
     canvasser = await res.json();
   } catch (e) {
     console.warn(e);
@@ -169,14 +182,7 @@ export class CardCanvasser extends Component {
       for (let ni in now) {
         let n = now[ni];
         if (prior.indexOf(n) === -1) {
-          await fetch('https://'+this.state.server+'/canvass/v1/team/members/add', {
-            method: 'POST',
-            headers: {
-              'Authorization': 'Bearer '+(this.state.jwt?this.state.jwt:"of the one ring"),
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({teamName: n, cId: this.props.id}),
-          });
+          await _fetch(this.state.server, '/canvass/v1/team/members/add', 'POST', {teamName: n, cId: this.props.id});
         }
       };
 
@@ -184,14 +190,7 @@ export class CardCanvasser extends Component {
       for (let pi in prior) {
         let p = prior[pi];
         if (now.indexOf(p) === -1) {
-          await fetch('https://'+this.state.server+'/canvass/v1/team/members/remove', {
-            method: 'POST',
-            headers: {
-              'Authorization': 'Bearer '+(this.state.jwt?this.state.jwt:"of the one ring"),
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({teamName: p, cId: this.props.id}),
-          });
+          await _fetch(this.state.server, '/canvass/v1/team/members/remove', 'POST', {teamName: p, cId: this.props.id});
         }
       };
 
@@ -207,29 +206,15 @@ export class CardCanvasser extends Component {
   handleFormsChange = async (selectedFormsOption) => {
     try {
       if (this.state.selectedFormsOption.value) {
-              await fetch('https://'+this.state.server+'/canvass/v1/form/assigned/canvasser/remove', {
-          method: 'POST',
-          headers: {
-            'Authorization': 'Bearer '+(this.state.jwt?this.state.jwt:"of the one ring"),
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            fId: this.state.selectedFormsOption.value,
-            cId: this.props.id,
-            }),
+        await _fetch(this.state.server, '/canvass/v1/form/assigned/canvasser/remove', 'POST', {
+          fId: this.state.selectedFormsOption.value,
+          cId: this.props.id,
         });
       }
       if (selectedFormsOption.value) {
-        await fetch('https://'+this.state.server+'/canvass/v1/form/assigned/canvasser/add', {
-          method: 'POST',
-          headers: {
-            'Authorization': 'Bearer '+(this.state.jwt?this.state.jwt:"of the one ring"),
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            fId: selectedFormsOption.value,
-            cId: this.props.id,
-            }),
+        await _fetch(this.state.server, '/canvass/v1/form/assigned/canvasser/add', 'POST', {
+          fId: selectedFormsOption.value,
+          cId: this.props.id,
         });
       }
       this.setState({selectedFormsOption});
@@ -241,29 +226,15 @@ export class CardCanvasser extends Component {
   handleTurfChange = async (selectedTurfOption) => {
     try {
       if (this.state.selectedTurfOption.value) {
-              await fetch('https://'+this.state.server+'/canvass/v1/turf/assigned/canvasser/remove', {
-          method: 'POST',
-          headers: {
-            'Authorization': 'Bearer '+(this.state.jwt?this.state.jwt:"of the one ring"),
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            turfName: this.state.selectedTurfOption.value,
-            cId: this.props.id,
-            }),
+        await _fetch(this.state.server, '/canvass/v1/turf/assigned/canvasser/remove', 'POST', {
+          turfName: this.state.selectedTurfOption.value,
+          cId: this.props.id,
         });
       }
       if (selectedTurfOption.value) {
-        await fetch('https://'+this.state.server+'/canvass/v1/turf/assigned/canvasser/add', {
-          method: 'POST',
-          headers: {
-            'Authorization': 'Bearer '+(this.state.jwt?this.state.jwt:"of the one ring"),
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            turfName: selectedTurfOption.value,
-            cId: this.props.id,
-          }),
+        await _fetch(this.state.server, '/canvass/v1/turf/assigned/canvasser/add', 'POST', {
+          turfName: selectedTurfOption.value,
+          cId: this.props.id,
         });
       }
       this.setState({selectedTurfOption});
@@ -326,20 +297,11 @@ export class CardCanvasser extends Component {
   }
 
   _lockCanvasser = async (canvasser, flag) => {
-
     try {
-      await fetch('https://'+this.state.server+'/canvass/v1/canvasser/'+(flag?'lock':'unlock'), {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer '+(this.state.jwt?this.state.jwt:"of the one ring"),
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({id: canvasser.id}),
-      });
+      await _fetch(this.state.server, '/canvass/v1/canvasser/'+(flag?'lock':'unlock'), 'POST', {id: canvasser.id});
     } catch (e) {
       console.warn(e);
     }
-
     this._loadData();
   }
 
@@ -456,12 +418,7 @@ export async function _loadCanvassers(refer, teamName) {
     let call = 'canvasser/list';
     if (teamName) call = 'team/members/list?teamName='+teamName;
 
-    let res = await fetch('https://'+refer.props.server+'/canvass/v1/'+call, {
-      headers: {
-        'Authorization': 'Bearer '+(refer.props.jwt?refer.props.jwt:"of the one ring"),
-        'Content-Type': 'application/json',
-      },
-    });
+    let res = await _fetch(refer.props.server, '/canvass/v1/'+call);
     canvassers = await res.json();
   } catch (e) {
     console.warn(e);
@@ -489,12 +446,7 @@ export async function _loadTurf(refer, teamName) {
   try {
     let call = 'turf/list';
     if (teamName) call = 'team/turf/list?teamName='+teamName;
-    let res = await fetch('https://'+refer.props.server+'/canvass/v1/'+call, {
-      headers: {
-        'Authorization': 'Bearer '+(refer.props.jwt?refer.props.jwt:"of the one ring"),
-        'Content-Type': 'application/json',
-      },
-    });
+    let res = await _fetch(refer.props.server, '/canvass/v1/'+call);
     let data = await res.json();
     turf = (data.data?data.data:[]);
   } catch (e) {
@@ -519,12 +471,7 @@ export async function _loadTeams(refer) {
   let teams = [];
 
   try {
-    let res = await fetch('https://'+refer.props.server+'/canvass/v1/team/list', {
-      headers: {
-        'Authorization': 'Bearer '+(refer.props.jwt?refer.props.jwt:"of the one ring"),
-        'Content-Type': 'application/json',
-      },
-    });
+    let res = await _fetch(refer.props.server, '/canvass/v1/team/list');
     teams = await res.json();
   } catch (e) {
     console.warn(e);
@@ -544,12 +491,7 @@ export async function _loadForms(refer, teamName) {
     if (teamName) uri = 'team/form/list?teamName='+teamName;
     else uri = 'form/list';
 
-    let res = await fetch('https://'+refer.props.server+'/canvass/v1/'+uri, {
-      headers: {
-        'Authorization': 'Bearer '+(refer.props.jwt?refer.props.jwt:"of the one ring"),
-        'Content-Type': 'application/json',
-      },
-    });
+    let res = await _fetch(refer.props.server, '/canvass/v1/'+uri);
     let data = await res.json();
     forms = (data.data?data.data:[]);
   } catch (e) {
@@ -564,14 +506,7 @@ export async function _loadForms(refer, teamName) {
 export async function _loadAddresses(refer) {
   let addresses = {};
   try {
-    let res = await fetch('https://'+refer.props.server+'/canvass/v1/sync', {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Bearer '+(refer.props.jwt?refer.props.jwt:"of the one ring"),
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({nodes: {}}),
-    });
+    let res = await _fetch(refer.props.server, '/canvass/v1/sync', 'POST', {nodes: {}});
     addresses = await res.json();
   } catch (e) {
     console.warn(e)
