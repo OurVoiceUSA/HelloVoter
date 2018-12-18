@@ -157,8 +157,8 @@ export class CardCanvasser extends Component {
       server: this.props.refer.props.server,
       canvasser: this.props.canvasser,
       selectedTeamsOption: null,
-      selectedFormsOption: null,
-      selectedTurfOption: null,
+      selectedFormsOption: {},
+      selectedTurfOption: {},
     };
   }
 
@@ -196,7 +196,7 @@ export class CardCanvasser extends Component {
       // refresh canvasser info
       let canvasser = await _loadCanvasser(this, this.props.id);
 
-      this.setState({ selectedTeamsOption, selectedFormsOption: null, selectedTurfOption: null, canvasser });
+      this.setState({ selectedTeamsOption, selectedFormsOption: {}, selectedTurfOption: {}, canvasser });
     } catch (e) {
 
     }
@@ -204,13 +204,13 @@ export class CardCanvasser extends Component {
 
   handleFormsChange = async (selectedFormsOption) => {
     try {
-      if (this.state.selectedFormsOption) {
+      if (this.state.selectedFormsOption.value) {
         await _fetch(this.state.server, '/canvass/v1/form/assigned/canvasser/remove', 'POST', {
           fId: this.state.selectedFormsOption.value,
           cId: this.props.id,
         });
       }
-      if (selectedFormsOption) {
+      if (selectedFormsOption.value) {
         await _fetch(this.state.server, '/canvass/v1/form/assigned/canvasser/add', 'POST', {
           fId: selectedFormsOption.value,
           cId: this.props.id,
@@ -226,13 +226,13 @@ export class CardCanvasser extends Component {
 
   handleTurfChange = async (selectedTurfOption) => {
     try {
-      if (this.state.selectedTurfOption) {
+      if (this.state.selectedTurfOption.value) {
         await _fetch(this.state.server, '/canvass/v1/turf/assigned/canvasser/remove', 'POST', {
           turfName: this.state.selectedTurfOption.value,
           cId: this.props.id,
         });
       }
-      if (selectedTurfOption) {
+      if (selectedTurfOption.value) {
         await _fetch(this.state.server, '/canvass/v1/turf/assigned/canvasser/add', 'POST', {
           turfName: selectedTurfOption.value,
           cId: this.props.id,
@@ -263,8 +263,8 @@ export class CardCanvasser extends Component {
 
     let teamOptions = [];
     let selectedTeamsOption = [];
-    let selectedFormsOption = null;
-    let selectedTurfOption = null;
+    let selectedFormsOption = {};
+    let selectedTurfOption = {};
 
     let formOptions = [
       {value: '', label: "None"},
@@ -373,15 +373,23 @@ export const CardCanvasserFull = (props) => (
     # of doors knocked: 0
     <br />
     <br />
-    Teams this canvasser is apart of:
-    <Select
-      value={props.refer.state.selectedTeamsOption}
-      onChange={props.refer.handleTeamsChange}
-      options={props.refer.state.teamOptions}
-      isMulti={true}
-      isSearchable={true}
-      placeholder="None"
-    />
+    {(props.refer.state.selectedFormsOption.value || props.refer.state.selectedTurfOption.value)?
+    <div>
+      This canvasser is not assigned to any teams. To do so, you must remove the direct form and turf assignments below.
+    </div>
+    :
+    <div>
+      Teams this canvasser is apart of:
+      <Select
+        value={props.refer.state.selectedTeamsOption}
+        onChange={props.refer.handleTeamsChange}
+        options={props.refer.state.teamOptions}
+        isMulti={true}
+        isSearchable={true}
+        placeholder="None"
+      />
+    </div>
+    }
     <br />
     {props.refer.state.selectedTeamsOption.length?
     <div>
