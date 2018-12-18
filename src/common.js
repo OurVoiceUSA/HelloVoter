@@ -140,7 +140,7 @@ export const RootLoader = (props) => {
 export async function _loadCanvasser(refer, id) {
   let canvasser = {};
   try {
-    let res = await _fetch(refer.state.server, '/canvass/v1/canvasser/get?id='+refer.props.id);
+    let res = await _fetch(refer.state.server, '/canvass/v1/canvasser/get?id='+id);
     canvasser = await res.json();
   } catch (e) {
     console.warn(e);
@@ -373,7 +373,7 @@ export const CardCanvasserFull = (props) => (
     # of doors knocked: 0
     <br />
     <br />
-    {props.canvasser.direct?
+    {props.canvasser.ass.direct?
     <div>
       This canvasser is not assigned to any teams. To do so, you must remove the direct form and turf assignments below.
     </div>
