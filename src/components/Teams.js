@@ -138,7 +138,7 @@ export default class App extends Component {
     let formOptions = [];
 
     canvassers.forEach((c) => {
-      if (!c.locked)
+      if (!c.locked && !c.ass.direct)
         memberOptions.push({value: c.name+c.email+c.location+(c.admin?"admin":""), id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={this} />)})
     });
 
@@ -239,7 +239,7 @@ const Team = (props) => {
             let canvassers = await _loadCanvassers(props.refer, props.team.name);
 
             canvassers.forEach((c) => {
-              if (!c.locked)
+              if (!c.locked && !c.ass.direct)
                 memberOptions.push({value: c.name+c.email+c.location+(c.admin?"admin":""), id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={props.refer} />)})
             });
           } catch (e) {
