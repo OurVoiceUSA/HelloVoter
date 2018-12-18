@@ -369,8 +369,8 @@ export const CardCanvasserFull = (props) => (
     <div>
       Forms / Turf this users sees based on the above team(s):
       <br />
-      {props.canvasser.ass.forms.map((f) => (<CardForm form={f} />))}
-      {props.canvasser.ass.turf.map((t) => (<CardTurf turf={t} />))}
+      {props.canvasser.ass.forms.map((f) => (<CardForm key={f.name} form={f} />))}
+      {props.canvasser.ass.turf.map((t) => (<CardTurf key={t.name} turf={t} />))}
     </div>
     :
     <div>
