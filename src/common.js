@@ -263,7 +263,7 @@ export class CardCanvasser extends Component {
           body: JSON.stringify({
             turfName: selectedTurfOption.value,
             cId: this.props.id,
-            }),
+          }),
         });
       }
       this.setState({selectedTurfOption});
@@ -341,7 +341,7 @@ export class CardCanvasser extends Component {
     }
 
     this._loadData();
-}
+  }
 
   render() {
     const { canvasser } = this.state;
