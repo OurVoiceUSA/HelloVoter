@@ -12,15 +12,22 @@ export default class App extends Component {
     this.state = {
       loading: true,
       canvassers: [],
+      search: "",
     };
+
+    this.onTypeSearch = this.onTypeSearch.bind(this);
   }
 
   componentDidMount() {
     this._loadData();
   }
 
+  onTypeSearch (event) {
+    this.setState({search: event.target.value.toLowerCase()})
+  }
+
   _loadData = async () => {
-    this.setState({canvassers: await _loadCanvassers(this),});
+    this.setState({canvassers: await _loadCanvassers(this), search: ""});
   }
 
   render() {
@@ -30,6 +37,7 @@ export default class App extends Component {
     let unassigned = [];
 
     this.state.canvassers.forEach(c => {
+      if (this.state.search && !c.name.toLowerCase().includes(this.state.search)) return;
       if (c.locked) {
         denied.push(<CardCanvasser key={c.id} canvasser={c} refer={this} />)
       } else {
@@ -45,6 +53,8 @@ export default class App extends Component {
         <div>
           <Route exact={true} path="/canvassers/" render={() => (
             <RootLoader flag={this.state.loading} func={() => this._loadData()}>
+              Search: <input type="text" value={this.state.value} onChange={this.onTypeSearch} />
+              <br />
               {unassigned.length?
               <div>
                 <h3>Unassigned Canvassers ({unassigned.length})</h3>
