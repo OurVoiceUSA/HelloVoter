@@ -90,7 +90,7 @@ function safe_input(str) {
     case 'object': return true;
     case 'number': return true;
     case 'boolean': return true;
-    case 'string': if (str.match(/^[0-9a-zA-Z:_\?\-\/\. '"]+$/)) return true;
+    case 'string': if (str.match(/^[0-9a-zA-Z:_\?\-\/,\. '"]+$/)) return true;
   }
   return false;
 }
@@ -343,10 +343,10 @@ async function canvasserGet(req, res) {
 
 function canvasserUpdate(req, res) {
   if (!req.user.admin && req.body.id !== req.user.id) return _403(res, "Permission denied.");
-  // TODO: need looser valid function for avatar
-  if (!valid(req.body.name) || !valid(req.body.id)) return _400(res, "Invalid value to parameter 'id' or 'name' or 'avatar'.");
+  // TODO: need to validate input, and only do updates based on what was posted
+  if (!valid(req.body.id)) return _400(res, "Invalid value to parameter 'id'.");
 
-  return cqdo(req, res, 'match (a:Canvasser {id:{id}}) set a.display_name={name}, a.display_avatar={avatar}', req.body);
+  return cqdo(req, res, 'match (a:Canvasser {id:{id}}) set a.homeaddress={address}, a.homelat={lat}, a.homelng={lng}', req.body);
 }
 
 async function canvasserLock(req, res) {
