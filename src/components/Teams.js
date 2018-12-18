@@ -7,7 +7,7 @@ import Select from 'react-select';
 import { faUsers } from '@fortawesome/free-solid-svg-icons';
 
 import { _fetch, RootLoader, Loader, Icon, CardCanvasser, _loadCanvassers,
-  CardTurf, _loadTurf, CardForm, _loadForms, _loadTeams }
+  CardTurf, _loadTurf, CardForm, _loadForms, _loadTeams, _searchStringCanvasser }
 from '../common.js';
 
 export default class App extends Component {
@@ -139,7 +139,7 @@ export default class App extends Component {
 
     canvassers.forEach((c) => {
       if (!c.locked && !c.ass.direct)
-        memberOptions.push({value: c.name+c.email+c.location+(c.admin?"admin":""), id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={this} />)})
+        memberOptions.push({value: _searchStringCanvasser(c), id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={this} />)})
     });
 
     turf.forEach((t) => {

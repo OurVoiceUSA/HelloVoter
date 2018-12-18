@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 
 import { HashRouter as Router, Route } from 'react-router-dom';
 
-import { RootLoader, CardCanvasser, _loadCanvassers } from '../common.js';
+import { RootLoader, CardCanvasser, _loadCanvassers, _searchStringCanvasser } from '../common.js';
 
 export default class App extends Component {
 
@@ -37,7 +37,7 @@ export default class App extends Component {
     let unassigned = [];
 
     this.state.canvassers.forEach(c => {
-      if (this.state.search && !c.name.toLowerCase().includes(this.state.search)) return;
+      if (this.state.search && !_searchStringCanvasser(c).includes(this.state.search)) return;
       if (c.locked) {
         denied.push(<CardCanvasser key={c.id} canvasser={c} refer={this} />)
       } else {
