@@ -167,6 +167,10 @@ export class CardCanvasser extends Component {
     if (!this.state.canvasser) this._loadData();
   }
 
+  componentDidUpdate() {
+    ReactTooltip.rebuild();
+  }
+
   handleTeamsChange = async (selectedTeamsOption) => {
     try {
 
@@ -329,7 +333,6 @@ export class CardCanvasser extends Component {
     const timeAgo = new TimeAgo('en-US');
     return (
       <div>
-      <ReactTooltip />
         <div style={{display: 'flex', padding: '10px'}}>
           <div style={{padding: '5px 10px'}}>
             <Img width={50} src={this.state.canvasser.avatar} loader={<Loader width={50} />} unloader={<Icon style={{width: 50, height: 50, color: "gray"}} icon={faUser} />} />

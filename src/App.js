@@ -4,6 +4,7 @@ import { HashRouter as Router, Route, Link } from 'react-router-dom';
 import t from 'tcomb-form';
 import jwt_decode from 'jwt-decode';
 import queryString from 'query-string';
+import ReactTooltip from 'react-tooltip';
 
 import Dashboard from './components/Dashboard';
 import Canvassers from './components/Canvassers';
@@ -199,6 +200,7 @@ class App extends Component {
     return (
     <Router>
       <Root>
+        <ReactTooltip />
         <Sidebar>
           <div style={{margin: 10}}>Welcome, {this.getName()}!<br />Server: {this.state.server.hostname}</div>
           <hr />
