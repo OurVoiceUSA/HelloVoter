@@ -33,7 +33,7 @@ export default class App extends Component {
       if (c.locked) {
         denied.push(<CardCanvasser key={c.id} canvasser={c} refer={this} />)
       } else {
-        if (c.ass.ready)
+        if (c.ass.ready || c.ass.teams.length)
           ready.push(<CardCanvasser key={c.id} canvasser={c} refer={this} />)
         else
           unassigned.push(<CardCanvasser key={c.id} canvasser={c} refer={this} />);
