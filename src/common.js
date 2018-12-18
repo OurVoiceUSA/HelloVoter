@@ -379,7 +379,7 @@ export const CardCanvasserFull = (props) => (
     </div>
     :
     <div>
-      Teams this canvasser is apart of:
+      Teams this canvasser is a part of:
       <Select
         value={props.refer.state.selectedTeamsOption}
         onChange={props.refer.handleTeamsChange}
