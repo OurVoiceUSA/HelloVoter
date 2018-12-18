@@ -136,8 +136,49 @@ export class CardCanvasser extends Component {
     if (!this.state.canvasser) this._loadData();
   }
 
-  handleTeamsChange = (selectedTeamsOption) => {
-    this.setState({ selectedTeamsOption });
+  handleTeamsChange = async (selectedTeamsOption) => {
+    try {
+
+      let prior = this.state.selectedTeamsOption.map((e) => {
+        return e.value;
+      });
+
+      let now = selectedTeamsOption.map((e) => {
+        return e.value;
+      });
+
+      // anything in "now" that isn't in "prior" gets added
+      now.forEach(async (n) => {
+        if (prior.indexOf(n) === -1) {
+          await fetch('https://'+this.state.server+'/canvass/v1/team/members/add', {
+            method: 'POST',
+            headers: {
+              'Authorization': 'Bearer '+(this.state.jwt?this.state.jwt:"of the one ring"),
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({teamName: n, cId: this.props.id}),
+          });
+        }
+      });
+
+      // anything in "prior" that isn't in "now" gets removed
+      prior.forEach(async (p) => {
+        if (now.indexOf(p) === -1) {
+          await fetch('https://'+this.state.server+'/canvass/v1/team/members/remove', {
+            method: 'POST',
+            headers: {
+              'Authorization': 'Bearer '+(this.state.jwt?this.state.jwt:"of the one ring"),
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({teamName: p, cId: this.props.id}),
+          });
+        }
+      });
+
+      this.setState({ selectedTeamsOption });
+    } catch (e) {
+
+    }
   }
 
   _loadData = async () => {
@@ -160,16 +201,22 @@ export class CardCanvasser extends Component {
     let teams = await _loadTeams(this.props.refer);
 
     let teamOptions = [];
+    let selectedTeamsOption = [];
 
     teams.forEach((t) => {
       teamOptions.push({value: t.name, label: (
-        <div key={t.name}>
-          <Icon style={{width: 35, height: 35, color: "gray"}} icon={faUsers} /> {t.name}
-        </div>
-      )})
+        <CardTeam key={t.name} t={t} />
+      )});
+      canvasser.ass.teams.forEach((a) => {
+        if (a.name === t.name) {
+          selectedTeamsOption.push({value: t.name, label: (
+            <CardTeam key={t.name} t={t} />
+          )});
+        }
+      });
     });
 
-    this.setState({canvasser, teamOptions, loading: false});
+    this.setState({canvasser, teamOptions, selectedTeamsOption, loading: false});
   }
 
   _lockCanvasser = async (canvasser, flag) => {
@@ -218,6 +265,12 @@ export class CardCanvasser extends Component {
   }
 }
 
+export const CardTeam = (props) => (
+  <div key={props.t.name}>
+    <Icon style={{width: 35, height: 35, color: "gray"}} icon={faUsers} /> {props.t.name}
+  </div>
+);
+
 export const CardCanvasserFull = (props) => (
   <div>
     <br />
@@ -241,7 +294,7 @@ export const CardCanvasserFull = (props) => (
       options={props.refer.state.teamOptions}
       isMulti={true}
       isSearchable={true}
-      placeholder="Select teams to add this canvasser to"
+      placeholder="none"
     />
   </div>
 )
