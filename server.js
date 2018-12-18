@@ -10,7 +10,8 @@ import jwt from 'jsonwebtoken';
 import bodyParser from 'body-parser';
 import http from 'http';
 import fs from 'fs';
-import pip from 'point-in-polygon';
+import {ingeojson} from 'ourvoiceusa-sdk-js';
+import circleToPolygon from 'circle-to-polygon';
 import neo4j from 'neo4j-driver';
 import BoltAdapter from 'node-neo4j-bolt-adapter';
 import * as secrets from "docker-secrets-nodejs";
@@ -142,24 +143,6 @@ function idInArrObj (arr, id) {
   return false;
 }
 
-function pipNode(node, geom) {
-  switch (geom.type) {
-    case "Polygon":
-      if (pip([node.longitude, node.latitude], geom.coordinates[0])) {
-        return true;
-      }
-      break;
-    case "MultiPolygon":
-      for (let p in geom.coordinates) {
-        if (pip([node.longitude, node.latitude], geom.coordinates[p][0])) {
-          return true;
-        }
-      }
-      break;
-  }
-  return false;
-}
-
 function sendError(res, code, msg) {
   let obj = {code: code, error: true, msg: msg};
   console.log('Returning http '+code+' error with msg: '+msg);
@@ -197,7 +180,7 @@ async function sameTeam(ida, idb) {
   return false;
 }
 
-async function canvassAssignments(id) {
+async function canvassAssignments(user) {
   let ref;
   let obj = {
     ready: false,
@@ -209,16 +192,20 @@ async function canvassAssignments(id) {
 
   try {
     // direct assignment to a form
-    ref = await cqa('match (a:Canvasser {id:{id}}) optional match (a)-[:ASSIGNED]-(b:Form) optional match (a)-[:ASSIGNED]-(c:Turf) return collect(distinct(b)), collect(distinct(c))', {id: id});
+    ref = await cqa('match (a:Canvasser {id:{id}}) optional match (a)-[:ASSIGNED]-(b:Form) optional match (a)-[:ASSIGNED]-(c:Turf) return collect(distinct(b)), collect(distinct(c))', user);
     if (ref.data[0][0].length > 0 || ref.data[0][1].length) {
       obj.forms = obj.forms.concat(ref.data[0][0]);
       obj.turf = obj.turf.concat(ref.data[0][1]);
       obj.direct = true;
+
+      if (user.autoturf && user.lng && user.lat) {
+        obj.turf = [{name: 'auto', geometry: circleToPolygon([user.lng,user.lat],1000)}];
+      }
     }
 
     // assingment to form/turf via team, but only bother checking if not directly assigned
     if (!obj.direct) {
-      ref = await cqa('match (a:Canvasser {id:{id}}) optional match (a)-[:MEMBERS]-(b:Team) optional match (b)-[:ASSIGNED]-(c:Turf) optional match (d:Form)-[:ASSIGNED]-(b) return collect(distinct(b)), collect(distinct(c)), collect(distinct(d))', {id: id});
+      ref = await cqa('match (a:Canvasser {id:{id}}) optional match (a)-[:MEMBERS]-(b:Team) optional match (b)-[:ASSIGNED]-(c:Turf) optional match (d:Form)-[:ASSIGNED]-(b) return collect(distinct(b)), collect(distinct(c)), collect(distinct(d))', user);
       if (ref.data[0][0].length > 0 || ref.data[0][1].length > 0 || ref.data[0][2].length > 0) {
         obj.teams = obj.teams.concat(ref.data[0][0]);
         obj.turf = obj.turf.concat(ref.data[0][1]);
@@ -256,7 +243,7 @@ async function hello(req, res) {
   let lat = req.body.latitude;
 
   let msg = "Awaiting assignment";
-  let ass = await canvassAssignments(req.user.id);
+  let ass = await canvassAssignments(req.user);
 
   try {
     // if there are no admins, make this one an admin
@@ -301,7 +288,7 @@ async function dashboard(req, res) {
 }
 
 async function google_maps_key(req, res) {
-  let ass = await canvassAssignments(req.user.id);
+  let ass = await canvassAssignments(req.user);
   if (ass.ready || req.user.admin) return res.json({google_maps_key: ovi_config.google_maps_key });
   else return _401(res, "No soup for you");
 }
@@ -316,7 +303,7 @@ async function _canvassersFromCypher(query, args) {
   let ref = await cqa(query, args)
   for (let i in ref.data) {
     let c = ref.data[i];
-    c.ass = await canvassAssignments(c.id);
+    c.ass = await canvassAssignments(c);
     canvassers.push(c);
   }
 
@@ -545,6 +532,9 @@ async function turfAssignedCanvasserAdd(req, res) {
   if (!valid(req.body.turfName) || !valid(req.body.cId)) return _400(res, "Invalid value to parameter 'turfName' or 'cId'.");
   if (!req.user.admin) return _403(res, "Permission denied.");
 
+  if (req.body.turfName === 'auto')
+    return cqdo(req, res, "match (a:Canvasser {id:{cId}}) set a.autoturf=true", req.body, true);
+
   if (!req.body.override) {
     try {
       let ret;
@@ -556,7 +546,7 @@ async function turfAssignedCanvasserAdd(req, res) {
       let t = ret.data[0];
 
       // TODO: config option for whether or not we care...
-      //if (!pipNode(c, JSON.parse(t.geometry))) return _400(res, "Canvasser location is not inside that turf.");
+      //if (!ingeojson(JSON.parse(t.geometry), c.longitude, c.latitude)) return _400(res, "Canvasser location is not inside that turf.");
     } catch (e) {
       return _500(res, e);
     }
@@ -567,13 +557,17 @@ async function turfAssignedCanvasserAdd(req, res) {
 
 function turfAssignedCanvasserRemove(req, res) {
   if (!valid(req.body.turfName) || !valid(req.body.cId)) return _400(res, "Invalid value to parameter 'turfName' or 'cId'.");
+
+  if (req.body.turfName === 'auto')
+    return cqdo(req, res, "match (a:Canvasser {id:{cId}}) set a.autoturf=null", req.body, true);
+
   return cqdo(req, res, 'match (a:Turf {name:{turfName}})-[r:ASSIGNED]-(b:Canvasser {id:{cId}}) delete r', req.body, true);
 }
 
 // form
 
 async function formGet(req, res) {
-  let ass = await canvassAssignments(req.user.id);
+  let ass = await canvassAssignments(req.user);
   if (!req.user.admin && !idInArrObj(ass.forms, req.query.id)) return _403(res, "Canvasser is not assigned to this form.");
 
   let form = {};
@@ -743,7 +737,7 @@ function questionAssignedRemove(req, res) {
 // sync
 
 async function sync(req, res) {
-  let ass = await canvassAssignments(req.user.id);
+  let ass = await canvassAssignments(req.user);
   if (!ass.ready) return _403(res, "Canvasser is not assigned.");
 
   let last_sync = req.body.last_sync;
@@ -788,7 +782,7 @@ async function sync(req, res) {
           // tie this address to turf
           // TODO: this won't scale - need to use neo4j native geo functions
           for (let t in turfs)
-            if (pipNode(node, turfs[t].geometry))
+            if (ingeojson(turfs[t].geometry, node.longitude, node.latitude))
               await cqa('match (a:Address {id:{id}}) merge (a)-[:WITHIN]->(b:Turf {name:{name}})', {id: node.id, name: turfs[t].name});
           break;
         case 'unit':
