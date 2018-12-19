@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import { _fetch, RootLoader } from '../common.js';
+import { _fetch, notify_error, RootLoader } from '../common.js';
 
 export default class App extends Component {
 
@@ -26,7 +26,7 @@ export default class App extends Component {
 
       data = await res.json();
     } catch (e) {
-      console.warn(e);
+      notify_error(e, "Unable to load dashboard info.");
     }
 
     this.setState({data: data, loading: false});

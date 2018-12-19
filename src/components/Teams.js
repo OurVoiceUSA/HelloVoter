@@ -6,7 +6,7 @@ import Select from 'react-select';
 
 import { faUsers } from '@fortawesome/free-solid-svg-icons';
 
-import { _fetch, RootLoader, Loader, Icon, CardCanvasser, _loadCanvassers,
+import { _fetch, notify_error, RootLoader, Loader, Icon, CardCanvasser, _loadCanvassers,
   CardTurf, _loadTurf, CardForm, _loadForms, _loadTeams, _searchStringCanvasser }
 from '../common.js';
 
@@ -65,15 +65,14 @@ export default class App extends Component {
       await _fetch(this.props.server, '/canvass/v1/team/turf/wipe', 'POST', {teamName: this.state.thisTeam});
       await _fetch(this.props.server, '/canvass/v1/team/form/wipe', 'POST', {teamName: this.state.thisTeam});
     } catch (e) {
-      console.warn(e);
+      notify_error(e, "Unable to save team members.");
     }
 
     this.state.selectedMembersOption.map(async (c) => {
       try {
         await _fetch(this.props.server, '/canvass/v1/team/members/add', 'POST', {teamName: this.state.thisTeam, cId: c.id});
       } catch (e) {
-        console.warn(e);
-      }
+        notify_error(e, "Unable to save team members.");      }
     });
 
     try {
@@ -82,7 +81,7 @@ export default class App extends Component {
         turfName: this.state.selectedTurfOption.value,
       });
     } catch (e) {
-      console.warn(e);
+      notify_error(e, "Unable to save team members.");
     }
 
     try {
@@ -91,7 +90,7 @@ export default class App extends Component {
         fId: this.state.selectedFormOption.value,
       });
     } catch (e) {
-      console.warn(e);
+      notify_error(e, "Unable to save team members.");
     }
 
     this.setState({saving: false});
@@ -101,7 +100,7 @@ export default class App extends Component {
     try {
       await _fetch(this.props.server, '/canvass/v1/team/delete', 'POST', {name: this.state.thisTeam});
     } catch (e) {
-      console.warn(e);
+      notify_error(e, "Unable to delete teams.");
     }
     window.location.href = "/HelloVoter/#/teams/";
     this._loadData();
@@ -111,7 +110,11 @@ export default class App extends Component {
     let json = this.addTeamForm.getValue();
     if (json === null) return;
 
-    await _fetch(this.props.server, '/canvass/v1/team/create', 'POST', {name: json.name});
+    try {
+      await _fetch(this.props.server, '/canvass/v1/team/create', 'POST', {name: json.name});
+    } catch (e) {
+      notify_error(e, "Unable to create team.");
+    }
 
     window.location.href = "/HelloVoter/#/teams/";
     this._loadData();
@@ -243,7 +246,7 @@ const Team = (props) => {
                 memberOptions.push({value: _searchStringCanvasser(c), id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={props.refer} />)})
             });
           } catch (e) {
-            console.warn(e);
+            notify_error(e, "Unable to load canvassers.");
           }
 
           try {
@@ -251,7 +254,7 @@ const Team = (props) => {
             if (turf.length)
               turfOptions = {value: turf[0].name, label: (<CardTurf key={turf[0].name} turf={turf[0]} />)};
           } catch (e) {
-            console.warn(e);
+            notify_error(e, "Unable to load turf.");
           }
 
           try {
@@ -259,7 +262,7 @@ const Team = (props) => {
             if (form.length)
               formOptions = {value: form[0].id, label: (<CardForm key={form[0].id} form={form[0]} />)};
           } catch (e) {
-            console.warn(e);
+            notify_error(e, "Unable to load forms.");
           }
 
           props.refer.setState({

@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 
 import { Route, Redirect } from 'react-router'
 import jwt_decode from 'jwt-decode';
+import {notify_error} from '../common.js';
 
 export default class App extends Component {
 
@@ -14,7 +15,7 @@ export default class App extends Component {
       jwt = this.props.location.pathname.split('/').pop();
       jwt_decode(jwt);
     } catch (e) {
-      console.warn("Unable to extract jwt from URI: "+e);
+      notify_error(e, "Unable to extract jwt from URI");
       jwt = 'error';
     }
 

@@ -7,6 +7,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 import GooglePlacesAutocomplete, {geocodeByAddress, getLatLng} from 'react-places-autocomplete';
+import {NotificationManager} from 'react-notifications';
 import LoaderSpinner from 'react-loader-spinner';
 import Select from 'react-select';
 import Img from 'react-image';
@@ -79,11 +80,16 @@ export const us_states = {
     "WY": "Wyoming"
 };
 
+export function notify_error(e, msg) {
+  NotificationManager.error(msg, 'Error');
+  console.warn(e);
+}
+
 export async function _fetch(server, uri, method, body) {
   if (!method) method = 'GET';
 
   if (!server.hostname) {
-    console.error("server is undefined in fetch");
+    notify_error({}, "API server definition error.");
     return;
   }
 
@@ -149,7 +155,7 @@ export async function _loadCanvasser(refer, id) {
     let res = await _fetch(refer.state.server, '/canvass/v1/canvasser/get?id='+id);
     canvasser = await res.json();
   } catch (e) {
-    console.warn(e);
+    notify_error(e, "Unable to load canvasser info.");
   }
   return canvasser;
 }
@@ -231,7 +237,7 @@ export class CardCanvasser extends Component {
       let canvasser = await _loadCanvasser(this, this.props.id);
       this.setState({canvasser, selectedFormsOption});
     } catch (e) {
-      console.warn(e);
+      notify_error(e, "Unable to add/remove form.");
     }
   }
 
@@ -253,7 +259,7 @@ export class CardCanvasser extends Component {
       let canvasser = await _loadCanvasser(this, this.props.id);
       this.setState({canvasser, selectedTurfOption});
     } catch (e) {
-      console.warn(e);
+      notify_error(e, "Unable to add/remove turf.");
     }
   }
 
@@ -265,7 +271,8 @@ export class CardCanvasser extends Component {
     try {
        canvasser = await _loadCanvasser(this, this.props.id);
     } catch (e) {
-      console.warn(e);
+      notify_error(e, "Unable to load canavasser info.");
+      return;
     }
 
     let forms = await _loadForms(this.props.refer);
@@ -324,7 +331,7 @@ export class CardCanvasser extends Component {
     try {
       await _fetch(this.state.server, '/canvass/v1/canvasser/'+(flag?'lock':'unlock'), 'POST', {id: canvasser.id});
     } catch (e) {
-      console.warn(e);
+      notify_error(e, "Unable to "+(flag?'lock':'unlock')+" canvasser.");
     }
     this._loadData();
   }
@@ -460,7 +467,7 @@ export class CanvasserAddress extends Component {
       });
       this.props.refer._loadData();
     } catch (e) {
-      console.warn(e);
+      notify_error(e, "Unable to update address info.");
     }
   }
 
@@ -508,7 +515,7 @@ export async function _loadCanvassers(refer, teamName) {
     let res = await _fetch(refer.props.server, '/canvass/v1/'+call);
     canvassers = await res.json();
   } catch (e) {
-    console.warn(e);
+    notify_error(e, "Unable to load canvasser data.");
   }
 
   refer.setState({loading: false});
@@ -539,7 +546,7 @@ export async function _loadTurf(refer, teamName) {
     let data = await res.json();
     turf = (data.data?data.data:[]);
   } catch (e) {
-    console.warn(e);
+    notify_error(e, "Unable to load turf data.");
   }
 
   refer.setState({loading: false});
@@ -565,7 +572,7 @@ export async function _loadTeams(refer) {
     let res = await _fetch(refer.props.server, '/canvass/v1/team/list');
     teams = await res.json();
   } catch (e) {
-    console.warn(e);
+    notify_error(e, "Unable to load team data.");
   }
 
   return teams.data;
@@ -586,7 +593,7 @@ export async function _loadForms(refer, teamName) {
     let data = await res.json();
     forms = (data.data?data.data:[]);
   } catch (e) {
-    console.warn(e);
+    notify_error(e, "Unable to load form data.");
   }
 
   refer.setState({loading: false});
@@ -600,7 +607,7 @@ export async function _loadAddresses(refer) {
     let res = await _fetch(refer.props.server, '/canvass/v1/sync', 'POST', {nodes: {}});
     addresses = await res.json();
   } catch (e) {
-    console.warn(e)
+    notify_error(e, "Unable to load address information.");
   }
   return addresses;
 }

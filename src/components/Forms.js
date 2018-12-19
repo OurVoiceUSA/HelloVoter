@@ -6,7 +6,7 @@ import t from 'tcomb-form';
 
 import { faTimesCircle, faPlusCircle } from '@fortawesome/free-solid-svg-icons';
 
-import { _fetch, RootLoader, CardForm, Icon, Loader, _loadForms } from '../common.js';
+import { _fetch, notify_error, RootLoader, CardForm, Icon, Loader, _loadForms } from '../common.js';
 
 Modal.setAppElement(document.getElementById('root'));
 
@@ -132,7 +132,7 @@ export default class App extends Component {
     // check for duplicate keys
     if (fields[key]) {
       //return Alert.alert('Error', 'Duplicate Input Key. Change your Input Key to add this item.', [{text: 'OK'}], { cancelable: false });    }
-      console.warn("Duplicate");
+      notify_error({}, "Duplicate entry.");
       return;
     }
 
@@ -198,13 +198,13 @@ export default class App extends Component {
 
     // disallow anything other than alphanumeric and a few other chars
     if (!formName.match(/^[a-zA-Z0-9\-_ ]+$/)) {
-      console.warn('From name can only contain alphanumeric characters, and spaces and dashes.');
+      notify_error({}, "From name can only contain alphanumeric characters, and spaces and dashes.");
       return;
     }
 
     // max length
     if (formName.length > 255) {
-      console.warn('Form name cannot be longer than 255 characters.');
+      notify_error({}, "Form name cannot be longer than 255 characters.");
       return;
     }
 
@@ -221,7 +221,7 @@ export default class App extends Component {
 
       await _fetch(this.props.server, '/canvass/v1/form/create', 'POST', obj);
     } catch (e) {
-      console.warn(e);
+      notify_error(e, "Unable to create form.");
     }
 
     this.setState({saving: false});

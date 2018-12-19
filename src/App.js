@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 
 import { HashRouter as Router, Route, Link } from 'react-router-dom';
+import {NotificationContainer} from 'react-notifications';
+import 'react-notifications/lib/notifications.css';
 import t from 'tcomb-form';
 import jwt_decode from 'jwt-decode';
 import queryString from 'query-string';
@@ -18,7 +20,7 @@ import Settings from './components/Settings';
 import Jwt from './components/Jwt';
 import About from './components/About';
 
-import { _fetch, Root, Sidebar, SidebarItem, Main, Icon } from './common.js';
+import { _fetch, notify_error, Root, Sidebar, SidebarItem, Main, Icon } from './common.js';
 
 import { faColumns, faUser, faUsers, faMap, faGlobe, faClipboard, faChartPie,
          faFileUpload, faSignOutAlt, faAward, faCog } from '@fortawesome/free-solid-svg-icons';
@@ -93,7 +95,7 @@ class App extends Component {
     try {
       name = jwt_decode(this.state.server.jwt).name;
     } catch (e) {
-      console.warn(e);
+      notify_error(e, "Holy crap this error should never happen!! Better dust off that résumé...");
     }
 
     return name;
@@ -153,8 +155,6 @@ class App extends Component {
       }
 
       let body = await res.json();
-
-      console.warn(body);
 
       this.setState({server: {hostname: server}});
       localStorage.setItem('server', server);
@@ -219,6 +219,7 @@ class App extends Component {
           <SidebarItem><Icon icon={faGithub} data-tip="Help" /> <a target="_blank" rel="noopener noreferrer" href="https://github.com/OurVoiceUSA/HelloVoter/tree/master/docs/">Help</a></SidebarItem>
         </Sidebar>
         <Main>
+          <NotificationContainer/>
           <Route exact={true} path="/" render={() => <Dashboard server={server} />} />
           <Route path="/canvassers/" render={(props) => <Canvassers server={server} {...props} />} />
           <Route path="/teams/" render={() => <Teams server={server} />} />

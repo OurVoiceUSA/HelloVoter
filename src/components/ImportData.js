@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import CSVReader from 'react-csv-reader';
 import t from 'tcomb-form';
 
-import { Loader } from '../common.js';
+import { notify_error, Loader } from '../common.js';
 
 const HEADER = t.enums({
   'address1': 'Address 1',
@@ -26,7 +26,7 @@ export default class App extends Component {
   }
 
   preProcessError(e) {
-    console.warn("BOOO = "+e);
+    notify_error(e, "Failed to preprocess the import file.");
   }
 
   preProcess = async (data) => {

@@ -6,7 +6,7 @@ import circleToPolygon from 'circle-to-polygon';
 import t from 'tcomb-form';
 import Select from 'react-select';
 
-import { _fetch, PlacesAutocomplete, RootLoader, Loader, CardTurf, _loadTurf, us_states } from '../common.js';
+import { _fetch, notify_error, PlacesAutocomplete, RootLoader, Loader, CardTurf, _loadTurf, us_states } from '../common.js';
 
 export default class App extends Component {
 
@@ -51,7 +51,7 @@ export default class App extends Component {
       let pos = await getLatLng(res[0]);
       this.setState({addressCoords: pos});
     } catch (e) {
-      console.warn(e);
+      notify_error(e, "Unable to search or geocode address.");
     }
   }
 
@@ -117,7 +117,7 @@ export default class App extends Component {
     try {
       await _fetch(this.props.server, '/canvass/v1/turf/delete', 'POST', {name: this.state.thisTurf.name});
     } catch (e) {
-      console.warn(e);
+      notify_error(e, "Unable to delete turf.");
     }
     this._loadTurf(this);
     window.location.href = "/HelloVoter/#/turf/";
@@ -134,7 +134,7 @@ export default class App extends Component {
       try {
         obj = JSON.parse(this.state.importFileData);
       } catch (e) {
-        console.warn(e);
+        notify_error(e, "Unable to parse import data file.");
         return;
       }
     } else if (this.state.selectedDrawOption.value === "radius") {
@@ -165,7 +165,7 @@ export default class App extends Component {
         let res = await fetch ('https://raw.githubusercontent.com/OurVoiceUSA/districts/gh-pages/'+uri)
         obj = await res.json();
       } catch (e) {
-        console.warn(e);
+        notify_error(e, "Unable to fetch district info data.");
         return;
       }
     }
@@ -181,7 +181,7 @@ export default class App extends Component {
         geometry: geometry,
       });
     } catch (e) {
-      console.warn(e);
+      notify_error(e, "Unable to create turf.");
     }
 
     this.setState({saving: false});

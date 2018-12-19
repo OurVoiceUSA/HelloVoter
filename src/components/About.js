@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 
 import Loader from 'react-loader-spinner';
 
-import { _fetch, Icon } from '../common.js';
+import { _fetch, notify_error, Icon } from '../common.js';
 
 import { faGlobe } from '@fortawesome/free-solid-svg-icons';
 import { faTwitter, faFacebook } from '@fortawesome/free-brands-svg-icons';
@@ -24,7 +24,7 @@ export default class App extends Component {
 
       data = await res.json();
     } catch (e) {
-      console.warn(e);
+      notify_error(e, "Unable to load dashboard info.");
     }
 
     this.setState({cb_version: (data.version?data.version:'unknown')});
