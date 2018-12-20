@@ -198,8 +198,8 @@ async function canvassAssignments(user) {
       obj.turf = obj.turf.concat(ref.data[0][1]);
       obj.direct = true;
 
-      if (user.autoturf && user.lng && user.lat) {
-        obj.turf = [{name: 'auto', geometry: circleToPolygon([user.lng,user.lat],1000)}];
+      if (user.autoturf && user.homelng && user.homelat) {
+        obj.turf = [{name: 'auto', geometry: circleToPolygon([user.homelng,user.homelat],1000)}];
       }
     }
 
