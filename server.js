@@ -83,18 +83,6 @@ function getConfig(item, required, def) {
   return value;
 }
 
-// TODO: safe input for generic safety vs. valid input on a data type basis
-
-function safe_input(str) {
-  switch (typeof str) {
-    case 'object': return true;
-    case 'number': return true;
-    case 'boolean': return true;
-    case 'string': if (str.match(/^[0-9a-zA-Z:_\?\-\/,\. '"]+$/)) return true;
-  }
-  return false;
-}
-
 function valid(str) {
   if (!str) return false;
   return true;
@@ -919,12 +907,6 @@ app.use(async function (req, res, next) {
     console.warn(e);
     return _401(res, "Invalid token.");
   }
-
-  // validate all keys in req.body and req.query
-  let kb = Object.keys(req.body);
-  for (let i in kb) if (!safe_input(req.body[kb[i]])) return _400(res, "Invalid input.");
-  let kq = Object.keys(req.query);
-  for (let i in kq) if (!safe_input(req.query[kq[i]])) return _400(res, "Invalid input.");
 
   next();
 });
