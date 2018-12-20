@@ -105,12 +105,10 @@ export default class App extends Component {
           </form>
 
           <hr />
-            NOTE: This import tool does not work on all voter files, as there is no standard format.
-            We do our best to accommodate the most common patterns. If your import doesn't work,&nbsp;
-            <a target="_blank" rel="noopener noreferrer" href="https://github.com/OurVoiceUSA/HelloVoter/issues/new">
-            submit an issue</a> and a volunteer programmer can work to fix the issue in the future.
-            If you need the import done now, contact someone you know who's good with Microsoft&copy; Excel
-            or LibreOffice&copy; and they can reformat your voter file so it works with this import tool.
+            NOTE: This import tool does not work on all spreadsheet files, as there is no standard format.
+            We do our best to accommodate the most common patterns. Contact someone you know who's
+            good with Microsoft&copy; Excel or LibreOffice&copy; and they can reformat your spreadsheet
+            file so it works with this import tool.
         </div>
         );
     }

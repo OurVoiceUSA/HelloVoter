@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import { HashRouter as Router, Route, Link } from 'react-router-dom';
+import { HashRouter as Router, Route, Link, Switch } from 'react-router-dom';
 import {NotificationContainer} from 'react-notifications';
 import 'react-notifications/lib/notifications.css';
 import t from 'tcomb-form';
@@ -220,22 +220,39 @@ class App extends Component {
         </Sidebar>
         <Main>
           <NotificationContainer/>
-          <Route exact={true} path="/" render={() => <Dashboard server={server} />} />
-          <Route path="/canvassers/" render={(props) => <Canvassers server={server} {...props} />} />
-          <Route path="/teams/" render={() => <Teams server={server} />} />
-          <Route path="/turf/" render={() => <Turf server={server} />} />
-          <Route path="/forms/" render={() => <Forms server={server} />} />
-          <Route path="/map/" render={() => <Map server={server} apiKey={this.state.google_maps_key} />} />
-          <Route path="/import/" render={() => <ImportData server={server} />} />
-          <Route path="/analytics/" render={() => <Analytics server={server} />} />
-          <Route path="/settings/" render={() => <Settings server={server} />} />
-          <Route path="/jwt/" render={(props) => <Jwt {...props} refer={this} />} />
-          <Route path="/about/" render={() => <About server={server} />} />
+          <Switch>
+            <Route exact={true} path="/" render={() => <Dashboard server={server} />} />
+            <Route path="/canvassers/" render={(props) => <Canvassers server={server} {...props} />} />
+            <Route path="/teams/" render={() => <Teams server={server} />} />
+            <Route path="/turf/" render={() => <Turf server={server} />} />
+            <Route path="/forms/" render={() => <Forms server={server} />} />
+            <Route path="/map/" render={() => <Map server={server} apiKey={this.state.google_maps_key} />} />
+            <Route path="/import/" render={() => <ImportData server={server} />} />
+            <Route path="/analytics/" render={() => <Analytics server={server} />} />
+            <Route path="/settings/" render={() => <Settings server={server} />} />
+            <Route path="/jwt/" render={(props) => <Jwt {...props} refer={this} />} />
+            <Route path="/about/" render={() => <About server={server} />} />
+            <Route component={NoMatch} />
+          </Switch>
         </Main>
       </Root>
     </Router>
     );
   }
 }
+
+const NoMatch = ({ location }) => (
+  <div>
+    <h1>OOOPS!!</h1>
+    <div>
+      We can't seem to find the page you're looking for:
+      <br /><br />
+      <code>{location.pathname}</code>
+      <br /><br />
+      If you feel this page is in error, <a target="_blank" rel="noopener noreferrer" href="https://github.com/OurVoiceUSA/HelloVoter/issues/new">
+      report an issue</a> and the coders will take a look.
+    </div>
+  </div>
+);
 
 export default App;
