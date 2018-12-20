@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import CSVReader from 'react-csv-reader';
 import t from 'tcomb-form';
 
-import { notify_error, Loader } from '../common.js';
+import { notify_error, notify_success, Loader } from '../common.js';
 
 const HEADER = t.enums({
   'address1': 'Address 1',
@@ -70,7 +70,10 @@ export default class App extends Component {
 
     this.setState({loading: true});
     // fake data loaded after 3 seconds
-    setTimeout(() => this.setState({loading: false, headers: []}), 3000);
+    setTimeout(() => {
+      notify_success("Data has been imported.")
+      this.setState({loading: false, headers: []})
+    }, 3000);
 
   }
 

@@ -80,8 +80,12 @@ export const us_states = {
     "WY": "Wyoming"
 };
 
+export function notify_success(msg) {
+  NotificationManager.success(msg, 'Success', 3000);
+}
+
 export function notify_error(e, msg) {
-  NotificationManager.error(msg, 'Error');
+  NotificationManager.error(msg, 'Error', 6000);
   console.warn(e);
 }
 
@@ -212,7 +216,7 @@ export class CardCanvasser extends Component {
 
       // refresh canvasser info
       let canvasser = await _loadCanvasser(this, this.props.id);
-
+      notify_success("Team assignments saved.");
       this.setState({ selectedTeamsOption, selectedFormsOption: {}, selectedTurfOption: {}, canvasser });
     } catch (e) {
 
@@ -235,6 +239,7 @@ export class CardCanvasser extends Component {
       }
       // refresh canvasser info
       let canvasser = await _loadCanvasser(this, this.props.id);
+      notify_success("Form selection saved.");
       this.setState({canvasser, selectedFormsOption});
     } catch (e) {
       notify_error(e, "Unable to add/remove form.");
@@ -257,6 +262,7 @@ export class CardCanvasser extends Component {
       }
       // refresh canvasser info
       let canvasser = await _loadCanvasser(this, this.props.id);
+      notify_success("Turf selection saved.");
       this.setState({canvasser, selectedTurfOption});
     } catch (e) {
       notify_error(e, "Unable to add/remove turf.");
@@ -328,12 +334,14 @@ export class CardCanvasser extends Component {
   }
 
   _lockCanvasser = async (canvasser, flag) => {
+    let term = (flag?'lock':'unlock');
     try {
-      await _fetch(this.state.server, '/canvass/v1/canvasser/'+(flag?'lock':'unlock'), 'POST', {id: canvasser.id});
+      await _fetch(this.state.server, '/canvass/v1/canvasser/'+term, 'POST', {id: canvasser.id});
     } catch (e) {
-      notify_error(e, "Unable to "+(flag?'lock':'unlock')+" canvasser.");
+      notify_error(e, "Unable to "+term+" canvasser.");
     }
     this._loadData();
+    notify_success("Canvasser hass been "+term+"ed.");
   }
 
   render() {
@@ -466,6 +474,7 @@ export class CanvasserAddress extends Component {
         lng: pos.lng,
       });
       this.props.refer._loadData();
+      notify_success("Address hass been saved.");
     } catch (e) {
       notify_error(e, "Unable to update address info.");
     }

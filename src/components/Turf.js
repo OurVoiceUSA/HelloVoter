@@ -6,7 +6,7 @@ import circleToPolygon from 'circle-to-polygon';
 import t from 'tcomb-form';
 import Select from 'react-select';
 
-import { _fetch, notify_error, PlacesAutocomplete, RootLoader, Loader, CardTurf, _loadTurf, us_states } from '../common.js';
+import { _fetch, notify_error, notify_success, PlacesAutocomplete, RootLoader, Loader, CardTurf, _loadTurf, us_states } from '../common.js';
 
 export default class App extends Component {
 
@@ -15,7 +15,6 @@ export default class App extends Component {
 
     this.state = {
       loading: true,
-      saving: false,
       selectedDrawOption: null,
       selectedStateOption: null,
       selectedTypeOption: null,
@@ -121,13 +120,13 @@ export default class App extends Component {
     }
     this._loadTurf(this);
     window.location.href = "/HelloVoter/#/turf/";
+    notify_success("Turf has been deleted.");
   }
 
   _createTurf = async () => {
     let json = this.addTurfForm.getValue();
     if (json === null) return;
 
-    this.setState({saving: true});
     let obj = {};
 
     if (this.state.importFileData !== null) {
@@ -184,10 +183,9 @@ export default class App extends Component {
       notify_error(e, "Unable to create turf.");
     }
 
-    this.setState({saving: false});
-
     window.location.href = "/HelloVoter/#/turf/";
     this._loadTurf();
+    notify_success("Turf has been created.");
   }
 
   componentDidMount() {

@@ -6,7 +6,7 @@ import t from 'tcomb-form';
 
 import { faTimesCircle, faPlusCircle } from '@fortawesome/free-solid-svg-icons';
 
-import { _fetch, notify_error, RootLoader, CardForm, Icon, Loader, _loadForms } from '../common.js';
+import { _fetch, notify_error, notify_success, RootLoader, CardForm, Icon, Loader, _loadForms } from '../common.js';
 
 Modal.setAppElement(document.getElementById('root'));
 
@@ -224,6 +224,7 @@ export default class App extends Component {
       notify_error(e, "Unable to create form.");
     }
 
+    notify_success("Form has been created.")
     this.setState({saving: false});
 
     window.location.href = "/HelloVoter/#/forms/";

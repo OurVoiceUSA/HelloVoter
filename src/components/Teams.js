@@ -6,7 +6,7 @@ import Select from 'react-select';
 
 import { faUsers } from '@fortawesome/free-solid-svg-icons';
 
-import { _fetch, notify_error, RootLoader, Loader, Icon, CardCanvasser, _loadCanvassers,
+import { _fetch, notify_error, notify_success, RootLoader, Loader, Icon, CardCanvasser, _loadCanvassers,
   CardTurf, _loadTurf, CardForm, _loadForms, _loadTeams, _searchStringCanvasser }
 from '../common.js';
 
@@ -93,6 +93,7 @@ export default class App extends Component {
       notify_error(e, "Unable to save team members.");
     }
 
+    notify_success("Team has been saved.");
     this.setState({saving: false});
   }
 
@@ -102,8 +103,10 @@ export default class App extends Component {
     } catch (e) {
       notify_error(e, "Unable to delete teams.");
     }
+
     window.location.href = "/HelloVoter/#/teams/";
     this._loadData();
+    notify_success("Team has been deleted.");
   }
 
   _createTeam = async () => {
@@ -118,6 +121,7 @@ export default class App extends Component {
 
     window.location.href = "/HelloVoter/#/teams/";
     this._loadData();
+    notify_success("Team has been created.");
   }
 
   componentDidMount() {
