@@ -20,7 +20,7 @@ import Settings from './components/Settings';
 import Jwt from './components/Jwt';
 import About from './components/About';
 
-import { _fetch, notify_error, Root, Sidebar, SidebarItem, Main, Icon } from './common.js';
+import { _fetch, notify_error, Icon } from './common.js';
 
 import { faColumns, faUser, faUsers, faMap, faGlobe, faClipboard, faChartPie,
          faFileUpload, faSignOutAlt, faAward, faCog } from '@fortawesome/free-solid-svg-icons';
@@ -240,6 +240,24 @@ class App extends Component {
     );
   }
 }
+
+const Root = (props) => (
+  <div style={{display: 'flex'}} {...props}/>
+);
+
+const Sidebar = (props) => (
+  <div style={{width: '22vw', height: '100vh', overlow: 'auto', background: '#eee'}} {...props}/>
+);
+
+const SidebarItem = (props) => (
+  <div style={{whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', padding: '5px 10px'}} {...props}/>
+);
+
+const Main = (props) => (
+  <div style={{flex: 1, height: '100vh', overflow: 'auto'}}>
+    <div style={{padding: '20px'}} {...props}/>
+  </div>
+);
 
 const NoMatch = ({ location }) => (
   <div>
