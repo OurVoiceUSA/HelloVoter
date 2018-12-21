@@ -11,11 +11,14 @@ export default class App extends Component {
   constructor(props) {
     super(props);
 
+    let perPage = localStorage.getItem('canvassersperpage');
+    if (!perPage) perPage = 5;
+
     this.state = {
       loading: true,
       canvassers: [],
       search: "",
-      perPage: 5,
+      perPage: perPage,
       pageNum: 1,
     };
 
@@ -28,6 +31,7 @@ export default class App extends Component {
   }
 
   handlePageNumChange(obj) {
+    localStorage.setItem('canvassersperpage', obj.value);
     this.setState({pageNum: 1, perPage: obj.value});
   }
 
