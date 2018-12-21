@@ -108,38 +108,36 @@ const ListCanvassers = (props) => {
     list.push(<CardCanvasser key={c.id} canvasser={c} refer={props.refer} />);
   });
 
-  if ((props.canvassers.length/perPage) > 1) {
-    paginate = (
-      <div style={{display: 'flex'}}>
-        <ReactPaginate previousLabel={"previous"}
-          nextLabel={"next"}
-          breakLabel={"..."}
-          breakClassName={"break-me"}
-          pageCount={props.canvassers.length/perPage}
-          marginPagesDisplayed={1}
-          pageRangeDisplayed={8}
-          onPageChange={props.refer.handlePageClick}
-          containerClassName={"pagination"}
-          subContainerClassName={"pages pagination"}
-          activeClassName={"active"}
-        />
-        &nbsp;&nbsp;&nbsp;
-        <div style={{width: 75}}>
-        # Per Page <Select
-          value={{value: perPage, label: perPage}}
-          onChange={props.refer.handlePageNumChange}
-          options={[
-            {value: 5, label: 5},
-            {value: 10, label: 10},
-            {value: 25, label: 25},
-            {value: 50, label: 50},
-            {value: 100, label: 100}
-          ]}
-        />
-        </div>
+  paginate = (
+    <div style={{display: 'flex'}}>
+      <ReactPaginate previousLabel={"previous"}
+        nextLabel={"next"}
+        breakLabel={"..."}
+        breakClassName={"break-me"}
+        pageCount={props.canvassers.length/perPage}
+        marginPagesDisplayed={1}
+        pageRangeDisplayed={8}
+        onPageChange={props.refer.handlePageClick}
+        containerClassName={"pagination"}
+        subContainerClassName={"pages pagination"}
+        activeClassName={"active"}
+      />
+      &nbsp;&nbsp;&nbsp;
+      <div style={{width: 75}}>
+      # Per Page <Select
+        value={{value: perPage, label: perPage}}
+        onChange={props.refer.handlePageNumChange}
+        options={[
+          {value: 5, label: 5},
+          {value: 10, label: 10},
+          {value: 25, label: 25},
+          {value: 50, label: 50},
+          {value: 100, label: 100}
+        ]}
+      />
       </div>
-    );
-  }
+    </div>
+  );
 
   return (
     <div>
