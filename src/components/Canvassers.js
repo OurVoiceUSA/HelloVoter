@@ -57,10 +57,6 @@ export default class App extends Component {
 
     return (
       <RootLoader flag={this.state.loading} func={() => this._loadData()}>
-
-        Search: <input type="text" value={this.state.value} onChange={this.onTypeSearch} data-tip="Search by name, email, location, or admin" />
-        <br />
-        <Link to={'/canvassers/'}>Canvassers</Link> - <Link to={'/canvassers/unassigned'}>Unassigned</Link> - <Link to={'/canvassers/denied'}>Denied</Link>
         <Router>
           <div>
             <Route exact={true} path="/canvassers/" render={() => (<ListCanvassers refer={this} canvassers={ready} />)} />
@@ -85,6 +81,9 @@ const ListCanvassers = (props) => {
 
   return (
     <div>
+      Search: <input type="text" value={props.refer.state.value} onChange={props.refer.onTypeSearch} data-tip="Search by name, email, location, or admin" />
+      <br />
+      <Link to={'/canvassers/'}>Canvassers</Link> - <Link to={'/canvassers/unassigned'}>Unassigned</Link> - <Link to={'/canvassers/denied'}>Denied</Link>
       <h3>{props.type}Canvassers ({props.canvassers.length})</h3>
       {list}
     </div>
