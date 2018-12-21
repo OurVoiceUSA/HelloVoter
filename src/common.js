@@ -132,7 +132,7 @@ export const RootLoader = (props) => {
 }
 
 export function _searchStringCanvasser(c) {
-    return (c.name+c.email+c.homeaddress+(c.admin?"admin":"")).toLowerCase();
+    return (c.id+c.name+c.email+c.homeaddress+(c.admin?"admin":"")).toLowerCase();
 }
 
 export async function _loadCanvasser(refer, id) {
