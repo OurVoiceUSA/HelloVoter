@@ -341,7 +341,7 @@ export class CardCanvasser extends Component {
             <Img width={50} src={this.state.canvasser.avatar} loader={<Loader width={50} />} unloader={<Icon style={{width: 50, height: 50, color: "gray"}} icon={faUser} />} />
           </div>
           <div style={{flex: 1, overflow: 'auto'}}>
-            Name: {canvasser.name} {(this.props.edit?'':(<Link to={'/canvassers/'+canvasser.id} onClick={() => this.props.refer.setState({thisCanvasser: this.props.canvasser})}>view profile</Link>))}
+            Name: {canvasser.name} {(this.props.edit?'':(<Link to={'/canvassers/view/'+canvasser.id} onClick={() => this.props.refer.setState({thisCanvasser: this.props.canvasser})}>view profile</Link>))}
             <CanvasserBadges canvasser={canvasser} />
             <br />
             Location: {(canvasser.homeaddress?canvasser.homeaddress:'N/A')} <br />
