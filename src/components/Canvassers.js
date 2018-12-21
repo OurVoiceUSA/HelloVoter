@@ -1,8 +1,11 @@
 import React, { Component } from 'react';
 
 import { HashRouter as Router, Route, Link } from 'react-router-dom';
+import ReactPaginate from 'react-paginate';
 
 import { notify_error, RootLoader, CardCanvasser, _loadCanvassers, _searchStringCanvasser } from '../common.js';
+
+const perPage = 5;
 
 export default class App extends Component {
 
@@ -13,6 +16,7 @@ export default class App extends Component {
       loading: true,
       canvassers: [],
       search: "",
+      pageNum: 1,
     };
 
     this.onTypeSearch = this.onTypeSearch.bind(this);
@@ -23,7 +27,10 @@ export default class App extends Component {
   }
 
   onTypeSearch (event) {
-    this.setState({search: event.target.value.toLowerCase()})
+    this.setState({
+      search: event.target.value.toLowerCase(),
+      pageNum: 1,
+    })
   }
 
   _loadData = async () => {
@@ -35,6 +42,10 @@ export default class App extends Component {
       notify_error(e, "Unable to load canvassers.");
     }
     this.setState({loading: false, canvassers});
+  }
+
+  handlePageClick = (data) => {
+    this.setState({pageNum: data.selected+1});
   }
 
   render() {
@@ -76,6 +87,8 @@ const ListCanvassers = (props) => {
   let list = [];
 
   props.canvassers.forEach((c, idx) => {
+    let tp = Math.floor(idx/perPage)+1;
+    if (tp !== props.refer.state.pageNum) return;
     list.push(<CardCanvasser key={c.id} canvasser={c} refer={props.refer} />);
   });
 
@@ -84,8 +97,21 @@ const ListCanvassers = (props) => {
       Search: <input type="text" value={props.refer.state.value} onChange={props.refer.onTypeSearch} data-tip="Search by name, email, location, or admin" />
       <br />
       <Link to={'/canvassers/'}>Canvassers</Link> - <Link to={'/canvassers/unassigned'}>Unassigned</Link> - <Link to={'/canvassers/denied'}>Denied</Link>
-      <h3>{props.type}Canvassers ({props.canvassers.length})</h3>
-      {list}
-    </div>
-  );
+      <div>
+        <h3>{props.type}Canvassers ({props.canvassers.length})</h3>
+        {list}
+        <ReactPaginate previousLabel={"previous"}
+                       nextLabel={"next"}
+                       breakLabel={"..."}
+                       breakClassName={"break-me"}
+                       pageCount={props.canvassers.length/perPage}
+                       marginPagesDisplayed={1}
+                       pageRangeDisplayed={8}
+                       onPageChange={props.refer.handlePageClick}
+                       containerClassName={"pagination"}
+                       subContainerClassName={"pages pagination"}
+                       activeClassName={"active"} />
+       </div>
+     </div>
+   );
 };
