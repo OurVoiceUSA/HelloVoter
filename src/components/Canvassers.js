@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 
 import { HashRouter as Router, Route, Link } from 'react-router-dom';
 
-import { RootLoader, CardCanvasser, _loadCanvassers, _searchStringCanvasser } from '../common.js';
+import { notify_error, RootLoader, CardCanvasser, _loadCanvassers, _searchStringCanvasser } from '../common.js';
 
 export default class App extends Component {
 
@@ -27,7 +27,14 @@ export default class App extends Component {
   }
 
   _loadData = async () => {
-    this.setState({canvassers: await _loadCanvassers(this), search: ""});
+    let canvassers = [];
+    this.setState({loading: true, search: ""});
+    try {
+      canvassers = await _loadCanvassers(this);
+    } catch (e) {
+      notify_error(e, "Unable to load canvassers.");
+    }
+    this.setState({loading: false, canvassers});
   }
 
   render() {
