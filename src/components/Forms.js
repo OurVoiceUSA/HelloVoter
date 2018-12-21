@@ -184,7 +184,9 @@ export default class App extends Component {
   }
 
   _loadForms = async () => {
-    this.setState({forms: await _loadForms(this)});
+    this.setState({loading: true});
+    let forms = await _loadForms(this);
+    this.setState({forms, loading: false});
   }
 
   _createForm = async () => {

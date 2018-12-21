@@ -157,7 +157,7 @@ export default class App extends Component {
       formOptions.push({value: f.id, label: (<CardForm key={f.id} form={f} />)})
     })
 
-    this.setState({memberOptions, turfOptions, formOptions});
+    this.setState({memberOptions, turfOptions, formOptions, loading: false});
   }
 
   render() {
