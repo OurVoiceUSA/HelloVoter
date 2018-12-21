@@ -2,10 +2,9 @@ import React, { Component } from 'react';
 
 import { HashRouter as Router, Route, Link } from 'react-router-dom';
 import ReactPaginate from 'react-paginate';
+import Select from 'react-select';
 
 import { notify_error, RootLoader, CardCanvasser, _loadCanvassers, _searchStringCanvasser } from '../common.js';
-
-const perPage = 5;
 
 export default class App extends Component {
 
@@ -16,14 +15,20 @@ export default class App extends Component {
       loading: true,
       canvassers: [],
       search: "",
+      perPage: 5,
       pageNum: 1,
     };
 
     this.onTypeSearch = this.onTypeSearch.bind(this);
+    this.handlePageNumChange = this.handlePageNumChange.bind(this);
   }
 
   componentDidMount() {
     this._loadData();
+  }
+
+  handlePageNumChange(obj) {
+    this.setState({pageNum: 1, perPage: obj.value});
   }
 
   onTypeSearch (event) {
@@ -70,6 +75,11 @@ export default class App extends Component {
       <RootLoader flag={this.state.loading} func={() => this._loadData()}>
         <Router>
           <div>
+            Search: <input type="text" value={this.state.value} onChange={this.onTypeSearch} data-tip="Search by name, email, location, or admin" />
+            <br />
+            <Link to={'/canvassers/'} onClick={() => this.setState({pageNum: 1})}>Canvassers ({ready.length})</Link>&nbsp;-&nbsp;
+            <Link to={'/canvassers/unassigned'} onClick={() => this.setState({pageNum: 1})}>Unassigned ({unassigned.length})</Link>&nbsp;-&nbsp;
+            <Link to={'/canvassers/denied'} onClick={() => this.setState({pageNum: 1})}>Denied ({denied.length})</Link>
             <Route exact={true} path="/canvassers/" render={() => (<ListCanvassers refer={this} canvassers={ready} />)} />
             <Route exact={true} path="/canvassers/unassigned" render={() => (<ListCanvassers refer={this} type="Unassigned" canvassers={unassigned} />)} />
             <Route exact={true} path="/canvassers/denied" render={() => (<ListCanvassers refer={this} type="Denied" canvassers={denied} />)} />
@@ -84,6 +94,8 @@ export default class App extends Component {
 }
 
 const ListCanvassers = (props) => {
+  const perPage = props.refer.state.perPage;
+  let paginate = (<div></div>);
   let list = [];
 
   props.canvassers.forEach((c, idx) => {
@@ -92,26 +104,45 @@ const ListCanvassers = (props) => {
     list.push(<CardCanvasser key={c.id} canvasser={c} refer={props.refer} />);
   });
 
+  if ((props.canvassers.length/perPage) > 1) {
+    paginate = (
+      <div style={{display: 'flex'}}>
+        <ReactPaginate previousLabel={"previous"}
+          nextLabel={"next"}
+          breakLabel={"..."}
+          breakClassName={"break-me"}
+          pageCount={props.canvassers.length/perPage}
+          marginPagesDisplayed={1}
+          pageRangeDisplayed={8}
+          onPageChange={props.refer.handlePageClick}
+          containerClassName={"pagination"}
+          subContainerClassName={"pages pagination"}
+          activeClassName={"active"}
+        />
+        &nbsp;&nbsp;&nbsp;
+        <div style={{width: 75}}>
+        # Per Page <Select
+          value={{value: perPage, label: perPage}}
+          onChange={props.refer.handlePageNumChange}
+          options={[
+            {value: 5, label: 5},
+            {value: 10, label: 10},
+            {value: 25, label: 25},
+            {value: 50, label: 50},
+            {value: 100, label: 100}
+          ]}
+        />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
-      Search: <input type="text" value={props.refer.state.value} onChange={props.refer.onTypeSearch} data-tip="Search by name, email, location, or admin" />
-      <br />
-      <Link to={'/canvassers/'}>Canvassers</Link> - <Link to={'/canvassers/unassigned'}>Unassigned</Link> - <Link to={'/canvassers/denied'}>Denied</Link>
-      <div>
-        <h3>{props.type}Canvassers ({props.canvassers.length})</h3>
-        {list}
-        <ReactPaginate previousLabel={"previous"}
-                       nextLabel={"next"}
-                       breakLabel={"..."}
-                       breakClassName={"break-me"}
-                       pageCount={props.canvassers.length/perPage}
-                       marginPagesDisplayed={1}
-                       pageRangeDisplayed={8}
-                       onPageChange={props.refer.handlePageClick}
-                       containerClassName={"pagination"}
-                       subContainerClassName={"pages pagination"}
-                       activeClassName={"active"} />
-       </div>
+      <h3>{props.type}Canvassers ({props.canvassers.length})</h3>
+      {paginate}
+      {list}
+      {paginate}
      </div>
    );
 };
