@@ -262,16 +262,19 @@ function uncle(req, res) {
 }
 
 async function dashboard(req, res) {
-  if (req.user.admin === true) return res.json({
-    canvassers: (await cqa('match (a:Canvasser) return count(a)')).data[0],
-    teams: (await cqa('match (a:Team) return count(a)')).data[0],
-    turfs: (await cqa('match (a:Turf) return count(a)')).data[0],
-    questions: (await cqa('match (a:Question) return count(a)')).data[0],
-    forms: (await cqa('match (a:Form) return count(a)')).data[0],
-    addresses: (await cqa('match (a:Address) where not a.multi_unit = true return count(a)')).data[0]+(await cqa('match (a:Unit) return count(a)')).data[0],
-    version: version,
-  });
-
+  try {
+    if (req.user.admin === true) return res.json({
+      canvassers: (await cqa('match (a:Canvasser) return count(a)')).data[0],
+      teams: (await cqa('match (a:Team) return count(a)')).data[0],
+      turfs: (await cqa('match (a:Turf) return count(a)')).data[0],
+      questions: (await cqa('match (a:Question) return count(a)')).data[0],
+      forms: (await cqa('match (a:Form) return count(a)')).data[0],
+      addresses: (await cqa('match (a:Address) where not a.multi_unit = true return count(a)')).data[0]+(await cqa('match (a:Unit) return count(a)')).data[0],
+      version: version,
+    });
+  } catch (e) {
+    return _500(res, e);
+  }
   return res.json({});
 }
 
@@ -288,13 +291,16 @@ async function google_maps_key(req, res) {
 async function _canvassersFromCypher(query, args) {
   let canvassers = [];
 
-  let ref = await cqa(query, args)
-  for (let i in ref.data) {
-    let c = ref.data[i];
-    c.ass = await canvassAssignments(c);
-    canvassers.push(c);
+  try {
+    let ref = await cqa(query, args)
+    for (let i in ref.data) {
+      let c = ref.data[i];
+      c.ass = await canvassAssignments(c);
+      canvassers.push(c);
+    }
+  } catch (e) {
+    return _500(res, e);
   }
-
   return canvassers;
 }
 
