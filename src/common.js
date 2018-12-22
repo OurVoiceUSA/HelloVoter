@@ -593,6 +593,7 @@ export async function _loadAddresses(refer) {
 
 export function extract_addr(addr) {
   let arr = addr.split(', ');
+  if (arr.length < 4) return addr;
   arr.shift();
   return arr.join(', ');
 }
