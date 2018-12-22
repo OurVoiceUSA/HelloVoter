@@ -344,7 +344,7 @@ export class CardCanvasser extends Component {
             Name: {canvasser.name} {(this.props.edit?'':(<Link to={'/canvassers/view/'+canvasser.id}>view profile</Link>))}
             <CanvasserBadges canvasser={canvasser} />
             <br />
-            Location: {(canvasser.homeaddress?canvasser.homeaddress:'N/A')} <br />
+            Location: {(canvasser.homeaddress?extract_addr(canvasser.homeaddress):'N/A')} <br />
             Last Login: {timeAgo.format(new Date(canvasser.last_seen-30000))}
           </div>
         </div>
@@ -589,6 +589,12 @@ export async function _loadAddresses(refer) {
     notify_error(e, "Unable to load address information.");
   }
   return addresses;
+}
+
+export function extract_addr(addr) {
+  let arr = addr.split(', ');
+  arr.shift();
+  return arr.join(', ');
 }
 
 export const PlacesAutocomplete = (props) => (
