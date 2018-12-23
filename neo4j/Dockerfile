@@ -1,4 +1,5 @@
 FROM neo4j:3.4.9
 
 ADD https://github.com/neo4j-contrib/spatial/releases/download/0.25.7-neo4j-3.4.9/neo4j-spatial-0.25.7-neo4j-3.4.9-server-plugin.jar /var/lib/neo4j/plugins/
+ADD https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases/download/3.4.0.4/apoc-3.4.0.4-all.jar /var/lib/neo4j/plugins/
 
