@@ -337,12 +337,20 @@ async function canvasserGet(req, res) {
   return res.json(canvassers[0]);
 }
 
-function canvasserUpdate(req, res) {
+async function canvasserUpdate(req, res) {
   if (!req.user.admin && req.body.id !== req.user.id) return _403(res, "Permission denied.");
   // TODO: need to validate input, and only do updates based on what was posted
   if (!valid(req.body.id)) return _400(res, "Invalid value to parameter 'id'.");
 
-  return cqdo(req, res, 'match (a:Canvasser {id:{id}}) set a.homeaddress={address}, a.homelat={lat}, a.homelng={lng}', req.body);
+  req.body.wkt = "POINT("+req.body.lng+" "+req.body.lat+")";
+
+  try {
+    await cqa('match (a:Canvasser {id:{id}}) set a.homeaddress={address}, a.homelat={lat}, a.homelng={lng}, a.wkt={wkt}', req.body);
+  } catch (e) {
+    return _500(res, e);
+  }
+
+  return cqdo(req, res, 'match (a:Canvasser {id:{id}}) where not (a)<-[:RTREE_REFERENCE]-() with collect(a) as nodes call spatial.addNodes("canvasser", nodes) yield count return count', req.body, true);
 }
 
 async function canvasserLock(req, res) {
