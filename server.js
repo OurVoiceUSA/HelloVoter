@@ -293,16 +293,13 @@ async function google_maps_key(req, res) {
 async function _canvassersFromCypher(query, args) {
   let canvassers = [];
 
-  try {
-    let ref = await cqa(query, args)
-    for (let i in ref.data) {
-      let c = ref.data[i];
-      c.ass = await canvassAssignments(c);
-      canvassers.push(c);
-    }
-  } catch (e) {
-    return _500(res, e);
+  let ref = await cqa(query, args)
+  for (let i in ref.data) {
+    let c = ref.data[i];
+    c.ass = await canvassAssignments(c);
+    canvassers.push(c);
   }
+
   return canvassers;
 }
 
