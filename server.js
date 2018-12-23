@@ -315,7 +315,7 @@ async function canvasserList(req, res) {
     if (req.user.admin)
       canvassers = await _canvassersFromCypher('match (a:Canvasser) return a');
     else
-      canvassers = await _canvassersFromCypher('match (a:Canvasser {id:{id}})-[:MEMBERS {leader:true}]-(:Team)-[]-(t:Turf) where t.wkt is not null call spatial.intersects("canvasser", t.wkt) yield node return node UNION match (a:Canvasser {id:{id}}) optional match (a)-[:MEMBERS]-(:Team)-[:MEMBERS]-(c:Canvasser) return distinct(c) as node');
+      canvassers = await _canvassersFromCypher('match (a:Canvasser {id:{id}})-[:MEMBERS {leader:true}]-(:Team)-[]-(t:Turf) where t.wkt is not null call spatial.intersects("canvasser", t.wkt) yield node return node UNION match (a:Canvasser {id:{id}}) optional match (a)-[:MEMBERS]-(:Team)-[:MEMBERS]-(c:Canvasser) return distinct(c) as node', req.user);
   } catch (e) {
     return _500(res, e);
   }
