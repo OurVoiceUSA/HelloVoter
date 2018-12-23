@@ -156,11 +156,11 @@ function _500(res, obj) {
   return sendError(res, 500, "Internal server error.");
 }
 
-async function sameTeam(ida, idb) {
+async function canvasserCanSee(ida, idb) {
   if (ida === idb) return true;
 
   try {
-    let ref = await cqa('match (a:Canvasser {id:{ida}})-[:MEMBERS]-(c:Team)-[:MEMBERS]-(b:Canvasser {id:{idb}}) return c;', {ida: ida, idb: idb});
+    let ref = await cqa('match (a:Canvasser {id:{ida}})-[:MEMBERS {leader:true}]-(:Team)-[]-(t:Turf) where t.wkt is not null call spatial.intersects("canvasser", t.wkt) yield node where node.id = {idb} return node UNION match (a:Canvasser {id:{ida}})-[:MEMBERS]-(:Team)-[:MEMBERS]-(c:Canvasser) return distinct(c) as node', {ida: ida, idb: idb});
     if (ref.data.length > 0)
       return true;
   } catch (e) {
@@ -321,7 +321,7 @@ async function canvasserList(req, res) {
 }
 
 async function canvasserGet(req, res) {
-  if (!req.user.admin && req.query.id !== req.user.id && !await sameTeam(req.query.id, req.user.id)) return _403(res, "Permission denied.");
+  if (!req.user.admin && req.query.id !== req.user.id && !await canvasserCanSee(req.user.id, req.query.id)) return _403(res, "Permission denied.");
 
   let canvassers = [];
 
