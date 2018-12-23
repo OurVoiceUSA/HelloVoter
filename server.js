@@ -68,7 +68,7 @@ cqa('return timestamp()').catch((e) => {console.error("Unable to connect to data
   cqa('create constraint on (a:Address) assert a.id is unique');
   cqa('create constraint on (a:Unit) assert a.id is unique');
   cqa('create constraint on (a:Survey) assert a.id is unique');
-  cqa('call spatial.addWKTLayer(\'turf\', \'wkt\')').catch(e => {});
+  ['turf','canvasser','address'].forEach((i) => cqa('call spatial.addWKTLayer({type}, \'wkt\')', {type: i}).catch(e => {}));
 });
 
 function getConfig(item, required, def) {
