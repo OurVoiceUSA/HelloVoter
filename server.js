@@ -12,6 +12,7 @@ import http from 'http';
 import fs from 'fs';
 import {ingeojson} from 'ourvoiceusa-sdk-js';
 import circleToPolygon from 'circle-to-polygon';
+import wkx from 'wkx';
 import neo4j from 'neo4j-driver';
 import BoltAdapter from 'node-neo4j-bolt-adapter';
 import * as secrets from "docker-secrets-nodejs";
@@ -67,6 +68,7 @@ cqa('return timestamp()').catch((e) => {console.error("Unable to connect to data
   cqa('create constraint on (a:Address) assert a.id is unique');
   cqa('create constraint on (a:Unit) assert a.id is unique');
   cqa('create constraint on (a:Survey) assert a.id is unique');
+  cqa('call spatial.addWKTLayer(\'turf\', \'wkt\')').catch(e => {});
 });
 
 function getConfig(item, required, def) {
@@ -484,8 +486,17 @@ function turfList(req, res) {
 function turfCreate(req, res) {
   if (!valid(req.body.name)) return _400(res, "Invalid value to parameter 'name'.");
   if (typeof req.body.geometry !== "object" || typeof req.body.geometry.coordinates !== "object") return _400(res, "Invalid value to parameter 'geometry'.");
+
+  try {
+    req.body.wkt = wkx.Geometry.parseGeoJSON(req.body.geometry).toEwkt().split(';')[1];
+  } catch (e) {
+    return _500(res, e);
+  }
+
+  // store geojson too as string
   req.body.geometry = JSON.stringify(req.body.geometry);
-  return cqdo(req, res, 'create (a:Turf {created: timestamp(), name:{name}, geometry:{geometry}})', req.body, true);
+
+  return cqdo(req, res, 'create (a:Turf {created: timestamp(), name:{name}, geometry: {geometry}, wkt:{wkt}}) WITH collect(a) AS t CALL spatial.addNodes(\'turf\', t) YIELD count return count', req.body, true);
 }
 
 function turfDelete(req, res) {
