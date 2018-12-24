@@ -6,9 +6,11 @@ import Select from 'react-select';
 
 import { faUsers } from '@fortawesome/free-solid-svg-icons';
 
-import { _fetch, notify_error, notify_success, RootLoader, Loader, Icon, CardCanvasser, _loadCanvassers,
-  CardTurf, _loadTurf, CardForm, _loadForms, _loadTeams, _searchStringCanvasser }
-from '../common.js';
+import {
+  _fetch, notify_error, notify_success, _loadCanvassers, _loadTurf, _loadForms, _loadTeams, _searchStringCanvasser,
+  RootLoader, Loader, Icon, CardTurf, CardForm,
+} from '../common.js';
+import { CardCanvasser } from './Canvassers';
 
 export default class App extends Component {
 
