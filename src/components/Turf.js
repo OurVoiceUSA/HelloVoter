@@ -343,7 +343,6 @@ export default class App extends Component {
               Search: <input type="text" value={this.state.value} onChange={this.onTypeSearch} data-tip="Search by name, email, location, or admin" />
               <br />
               <ListTurf turf={list} refer={this} />
-              <Link to={'/turf/add'}><button>Add Turf</button></Link>
             </RootLoader>
           )} />
           <Route exact={true} path="/turf/add" render={() => (
@@ -435,6 +434,7 @@ const ListTurf = (props) => {
   return (
     <div>
       <h3>{props.type}Turf ({props.turf.length})</h3>
+      <Link to={'/turf/add'}><button>Add Turf</button></Link>
       {paginate}
       {list}
       {paginate}

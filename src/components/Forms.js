@@ -297,7 +297,6 @@ export default class App extends Component {
               Search: <input type="text" value={this.state.value} onChange={this.onTypeSearch} data-tip="Search by name, email, location, or admin" />
               <br />
               <ListForms forms={list} refer={this} />
-              <Link to={'/forms/add'}><button>Add Form</button></Link>
             </RootLoader>
           )} />
           <Route path="/forms/add" render={(props) => (
@@ -407,6 +406,7 @@ const ListForms = (props) => {
   return (
     <div>
       <h3>{props.type}Forms ({props.forms.length})</h3>
+      <Link to={'/forms/add'}><button>Add Form</button></Link>
       {paginate}
       {list}
       {paginate}

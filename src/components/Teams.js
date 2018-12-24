@@ -131,7 +131,6 @@ export default class App extends Component {
             <RootLoader flag={this.state.loading} func={this._loadData}>
               Search: <input type="text" value={this.state.value} onChange={this.onTypeSearch} data-tip="Search by name, email, location, or admin" />
               <ListTeams refer={this} teams={list} />
-              <Link to={'/teams/add'}><button>Add Team</button></Link>
             </RootLoader>
           )} />
           <Route exact={true} path="/teams/add" render={() => (
@@ -208,6 +207,7 @@ const ListTeams = (props) => {
   return (
     <div>
       <h3>{props.type}Teams ({props.teams.length})</h3>
+      <Link to={'/teams/add'}><button>Add Team</button></Link>
       {paginate}
       {list}
       {paginate}
