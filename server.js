@@ -494,10 +494,13 @@ function teamFormRemove(req, res) {
 // turf
 
 function turfList(req, res) {
+  let geom = false;
+  if (req.query.geometry) geom = true;
+
   if (req.user.admin)
-    return cqdo(req, res, 'match (a:Turf) return a{.id, .name, .created, .geometry}');
+    return cqdo(req, res, 'match (a:Turf) return a{.id, .name, .created'+(geom?', .geometry':'')+'}');
   else
-    return cqdo(req, res, 'match (a:Canvasser {id:{id}})-[:MEMBERS]-(b:Team)-[:ASSIGNED]-(c:Turf) return c UNION match (a:Canvasser {id:{id}})-[:ASSIGNED]-(c:Turf) return c{.id, .name, .created, .geometry}', req.user);
+    return cqdo(req, res, 'match (a:Canvasser {id:{id}})-[:MEMBERS]-(b:Team)-[:ASSIGNED]-(c:Turf) return c UNION match (a:Canvasser {id:{id}})-[:ASSIGNED]-(c:Turf) return c{.id, .name, .created'+(geom?', .geometry':'')+'}', req.user);
 }
 
 function turfCreate(req, res) {
