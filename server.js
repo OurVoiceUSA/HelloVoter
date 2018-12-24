@@ -324,7 +324,7 @@ async function canvasserList(req, res) {
     if (req.user.admin)
       canvassers = await _canvassersFromCypher('match (a:Canvasser) return a');
     else
-      canvassers = await _canvassersFromCypher('match (a:Canvasser {id:{id}})-[:MEMBERS {leader:true}]-(:Team)-[]-(t:Turf) where t.wkt is not null call spatial.intersects("canvasser", t.wkt) yield node return node UNION match (a:Canvasser {id:{id}}) optional match (a)-[:MEMBERS]-(:Team)-[:MEMBERS]-(c:Canvasser) return distinct(c) as node', req.user);
+      canvassers = await _canvassersFromCypher('match (a:Canvasser {id:{id}})-[:MEMBERS {leader:true}]-(:Team)-[]-(t:Turf) where t.wkt is not null call spatial.intersects("canvasser", t.wkt) yield node return node UNION match (a:Canvasser {id:{id}})-[:MEMBERS]-(:Team)-[:MEMBERS]-(c:Canvasser) return distinct(c) as node UNION match (a:Canvasser {id:{id}}) return a as node', req.user);
   } catch (e) {
     return _500(res, e);
   }
@@ -392,25 +392,29 @@ function teamList(req, res) {
 
 function teamCreate(req, res) {
   if (!valid(req.body.name)) return _400(res, "Invalid value to parameter 'name'.");
-  return cqdo(req, res, 'create (a:Team {created: timestamp(), name:{name}})', req.body, true);
+
+  req.body.teamId = uuidv4();
+  req.body.author_id = req.user.id;
+
+  return cqdo(req, res, 'match (a:Canvasser {id:{author_id}}) create (a:Team {id:{teamId}, created: timestamp(), name:{name}})-[:CREATOR]->(a)', req.body, true);
 }
 
 function teamDelete(req, res) {
-  if (!valid(req.body.name)) return _400(res, "Invalid value to parameter 'name'.");
-  return cqdo(req, res, 'match (a:Team {name:{name}}) detach delete a', req.body, true);
+  if (!valid(req.body.teamId)) return _400(res, "Invalid value to parameter 'teamId'.");
+  return cqdo(req, res, 'match (a:Team {id:{teamId}}) detach delete a', req.body, true);
 }
 
 async function teamMembersList(req, res) {
-  if (!valid(req.query.teamName)) return _400(res, "Invalid value to parameter 'teamName'.");
+  if (!valid(req.query.teamId)) return _400(res, "Invalid value to parameter 'teamId'.");
 
   let canvassers = [];
 
   try {
     if (req.user.admin)
-      canvassers = await _canvassersFromCypher('match (a:Canvasser)-[:MEMBERS]-(b:Team {name:{teamName}}) return a', req.query);
+      canvassers = await _canvassersFromCypher('match (a:Canvasser)-[:MEMBERS]-(b:Team {id:{teamId}}) return a', req.query);
     else {
       req.query.id = req.user.id;
-      canvassers = await _canvassersFromCypher('match (a:Canvasser {id:{id}})-[:MEMBERS]-(b:Team {name:{teamName}}) optional match (b)-[:MEMBERS]-(c:Canvasser) return distinct(c)', req.query);
+      canvassers = await _canvassersFromCypher('match (a:Canvasser {id:{id}})-[:MEMBERS]-(b:Team {id:{teamId}}) optional match (b)-[:MEMBERS]-(c:Canvasser) return distinct(c)', req.query);
     }
   } catch (e) {
     return _500(res, e);
@@ -420,76 +424,54 @@ async function teamMembersList(req, res) {
 }
 
 function teamMembersAdd(req, res) {
-  if (!valid(req.body.teamName) || !valid(req.body.cId)) return _400(res, "Invalid value to parameter 'teamName' or 'cId'.");
-  return cqdo(req, res, 'match (a:Canvasser {id:{cId}}), (b:Team {name:{teamName}}) merge (b)-[:MEMBERS]->(a)', req.body, true);
+  if (!valid(req.body.teamId) || !valid(req.body.cId)) return _400(res, "Invalid value to parameter 'teamId' or 'cId'.");
+  return cqdo(req, res, 'match (a:Canvasser {id:{cId}}), (b:Team {teamId:{teamId}}) merge (b)-[:MEMBERS]->(a)', req.body, true);
 }
 
 function teamMembersRemove(req, res) {
-  if (!valid(req.body.teamName) || valid(!req.body.cId)) return _400(res, "Invalid value to parameter 'teamName' or 'cId'.");
-  return cqdo(req, res, 'match (a:Canvasser {id:{cId}})-[r:MEMBERS]-(b:Team {name:{teamName}}) delete r', req.body, true);
-}
-
-function teamMembersWipe(req, res) {
-  if (!valid(req.body.teamName)) return _400(res, "Invalid value to parameter 'teamName'.");
-  return cqdo(req, res, 'match (a:Canvasser)-[r:MEMBERS]-(b:Team {name:{teamName}}) delete r', req.body, true);
+  if (!valid(req.body.teamId) || valid(!req.body.cId)) return _400(res, "Invalid value to parameter 'teamId' or 'cId'.");
+  return cqdo(req, res, 'match (a:Canvasser {id:{cId}})-[r:MEMBERS]-(b:Team {id:{teamId}}) delete r', req.body, true);
 }
 
 function teamTurfList(req, res) {
-  if (!valid(req.query.teamName)) return _400(res, "Invalid value to parameter 'teamName'.");
+  if (!valid(req.query.teamId)) return _400(res, "Invalid value to parameter 'teamId'.");
   if (req.user.admin)
-    return cqdo(req, res, 'match (a:Turf)-[:ASSIGNED]-(b:Team {name:{teamName}}) return a', req.query);
+    return cqdo(req, res, 'match (a:Turf)-[:ASSIGNED]-(b:Team {id:{teamId}}) return a', req.query);
   else {
     req.query.id = req.user.id;
-    return cqdo(req, res, 'match (a:Turf)-[:ASSIGNED]-(b:Team {name:{teamName}})-[:MEMBERS]-(c:Canvasser {id:{id}}) return a', {
-      teamName: req.query.teamName,
-      id: req.user.id,
-    });
+    return cqdo(req, res, 'match (a:Turf)-[:ASSIGNED]-(b:Team {id:{teamId}})-[:MEMBERS]-(c:Canvasser {id:{id}}) return a', req.query);
   }
 }
 
 function teamTurfAdd(req, res) {
-  if (!valid(req.body.teamName) || !valid(req.body.turfName)) return _400(res, "Invalid value to parameter 'teamName' or 'turfName'.");
-  return cqdo(req, res, 'match (a:Turf {name:{turfName}}), (b:Team {name:{teamName}}) merge (b)-[:ASSIGNED]->(a)', req.body, true);
+  if (!valid(req.body.teamId) || !valid(req.body.turformId)) return _400(res, "Invalid value to parameter 'teamId' or 'turformId'.");
+  return cqdo(req, res, 'match (a:Turf {id:{turformId}}), (b:Team {id:{teamId}}) merge (b)-[:ASSIGNED]->(a)', req.body, true);
 }
 
 function teamTurfRemove(req, res) {
-  if (!valid(req.body.teamName) || valid(!req.body.turfName)) return _400(res, "Invalid value to parameter 'teamName' or 'turfName'.");
-  return cqdo(req, res, 'match (a:Turf {name:{turfName}})-[r:ASSIGNED]-(b:Team {name:{teamName}}) delete r', req.body, true);
-}
-
-function teamTurfWipe(req, res) {
-  if (!valid(req.body.teamName)) return _400(res, "Invalid value to parameter 'teamName'.");
-  return cqdo(req, res, 'match (a:Turf)-[r:ASSIGNED]-(b:Team {name:{teamName}}) delete r', req.body, true);
+  if (!valid(req.body.teamId) || valid(!req.body.turformId)) return _400(res, "Invalid value to parameter 'teamId' or 'turformId'.");
+  return cqdo(req, res, 'match (a:Turf {id:{turformId}})-[r:ASSIGNED]-(b:Team {id:{teamId}}) delete r', req.body, true);
 }
 
 function teamFormList(req, res) {
-  if (!valid(req.query.teamName)) return _400(res, "Invalid value to parameter 'teamName'.");
+  if (!valid(req.query.teamId)) return _400(res, "Invalid value to parameter 'teamId'.");
   if (req.user.admin)
-    return cqdo(req, res, 'match (a:Form)-[:ASSIGNED]-(b:Team {name:{teamName}}) return a', req.query);
+    return cqdo(req, res, 'match (a:Form)-[:ASSIGNED]-(b:Team {id:{teamId}}) return a', req.query);
   else {
     req.query.id = req.user.id;
-    return cqdo(req, res, 'match (a:Form)-[:ASSIGNED]-(b:Team {name:{teamName}})-[:MEMBERS]-(c:Canvasser {id:{id}}) return a', {
-      teamName: req.query.teamName,
-      id: req.user.id,
-    });
+    return cqdo(req, res, 'match (a:Form)-[:ASSIGNED]-(b:Team {id:{teamId}})-[:MEMBERS]-(c:Canvasser {id:{id}}) return a', req.query);
   }
 }
 
 function teamFormAdd(req, res) {
-  if (!valid(req.body.teamName) || !valid(req.body.fId)) return _400(res, "Invalid value to parameter 'teamName' or 'fId'.");
-  return cqdo(req, res, 'match (a:Form {id:{fId}}), (b:Team {name:{teamName}}) merge (b)-[:ASSIGNED]->(a)', req.body, true);
+  if (!valid(req.body.teamId) || !valid(req.body.formId)) return _400(res, "Invalid value to parameter 'teamId' or 'formId'.");
+  return cqdo(req, res, 'match (a:Form {id:{formId}}), (b:Team {id:{teamId}}) merge (b)-[:ASSIGNED]->(a)', req.body, true);
 }
 
 function teamFormRemove(req, res) {
-  if (!valid(req.body.teamName) || valid(!req.body.fId)) return _400(res, "Invalid value to parameter 'teamName' or 'fId'.");
-  return cqdo(req, res, 'match (a:Form {id:{fId}})-[r:ASSIGNED]-(b:Team {name:{teamName}}) delete r', req.body, true);
+  if (!valid(req.body.teamId) || valid(!req.body.formId)) return _400(res, "Invalid value to parameter 'teamId' or 'formId'.");
+  return cqdo(req, res, 'match (a:Form {id:{formId}})-[r:ASSIGNED]-(b:Team {id:{teamId}}) delete r', req.body, true);
 }
-
-function teamFormWipe(req, res) {
-  if (!valid(req.body.teamName)) return _400(res, "Invalid value to parameter 'teamName'.");
-  return cqdo(req, res, 'match (a:Form)-[r:ASSIGNED]-(b:Team {name:{teamName}}) delete r', req.body, true);
-}
-
 
 // turf
 
@@ -513,36 +495,39 @@ function turfCreate(req, res) {
   // store geojson too as string
   req.body.geometry = JSON.stringify(req.body.geometry);
 
-  return cqdo(req, res, 'create (a:Turf {created: timestamp(), name:{name}, geometry: {geometry}, wkt:{wkt}}) WITH collect(a) AS t CALL spatial.addNodes(\'turf\', t) YIELD count return count', req.body, true);
+  req.body.turfId = uuidv4();
+  req.body.author_id = req.user.id;
+
+  return cqdo(req, res, 'match (a:Canvasser {id:{author_id}}) create (b:Turf {id:{turfId}, created: timestamp(), name:{name}, geometry: {geometry}, wkt:{wkt}})-[:AUTHOR]->(a) WITH collect(b) AS t CALL spatial.addNodes(\'turf\', t) YIELD count return count', req.body, true);
 }
 
 function turfDelete(req, res) {
-  if (!valid(req.body.name)) return _400(res, "Invalid value to parameter 'name'.");
-  return cqdo(req, res, 'match (a:Turf {name:{name}}) detach delete a', req.body, true);
+  if (!valid(req.body.turfId)) return _400(res, "Invalid value to parameter 'turfId'.");
+  return cqdo(req, res, 'match (a:Turf {id:{turfId}}) detach delete a', req.body, true);
 }
 
 function turfAssignedTeamList(req, res) {
-  if (!valid(req.query.turfName)) return _400(res, "Invalid value to parameter 'turfName'.");
-  return cqdo(req, res, 'match (a:Turf {name:{turfName}})-[:ASSIGNED]-(b:Team) return b', req.query, true);
+  if (!valid(req.query.turfId)) return _400(res, "Invalid value to parameter 'turfId'.");
+  return cqdo(req, res, 'match (a:Turf {id:{turfId}})-[:ASSIGNED]-(b:Team) return b', req.query, true);
 }
 
 function turfAssignedTeamAdd(req, res) {
-  if (!valid(req.body.turfName) || !valid(req.body.teamName)) return _400(res, "Invalid value to parameter 'turfName' or 'teamName'.");
-  return cqdo(req, res, 'match (a:Turf {name:{turfName}}), (b:Team {name:{teamName}}) merge (a)-[:ASSIGNED]->(b)', req.body, true);
+  if (!valid(req.body.turfId) || !valid(req.body.teamId)) return _400(res, "Invalid value to parameter 'turfId' or 'teamId'.");
+  return cqdo(req, res, 'match (a:Turf {id:{turfId}}), (b:Team {id:{teamId}}) merge (a)-[:ASSIGNED]->(b)', req.body, true);
 }
 
 function turfAssignedTeamRemove(req, res) {
-  if (!valid(req.body.turfName) || !valid(req.body.teamName)) return _400(res, "Invalid value to parameter 'turfName' or 'teamName'.");
-  return cqdo(req, res, 'match (a:Turf {name:{turfName}})-[r:ASSIGNED]-(b:Team {name:{teamName}}) delete r', req.body, true);
+  if (!valid(req.body.turfId) || !valid(req.body.teamId)) return _400(res, "Invalid value to parameter 'turfId' or 'teamId'.");
+  return cqdo(req, res, 'match (a:Turf {id:{turfId}})-[r:ASSIGNED]-(b:Team {id:{teamId}}) delete r', req.body, true);
 }
 
 async function turfAssignedCanvasserList(req, res) {
-  if (!valid(req.query.turfName)) return _400(res, "Invalid value to parameter 'turfName'.");
+  if (!valid(req.query.turfId)) return _400(res, "Invalid value to parameter 'turfId'.");
 
   let canvassers;
 
   try {
-    canvassers = await _canvassersFromCypher('match (a:Turf {name:{turfName}})-[:ASSIGNED]-(b:Canvasser) return b', req.query, true);
+    canvassers = await _canvassersFromCypher('match (a:Turf {id:{turfId}})-[:ASSIGNED]-(b:Canvasser) return b', req.query, true);
   } catch (e) {
     return _500(res, e)
   }
@@ -551,10 +536,10 @@ async function turfAssignedCanvasserList(req, res) {
 }
 
 async function turfAssignedCanvasserAdd(req, res) {
-  if (!valid(req.body.turfName) || !valid(req.body.cId)) return _400(res, "Invalid value to parameter 'turfName' or 'cId'.");
+  if (!valid(req.body.turfId) || !valid(req.body.cId)) return _400(res, "Invalid value to parameter 'turfId' or 'cId'.");
   if (!req.user.admin) return _403(res, "Permission denied.");
 
-  if (req.body.turfName === 'auto')
+  if (req.body.turfId === 'auto')
     return cqdo(req, res, "match (a:Canvasser {id:{cId}}) set a.autoturf=true", req.body, true);
 
   if (!req.body.override) {
@@ -564,7 +549,7 @@ async function turfAssignedCanvasserAdd(req, res) {
       ret = await cqa('match (a:Canvasser {id:{cId}}) return a', req.body);
       let c = ret.data[0];
 
-      ret = await cqa('match (a:Turf {name:{turfName}}) return a', req.body);
+      ret = await cqa('match (a:Turf {id:{turfId}}) return a', req.body);
       let t = ret.data[0];
 
       // TODO: config option for whether or not we care...
@@ -574,16 +559,16 @@ async function turfAssignedCanvasserAdd(req, res) {
     }
   }
 
-  return cqdo(req, res, 'match (a:Turf {name:{turfName}}), (b:Canvasser {id:{cId}}) merge (a)-[:ASSIGNED]->(b)', req.body);
+  return cqdo(req, res, 'match (a:Turf {id:{turfId}}), (b:Canvasser {id:{cId}}) merge (a)-[:ASSIGNED]->(b)', req.body);
 }
 
 function turfAssignedCanvasserRemove(req, res) {
-  if (!valid(req.body.turfName) || !valid(req.body.cId)) return _400(res, "Invalid value to parameter 'turfName' or 'cId'.");
+  if (!valid(req.body.turfId) || !valid(req.body.cId)) return _400(res, "Invalid value to parameter 'turfId' or 'cId'.");
 
-  if (req.body.turfName === 'auto')
+  if (req.body.turfId === 'auto')
     return cqdo(req, res, "match (a:Canvasser {id:{cId}}) set a.autoturf=null", req.body, true);
 
-  return cqdo(req, res, 'match (a:Turf {name:{turfName}})-[r:ASSIGNED]-(b:Canvasser {id:{cId}}) delete r', req.body, true);
+  return cqdo(req, res, 'match (a:Turf {id:{turfId}})-[r:ASSIGNED]-(b:Canvasser {id:{cId}}) delete r', req.body, true);
 }
 
 // form
@@ -595,12 +580,12 @@ async function formGet(req, res) {
   let form = {};
 
   try {
-    let a = await cqa('match (a:Form {id:{id}})-[:AUTHOR]-(b:Canvasser) return a,b', req.query);
+    let a = await cqa('match (a:Form {id:{formId}})-[:AUTHOR]-(b:Canvasser) return a,b', req.query);
     form = a.data[0][0];
     form.author_id = a.data[0][1].id;
     form.author = a.data[0][1].name;
     form.questions = {};
-    let b = await cqa('match (a:Question)-[:ASSIGNED]-(b:Form {id:{id}}) return a', req.query);
+    let b = await cqa('match (a:Question)-[:ASSIGNED]-(b:Form {id:{formId}}) return a', req.query);
     // convert from an array of objects to an objects of objects
     b.data.forEach((q) => {
       let key = q.key;
@@ -626,7 +611,7 @@ async function formCreate(req, res) {
     typeof req.body.questions !== "object" || typeof req.body.questions_order !== "object")
     return _400(res, "Invalid value to parameter 'name' or 'questions' or 'questions_order'.");
 
-  req.body.id = uuidv4();
+  req.body.formId = uuidv4();
   req.body.author_id = req.user.id;
 
   try {
@@ -637,34 +622,34 @@ async function formCreate(req, res) {
       let q = req.body.questions[key];
       q.key = key;
       q.author_id = req.user.id;
-      q.fId = req.body.id;
-      await cqa('match (a:Canvasser {id:{author_id}}) match (b:Form {id:{fId}}) create (b)<-[:ASSIGNED]-(c:Question {key:{key}, label:{label}, optional:{optional}, type:{type}})-[:AUTHOR]->(a)', q);
+      q.formId = req.body.formId;
+      await cqa('match (a:Canvasser {id:{author_id}}) match (b:Form {id:{formId}}) create (b)<-[:ASSIGNED]-(c:Question {key:{key}, label:{label}, optional:{optional}, type:{type}})-[:AUTHOR]->(a)', q);
     });
   } catch (e) {
     return _500(res, e);
   }
 
-  return res.json({id: req.body.id});
+  return res.json({id: req.body.formId});
 }
 
 function formDelete(req, res) {
-  if (!valid(req.body.id)) return _400(res, "Invalid value to parameter 'id'.");
-  return cqdo(req, res, 'match (a:Form {id:{id}}) detach delete a', req.body, true);
+  if (!valid(req.body.formId)) return _400(res, "Invalid value to parameter 'formId'.");
+  return cqdo(req, res, 'match (a:Form {id:{formId}}) detach delete a', req.body, true);
 }
 
 function formAssignedTeamList(req, res) {
-  if (!valid(req.query.id)) return _400(res, "Invalid value to parameter 'id'.");
-  return cqdo(req, res, 'match (a:Form {id:{id}})-[:ASSIGNED]-(b:Team) return b', req.query, true);
+  if (!valid(req.query.formId)) return _400(res, "Invalid value to parameter 'formId'.");
+  return cqdo(req, res, 'match (a:Form {id:{formId}})-[:ASSIGNED]-(b:Team) return b', req.query, true);
 }
 
 function formAssignedTeamAdd(req, res) {
-  if (!valid(req.body.fId) || !valid(req.body.teamName)) return _400(res, "Invalid value to parameter 'fId' or 'teamName'.");
-  return cqdo(req, res, 'match (a:Form {id:{fId}}), (b:Team {name:{teamName}}) merge (a)-[:ASSIGNED]->(b)', req.body, true);
+  if (!valid(req.body.formId) || !valid(req.body.teamId)) return _400(res, "Invalid value to parameter 'formId' or 'teamId'.");
+  return cqdo(req, res, 'match (a:Form {id:{formId}}), (b:Team {id:{teamId}}) merge (a)-[:ASSIGNED]->(b)', req.body, true);
 }
 
 function formAssignedTeamRemove(req, res) {
-  if (!valid(req.body.fId) || !valid(req.body.teamName)) return _400(res, "Invalid value to parameter 'fId' or 'teamName'.");
-  return cqdo(req, res, 'match (a:Form {id:{fId}})-[r:ASSIGNED]-(b:Team {name:{teamName}}) delete r', req.body, true);
+  if (!valid(req.body.formId) || !valid(req.body.teamId)) return _400(res, "Invalid value to parameter 'formId' or 'teamId'.");
+  return cqdo(req, res, 'match (a:Form {id:{formId}})-[r:ASSIGNED]-(b:Team {id:{teamId}}) delete r', req.body, true);
 }
 
 async function formAssignedCanvasserList(req, res) {
@@ -673,7 +658,7 @@ async function formAssignedCanvasserList(req, res) {
   let canvassers;
 
   try {
-    canvassers = await _canvassersFromCypher('match (a:Form {id:{id}})-[:ASSIGNED]-(b:Canvasser) return b', req.query, true);
+    canvassers = await _canvassersFromCypher('match (a:Form {id:{formId}})-[:ASSIGNED]-(b:Canvasser) return b', req.query, true);
   } catch (e) {
     return _500(res, e)
   }
@@ -682,13 +667,13 @@ async function formAssignedCanvasserList(req, res) {
 }
 
 function formAssignedCanvasserAdd(req, res) {
-  if (!valid(req.body.fId) || !valid(req.body.cId)) return _400(res, "Invalid value to parameter 'fId' or 'cId'.");
-  return cqdo(req, res, 'match (a:Form {id:{fId}}), (b:Canvasser {id:{cId}}) merge (a)-[:ASSIGNED]->(b)', req.body, true);
+  if (!valid(req.body.formId) || !valid(req.body.cId)) return _400(res, "Invalid value to parameter 'formId' or 'cId'.");
+  return cqdo(req, res, 'match (a:Form {id:{formId}}), (b:Canvasser {id:{cId}}) merge (a)-[:ASSIGNED]->(b)', req.body, true);
 }
 
 function formAssignedCanvasserRemove(req, res) {
-  if (!valid(req.body.fId) || !valid(req.body.cId)) return _400(res, "Invalid value to parameter 'fId' or 'cId'.");
-  return cqdo(req, res, 'match (a:Form {id:{fId}})-[r:ASSIGNED]-(b:Canvasser {id:{cId}}) delete r', req.body, true);
+  if (!valid(req.body.formId) || !valid(req.body.cId)) return _400(res, "Invalid value to parameter 'formId' or 'cId'.");
+  return cqdo(req, res, 'match (a:Form {id:{formId}})-[r:ASSIGNED]-(b:Canvasser {id:{cId}}) delete r', req.body, true);
 }
 
 // question
@@ -747,13 +732,13 @@ function questionAssignedList(req, res) {
 }
 
 function questionAssignedAdd(req, res) {
-  if (!valid(req.body.key) || !valid(req.body.fId)) return _400(res, "Invalid value to parameter 'key' or 'fId'.");
-  return cqdo(req, res, 'match (a:Question {key:{key}}), (b:Form {id:{fId}}) merge (a)-[:ASSIGNED]->(b)', req.body, true);
+  if (!valid(req.body.key) || !valid(req.body.formId)) return _400(res, "Invalid value to parameter 'key' or 'formId'.");
+  return cqdo(req, res, 'match (a:Question {key:{key}}), (b:Form {id:{formId}}) merge (a)-[:ASSIGNED]->(b)', req.body, true);
 }
 
 function questionAssignedRemove(req, res) {
-  if (!valid(req.body.key) || !valid(req.body.fId)) return _400(res, "Invalid value to parameter 'key' or 'fId'.");
-  return cqdo(req, res, 'match (a:Question {key:{key}})-[r:ASSIGNED]-(b:Form {id:{fId}}) delete r', req.body, true);
+  if (!valid(req.body.key) || !valid(req.body.formId)) return _400(res, "Invalid value to parameter 'key' or 'formId'.");
+  return cqdo(req, res, 'match (a:Question {key:{key}})-[r:ASSIGNED]-(b:Form {id:{formId}}) delete r', req.body, true);
 }
 
 // sync
@@ -966,15 +951,12 @@ app.post('/canvass/v1/team/delete', teamDelete);
 app.get('/canvass/v1/team/members/list', teamMembersList);
 app.post('/canvass/v1/team/members/add', teamMembersAdd);
 app.post('/canvass/v1/team/members/remove', teamMembersRemove);
-app.post('/canvass/v1/team/members/wipe', teamMembersWipe);
 app.get('/canvass/v1/team/turf/list', teamTurfList);
 app.post('/canvass/v1/team/turf/add', teamTurfAdd);
 app.post('/canvass/v1/team/turf/remove', teamTurfRemove);
-app.post('/canvass/v1/team/turf/wipe', teamTurfWipe);
 app.get('/canvass/v1/team/form/list', teamFormList);
 app.post('/canvass/v1/team/form/add', teamFormAdd);
 app.post('/canvass/v1/team/form/remove', teamFormRemove);
-app.post('/canvass/v1/team/form/wipe', teamFormWipe);
 app.get('/canvass/v1/turf/list', turfList);
 app.post('/canvass/v1/turf/create', turfCreate);
 app.post('/canvass/v1/turf/delete', turfDelete);
