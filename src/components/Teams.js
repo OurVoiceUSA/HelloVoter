@@ -328,11 +328,11 @@ export class CardTeam extends Component {
     });
 
     turfs.forEach((t) => {
-      turfOptions.push({value: t.id, id: t.id, label: (<CardTurf key={t.id} turf={t} />)});
+      turfOptions.push({value: t.id, id: t.id, label: (<CardTurf key={t.id} turf={t} refer={this} />)});
     })
 
     turfSelected.forEach((t) => {
-      selectedTurfOption.push({value: t.id, id: t.id, label: (<CardTurf key={t.id} turf={t} />)});
+      selectedTurfOption.push({value: t.id, id: t.id, label: (<CardTurf key={t.id} turf={t} refer={this} />)});
     })
 
     forms.forEach((f) => {

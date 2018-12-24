@@ -285,7 +285,7 @@ export class CardCanvasser extends Component {
 
     let turfOptions = [
       {value: '', label: "None"},
-      {value: 'auto', id: 'auto', label: (<CardTurf key="auto" turf={{id: "auto", name: "Area surrounnding this canvasser's home address"}} icon={faHome} />)},
+      {value: 'auto', id: 'auto', label: (<CardTurf key="auto" turf={{id: "auto", name: "Area surrounnding this canvasser's home address"}} refer={this} icon={faHome} />)},
     ];
 
     teams.forEach((t) => {
@@ -311,12 +311,12 @@ export class CardCanvasser extends Component {
     }
 
     turf.forEach((t) => {
-      turfOptions.push({value: t.id, id: t.id, label: (<CardTurf key={t.id} turf={t} />)})
+      turfOptions.push({value: t.id, id: t.id, label: (<CardTurf key={t.id} turf={t} refer={this} />)})
     });
 
     if (canvasser.ass.turf.length) {
       let t = canvasser.ass.turf[0];
-      selectedTurfOption = {value: t.id, id: t.id, label: (<CardTurf key={t.id} turf={t} icon={(canvasser.autoturf?faHome:null)} />)};
+      selectedTurfOption = {value: t.id, id: t.id, label: (<CardTurf key={t.id} turf={t} refer={this} icon={(canvasser.autoturf?faHome:null)} />)};
     }
 
     this.setState({canvasser, teamOptions, formOptions, turfOptions, selectedTeamsOption, selectedFormsOption, selectedTurfOption, loading: false});
@@ -402,7 +402,7 @@ export const CardCanvasserFull = (props) => (
       Forms / Turf this users sees based on the above team(s):
       <br />
       {props.canvasser.ass.forms.map((f) => (<CardForm key={f.id} form={f} />))}
-      {props.canvasser.ass.turf.map((t) => (<CardTurf key={t.id} turf={t} />))}
+      {props.canvasser.ass.turf.map((t) => (<CardTurf key={t.id} turf={t} refer={this} />))}
     </div>
     :
     <div>
