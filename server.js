@@ -390,6 +390,15 @@ function teamList(req, res) {
     return cqdo(req, res, 'match (a:Canvasser {id:{id}})-[:MEMBERS]-(b:Team) return b', req.user);
 }
 
+function teamGet(req, res) {
+  if (req.user.admin)
+    return cqdo(req, res, 'match (a:Team {id:{teamId}}) return a', req.query);
+  else {
+    req.query.id = req.user.id;
+    return cqdo(req, res, 'match (:Canvasser {id:{id}})-[:MEMBERS]-(a:Team {id:{teamId}}) return a', req.query);
+  }
+}
+
 function teamCreate(req, res) {
   if (!valid(req.body.name)) return _400(res, "Invalid value to parameter 'name'.");
 
@@ -440,6 +449,15 @@ function teamTurfList(req, res) {
   else {
     req.query.id = req.user.id;
     return cqdo(req, res, 'match (a:Turf)-[:ASSIGNED]-(b:Team {id:{teamId}})-[:MEMBERS]-(c:Canvasser {id:{id}}) return a', req.query);
+  }
+}
+
+function turfGet(req, res) {
+  if (req.user.admin)
+    return cqdo(req, res, 'match (a:Turf {id:{turfId}}) return a', req.query);
+  else {
+    req.query.id = req.user.id;
+    return cqdo(req, res, 'match (:Canvasser {id:{id}})-[:ASSIGNED]-(a:Turf {id:{turfId}}) return a UNION match (:Canvasser {id:{id}})-[:ASSIGNED]-(:Team)-[:ASSIGNED]-(a:Turf {id:{turfId}}) return a', req.query);
   }
 }
 
@@ -946,12 +964,14 @@ app.post('/canvass/v1/canvasser/update', canvasserUpdate);
 app.post('/canvass/v1/canvasser/lock', canvasserLock);
 app.post('/canvass/v1/canvasser/unlock', canvasserUnlock);
 app.get('/canvass/v1/team/list', teamList);
+app.get('/canvass/v1/team/get', teamGet);
 app.post('/canvass/v1/team/create', teamCreate);
 app.post('/canvass/v1/team/delete', teamDelete);
 app.get('/canvass/v1/team/members/list', teamMembersList);
 app.post('/canvass/v1/team/members/add', teamMembersAdd);
 app.post('/canvass/v1/team/members/remove', teamMembersRemove);
 app.get('/canvass/v1/team/turf/list', teamTurfList);
+app.get('/canvass/v1/team/turf/get', turfGet);
 app.post('/canvass/v1/team/turf/add', teamTurfAdd);
 app.post('/canvass/v1/team/turf/remove', teamTurfRemove);
 app.get('/canvass/v1/team/form/list', teamFormList);
