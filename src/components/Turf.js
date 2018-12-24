@@ -285,6 +285,7 @@ export default class App extends Component {
                 value={this.state.selectedDrawOption}
                 onChange={this.handleDrawChange}
                 options={drawOptions}
+                isSearchable={false}
                 placeholder="Select method"
               />
 
@@ -350,7 +351,7 @@ const TurfOptions = (props) => {
               onChange={props.refer.handleTypeChange}
               onMenuClose={props.refer.selectedTypeFetch}
               options={typeOptions}
-              isSearchable={true}
+              isSearchable={false}
               placeholder="Select district for this turf"
             />
           </div>
@@ -381,7 +382,7 @@ const TurfOptions = (props) => {
     case "radius":
       return (
         <div><br />
-          Type your address:
+          Type the address:
           <PlacesAutocomplete
             debounce={500}
             value={props.refer.state.address}
