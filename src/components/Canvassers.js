@@ -227,13 +227,13 @@ export class CardCanvasser extends Component {
     try {
       if (this.state.selectedFormsOption.value) {
         await _fetch(this.state.server, '/canvass/v1/form/assigned/canvasser/remove', 'POST', {
-          fId: this.state.selectedFormsOption.value,
+          formId: this.state.selectedFormsOption.value,
           cId: this.props.id,
         });
       }
       if (selectedFormsOption.value) {
         await _fetch(this.state.server, '/canvass/v1/form/assigned/canvasser/add', 'POST', {
-          fId: selectedFormsOption.value,
+          formId: selectedFormsOption.value,
           cId: this.props.id,
         });
       }
@@ -250,13 +250,13 @@ export class CardCanvasser extends Component {
     try {
       if (this.state.selectedTurfOption.value) {
         await _fetch(this.state.server, '/canvass/v1/turf/assigned/canvasser/remove', 'POST', {
-          turfName: this.state.selectedTurfOption.value,
+          turfId: this.state.selectedTurfOption.value,
           cId: this.props.id,
         });
       }
       if (selectedTurfOption.value) {
         await _fetch(this.state.server, '/canvass/v1/turf/assigned/canvasser/add', 'POST', {
-          turfName: selectedTurfOption.value,
+          turfId: selectedTurfOption.value,
           cId: this.props.id,
         });
       }
@@ -301,12 +301,12 @@ export class CardCanvasser extends Component {
 
     teams.forEach((t) => {
       teamOptions.push({value: t.id, label: (
-        <CardTeam key={t.name} t={t} />
+        <CardTeam key={t.id} t={t} />
       )});
       canvasser.ass.teams.forEach((a) => {
         if (a.id === t.id) {
           selectedTeamsOption.push({value: t.id, label: (
-            <CardTeam key={t.name} t={t} />
+            <CardTeam key={t.id} t={t} />
           )});
         }
       });
@@ -322,12 +322,12 @@ export class CardCanvasser extends Component {
     }
 
     turf.forEach((t) => {
-      turfOptions.push({value: t.name, label: (<CardTurf key={t.id} turf={t} />)})
+      turfOptions.push({value: t.id, label: (<CardTurf key={t.id} turf={t} />)})
     });
 
     if (canvasser.ass.turf.length) {
       let t = canvasser.ass.turf[0];
-      selectedTurfOption = {value: t.name, label: (<CardTurf key={t.id} turf={t} icon={(canvasser.autoturf?faHome:null)} />)};
+      selectedTurfOption = {value: t.id, label: (<CardTurf key={t.id} turf={t} icon={(canvasser.autoturf?faHome:null)} />)};
     }
 
     this.setState({canvasser, teamOptions, formOptions, turfOptions, selectedTeamsOption, selectedFormsOption, selectedTurfOption, loading: false});
@@ -412,8 +412,8 @@ export const CardCanvasserFull = (props) => (
     <div>
       Forms / Turf this users sees based on the above team(s):
       <br />
-      {props.canvasser.ass.forms.map((f) => (<CardForm key={f.name} form={f} />))}
-      {props.canvasser.ass.turf.map((t) => (<CardTurf key={t.name} turf={t} />))}
+      {props.canvasser.ass.forms.map((f) => (<CardForm key={f.id} form={f} />))}
+      {props.canvasser.ass.turf.map((t) => (<CardTurf key={t.id} turf={t} />))}
     </div>
     :
     <div>
