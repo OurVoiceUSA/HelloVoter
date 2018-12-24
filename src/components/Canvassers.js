@@ -303,12 +303,12 @@ export class CardCanvasser extends Component {
     });
 
     forms.forEach((f) => {
-      formOptions.push({value: f.id, id: f.id, label: (<CardForm key={f.id} form={f} />)});
+      formOptions.push({value: f.id, id: f.id, label: (<CardForm key={f.id} form={f} refer={this} />)});
     });
 
     if (canvasser.ass.forms.length) {
       let f = canvasser.ass.forms[0];
-      selectedFormsOption = {value: f.id, id: f.id, label: (<CardForm key={f.id} form={f} />)};
+      selectedFormsOption = {value: f.id, id: f.id, label: (<CardForm key={f.id} form={f} refer={this} />)};
     }
 
     turf.forEach((t) => {

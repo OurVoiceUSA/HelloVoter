@@ -337,11 +337,11 @@ export class CardTeam extends Component {
     })
 
     forms.forEach((f) => {
-      formOptions.push({value: f.id, id: f.id, label: (<CardForm key={f.id} form={f} />)});
+      formOptions.push({value: f.id, id: f.id, label: (<CardForm key={f.id} form={f} refer={this} />)});
     })
 
     formSelected.forEach((f) => {
-      selectedFormsOption.push({value: f.id, id: f.id, label: (<CardForm key={f.id} form={f} />)});
+      selectedFormsOption.push({value: f.id, id: f.id, label: (<CardForm key={f.id} form={f} refer={this} />)});
     })
 
     this.setState({team, memberOptions, turfOptions, formOptions, selectedMembersOption, selectedTurfOption, selectedFormsOption, loading: false});
