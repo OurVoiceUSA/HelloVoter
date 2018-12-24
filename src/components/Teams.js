@@ -306,7 +306,7 @@ export class CardTeam extends Component {
 
     // also load canvassers & turf & forms
     let canvassers = await _loadCanvassers(this.props.refer);
-    let members = await _loadCanvassers(this.props.refer, this.props.id);
+    let members = await _loadCanvassers(this.props.refer, 'team', this.props.id);
     let turfSelected = await _loadTurfs(this.props.refer, this.props.id);
     let turfs = await _loadTurfs(this.props.refer);
     let formSelected = await _loadForms(this.props.refer, this.props.id);
@@ -357,7 +357,7 @@ export class CardTeam extends Component {
       <div>
         <div style={{display: 'flex', padding: '10px'}}>
           <div style={{flex: 1, overflow: 'auto', padding: '5px 10px'}}>
-            <Icon icon={faUsers} style={{width: 50, height: 50, color: "gray"}} /> Name: {team.name} {(this.props.edit?'':(<Link to={'/teams/view/'+team.id}>view</Link>))}
+            <Icon icon={faUsers} style={{width: 50, height: 50, color: "gray"}} /> {team.name} {(this.props.edit?'':(<Link to={'/teams/view/'+team.id}>view</Link>))}
           </div>
         </div>
         {this.props.edit?<CardTeamFull team={team} refer={this} />:''}

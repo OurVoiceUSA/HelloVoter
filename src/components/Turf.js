@@ -574,7 +574,7 @@ export class CardTurf extends Component {
     }
   }
 
-  handleTeamsChange = async (selectedMembersOption) => {
+  handleMembersChange = async (selectedMembersOption) => {
     try {
       let obj = _handleSelectChange(this.state.selectedMembersOption, selectedMembersOption);
 
@@ -606,10 +606,12 @@ export class CardTurf extends Component {
     }
 
     let canvassers = await _loadCanvassers(this.props.refer);
+    let members = await _loadCanvassers(this.props.refer, 'turf', this.props.id);
     let teams = await _loadTeams(this.props.refer);
+    let teamsSelected = await _loadTeams(this.props.refer, this.props.id);
 
     let teamOptions = [];
-    let membersOptions = [];
+    let membersOption = [];
     let selectedTeamsOption = [];
     let selectedMembersOption = [];
 
@@ -619,11 +621,19 @@ export class CardTurf extends Component {
       )});
     });
 
+    teamsSelected.forEach((t) => {
+      selectedTeamsOption.push({value: t.id, id: t.id, label: (<CardTeam key={t.id} team={t} refer={this} />)});
+    })
+
     canvassers.forEach((c) => {
-      membersOptions.push({value: c.id, id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={this} />)});
+      membersOption.push({value: c.id, id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={this} />)});
     });
 
-    this.setState({turf, canvassers, teamOptions, membersOptions, selectedTeamsOption, selectedMembersOption, loading: false});
+    members.forEach((c) => {
+      selectedMembersOption.push({value: c.id, id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={this} />)});
+    });
+
+    this.setState({turf, canvassers, teamOptions, membersOption, selectedTeamsOption, selectedMembersOption, loading: false});
   }
 
   render() {
@@ -640,7 +650,35 @@ export class CardTurf extends Component {
             <Icon icon={faStreetView} style={{width: 50, height: 50, color: "gray"}} /> {turf.name} {(this.props.edit?'':(<Link to={'/turf/view/'+turf.id}>view</Link>))}
           </div>
         </div>
+        {this.props.edit?<CardTurfFull turf={turf} refer={this} />:''}
       </div>
     );
   }
-};
+}
+
+export const CardTurfFull = (props) => (
+  <div>
+    <div>
+      <br />
+      Teams assigned to this turf:
+      <Select
+        value={props.refer.state.selectedTeamsOption}
+        onChange={props.refer.handleTeamsChange}
+        options={props.refer.state.teamOptions}
+        isMulti={true}
+        isSearchable={true}
+        placeholder="None"
+      />
+      <br />
+      Canvassers assigned directly to this turf:
+      <Select
+        value={props.refer.state.selectedMembersOption}
+        onChange={props.refer.handleMembersChange}
+        options={props.refer.state.membersOption}
+        isMulti={true}
+        isSearchable={true}
+        placeholder="None"
+      />
+    </div>
+  </div>
+);

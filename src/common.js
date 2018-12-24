@@ -77,12 +77,14 @@ export async function _loadCanvasser(refer, id) {
   return canvasser;
 }
 
-export async function _loadCanvassers(refer, teamId) {
+export async function _loadCanvassers(refer, byType, id) {
   let canvassers = [];
 
   try {
     let call = 'canvasser/list';
-    if (teamId) call = 'team/members/list?teamId='+teamId;
+
+    if (byType === 'team') call = 'team/members/list?teamId='+id;
+    else if (byType === 'turf') call = 'turf/assigned/canvasser/list?turfId='+id;
 
     let res = await _fetch(refer.props.server, '/canvass/v1/'+call);
     canvassers = await res.json();
@@ -146,11 +148,13 @@ export async function _loadTeam(refer, id) {
   return team.data[0];
 }
 
-export async function _loadTeams(refer) {
+export async function _loadTeams(refer, turfId) {
   let teams = [];
 
   try {
-    let res = await _fetch(refer.props.server, '/canvass/v1/team/list');
+    let call = 'team/list';
+    if (turfId) call = 'turf/assigned/team/list?turfId='+turfId;
+    let res = await _fetch(refer.props.server, '/canvass/v1/'+call);
     teams = await res.json();
   } catch (e) {
     notify_error(e, "Unable to load teams data.");
