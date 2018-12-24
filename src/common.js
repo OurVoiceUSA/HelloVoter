@@ -184,7 +184,7 @@ export class CardCanvasser extends Component {
       for (let ni in now) {
         let n = now[ni];
         if (prior.indexOf(n) === -1) {
-          await _fetch(this.state.server, '/canvass/v1/team/members/add', 'POST', {teamName: n, cId: this.props.id});
+          await _fetch(this.state.server, '/canvass/v1/team/members/add', 'POST', {teamId: n, cId: this.props.id});
         }
       };
 
@@ -192,7 +192,7 @@ export class CardCanvasser extends Component {
       for (let pi in prior) {
         let p = prior[pi];
         if (now.indexOf(p) === -1) {
-          await _fetch(this.state.server, '/canvass/v1/team/members/remove', 'POST', {teamName: p, cId: this.props.id});
+          await _fetch(this.state.server, '/canvass/v1/team/members/remove', 'POST', {teamId: p, cId: this.props.id});
         }
       };
 
@@ -282,12 +282,12 @@ export class CardCanvasser extends Component {
     ];
 
     teams.forEach((t) => {
-      teamOptions.push({value: t.name, label: (
+      teamOptions.push({value: t.id, label: (
         <CardTeam key={t.name} t={t} />
       )});
       canvasser.ass.teams.forEach((a) => {
-        if (a.name === t.name) {
-          selectedTeamsOption.push({value: t.name, label: (
+        if (a.id === t.id) {
+          selectedTeamsOption.push({value: t.id, label: (
             <CardTeam key={t.name} t={t} />
           )});
         }
