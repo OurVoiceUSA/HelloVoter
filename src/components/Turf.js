@@ -3,14 +3,17 @@ import React, { Component } from 'react';
 import { HashRouter as Router, Route, Link } from 'react-router-dom';
 import {geocodeByAddress, getLatLng} from 'react-places-autocomplete';
 import circleToPolygon from 'circle-to-polygon';
-import t from 'tcomb-form';
+import ReactPaginate from 'react-paginate';
 import Select from 'react-select';
+import t from 'tcomb-form';
+
+import { faStreetView } from '@fortawesome/free-solid-svg-icons';
 
 import { us_states } from 'ourvoiceusa-sdk-js';
 
 import {
-  _fetch, notify_error, notify_success, _loadTurf,
-  PlacesAutocomplete, RootLoader, Loader, CardTurf,
+  _fetch, notify_error, notify_success, _loadTurf, _loadTeams, _loadCanvassers, _handleSelectChange,
+  PlacesAutocomplete, RootLoader, Loader, Icon,
 } from '../common.js';
 
 export default class App extends Component {
@@ -440,3 +443,14 @@ const TurfOptions = (props) => {
       return (<div>Unknown generation method.</div>);
   }
 }
+
+export const CardTurf = (props) => (
+  <div style={{display: 'flex', padding: '10px'}}>
+    <div style={{padding: '5px 10px'}}>
+      <Icon style={{width: 50, height: 50, color: "gray"}} icon={(props.icon?props.icon:faStreetView)} />
+    </div>
+    <div style={{flex: 1, overflow: 'auto'}}>
+      {props.turf.name}
+    </div>
+  </div>
+);

@@ -8,9 +8,10 @@ import t from 'tcomb-form';
 import {
   notify_error, notify_success, _fetch,  _searchStringCanvasser, _handleSelectChange,
   _loadCanvassers, _loadTeams, _loadTeam, _loadForms, _loadTurf,
-  RootLoader, CardTurf, CardForm, Loader, Icon,
+  RootLoader, CardForm, Loader, Icon,
 } from '../common.js';
 
+import { CardTurf } from './Turf.js';
 import { CardCanvasser } from './Canvassers.js';
 
 import { faUsers } from '@fortawesome/free-solid-svg-icons';

@@ -10,9 +10,10 @@ import Img from 'react-image';
 import {
   notify_error, notify_success, _fetch, _searchStringCanvasser, _handleSelectChange,
   _loadCanvassers, _loadCanvasser, _loadTeams, _loadForms, _loadTurf,
-  RootLoader, CardTurf, CardForm, Loader, Icon, PlacesAutocomplete,
+  RootLoader, CardForm, Loader, Icon, PlacesAutocomplete,
 } from '../common.js';
 
+import { CardTurf } from './Turf.js';
 import { CardTeam } from './Teams.js';
 
 import {

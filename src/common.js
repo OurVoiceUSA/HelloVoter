@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSync, faStreetView, faClipboard } from '@fortawesome/free-solid-svg-icons';
+import { faSync, faClipboard } from '@fortawesome/free-solid-svg-icons';
 
 import GooglePlacesAutocomplete from 'react-places-autocomplete';
 import {NotificationManager} from 'react-notifications';
@@ -92,17 +92,6 @@ export async function _loadCanvassers(refer, teamId) {
 
   return canvassers;
 }
-
-export const CardTurf = (props) => (
-  <div style={{display: 'flex', padding: '10px'}}>
-    <div style={{padding: '5px 10px'}}>
-      <Icon style={{width: 50, height: 50, color: "gray"}} icon={(props.icon?props.icon:faStreetView)} />
-    </div>
-    <div style={{flex: 1, overflow: 'auto'}}>
-      {props.turf.name}
-    </div>
-  </div>
-)
 
 export async function _loadTurf(refer, teamId, flag) {
   let turf = [];
