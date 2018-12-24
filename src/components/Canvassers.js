@@ -8,7 +8,8 @@ import Select from 'react-select';
 import Img from 'react-image';
 
 import {
-  notify_error, notify_success, _fetch, _loadCanvassers, _loadCanvasser, _loadTeams, _loadForms, _loadTurf, _searchStringCanvasser,
+  notify_error, notify_success, _fetch, _searchStringCanvasser, _handleSelectChange,
+  _loadCanvassers, _loadCanvasser, _loadTeams, _loadForms, _loadTurf,
   RootLoader, CardTurf, CardForm, Loader, Icon, PlacesAutocomplete,
 } from '../common.js';
 
@@ -173,7 +174,7 @@ export class CardCanvasser extends Component {
     this.state = {
       server: this.props.refer.props.server,
       canvasser: this.props.canvasser,
-      selectedTeamsOption: null,
+      selectedTeamsOption: [],
       selectedFormsOption: {},
       selectedTurfOption: {},
     };
@@ -191,30 +192,15 @@ export class CardCanvasser extends Component {
 
   handleTeamsChange = async (selectedTeamsOption) => {
     try {
+      let obj = _handleSelectChange(this.state.selectedTeamsOption, selectedTeamsOption);
 
-      let prior = this.state.selectedTeamsOption.map((e) => {
-        return e.value;
-      });
+      for (let i in obj.add) {
+        await _fetch(this.state.server, '/canvass/v1/team/members/add', 'POST', {teamId: obj.add[i], cId: this.props.id});
+      }
 
-      let now = selectedTeamsOption.map((e) => {
-        return e.value;
-      });
-
-      // anything in "now" that isn't in "prior" gets added
-      for (let ni in now) {
-        let n = now[ni];
-        if (prior.indexOf(n) === -1) {
-          await _fetch(this.state.server, '/canvass/v1/team/members/add', 'POST', {teamId: n, cId: this.props.id});
-        }
-      };
-
-      // anything in "prior" that isn't in "now" gets removed
-      for (let pi in prior) {
-        let p = prior[pi];
-        if (now.indexOf(p) === -1) {
-          await _fetch(this.state.server, '/canvass/v1/team/members/remove', 'POST', {teamId: p, cId: this.props.id});
-        }
-      };
+      for (let i in obj.rm) {
+        await _fetch(this.state.server, '/canvass/v1/team/members/remove', 'POST', {teamId: obj.rm[i], cId: this.props.id});
+      }
 
       // refresh canvasser info
       let canvasser = await _loadCanvasser(this, this.props.id);
@@ -298,38 +284,38 @@ export class CardCanvasser extends Component {
 
     let turfOptions = [
       {value: '', label: "None"},
-      {value: 'auto', label: (<CardTurf key="auto" turf={{id: "auto", name: "Area surrounnding this canvasser's home address"}} icon={faHome} />)},
+      {value: 'auto', id: 'auto', label: (<CardTurf key="auto" turf={{id: "auto", name: "Area surrounnding this canvasser's home address"}} icon={faHome} />)},
     ];
 
     teams.forEach((t) => {
-      teamOptions.push({value: t.id, label: (
-        <CardTeam key={t.id} t={t} />
+      teamOptions.push({value: t.id, id: t.id, label: (
+        <CardTeam key={t.id} team={t} refer={this} />
       )});
       canvasser.ass.teams.forEach((a) => {
         if (a.id === t.id) {
-          selectedTeamsOption.push({value: t.id, label: (
-            <CardTeam key={t.id} t={t} />
+          selectedTeamsOption.push({value: t.id, id: t.id, label: (
+            <CardTeam key={t.id} team={t} refer={this} />
           )});
         }
       });
     });
 
     forms.forEach((f) => {
-      formOptions.push({value: f.id, label: (<CardForm key={f.id} form={f} />)});
+      formOptions.push({value: f.id, id: f.id, label: (<CardForm key={f.id} form={f} />)});
     });
 
     if (canvasser.ass.forms.length) {
       let f = canvasser.ass.forms[0];
-      selectedFormsOption = {value: f.id, label: (<CardForm key={f.id} form={f} />)};
+      selectedFormsOption = {value: f.id, id: f.id, label: (<CardForm key={f.id} form={f} />)};
     }
 
     turf.forEach((t) => {
-      turfOptions.push({value: t.id, label: (<CardTurf key={t.id} turf={t} />)})
+      turfOptions.push({value: t.id, id: t.id, label: (<CardTurf key={t.id} turf={t} />)})
     });
 
     if (canvasser.ass.turf.length) {
       let t = canvasser.ass.turf[0];
-      selectedTurfOption = {value: t.id, label: (<CardTurf key={t.id} turf={t} icon={(canvasser.autoturf?faHome:null)} />)};
+      selectedTurfOption = {value: t.id, id: t.id, label: (<CardTurf key={t.id} turf={t} icon={(canvasser.autoturf?faHome:null)} />)};
     }
 
     this.setState({canvasser, teamOptions, formOptions, turfOptions, selectedTeamsOption, selectedFormsOption, selectedTurfOption, loading: false});

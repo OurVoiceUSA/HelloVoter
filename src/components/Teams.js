@@ -6,7 +6,8 @@ import Select from 'react-select';
 import t from 'tcomb-form';
 
 import {
-  notify_error, notify_success, _fetch, _loadCanvassers, _loadTeams, _loadTeam, _loadForms, _loadTurf, _searchStringCanvasser,
+  notify_error, notify_success, _fetch,  _searchStringCanvasser, _handleSelectChange,
+  _loadCanvassers, _loadTeams, _loadTeam, _loadForms, _loadTurf,
   RootLoader, CardTurf, CardForm, Loader, Icon,
 } from '../common.js';
 
@@ -221,8 +222,8 @@ export class CardTeam extends Component {
       server: this.props.refer.props.server,
       team: this.props.team,
       selectedMembersOption: [],
-      selectedFormsOption: {},
-      selectedTurfOption: {},
+      selectedFormsOption: [],
+      selectedTurfOption: [],
     };
 
   }
@@ -234,29 +235,15 @@ export class CardTeam extends Component {
   handleMembersChange = async (selectedMembersOption) => {
     try {
 
-      let prior = this.state.selectedMembersOption.map((e) => {
-        return e.id;
-      });
+      let obj = _handleSelectChange(this.state.selectedMembersOption, selectedMembersOption);
 
-      let now = selectedMembersOption.map((e) => {
-        return e.id;
-      });
+      for (let i in obj.add) {
+        await _fetch(this.state.server, '/canvass/v1/team/members/add', 'POST', {teamId: this.props.id, cId: obj.add[i]});
+      }
 
-      // anything in "now" that isn't in "prior" gets added
-      for (let ni in now) {
-        let n = now[ni];
-        if (prior.indexOf(n) === -1) {
-          await _fetch(this.state.server, '/canvass/v1/team/members/add', 'POST', {teamId: this.props.id, cId: n});
-        }
-      };
-
-      // anything in "prior" that isn't in "now" gets removed
-      for (let pi in prior) {
-        let p = prior[pi];
-        if (now.indexOf(p) === -1) {
-          await _fetch(this.state.server, '/canvass/v1/team/members/remove', 'POST', {teamId: this.props.id, cId: p});
-        }
-      };
+      for (let i in obj.rm) {
+        await _fetch(this.state.server, '/canvass/v1/team/members/remove', 'POST', {teamId: this.props.id, cId: obj.rm[i]});
+      }
 
       // refresh team info
       let team = await _loadTeam(this, this.props.id);
@@ -269,18 +256,16 @@ export class CardTeam extends Component {
 
   handleFormsChange = async (selectedFormsOption) => {
     try {
-      if (this.state.selectedFormsOption.value) {
-        await _fetch(this.state.server, '/canvass/v1/form/assigned/team/remove', 'POST', {
-          formId: this.state.selectedFormsOption.value,
-          teamId: this.props.id,
-        });
+      let obj = _handleSelectChange(this.state.selectedFormsOption, selectedFormsOption);
+
+      for (let i in obj.add) {
+        await _fetch(this.state.server, '/canvass/v1/form/assigned/team/add', 'POST', {formId: obj.add[i], teamId: this.props.id});
       }
-      if (selectedFormsOption.value) {
-        await _fetch(this.state.server, '/canvass/v1/form/assigned/team/add', 'POST', {
-          formId: selectedFormsOption.value,
-          teamId: this.props.id,
-        });
+
+      for (let i in obj.rm) {
+        await _fetch(this.state.server, '/canvass/v1/form/assigned/team/remove', 'POST', {formId: obj.rm[i], teamId: this.props.id});
       }
+
       // refresh team info
       let teamn = await _loadTeam(this, this.props.id);
       notify_success("Form selection saved.");
@@ -292,18 +277,16 @@ export class CardTeam extends Component {
 
   handleTurfChange = async (selectedTurfOption) => {
     try {
-      if (this.state.selectedTurfOption.value) {
-        await _fetch(this.state.server, '/canvass/v1/turf/assigned/canvasser/remove', 'POST', {
-          turfId: this.state.selectedTurfOption.value,
-          teamId: this.props.id,
-        });
+      let obj = _handleSelectChange(this.state.selectedTurfOption, selectedTurfOption);
+
+      for (let i in obj.add) {
+        await _fetch(this.state.server, '/canvass/v1/turf/assigned/team/add', 'POST', {turfId: obj.add[i], teamId: this.props.id});
       }
-      if (selectedTurfOption.value) {
-        await _fetch(this.state.server, '/canvass/v1/turf/assigned/canvasser/add', 'POST', {
-          turfId: selectedTurfOption.value,
-          teamId: this.props.id,
-        });
+
+      for (let i in obj.rm) {
+        await _fetch(this.state.server, '/canvass/v1/turf/assigned/team/remove', 'POST', {turfId: obj.rm[i], teamId: this.props.id});
       }
+
       // refresh team info
       let team = await _loadTeam(this, this.props.id);
       notify_success("Turf selection saved.");
@@ -323,26 +306,20 @@ export class CardTeam extends Component {
     // also load canvassers & turf & forms
     let canvassers = await _loadCanvassers(this.props.refer);
     let members = await _loadCanvassers(this.props.refer, this.props.id);
-    let turf = await _loadTurf(this.props.refer, this.props.id);
+    let turfSelected = await _loadTurf(this.props.refer, this.props.id);
     let turfs = await _loadTurf(this.props.refer);
-    let form = await _loadForms(this.props.refer, this.props.id);
+    let formSelected = await _loadForms(this.props.refer, this.props.id);
     let forms = await _loadForms(this.props.refer);
 
     let memberOptions = [];
+    let formOptions = [];
+    let turfOptions = [];
     let selectedMembersOption = [];
-    let selectedTurfOption = {};
-    let selectedFormsOption = {};
-
-    let formOptions = [
-      {value: '', label: "None"},
-    ];
-
-    let turfOptions = [
-      {value: '', label: "None"},
-    ];
+    let selectedTurfOption = [];
+    let selectedFormsOption = [];
 
     canvassers.forEach((c) => {
-      memberOptions.push({value: _searchStringCanvasser(c), id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={this} />)})
+      memberOptions.push({value: _searchStringCanvasser(c), id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={this} />)});
     });
 
     members.forEach((c) => {
@@ -350,20 +327,20 @@ export class CardTeam extends Component {
     });
 
     turfs.forEach((t) => {
-      turfOptions.push({value: t.id, label: (<CardTurf key={t.id} turf={t} />)})
+      turfOptions.push({value: t.id, id: t.id, label: (<CardTurf key={t.id} turf={t} />)});
     })
 
-    if (turf.length) {
-      selectedTurfOption = {value: turf[0].id, label: (<CardTurf key={turf[0].id} turf={turf[0]} />)};
-    }
+    turfSelected.forEach((t) => {
+      selectedTurfOption.push({value: t.id, id: t.id, label: (<CardTurf key={t.id} turf={t} />)});
+    })
 
     forms.forEach((f) => {
-      formOptions.push({value: f.id, label: (<CardForm key={f.id} form={f} />)})
+      formOptions.push({value: f.id, id: f.id, label: (<CardForm key={f.id} form={f} />)});
     })
 
-    if (form.length) {
-      selectedFormsOption = {value: form[0].id, label: (<CardForm key={form[0].id} form={form[0]} />)};
-    }
+    formSelected.forEach((f) => {
+      selectedFormsOption.push({value: f.id, id: f.id, label: (<CardForm key={f.id} form={f} />)});
+    })
 
     this.setState({team, memberOptions, turfOptions, formOptions, selectedMembersOption, selectedTurfOption, selectedFormsOption, loading: false});
   }
@@ -410,6 +387,7 @@ export const CardTeamFull = (props) => (
         value={props.refer.state.selectedFormsOption}
         onChange={props.refer.handleFormsChange}
         options={props.refer.state.formOptions}
+        isMulti={true}
         isSearchable={true}
         placeholder="None"
       />
@@ -419,6 +397,7 @@ export const CardTeamFull = (props) => (
         value={props.refer.state.selectedTurfOption}
         onChange={props.refer.handleTurfChange}
         options={props.refer.state.turfOptions}
+        isMulti={true}
         isSearchable={true}
         placeholder="None"
       />

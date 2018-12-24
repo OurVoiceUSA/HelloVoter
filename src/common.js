@@ -187,6 +187,37 @@ export async function _loadAddresses(refer) {
   return addresses;
 }
 
+export function _handleSelectChange(oldopt, newopt) {
+  let add = [];
+  let rm = [];
+
+  let prior = oldopt.map((e) => {
+    return e.id;
+  });
+
+  let now = newopt.map((e) => {
+    return e.id;
+  });
+
+  // anything in "now" that isn't in "prior" gets added
+  for (let ni in now) {
+    let n = now[ni];
+    if (prior.indexOf(n) === -1) {
+      add.push(n);
+    }
+  };
+
+  // anything in "prior" that isn't in "now" gets removed
+  for (let pi in prior) {
+    let p = prior[pi];
+    if (now.indexOf(p) === -1) {
+      rm.push(p);
+    }
+  };
+
+  return {add: add, rm: rm};
+}
+
 export const PlacesAutocomplete = (props) => (
   <GooglePlacesAutocomplete {...props}>
     {addressSearch}
