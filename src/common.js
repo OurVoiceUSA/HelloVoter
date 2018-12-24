@@ -29,7 +29,7 @@ export async function _fetch(server, uri, method, body) {
     return;
   }
 
-  return fetch('https://'+server.hostname+uri, {
+  let res = await fetch('https://'+server.hostname+uri, {
     method: method,
     headers: {
       'Authorization': 'Bearer '+server.jwt,
@@ -37,6 +37,10 @@ export async function _fetch(server, uri, method, body) {
     },
     body: (body?JSON.stringify(body):null),
   });
+
+  if (res.status >= 400) throw new Error(await res.text());
+
+  return res;
 }
 
 export function _browserLocation(props) {
