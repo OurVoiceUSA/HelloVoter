@@ -183,13 +183,13 @@ async function canvassAssignments(user) {
   try {
     // direct assignment to a form
     ref = await cqa('match (a:Canvasser {id:{id}}) optional match (a)-[:ASSIGNED]-(b:Form) optional match (a)-[:ASSIGNED]-(c:Turf) return collect(distinct(b)), collect(distinct(c))', user);
-    if (ref.data[0][0].length > 0 || ref.data[0][1].length) {
+    if (user.autoturf || ref.data[0][0].length > 0 || ref.data[0][1].length) {
       obj.forms = obj.forms.concat(ref.data[0][0]);
       obj.turf = obj.turf.concat(ref.data[0][1]);
       obj.direct = true;
 
       if (user.autoturf && user.homelng && user.homelat) {
-        obj.turf = [{name: 'auto', geometry: circleToPolygon([user.homelng,user.homelat],1000)}];
+        obj.turf = [{id: 'auto', geometry: circleToPolygon([user.homelng,user.homelat],1000)}];
       }
     }
 
