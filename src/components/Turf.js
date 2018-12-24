@@ -15,7 +15,7 @@ import { CardCanvasser } from './Canvassers.js';
 import { CardTeam } from './Teams.js';
 
 import {
-  _fetch, notify_error, notify_success, _loadTurf, _loadTeams, _loadCanvassers, _handleSelectChange,
+  _fetch, notify_error, notify_success, _loadTurfs, _loadTurf, _loadTeams, _loadCanvassers, _handleSelectChange,
   PlacesAutocomplete, RootLoader, Loader, Icon,
 } from '../common.js';
 
@@ -148,11 +148,12 @@ export default class App extends Component {
     return false;
   }
 
-  _deleteTurf = async () => {
+  _deleteTurf = async (id) => {
     try {
-      await _fetch(this.props.server, '/canvass/v1/turf/delete', 'POST', {name: this.state.thisTurf.name});
+      await _fetch(this.props.server, '/canvass/v1/turf/delete', 'POST', {turfId: id});
     } catch (e) {
       notify_error(e, "Unable to delete turf.");
+      return;
     }
     this._loadData();
     window.location.href = "/HelloVoter/#/turf/";
@@ -226,7 +227,7 @@ export default class App extends Component {
     }
 
     window.location.href = "/HelloVoter/#/turf/";
-    this._loadTurf();
+    this._loadData();
     notify_success("Turf has been created.");
     this.setState({creating: false});
   }
@@ -311,7 +312,7 @@ export default class App extends Component {
     let turf = [];
 
     try {
-      turf = await _loadTurf(this);
+      turf = await _loadTurfs(this);
     } catch (e) {
       notify_error(e, "Unable to load turf.");
     }
@@ -374,14 +375,13 @@ export default class App extends Component {
               :''}
             </div>
           )} />
-          <Route path="/turf/view/:name" render={() => (
+          <Route path="/turf/view/:id" render={(props) => (
             <div>
-              <h3>{this.state.thisTurf.name}</h3>
-              {this.state.thisTurf.geometry}
+              <CardTurf key={props.match.params.id} id={props.match.params.id} edit={true} refer={this} />
               <br />
               <br />
               <br />
-              <button onClick={() => this._deleteTurf()}>Delete Turf</button>
+              <button onClick={() => this._deleteTurf(props.match.params.id)}>Delete Turf</button>
             </div>
           )} />
         </div>
@@ -538,13 +538,109 @@ const TurfOptions = (props) => {
   }
 }
 
-export const CardTurf = (props) => (
-  <div style={{display: 'flex', padding: '10px'}}>
-    <div style={{padding: '5px 10px'}}>
-      <Icon style={{width: 50, height: 50, color: "gray"}} icon={(props.icon?props.icon:faStreetView)} />
-    </div>
-    <div style={{flex: 1, overflow: 'auto'}}>
-      {props.turf.name}
-    </div>
-  </div>
-);
+export class CardTurf extends Component {
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      server: this.props.refer.props.server,
+      turf: this.props.turf,
+      selectedTeamsOption: [],
+      selectedMembersOption: [],
+    };
+  }
+
+  componentDidMount() {
+    if (!this.state.turf) this._loadData();
+  }
+
+  handleTeamsChange = async (selectedTeamsOption) => {
+    try {
+      let obj = _handleSelectChange(this.state.selectedTeamsOption, selectedTeamsOption);
+
+      for (let i in obj.add) {
+        await _fetch(this.state.server, '/canvass/v1/turf/assigned/team/add', 'POST', {teamId: obj.add[i], turfId: this.props.id});
+      }
+
+      for (let i in obj.rm) {
+        await _fetch(this.state.server, '/canvass/v1/turf/assigned/team/remove', 'POST', {teamId: obj.rm[i], turfId: this.props.id});
+      }
+
+      notify_success("Team assignments saved.");
+      this.setState({ selectedTeamsOption });
+    } catch (e) {
+      notify_error(e, "Unable to add/remove teams.");
+    }
+  }
+
+  handleTeamsChange = async (selectedMembersOption) => {
+    try {
+      let obj = _handleSelectChange(this.state.selectedMembersOption, selectedMembersOption);
+
+      for (let i in obj.add) {
+        await _fetch(this.state.server, '/canvass/v1/turf/assigned/canvasser/add', 'POST', {cId: obj.add[i], turfId: this.props.id});
+      }
+
+      for (let i in obj.rm) {
+        await _fetch(this.state.server, '/canvass/v1/turf/assigned/canvasser/remove', 'POST', {cId: obj.rm[i], turfId: this.props.id});
+      }
+
+      notify_success("Canvasser assignments saved.");
+      this.setState({ selectedMembersOption });
+    } catch (e) {
+      notify_error(e, "Unable to add/remove teams.");
+    }
+  }
+
+  _loadData = async () => {
+    let turf = {};
+
+    this.setState({loading: true})
+
+    try {
+       turf = await _loadTurf(this, this.props.id, true);
+    } catch (e) {
+      notify_error(e, "Unable to load canavasser info.");
+      return;
+    }
+
+    let canvassers = await _loadCanvassers(this.props.refer);
+    let teams = await _loadTeams(this.props.refer);
+
+    let teamOptions = [];
+    let membersOptions = [];
+    let selectedTeamsOption = [];
+    let selectedMembersOption = [];
+
+    teams.forEach((t) => {
+      teamOptions.push({value: t.id, id: t.id, label: (
+        <CardTeam key={t.id} team={t} refer={this} />
+      )});
+    });
+
+    canvassers.forEach((c) => {
+      membersOptions.push({value: c.id, id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={this} />)});
+    });
+
+    this.setState({turf, canvassers, teamOptions, membersOptions, selectedTeamsOption, selectedMembersOption, loading: false});
+  }
+
+  render() {
+    const { turf } = this.state;
+
+    if (!turf || this.state.loading) {
+      return (<Loader />);
+    }
+
+    return (
+      <div>
+        <div style={{display: 'flex', padding: '10px'}}>
+          <div style={{padding: '5px 10px'}}>
+            <Icon icon={faStreetView} style={{width: 50, height: 50, color: "gray"}} /> Name: {turf.name} {(this.props.edit?'':(<Link to={'/turf/view/'+turf.id}>view</Link>))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+};

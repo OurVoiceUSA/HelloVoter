@@ -9,7 +9,7 @@ import Img from 'react-image';
 
 import {
   notify_error, notify_success, _fetch, _searchStringCanvasser, _handleSelectChange,
-  _loadCanvassers, _loadCanvasser, _loadTeams, _loadForms, _loadTurf,
+  _loadCanvassers, _loadCanvasser, _loadTeams, _loadForms, _loadTurfs,
   RootLoader, CardForm, Loader, Icon, PlacesAutocomplete,
 } from '../common.js';
 
@@ -271,7 +271,7 @@ export class CardCanvasser extends Component {
     }
 
     let forms = await _loadForms(this.props.refer);
-    let turf = await _loadTurf(this.props.refer);
+    let turf = await _loadTurfs(this.props.refer);
     let teams = await _loadTeams(this.props.refer);
 
     let teamOptions = [];

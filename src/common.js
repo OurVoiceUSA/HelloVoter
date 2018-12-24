@@ -93,7 +93,20 @@ export async function _loadCanvassers(refer, teamId) {
   return canvassers;
 }
 
-export async function _loadTurf(refer, teamId, flag) {
+export async function _loadTurf(refer, id) {
+  let turf = {};
+
+  try {
+    let res = await _fetch(refer.state.server, '/canvass/v1/turf/get?turfId='+id);
+    turf = await res.json();
+  } catch (e) {
+    notify_error(e, "Unable to load turf data.");
+  }
+
+  return turf.data[0];
+}
+
+export async function _loadTurfs(refer, teamId, flag) {
   let turf = [];
 
   try {

@@ -7,7 +7,7 @@ import t from 'tcomb-form';
 
 import {
   notify_error, notify_success, _fetch,  _searchStringCanvasser, _handleSelectChange,
-  _loadCanvassers, _loadTeams, _loadTeam, _loadForms, _loadTurf,
+  _loadCanvassers, _loadTeams, _loadTeam, _loadForms, _loadTurfs,
   RootLoader, CardForm, Loader, Icon,
 } from '../common.js';
 
@@ -307,8 +307,8 @@ export class CardTeam extends Component {
     // also load canvassers & turf & forms
     let canvassers = await _loadCanvassers(this.props.refer);
     let members = await _loadCanvassers(this.props.refer, this.props.id);
-    let turfSelected = await _loadTurf(this.props.refer, this.props.id);
-    let turfs = await _loadTurf(this.props.refer);
+    let turfSelected = await _loadTurfs(this.props.refer, this.props.id);
+    let turfs = await _loadTurfs(this.props.refer);
     let formSelected = await _loadForms(this.props.refer, this.props.id);
     let forms = await _loadForms(this.props.refer);
 
