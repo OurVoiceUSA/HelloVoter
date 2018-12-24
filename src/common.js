@@ -1,16 +1,13 @@
-import React, { Component } from 'react';
+import React from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faSync, faUser, faUsers, faCrown, faStreetView, faClipboard,
-  faExclamationTriangle, faCheckCircle, faBan, faHome,
+  faSync, faUsers, faStreetView, faClipboard,
 } from '@fortawesome/free-solid-svg-icons';
 
-import GooglePlacesAutocomplete, {geocodeByAddress, getLatLng} from 'react-places-autocomplete';
+import GooglePlacesAutocomplete from 'react-places-autocomplete';
 import {NotificationManager} from 'react-notifications';
 import LoaderSpinner from 'react-loader-spinner';
-import Select from 'react-select';
-import { Link } from 'react-router-dom';
 
 export function notify_success(msg) {
   NotificationManager.success(msg, 'Success', 3000);

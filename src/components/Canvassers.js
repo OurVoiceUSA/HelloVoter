@@ -13,8 +13,7 @@ import {
 } from '../common.js';
 
 import {
-  faSync, faUser, faUsers, faCrown, faStreetView, faClipboard,
-  faExclamationTriangle, faCheckCircle, faBan, faHome,
+  faUser, faCrown, faExclamationTriangle, faCheckCircle, faBan, faHome,
 } from '@fortawesome/free-solid-svg-icons';
 
 import TimeAgo from 'javascript-time-ago';
