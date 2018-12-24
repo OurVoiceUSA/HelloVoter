@@ -20,6 +20,7 @@ export default class App extends Component {
 
     this.state = {
       loading: true,
+      creating: false,
       selectedDrawOption: null,
       selectedStateOption: null,
       selectedTypeOption: null,
@@ -38,7 +39,7 @@ export default class App extends Component {
 
     this.formServerOptions = {
       fields: {
-        server: {
+        name: {
           label: 'Turf Name',
           error: 'You must enter a turf name.',
         },
@@ -132,65 +133,96 @@ export default class App extends Component {
     let json = this.addTurfForm.getValue();
     if (json === null) return;
 
-    let obj = {};
+    this.setState({creating: true});
+
+    let objs = [];
 
     if (this.state.importFileData !== null) {
       try {
-        obj = JSON.parse(this.state.importFileData);
+        objs.push(JSON.parse(this.state.importFileData));
       } catch (e) {
         notify_error(e, "Unable to parse import data file.");
+        this.setState({creating: false});
         return;
       }
     } else if (this.state.selectedDrawOption.value === "radius") {
-      obj = circleToPolygon([this.state.addressCoords.lng,this.state.addressCoords.lat],1000);
+      objs.push(circleToPolygon([this.state.addressCoords.lng,this.state.addressCoords.lat],1000));
     } else {
-      let uri;
       let state = this.state.selectedStateOption.value;
 
-      switch (this.state.selectedTypeOption.value) {
-        case 'state':
-          uri = 'states/'+state+'/shape.geojson';
-          break;
-        case 'cd':
-          // TODO: handle the fact there are new years with less in them
-          uri = 'cds/2016/'+this.state.selectedDistrictOption.value+'/shape.geojson';
-          break;
-        case 'sldu':
-          uri = 'states/'+state+'/sldu/'+this.state.selectedDistrictOption.value+'.geojson';
-          break;
-        case 'sldl':
-          uri = 'states/'+state+'/sldl/'+this.state.selectedDistrictOption.value+'.geojson';
-          break;
-        default:
-          throw new Error("unknown selectedTypeOption");
-      }
-
       try {
-        let res = await fetch ('https://raw.githubusercontent.com/OurVoiceUSA/districts/gh-pages/'+uri)
-        obj = await res.json();
+        if (this.state.selectedDistrictOption.value === 'all') {
+          for (let i in this.state.districtOptions) {
+            if (this.state.districtOptions[i].value === 'all') continue;
+            let res = await fetch(this.urlFromDist(state, this.state.selectedTypeOption.value, this.state.districtOptions[i].value));
+            let obj = await res.json();
+            obj.name = this.state.districtOptions[i].value;
+            objs.push(obj);
+          }
+        } else {
+          let res = await fetch(this.urlFromDist(state, this.state.selectedTypeOption.value, this.state.selectedDistrictOption.value));
+          objs.push(await res.json());
+        }
       } catch (e) {
         notify_error(e, "Unable to fetch district info data.");
+        this.setState({creating: false});
         return;
       }
     }
 
     try {
-      let geometry;
+      for (let i in objs) {
+        let obj = objs[i];
+        let geometry;
+        let name;
 
-      if (obj.geometry) geometry = obj.geometry;
-      else geometry = obj;
+        if (obj.geometry) geometry = obj.geometry;
+        else geometry = obj;
 
-      await _fetch(this.props.server, '/canvass/v1/turf/create', 'POST', {
-        name: json.name,
-        geometry: geometry,
-      });
+        if (this.state.selectedDistrictOption && this.state.selectedDistrictOption.value === 'all')
+          name = json.name+' '+obj.name;
+        else
+          name = json.name;
+
+        await _fetch(this.props.server, '/canvass/v1/turf/create', 'POST', {
+          name: name,
+          geometry: geometry,
+        });
+      }
     } catch (e) {
       notify_error(e, "Unable to create turf.");
+      this.setState({creating: false});
+      return;
     }
 
     window.location.href = "/HelloVoter/#/turf/";
     this._loadTurf();
     notify_success("Turf has been created.");
+    this.setState({creating: false});
+  }
+
+  urlFromDist(state, type, value) {
+    let uri;
+
+    switch (type) {
+      case 'state':
+        uri = 'states/'+state+'/shape.geojson';
+        break;
+      case 'cd':
+        // TODO: handle the fact there are new years with less in them
+        uri = 'cds/2016/'+value+'/shape.geojson';
+        break;
+      case 'sldu':
+        uri = 'states/'+state+'/sldu/'+value+'.geojson';
+        break;
+      case 'sldl':
+        uri = 'states/'+state+'/sldl/'+value+'.geojson';
+        break;
+      default:
+        throw new Error("unknown selectedTypeOption");
+    }
+
+    return 'https://raw.githubusercontent.com/OurVoiceUSA/districts/gh-pages/'+uri;
   }
 
   componentDidMount() {
@@ -223,7 +255,7 @@ export default class App extends Component {
 
     let res = await fetch('https://api.github.com/repos/OurVoiceUSA/districts/contents/'+uri);
 
-    let dist = [];
+    let dist = [{value: 'all', label: 'Create all of them!'}];
     let objs = await res.json();
 
     switch (this.state.selectedTypeOption.value) {
@@ -238,7 +270,7 @@ export default class App extends Component {
           let val = o.name.replace('.geojson', '');
           dist.push({value: val, label: val});
         });
-      }
+    }
 
     this.setState({districtOptions: dist});
 
@@ -270,7 +302,6 @@ export default class App extends Component {
           )} />
           <Route exact={true} path="/turf/add" render={() => (
             <div>
-              Turf Name:
               <t.form.Form
                 ref={(ref) => this.addTurfForm = ref}
                 type={this.formServerItems}
@@ -293,9 +324,7 @@ export default class App extends Component {
 
               {this._showSubmitButton()?
               <div><br />
-                <button onClick={() => this._createTurf()}>
-                  Submit
-                </button>
+                <SubmitButton refer={this} />
               </div>
               :''}
             </div>
@@ -315,6 +344,15 @@ export default class App extends Component {
     );
   }
 }
+
+const SubmitButton = (props) => {
+  if (props.refer.state.creating) return (<Loader />);
+  return (
+    <button onClick={() => props.refer._createTurf()}>
+      Submit
+    </button>
+  );
+};
 
 const TurfOptions = (props) => {
   if (!props.refer.state.selectedDrawOption) return (<br />);
