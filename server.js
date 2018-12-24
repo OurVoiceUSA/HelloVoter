@@ -615,7 +615,7 @@ async function formCreate(req, res) {
   req.body.author_id = req.user.id;
 
   try {
-    await cqa('match (a:Canvasser {id:{author_id}}) create (b:Form {created: timestamp(), updated: timestamp(), id:{id}, name:{name}, questions_order:{questions_order}, version:1})-[:AUTHOR]->(a)', req.body);
+    await cqa('match (a:Canvasser {id:{author_id}}) create (b:Form {created: timestamp(), updated: timestamp(), id:{formId}, name:{name}, questions_order:{questions_order}, version:1})-[:AUTHOR]->(a)', req.body);
 
     // question is an object of objects, whos schema is; key: {label: , optional: , type: }
     Object.keys(req.body.questions).forEach(async (key) => {
