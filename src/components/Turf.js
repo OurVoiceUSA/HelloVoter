@@ -608,7 +608,7 @@ export class CardTurf extends Component {
     let canvassers = await _loadCanvassers(this.props.refer);
     let members = await _loadCanvassers(this.props.refer, 'turf', this.props.id);
     let teams = await _loadTeams(this.props.refer);
-    let teamsSelected = await _loadTeams(this.props.refer, this.props.id);
+    let teamsSelected = await _loadTeams(this.props.refer, 'turf', this.props.id);
 
     let teamOptions = [];
     let membersOption = [];

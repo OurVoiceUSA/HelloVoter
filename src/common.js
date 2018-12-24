@@ -85,6 +85,7 @@ export async function _loadCanvassers(refer, byType, id) {
 
     if (byType === 'team') call = 'team/members/list?teamId='+id;
     else if (byType === 'turf') call = 'turf/assigned/canvasser/list?turfId='+id;
+    else if (byType === 'form') call = 'form/assigned/canvasser/list?formId='+id;
 
     let res = await _fetch(refer.props.server, '/canvass/v1/'+call);
     canvassers = await res.json();
@@ -137,12 +138,15 @@ export async function _loadTeam(refer, id) {
   return team.data[0];
 }
 
-export async function _loadTeams(refer, turfId) {
+export async function _loadTeams(refer, byType, id) {
   let teams = [];
 
   try {
     let call = 'team/list';
-    if (turfId) call = 'turf/assigned/team/list?turfId='+turfId;
+
+    if (byType === 'turf') call = 'team/turf/list?turfId='+id;
+    else if (byType === 'form') call = 'form/assigned/team/list?formId='+id
+
     let res = await _fetch(refer.props.server, '/canvass/v1/'+call);
     teams = await res.json();
   } catch (e) {
@@ -150,6 +154,19 @@ export async function _loadTeams(refer, turfId) {
   }
 
   return teams.data;
+}
+
+export async function _loadForm(refer, id) {
+  let form = {};
+
+  try {
+    let res = await _fetch(refer.state.server, '/canvass/v1/form/get?formId='+id);
+    form = await res.json();
+  } catch (e) {
+    notify_error(e, "Unable to load form data.");
+  }
+
+  return form;
 }
 
 export async function _loadForms(refer, teamId) {
