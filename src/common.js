@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSync, faClipboard } from '@fortawesome/free-solid-svg-icons';
+import { faSync } from '@fortawesome/free-solid-svg-icons';
 
 import GooglePlacesAutocomplete from 'react-places-autocomplete';
 import {NotificationManager} from 'react-notifications';
@@ -123,17 +123,6 @@ export async function _loadTurfs(refer, teamId, flag) {
 
   return turf;
 }
-
-export const CardForm = (props) => (
-  <div style={{display: 'flex', padding: '10px'}}>
-    <div style={{padding: '5px 10px'}}>
-      <Icon style={{width: 50, height: 50, color: "gray"}} icon={faClipboard} />
-    </div>
-    <div style={{flex: 1, overflow: 'auto'}}>
-      {props.form.name}
-    </div>
-  </div>
-)
 
 export async function _loadTeam(refer, id) {
   let team = {};

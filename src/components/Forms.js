@@ -4,9 +4,12 @@ import { HashRouter as Router, Route, Link } from 'react-router-dom';
 import Modal from 'react-modal';
 import t from 'tcomb-form';
 
-import { faTimesCircle, faPlusCircle } from '@fortawesome/free-solid-svg-icons';
+import { faTimesCircle, faPlusCircle, faClipboard } from '@fortawesome/free-solid-svg-icons';
 
-import { _fetch, notify_error, notify_success, RootLoader, CardForm, Icon, Loader, _loadForms } from '../common.js';
+import {
+  _fetch, notify_error, notify_success, _loadForms,
+  RootLoader, Icon, Loader,
+} from '../common.js';
 
 Modal.setAppElement(document.getElementById('root'));
 
@@ -297,3 +300,14 @@ export default class App extends Component {
     );
   }
 }
+
+export const CardForm = (props) => (
+  <div style={{display: 'flex', padding: '10px'}}>
+    <div style={{padding: '5px 10px'}}>
+      <Icon style={{width: 50, height: 50, color: "gray"}} icon={faClipboard} />
+    </div>
+    <div style={{flex: 1, overflow: 'auto'}}>
+      {props.form.name}
+    </div>
+  </div>
+)
