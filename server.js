@@ -495,9 +495,9 @@ function teamFormRemove(req, res) {
 
 function turfList(req, res) {
   if (req.user.admin)
-    return cqdo(req, res, 'match (a:Turf) return a');
+    return cqdo(req, res, 'match (a:Turf) return a{.id, .name, .created, .geometry}');
   else
-    return cqdo(req, res, 'match (a:Canvasser {id:{id}})-[:MEMBERS]-(b:Team)-[:ASSIGNED]-(c:Turf) return c UNION match (a:Canvasser {id:{id}})-[:ASSIGNED]-(c:Turf) return c', req.user);
+    return cqdo(req, res, 'match (a:Canvasser {id:{id}})-[:MEMBERS]-(b:Team)-[:ASSIGNED]-(c:Turf) return c UNION match (a:Canvasser {id:{id}})-[:ASSIGNED]-(c:Turf) return c{.id, .name, .created, .geometry}', req.user);
 }
 
 function turfCreate(req, res) {
