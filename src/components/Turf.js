@@ -637,7 +637,7 @@ export class CardTurf extends Component {
       <div>
         <div style={{display: 'flex', padding: '10px'}}>
           <div style={{padding: '5px 10px'}}>
-            <Icon icon={faStreetView} style={{width: 50, height: 50, color: "gray"}} /> Name: {turf.name} {(this.props.edit?'':(<Link to={'/turf/view/'+turf.id}>view</Link>))}
+            <Icon icon={faStreetView} style={{width: 50, height: 50, color: "gray"}} /> {turf.name} {(this.props.edit?'':(<Link to={'/turf/view/'+turf.id}>view</Link>))}
           </div>
         </div>
       </div>
