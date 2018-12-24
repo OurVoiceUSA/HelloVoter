@@ -26,7 +26,7 @@ export class App extends Component {
   _loadData = async () => {
     let addresses = [];
 
-    let turfs = await _loadTurf(this);
+    let turfs = await _loadTurf(this, null, true);
     let data = (await _loadAddresses(this)).nodes;
 
     if (!data) data = {};
@@ -65,7 +65,8 @@ export class App extends Component {
     let location = _browserLocation(this.props);
 
     this.state.turfs.forEach((c) => {
-      geojson2polygons(JSON.parse(c.geometry)).forEach((p) => polygons.push(p));
+      if (c.geometry)
+        geojson2polygons(JSON.parse(c.geometry)).forEach((p) => polygons.push(p));
     });
 
     return (

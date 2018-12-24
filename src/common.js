@@ -104,12 +104,12 @@ export const CardTurf = (props) => (
   </div>
 )
 
-export async function _loadTurf(refer, teamId) {
+export async function _loadTurf(refer, teamId, flag) {
   let turf = [];
 
   try {
-    let call = 'turf/list';
-    if (teamId) call = 'team/turf/list?teamId='+teamId;
+    let call = 'turf/list'+(flag?'?geometry=true':'');
+    if (teamId) call = 'team/turf/list?teamId='+teamId+(flag?'&geometry=true':'');
     let res = await _fetch(refer.props.server, '/canvass/v1/'+call);
     let data = await res.json();
     turf = (data.data?data.data:[]);
