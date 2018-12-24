@@ -296,7 +296,7 @@ export class CardCanvasser extends Component {
 
     let turfOptions = [
       {value: '', label: "None"},
-      {value: 'auto', label: (<CardTurf key="auto" turf={{name: "Area surrounnding this canvasser's home address"}} icon={faHome} />)},
+      {value: 'auto', label: (<CardTurf key="auto" turf={{id: "auto", name: "Area surrounnding this canvasser's home address"}} icon={faHome} />)},
     ];
 
     teams.forEach((t) => {
