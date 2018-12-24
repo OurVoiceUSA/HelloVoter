@@ -11,6 +11,9 @@ import { faStreetView } from '@fortawesome/free-solid-svg-icons';
 
 import { us_states } from 'ourvoiceusa-sdk-js';
 
+import { CardCanvasser } from './Canvassers.js';
+import { CardTeam } from './Teams.js';
+
 import {
   _fetch, notify_error, notify_success, _loadTurf, _loadTeams, _loadCanvassers, _handleSelectChange,
   PlacesAutocomplete, RootLoader, Loader, Icon,
@@ -20,6 +23,9 @@ export default class App extends Component {
 
   constructor(props) {
     super(props);
+
+    let perPage = localStorage.getItem('turfperpage');
+    if (!perPage) perPage = 5;
 
     this.state = {
       loading: true,
@@ -34,6 +40,9 @@ export default class App extends Component {
       importFileData: null,
       address: "",
       addressCoords: null,
+      search: "",
+      perPage: perPage,
+      pageNum: 1,
     };
 
     this.formServerItems = t.struct({
@@ -50,6 +59,24 @@ export default class App extends Component {
     };
 
     this.onTypeAddress = (address) => this.setState({ address })
+    this.onTypeSearch = this.onTypeSearch.bind(this);
+    this.handlePageNumChange = this.handlePageNumChange.bind(this);
+  }
+
+  handlePageNumChange(obj) {
+    localStorage.setItem('canvassersperpage', obj.value);
+    this.setState({pageNum: 1, perPage: obj.value});
+  }
+
+  handlePageClick = (data) => {
+    this.setState({pageNum: data.selected+1});
+  }
+
+  onTypeSearch (event) {
+    this.setState({
+      search: event.target.value.toLowerCase(),
+      pageNum: 1,
+    })
   }
 
   submitAddress = async (address) => {
@@ -127,7 +154,7 @@ export default class App extends Component {
     } catch (e) {
       notify_error(e, "Unable to delete turf.");
     }
-    this._loadTurf(this);
+    this._loadData();
     window.location.href = "/HelloVoter/#/turf/";
     notify_success("Turf has been deleted.");
   }
@@ -229,7 +256,7 @@ export default class App extends Component {
   }
 
   componentDidMount() {
-    this._loadTurf();
+    this._loadData();
   }
 
   selectedTypeFetch = async () => {
@@ -279,9 +306,15 @@ export default class App extends Component {
 
   }
 
-  _loadTurf = async () => {
-    this.setState({loading: true})
-    let turf = await _loadTurf(this);
+  _loadData = async () => {
+    this.setState({loading: true, search: ""})
+    let turf = [];
+
+    try {
+      turf = await _loadTurf(this);
+    } catch (e) {
+      notify_error(e, "Unable to load turf.");
+    }
     this.setState({loading: false, turf: turf})
   }
 
@@ -294,12 +327,21 @@ export default class App extends Component {
       {value: 'draw', label: 'Manually draw with your mouse'},
     ];
 
+    let list = [];
+
+    this.state.turf.forEach(t => {
+      if (this.state.search && !t.name.toLowerCase().includes(this.state.search)) return;
+      list.push(t);
+    });
+
     return (
       <Router>
         <div>
           <Route exact={true} path="/turf/" render={() => (
-            <RootLoader flag={this.state.loading} func={this._loadTurf}>
-              {(this.state.loading?'loading':this.state.turf.map(t => <CardTurf key={t.name} turf={t} refer={this} />))}
+            <RootLoader flag={this.state.loading} func={this._loadData}>
+              Search: <input type="text" value={this.state.value} onChange={this.onTypeSearch} data-tip="Search by name, email, location, or admin" />
+              <br />
+              <ListTurf turf={list} refer={this} />
               <Link to={'/turf/add'}><button>Add Turf</button></Link>
             </RootLoader>
           )} />
@@ -347,6 +389,58 @@ export default class App extends Component {
     );
   }
 }
+
+const ListTurf = (props) => {
+  const perPage = props.refer.state.perPage;
+  let paginate = (<div></div>);
+  let list = [];
+
+  props.turf.forEach((t, idx) => {
+    let tp = Math.floor(idx/perPage)+1;
+    if (tp !== props.refer.state.pageNum) return;
+    list.push(<CardTurf key={t.id} turf={t} refer={props.refer} />);
+  });
+
+  paginate = (
+    <div style={{display: 'flex'}}>
+      <ReactPaginate previousLabel={"previous"}
+        nextLabel={"next"}
+        breakLabel={"..."}
+        breakClassName={"break-me"}
+        pageCount={props.turf.length/perPage}
+        marginPagesDisplayed={1}
+        pageRangeDisplayed={8}
+        onPageChange={props.refer.handlePageClick}
+        containerClassName={"pagination"}
+        subContainerClassName={"pages pagination"}
+        activeClassName={"active"}
+      />
+      &nbsp;&nbsp;&nbsp;
+      <div style={{width: 75}}>
+      # Per Page <Select
+        value={{value: perPage, label: perPage}}
+        onChange={props.refer.handlePageNumChange}
+        options={[
+          {value: 5, label: 5},
+          {value: 10, label: 10},
+          {value: 25, label: 25},
+          {value: 50, label: 50},
+          {value: 100, label: 100}
+        ]}
+      />
+      </div>
+    </div>
+  );
+
+  return (
+    <div>
+      <h3>{props.type}Turf ({props.turf.length})</h3>
+      {paginate}
+      {list}
+      {paginate}
+     </div>
+   );
+};
 
 const SubmitButton = (props) => {
   if (props.refer.state.creating) return (<Loader />);
