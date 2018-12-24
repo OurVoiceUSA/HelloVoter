@@ -222,7 +222,7 @@ class App extends Component {
           <NotificationContainer/>
           <Switch>
             <Route exact={true} path="/" render={() => <Dashboard server={server} />} />
-            <Route path="/canvassers/" render={(props) => <Canvassers server={server} {...props} />} />
+            <Route path="/canvassers/" render={() => <Canvassers server={server} />} />
             <Route path="/teams/" render={() => <Teams server={server} />} />
             <Route path="/turf/" render={() => <Turf server={server} />} />
             <Route path="/forms/" render={() => <Forms server={server} />} />

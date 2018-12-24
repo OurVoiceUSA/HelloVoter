@@ -1,30 +1,37 @@
 import React, { Component } from 'react';
 
 import { HashRouter as Router, Route, Link } from 'react-router-dom';
-import t from 'tcomb-form';
+import ReactPaginate from 'react-paginate';
 import Select from 'react-select';
+import t from 'tcomb-form';
+
+import {
+  notify_error, notify_success, _fetch, _loadCanvassers, _loadTeams, _loadTeam, _loadForms, _loadTurf, _searchStringCanvasser,
+  RootLoader, CardTurf, CardForm, Loader, Icon,
+} from '../common.js';
+
+import { CardCanvasser } from './Canvassers.js';
 
 import { faUsers } from '@fortawesome/free-solid-svg-icons';
 
-import {
-  _fetch, notify_error, notify_success, _loadCanvassers, _loadTurf, _loadForms, _loadTeams, _searchStringCanvasser,
-  RootLoader, Loader, Icon, CardTurf, CardForm,
-} from '../common.js';
-import { CardCanvasser } from './Canvassers';
+import TimeAgo from 'javascript-time-ago';
+import en from 'javascript-time-ago/locale/en';
+TimeAgo.locale(en);
 
 export default class App extends Component {
 
   constructor(props) {
     super(props);
 
+    let perPage = localStorage.getItem('teamsperpage');
+    if (!perPage) perPage = 5;
+
     this.state = {
       loading: true,
-      saving: false,
-      selectedMembersOption: null,
-      selectedTurfOption: null,
-      selectedFormOption: null,
       teams: [],
-      thisTeam: null,
+      search: "",
+      perPage: perPage,
+      pageNum: 1,
     };
 
     this.formServerItems = t.struct({
@@ -40,68 +47,33 @@ export default class App extends Component {
       },
     };
 
+    this.onTypeSearch = this.onTypeSearch.bind(this);
+    this.handlePageNumChange = this.handlePageNumChange.bind(this);
+  }
+
+  componentDidMount() {
+    this._loadData();
   }
 
   onChangeTeam(addTeamForm) {
     this.setState({addTeamForm})
   }
 
-  handleMembersChange = (selectedMembersOption) => {
-    this.setState({ selectedMembersOption });
+  handlePageNumChange(obj) {
+    localStorage.setItem('teamsperpage', obj.value);
+    this.setState({pageNum: 1, perPage: obj.value});
   }
 
-  handleTurfChange = (selectedTurfOption) => {
-    this.setState({ selectedTurfOption });
+  onTypeSearch (event) {
+    this.setState({
+      search: event.target.value.toLowerCase(),
+      pageNum: 1,
+    })
   }
 
-  handleFormChange = (selectedFormOption) => {
-    this.setState({ selectedFormOption });
-  }
-
-  _saveTeam = async () => {
-
-    this.setState({saving: true});
-
+  _deleteTeam = async (id) => {
     try {
-      await _fetch(this.props.server, '/canvass/v1/team/members/wipe', 'POST', {teamName: this.state.thisTeam});
-      await _fetch(this.props.server, '/canvass/v1/team/turf/wipe', 'POST', {teamName: this.state.thisTeam});
-      await _fetch(this.props.server, '/canvass/v1/team/form/wipe', 'POST', {teamName: this.state.thisTeam});
-    } catch (e) {
-      notify_error(e, "Unable to save team members.");
-    }
-
-    this.state.selectedMembersOption.map(async (c) => {
-      try {
-        await _fetch(this.props.server, '/canvass/v1/team/members/add', 'POST', {teamName: this.state.thisTeam, cId: c.id});
-      } catch (e) {
-        notify_error(e, "Unable to save team members.");      }
-    });
-
-    try {
-      await _fetch(this.props.server, '/canvass/v1/team/turf/add', 'POST', {
-        teamName: this.state.thisTeam,
-        turfName: this.state.selectedTurfOption.value,
-      });
-    } catch (e) {
-      notify_error(e, "Unable to save team members.");
-    }
-
-    try {
-      await _fetch(this.props.server, '/canvass/v1/team/form/add', 'POST', {
-        teamName: this.state.thisTeam,
-        fId: this.state.selectedFormOption.value,
-      });
-    } catch (e) {
-      notify_error(e, "Unable to save team members.");
-    }
-
-    notify_success("Team has been saved.");
-    this.setState({saving: false});
-  }
-
-  _deleteTeam = async () => {
-    try {
-      await _fetch(this.props.server, '/canvass/v1/team/delete', 'POST', {name: this.state.thisTeam});
+      await _fetch(this.props.server, '/canvass/v1/team/delete', 'POST', {teamId: id});
     } catch (e) {
       notify_error(e, "Unable to delete teams.");
     }
@@ -126,49 +98,36 @@ export default class App extends Component {
     notify_success("Team has been created.");
   }
 
-  componentDidMount() {
-    this._loadData();
+  _loadData = async () => {
+    let teams = [];
+    this.setState({loading: true, search: ""});
+    try {
+      teams = await _loadTeams(this);
+    } catch (e) {
+      notify_error(e, "Unable to load canvassers.");
+    }
+    this.setState({loading: false, teams});
   }
 
-  _loadData = async () => {
-    this.setState({loading: true})
-
-    let teams = await _loadTeams(this);
-
-    this.setState({teams: teams});
-
-    // also load canvassers & turf & forms
-    let canvassers = await _loadCanvassers(this);
-    let turf = await _loadTurf(this);
-    let forms = await _loadForms(this);
-
-    let memberOptions = [];
-    let turfOptions = [];
-    let formOptions = [];
-
-    canvassers.forEach((c) => {
-      if (!c.locked && !c.ass.direct)
-        memberOptions.push({value: _searchStringCanvasser(c), id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={this} />)})
-    });
-
-    turf.forEach((t) => {
-      turfOptions.push({value: t.name, label: (<CardTurf key={t.name} turf={t} />)})
-    })
-
-    forms.forEach((f) => {
-      formOptions.push({value: f.id, label: (<CardForm key={f.id} form={f} />)})
-    })
-
-    this.setState({memberOptions, turfOptions, formOptions, loading: false});
+  handlePageClick = (data) => {
+    this.setState({pageNum: data.selected+1});
   }
 
   render() {
+    let list = [];
+
+    this.state.teams.forEach(t => {
+      if (this.state.search && !t.name.toLowerCase().includes(this.state.search)) return;
+        list.push(t);
+    });
+
     return (
       <Router>
         <div>
           <Route exact={true} path="/teams/" render={() => (
             <RootLoader flag={this.state.loading} func={this._loadData}>
-              {(this.state.loading?'loading':this.state.teams.map(t => <Team key={t.name} team={t} refer={this} />))}
+              Search: <input type="text" value={this.state.value} onChange={this.onTypeSearch} data-tip="Search by name, email, location, or admin" />
+              <ListTeams refer={this} teams={list} />
               <Link to={'/teams/add'}><button>Add Team</button></Link>
             </RootLoader>
           )} />
@@ -186,42 +145,13 @@ export default class App extends Component {
               </button>
             </div>
           )} />
-          <Route path="/teams/edit/:name" render={() => (
+          <Route path="/teams/view/:id" render={(props) => (
             <div>
-              <h3>{this.state.thisTeam}</h3>
-              Canvassers:
-              <Select
-                value={this.state.selectedMembersOption}
-                onChange={this.handleMembersChange}
-                options={this.state.memberOptions}
-                isMulti={true}
-                isSearchable={true}
-                placeholder="Select team members to add"
-              />
-              <br />
-              Turf:
-              <Select
-                value={this.state.selectedTurfOption}
-                onChange={this.handleTurfChange}
-                options={this.state.turfOptions}
-                isSearchable={true}
-                placeholder="Select turf for this team"
-              />
-              <br />
-              Form:
-              <Select
-                value={this.state.selectedFormOption}
-                onChange={this.handleFormChange}
-                options={this.state.formOptions}
-                isSearchable={true}
-                placeholder="Select form for this team"
-              />
-              <br />
-              {(this.state.saving?<Loader />:<button onClick={() => this._saveTeam()}>Save Team</button>)}
+              <CardTeam key={props.match.params.id} id={props.match.params.id} edit={true} refer={this} />
               <br />
               <br />
               <br />
-              <button onClick={() => this._deleteTeam()}>Delete Team</button>
+              <button onClick={() => this._deleteTeam(props.match.params.id)}>Delete Team</button>
             </div>
           )} />
         </div>
@@ -230,55 +160,269 @@ export default class App extends Component {
   }
 }
 
-const Team = (props) => {
-  return (
-    <div style={{display: 'flex', padding: '10px'}}>
-      <div style={{padding: '5px 10px'}}>
-        <Icon style={{width: 35, height: 35, color: "gray"}} icon={faUsers} />
-      </div>
-      <div style={{flex: 1, overflow: 'auto'}}>
-        {props.team.name} (<Link to={'/teams/edit/'+props.team.name} onClick={async () => {
-          props.refer.setState({thisTeam: props.team.name, selectedMembersOption: null, selectedTurfOption: null, selectedFormOption: null});
+const ListTeams = (props) => {
+  const perPage = props.refer.state.perPage;
+  let paginate = (<div></div>);
+  let list = [];
 
-          let memberOptions = [];
-          let turfOptions = null;
-          let formOptions = null;
+  props.teams.forEach((t, idx) => {
+    let tp = Math.floor(idx/perPage)+1;
+    if (tp !== props.refer.state.pageNum) return;
+    list.push(<CardTeam key={t.id} team={t} refer={props.refer} />);
+  });
 
-          try {
-            let canvassers = await _loadCanvassers(props.refer, props.team.name);
-
-            canvassers.forEach((c) => {
-              if (!c.locked && !c.ass.direct)
-                memberOptions.push({value: _searchStringCanvasser(c), id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={props.refer} />)})
-            });
-          } catch (e) {
-            notify_error(e, "Unable to load canvassers.");
-          }
-
-          try {
-            let turf = await _loadTurf(props.refer, props.team.name);
-            if (turf.length)
-              turfOptions = {value: turf[0].name, label: (<CardTurf key={turf[0].name} turf={turf[0]} />)};
-          } catch (e) {
-            notify_error(e, "Unable to load turf.");
-          }
-
-          try {
-            let form = await _loadForms(props.refer, props.team.name);
-            if (form.length)
-              formOptions = {value: form[0].id, label: (<CardForm key={form[0].id} form={form[0]} />)};
-          } catch (e) {
-            notify_error(e, "Unable to load forms.");
-          }
-
-          props.refer.setState({
-            selectedMembersOption: memberOptions,
-            selectedTurfOption: turfOptions,
-            selectedFormOption: formOptions,
-          });
-
-        }}>edit</Link>)
+  paginate = (
+    <div style={{display: 'flex'}}>
+      <ReactPaginate previousLabel={"previous"}
+        nextLabel={"next"}
+        breakLabel={"..."}
+        breakClassName={"break-me"}
+        pageCount={props.teams.length/perPage}
+        marginPagesDisplayed={1}
+        pageRangeDisplayed={8}
+        onPageChange={props.refer.handlePageClick}
+        containerClassName={"pagination"}
+        subContainerClassName={"pages pagination"}
+        activeClassName={"active"}
+      />
+      &nbsp;&nbsp;&nbsp;
+      <div style={{width: 75}}>
+      # Per Page <Select
+        value={{value: perPage, label: perPage}}
+        onChange={props.refer.handlePageNumChange}
+        options={[
+          {value: 5, label: 5},
+          {value: 10, label: 10},
+          {value: 25, label: 25},
+          {value: 50, label: 50},
+          {value: 100, label: 100}
+        ]}
+      />
       </div>
     </div>
   );
+
+  return (
+    <div>
+      <h3>{props.type}Teams ({props.teams.length})</h3>
+      {paginate}
+      {list}
+      {paginate}
+     </div>
+   );
+};
+
+export class CardTeam extends Component {
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      server: this.props.refer.props.server,
+      team: this.props.team,
+      selectedMembersOption: [],
+      selectedFormsOption: {},
+      selectedTurfOption: {},
+    };
+
+  }
+
+  componentDidMount() {
+    if (!this.state.team) this._loadData();
+  }
+
+  handleMembersChange = async (selectedMembersOption) => {
+    try {
+
+      let prior = this.state.selectedMembersOption.map((e) => {
+        return e.id;
+      });
+
+      let now = selectedMembersOption.map((e) => {
+        return e.id;
+      });
+
+      // anything in "now" that isn't in "prior" gets added
+      for (let ni in now) {
+        let n = now[ni];
+        if (prior.indexOf(n) === -1) {
+          await _fetch(this.state.server, '/canvass/v1/team/members/add', 'POST', {teamId: this.props.id, cId: n});
+        }
+      };
+
+      // anything in "prior" that isn't in "now" gets removed
+      for (let pi in prior) {
+        let p = prior[pi];
+        if (now.indexOf(p) === -1) {
+          await _fetch(this.state.server, '/canvass/v1/team/members/remove', 'POST', {teamId: this.props.id, cId: p});
+        }
+      };
+
+      // refresh team info
+      let team = await _loadTeam(this, this.props.id);
+      notify_success("Team assignments saved.");
+      this.setState({ selectedMembersOption, team });
+    } catch (e) {
+      notify_error(e, "Unable to add/remove team members.");
+    }
+  }
+
+  handleFormsChange = async (selectedFormsOption) => {
+    try {
+      if (this.state.selectedFormsOption.value) {
+        await _fetch(this.state.server, '/canvass/v1/form/assigned/team/remove', 'POST', {
+          formId: this.state.selectedFormsOption.value,
+          teamId: this.props.id,
+        });
+      }
+      if (selectedFormsOption.value) {
+        await _fetch(this.state.server, '/canvass/v1/form/assigned/team/add', 'POST', {
+          formId: selectedFormsOption.value,
+          teamId: this.props.id,
+        });
+      }
+      // refresh team info
+      let teamn = await _loadTeam(this, this.props.id);
+      notify_success("Form selection saved.");
+      this.setState({teamn, selectedFormsOption});
+    } catch (e) {
+      notify_error(e, "Unable to add/remove form.");
+    }
+  }
+
+  handleTurfChange = async (selectedTurfOption) => {
+    try {
+      if (this.state.selectedTurfOption.value) {
+        await _fetch(this.state.server, '/canvass/v1/turf/assigned/canvasser/remove', 'POST', {
+          turfId: this.state.selectedTurfOption.value,
+          teamId: this.props.id,
+        });
+      }
+      if (selectedTurfOption.value) {
+        await _fetch(this.state.server, '/canvass/v1/turf/assigned/canvasser/add', 'POST', {
+          turfId: selectedTurfOption.value,
+          teamId: this.props.id,
+        });
+      }
+      // refresh team info
+      let team = await _loadTeam(this, this.props.id);
+      notify_success("Turf selection saved.");
+      this.setState({team, selectedTurfOption});
+    } catch (e) {
+      notify_error(e, "Unable to add/remove turf.");
+    }
+  }
+
+  _loadData = async () => {
+    this.setState({loading: true})
+
+    let team = await _loadTeam(this, this.props.id);
+
+    this.setState({teams: team});
+
+    // also load canvassers & turf & forms
+    let canvassers = await _loadCanvassers(this.props.refer);
+    let members = await _loadCanvassers(this.props.refer, this.props.id);
+    let turf = await _loadTurf(this.props.refer, this.props.id);
+    let turfs = await _loadTurf(this.props.refer);
+    let form = await _loadForms(this.props.refer, this.props.id);
+    let forms = await _loadForms(this.props.refer);
+
+    let memberOptions = [];
+    let selectedMembersOption = [];
+    let selectedTurfOption = {};
+    let selectedFormsOption = {};
+
+    let formOptions = [
+      {value: '', label: "None"},
+    ];
+
+    let turfOptions = [
+      {value: '', label: "None"},
+    ];
+
+    canvassers.forEach((c) => {
+      memberOptions.push({value: _searchStringCanvasser(c), id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={this} />)})
+    });
+
+    members.forEach((c) => {
+      selectedMembersOption.push({value: _searchStringCanvasser(c), id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={this} />)});
+    });
+
+    turfs.forEach((t) => {
+      turfOptions.push({value: t.id, label: (<CardTurf key={t.id} turf={t} />)})
+    })
+
+    if (turf.length) {
+      selectedTurfOption = {value: turf[0].id, label: (<CardTurf key={turf[0].id} turf={turf[0]} />)};
+    }
+
+    forms.forEach((f) => {
+      formOptions.push({value: f.id, label: (<CardForm key={f.id} form={f} />)})
+    })
+
+    if (form.length) {
+      selectedFormsOption = {value: form[0].id, label: (<CardForm key={form[0].id} form={form[0]} />)};
+    }
+
+    this.setState({team, memberOptions, turfOptions, formOptions, selectedMembersOption, selectedTurfOption, selectedFormsOption, loading: false});
+  }
+
+  render() {
+    const { team } = this.state;
+
+    if (!team || this.state.loading) {
+      return (<Loader />);
+    }
+
+    return (
+      <div>
+        <div style={{display: 'flex', padding: '10px'}}>
+          <div style={{flex: 1, overflow: 'auto', padding: '5px 10px'}}>
+            <Icon icon={faUsers} style={{width: 50, height: 50, color: "gray"}} /> Name: {team.name} {(this.props.edit?'':(<Link to={'/teams/view/'+team.id}>view</Link>))}
+          </div>
+        </div>
+        {this.props.edit?<CardTeamFull team={team} refer={this} />:''}
+      </div>
+    );
+  }
 }
+
+export const CardTeamFull = (props) => (
+  <div>
+    <br />
+    <div>
+
+      Members of this team:
+      <Select
+        value={props.refer.state.selectedMembersOption}
+        onChange={props.refer.handleMembersChange}
+        options={props.refer.state.memberOptions}
+        isMulti={true}
+        isSearchable={true}
+        placeholder="None"
+      />
+    </div>
+    <br />
+    <div>
+      Form this team is assigned to:
+      <Select
+        value={props.refer.state.selectedFormsOption}
+        onChange={props.refer.handleFormsChange}
+        options={props.refer.state.formOptions}
+        isSearchable={true}
+        placeholder="None"
+      />
+      <br />
+      Turf this team assigned to:
+      <Select
+        value={props.refer.state.selectedTurfOption}
+        onChange={props.refer.handleTurfChange}
+        options={props.refer.state.turfOptions}
+        isSearchable={true}
+        placeholder="None"
+      />
+    </div>
+
+  </div>
+);

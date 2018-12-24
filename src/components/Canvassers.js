@@ -9,8 +9,10 @@ import Img from 'react-image';
 
 import {
   notify_error, notify_success, _fetch, _loadCanvassers, _loadCanvasser, _loadTeams, _loadForms, _loadTurf, _searchStringCanvasser,
-  RootLoader, CardTurf, CardTeam, CardForm, Loader, Icon, PlacesAutocomplete,
+  RootLoader, CardTurf, CardForm, Loader, Icon, PlacesAutocomplete,
 } from '../common.js';
+
+import { CardTeam } from './Teams.js';
 
 import {
   faUser, faCrown, faExclamationTriangle, faCheckCircle, faBan, faHome,
@@ -219,7 +221,7 @@ export class CardCanvasser extends Component {
       notify_success("Team assignments saved.");
       this.setState({ selectedTeamsOption, selectedFormsOption: {}, selectedTurfOption: {}, canvasser });
     } catch (e) {
-
+      notify_error(e, "Unable to add/remove teams.");
     }
   }
 

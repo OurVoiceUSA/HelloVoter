@@ -1,9 +1,7 @@
 import React from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faSync, faUsers, faStreetView, faClipboard,
-} from '@fortawesome/free-solid-svg-icons';
+import { faSync, faStreetView, faClipboard } from '@fortawesome/free-solid-svg-icons';
 
 import GooglePlacesAutocomplete from 'react-places-autocomplete';
 import {NotificationManager} from 'react-notifications';
@@ -79,23 +77,12 @@ export async function _loadCanvasser(refer, id) {
   return canvasser;
 }
 
-export const CardTeam = (props) => (
-  <div style={{display: 'flex', padding: '10px'}}>
-    <div style={{padding: '5px 10px'}}>
-      <Icon style={{width: 50, height: 50, color: "gray"}} icon={faUsers} />
-    </div>
-    <div style={{flex: 1, overflow: 'auto'}}>
-      {props.t.name}
-    </div>
-  </div>
-);
-
-export async function _loadCanvassers(refer, teamName) {
+export async function _loadCanvassers(refer, teamId) {
   let canvassers = [];
 
   try {
     let call = 'canvasser/list';
-    if (teamName) call = 'team/members/list?teamName='+teamName;
+    if (teamId) call = 'team/members/list?teamId='+teamId;
 
     let res = await _fetch(refer.props.server, '/canvass/v1/'+call);
     canvassers = await res.json();
@@ -117,12 +104,12 @@ export const CardTurf = (props) => (
   </div>
 )
 
-export async function _loadTurf(refer, teamName) {
+export async function _loadTurf(refer, teamId) {
   let turf = [];
 
   try {
     let call = 'turf/list';
-    if (teamName) call = 'team/turf/list?teamName='+teamName;
+    if (teamId) call = 'team/turf/list?teamId='+teamId;
     let res = await _fetch(refer.props.server, '/canvass/v1/'+call);
     let data = await res.json();
     turf = (data.data?data.data:[]);
@@ -144,6 +131,19 @@ export const CardForm = (props) => (
   </div>
 )
 
+export async function _loadTeam(refer, id) {
+  let team = {};
+
+  try {
+    let res = await _fetch(refer.state.server, '/canvass/v1/team/get?teamId='+id);
+    team = await res.json();
+  } catch (e) {
+    notify_error(e, "Unable to load team data.");
+  }
+
+  return team.data[0];
+}
+
 export async function _loadTeams(refer) {
   let teams = [];
 
@@ -151,19 +151,19 @@ export async function _loadTeams(refer) {
     let res = await _fetch(refer.props.server, '/canvass/v1/team/list');
     teams = await res.json();
   } catch (e) {
-    notify_error(e, "Unable to load team data.");
+    notify_error(e, "Unable to load teams data.");
   }
 
   return teams.data;
 }
 
-export async function _loadForms(refer, teamName) {
+export async function _loadForms(refer, teamId) {
   let forms = [];
 
   try {
     let uri;
 
-    if (teamName) uri = 'team/form/list?teamName='+teamName;
+    if (teamId) uri = 'team/form/list?teamId='+teamId;
     else uri = 'form/list';
 
     let res = await _fetch(refer.props.server, '/canvass/v1/'+uri);
