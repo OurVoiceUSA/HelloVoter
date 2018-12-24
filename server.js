@@ -674,7 +674,7 @@ function formAssignedTeamRemove(req, res) {
 }
 
 async function formAssignedCanvasserList(req, res) {
-  if (!valid(req.query.id)) return _400(res, "Invalid value to parameter 'id'.");
+  if (!valid(req.query.formId)) return _400(res, "Invalid value to parameter 'formId'.");
 
   let canvassers;
 
