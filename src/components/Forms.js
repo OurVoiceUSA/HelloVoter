@@ -222,11 +222,10 @@ export default class App extends Component {
       };
 
       await _fetch(this.props.server, '/canvass/v1/form/create', 'POST', obj);
+      notify_success("Form has been created.")
     } catch (e) {
       notify_error(e, "Unable to create form.");
     }
-
-    notify_success("Form has been created.")
     this.setState({saving: false});
 
     window.location.href = "/HelloVoter/#/forms/";
