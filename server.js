@@ -274,6 +274,18 @@ async function dashboard(req, res) {
       addresses: (await cqa('match (a:Address) where not a.multi_unit = true return count(a)')).data[0]+(await cqa('match (a:Unit) return count(a)')).data[0],
       version: version,
     });
+    else {
+      let ass = await canvassAssignments(req.user);
+      return res.json({
+        canvassers: (await cqa('match (a:Canvasser {id:{id}})-[:MEMBERS {leader:true}]-(:Team)-[]-(t:Turf) where t.wkt is not null call spatial.intersects("canvasser", t.wkt) yield node return node UNION match (a:Canvasser {id:{id}}) optional match (a)-[:MEMBERS]-(:Team)-[:MEMBERS]-(c:Canvasser) return distinct(c) as node', req.user)).data.length,
+        teams: ass.teams.length,
+        turfs: ass.turf.length,
+        questions: 'N/A',
+        forms: ass.forms.length,
+        addresses: 'N/A',
+        version: (ass.ready?version:null),
+      });
+    }
   } catch (e) {
     return _500(res, e);
   }
