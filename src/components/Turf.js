@@ -6,7 +6,12 @@ import circleToPolygon from 'circle-to-polygon';
 import t from 'tcomb-form';
 import Select from 'react-select';
 
-import { _fetch, notify_error, notify_success, PlacesAutocomplete, RootLoader, Loader, CardTurf, _loadTurf, us_states } from '../common.js';
+import { us_states } from 'ourvoiceusa-sdk-js';
+
+import {
+  _fetch, notify_error, notify_success, _loadTurf,
+  PlacesAutocomplete, RootLoader, Loader, CardTurf,
+} from '../common.js';
 
 export default class App extends Component {
 
