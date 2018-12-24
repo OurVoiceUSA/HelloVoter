@@ -425,7 +425,7 @@ async function teamMembersList(req, res) {
 
 function teamMembersAdd(req, res) {
   if (!valid(req.body.teamId) || !valid(req.body.cId)) return _400(res, "Invalid value to parameter 'teamId' or 'cId'.");
-  return cqdo(req, res, 'match (a:Canvasser {id:{cId}}), (b:Team {teamId:{teamId}}) merge (b)-[:MEMBERS]->(a)', req.body, true);
+  return cqdo(req, res, 'match (a:Canvasser {id:{cId}}), (b:Team {id:{teamId}}) merge (b)-[:MEMBERS]->(a)', req.body, true);
 }
 
 function teamMembersRemove(req, res) {
