@@ -396,7 +396,7 @@ function teamCreate(req, res) {
   req.body.teamId = uuidv4();
   req.body.author_id = req.user.id;
 
-  return cqdo(req, res, 'match (a:Canvasser {id:{author_id}}) create (a:Team {id:{teamId}, created: timestamp(), name:{name}})-[:CREATOR]->(a)', req.body, true);
+  return cqdo(req, res, 'match (a:Canvasser {id:{author_id}}) create (b:Team {id:{teamId}, created: timestamp(), name:{name}})-[:CREATOR]->(a)', req.body, true);
 }
 
 function teamDelete(req, res) {
