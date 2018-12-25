@@ -214,6 +214,27 @@ export class CardVolunteer extends Component {
     }
   }
 
+  handleLeaderChange = async (selectedLeaderOption) => {
+    try {
+      let obj = _handleSelectChange(this.state.selectedLeaderOption, selectedLeaderOption);
+
+      for (let i in obj.add) {
+        await _fetch(this.state.server, '/volunteer/v1/team/members/promote', 'POST', {teamId: obj.add[i], cId: this.props.id});
+      }
+
+      for (let i in obj.rm) {
+        await _fetch(this.state.server, '/volunteer/v1/team/members/demote', 'POST', {teamId: obj.rm[i], cId: this.props.id});
+      }
+
+      // refresh volunteer info
+      let volunteer = await _loadVolunteer(this, this.props.id);
+      notify_success("Team assignments saved.");
+      this.setState({ selectedLeaderOption, volunteer });
+    } catch (e) {
+      notify_error(e, "Unable to add/remove teams.");
+    }
+  }
+
   handleFormsChange = async (selectedFormsOption) => {
     try {
       if (this.state.selectedFormsOption.value) {
