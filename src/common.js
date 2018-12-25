@@ -144,7 +144,7 @@ export async function _loadTeams(refer, byType, id) {
   try {
     let call = 'team/list';
 
-    if (byType === 'turf') call = 'team/turf/list?turfId='+id;
+    if (byType === 'turf') call = 'turf/assigned/team/list?turfId='+id;
     else if (byType === 'form') call = 'form/assigned/team/list?formId='+id
 
     let res = await _fetch(refer.props.server, '/canvass/v1/'+call);

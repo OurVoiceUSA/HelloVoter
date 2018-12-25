@@ -6,7 +6,7 @@ import Select from 'react-select';
 import t from 'tcomb-form';
 
 import {
-  notify_error, notify_success, _fetch,  _searchStringCanvasser, _handleSelectChange, _searchStringify,
+  notify_error, notify_success, _fetch,  _handleSelectChange, _searchStringify,
   _loadCanvassers, _loadTeams, _loadTeam, _loadForms, _loadTurfs,
   RootLoader, Loader, Icon,
 } from '../common.js';
