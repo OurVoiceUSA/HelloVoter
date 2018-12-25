@@ -7,13 +7,13 @@ import t from 'tcomb-form';
 
 import {
   notify_error, notify_success, _fetch,  _handleSelectChange, _searchStringify,
-  _loadCanvassers, _loadTeams, _loadTeam, _loadForms, _loadTurfs,
+  _loadVolunteers, _loadTeams, _loadTeam, _loadForms, _loadTurfs,
   RootLoader, Loader, Icon,
 } from '../common.js';
 
 import { CardTurf } from './Turf.js';
 import { CardForm } from './Forms.js';
-import { CardCanvasser } from './Canvassers.js';
+import { CardVolunteer } from './Volunteers.js';
 
 import { faUsers } from '@fortawesome/free-solid-svg-icons';
 
@@ -76,7 +76,7 @@ export default class App extends Component {
 
   _deleteTeam = async (id) => {
     try {
-      await _fetch(this.props.server, '/canvass/v1/team/delete', 'POST', {teamId: id});
+      await _fetch(this.props.server, '/volunteer/v1/team/delete', 'POST', {teamId: id});
     } catch (e) {
       notify_error(e, "Unable to delete teams.");
     }
@@ -91,7 +91,7 @@ export default class App extends Component {
     if (json === null) return;
 
     try {
-      await _fetch(this.props.server, '/canvass/v1/team/create', 'POST', {name: json.name});
+      await _fetch(this.props.server, '/volunteer/v1/team/create', 'POST', {name: json.name});
     } catch (e) {
       notify_error(e, "Unable to create team.");
     }
@@ -107,7 +107,7 @@ export default class App extends Component {
     try {
       teams = await _loadTeams(this);
     } catch (e) {
-      notify_error(e, "Unable to load canvassers.");
+      notify_error(e, "Unable to load volunteers.");
     }
     this.setState({loading: false, teams});
   }
@@ -240,11 +240,11 @@ export class CardTeam extends Component {
       let obj = _handleSelectChange(this.state.selectedMembersOption, selectedMembersOption);
 
       for (let i in obj.add) {
-        await _fetch(this.state.server, '/canvass/v1/team/members/add', 'POST', {teamId: this.props.id, cId: obj.add[i]});
+        await _fetch(this.state.server, '/volunteer/v1/team/members/add', 'POST', {teamId: this.props.id, cId: obj.add[i]});
       }
 
       for (let i in obj.rm) {
-        await _fetch(this.state.server, '/canvass/v1/team/members/remove', 'POST', {teamId: this.props.id, cId: obj.rm[i]});
+        await _fetch(this.state.server, '/volunteer/v1/team/members/remove', 'POST', {teamId: this.props.id, cId: obj.rm[i]});
       }
 
       // refresh team info
@@ -261,11 +261,11 @@ export class CardTeam extends Component {
       let obj = _handleSelectChange(this.state.selectedFormsOption, selectedFormsOption);
 
       for (let i in obj.add) {
-        await _fetch(this.state.server, '/canvass/v1/form/assigned/team/add', 'POST', {formId: obj.add[i], teamId: this.props.id});
+        await _fetch(this.state.server, '/volunteer/v1/form/assigned/team/add', 'POST', {formId: obj.add[i], teamId: this.props.id});
       }
 
       for (let i in obj.rm) {
-        await _fetch(this.state.server, '/canvass/v1/form/assigned/team/remove', 'POST', {formId: obj.rm[i], teamId: this.props.id});
+        await _fetch(this.state.server, '/volunteer/v1/form/assigned/team/remove', 'POST', {formId: obj.rm[i], teamId: this.props.id});
       }
 
       // refresh team info
@@ -282,11 +282,11 @@ export class CardTeam extends Component {
       let obj = _handleSelectChange(this.state.selectedTurfOption, selectedTurfOption);
 
       for (let i in obj.add) {
-        await _fetch(this.state.server, '/canvass/v1/turf/assigned/team/add', 'POST', {turfId: obj.add[i], teamId: this.props.id});
+        await _fetch(this.state.server, '/volunteer/v1/turf/assigned/team/add', 'POST', {turfId: obj.add[i], teamId: this.props.id});
       }
 
       for (let i in obj.rm) {
-        await _fetch(this.state.server, '/canvass/v1/turf/assigned/team/remove', 'POST', {turfId: obj.rm[i], teamId: this.props.id});
+        await _fetch(this.state.server, '/volunteer/v1/turf/assigned/team/remove', 'POST', {turfId: obj.rm[i], teamId: this.props.id});
       }
 
       // refresh team info
@@ -305,9 +305,9 @@ export class CardTeam extends Component {
 
     this.setState({teams: team});
 
-    // also load canvassers & turf & forms
-    let canvassers = await _loadCanvassers(this.props.refer);
-    let members = await _loadCanvassers(this.props.refer, 'team', this.props.id);
+    // also load volunteers & turf & forms
+    let volunteers = await _loadVolunteers(this.props.refer);
+    let members = await _loadVolunteers(this.props.refer, 'team', this.props.id);
     let turfSelected = await _loadTurfs(this.props.refer, this.props.id);
     let turfs = await _loadTurfs(this.props.refer);
     let formSelected = await _loadForms(this.props.refer, this.props.id);
@@ -320,12 +320,12 @@ export class CardTeam extends Component {
     let selectedTurfOption = [];
     let selectedFormsOption = [];
 
-    canvassers.forEach((c) => {
-      memberOptions.push({value: _searchStringify(c), id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={this} />)});
+    volunteers.forEach((c) => {
+      memberOptions.push({value: _searchStringify(c), id: c.id, label: (<CardVolunteer key={c.id} volunteer={c} refer={this} />)});
     });
 
     members.forEach((c) => {
-      selectedMembersOption.push({value: _searchStringify(c), id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={this} />)});
+      selectedMembersOption.push({value: _searchStringify(c), id: c.id, label: (<CardVolunteer key={c.id} volunteer={c} refer={this} />)});
     });
 
     turfs.forEach((t) => {

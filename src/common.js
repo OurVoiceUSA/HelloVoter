@@ -66,41 +66,41 @@ export function _searchStringify(obj) {
   return JSON.stringify(obj).toLowerCase();
 }
 
-export async function _loadCanvasser(refer, id) {
-  let canvasser = {};
+export async function _loadVolunteer(refer, id) {
+  let volunteer = {};
   try {
-    let res = await _fetch(refer.state.server, '/canvass/v1/canvasser/get?id='+id);
-    canvasser = await res.json();
+    let res = await _fetch(refer.state.server, '/volunteer/v1/volunteer/get?id='+id);
+    volunteer = await res.json();
   } catch (e) {
-    notify_error(e, "Unable to load canvasser info.");
+    notify_error(e, "Unable to load volunteer info.");
   }
-  return canvasser;
+  return volunteer;
 }
 
-export async function _loadCanvassers(refer, byType, id) {
-  let canvassers = [];
+export async function _loadVolunteers(refer, byType, id) {
+  let volunteers = [];
 
   try {
-    let call = 'canvasser/list';
+    let call = 'volunteer/list';
 
     if (byType === 'team') call = 'team/members/list?teamId='+id;
-    else if (byType === 'turf') call = 'turf/assigned/canvasser/list?turfId='+id;
-    else if (byType === 'form') call = 'form/assigned/canvasser/list?formId='+id;
+    else if (byType === 'turf') call = 'turf/assigned/volunteer/list?turfId='+id;
+    else if (byType === 'form') call = 'form/assigned/volunteer/list?formId='+id;
 
-    let res = await _fetch(refer.props.server, '/canvass/v1/'+call);
-    canvassers = await res.json();
+    let res = await _fetch(refer.props.server, '/volunteer/v1/'+call);
+    volunteers = await res.json();
   } catch (e) {
-    notify_error(e, "Unable to load canvasser data.");
+    notify_error(e, "Unable to load volunteer data.");
   }
 
-  return canvassers;
+  return volunteers;
 }
 
 export async function _loadTurf(refer, id) {
   let turf = {};
 
   try {
-    let res = await _fetch(refer.state.server, '/canvass/v1/turf/get?turfId='+id);
+    let res = await _fetch(refer.state.server, '/volunteer/v1/turf/get?turfId='+id);
     turf = await res.json();
   } catch (e) {
     notify_error(e, "Unable to load turf data.");
@@ -115,7 +115,7 @@ export async function _loadTurfs(refer, teamId, flag) {
   try {
     let call = 'turf/list'+(flag?'?geometry=true':'');
     if (teamId) call = 'team/turf/list?teamId='+teamId+(flag?'&geometry=true':'');
-    let res = await _fetch(refer.props.server, '/canvass/v1/'+call);
+    let res = await _fetch(refer.props.server, '/volunteer/v1/'+call);
     let data = await res.json();
     turf = (data.data?data.data:[]);
   } catch (e) {
@@ -129,7 +129,7 @@ export async function _loadTeam(refer, id) {
   let team = {};
 
   try {
-    let res = await _fetch(refer.state.server, '/canvass/v1/team/get?teamId='+id);
+    let res = await _fetch(refer.state.server, '/volunteer/v1/team/get?teamId='+id);
     team = await res.json();
   } catch (e) {
     notify_error(e, "Unable to load team data.");
@@ -147,7 +147,7 @@ export async function _loadTeams(refer, byType, id) {
     if (byType === 'turf') call = 'turf/assigned/team/list?turfId='+id;
     else if (byType === 'form') call = 'form/assigned/team/list?formId='+id
 
-    let res = await _fetch(refer.props.server, '/canvass/v1/'+call);
+    let res = await _fetch(refer.props.server, '/volunteer/v1/'+call);
     teams = await res.json();
   } catch (e) {
     notify_error(e, "Unable to load teams data.");
@@ -160,7 +160,7 @@ export async function _loadForm(refer, id) {
   let form = {};
 
   try {
-    let res = await _fetch(refer.state.server, '/canvass/v1/form/get?formId='+id);
+    let res = await _fetch(refer.state.server, '/volunteer/v1/form/get?formId='+id);
     form = await res.json();
   } catch (e) {
     notify_error(e, "Unable to load form data.");
@@ -178,7 +178,7 @@ export async function _loadForms(refer, teamId) {
     if (teamId) uri = 'team/form/list?teamId='+teamId;
     else uri = 'form/list';
 
-    let res = await _fetch(refer.props.server, '/canvass/v1/'+uri);
+    let res = await _fetch(refer.props.server, '/volunteer/v1/'+uri);
     let data = await res.json();
     forms = (data.data?data.data:[]);
   } catch (e) {
@@ -191,7 +191,7 @@ export async function _loadForms(refer, teamId) {
 export async function _loadAddresses(refer) {
   let addresses = {};
   try {
-    let res = await _fetch(refer.props.server, '/canvass/v1/sync', 'POST', {nodes: {}});
+    let res = await _fetch(refer.props.server, '/volunteer/v1/sync', 'POST', {nodes: {}});
     addresses = await res.json();
   } catch (e) {
     notify_error(e, "Unable to load address information.");

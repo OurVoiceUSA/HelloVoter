@@ -9,7 +9,7 @@ import queryString from 'query-string';
 import ReactTooltip from 'react-tooltip';
 
 import Dashboard from './components/Dashboard';
-import Canvassers from './components/Canvassers';
+import Volunteers from './components/Volunteers';
 import Teams from './components/Teams';
 import Turf from './components/Turf';
 import Forms from './components/Forms';
@@ -73,7 +73,7 @@ class App extends Component {
   _loadKeys = async () => {
     if (!this.state.server.hostname) return;
 
-    let res = await _fetch(this.state.server, '/canvass/v1/google_maps_key')
+    let res = await _fetch(this.state.server, '/volunteer/v1/google_maps_key')
     let data = await res.json();
 
     // load google places API
@@ -127,7 +127,7 @@ class App extends Component {
     localStorage.setItem('server', server);
 
     try {
-      res = await fetch('https://'+server+'/canvass/v1/hello', {
+      res = await fetch('https://'+server+'/volunteer/v1/hello', {
         method: 'POST',
         headers: {
           'Authorization': 'Bearer '+(this.state.jwt?this.state.jwt:"of the one ring"),
@@ -149,7 +149,7 @@ class App extends Component {
           window.location.href = sm_oauth_url+"/gm?app=HelloVoter";
           return {error: false, flag: true};
         case 403:
-          return {error: true, msg: "We're sorry, but your request to canvass with this server has been rejected."};
+          return {error: true, msg: "We're sorry, but your request to volunteer with this server has been rejected."};
         default:
           return {error: true, msg: "Unknown error connecting to server."};
       }
@@ -205,7 +205,7 @@ class App extends Component {
           <div style={{margin: 10}}>Welcome, {this.getName()}!<br />Server: {this.state.server.hostname}</div>
           <hr />
           <SidebarItem><Icon icon={faColumns} data-tip="Dashboard" /> <Link to={'/'}>Dashboard</Link></SidebarItem>
-          <SidebarItem><Icon icon={faUser} data-tip="Canvassers" /> <Link to={'/canvassers/'}>Canvassers</Link></SidebarItem>
+          <SidebarItem><Icon icon={faUser} data-tip="Volunteers" /> <Link to={'/volunteers/'}>Volunteers</Link></SidebarItem>
           <SidebarItem><Icon icon={faUsers} data-tip="Teams" /> <Link to={'/teams/'}>Teams</Link></SidebarItem>
           <SidebarItem><Icon icon={faMap} data-tip="Turf" /> <Link to={'/turf/'}>Turf</Link></SidebarItem>
           <SidebarItem><Icon icon={faClipboard} data-tip="Forms" /> <Link to={'/forms/'}>Forms</Link></SidebarItem>
@@ -222,7 +222,7 @@ class App extends Component {
           <NotificationContainer/>
           <Switch>
             <Route exact={true} path="/" render={() => <Dashboard server={server} />} />
-            <Route path="/canvassers/" render={() => <Canvassers server={server} />} />
+            <Route path="/volunteers/" render={() => <Volunteers server={server} />} />
             <Route path="/teams/" render={() => <Teams server={server} />} />
             <Route path="/turf/" render={() => <Turf server={server} />} />
             <Route path="/forms/" render={() => <Forms server={server} />} />

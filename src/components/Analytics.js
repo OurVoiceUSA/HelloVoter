@@ -58,7 +58,7 @@ export default class App extends Component {
                 <Cell key={`slice-${index}`} fill={["red","blue","yellow","grey"][index]} />
               ))
             }
-            <Label value="Canvassing" position="outside" />
+            <Label value="Volunteering" position="outside" />
             <LabelList position="outside" />
           </Pie>
           <Pie

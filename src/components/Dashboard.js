@@ -25,7 +25,7 @@ export default class App extends Component {
     this.setState({loading: true})
 
     try {
-      let res = await _fetch(this.props.server, '/canvass/v1/dashboard');
+      let res = await _fetch(this.props.server, '/volunteer/v1/dashboard');
 
       data = await res.json();
     } catch (e) {
@@ -38,7 +38,7 @@ export default class App extends Component {
   render() {
     return (
       <RootLoader flag={this.state.loading} func={this._loadData}>
-        <CardDashboard name="Canvassers" stat={this.state.data.canvassers} icon={faUser} />
+        <CardDashboard name="Volunteers" stat={this.state.data.volunteers} icon={faUser} />
         <CardDashboard name="Teams" stat={this.state.data.teams} icon={faUsers} />
         <CardDashboard name="Turf" stat={this.state.data.turfs} icon={faMap} />
         <CardDashboard name="Forms" stat={this.state.data.forms} icon={faClipboard} />

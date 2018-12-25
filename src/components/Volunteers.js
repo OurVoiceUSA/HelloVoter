@@ -9,7 +9,7 @@ import Img from 'react-image';
 
 import {
   notify_error, notify_success, _fetch, _searchStringify, _handleSelectChange,
-  _loadCanvassers, _loadCanvasser, _loadTeams, _loadForms, _loadTurfs,
+  _loadVolunteers, _loadVolunteer, _loadTeams, _loadForms, _loadTurfs,
   RootLoader, Loader, Icon, PlacesAutocomplete,
 } from '../common.js';
 
@@ -30,12 +30,12 @@ export default class App extends Component {
   constructor(props) {
     super(props);
 
-    let perPage = localStorage.getItem('canvassersperpage');
+    let perPage = localStorage.getItem('volunteersperpage');
     if (!perPage) perPage = 5;
 
     this.state = {
       loading: true,
-      canvassers: [],
+      volunteers: [],
       search: "",
       perPage: perPage,
       pageNum: 1,
@@ -50,7 +50,7 @@ export default class App extends Component {
   }
 
   handlePageNumChange(obj) {
-    localStorage.setItem('canvassersperpage', obj.value);
+    localStorage.setItem('volunteersperpage', obj.value);
     this.setState({pageNum: 1, perPage: obj.value});
   }
 
@@ -62,14 +62,14 @@ export default class App extends Component {
   }
 
   _loadData = async () => {
-    let canvassers = [];
+    let volunteers = [];
     this.setState({loading: true, search: ""});
     try {
-      canvassers = await _loadCanvassers(this);
+      volunteers = await _loadVolunteers(this);
     } catch (e) {
-      notify_error(e, "Unable to load canvassers.");
+      notify_error(e, "Unable to load volunteers.");
     }
-    this.setState({loading: false, canvassers});
+    this.setState({loading: false, volunteers});
   }
 
   handlePageClick = (data) => {
@@ -82,7 +82,7 @@ export default class App extends Component {
     let unassigned = [];
     let denied = [];
 
-    this.state.canvassers.forEach(c => {
+    this.state.volunteers.forEach(c => {
       if (this.state.search && !_searchStringify(c).includes(this.state.search)) return;
       if (c.locked) {
         denied.push(c);
@@ -100,14 +100,14 @@ export default class App extends Component {
           <div>
             Search: <input type="text" value={this.state.value} onChange={this.onTypeSearch} data-tip="Search by name, email, location, or admin" />
             <br />
-            <Link to={'/canvassers/'} onClick={() => this.setState({pageNum: 1})}>Canvassers ({ready.length})</Link>&nbsp;-&nbsp;
-            <Link to={'/canvassers/unassigned'} onClick={() => this.setState({pageNum: 1})}>Unassigned ({unassigned.length})</Link>&nbsp;-&nbsp;
-            <Link to={'/canvassers/denied'} onClick={() => this.setState({pageNum: 1})}>Denied ({denied.length})</Link>
-            <Route exact={true} path="/canvassers/" render={() => (<ListCanvassers refer={this} canvassers={ready} />)} />
-            <Route exact={true} path="/canvassers/unassigned" render={() => (<ListCanvassers refer={this} type="Unassigned" canvassers={unassigned} />)} />
-            <Route exact={true} path="/canvassers/denied" render={() => (<ListCanvassers refer={this} type="Denied" canvassers={denied} />)} />
-            <Route path="/canvassers/view/:id" render={(props) => (
-              <CardCanvasser key={props.match.params.id} id={props.match.params.id} edit={true} refer={this} />
+            <Link to={'/volunteers/'} onClick={() => this.setState({pageNum: 1})}>Volunteers ({ready.length})</Link>&nbsp;-&nbsp;
+            <Link to={'/volunteers/unassigned'} onClick={() => this.setState({pageNum: 1})}>Unassigned ({unassigned.length})</Link>&nbsp;-&nbsp;
+            <Link to={'/volunteers/denied'} onClick={() => this.setState({pageNum: 1})}>Denied ({denied.length})</Link>
+            <Route exact={true} path="/volunteers/" render={() => (<ListVolunteers refer={this} volunteers={ready} />)} />
+            <Route exact={true} path="/volunteers/unassigned" render={() => (<ListVolunteers refer={this} type="Unassigned" volunteers={unassigned} />)} />
+            <Route exact={true} path="/volunteers/denied" render={() => (<ListVolunteers refer={this} type="Denied" volunteers={denied} />)} />
+            <Route path="/volunteers/view/:id" render={(props) => (
+              <CardVolunteer key={props.match.params.id} id={props.match.params.id} edit={true} refer={this} />
             )} />
           </div>
         </Router>
@@ -116,15 +116,15 @@ export default class App extends Component {
   }
 }
 
-const ListCanvassers = (props) => {
+const ListVolunteers = (props) => {
   const perPage = props.refer.state.perPage;
   let paginate = (<div></div>);
   let list = [];
 
-  props.canvassers.forEach((c, idx) => {
+  props.volunteers.forEach((c, idx) => {
     let tp = Math.floor(idx/perPage)+1;
     if (tp !== props.refer.state.pageNum) return;
-    list.push(<CardCanvasser key={c.id} canvasser={c} refer={props.refer} />);
+    list.push(<CardVolunteer key={c.id} volunteer={c} refer={props.refer} />);
   });
 
   paginate = (
@@ -133,7 +133,7 @@ const ListCanvassers = (props) => {
         nextLabel={"next"}
         breakLabel={"..."}
         breakClassName={"break-me"}
-        pageCount={props.canvassers.length/perPage}
+        pageCount={props.volunteers.length/perPage}
         marginPagesDisplayed={1}
         pageRangeDisplayed={8}
         onPageChange={props.refer.handlePageClick}
@@ -160,7 +160,7 @@ const ListCanvassers = (props) => {
 
   return (
     <div>
-      <h3>{props.type}Canvassers ({props.canvassers.length})</h3>
+      <h3>{props.type}Volunteers ({props.volunteers.length})</h3>
       {paginate}
       {list}
       {paginate}
@@ -168,14 +168,14 @@ const ListCanvassers = (props) => {
    );
 };
 
-export class CardCanvasser extends Component {
+export class CardVolunteer extends Component {
 
   constructor(props) {
     super(props);
 
     this.state = {
       server: this.props.refer.props.server,
-      canvasser: this.props.canvasser,
+      volunteer: this.props.volunteer,
       selectedTeamsOption: [],
       selectedFormsOption: {},
       selectedTurfOption: {},
@@ -183,7 +183,7 @@ export class CardCanvasser extends Component {
   }
 
   componentDidMount() {
-    if (!this.state.canvasser) this._loadData();
+    if (!this.state.volunteer) this._loadData();
 
     ReactTooltip.rebuild();
   }
@@ -197,17 +197,17 @@ export class CardCanvasser extends Component {
       let obj = _handleSelectChange(this.state.selectedTeamsOption, selectedTeamsOption);
 
       for (let i in obj.add) {
-        await _fetch(this.state.server, '/canvass/v1/team/members/add', 'POST', {teamId: obj.add[i], cId: this.props.id});
+        await _fetch(this.state.server, '/volunteer/v1/team/members/add', 'POST', {teamId: obj.add[i], cId: this.props.id});
       }
 
       for (let i in obj.rm) {
-        await _fetch(this.state.server, '/canvass/v1/team/members/remove', 'POST', {teamId: obj.rm[i], cId: this.props.id});
+        await _fetch(this.state.server, '/volunteer/v1/team/members/remove', 'POST', {teamId: obj.rm[i], cId: this.props.id});
       }
 
-      // refresh canvasser info
-      let canvasser = await _loadCanvasser(this, this.props.id);
+      // refresh volunteer info
+      let volunteer = await _loadVolunteer(this, this.props.id);
       notify_success("Team assignments saved.");
-      this.setState({ selectedTeamsOption, selectedFormsOption: {}, selectedTurfOption: {}, canvasser });
+      this.setState({ selectedTeamsOption, selectedFormsOption: {}, selectedTurfOption: {}, volunteer });
     } catch (e) {
       notify_error(e, "Unable to add/remove teams.");
     }
@@ -216,21 +216,21 @@ export class CardCanvasser extends Component {
   handleFormsChange = async (selectedFormsOption) => {
     try {
       if (this.state.selectedFormsOption.value) {
-        await _fetch(this.state.server, '/canvass/v1/form/assigned/canvasser/remove', 'POST', {
+        await _fetch(this.state.server, '/volunteer/v1/form/assigned/volunteer/remove', 'POST', {
           formId: this.state.selectedFormsOption.value,
           cId: this.props.id,
         });
       }
       if (selectedFormsOption.value) {
-        await _fetch(this.state.server, '/canvass/v1/form/assigned/canvasser/add', 'POST', {
+        await _fetch(this.state.server, '/volunteer/v1/form/assigned/volunteer/add', 'POST', {
           formId: selectedFormsOption.value,
           cId: this.props.id,
         });
       }
-      // refresh canvasser info
-      let canvasser = await _loadCanvasser(this, this.props.id);
+      // refresh volunteer info
+      let volunteer = await _loadVolunteer(this, this.props.id);
       notify_success("Form selection saved.");
-      this.setState({canvasser, selectedFormsOption});
+      this.setState({volunteer, selectedFormsOption});
     } catch (e) {
       notify_error(e, "Unable to add/remove form.");
     }
@@ -239,33 +239,33 @@ export class CardCanvasser extends Component {
   handleTurfChange = async (selectedTurfOption) => {
     try {
       if (this.state.selectedTurfOption.value) {
-        await _fetch(this.state.server, '/canvass/v1/turf/assigned/canvasser/remove', 'POST', {
+        await _fetch(this.state.server, '/volunteer/v1/turf/assigned/volunteer/remove', 'POST', {
           turfId: this.state.selectedTurfOption.value,
           cId: this.props.id,
         });
       }
       if (selectedTurfOption.value) {
-        await _fetch(this.state.server, '/canvass/v1/turf/assigned/canvasser/add', 'POST', {
+        await _fetch(this.state.server, '/volunteer/v1/turf/assigned/volunteer/add', 'POST', {
           turfId: selectedTurfOption.value,
           cId: this.props.id,
         });
       }
-      // refresh canvasser info
-      let canvasser = await _loadCanvasser(this, this.props.id);
+      // refresh volunteer info
+      let volunteer = await _loadVolunteer(this, this.props.id);
       notify_success("Turf selection saved.");
-      this.setState({canvasser, selectedTurfOption});
+      this.setState({volunteer, selectedTurfOption});
     } catch (e) {
       notify_error(e, "Unable to add/remove turf.");
     }
   }
 
   _loadData = async () => {
-    let canvasser = {};
+    let volunteer = {};
 
     this.setState({loading: true})
 
     try {
-       canvasser = await _loadCanvasser(this, this.props.id);
+       volunteer = await _loadVolunteer(this, this.props.id);
     } catch (e) {
       notify_error(e, "Unable to load canavasser info.");
       return;
@@ -286,14 +286,14 @@ export class CardCanvasser extends Component {
 
     let turfOptions = [
       {value: '', label: "None"},
-      {value: 'auto', id: 'auto', label: (<CardTurf key="auto" turf={{id: "auto", name: "Area surrounnding this canvasser's home address"}} refer={this} icon={faHome} />)},
+      {value: 'auto', id: 'auto', label: (<CardTurf key="auto" turf={{id: "auto", name: "Area surrounnding this volunteer's home address"}} refer={this} icon={faHome} />)},
     ];
 
     teams.forEach((t) => {
       teamOptions.push({value: _searchStringify(t), id: t.id, label: (
         <CardTeam key={t.id} team={t} refer={this} />
       )});
-      canvasser.ass.teams.forEach((a) => {
+      volunteer.ass.teams.forEach((a) => {
         if (a.id === t.id) {
           selectedTeamsOption.push({value: _searchStringify(t), id: t.id, label: (
             <CardTeam key={t.id} team={t} refer={this} />
@@ -306,8 +306,8 @@ export class CardCanvasser extends Component {
       formOptions.push({value: _searchStringify(f), id: f.id, label: (<CardForm key={f.id} form={f} refer={this} />)});
     });
 
-    if (canvasser.ass.forms.length) {
-      let f = canvasser.ass.forms[0];
+    if (volunteer.ass.forms.length) {
+      let f = volunteer.ass.forms[0];
       selectedFormsOption = {value: _searchStringify(f), id: f.id, label: (<CardForm key={f.id} form={f} refer={this} />)};
     }
 
@@ -315,29 +315,29 @@ export class CardCanvasser extends Component {
       turfOptions.push({value: _searchStringify(t), id: t.id, label: (<CardTurf key={t.id} turf={t} refer={this} />)})
     });
 
-    if (canvasser.ass.turf.length) {
-      let t = canvasser.ass.turf[0];
-      selectedTurfOption = {value: _searchStringify(t), id: t.id, label: (<CardTurf key={t.id} turf={t} refer={this} icon={(canvasser.autoturf?faHome:null)} />)};
+    if (volunteer.ass.turf.length) {
+      let t = volunteer.ass.turf[0];
+      selectedTurfOption = {value: _searchStringify(t), id: t.id, label: (<CardTurf key={t.id} turf={t} refer={this} icon={(volunteer.autoturf?faHome:null)} />)};
     }
 
-    this.setState({canvasser, teamOptions, formOptions, turfOptions, selectedTeamsOption, selectedFormsOption, selectedTurfOption, loading: false});
+    this.setState({volunteer, teamOptions, formOptions, turfOptions, selectedTeamsOption, selectedFormsOption, selectedTurfOption, loading: false});
   }
 
-  _lockCanvasser = async (canvasser, flag) => {
+  _lockVolunteer = async (volunteer, flag) => {
     let term = (flag?'lock':'unlock');
     try {
-      await _fetch(this.state.server, '/canvass/v1/canvasser/'+term, 'POST', {id: canvasser.id});
+      await _fetch(this.state.server, '/volunteer/v1/volunteer/'+term, 'POST', {id: volunteer.id});
     } catch (e) {
-      notify_error(e, "Unable to "+term+" canvasser.");
+      notify_error(e, "Unable to "+term+" volunteer.");
     }
     this._loadData();
-    notify_success("Canvasser hass been "+term+"ed.");
+    notify_success("Volunteer hass been "+term+"ed.");
   }
 
   render() {
-    const { canvasser } = this.state;
+    const { volunteer } = this.state;
 
-    if (!canvasser || this.state.loading) {
+    if (!volunteer || this.state.loading) {
       return (<Loader />);
     }
 
@@ -346,47 +346,47 @@ export class CardCanvasser extends Component {
       <div>
         <div style={{display: 'flex', padding: '10px'}}>
           <div style={{padding: '5px 10px'}}>
-            <Img width={50} src={this.state.canvasser.avatar} loader={<Loader width={50} />} unloader={<Icon style={{width: 50, height: 50, color: "gray"}} icon={faUser} />} />
+            <Img width={50} src={this.state.volunteer.avatar} loader={<Loader width={50} />} unloader={<Icon style={{width: 50, height: 50, color: "gray"}} icon={faUser} />} />
           </div>
           <div style={{flex: 1, overflow: 'auto'}}>
-            Name: {canvasser.name} {(this.props.edit?'':(<Link to={'/canvassers/view/'+canvasser.id}>view profile</Link>))}
-            <CanvasserBadges canvasser={canvasser} />
+            Name: {volunteer.name} {(this.props.edit?'':(<Link to={'/volunteers/view/'+volunteer.id}>view profile</Link>))}
+            <VolunteerBadges volunteer={volunteer} />
             <br />
-            Location: {(canvasser.homeaddress?extract_addr(canvasser.homeaddress):'N/A')} <br />
-            Last Login: {timeAgo.format(new Date(canvasser.last_seen-30000))}
+            Location: {(volunteer.homeaddress?extract_addr(volunteer.homeaddress):'N/A')} <br />
+            Last Login: {timeAgo.format(new Date(volunteer.last_seen-30000))}
           </div>
         </div>
-        {this.props.edit?<CardCanvasserFull canvasser={canvasser} refer={this} />:''}
+        {this.props.edit?<CardVolunteerFull volunteer={volunteer} refer={this} />:''}
       </div>
     );
   }
 }
 
-export const CardCanvasserFull = (props) => (
+export const CardVolunteerFull = (props) => (
   <div>
     <br />
-    {props.canvasser.locked?
-      (<button onClick={() => props.refer._lockCanvasser(props.canvasser, false)}>Restore Access</button>)
+    {props.volunteer.locked?
+      (<button onClick={() => props.refer._lockVolunteer(props.volunteer, false)}>Restore Access</button>)
     :
-      (<button onClick={() => props.refer._lockCanvasser(props.canvasser, true)}>Deny Access</button>)
+      (<button onClick={() => props.refer._lockVolunteer(props.volunteer, true)}>Deny Access</button>)
     }
     <br />
-    Email: {(props.canvasser.email?props.canvasser.email:'N/A')}
+    Email: {(props.volunteer.email?props.volunteer.email:'N/A')}
     <br />
-    Phone: {(props.canvasser.phone?props.canvasser.phone:'N/A')}
+    Phone: {(props.volunteer.phone?props.volunteer.phone:'N/A')}
     <br />
-    Address: <CanvasserAddress refer={props.refer} canvasser={props.canvasser} />
+    Address: <VolunteerAddress refer={props.refer} volunteer={props.volunteer} />
     <br />
     # of doors knocked: 0
     <br />
     <br />
-    {props.canvasser.ass.direct?
+    {props.volunteer.ass.direct?
     <div>
-      This canvasser is not assigned to any teams. To do so, you must remove the direct form and turf assignments below.
+      This volunteer is not assigned to any teams. To do so, you must remove the direct form and turf assignments below.
     </div>
     :
     <div>
-      Teams this canvasser is a part of:
+      Teams this volunteer is a part of:
       <Select
         value={props.refer.state.selectedTeamsOption}
         onChange={props.refer.handleTeamsChange}
@@ -402,12 +402,12 @@ export const CardCanvasserFull = (props) => (
     <div>
       Forms / Turf this users sees based on the above team(s):
       <br />
-      {props.canvasser.ass.forms.map((f) => (<CardForm key={f.id} form={f} refer={props.refer} />))}
-      {props.canvasser.ass.turf.map((t) => (<CardTurf key={t.id} turf={t} refer={props.refer} />))}
+      {props.volunteer.ass.forms.map((f) => (<CardForm key={f.id} form={f} refer={props.refer} />))}
+      {props.volunteer.ass.turf.map((t) => (<CardTurf key={t.id} turf={t} refer={props.refer} />))}
     </div>
     :
     <div>
-      Forms this canvasser is directly assigned to:
+      Forms this volunteer is directly assigned to:
       <Select
         value={props.refer.state.selectedFormsOption}
         onChange={props.refer.handleFormsChange}
@@ -416,7 +416,7 @@ export const CardCanvasserFull = (props) => (
         placeholder="None"
       />
       <br />
-      Turf this canvasser is directly assigned to:
+      Turf this volunteer is directly assigned to:
       <Select
         value={props.refer.state.selectedTurfOption}
         onChange={props.refer.handleTurfChange}
@@ -430,13 +430,13 @@ export const CardCanvasserFull = (props) => (
   </div>
 )
 
-export class CanvasserAddress extends Component {
+export class VolunteerAddress extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
       edit: false,
-      address: (this.props.canvasser.homeaddress?this.props.canvasser.homeaddress:""),
+      address: (this.props.volunteer.homeaddress?this.props.volunteer.homeaddress:""),
     };
     this.onTypeAddress = (address) => this.setState({ address });
   }
@@ -446,8 +446,8 @@ export class CanvasserAddress extends Component {
     try {
       let res = await geocodeByAddress(address);
       let pos = await getLatLng(res[0]);
-      await _fetch(this.props.refer.state.server, '/canvass/v1/canvasser/update', 'POST', {
-        id: this.props.canvasser.id,
+      await _fetch(this.props.refer.state.server, '/volunteer/v1/volunteer/update', 'POST', {
+        id: this.props.volunteer.id,
         address: address,
         lat: pos.lat,
         lng: pos.lng,
@@ -477,15 +477,15 @@ export class CanvasserAddress extends Component {
   }
 }
 
-export const CanvasserBadges = (props) => {
+export const VolunteerBadges = (props) => {
   let badges = [];
-  let id = props.canvasser.id;
+  let id = props.volunteer.id;
 
-  if (props.canvasser.admin) badges.push(<Icon icon={faCrown} color="gold" key={id+"admin"} data-tip="Administrator" />);
-  if (props.canvasser.locked) badges.push(<Icon icon={faBan} color="red" key={id+"locked"} data-tip="Denied access" />);
+  if (props.volunteer.admin) badges.push(<Icon icon={faCrown} color="gold" key={id+"admin"} data-tip="Administrator" />);
+  if (props.volunteer.locked) badges.push(<Icon icon={faBan} color="red" key={id+"locked"} data-tip="Denied access" />);
   else {
-    if (props.canvasser.ass.ready) badges.push(<Icon icon={faCheckCircle} color="green" key={id+"ready"} data-tip="Ready to Canvass" />);
-    else badges.push(<Icon icon={faExclamationTriangle} color="red" key={id+"notready"} data-tip="Not ready to canvass, check assignments" />);
+    if (props.volunteer.ass.ready) badges.push(<Icon icon={faCheckCircle} color="green" key={id+"ready"} data-tip="Ready to Canvass" />);
+    else badges.push(<Icon icon={faExclamationTriangle} color="red" key={id+"notready"} data-tip="Not ready to volunteer, check assignments" />);
   }
 
   return badges;

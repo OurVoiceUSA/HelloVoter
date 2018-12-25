@@ -8,11 +8,11 @@ import t from 'tcomb-form';
 
 import { faTimesCircle, faPlusCircle, faClipboard } from '@fortawesome/free-solid-svg-icons';
 
-import { CardCanvasser } from './Canvassers.js';
+import { CardVolunteer } from './Volunteers.js';
 import { CardTeam } from './Teams.js';
 
 import {
-  _fetch, notify_error, notify_success, _loadForms, _loadForm, _loadCanvassers, _loadTeams, _handleSelectChange, _searchStringify,
+  _fetch, notify_error, notify_success, _loadForms, _loadForm, _loadVolunteers, _loadTeams, _handleSelectChange, _searchStringify,
   RootLoader, Icon, Loader,
 } from '../common.js';
 
@@ -126,7 +126,7 @@ export default class App extends Component {
   }
 
   handlePageNumChange(obj) {
-    localStorage.setItem('canvassersperpage', obj.value);
+    localStorage.setItem('volunteersperpage', obj.value);
     this.setState({pageNum: 1, perPage: obj.value});
   }
 
@@ -228,7 +228,7 @@ export default class App extends Component {
 
   _deleteForm = async (id) => {
     try {
-      await _fetch(this.props.server, '/canvass/v1/form/delete', 'POST', {formId: id});
+      await _fetch(this.props.server, '/volunteer/v1/form/delete', 'POST', {formId: id});
     } catch (e) {
       notify_error(e, "Unable to delete form.");
     }
@@ -270,7 +270,7 @@ export default class App extends Component {
         questions_order: this.state.order,
       };
 
-      await _fetch(this.props.server, '/canvass/v1/form/create', 'POST', obj);
+      await _fetch(this.props.server, '/volunteer/v1/form/create', 'POST', obj);
       notify_success("Form has been created.")
     } catch (e) {
       notify_error(e, "Unable to create form.");
@@ -309,7 +309,7 @@ export default class App extends Component {
                 value={this.state.addFormForm}
               />
 
-              <div style={{margin: 25}}>Items in your Canvassing form: <button onClick={this.openModal}><Icon icon={faPlusCircle} /> Add Item</button></div>
+              <div style={{margin: 25}}>Items in your Volunteering form: <button onClick={this.openModal}><Icon icon={faPlusCircle} /> Add Item</button></div>
 
               {Object.keys(this.state.fields).map((f) => {
                 let field = this.state.fields[f];
@@ -436,11 +436,11 @@ export class CardForm extends Component {
       let obj = _handleSelectChange(this.state.selectedTeamsOption, selectedTeamsOption);
 
       for (let i in obj.add) {
-        await _fetch(this.state.server, '/canvass/v1/form/assigned/team/add', 'POST', {teamId: obj.add[i], formId: this.props.id});
+        await _fetch(this.state.server, '/volunteer/v1/form/assigned/team/add', 'POST', {teamId: obj.add[i], formId: this.props.id});
       }
 
       for (let i in obj.rm) {
-        await _fetch(this.state.server, '/canvass/v1/form/assigned/team/remove', 'POST', {teamId: obj.rm[i], formId: this.props.id});
+        await _fetch(this.state.server, '/volunteer/v1/form/assigned/team/remove', 'POST', {teamId: obj.rm[i], formId: this.props.id});
       }
 
       notify_success("Team assignments saved.");
@@ -455,14 +455,14 @@ export class CardForm extends Component {
       let obj = _handleSelectChange(this.state.selectedMembersOption, selectedMembersOption);
 
       for (let i in obj.add) {
-        await _fetch(this.state.server, '/canvass/v1/form/assigned/canvasser/add', 'POST', {cId: obj.add[i], formId: this.props.id});
+        await _fetch(this.state.server, '/volunteer/v1/form/assigned/volunteer/add', 'POST', {cId: obj.add[i], formId: this.props.id});
       }
 
       for (let i in obj.rm) {
-        await _fetch(this.state.server, '/canvass/v1/form/assigned/canvasser/remove', 'POST', {cId: obj.rm[i], formId: this.props.id});
+        await _fetch(this.state.server, '/volunteer/v1/form/assigned/volunteer/remove', 'POST', {cId: obj.rm[i], formId: this.props.id});
       }
 
-      notify_success("Canvasser assignments saved.");
+      notify_success("Volunteer assignments saved.");
       this.setState({ selectedMembersOption });
     } catch (e) {
       notify_error(e, "Unable to add/remove teams.");
@@ -481,8 +481,8 @@ export class CardForm extends Component {
       return;
     }
 
-    let canvassers = await _loadCanvassers(this.props.refer);
-    let members = await _loadCanvassers(this.props.refer, 'form', this.props.id);
+    let volunteers = await _loadVolunteers(this.props.refer);
+    let members = await _loadVolunteers(this.props.refer, 'form', this.props.id);
     let teams = await _loadTeams(this.props.refer);
     let teamsSelected = await _loadTeams(this.props.refer, 'form', this.props.id);
 
@@ -501,15 +501,15 @@ export class CardForm extends Component {
       selectedTeamsOption.push({value: _searchStringify(t), id: t.id, label: (<CardTeam key={t.id} team={t} refer={this} />)});
     })
 
-    canvassers.forEach((c) => {
-      membersOption.push({value: _searchStringify(c), id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={this} />)});
+    volunteers.forEach((c) => {
+      membersOption.push({value: _searchStringify(c), id: c.id, label: (<CardVolunteer key={c.id} volunteer={c} refer={this} />)});
     });
 
     members.forEach((c) => {
-      selectedMembersOption.push({value: _searchStringify(c), id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={this} />)});
+      selectedMembersOption.push({value: _searchStringify(c), id: c.id, label: (<CardVolunteer key={c.id} volunteer={c} refer={this} />)});
     });
 
-    this.setState({form, canvassers, teamOptions, membersOption, selectedTeamsOption, selectedMembersOption, loading: false});
+    this.setState({form, volunteers, teamOptions, membersOption, selectedTeamsOption, selectedMembersOption, loading: false});
   }
 
   render() {
@@ -546,7 +546,7 @@ export const CardFormFull = (props) => (
         placeholder="None"
       />
       <br />
-      Canvassers assigned directly to this form:
+      Volunteers assigned directly to this form:
       <Select
         value={props.refer.state.selectedMembersOption}
         onChange={props.refer.handleMembersChange}
