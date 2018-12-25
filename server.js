@@ -177,6 +177,7 @@ async function volunteerAssignments(user) {
     direct: false,
     turf: [],
     teams: [],
+    teamperms: [],
     forms: [],
   };
 
@@ -195,11 +196,16 @@ async function volunteerAssignments(user) {
 
     // assingment to form/turf via team, but only bother checking if not directly assigned
     if (!obj.direct) {
-      ref = await cqa('match (a:Volunteer {id:{id}}) optional match (a)-[:MEMBERS]-(b:Team) optional match (b)-[:ASSIGNED]-(c:Turf) optional match (d:Form)-[:ASSIGNED]-(b) return collect(distinct(b)), collect(distinct(c)), collect(distinct(d))', user);
+      ref = await cqa('match (a:Volunteer {id:{id}}) optional match (a)-[r:MEMBERS]-(b:Team) optional match (b)-[:ASSIGNED]-(c:Turf) optional match (d:Form)-[:ASSIGNED]-(b) return collect(distinct(b)), collect(distinct(c)), collect(distinct(d)), collect(distinct(r))', user);
       if (ref.data[0][0].length > 0 || ref.data[0][1].length > 0 || ref.data[0][2].length > 0) {
         obj.teams = obj.teams.concat(ref.data[0][0]);
         obj.turf = obj.turf.concat(ref.data[0][1]);
         obj.forms = obj.forms.concat(ref.data[0][2]);
+        obj.teamperms = obj.teamperms.concat(ref.data[0][3]);
+        // iterate through teamperms to see if this volunteer is a leader
+        for (let i in obj.teamperms) {
+          if (obj.teamperms[i].leader === true) obj.leader = true;
+        }
       }
     }
   } catch (e) {
