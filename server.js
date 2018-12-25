@@ -60,7 +60,7 @@ const authToken = neo4j.auth.basic(ovi_config.neo4j_user, ovi_config.neo4j_pass)
 const db = new BoltAdapter(neo4j.driver('bolt://'+ovi_config.neo4j_host, authToken));
 
 cqa('return timestamp()').catch((e) => {console.error("Unable to connect to database."); process.exit(1)}).then(() => {
-  cqa('create constraint on (a:Canvasser) assert a.id is unique');
+  cqa('create constraint on (a:Volunteer) assert a.id is unique');
   cqa('create constraint on (a:Team) assert a.name is unique');
   cqa('create constraint on (a:Turf) assert a.name is unique');
   cqa('create constraint on (a:Form) assert a.id is unique');
@@ -68,7 +68,7 @@ cqa('return timestamp()').catch((e) => {console.error("Unable to connect to data
   cqa('create constraint on (a:Address) assert a.id is unique');
   cqa('create constraint on (a:Unit) assert a.id is unique');
   cqa('create constraint on (a:Survey) assert a.id is unique');
-  ['turf','canvasser','address'].forEach((i) => cqa('call spatial.addWKTLayer({type}, \'wkt\')', {type: i}).catch(e => {}));
+  ['turf','volunteer','address'].forEach((i) => cqa('call spatial.addWKTLayer({type}, \'wkt\')', {type: i}).catch(e => {}));
 });
 
 function getConfig(item, required, def) {
@@ -156,11 +156,11 @@ function _500(res, obj) {
   return sendError(res, 500, "Internal server error.");
 }
 
-async function canvasserCanSee(ida, idb) {
+async function volunteerCanSee(ida, idb) {
   if (ida === idb) return true;
 
   try {
-    let ref = await cqa('match (a:Canvasser {id:{ida}})-[:MEMBERS {leader:true}]-(:Team)-[]-(t:Turf) where t.wkt is not null call spatial.intersects("canvasser", t.wkt) yield node where node.id = {idb} return node UNION match (a:Canvasser {id:{ida}})-[:MEMBERS]-(:Team)-[:MEMBERS]-(c:Canvasser) return distinct(c) as node', {ida: ida, idb: idb});
+    let ref = await cqa('match (a:Volunteer {id:{ida}})-[:MEMBERS {leader:true}]-(:Team)-[]-(t:Turf) where t.wkt is not null call spatial.intersects("volunteer", t.wkt) yield node where node.id = {idb} return node UNION match (a:Volunteer {id:{ida}})-[:MEMBERS]-(:Team)-[:MEMBERS]-(c:Volunteer) return distinct(c) as node', {ida: ida, idb: idb});
     if (ref.data.length > 0)
       return true;
   } catch (e) {
@@ -170,7 +170,7 @@ async function canvasserCanSee(ida, idb) {
   return false;
 }
 
-async function canvassAssignments(user) {
+async function volunteerAssignments(user) {
   let ref;
   let obj = {
     ready: false,
@@ -182,7 +182,7 @@ async function canvassAssignments(user) {
 
   try {
     // direct assignment to a form
-    ref = await cqa('match (a:Canvasser {id:{id}}) optional match (a)-[:ASSIGNED]-(b:Form) optional match (a)-[:ASSIGNED]-(c:Turf) return collect(distinct(b)), collect(distinct(c))', user);
+    ref = await cqa('match (a:Volunteer {id:{id}}) optional match (a)-[:ASSIGNED]-(b:Form) optional match (a)-[:ASSIGNED]-(c:Turf) return collect(distinct(b)), collect(distinct(c))', user);
     if (user.autoturf || ref.data[0][0].length > 0 || ref.data[0][1].length) {
       obj.forms = obj.forms.concat(ref.data[0][0]);
       obj.turf = obj.turf.concat(ref.data[0][1]);
@@ -195,7 +195,7 @@ async function canvassAssignments(user) {
 
     // assingment to form/turf via team, but only bother checking if not directly assigned
     if (!obj.direct) {
-      ref = await cqa('match (a:Canvasser {id:{id}}) optional match (a)-[:MEMBERS]-(b:Team) optional match (b)-[:ASSIGNED]-(c:Turf) optional match (d:Form)-[:ASSIGNED]-(b) return collect(distinct(b)), collect(distinct(c)), collect(distinct(d))', user);
+      ref = await cqa('match (a:Volunteer {id:{id}}) optional match (a)-[:MEMBERS]-(b:Team) optional match (b)-[:ASSIGNED]-(c:Turf) optional match (d:Form)-[:ASSIGNED]-(b) return collect(distinct(b)), collect(distinct(c)), collect(distinct(d))', user);
       if (ref.data[0][0].length > 0 || ref.data[0][1].length > 0 || ref.data[0][2].length > 0) {
         obj.teams = obj.teams.concat(ref.data[0][0]);
         obj.turf = obj.turf.concat(ref.data[0][1]);
@@ -233,13 +233,13 @@ async function hello(req, res) {
   let lat = req.body.latitude;
 
   let msg = "Awaiting assignment";
-  let ass = await canvassAssignments(req.user);
+  let ass = await volunteerAssignments(req.user);
 
   try {
     // if there are no admins, make this one an admin
-    let ref = await cqa('match (a:Canvasser {admin:true}) return count(a)');
+    let ref = await cqa('match (a:Volunteer {admin:true}) return count(a)');
     if (ref.data[0] === 0) {
-      await cqa('match (a:Canvasser {id:{id}}) set a.admin=true', req.user);
+      await cqa('match (a:Volunteer {id:{id}}) set a.admin=true', req.user);
       req.user.admin = true;
     }
 
@@ -248,13 +248,13 @@ async function hello(req, res) {
 
     // web browser doesn't send this
     if (lat && lng) 
-      await cqa('match (a:Canvasser {id:{id}}) set a.longitude={lng}, a.latitude={lat}', {id: req.user.id, lng: lng, lat: lat});
+      await cqa('match (a:Volunteer {id:{id}}) set a.longitude={lng}, a.latitude={lat}', {id: req.user.id, lng: lng, lat: lat});
   } catch (e) {
     return _500(res, e);
   }
 
   if (ass.ready)
-    msg = "You are assigned turf and ready to canvass!";
+    msg = "You are assigned turf and ready to volunteer!";
 
   return res.json({msg: msg, data: ass});
 }
@@ -266,7 +266,7 @@ function uncle(req, res) {
 async function dashboard(req, res) {
   try {
     if (req.user.admin === true) return res.json({
-      canvassers: (await cqa('match (a:Canvasser) return count(a)')).data[0],
+      volunteers: (await cqa('match (a:Volunteer) return count(a)')).data[0],
       teams: (await cqa('match (a:Team) return count(a)')).data[0],
       turfs: (await cqa('match (a:Turf) return count(a)')).data[0],
       questions: (await cqa('match (a:Question) return count(a)')).data[0],
@@ -275,9 +275,9 @@ async function dashboard(req, res) {
       version: version,
     });
     else {
-      let ass = await canvassAssignments(req.user);
+      let ass = await volunteerAssignments(req.user);
       return res.json({
-        canvassers: (await cqa('match (a:Canvasser {id:{id}})-[:MEMBERS {leader:true}]-(:Team)-[]-(t:Turf) where t.wkt is not null call spatial.intersects("canvasser", t.wkt) yield node return node UNION match (a:Canvasser {id:{id}}) optional match (a)-[:MEMBERS]-(:Team)-[:MEMBERS]-(c:Canvasser) return distinct(c) as node', req.user)).data.length,
+        volunteers: (await cqa('match (a:Volunteer {id:{id}})-[:MEMBERS {leader:true}]-(:Team)-[]-(t:Turf) where t.wkt is not null call spatial.intersects("volunteer", t.wkt) yield node return node UNION match (a:Volunteer {id:{id}}) optional match (a)-[:MEMBERS]-(:Team)-[:MEMBERS]-(c:Volunteer) return distinct(c) as node', req.user)).data.length,
         teams: ass.teams.length,
         turfs: ass.turf.length,
         questions: 'N/A',
@@ -293,60 +293,60 @@ async function dashboard(req, res) {
 }
 
 async function google_maps_key(req, res) {
-  let ass = await canvassAssignments(req.user);
+  let ass = await volunteerAssignments(req.user);
   if (ass.ready || req.user.admin) return res.json({google_maps_key: ovi_config.google_maps_key });
   else return _401(res, "No soup for you");
 }
 
-// canvassers
+// volunteers
 
-// get the canvassers from the given query, and populate relationships
+// get the volunteers from the given query, and populate relationships
 
-async function _canvassersFromCypher(query, args) {
-  let canvassers = [];
+async function _volunteersFromCypher(query, args) {
+  let volunteers = [];
 
   let ref = await cqa(query, args)
   for (let i in ref.data) {
     let c = ref.data[i];
-    c.ass = await canvassAssignments(c);
-    canvassers.push(c);
+    c.ass = await volunteerAssignments(c);
+    volunteers.push(c);
   }
 
-  return canvassers;
+  return volunteers;
 }
 
-async function canvasserList(req, res) {
-  let canvassers = [];
+async function volunteerList(req, res) {
+  let volunteers = [];
 
   try {
     let ref;
 
     if (req.user.admin)
-      canvassers = await _canvassersFromCypher('match (a:Canvasser) return a');
+      volunteers = await _volunteersFromCypher('match (a:Volunteer) return a');
     else
-      canvassers = await _canvassersFromCypher('match (a:Canvasser {id:{id}})-[:MEMBERS {leader:true}]-(:Team)-[]-(t:Turf) where t.wkt is not null call spatial.intersects("canvasser", t.wkt) yield node return node UNION match (a:Canvasser {id:{id}})-[:MEMBERS]-(:Team)-[:MEMBERS]-(c:Canvasser) return distinct(c) as node UNION match (a:Canvasser {id:{id}}) return a as node', req.user);
+      volunteers = await _volunteersFromCypher('match (a:Volunteer {id:{id}})-[:MEMBERS {leader:true}]-(:Team)-[]-(t:Turf) where t.wkt is not null call spatial.intersects("volunteer", t.wkt) yield node return node UNION match (a:Volunteer {id:{id}})-[:MEMBERS]-(:Team)-[:MEMBERS]-(c:Volunteer) return distinct(c) as node UNION match (a:Volunteer {id:{id}}) return a as node', req.user);
   } catch (e) {
     return _500(res, e);
   }
 
-  return res.json(canvassers);
+  return res.json(volunteers);
 }
 
-async function canvasserGet(req, res) {
-  if (!req.user.admin && req.query.id !== req.user.id && !await canvasserCanSee(req.user.id, req.query.id)) return _403(res, "Permission denied.");
+async function volunteerGet(req, res) {
+  if (!req.user.admin && req.query.id !== req.user.id && !await volunteerCanSee(req.user.id, req.query.id)) return _403(res, "Permission denied.");
 
-  let canvassers = [];
+  let volunteers = [];
 
   try {
-    canvassers = await _canvassersFromCypher('match (a:Canvasser {id:{id}}) return a', req.query);
+    volunteers = await _volunteersFromCypher('match (a:Volunteer {id:{id}}) return a', req.query);
   } catch (e) {
     return _500(res, e);
   }
 
-  return res.json(canvassers[0]);
+  return res.json(volunteers[0]);
 }
 
-async function canvasserUpdate(req, res) {
+async function volunteerUpdate(req, res) {
   if (!req.user.admin && req.body.id !== req.user.id) return _403(res, "Permission denied.");
   // TODO: need to validate input, and only do updates based on what was posted
   if (!valid(req.body.id)) return _400(res, "Invalid value to parameter 'id'.");
@@ -354,31 +354,31 @@ async function canvasserUpdate(req, res) {
   req.body.wkt = "POINT("+req.body.lng+" "+req.body.lat+")";
 
   try {
-    await cqa('match (a:Canvasser {id:{id}}) set a.homeaddress={address}, a.homelat={lat}, a.homelng={lng}, a.wkt={wkt}', req.body);
+    await cqa('match (a:Volunteer {id:{id}}) set a.homeaddress={address}, a.homelat={lat}, a.homelng={lng}, a.wkt={wkt}', req.body);
   } catch (e) {
     return _500(res, e);
   }
 
-  return cqdo(req, res, 'match (a:Canvasser {id:{id}}) where not (a)<-[:RTREE_REFERENCE]-() with collect(a) as nodes call spatial.addNodes("canvasser", nodes) yield count return count', req.body, true);
+  return cqdo(req, res, 'match (a:Volunteer {id:{id}}) where not (a)<-[:RTREE_REFERENCE]-() with collect(a) as nodes call spatial.addNodes("volunteer", nodes) yield count return count', req.body, true);
 }
 
-async function canvasserLock(req, res) {
+async function volunteerLock(req, res) {
   if (req.body.id === req.user.id) return _403(res, "You can't lock yourself.");
 
   try {
-    let ref = await cqa("match (a:Canvasser {id:{id}}) return a", req.body);
+    let ref = await cqa("match (a:Volunteer {id:{id}}) return a", req.body);
     if (ref.data[0] && ref.data[0].admin === true)
       return _403(res, "Permission denied.");
   } catch(e) {
     return _500(res, e);
   }
 
-  return cqdo(req, res, 'match (a:Canvasser {id:{id}}) set a.locked=true', req.body, true);
+  return cqdo(req, res, 'match (a:Volunteer {id:{id}}) set a.locked=true', req.body, true);
 }
 
-function canvasserUnlock(req, res) {
+function volunteerUnlock(req, res) {
   if (!valid(req.body.id)) return _400(res, "Invalid value to parameter 'id'.");
-  return cqdo(req, res, 'match (a:Canvasser {id:{id}}) remove a.locked', req.body, true);
+  return cqdo(req, res, 'match (a:Volunteer {id:{id}}) remove a.locked', req.body, true);
 }
 
 // teams
@@ -387,7 +387,7 @@ function teamList(req, res) {
   if (req.user.admin)
     return cqdo(req, res, 'match (a:Team) return a');
   else
-    return cqdo(req, res, 'match (a:Canvasser {id:{id}})-[:MEMBERS]-(b:Team) return b', req.user);
+    return cqdo(req, res, 'match (a:Volunteer {id:{id}})-[:MEMBERS]-(b:Team) return b', req.user);
 }
 
 function teamGet(req, res) {
@@ -395,7 +395,7 @@ function teamGet(req, res) {
     return cqdo(req, res, 'match (a:Team {id:{teamId}}) return a', req.query);
   else {
     req.query.id = req.user.id;
-    return cqdo(req, res, 'match (:Canvasser {id:{id}})-[:MEMBERS]-(a:Team {id:{teamId}}) return a', req.query);
+    return cqdo(req, res, 'match (:Volunteer {id:{id}})-[:MEMBERS]-(a:Team {id:{teamId}}) return a', req.query);
   }
 }
 
@@ -405,7 +405,7 @@ function teamCreate(req, res) {
   req.body.teamId = uuidv4();
   req.body.author_id = req.user.id;
 
-  return cqdo(req, res, 'match (a:Canvasser {id:{author_id}}) create (b:Team {id:{teamId}, created: timestamp(), name:{name}})-[:CREATOR]->(a)', req.body, true);
+  return cqdo(req, res, 'match (a:Volunteer {id:{author_id}}) create (b:Team {id:{teamId}, created: timestamp(), name:{name}})-[:CREATOR]->(a)', req.body, true);
 }
 
 function teamDelete(req, res) {
@@ -416,30 +416,30 @@ function teamDelete(req, res) {
 async function teamMembersList(req, res) {
   if (!valid(req.query.teamId)) return _400(res, "Invalid value to parameter 'teamId'.");
 
-  let canvassers = [];
+  let volunteers = [];
 
   try {
     if (req.user.admin)
-      canvassers = await _canvassersFromCypher('match (a:Canvasser)-[:MEMBERS]-(b:Team {id:{teamId}}) return a', req.query);
+      volunteers = await _volunteersFromCypher('match (a:Volunteer)-[:MEMBERS]-(b:Team {id:{teamId}}) return a', req.query);
     else {
       req.query.id = req.user.id;
-      canvassers = await _canvassersFromCypher('match (a:Canvasser {id:{id}})-[:MEMBERS]-(b:Team {id:{teamId}}) optional match (b)-[:MEMBERS]-(c:Canvasser) return distinct(c)', req.query);
+      volunteers = await _volunteersFromCypher('match (a:Volunteer {id:{id}})-[:MEMBERS]-(b:Team {id:{teamId}}) optional match (b)-[:MEMBERS]-(c:Volunteer) return distinct(c)', req.query);
     }
   } catch (e) {
     return _500(res, e);
   }
 
-  return res.json(canvassers);
+  return res.json(volunteers);
 }
 
 function teamMembersAdd(req, res) {
   if (!valid(req.body.teamId) || !valid(req.body.cId)) return _400(res, "Invalid value to parameter 'teamId' or 'cId'.");
-  return cqdo(req, res, 'match (a:Canvasser {id:{cId}}), (b:Team {id:{teamId}}) merge (b)-[:MEMBERS]->(a)', req.body, true);
+  return cqdo(req, res, 'match (a:Volunteer {id:{cId}}), (b:Team {id:{teamId}}) merge (b)-[:MEMBERS]->(a)', req.body, true);
 }
 
 function teamMembersRemove(req, res) {
   if (!valid(req.body.teamId) || valid(!req.body.cId)) return _400(res, "Invalid value to parameter 'teamId' or 'cId'.");
-  return cqdo(req, res, 'match (a:Canvasser {id:{cId}})-[r:MEMBERS]-(b:Team {id:{teamId}}) delete r', req.body, true);
+  return cqdo(req, res, 'match (a:Volunteer {id:{cId}})-[r:MEMBERS]-(b:Team {id:{teamId}}) delete r', req.body, true);
 }
 
 function teamTurfList(req, res) {
@@ -448,7 +448,7 @@ function teamTurfList(req, res) {
     return cqdo(req, res, 'match (a:Turf)-[:ASSIGNED]-(b:Team {id:{teamId}}) return a', req.query);
   else {
     req.query.id = req.user.id;
-    return cqdo(req, res, 'match (a:Turf)-[:ASSIGNED]-(b:Team {id:{teamId}})-[:MEMBERS]-(c:Canvasser {id:{id}}) return a', req.query);
+    return cqdo(req, res, 'match (a:Turf)-[:ASSIGNED]-(b:Team {id:{teamId}})-[:MEMBERS]-(c:Volunteer {id:{id}}) return a', req.query);
   }
 }
 
@@ -457,7 +457,7 @@ function turfGet(req, res) {
     return cqdo(req, res, 'match (a:Turf {id:{turfId}}) return a', req.query);
   else {
     req.query.id = req.user.id;
-    return cqdo(req, res, 'match (:Canvasser {id:{id}})-[:ASSIGNED]-(a:Turf {id:{turfId}}) return a UNION match (:Canvasser {id:{id}})-[:ASSIGNED]-(:Team)-[:ASSIGNED]-(a:Turf {id:{turfId}}) return a', req.query);
+    return cqdo(req, res, 'match (:Volunteer {id:{id}})-[:ASSIGNED]-(a:Turf {id:{turfId}}) return a UNION match (:Volunteer {id:{id}})-[:ASSIGNED]-(:Team)-[:ASSIGNED]-(a:Turf {id:{turfId}}) return a', req.query);
   }
 }
 
@@ -477,7 +477,7 @@ function teamFormList(req, res) {
     return cqdo(req, res, 'match (a:Form)-[:ASSIGNED]-(b:Team {id:{teamId}}) return a', req.query);
   else {
     req.query.id = req.user.id;
-    return cqdo(req, res, 'match (a:Form)-[:ASSIGNED]-(b:Team {id:{teamId}})-[:MEMBERS]-(c:Canvasser {id:{id}}) return a', req.query);
+    return cqdo(req, res, 'match (a:Form)-[:ASSIGNED]-(b:Team {id:{teamId}})-[:MEMBERS]-(c:Volunteer {id:{id}}) return a', req.query);
   }
 }
 
@@ -500,7 +500,7 @@ function turfList(req, res) {
   if (req.user.admin)
     return cqdo(req, res, 'match (a:Turf) return a{.id, .name, .created'+(geom?', .geometry':'')+'}');
   else
-    return cqdo(req, res, 'match (a:Canvasser {id:{id}})-[:MEMBERS]-(b:Team)-[:ASSIGNED]-(c:Turf) return c UNION match (a:Canvasser {id:{id}})-[:ASSIGNED]-(c:Turf) return c{.id, .name, .created'+(geom?', .geometry':'')+'}', req.user);
+    return cqdo(req, res, 'match (a:Volunteer {id:{id}})-[:MEMBERS]-(b:Team)-[:ASSIGNED]-(c:Turf) return c UNION match (a:Volunteer {id:{id}})-[:ASSIGNED]-(c:Turf) return c{.id, .name, .created'+(geom?', .geometry':'')+'}', req.user);
 }
 
 function turfCreate(req, res) {
@@ -519,7 +519,7 @@ function turfCreate(req, res) {
   req.body.turfId = uuidv4();
   req.body.author_id = req.user.id;
 
-  return cqdo(req, res, 'match (a:Canvasser {id:{author_id}}) create (b:Turf {id:{turfId}, created: timestamp(), name:{name}, geometry: {geometry}, wkt:{wkt}})-[:AUTHOR]->(a) WITH collect(b) AS t CALL spatial.addNodes(\'turf\', t) YIELD count return count', req.body, true);
+  return cqdo(req, res, 'match (a:Volunteer {id:{author_id}}) create (b:Turf {id:{turfId}, created: timestamp(), name:{name}, geometry: {geometry}, wkt:{wkt}})-[:AUTHOR]->(a) WITH collect(b) AS t CALL spatial.addNodes(\'turf\', t) YIELD count return count', req.body, true);
 }
 
 function turfDelete(req, res) {
@@ -542,66 +542,66 @@ function turfAssignedTeamRemove(req, res) {
   return cqdo(req, res, 'match (a:Turf {id:{turfId}})-[r:ASSIGNED]-(b:Team {id:{teamId}}) delete r', req.body, true);
 }
 
-async function turfAssignedCanvasserList(req, res) {
+async function turfAssignedVolunteerList(req, res) {
   if (!valid(req.query.turfId)) return _400(res, "Invalid value to parameter 'turfId'.");
 
-  let canvassers;
+  let volunteers;
 
   try {
-    canvassers = await _canvassersFromCypher('match (a:Turf {id:{turfId}})-[:ASSIGNED]-(b:Canvasser) return b', req.query, true);
+    volunteers = await _volunteersFromCypher('match (a:Turf {id:{turfId}})-[:ASSIGNED]-(b:Volunteer) return b', req.query, true);
   } catch (e) {
     return _500(res, e)
   }
 
-  return res.json(canvassers);
+  return res.json(volunteers);
 }
 
-async function turfAssignedCanvasserAdd(req, res) {
+async function turfAssignedVolunteerAdd(req, res) {
   if (!valid(req.body.turfId) || !valid(req.body.cId)) return _400(res, "Invalid value to parameter 'turfId' or 'cId'.");
   if (!req.user.admin) return _403(res, "Permission denied.");
 
   if (req.body.turfId === 'auto')
-    return cqdo(req, res, "match (a:Canvasser {id:{cId}}) set a.autoturf=true", req.body, true);
+    return cqdo(req, res, "match (a:Volunteer {id:{cId}}) set a.autoturf=true", req.body, true);
 
   if (!req.body.override) {
     try {
       let ret;
 
-      ret = await cqa('match (a:Canvasser {id:{cId}}) return a', req.body);
+      ret = await cqa('match (a:Volunteer {id:{cId}}) return a', req.body);
       let c = ret.data[0];
 
       ret = await cqa('match (a:Turf {id:{turfId}}) return a', req.body);
       let t = ret.data[0];
 
       // TODO: config option for whether or not we care...
-      //if (!ingeojson(JSON.parse(t.geometry), c.longitude, c.latitude)) return _400(res, "Canvasser location is not inside that turf.");
+      //if (!ingeojson(JSON.parse(t.geometry), c.longitude, c.latitude)) return _400(res, "Volunteer location is not inside that turf.");
     } catch (e) {
       return _500(res, e);
     }
   }
 
-  return cqdo(req, res, 'match (a:Turf {id:{turfId}}), (b:Canvasser {id:{cId}}) merge (a)-[:ASSIGNED]->(b)', req.body);
+  return cqdo(req, res, 'match (a:Turf {id:{turfId}}), (b:Volunteer {id:{cId}}) merge (a)-[:ASSIGNED]->(b)', req.body);
 }
 
-function turfAssignedCanvasserRemove(req, res) {
+function turfAssignedVolunteerRemove(req, res) {
   if (!valid(req.body.turfId) || !valid(req.body.cId)) return _400(res, "Invalid value to parameter 'turfId' or 'cId'.");
 
   if (req.body.turfId === 'auto')
-    return cqdo(req, res, "match (a:Canvasser {id:{cId}}) set a.autoturf=null", req.body, true);
+    return cqdo(req, res, "match (a:Volunteer {id:{cId}}) set a.autoturf=null", req.body, true);
 
-  return cqdo(req, res, 'match (a:Turf {id:{turfId}})-[r:ASSIGNED]-(b:Canvasser {id:{cId}}) delete r', req.body, true);
+  return cqdo(req, res, 'match (a:Turf {id:{turfId}})-[r:ASSIGNED]-(b:Volunteer {id:{cId}}) delete r', req.body, true);
 }
 
 // form
 
 async function formGet(req, res) {
-  let ass = await canvassAssignments(req.user);
-  if (!req.user.admin && !idInArrObj(ass.forms, req.query.id)) return _403(res, "Canvasser is not assigned to this form.");
+  let ass = await volunteerAssignments(req.user);
+  if (!req.user.admin && !idInArrObj(ass.forms, req.query.id)) return _403(res, "Volunteer is not assigned to this form.");
 
   let form = {};
 
   try {
-    let a = await cqa('match (a:Form {id:{formId}})-[:AUTHOR]-(b:Canvasser) return a,b', req.query);
+    let a = await cqa('match (a:Form {id:{formId}})-[:AUTHOR]-(b:Volunteer) return a,b', req.query);
     form = a.data[0][0];
     form.author_id = a.data[0][1].id;
     form.author = a.data[0][1].name;
@@ -624,7 +624,7 @@ function formList(req, res) {
   if (req.user.admin)
     return cqdo(req, res, 'match (a:Form) return a');
   else
-    return cqdo(req, res, 'match (a:Canvasser {id:{id}})-[:ASSIGNED]-(b:Team)-[:ASSIGNED]-(c:Form) return c UNION match (a:Canvasser {id:{id}})-[:ASSIGNED]-(c:Form) return c', req.user)
+    return cqdo(req, res, 'match (a:Volunteer {id:{id}})-[:ASSIGNED]-(b:Team)-[:ASSIGNED]-(c:Form) return c UNION match (a:Volunteer {id:{id}})-[:ASSIGNED]-(c:Form) return c', req.user)
 }
 
 async function formCreate(req, res) {
@@ -636,7 +636,7 @@ async function formCreate(req, res) {
   req.body.author_id = req.user.id;
 
   try {
-    await cqa('match (a:Canvasser {id:{author_id}}) create (b:Form {created: timestamp(), updated: timestamp(), id:{formId}, name:{name}, questions_order:{questions_order}, version:1})-[:AUTHOR]->(a)', req.body);
+    await cqa('match (a:Volunteer {id:{author_id}}) create (b:Form {created: timestamp(), updated: timestamp(), id:{formId}, name:{name}, questions_order:{questions_order}, version:1})-[:AUTHOR]->(a)', req.body);
 
     // question is an object of objects, whos schema is; key: {label: , optional: , type: }
     Object.keys(req.body.questions).forEach(async (key) => {
@@ -644,7 +644,7 @@ async function formCreate(req, res) {
       q.key = key;
       q.author_id = req.user.id;
       q.formId = req.body.formId;
-      await cqa('match (a:Canvasser {id:{author_id}}) match (b:Form {id:{formId}}) create (b)<-[:ASSIGNED]-(c:Question {key:{key}, label:{label}, optional:{optional}, type:{type}})-[:AUTHOR]->(a)', q);
+      await cqa('match (a:Volunteer {id:{author_id}}) match (b:Form {id:{formId}}) create (b)<-[:ASSIGNED]-(c:Question {key:{key}, label:{label}, optional:{optional}, type:{type}})-[:AUTHOR]->(a)', q);
     });
   } catch (e) {
     return _500(res, e);
@@ -673,28 +673,28 @@ function formAssignedTeamRemove(req, res) {
   return cqdo(req, res, 'match (a:Form {id:{formId}})-[r:ASSIGNED]-(b:Team {id:{teamId}}) delete r', req.body, true);
 }
 
-async function formAssignedCanvasserList(req, res) {
+async function formAssignedVolunteerList(req, res) {
   if (!valid(req.query.formId)) return _400(res, "Invalid value to parameter 'formId'.");
 
-  let canvassers;
+  let volunteers;
 
   try {
-    canvassers = await _canvassersFromCypher('match (a:Form {id:{formId}})-[:ASSIGNED]-(b:Canvasser) return b', req.query, true);
+    volunteers = await _volunteersFromCypher('match (a:Form {id:{formId}})-[:ASSIGNED]-(b:Volunteer) return b', req.query, true);
   } catch (e) {
     return _500(res, e)
   }
 
-  return res.json(canvassers);
+  return res.json(volunteers);
 }
 
-function formAssignedCanvasserAdd(req, res) {
+function formAssignedVolunteerAdd(req, res) {
   if (!valid(req.body.formId) || !valid(req.body.cId)) return _400(res, "Invalid value to parameter 'formId' or 'cId'.");
-  return cqdo(req, res, 'match (a:Form {id:{formId}}), (b:Canvasser {id:{cId}}) merge (a)-[:ASSIGNED]->(b)', req.body, true);
+  return cqdo(req, res, 'match (a:Form {id:{formId}}), (b:Volunteer {id:{cId}}) merge (a)-[:ASSIGNED]->(b)', req.body, true);
 }
 
-function formAssignedCanvasserRemove(req, res) {
+function formAssignedVolunteerRemove(req, res) {
   if (!valid(req.body.formId) || !valid(req.body.cId)) return _400(res, "Invalid value to parameter 'formId' or 'cId'.");
-  return cqdo(req, res, 'match (a:Form {id:{formId}})-[r:ASSIGNED]-(b:Canvasser {id:{cId}}) delete r', req.body, true);
+  return cqdo(req, res, 'match (a:Form {id:{formId}})-[r:ASSIGNED]-(b:Volunteer {id:{cId}}) delete r', req.body, true);
 }
 
 // question
@@ -707,7 +707,7 @@ async function questionGet(req, res) {
 
   try {
     // TODO: use cqdo() and format the code in the cypher return rather than in javascript code
-    let a = await cqa('match (a:Question {key:{key}})-[:AUTHOR]-(b:Canvasser) return a,b', req.query);
+    let a = await cqa('match (a:Question {key:{key}})-[:AUTHOR]-(b:Volunteer) return a,b', req.query);
 
     if (a.data.length === 1) {
       q = a.data[0][0];
@@ -739,7 +739,7 @@ function questionCreate(req, res) {
      default: return _400(res, "Invalid value to parameter 'type'.");
    }
 
-   return cqdo(req, res, 'match (a:Canvasser {id:{author_id}}) create (b:Question {created: timestamp(), key:{key}, label:{label}, type:{type}})-[:AUTHOR]->(a)', req.body, true);
+   return cqdo(req, res, 'match (a:Volunteer {id:{author_id}}) create (b:Question {created: timestamp(), key:{key}, label:{label}, type:{type}})-[:AUTHOR]->(a)', req.body, true);
 }
 
 function questionDelete(req, res) {
@@ -765,8 +765,8 @@ function questionAssignedRemove(req, res) {
 // sync
 
 async function sync(req, res) {
-  let ass = await canvassAssignments(req.user);
-  if (!ass.ready) return _403(res, "Canvasser is not assigned.");
+  let ass = await volunteerAssignments(req.user);
+  if (!ass.ready) return _403(res, "Volunteer is not assigned.");
 
   let last_sync = req.body.last_sync;
   if (isNaN(last_sync)) last_sync = 0;
@@ -828,7 +828,7 @@ async function sync(req, res) {
       }
 
       if (node.parent_id) await cqa('MATCH (a {id:{id}}), (b {id:{parent_id}}) merge (a)-[:PARENT]->(b)', node);
-      // TODO: link to canvasser
+      // TODO: link to volunteer
     } catch (e) {
       console.log(e);
     }
@@ -905,7 +905,7 @@ app.use(async function (req, res, next) {
     if (!req.user.id) return;
     let obj = (req.body ? req.body : req.query);
     try {
-      cqa('match (a:Canvasser {id:{id}}) merge (l:Log {uri:{uri}}) merge (a)-[:HTTP {code:{code},time:timestamp(),input:{input}}]-(l)', {id: req.user.id, code: res.statusCode, uri: req.route.path, input: JSON.stringify(obj)});
+      cqa('match (a:Volunteer {id:{id}}) merge (l:Log {uri:{uri}}) merge (a)-[:HTTP {code:{code},time:timestamp(),input:{input}}]-(l)', {id: req.user.id, code: res.statusCode, uri: req.route.path, input: JSON.stringify(obj)});
     } catch (e) {}
   }
 
@@ -918,7 +918,7 @@ app.use(async function (req, res, next) {
   switch (req.url) {
     case '/':
     case '/poke':
-    case '/canvass/':
+    case '/volunteer/':
       return next();
     default:
       break;
@@ -936,7 +936,7 @@ app.use(async function (req, res, next) {
     if (!u.email) u.email = "";
     if (!u.avatar) u.avatar = "";
 
-    let a = await cqa('merge (a:Canvasser {id:{id}}) on match set a += {last_seen: timestamp(), name:{name}, email:{email}, avatar:{avatar}} on create set a += {created: timestamp(), last_seen: timestamp(), name:{name}, email:{email}, avatar:{avatar}} return a', u);
+    let a = await cqa('merge (a:Volunteer {id:{id}}) on match set a += {last_seen: timestamp(), name:{name}, email:{email}, avatar:{avatar}} on create set a += {created: timestamp(), last_seen: timestamp(), name:{name}, email:{email}, avatar:{avatar}} return a', u);
     if (a.data.length === 1) {
       req.user = a.data[0];
     } else return _500(res, {});
@@ -956,57 +956,57 @@ app.get('/poke', poke);
 
 // ws routes
 app.get('/', towebapp);
-app.get('/canvass/', towebapp);
-app.post('/canvass/v1/hello', hello);
-app.get('/canvass/v1/uncle', uncle);
-app.get('/canvass/v1/dashboard', dashboard);
-app.get('/canvass/v1/google_maps_key', google_maps_key);
-app.get('/canvass/v1/canvasser/list', canvasserList);
-app.get('/canvass/v1/canvasser/get', canvasserGet);
-app.post('/canvass/v1/canvasser/update', canvasserUpdate);
-app.post('/canvass/v1/canvasser/lock', canvasserLock);
-app.post('/canvass/v1/canvasser/unlock', canvasserUnlock);
-app.get('/canvass/v1/team/list', teamList);
-app.get('/canvass/v1/team/get', teamGet);
-app.post('/canvass/v1/team/create', teamCreate);
-app.post('/canvass/v1/team/delete', teamDelete);
-app.get('/canvass/v1/team/members/list', teamMembersList);
-app.post('/canvass/v1/team/members/add', teamMembersAdd);
-app.post('/canvass/v1/team/members/remove', teamMembersRemove);
-app.get('/canvass/v1/team/turf/list', teamTurfList);
-app.post('/canvass/v1/team/turf/add', teamTurfAdd);
-app.post('/canvass/v1/team/turf/remove', teamTurfRemove);
-app.get('/canvass/v1/team/form/list', teamFormList);
-app.post('/canvass/v1/team/form/add', teamFormAdd);
-app.post('/canvass/v1/team/form/remove', teamFormRemove);
-app.get('/canvass/v1/turf/list', turfList);
-app.get('/canvass/v1/turf/get', turfGet);
-app.post('/canvass/v1/turf/create', turfCreate);
-app.post('/canvass/v1/turf/delete', turfDelete);
-app.get('/canvass/v1/turf/assigned/team/list', turfAssignedTeamList);
-app.post('/canvass/v1/turf/assigned/team/add', turfAssignedTeamAdd);
-app.post('/canvass/v1/turf/assigned/team/remove', turfAssignedTeamRemove);
-app.get('/canvass/v1/turf/assigned/canvasser/list', turfAssignedCanvasserList);
-app.post('/canvass/v1/turf/assigned/canvasser/add', turfAssignedCanvasserAdd);
-app.post('/canvass/v1/turf/assigned/canvasser/remove', turfAssignedCanvasserRemove);
-app.get('/canvass/v1/form/get', formGet);
-app.get('/canvass/v1/form/list', formList);
-app.post('/canvass/v1/form/create', formCreate);
-app.post('/canvass/v1/form/delete', formDelete);
-app.get('/canvass/v1/form/assigned/team/list', formAssignedTeamList);
-app.post('/canvass/v1/form/assigned/team/add', formAssignedTeamAdd);
-app.post('/canvass/v1/form/assigned/team/remove', formAssignedTeamRemove);
-app.get('/canvass/v1/form/assigned/canvasser/list', formAssignedCanvasserList);
-app.post('/canvass/v1/form/assigned/canvasser/add', formAssignedCanvasserAdd);
-app.post('/canvass/v1/form/assigned/canvasser/remove', formAssignedCanvasserRemove);
-app.get('/canvass/v1/question/get', questionGet);
-app.get('/canvass/v1/question/list', questionList);
-app.post('/canvass/v1/question/create', questionCreate);
-app.post('/canvass/v1/question/delete', questionDelete);
-app.get('/canvass/v1/question/assigned/list', questionAssignedList);
-app.post('/canvass/v1/question/assigned/add', questionAssignedAdd);
-app.post('/canvass/v1/question/assigned/remove', questionAssignedRemove);
-app.post('/canvass/v1/sync', sync);
+app.get('/volunteer/', towebapp);
+app.post('/volunteer/v1/hello', hello);
+app.get('/volunteer/v1/uncle', uncle);
+app.get('/volunteer/v1/dashboard', dashboard);
+app.get('/volunteer/v1/google_maps_key', google_maps_key);
+app.get('/volunteer/v1/volunteer/list', volunteerList);
+app.get('/volunteer/v1/volunteer/get', volunteerGet);
+app.post('/volunteer/v1/volunteer/update', volunteerUpdate);
+app.post('/volunteer/v1/volunteer/lock', volunteerLock);
+app.post('/volunteer/v1/volunteer/unlock', volunteerUnlock);
+app.get('/volunteer/v1/team/list', teamList);
+app.get('/volunteer/v1/team/get', teamGet);
+app.post('/volunteer/v1/team/create', teamCreate);
+app.post('/volunteer/v1/team/delete', teamDelete);
+app.get('/volunteer/v1/team/members/list', teamMembersList);
+app.post('/volunteer/v1/team/members/add', teamMembersAdd);
+app.post('/volunteer/v1/team/members/remove', teamMembersRemove);
+app.get('/volunteer/v1/team/turf/list', teamTurfList);
+app.post('/volunteer/v1/team/turf/add', teamTurfAdd);
+app.post('/volunteer/v1/team/turf/remove', teamTurfRemove);
+app.get('/volunteer/v1/team/form/list', teamFormList);
+app.post('/volunteer/v1/team/form/add', teamFormAdd);
+app.post('/volunteer/v1/team/form/remove', teamFormRemove);
+app.get('/volunteer/v1/turf/list', turfList);
+app.get('/volunteer/v1/turf/get', turfGet);
+app.post('/volunteer/v1/turf/create', turfCreate);
+app.post('/volunteer/v1/turf/delete', turfDelete);
+app.get('/volunteer/v1/turf/assigned/team/list', turfAssignedTeamList);
+app.post('/volunteer/v1/turf/assigned/team/add', turfAssignedTeamAdd);
+app.post('/volunteer/v1/turf/assigned/team/remove', turfAssignedTeamRemove);
+app.get('/volunteer/v1/turf/assigned/volunteer/list', turfAssignedVolunteerList);
+app.post('/volunteer/v1/turf/assigned/volunteer/add', turfAssignedVolunteerAdd);
+app.post('/volunteer/v1/turf/assigned/volunteer/remove', turfAssignedVolunteerRemove);
+app.get('/volunteer/v1/form/get', formGet);
+app.get('/volunteer/v1/form/list', formList);
+app.post('/volunteer/v1/form/create', formCreate);
+app.post('/volunteer/v1/form/delete', formDelete);
+app.get('/volunteer/v1/form/assigned/team/list', formAssignedTeamList);
+app.post('/volunteer/v1/form/assigned/team/add', formAssignedTeamAdd);
+app.post('/volunteer/v1/form/assigned/team/remove', formAssignedTeamRemove);
+app.get('/volunteer/v1/form/assigned/volunteer/list', formAssignedVolunteerList);
+app.post('/volunteer/v1/form/assigned/volunteer/add', formAssignedVolunteerAdd);
+app.post('/volunteer/v1/form/assigned/volunteer/remove', formAssignedVolunteerRemove);
+app.get('/volunteer/v1/question/get', questionGet);
+app.get('/volunteer/v1/question/list', questionList);
+app.post('/volunteer/v1/question/create', questionCreate);
+app.post('/volunteer/v1/question/delete', questionDelete);
+app.get('/volunteer/v1/question/assigned/list', questionAssignedList);
+app.post('/volunteer/v1/question/assigned/add', questionAssignedAdd);
+app.post('/volunteer/v1/question/assigned/remove', questionAssignedRemove);
+app.post('/volunteer/v1/sync', sync);
 
 Object.keys(ovi_config).forEach((k) => {
   delete process.env[k.toUpperCase()];
@@ -1023,7 +1023,7 @@ if (!ovi_config.DEBUG) {
 // Launch the server
 const server = app.listen(ovi_config.server_port, () => {
   const { address, port } = server.address();
-  console.log('canvass-broker express');
+  console.log('volunteer-broker express');
   console.log(`Listening at http://${address}:${port}`);
 });
 
