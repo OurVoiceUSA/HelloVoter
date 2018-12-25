@@ -62,8 +62,8 @@ export const RootLoader = (props) => {
   );
 }
 
-export function _searchStringCanvasser(c) {
-    return (c.id+c.name+c.email+c.homeaddress+(c.admin?"admin":"")).toLowerCase();
+export function _searchStringify(obj) {
+  return JSON.stringify(obj).toLowerCase();
 }
 
 export async function _loadCanvasser(refer, id) {

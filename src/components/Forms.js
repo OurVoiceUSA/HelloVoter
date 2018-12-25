@@ -12,7 +12,7 @@ import { CardCanvasser } from './Canvassers.js';
 import { CardTeam } from './Teams.js';
 
 import {
-  _fetch, notify_error, notify_success, _loadForms, _loadForm, _loadCanvassers, _loadTeams, _handleSelectChange,
+  _fetch, notify_error, notify_success, _loadForms, _loadForm, _loadCanvassers, _loadTeams, _handleSelectChange, _searchStringify,
   RootLoader, Icon, Loader,
 } from '../common.js';
 
@@ -285,7 +285,7 @@ export default class App extends Component {
     let list = [];
 
     this.state.forms.forEach(f => {
-      if (this.state.search && !f.name.toLowerCase().includes(this.state.search)) return;
+      if (this.state.search && !_searchStringify(f).includes(this.state.search)) return;
       list.push(f);
     });
 
@@ -492,21 +492,21 @@ export class CardForm extends Component {
     let selectedMembersOption = [];
 
     teams.forEach((t) => {
-      teamOptions.push({value: t.id, id: t.id, label: (
+      teamOptions.push({value: _searchStringify(t), id: t.id, label: (
         <CardTeam key={t.id} team={t} refer={this} />
       )});
     });
 
     teamsSelected.forEach((t) => {
-      selectedTeamsOption.push({value: t.id, id: t.id, label: (<CardTeam key={t.id} team={t} refer={this} />)});
+      selectedTeamsOption.push({value: _searchStringify(t), id: t.id, label: (<CardTeam key={t.id} team={t} refer={this} />)});
     })
 
     canvassers.forEach((c) => {
-      membersOption.push({value: c.id, id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={this} />)});
+      membersOption.push({value: _searchStringify(c), id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={this} />)});
     });
 
     members.forEach((c) => {
-      selectedMembersOption.push({value: c.id, id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={this} />)});
+      selectedMembersOption.push({value: _searchStringify(c), id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={this} />)});
     });
 
     this.setState({form, canvassers, teamOptions, membersOption, selectedTeamsOption, selectedMembersOption, loading: false});

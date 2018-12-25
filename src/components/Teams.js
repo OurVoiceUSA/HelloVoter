@@ -6,7 +6,7 @@ import Select from 'react-select';
 import t from 'tcomb-form';
 
 import {
-  notify_error, notify_success, _fetch,  _searchStringCanvasser, _handleSelectChange,
+  notify_error, notify_success, _fetch,  _searchStringCanvasser, _handleSelectChange, _searchStringify,
   _loadCanvassers, _loadTeams, _loadTeam, _loadForms, _loadTurfs,
   RootLoader, Loader, Icon,
 } from '../common.js';
@@ -120,7 +120,7 @@ export default class App extends Component {
     let list = [];
 
     this.state.teams.forEach(t => {
-      if (this.state.search && !t.name.toLowerCase().includes(this.state.search)) return;
+      if (this.state.search && !_searchStringify(t).includes(this.state.search)) return;
         list.push(t);
     });
 
@@ -321,27 +321,27 @@ export class CardTeam extends Component {
     let selectedFormsOption = [];
 
     canvassers.forEach((c) => {
-      memberOptions.push({value: _searchStringCanvasser(c), id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={this} />)});
+      memberOptions.push({value: _searchStringify(c), id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={this} />)});
     });
 
     members.forEach((c) => {
-      selectedMembersOption.push({value: _searchStringCanvasser(c), id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={this} />)});
+      selectedMembersOption.push({value: _searchStringify(c), id: c.id, label: (<CardCanvasser key={c.id} canvasser={c} refer={this} />)});
     });
 
     turfs.forEach((t) => {
-      turfOptions.push({value: t.id, id: t.id, label: (<CardTurf key={t.id} turf={t} refer={this} />)});
+      turfOptions.push({value: _searchStringify(t), id: t.id, label: (<CardTurf key={t.id} turf={t} refer={this} />)});
     })
 
     turfSelected.forEach((t) => {
-      selectedTurfOption.push({value: t.id, id: t.id, label: (<CardTurf key={t.id} turf={t} refer={this} />)});
+      selectedTurfOption.push({value: _searchStringify(t), id: t.id, label: (<CardTurf key={t.id} turf={t} refer={this} />)});
     })
 
     forms.forEach((f) => {
-      formOptions.push({value: f.id, id: f.id, label: (<CardForm key={f.id} form={f} refer={this} />)});
+      formOptions.push({value: _searchStringify(f), id: f.id, label: (<CardForm key={f.id} form={f} refer={this} />)});
     })
 
     formSelected.forEach((f) => {
-      selectedFormsOption.push({value: f.id, id: f.id, label: (<CardForm key={f.id} form={f} refer={this} />)});
+      selectedFormsOption.push({value: _searchStringify(f), id: f.id, label: (<CardForm key={f.id} form={f} refer={this} />)});
     })
 
     this.setState({team, memberOptions, turfOptions, formOptions, selectedMembersOption, selectedTurfOption, selectedFormsOption, loading: false});

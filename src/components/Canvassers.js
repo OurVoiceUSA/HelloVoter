@@ -8,7 +8,7 @@ import Select from 'react-select';
 import Img from 'react-image';
 
 import {
-  notify_error, notify_success, _fetch, _searchStringCanvasser, _handleSelectChange,
+  notify_error, notify_success, _fetch, _searchStringify, _handleSelectChange,
   _loadCanvassers, _loadCanvasser, _loadTeams, _loadForms, _loadTurfs,
   RootLoader, Loader, Icon, PlacesAutocomplete,
 } from '../common.js';
@@ -83,7 +83,7 @@ export default class App extends Component {
     let denied = [];
 
     this.state.canvassers.forEach(c => {
-      if (this.state.search && !_searchStringCanvasser(c).includes(this.state.search)) return;
+      if (this.state.search && !_searchStringify(c).includes(this.state.search)) return;
       if (c.locked) {
         denied.push(c);
       } else {
@@ -290,12 +290,12 @@ export class CardCanvasser extends Component {
     ];
 
     teams.forEach((t) => {
-      teamOptions.push({value: t.id, id: t.id, label: (
+      teamOptions.push({value: _searchStringify(t), id: t.id, label: (
         <CardTeam key={t.id} team={t} refer={this} />
       )});
       canvasser.ass.teams.forEach((a) => {
         if (a.id === t.id) {
-          selectedTeamsOption.push({value: t.id, id: t.id, label: (
+          selectedTeamsOption.push({value: _searchStringify(t), id: t.id, label: (
             <CardTeam key={t.id} team={t} refer={this} />
           )});
         }
@@ -303,21 +303,21 @@ export class CardCanvasser extends Component {
     });
 
     forms.forEach((f) => {
-      formOptions.push({value: f.id, id: f.id, label: (<CardForm key={f.id} form={f} refer={this} />)});
+      formOptions.push({value: _searchStringify(f), id: f.id, label: (<CardForm key={f.id} form={f} refer={this} />)});
     });
 
     if (canvasser.ass.forms.length) {
       let f = canvasser.ass.forms[0];
-      selectedFormsOption = {value: f.id, id: f.id, label: (<CardForm key={f.id} form={f} refer={this} />)};
+      selectedFormsOption = {value: _searchStringify(f), id: f.id, label: (<CardForm key={f.id} form={f} refer={this} />)};
     }
 
     turf.forEach((t) => {
-      turfOptions.push({value: t.id, id: t.id, label: (<CardTurf key={t.id} turf={t} refer={this} />)})
+      turfOptions.push({value: _searchStringify(t), id: t.id, label: (<CardTurf key={t.id} turf={t} refer={this} />)})
     });
 
     if (canvasser.ass.turf.length) {
       let t = canvasser.ass.turf[0];
-      selectedTurfOption = {value: t.id, id: t.id, label: (<CardTurf key={t.id} turf={t} refer={this} icon={(canvasser.autoturf?faHome:null)} />)};
+      selectedTurfOption = {value: _searchStringify(t), id: t.id, label: (<CardTurf key={t.id} turf={t} refer={this} icon={(canvasser.autoturf?faHome:null)} />)};
     }
 
     this.setState({canvasser, teamOptions, formOptions, turfOptions, selectedTeamsOption, selectedFormsOption, selectedTurfOption, loading: false});
