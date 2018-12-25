@@ -158,11 +158,26 @@ function _500(res, obj) {
 
 async function volunteerCanSee(ida, idb) {
   if (ida === idb) return true;
+  if (sameTeam(ida, idb)) return true;
+  if (onMyTurf(ida, idb)) return true;
+  return false;
+}
 
+async function onMyTurf(ida, idb) {
   try {
-    let ref = await cqa('match (a:Volunteer {id:{ida}})-[:MEMBERS {leader:true}]-(:Team)-[]-(t:Turf) where t.wkt is not null call spatial.intersects("volunteer", t.wkt) yield node where node.id = {idb} return node UNION match (a:Volunteer {id:{ida}})-[:MEMBERS]-(:Team)-[:MEMBERS]-(c:Volunteer) return distinct(c) as node', {ida: ida, idb: idb});
-    if (ref.data.length > 0)
-      return true;
+    let ref = await cqa('match (a:Volunteer {id:{ida}})-[:MEMBERS {leader:true}]-(:Team)-[]-(t:Turf) where t.wkt is not null call spatial.intersects("volunteer", t.wkt) yield node where node.id = {idb} return node', {ida: ida, idb: idb});
+    if (ref.data.length > 0) return true;
+  } catch (e) {
+    console.warn(e);
+  }
+
+  return false;
+}
+
+async function sameTeam(ida, idb) {
+  try {
+    let ref = await cqa('match (a:Volunteer {id:{ida}})-[:MEMBERS]-(:Team)-[:MEMBERS]-(b:Volunteer {id:{idb}}) return c', {ida: ida, idb: idb});
+    if (ref.data.length > 0) return true;
   } catch (e) {
     console.warn(e);
   }
@@ -438,14 +453,28 @@ async function teamMembersList(req, res) {
   return res.json(volunteers);
 }
 
-function teamMembersAdd(req, res) {
+async function teamMembersAdd(req, res) {
   if (!valid(req.body.teamId) || !valid(req.body.cId)) return _400(res, "Invalid value to parameter 'teamId' or 'cId'.");
-  return cqdo(req, res, 'match (a:Volunteer {id:{cId}}), (b:Team {id:{teamId}}) merge (b)-[:MEMBERS]->(a)', req.body, true);
+  if (req.user.admin || (await volunteerIsLeader(req.user.id, req.body.teamId) && await onMyTurf(req.user.id, req.body.cId)))
+    return cqdo(req, res, 'match (a:Volunteer {id:{cId}}), (b:Team {id:{teamId}}) merge (b)-[:MEMBERS]->(a)', req.body);
+  return _403(res, "Permission denied.");
 }
 
-function teamMembersRemove(req, res) {
+async function volunteerIsLeader(id, teamId) {
+  try {
+    let ref = await cqa('match (:Volunteer {id:{id}})-[:MEMBERS {leader:true}]-(a:Team {id:{teamId}}) return a', {id: id, teamId: teamId})
+    if (ref.data.length > 0) return true;
+  } catch (e) {
+    console.warn(e);
+  }
+  return false;
+}
+
+async function teamMembersRemove(req, res) {
   if (!valid(req.body.teamId) || valid(!req.body.cId)) return _400(res, "Invalid value to parameter 'teamId' or 'cId'.");
-  return cqdo(req, res, 'match (a:Volunteer {id:{cId}})-[r:MEMBERS]-(b:Team {id:{teamId}}) delete r', req.body, true);
+  if (req.user.admin || (await volunteerIsLeader(req.user.id, req.body.teamId) && await onMyTurf(req.user.id, req.body.cId)))
+    return cqdo(req, res, 'match (a:Volunteer {id:{cId}})-[r:MEMBERS]-(b:Team {id:{teamId}}) delete r', req.body)
+  return _403(res, "Permission denied.");
 }
 
 function teamMembersPromote(req, res) {
