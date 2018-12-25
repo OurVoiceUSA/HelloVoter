@@ -18,7 +18,7 @@ import { CardForm } from './Forms.js';
 import { CardTeam } from './Teams.js';
 
 import {
-  faUser, faCrown, faExclamationTriangle, faCheckCircle, faBan, faHome,
+  faUser, faCrown, faExclamationTriangle, faCheckCircle, faBan, faHome, faFlag,
 } from '@fortawesome/free-solid-svg-icons';
 
 import TimeAgo from 'javascript-time-ago';
@@ -177,6 +177,7 @@ export class CardVolunteer extends Component {
       server: this.props.refer.props.server,
       volunteer: this.props.volunteer,
       selectedTeamsOption: [],
+      selectedLeaderOption: [],
       selectedFormsOption: {},
       selectedTurfOption: {},
     };
@@ -276,7 +277,9 @@ export class CardVolunteer extends Component {
     let teams = await _loadTeams(this.props.refer);
 
     let teamOptions = [];
+    let leaderOptions = [];
     let selectedTeamsOption = [];
+    let selectedLeaderOption = [];
     let selectedFormsOption = {};
     let selectedTurfOption = {};
 
@@ -293,11 +296,19 @@ export class CardVolunteer extends Component {
       teamOptions.push({value: _searchStringify(t), id: t.id, label: (
         <CardTeam key={t.id} team={t} refer={this} />
       )});
-      volunteer.ass.teams.forEach((a) => {
+      volunteer.ass.teams.forEach((a, idx) => {
         if (a.id === t.id) {
           selectedTeamsOption.push({value: _searchStringify(t), id: t.id, label: (
             <CardTeam key={t.id} team={t} refer={this} />
           )});
+          leaderOptions.push({value: _searchStringify(t), id: t.id, label: (
+            <CardTeam key={t.id} team={t} refer={this} />
+          )});
+          if (volunteer.ass.teamperms[idx].leader) {
+            selectedLeaderOption.push({value: _searchStringify(t), id: t.id, label: (
+              <CardTeam key={t.id} team={t} refer={this} />
+            )});
+          }
         }
       });
     });
@@ -320,7 +331,10 @@ export class CardVolunteer extends Component {
       selectedTurfOption = {value: _searchStringify(t), id: t.id, label: (<CardTurf key={t.id} turf={t} refer={this} icon={(volunteer.autoturf?faHome:null)} />)};
     }
 
-    this.setState({volunteer, teamOptions, formOptions, turfOptions, selectedTeamsOption, selectedFormsOption, selectedTurfOption, loading: false});
+    this.setState({
+      loading: false, volunteer, teamOptions, leaderOptions, formOptions, turfOptions,
+      selectedTeamsOption, selectedLeaderOption, selectedFormsOption, selectedTurfOption
+    });
   }
 
   _lockVolunteer = async (volunteer, flag) => {
@@ -386,11 +400,21 @@ export const CardVolunteerFull = (props) => (
     </div>
     :
     <div>
-      Teams this volunteer is a part of:
+      Teams this volunteer is a member of:
       <Select
         value={props.refer.state.selectedTeamsOption}
         onChange={props.refer.handleTeamsChange}
         options={props.refer.state.teamOptions}
+        isMulti={true}
+        isSearchable={true}
+        placeholder="None"
+      />
+      <br />
+      Teams this volunteer is a leader of:
+      <Select
+        value={props.refer.state.selectedLeaderOption}
+        onChange={props.refer.handleLeaderChange}
+        options={props.refer.state.selectedTeamsOption}
         isMulti={true}
         isSearchable={true}
         placeholder="None"
@@ -482,6 +506,7 @@ export const VolunteerBadges = (props) => {
   let id = props.volunteer.id;
 
   if (props.volunteer.admin) badges.push(<Icon icon={faCrown} color="gold" key={id+"admin"} data-tip="Administrator" />);
+  if (props.volunteer.ass.leader) badges.push(<Icon icon={faFlag} color="green" key={id+"leader"} data-tip="Team Leader" />);
   if (props.volunteer.locked) badges.push(<Icon icon={faBan} color="red" key={id+"locked"} data-tip="Denied access" />);
   else {
     if (props.volunteer.ass.ready) badges.push(<Icon icon={faCheckCircle} color="green" key={id+"ready"} data-tip="Ready to Canvass" />);
