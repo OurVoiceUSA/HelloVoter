@@ -63,7 +63,10 @@ export const RootLoader = (props) => {
 }
 
 export function _searchStringify(obj) {
-  return JSON.stringify(obj).toLowerCase();
+  // deep copy and remove volitile variables
+  let o = JSON.parse(JSON.stringify(obj));
+  delete o.last_seen;
+  return JSON.stringify(o).toLowerCase();
 }
 
 export async function _loadVolunteer(refer, id) {
