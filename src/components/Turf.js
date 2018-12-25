@@ -182,7 +182,7 @@ export default class App extends Component {
       let state = this.state.selectedStateOption.value;
 
       try {
-        if (this.state.selectedDistrictOption.value === 'all') {
+        if (this.state.selectedDistrictOption && this.state.selectedDistrictOption.value === 'all') {
           for (let i in this.state.districtOptions) {
             if (this.state.districtOptions[i].value === 'all') continue;
             let res = await fetch(this.urlFromDist(state, this.state.selectedTypeOption.value, this.state.districtOptions[i].value));
@@ -191,7 +191,7 @@ export default class App extends Component {
             objs.push(obj);
           }
         } else {
-          let res = await fetch(this.urlFromDist(state, this.state.selectedTypeOption.value, this.state.selectedDistrictOption.value));
+          let res = await fetch(this.urlFromDist(state, this.state.selectedTypeOption.value, (this.state.selectedDistrictOption?this.state.selectedDistrictOption.value:null)));
           objs.push(await res.json());
         }
       } catch (e) {

@@ -228,10 +228,10 @@ export class CardVolunteer extends Component {
 
       // refresh volunteer info
       let volunteer = await _loadVolunteer(this, this.props.id);
-      notify_success("Team assignments saved.");
+      notify_success("Team leaders saved.");
       this.setState({ selectedLeaderOption, volunteer });
     } catch (e) {
-      notify_error(e, "Unable to add/remove teams.");
+      notify_error(e, "Unable to edit team leadership.");
     }
   }
 
