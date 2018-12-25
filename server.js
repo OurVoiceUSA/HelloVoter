@@ -448,6 +448,16 @@ function teamMembersRemove(req, res) {
   return cqdo(req, res, 'match (a:Volunteer {id:{cId}})-[r:MEMBERS]-(b:Team {id:{teamId}}) delete r', req.body, true);
 }
 
+function teamMembersPromote(req, res) {
+  if (!valid(req.body.teamId) || valid(!req.body.cId)) return _400(res, "Invalid value to parameter 'teamId' or 'cId'.");
+  return cqdo(req, res, 'match (a:Volunteer {id:{cId}})-[r:MEMBERS]-(b:Team {id:{teamId}}) set r.leader=true', req.body, true);
+}
+
+function teamMembersDemote(req, res) {
+  if (!valid(req.body.teamId) || valid(!req.body.cId)) return _400(res, "Invalid value to parameter 'teamId' or 'cId'.");
+  return cqdo(req, res, 'match (a:Volunteer {id:{cId}})-[r:MEMBERS]-(b:Team {id:{teamId}}) set r.leader=null', req.body, true);
+}
+
 function teamTurfList(req, res) {
   if (!valid(req.query.teamId)) return _400(res, "Invalid value to parameter 'teamId'.");
   if (req.user.admin)
@@ -979,6 +989,8 @@ app.post('/volunteer/v1/team/delete', teamDelete);
 app.get('/volunteer/v1/team/members/list', teamMembersList);
 app.post('/volunteer/v1/team/members/add', teamMembersAdd);
 app.post('/volunteer/v1/team/members/remove', teamMembersRemove);
+app.post('/volunteer/v1/team/members/promote', teamMembersPromote);
+app.post('/volunteer/v1/team/members/demote', teamMembersDemote);
 app.get('/volunteer/v1/team/turf/list', teamTurfList);
 app.post('/volunteer/v1/team/turf/add', teamTurfAdd);
 app.post('/volunteer/v1/team/turf/remove', teamTurfRemove);
