@@ -533,6 +533,7 @@ export const VolunteerBadges = (props) => {
   else {
     if (props.volunteer.ass.ready) badges.push(<Icon icon={faCheckCircle} color="green" key={id+"ready"} data-tip="Ready to Canvass" />);
     else badges.push(<Icon icon={faExclamationTriangle} color="red" key={id+"notready"} data-tip="Not ready to volunteer, check assignments" />);
+    if (!props.volunteer.homeaddress) badges.push(<Icon icon={faHome} color="red" key={id+"addr"} data-tip="Home Address is not set" />);
   }
 
   return badges;
