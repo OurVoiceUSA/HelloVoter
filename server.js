@@ -170,13 +170,12 @@ async function onMyTurf(ida, idb) {
   } catch (e) {
     console.warn(e);
   }
-
   return false;
 }
 
 async function sameTeam(ida, idb) {
   try {
-    let ref = await cqa('match (a:Volunteer {id:{ida}})-[:MEMBERS]-(:Team)-[:MEMBERS]-(b:Volunteer {id:{idb}}) return c', {ida: ida, idb: idb});
+    let ref = await cqa('match (a:Volunteer {id:{ida}})-[:MEMBERS]-(:Team)-[:MEMBERS]-(b:Volunteer {id:{idb}}) return b', {ida: ida, idb: idb});
     if (ref.data.length > 0) return true;
   } catch (e) {
     console.warn(e);
@@ -477,14 +476,18 @@ async function teamMembersRemove(req, res) {
   return _403(res, "Permission denied.");
 }
 
-function teamMembersPromote(req, res) {
+async function teamMembersPromote(req, res) {
   if (!valid(req.body.teamId) || valid(!req.body.cId)) return _400(res, "Invalid value to parameter 'teamId' or 'cId'.");
-  return cqdo(req, res, 'match (a:Volunteer {id:{cId}})-[r:MEMBERS]-(b:Team {id:{teamId}}) set r.leader=true', req.body, true);
+  if (req.user.admin || (await volunteerIsLeader(req.user.id, req.body.teamId) && await onMyTurf(req.user.id, req.body.cId)))
+    return cqdo(req, res, 'match (a:Volunteer {id:{cId}})-[r:MEMBERS]-(b:Team {id:{teamId}}) set r.leader=true', req.body);
+  return _403(res, "Permission denied.");
 }
 
-function teamMembersDemote(req, res) {
+async function teamMembersDemote(req, res) {
   if (!valid(req.body.teamId) || valid(!req.body.cId)) return _400(res, "Invalid value to parameter 'teamId' or 'cId'.");
-  return cqdo(req, res, 'match (a:Volunteer {id:{cId}})-[r:MEMBERS]-(b:Team {id:{teamId}}) set r.leader=null', req.body, true);
+  if (req.user.admin || (await volunteerIsLeader(req.user.id, req.body.teamId) && await onMyTurf(req.user.id, req.body.cId)))
+    return cqdo(req, res, 'match (a:Volunteer {id:{cId}})-[r:MEMBERS]-(b:Team {id:{teamId}}) set r.leader=null', req.body);
+  return _403(res, "Permission denied.");
 }
 
 function teamTurfList(req, res) {
