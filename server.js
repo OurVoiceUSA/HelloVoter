@@ -385,6 +385,9 @@ async function volunteerUpdate(req, res) {
 async function volunteerLock(req, res) {
   if (req.body.id === req.user.id) return _403(res, "You can't lock yourself.");
 
+  if (!req.user.admin && !await onMyTurf(req.user.id, req.body.id))
+    return _403("Permission denied.");
+
   try {
     let ref = await cqa("match (a:Volunteer {id:{id}}) return a", req.body);
     if (ref.data[0] && ref.data[0].admin === true)
@@ -393,12 +396,14 @@ async function volunteerLock(req, res) {
     return _500(res, e);
   }
 
-  return cqdo(req, res, 'match (a:Volunteer {id:{id}}) set a.locked=true', req.body, true);
+  return cqdo(req, res, 'match (a:Volunteer {id:{id}}) set a.locked=true', req.body);
 }
 
-function volunteerUnlock(req, res) {
+async function volunteerUnlock(req, res) {
   if (!valid(req.body.id)) return _400(res, "Invalid value to parameter 'id'.");
-  return cqdo(req, res, 'match (a:Volunteer {id:{id}}) remove a.locked', req.body, true);
+  if (req.user.admin || await onMyTurf(req.user.id, req.body.id))
+    return cqdo(req, res, 'match (a:Volunteer {id:{id}}) remove a.locked', req.body);
+  return _403("Permission denied.");
 }
 
 // teams
