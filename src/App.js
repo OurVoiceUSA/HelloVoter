@@ -20,6 +20,7 @@ import Settings from './components/Settings';
 import Jwt from './components/Jwt';
 import About from './components/About';
 
+import 'typeface-roboto';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -343,11 +344,6 @@ class App extends Component {
               >
                 <div style={{margin: 10}}>Welcome, {this.getName()}!<br />Server: {this.state.server.hostname}</div>
               </Typography>
-              <IconButton color="inherit">
-                <Badge badgeContent={4} color="secondary">
-                  <NotificationsIcon />
-                </Badge>
-              </IconButton>
             </Toolbar>
           </AppBar>
           <Drawer

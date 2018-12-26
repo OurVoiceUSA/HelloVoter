@@ -32,6 +32,7 @@
     "react-tooltip": "^3.9.0",
     "recharts": "^1.4.2",
     "tcomb-form": "^0.9.21",
+    "typeface-roboto": "0.0.54",
     "uuid": "^3.3.2"
   },
   "scripts": {
