@@ -364,6 +364,7 @@ export class CardVolunteer extends Component {
       await _fetch(this.state.server, '/volunteer/v1/volunteer/'+term, 'POST', {id: volunteer.id});
     } catch (e) {
       notify_error(e, "Unable to "+term+" volunteer.");
+      return;
     }
     this._loadData();
     notify_success("Volunteer hass been "+term+"ed.");
