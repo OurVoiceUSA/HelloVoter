@@ -367,10 +367,15 @@ async function volunteerGet(req, res) {
 }
 
 async function volunteerUpdate(req, res) {
-  if (!req.user.admin && req.body.id !== req.user.id) return _403(res, "Permission denied.");
   // TODO: need to validate input, and only do updates based on what was posted
   if (!valid(req.body.id)) return _400(res, "Invalid value to parameter 'id'.");
 
+  if (!req.user.admin && req.body.id !== req.user.id && !await onMyTurf(req.user.id, req.body.id)) return _403(res, "Permission denied.");
+
+  // can't update your location if your turf is set to auto
+  if (req.body.id === req.user.id && req.user.autoturf) return _403(res, "Permission denied.");
+
+  // TODO: parameterize this
   req.body.wkt = "POINT("+req.body.lng+" "+req.body.lat+")";
 
   try {
@@ -379,7 +384,7 @@ async function volunteerUpdate(req, res) {
     return _500(res, e);
   }
 
-  return cqdo(req, res, 'match (a:Volunteer {id:{id}}) where not (a)<-[:RTREE_REFERENCE]-() with collect(a) as nodes call spatial.addNodes("volunteer", nodes) yield count return count', req.body, true);
+  return cqdo(req, res, 'match (a:Volunteer {id:{id}}) where not (a)<-[:RTREE_REFERENCE]-() with collect(a) as nodes call spatial.addNodes("volunteer", nodes) yield count return count', req.body);
 }
 
 async function volunteerLock(req, res) {
