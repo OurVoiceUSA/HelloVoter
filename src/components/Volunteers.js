@@ -7,6 +7,14 @@ import ReactTooltip from 'react-tooltip';
 import Select from 'react-select';
 import Img from 'react-image';
 
+import Modal from '@material-ui/core/Modal';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
+import Avatar from '@material-ui/core/Avatar';
+import Typography from '@material-ui/core/Typography';
+
 import {
   notify_error, notify_success, _fetch, _searchStringify, _handleSelectChange,
   _loadVolunteers, _loadVolunteer, _loadTeams, _loadForms, _loadTurfs,
@@ -35,6 +43,7 @@ export default class App extends Component {
 
     this.state = {
       loading: true,
+      thisVolunteer: {},
       volunteers: [],
       search: "",
       perPage: perPage,
@@ -109,6 +118,21 @@ export default class App extends Component {
             <Route path="/volunteers/view/:id" render={(props) => (
               <CardVolunteer key={props.match.params.id} id={props.match.params.id} edit={true} refer={this} />
             )} />
+            <Modal
+              aria-labelledby="simple-modal-title"
+              aria-describedby="simple-modal-description"
+              open={this.state.thisVolunteer.id}
+              onClose={() => this.setState({thisVolunteer: {}})}
+            >
+              <div style={{
+                position: 'absolute',
+                top: 100, left: 200, right: 200,
+                backgroundColor: 'white',
+                padding: 40,
+              }}>
+                <CardVolunteer key={this.state.thisVolunteer.id} id={this.state.thisVolunteer.id} edit={true} refer={this} />
+              </div>
+            </Modal>
           </div>
         </Router>
       </RootLoader>
@@ -117,6 +141,7 @@ export default class App extends Component {
 }
 
 const ListVolunteers = (props) => {
+  const { classes } = props;
   const perPage = props.refer.state.perPage;
   let paginate = (<div></div>);
   let list = [];
@@ -124,7 +149,9 @@ const ListVolunteers = (props) => {
   props.volunteers.forEach((c, idx) => {
     let tp = Math.floor(idx/perPage)+1;
     if (tp !== props.refer.state.pageNum) return;
-    list.push(<CardVolunteer key={c.id} volunteer={c} refer={props.refer} />);
+    list.push(
+      <CardVolunteer key={c.id} volunteer={c} refer={props.refer} />
+    );
   });
 
   paginate = (
@@ -162,7 +189,9 @@ const ListVolunteers = (props) => {
     <div>
       <h3>{props.type}Volunteers ({props.volunteers.length})</h3>
       {paginate}
-      {list}
+      <List component="nav">
+        {list}
+      </List>
       {paginate}
      </div>
    );
@@ -378,22 +407,34 @@ export class CardVolunteer extends Component {
     }
 
     const timeAgo = new TimeAgo('en-US');
-    return (
+
+    if (this.props.edit) return (
       <div>
-        <div style={{display: 'flex', padding: '10px'}}>
-          <div style={{padding: '5px 10px'}}>
-            <Img width={50} src={this.state.volunteer.avatar} loader={<Loader width={50} />} unloader={<Icon style={{width: 50, height: 50, color: "gray"}} icon={faUser} />} />
-          </div>
-          <div style={{flex: 1, overflow: 'auto'}}>
-            Name: {volunteer.name} {(this.props.edit?'':(<Link to={'/volunteers/view/'+volunteer.id}>view profile</Link>))}
-            <VolunteerBadges volunteer={volunteer} />
-            <br />
-            Location: {(volunteer.homeaddress?extract_addr(volunteer.homeaddress):'N/A')} <br />
-            Last Login: {timeAgo.format(new Date(volunteer.last_seen-30000))}
-          </div>
-        </div>
-        {this.props.edit?<CardVolunteerFull volunteer={volunteer} refer={this} />:''}
+        <ListItem alignItems="flex-start" style={{width: 350}}>
+          <ListItemAvatar>
+            <Avatar alt={volunteer.name} src={volunteer.avatar} />
+          </ListItemAvatar>
+          <ListItemText
+            primary={volunteer.name}
+            secondary={(volunteer.homeaddress?extract_addr(volunteer.homeaddress):'N/A')}
+          />
+          <VolunteerBadges volunteer={volunteer} />
+        </ListItem>
+        <CardVolunteerFull volunteer={volunteer} refer={this} />
       </div>
+    );
+
+    return (
+      <ListItem button style={{width: 350}} alignItems="flex-start" onClick={() => this.props.refer.setState({thisVolunteer: volunteer})}>
+        <ListItemAvatar>
+          <Avatar alt={volunteer.name} src={volunteer.avatar} />
+        </ListItemAvatar>
+        <ListItemText
+          primary={volunteer.name}
+          secondary={(volunteer.homeaddress?extract_addr(volunteer.homeaddress):'N/A')}
+        />
+        <VolunteerBadges volunteer={volunteer} />
+      </ListItem>
     );
   }
 }
