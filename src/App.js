@@ -38,6 +38,7 @@ import NotificationsIcon from '@material-ui/icons/Notifications';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
+import Avatar from '@material-ui/core/Avatar';
 
 import DashboardIcon from '@material-ui/icons/Dashboard';
 import PersonIcon from '@material-ui/icons/Person';
@@ -84,6 +85,9 @@ const styles = theme => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
+  },
+  avatar: {
+    margin: 10,
   },
   menuButton: {
     marginLeft: 12,
@@ -197,16 +201,14 @@ class App extends Component {
     this.setState({connectForm})
   }
 
-  getName() {
-    let name;
-
+  getUserProp(prop) {
+    let item;
     try {
-      name = jwt_decode(this.state.server.jwt).name;
+      item = jwt_decode(this.state.server.jwt)[prop];
     } catch (e) {
       notify_error(e, "Holy crap this error should never happen!! Better dust off that résumé...");
     }
-
-    return name;
+    return item;
   }
 
   _logout() {
@@ -342,8 +344,10 @@ class App extends Component {
                 noWrap
                 className={classes.title}
               >
-                <div style={{margin: 10}}>Welcome, {this.getName()}!<br />Server: {this.state.server.hostname}</div>
+                <div style={{margin: 10}}>HelloVoter @ {this.state.server.hostname}</div>
               </Typography>
+              <Avatar alt="Remy Sharp" src={this.getUserProp('avatar')} className={classes.avatar} />
+              {this.getUserProp('name')}
             </Toolbar>
           </AppBar>
           <Drawer
