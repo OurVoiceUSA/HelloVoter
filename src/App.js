@@ -20,11 +20,117 @@ import Settings from './components/Settings';
 import Jwt from './components/Jwt';
 import About from './components/About';
 
-import { _fetch, notify_error, Icon } from './common.js';
+import classNames from 'classnames';
+import { withStyles } from '@material-ui/core/styles';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import Drawer from '@material-ui/core/Drawer';
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
+import List from '@material-ui/core/List';
+import Typography from '@material-ui/core/Typography';
+import Divider from '@material-ui/core/Divider';
+import IconButton from '@material-ui/core/IconButton';
+import Badge from '@material-ui/core/Badge';
+import MenuIcon from '@material-ui/icons/Menu';
+import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
+import NotificationsIcon from '@material-ui/icons/Notifications';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
 
-import { faColumns, faUser, faUsers, faMap, faGlobe, faClipboard, faChartPie,
-         faFileUpload, faSignOutAlt, faAward, faCog } from '@fortawesome/free-solid-svg-icons';
-import { faGithub } from '@fortawesome/free-brands-svg-icons';
+import DashboardIcon from '@material-ui/icons/Dashboard';
+import PersonIcon from '@material-ui/icons/Person';
+import PeopleIcon from '@material-ui/icons/People';
+import MapIcon from '@material-ui/icons/Map';
+import AssignmentIcon from '@material-ui/icons/Assignment';
+import NavigationIcon from '@material-ui/icons/Navigation';
+import PresentToAllIcon from '@material-ui/icons/PresentToAll';
+import BarChartIcon from '@material-ui/icons/BarChart';
+import SettingsIcon from '@material-ui/icons/Settings';
+import IndeterminateCheckBoxIcon from '@material-ui/icons/IndeterminateCheckBox';
+import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
+import HelpIcon from '@material-ui/icons/Help';
+
+import { _fetch, notify_error } from './common.js';
+
+const drawerWidth = 175;
+
+const styles = theme => ({
+  root: {
+    display: 'flex',
+  },
+  toolbar: {
+    paddingRight: 24, // keep right padding when drawer closed
+  },
+  toolbarIcon: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    padding: '0 8px',
+    ...theme.mixins.toolbar,
+  },
+  appBar: {
+    zIndex: theme.zIndex.drawer + 1,
+    transition: theme.transitions.create(['width', 'margin'], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
+  },
+  appBarShift: {
+    marginLeft: drawerWidth,
+    width: `calc(100% - ${drawerWidth}px)`,
+    transition: theme.transitions.create(['width', 'margin'], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+  },
+  menuButton: {
+    marginLeft: 12,
+    marginRight: 36,
+  },
+  menuButtonHidden: {
+    display: 'none',
+  },
+  title: {
+    flexGrow: 1,
+  },
+  drawerPaper: {
+    position: 'relative',
+    whiteSpace: 'nowrap',
+    width: drawerWidth,
+    transition: theme.transitions.create('width', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+  },
+  drawerPaperClose: {
+    overflowX: 'hidden',
+    transition: theme.transitions.create('width', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
+    width: theme.spacing.unit * 7,
+    [theme.breakpoints.up('sm')]: {
+      width: theme.spacing.unit * 9,
+    },
+  },
+  appBarSpacer: theme.mixins.toolbar,
+  content: {
+    flexGrow: 1,
+    padding: theme.spacing.unit * 3,
+    height: '100vh',
+    overflow: 'auto',
+  },
+  chartContainer: {
+    marginLeft: -22,
+  },
+  tableContainer: {
+    height: 320,
+  },
+  h5: {
+    marginBottom: theme.spacing.unit * 2,
+  },
+});
 
 class App extends Component {
 
@@ -34,6 +140,7 @@ class App extends Component {
     const v = queryString.parse(window.location.search);
 
     this.state = {
+      open: true,
       server: {
         hostname: localStorage.getItem('server'),
         jwt: localStorage.getItem('jwt'),
@@ -173,7 +280,16 @@ class App extends Component {
 
   }
 
+  handleDrawerOpen = () => {
+    this.setState({ open: true });
+  };
+
+  handleDrawerClose = () => {
+    this.setState({ open: false });
+  };
+
   render() {
+    const { classes } = this.props;
     let { server } = this.state;
 
     if (!server.hostname) {
@@ -198,66 +314,182 @@ class App extends Component {
     }
 
     return (
-    <Router>
-      <Root>
-        <ReactTooltip />
-        <Sidebar>
-          <div style={{margin: 10}}>Welcome, {this.getName()}!<br />Server: {this.state.server.hostname}</div>
-          <hr />
-          <SidebarItem><Icon icon={faColumns} data-tip="Dashboard" /> <Link to={'/'}>Dashboard</Link></SidebarItem>
-          <SidebarItem><Icon icon={faUser} data-tip="Volunteers" /> <Link to={'/volunteers/'}>Volunteers</Link></SidebarItem>
-          <SidebarItem><Icon icon={faUsers} data-tip="Teams" /> <Link to={'/teams/'}>Teams</Link></SidebarItem>
-          <SidebarItem><Icon icon={faMap} data-tip="Turf" /> <Link to={'/turf/'}>Turf</Link></SidebarItem>
-          <SidebarItem><Icon icon={faClipboard} data-tip="Forms" /> <Link to={'/forms/'}>Forms</Link></SidebarItem>
-          <SidebarItem><Icon icon={faGlobe} data-tip="Map" /> <Link to={'/map/'}>Map</Link></SidebarItem>
-          <SidebarItem><Icon icon={faFileUpload} data-tip="Import Data" /> <Link to={'/import/'}>Import Data</Link></SidebarItem>
-          <SidebarItem><Icon icon={faChartPie} data-tip="Analytics" /> <Link to={'/analytics/'}>Analytics</Link></SidebarItem>
-          <SidebarItem><Icon icon={faCog} data-tip="Settings" /> <Link to={'/settings/'}>Settings</Link></SidebarItem>
-          <SidebarItem><Icon icon={faSignOutAlt} data-tip="Logout" /> <button onClick={() => this._logout()}>Logout</button></SidebarItem>
-          <hr />
-          <SidebarItem><Icon icon={faAward} data-tip="About" /> <Link to={'/about/'}>About</Link></SidebarItem>
-          <SidebarItem><Icon icon={faGithub} data-tip="Help" /> <a target="_blank" rel="noopener noreferrer" href="https://github.com/OurVoiceUSA/HelloVoter/tree/master/docs/">Help</a></SidebarItem>
-        </Sidebar>
-        <Main>
-          <NotificationContainer/>
-          <Switch>
-            <Route exact={true} path="/" render={() => <Dashboard server={server} />} />
-            <Route path="/volunteers/" render={() => <Volunteers server={server} />} />
-            <Route path="/teams/" render={() => <Teams server={server} />} />
-            <Route path="/turf/" render={() => <Turf server={server} />} />
-            <Route path="/forms/" render={() => <Forms server={server} />} />
-            <Route path="/map/" render={() => <Map server={server} apiKey={this.state.google_maps_key} />} />
-            <Route path="/import/" render={() => <ImportData server={server} />} />
-            <Route path="/analytics/" render={() => <Analytics server={server} />} />
-            <Route path="/settings/" render={() => <Settings server={server} />} />
-            <Route path="/jwt/" render={(props) => <Jwt {...props} refer={this} />} />
-            <Route path="/about/" render={() => <About server={server} />} />
-            <Route component={NoMatch} />
-          </Switch>
-        </Main>
-      </Root>
-    </Router>
+      <Router>
+        <div className={classes.root}>
+          <ReactTooltip />
+          <CssBaseline />
+          <AppBar
+            position="absolute"
+            className={classNames(classes.appBar, this.state.open && classes.appBarShift)}
+          >
+            <Toolbar disableGutters={!this.state.open} className={classes.toolbar}>
+              <IconButton
+                color="inherit"
+                aria-label="Open drawer"
+                onClick={this.handleDrawerOpen}
+                className={classNames(
+                  classes.menuButton,
+                  this.state.open && classes.menuButtonHidden,
+                )}
+              >
+                <MenuIcon />
+              </IconButton>
+              <Typography
+                component="h1"
+                variant="h6"
+                color="inherit"
+                noWrap
+                className={classes.title}
+              >
+                <div style={{margin: 10}}>Welcome, {this.getName()}!<br />Server: {this.state.server.hostname}</div>
+              </Typography>
+              <IconButton color="inherit">
+                <Badge badgeContent={4} color="secondary">
+                  <NotificationsIcon />
+                </Badge>
+              </IconButton>
+            </Toolbar>
+          </AppBar>
+          <Drawer
+            variant="permanent"
+            classes={{
+              paper: classNames(classes.drawerPaper, !this.state.open && classes.drawerPaperClose),
+            }}
+            open={this.state.open}
+          >
+            <div className={classes.toolbarIcon}>
+              <IconButton onClick={this.handleDrawerClose}>
+                <ChevronLeftIcon />
+              </IconButton>
+            </div>
+            <Divider />
+            <List>
+                <Link to={'/'}>
+                  <ListItem button>
+                      <ListItemIcon><DashboardIcon /></ListItemIcon>
+                      <ListItemText primary="Dashboard" />
+                  </ListItem>
+                </Link>
+                <Link to={'/volunteers/'}>
+                  <ListItem button>
+                    <ListItemIcon>
+                      <PersonIcon />
+                    </ListItemIcon>
+                    <ListItemText primary="Volunteers" />
+                  </ListItem>
+                </Link>
+                <Link to={'/teams/'}>
+                  <ListItem button>
+                    <ListItemIcon>
+                      <PeopleIcon />
+                    </ListItemIcon>
+                    <ListItemText primary="Teams" />
+                  </ListItem>
+                </Link>
+                <Link to={'/turf/'}>
+                  <ListItem button>
+                    <ListItemIcon>
+                      <MapIcon />
+                    </ListItemIcon>
+                    <ListItemText primary="Turf" />
+                  </ListItem>
+                </Link>
+                <Link to={'/forms/'}>
+                  <ListItem button>
+                    <ListItemIcon>
+                      <AssignmentIcon />
+                    </ListItemIcon>
+                    <ListItemText primary="Forms" />
+                  </ListItem>
+                </Link>
+                <Link to={'/map/'}>
+                  <ListItem button>
+                    <ListItemIcon>
+                      <NavigationIcon />
+                    </ListItemIcon>
+                    <ListItemText primary="Map" />
+                  </ListItem>
+                </Link>
+                <Link to={'/import/'}>
+                  <ListItem button>
+                    <ListItemIcon>
+                      <PresentToAllIcon />
+                    </ListItemIcon>
+                    <ListItemText primary="Import Data" />
+                  </ListItem>
+                </Link>
+                <Link to={'/analytics/'}>
+                  <ListItem button>
+                    <ListItemIcon>
+                      <BarChartIcon />
+                    </ListItemIcon>
+                    <ListItemText primary="Analytics" />
+                  </ListItem>
+                </Link>
+                <Link to={'/settings/'}>
+                  <ListItem button>
+                    <ListItemIcon>
+                      <SettingsIcon />
+                    </ListItemIcon>
+                    <ListItemText primary="Settings" />
+                  </ListItem>
+                </Link>
+              </List>
+              <Divider />
+              <List>
+                <Link to={'/logout/'}>
+                  <ListItem button>
+                    <ListItemIcon>
+                      <IndeterminateCheckBoxIcon />
+                    </ListItemIcon>
+                    <ListItemText primary="Logout" />
+                  </ListItem>
+                </Link>
+            </List>
+            <Divider />
+            <List>
+              <Link to={'/about/'}>
+                <ListItem button>
+                  <ListItemIcon>
+                    <AccountBalanceIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="About" />
+                </ListItem>
+              </Link>
+              <a target="_blank" rel="noopener noreferrer" href="https://github.com/OurVoiceUSA/HelloVoter/tree/mast
+  er/docs/">
+                <ListItem button>
+                  <ListItemIcon>
+                    <HelpIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Help" />
+                </ListItem>
+              </a>
+            </List>
+          </Drawer>
+          <main className={classes.content}>
+            <div className={classes.appBarSpacer} />
+            <NotificationContainer/>
+            <Switch>
+              <Route exact={true} path="/" render={() => <Dashboard server={server} />} />
+              <Route path="/volunteers/" render={() => <Volunteers server={server} />} />
+              <Route path="/teams/" render={() => <Teams server={server} />} />
+              <Route path="/turf/" render={() => <Turf server={server} />} />
+              <Route path="/forms/" render={() => <Forms server={server} />} />
+              <Route path="/map/" render={() => <Map server={server} apiKey={this.state.google_maps_key} />} />
+              <Route path="/import/" render={() => <ImportData server={server} />} />
+              <Route path="/analytics/" render={() => <Analytics server={server} />} />
+              <Route path="/settings/" render={() => <Settings server={server} />} />
+              <Route path="/jwt/" render={(props) => <Jwt {...props} refer={this} />} />
+              <Route path="/about/" render={() => <About server={server} />} />
+              <Route component={NoMatch} />
+            </Switch>
+          </main>
+        </div>
+      </Router>
     );
   }
 }
-
-const Root = (props) => (
-  <div style={{display: 'flex'}} {...props}/>
-);
-
-const Sidebar = (props) => (
-  <div style={{width: '22vw', height: '100vh', overlow: 'auto', background: '#eee'}} {...props}/>
-);
-
-const SidebarItem = (props) => (
-  <div style={{whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', padding: '5px 10px'}} {...props}/>
-);
-
-const Main = (props) => (
-  <div style={{flex: 1, height: '100vh', overflow: 'auto'}}>
-    <div style={{padding: '20px'}} {...props}/>
-  </div>
-);
 
 const NoMatch = ({ location }) => (
   <div>
@@ -273,4 +505,4 @@ const NoMatch = ({ location }) => (
   </div>
 );
 
-export default App;
+export default withStyles(styles)(App);
