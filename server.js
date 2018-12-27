@@ -291,7 +291,7 @@ async function dashboard(req, res) {
       turfs: (await cqa('match (a:Turf) return count(a)')).data[0],
       questions: (await cqa('match (a:Question) return count(a)')).data[0],
       forms: (await cqa('match (a:Form) return count(a)')).data[0],
-      addresses: (await cqa('match (a:Address) where not a.multi_unit = true return count(a)')).data[0]+(await cqa('match (a:Unit) return count(a)')).data[0],
+      addresses: (await cqa('match (a:Address) where a.multi_unit is null or not a.multi_unit = true return count(a)')).data[0]+(await cqa('match (a:Unit) return count(a)')).data[0],
       version: version,
     });
     else {
