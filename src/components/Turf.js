@@ -15,8 +15,9 @@ import { CardVolunteer } from './Volunteers.js';
 import { CardTeam } from './Teams.js';
 
 import {
-  _fetch, notify_error, notify_success, _loadTurfs, _loadTurf, _loadTeams, _loadVolunteers, _handleSelectChange, _searchStringify,
-  PlacesAutocomplete, RootLoader, Loader, Icon,
+  _fetch, notify_error, notify_success, _handleSelectChange, _searchStringify,
+  _loadTurfs, _loadTurf, _loadTeams, _loadVolunteers,
+  PlacesAutocomplete, RootLoader, Loader, Icon, DialogSaving,
 } from '../common.js';
 
 export default class App extends Component {
@@ -50,7 +51,6 @@ export default class App extends Component {
 
     return {
       loading: true,
-      creating: false,
       selectedDrawOption: null,
       selectedStateOption: null,
       selectedTypeOption: null,
@@ -84,7 +84,7 @@ export default class App extends Component {
   }
 
   submitAddress = async (address) => {
-    this.setState({address})
+    this.setState({address, saving: true})
     try {
       let res = await geocodeByAddress(address);
       let pos = await getLatLng(res[0]);
@@ -92,6 +92,7 @@ export default class App extends Component {
     } catch (e) {
       notify_error(e, "Unable to search or geocode address.");
     }
+    this.setState({saving: false});
   }
 
   onChangeTurf(addTurfForm) {
@@ -124,9 +125,10 @@ export default class App extends Component {
   }
 
   handleImportFiles = (files: FileList) => {
+    this.setState({saving: true});
     let reader = new FileReader();
     reader.onload = (event) => {
-      this.setState({importFileData: event.target.result});
+      this.setState({importFileData: event.target.result, saving: false});
     };
     reader.readAsText(files[0]);
   }
@@ -144,6 +146,7 @@ export default class App extends Component {
   }
 
   _showSubmitButton() {
+    if (this.state.saving) return false;
     if (!this.state.selectedDrawOption) return false;
     if (this.state.selectedTypeOption && this.state.selectedTypeOption.value === "state") return true;
     if (this._showDistrictOption() && this.state.selectedDistrictOption) return true;
@@ -153,12 +156,14 @@ export default class App extends Component {
   }
 
   _deleteTurf = async (id) => {
+    this.setState({saving: true});
     try {
       await _fetch(this.props.server, '/volunteer/v1/turf/delete', 'POST', {turfId: id});
     } catch (e) {
       notify_error(e, "Unable to delete turf.");
       return;
     }
+    this.setState({saving: false});
     this._loadData();
     window.location.href = "/HelloVoter/#/turf/";
     notify_success("Turf has been deleted.");
@@ -168,7 +173,7 @@ export default class App extends Component {
     let json = this.addTurfForm.getValue();
     if (json === null) return;
 
-    this.setState({creating: true});
+    this.setState({saving: true});
 
     let objs = [];
 
@@ -177,8 +182,7 @@ export default class App extends Component {
         objs.push(JSON.parse(this.state.importFileData));
       } catch (e) {
         notify_error(e, "Unable to parse import data file.");
-        this.setState({creating: false});
-        return;
+        return this.setState({saving: false});
       }
     } else if (this.state.selectedDrawOption.value === "radius") {
       objs.push(circleToPolygon([this.state.addressCoords.lng,this.state.addressCoords.lat],1000));
@@ -200,8 +204,7 @@ export default class App extends Component {
         }
       } catch (e) {
         notify_error(e, "Unable to fetch district info data.");
-        this.setState({creating: false});
-        return;
+        return this.setState({saving: false});
       }
     }
 
@@ -226,14 +229,13 @@ export default class App extends Component {
       }
     } catch (e) {
       notify_error(e, "Unable to create turf.");
-      this.setState({creating: false});
-      return;
+      return this.setState({saving: false});
     }
+    this.setState({saving: false});
 
     window.location.href = "/HelloVoter/#/turf/";
     this._loadData();
     notify_success("Turf has been created.");
-    this.setState({creating: false});
   }
 
   urlFromDist(state, type, value) {
@@ -374,7 +376,9 @@ export default class App extends Component {
 
               {this._showSubmitButton()?
               <div><br />
-                <SubmitButton refer={this} />
+                <button onClick={() => this._createTurf()}>
+                  Submit
+                </button>
               </div>
               :''}
             </div>
@@ -388,6 +392,7 @@ export default class App extends Component {
               <button onClick={() => this._deleteTurf(props.match.params.id)}>Delete Turf</button>
             </div>
           )} />
+          <DialogSaving flag={this.state.saving} />
         </div>
       </Router>
     );
@@ -445,15 +450,6 @@ const ListTurf = (props) => {
       {paginate}
      </div>
    );
-};
-
-const SubmitButton = (props) => {
-  if (props.refer.state.creating) return (<Loader />);
-  return (
-    <button onClick={() => props.refer._createTurf()}>
-      Submit
-    </button>
-  );
 };
 
 const TurfOptions = (props) => {
@@ -561,6 +557,7 @@ export class CardTurf extends Component {
   }
 
   handleTeamsChange = async (selectedTeamsOption) => {
+    this.props.refer.setState({saving: true});
     try {
       let obj = _handleSelectChange(this.state.selectedTeamsOption, selectedTeamsOption);
 
@@ -577,9 +574,11 @@ export class CardTurf extends Component {
     } catch (e) {
       notify_error(e, "Unable to add/remove teams.");
     }
+    this.props.refer.setState({saving: false});
   }
 
   handleMembersChange = async (selectedMembersOption) => {
+    this.props.refer.setState({saving: true});
     try {
       let obj = _handleSelectChange(this.state.selectedMembersOption, selectedMembersOption);
 
@@ -596,6 +595,7 @@ export class CardTurf extends Component {
     } catch (e) {
       notify_error(e, "Unable to add/remove teams.");
     }
+    this.props.refer.setState({saving: false});
   }
 
   _loadData = async () => {

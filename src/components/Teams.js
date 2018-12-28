@@ -8,7 +8,7 @@ import t from 'tcomb-form';
 import {
   notify_error, notify_success, _fetch,  _handleSelectChange, _searchStringify,
   _loadVolunteers, _loadTeams, _loadTeam, _loadForms, _loadTurfs,
-  RootLoader, Loader, Icon,
+  RootLoader, Loader, Icon, DialogSaving,
 } from '../common.js';
 
 import { CardTurf } from './Turf.js';
@@ -156,6 +156,7 @@ export default class App extends Component {
               <button onClick={() => this._deleteTeam(props.match.params.id)}>Delete Team</button>
             </div>
           )} />
+          <DialogSaving flag={this.state.saving} />
         </div>
       </Router>
     );
@@ -235,8 +236,8 @@ export class CardTeam extends Component {
   }
 
   handleMembersChange = async (selectedMembersOption) => {
+    this.props.refer.setState({saving: true});
     try {
-
       let obj = _handleSelectChange(this.state.selectedMembersOption, selectedMembersOption);
 
       for (let i in obj.add) {
@@ -254,9 +255,11 @@ export class CardTeam extends Component {
     } catch (e) {
       notify_error(e, "Unable to add/remove team members.");
     }
+    this.props.refer.setState({saving: false});
   }
 
   handleFormsChange = async (selectedFormsOption) => {
+    this.props.refer.setState({saving: true});
     try {
       let obj = _handleSelectChange(this.state.selectedFormsOption, selectedFormsOption);
 
@@ -275,9 +278,11 @@ export class CardTeam extends Component {
     } catch (e) {
       notify_error(e, "Unable to add/remove form.");
     }
+    this.props.refer.setState({saving: false});
   }
 
   handleTurfChange = async (selectedTurfOption) => {
+    this.props.refer.setState({saving: true});
     try {
       let obj = _handleSelectChange(this.state.selectedTurfOption, selectedTurfOption);
 
@@ -296,6 +301,7 @@ export class CardTeam extends Component {
     } catch (e) {
       notify_error(e, "Unable to add/remove turf.");
     }
+    this.props.refer.setState({saving: false});
   }
 
   _loadData = async () => {
@@ -375,7 +381,6 @@ export const CardTeamFull = (props) => (
   <div>
     <br />
     <div>
-
       Members of this team:
       <Select
         value={props.refer.state.selectedMembersOption}

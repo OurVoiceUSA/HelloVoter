@@ -16,7 +16,7 @@ import Avatar from '@material-ui/core/Avatar';
 import {
   notify_error, notify_success, _fetch, _searchStringify, _handleSelectChange,
   _loadVolunteers, _loadVolunteer, _loadTeams, _loadForms, _loadTurfs,
-  RootLoader, Loader, Icon, PlacesAutocomplete,
+  RootLoader, Loader, Icon, PlacesAutocomplete, DialogSaving,
 } from '../common.js';
 
 import { CardTurf } from './Turf.js';
@@ -131,6 +131,7 @@ export default class App extends Component {
                 <CardVolunteer key={this.state.thisVolunteer.id} id={this.state.thisVolunteer.id} edit={true} refer={this} />
               </div>
             </Modal>
+            <DialogSaving flag={this.state.saving} />
           </div>
         </Router>
       </RootLoader>
@@ -220,6 +221,7 @@ export class CardVolunteer extends Component {
   }
 
   handleTeamsChange = async (selectedTeamsOption) => {
+    this.props.refer.setState({saving: true});
     try {
       let obj = _handleSelectChange(this.state.selectedTeamsOption, selectedTeamsOption);
 
@@ -238,9 +240,11 @@ export class CardVolunteer extends Component {
     } catch (e) {
       notify_error(e, "Unable to add/remove teams.");
     }
+    this.props.refer.setState({saving: false});
   }
 
   handleLeaderChange = async (selectedLeaderOption) => {
+    this.props.refer.setState({saving: true});
     try {
       let obj = _handleSelectChange(this.state.selectedLeaderOption, selectedLeaderOption);
 
@@ -259,9 +263,11 @@ export class CardVolunteer extends Component {
     } catch (e) {
       notify_error(e, "Unable to edit team leadership.");
     }
+    this.props.refer.setState({saving: false});
   }
 
   handleFormsChange = async (selectedFormsOption) => {
+    this.props.refer.setState({saving: true});
     try {
       if (this.state.selectedFormsOption.value) {
         await _fetch(this.state.server, '/volunteer/v1/form/assigned/volunteer/remove', 'POST', {
@@ -282,9 +288,11 @@ export class CardVolunteer extends Component {
     } catch (e) {
       notify_error(e, "Unable to add/remove form.");
     }
+    this.props.refer.setState({saving: false});
   }
 
   handleTurfChange = async (selectedTurfOption) => {
+    this.props.refer.setState({saving: true});
     try {
       if (this.state.selectedTurfOption.value) {
         await _fetch(this.state.server, '/volunteer/v1/turf/assigned/volunteer/remove', 'POST', {
@@ -305,6 +313,7 @@ export class CardVolunteer extends Component {
     } catch (e) {
       notify_error(e, "Unable to add/remove turf.");
     }
+    this.props.refer.setState({saving: false});
   }
 
   _loadData = async () => {
@@ -387,14 +396,16 @@ export class CardVolunteer extends Component {
 
   _lockVolunteer = async (volunteer, flag) => {
     let term = (flag?'lock':'unlock');
+    this.props.refer.setState({saving: true});
     try {
       await _fetch(this.state.server, '/volunteer/v1/volunteer/'+term, 'POST', {id: volunteer.id});
+      notify_success("Volunteer hass been "+term+"ed.");
     } catch (e) {
       notify_error(e, "Unable to "+term+" volunteer.");
-      return;
     }
+    this.props.refer.setState({saving: false});
+
     this._loadData();
-    notify_success("Volunteer hass been "+term+"ed.");
   }
 
   render() {

@@ -7,6 +7,9 @@ import GooglePlacesAutocomplete from 'react-places-autocomplete';
 import {NotificationManager} from 'react-notifications';
 import LoaderSpinner from 'react-loader-spinner';
 
+import Modal from '@material-ui/core/Modal';
+import CircularProgress from '@material-ui/core/CircularProgress';
+
 export function notify_success(msg) {
   NotificationManager.success(msg, 'Success', 3000);
 }
@@ -60,6 +63,30 @@ export const RootLoader = (props) => {
       <div>{props.children}</div>
     </div>
   );
+}
+
+export const DialogSaving = (props) => {
+  if (props.flag)
+    return (
+      <Modal
+        aria-labelledby="simple-modal-title"
+        aria-describedby="simple-modal-description"
+        open={true}
+      >
+        <div style={{
+          position: 'absolute',
+          top: 100, left: '40%', right: '40%',
+          backgroundColor: 'white',
+          padding: 40,
+        }}>
+        <center>
+          Saving...<br /><br />
+          <CircularProgress disableShrink />
+        </center>
+        </div>
+      </Modal>
+    );
+  return (<div />);
 }
 
 export function _searchStringify(obj) {

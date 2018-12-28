@@ -12,8 +12,9 @@ import { CardVolunteer } from './Volunteers.js';
 import { CardTeam } from './Teams.js';
 
 import {
-  _fetch, notify_error, notify_success, _loadForms, _loadForm, _loadVolunteers, _loadTeams, _handleSelectChange, _searchStringify,
-  RootLoader, Icon, Loader,
+  _fetch, notify_error, notify_success, _handleSelectChange, _searchStringify,
+  _loadForms, _loadForm, _loadVolunteers, _loadTeams,
+  RootLoader, Icon, Loader, DialogSaving,
 } from '../common.js';
 
 Modal.setAppElement(document.getElementById('root'));
@@ -227,11 +228,13 @@ export default class App extends Component {
   }
 
   _deleteForm = async (id) => {
+    this.setState({saving: true});
     try {
       await _fetch(this.props.server, '/volunteer/v1/form/delete', 'POST', {formId: id});
     } catch (e) {
       notify_error(e, "Unable to delete form.");
     }
+    this.setState({saving: false});
 
     window.location.href = "/HelloVoter/#/forms/";
     this._loadData();
@@ -241,8 +244,6 @@ export default class App extends Component {
   _createForm = async () => {
     let json = this.addFormForm.getValue();
     if (json === null) return;
-
-    this.setState({saving: true});
 
     // get rid of ending whitespace
     let formName = json.name.trim();
@@ -258,6 +259,8 @@ export default class App extends Component {
       notify_error({}, "Form name cannot be longer than 255 characters.");
       return;
     }
+
+    this.setState({saving: true});
 
     // make sure this name doesn't exist
     try {
@@ -318,13 +321,9 @@ export default class App extends Component {
                 );
               })}
 
-              {this.state.saving?
-              <Loader />
-              :
               <button style={{margin: 25}} onClick={() => this._createForm()}>
                 Create Form
               </button>
-              }
 
               <Modal
                 isOpen={(this.state.customForm !== null)}
@@ -355,6 +354,7 @@ export default class App extends Component {
               <button onClick={() => this._deleteForm(props.match.params.id)}>Delete Form</button>
             </div>
           )} />
+          <DialogSaving flag={this.state.saving} />
         </div>
       </Router>
     );
@@ -432,6 +432,7 @@ export class CardForm extends Component {
   }
 
   handleTeamsChange = async (selectedTeamsOption) => {
+    this.props.refer.setState({saving: true});
     try {
       let obj = _handleSelectChange(this.state.selectedTeamsOption, selectedTeamsOption);
 
@@ -448,9 +449,11 @@ export class CardForm extends Component {
     } catch (e) {
       notify_error(e, "Unable to add/remove teams.");
     }
+    this.props.refer.setState({saving: false});
   }
 
   handleMembersChange = async (selectedMembersOption) => {
+    this.props.refer.setState({saving: true});
     try {
       let obj = _handleSelectChange(this.state.selectedMembersOption, selectedMembersOption);
 
@@ -467,6 +470,7 @@ export class CardForm extends Component {
     } catch (e) {
       notify_error(e, "Unable to add/remove teams.");
     }
+    this.props.refer.setState({saving: false});
   }
 
   _loadData = async () => {
