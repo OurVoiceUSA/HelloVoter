@@ -599,23 +599,22 @@ export class CardTurf extends Component {
   }
 
   _loadData = async () => {
-    let turf = {};
+    let turf = {}, volunteers = [], members = [], teams = [], teamsSelected = [];
 
     this.setState({loading: true})
 
     try {
-       turf = await _loadTurf(this, this.props.id, true);
+      [turf, volunteers, members, teams, teamsSelected] = await Promise.all([
+        _loadTurf(this, this.props.id, true),
+        _loadVolunteers(this.props.refer),
+        _loadVolunteers(this.props.refer, 'turf', this.props.id),
+        _loadTeams(this.props.refer),
+        _loadTeams(this.props.refer, 'turf', this.props.id),
+      ]);
     } catch (e) {
-      notify_error(e, "Unable to load canavasser info.");
-      return;
+      notify_error(e, "Unable to load turf info.");
+      return this.setState({loading: false});
     }
-
-    const [volunteers, members, teams, teamsSelected] = await Promise.all([
-      _loadVolunteers(this.props.refer),
-      _loadVolunteers(this.props.refer, 'turf', this.props.id),
-      _loadTeams(this.props.refer),
-      _loadTeams(this.props.refer, 'turf', this.props.id),
-    ]);
 
     let teamOptions = [];
     let membersOption = [];

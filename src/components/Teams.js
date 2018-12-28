@@ -299,21 +299,23 @@ export class CardTeam extends Component {
   }
 
   _loadData = async () => {
+    let team = {}, volunteers = [], members = [], turfSelected = [], turfs = [], formSelected = [], forms = [];
     this.setState({loading: true})
 
-    let team = await _loadTeam(this, this.props.id);
-
-    this.setState({teams: team});
-
-    // also load volunteers & turf & forms
-    const [volunteers, members, turfSelected, turfs, formSelected, forms] = await Promise.all([
-      _loadVolunteers(this.props.refer),
-      _loadVolunteers(this.props.refer, 'team', this.props.id),
-      _loadTurfs(this.props.refer, this.props.id),
-      _loadTurfs(this.props.refer),
-      _loadForms(this.props.refer, this.props.id),
-      _loadForms(this.props.refer),
-    ]);
+    try {
+      const [team, volunteers, members, turfSelected, turfs, formSelected, forms] = await Promise.all([
+        _loadTeam(this, this.props.id),
+        _loadVolunteers(this.props.refer),
+        _loadVolunteers(this.props.refer, 'team', this.props.id),
+        _loadTurfs(this.props.refer, this.props.id),
+        _loadTurfs(this.props.refer),
+        _loadForms(this.props.refer, this.props.id),
+        _loadForms(this.props.refer),
+      ]);
+    } catch (e) {
+      notify_error(e, "Unable to load team info.");
+      return this.setState({loading: false});
+    }
 
     let memberOptions = [];
     let formOptions = [];

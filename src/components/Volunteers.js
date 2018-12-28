@@ -311,22 +311,21 @@ export class CardVolunteer extends Component {
   }
 
   _loadData = async () => {
-    let volunteer = {};
+    let volunteer = {}, forms = [], turf = [], teams = [];
 
     this.setState({loading: true})
 
     try {
-       volunteer = await _loadVolunteer(this, this.props.id);
+      [volunteer, forms, turf, teams] = await Promise.all([
+        _loadVolunteer(this, this.props.id),
+        _loadForms(this.props.refer),
+        _loadTurfs(this.props.refer),
+        _loadTeams(this.props.refer)
+      ]);
     } catch (e) {
       notify_error(e, "Unable to load canavasser info.");
-      return;
+      return this.setState({loading: false});
     }
-
-    const [forms, turf, teams] = await Promise.all([
-      _loadForms(this.props.refer),
-      _loadTurfs(this.props.refer),
-      _loadTeams(this.props.refer)
-    ]);
 
     let teamOptions = [];
     let leaderOptions = [];

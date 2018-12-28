@@ -470,23 +470,22 @@ export class CardForm extends Component {
   }
 
   _loadData = async () => {
-    let form = {};
+    let form = {}, volunteers = [], members = [], teams = [], teamsSelected = [];
 
     this.setState({loading: true})
 
     try {
-       form = await _loadForm(this, this.props.id, true);
+      [form, volunteers, members, teams, teamsSelected] = await Promise.all([
+        _loadForm(this, this.props.id, true),
+        _loadVolunteers(this.props.refer),
+        _loadVolunteers(this.props.refer, 'form', this.props.id),
+        _loadTeams(this.props.refer),
+        _loadTeams(this.props.refer, 'form', this.props.id),
+      ]);
     } catch (e) {
       notify_error(e, "Unable to load form info.");
-      return;
+      return this.setState({loading: false});
     }
-
-    const [volunteers, members, teams, teamsSelected] = await Promise.all([
-      _loadVolunteers(this.props.refer),
-      _loadVolunteers(this.props.refer, 'form', this.props.id),
-      _loadTeams(this.props.refer),
-      _loadTeams(this.props.refer, 'form', this.props.id),
-    ]);
 
     let teamOptions = [];
     let membersOption = [];
