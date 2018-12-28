@@ -306,12 +306,14 @@ export class CardTeam extends Component {
     this.setState({teams: team});
 
     // also load volunteers & turf & forms
-    let volunteers = await _loadVolunteers(this.props.refer);
-    let members = await _loadVolunteers(this.props.refer, 'team', this.props.id);
-    let turfSelected = await _loadTurfs(this.props.refer, this.props.id);
-    let turfs = await _loadTurfs(this.props.refer);
-    let formSelected = await _loadForms(this.props.refer, this.props.id);
-    let forms = await _loadForms(this.props.refer);
+    const [volunteers, members, turfSelected, turfs, formSelected, forms] = await Promise.all([
+      _loadVolunteers(this.props.refer),
+      _loadVolunteers(this.props.refer, 'team', this.props.id),
+      _loadTurfs(this.props.refer, this.props.id),
+      _loadTurfs(this.props.refer),
+      _loadForms(this.props.refer, this.props.id),
+      _loadForms(this.props.refer),
+    ]);
 
     let memberOptions = [];
     let formOptions = [];

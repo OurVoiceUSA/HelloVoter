@@ -322,9 +322,11 @@ export class CardVolunteer extends Component {
       return;
     }
 
-    let forms = await _loadForms(this.props.refer);
-    let turf = await _loadTurfs(this.props.refer);
-    let teams = await _loadTeams(this.props.refer);
+    const [forms, turf, teams] = await Promise.all([
+      _loadForms(this.props.refer),
+      _loadTurfs(this.props.refer),
+      _loadTeams(this.props.refer)
+    ]);
 
     let teamOptions = [];
     let leaderOptions = [];

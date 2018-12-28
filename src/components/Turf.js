@@ -610,10 +610,12 @@ export class CardTurf extends Component {
       return;
     }
 
-    let volunteers = await _loadVolunteers(this.props.refer);
-    let members = await _loadVolunteers(this.props.refer, 'turf', this.props.id);
-    let teams = await _loadTeams(this.props.refer);
-    let teamsSelected = await _loadTeams(this.props.refer, 'turf', this.props.id);
+    const [volunteers, members, teams, teamsSelected] = await Promise.all([
+      _loadVolunteers(this.props.refer),
+      _loadVolunteers(this.props.refer, 'turf', this.props.id),
+      _loadTeams(this.props.refer),
+      _loadTeams(this.props.refer, 'turf', this.props.id),
+    ]);
 
     let teamOptions = [];
     let membersOption = [];
