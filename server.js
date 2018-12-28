@@ -60,16 +60,22 @@ const authToken = neo4j.auth.basic(ovi_config.neo4j_user, ovi_config.neo4j_pass)
 const db = new BoltAdapter(neo4j.driver('bolt://'+ovi_config.neo4j_host, authToken));
 
 cqa('return timestamp()').catch((e) => {console.error("Unable to connect to database."); process.exit(1)}).then(() => {
-  cqa('create constraint on (a:Volunteer) assert a.id is unique');
-  cqa('create constraint on (a:Team) assert a.name is unique');
-  cqa('create constraint on (a:Turf) assert a.name is unique');
-  cqa('create constraint on (a:Form) assert a.id is unique');
-  cqa('create constraint on (a:Question) assert a.key is unique');
-  cqa('create constraint on (a:Address) assert a.id is unique');
-  cqa('create constraint on (a:Unit) assert a.id is unique');
-  cqa('create constraint on (a:Survey) assert a.id is unique');
-  ['turf','volunteer','address'].forEach((i) => cqa('call spatial.addWKTLayer({type}, \'wkt\')', {type: i}).catch(e => {}));
+  doDbInit();
 });
+
+async function doDbInit() {
+  await cqa('create constraint on (a:Volunteer) assert a.id is unique');
+  await cqa('create constraint on (a:Team) assert a.name is unique');
+  await cqa('create constraint on (a:Turf) assert a.name is unique');
+  await cqa('create constraint on (a:Form) assert a.id is unique');
+  await cqa('create constraint on (a:Question) assert a.key is unique');
+  await cqa('create constraint on (a:Address) assert a.id is unique');
+  await cqa('create constraint on (a:Unit) assert a.id is unique');
+  await cqa('create constraint on (a:Survey) assert a.id is unique');
+  try {await cqa('call spatial.addWKTLayer("turf", "wkt")');} catch (e) {}
+  try {await cqa('call spatial.addWKTLayer("volunteer", "wkt")');} catch (e) {}
+  try {await cqa('call spatial.addWKTLayer("address", "wkt")');} catch (e) {}
+}
 
 function getConfig(item, required, def) {
   let value = secrets.get(item);
@@ -291,7 +297,7 @@ async function dashboard(req, res) {
       turfs: (await cqa('match (a:Turf) return count(a)')).data[0],
       questions: (await cqa('match (a:Question) return count(a)')).data[0],
       forms: (await cqa('match (a:Form) return count(a)')).data[0],
-      addresses: (await cqa('match (a:Address) where a.multi_unit is null or not a.multi_unit = true return count(a)')).data[0]+(await cqa('match (a:Unit) return count(a)')).data[0],
+      addresses: (await cqa('match (a:Address) return count(a)')),
       version: version,
     });
     else {
