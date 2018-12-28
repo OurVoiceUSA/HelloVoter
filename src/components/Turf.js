@@ -24,26 +24,7 @@ export default class App extends Component {
   constructor(props) {
     super(props);
 
-    let perPage = localStorage.getItem('turfperpage');
-    if (!perPage) perPage = 5;
-
-    this.state = {
-      loading: true,
-      creating: false,
-      selectedDrawOption: null,
-      selectedStateOption: null,
-      selectedTypeOption: null,
-      selectedDistrictOption: null,
-      districtOptions: [],
-      turf: [],
-      thisTurf: {},
-      importFileData: null,
-      address: "",
-      addressCoords: null,
-      search: "",
-      perPage: perPage,
-      pageNum: 1,
-    };
+    this.state = this.initState();
 
     this.formServerItems = t.struct({
       name: t.String,
@@ -61,6 +42,29 @@ export default class App extends Component {
     this.onTypeAddress = (address) => this.setState({ address })
     this.onTypeSearch = this.onTypeSearch.bind(this);
     this.handlePageNumChange = this.handlePageNumChange.bind(this);
+  }
+
+  initState() {
+    let perPage = localStorage.getItem('turfperpage');
+    if (!perPage) perPage = 5;
+
+    return {
+      loading: true,
+      creating: false,
+      selectedDrawOption: null,
+      selectedStateOption: null,
+      selectedTypeOption: null,
+      selectedDistrictOption: null,
+      districtOptions: [],
+      turf: [],
+      thisTurf: {},
+      importFileData: null,
+      address: "",
+      addressCoords: null,
+      search: "",
+      perPage: perPage,
+      pageNum: 1,
+    };
   }
 
   handlePageNumChange(obj) {
@@ -316,6 +320,7 @@ export default class App extends Component {
     } catch (e) {
       notify_error(e, "Unable to load turf.");
     }
+    this.setState(this.initState());
     this.setState({loading: false, turf: turf})
   }
 
