@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import { HashRouter as Router, Route, Link, Switch } from 'react-router-dom';
+import { HashRouter as Router, Route, Redirect, Link, Switch } from 'react-router-dom';
 import {NotificationContainer} from 'react-notifications';
 import 'react-notifications/lib/notifications.css';
 import t from 'tcomb-form';
@@ -479,6 +479,10 @@ class App extends Component {
               <Route path="/analytics/" render={() => <Analytics server={server} />} />
               <Route path="/settings/" render={() => <Settings server={server} />} />
               <Route path="/jwt/" render={(props) => <Jwt {...props} refer={this} />} />
+              <Route path="/logout/" render={(props) => {
+                this._logout();
+                return (<Redirect to="/" />)
+              }} />
               <Route path="/about/" render={() => <About server={server} />} />
               <Route component={NoMatch} />
             </Switch>
