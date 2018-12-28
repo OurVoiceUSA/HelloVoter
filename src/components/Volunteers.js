@@ -5,7 +5,6 @@ import {geocodeByAddress, getLatLng} from 'react-places-autocomplete';
 import ReactPaginate from 'react-paginate';
 import ReactTooltip from 'react-tooltip';
 import Select from 'react-select';
-import Img from 'react-image';
 
 import Modal from '@material-ui/core/Modal';
 import List from '@material-ui/core/List';
@@ -13,7 +12,6 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Avatar from '@material-ui/core/Avatar';
-import Typography from '@material-ui/core/Typography';
 
 import {
   notify_error, notify_success, _fetch, _searchStringify, _handleSelectChange,
@@ -26,7 +24,7 @@ import { CardForm } from './Forms.js';
 import { CardTeam } from './Teams.js';
 
 import {
-  faUser, faCrown, faExclamationTriangle, faCheckCircle, faBan, faHome, faFlag,
+  faCrown, faExclamationTriangle, faCheckCircle, faBan, faHome, faFlag,
 } from '@fortawesome/free-solid-svg-icons';
 
 import TimeAgo from 'javascript-time-ago';
@@ -121,7 +119,7 @@ export default class App extends Component {
             <Modal
               aria-labelledby="simple-modal-title"
               aria-describedby="simple-modal-description"
-              open={this.state.thisVolunteer.id}
+              open={(this.state.thisVolunteer.id?true:false)}
               onClose={() => this.setState({thisVolunteer: {}})}
             >
               <div style={{
@@ -141,7 +139,6 @@ export default class App extends Component {
 }
 
 const ListVolunteers = (props) => {
-  const { classes } = props;
   const perPage = props.refer.state.perPage;
   let paginate = (<div></div>);
   let list = [];
@@ -407,8 +404,6 @@ export class CardVolunteer extends Component {
       return (<Loader />);
     }
 
-    const timeAgo = new TimeAgo('en-US');
-
     if (this.props.edit) return (
       <div>
         <ListItem alignItems="flex-start" style={{width: 350}}>
@@ -448,6 +443,8 @@ export const CardVolunteerFull = (props) => (
     :
       (<button onClick={() => props.refer._lockVolunteer(props.volunteer, true)}>Deny Access</button>)
     }
+    <br />
+    Last Seen: {new TimeAgo('en-US').format(new Date(props.volunteer.last_seen-30000))}
     <br />
     Email: {(props.volunteer.email?props.volunteer.email:'N/A')}
     <br />

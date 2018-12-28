@@ -303,7 +303,7 @@ export class CardTeam extends Component {
     this.setState({loading: true})
 
     try {
-      const [team, volunteers, members, turfSelected, turfs, formSelected, forms] = await Promise.all([
+      [team, volunteers, members, turfSelected, turfs, formSelected, forms] = await Promise.all([
         _loadTeam(this, this.props.id),
         _loadVolunteers(this.props.refer),
         _loadVolunteers(this.props.refer, 'team', this.props.id),
