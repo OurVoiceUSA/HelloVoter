@@ -265,13 +265,13 @@ export class CardVolunteer extends Component {
     try {
       if (this.state.selectedFormsOption.value) {
         await _fetch(this.state.server, '/volunteer/v1/form/assigned/volunteer/remove', 'POST', {
-          formId: this.state.selectedFormsOption.value,
+          formId: this.state.selectedFormsOption.id,
           cId: this.props.id,
         });
       }
       if (selectedFormsOption.value) {
         await _fetch(this.state.server, '/volunteer/v1/form/assigned/volunteer/add', 'POST', {
-          formId: selectedFormsOption.value,
+          formId: selectedFormsOption.id,
           cId: this.props.id,
         });
       }
@@ -288,13 +288,13 @@ export class CardVolunteer extends Component {
     try {
       if (this.state.selectedTurfOption.value) {
         await _fetch(this.state.server, '/volunteer/v1/turf/assigned/volunteer/remove', 'POST', {
-          turfId: this.state.selectedTurfOption.value,
+          turfId: this.state.selectedTurfOption.id,
           cId: this.props.id,
         });
       }
       if (selectedTurfOption.value) {
         await _fetch(this.state.server, '/volunteer/v1/turf/assigned/volunteer/add', 'POST', {
-          turfId: selectedTurfOption.value,
+          turfId: selectedTurfOption.id,
           cId: this.props.id,
         });
       }
