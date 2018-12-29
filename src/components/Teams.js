@@ -5,10 +5,12 @@ import ReactPaginate from 'react-paginate';
 import Select from 'react-select';
 import t from 'tcomb-form';
 
+import CircularProgress from '@material-ui/core/CircularProgress';
+
 import {
   notify_error, notify_success, _fetch,  _handleSelectChange, _searchStringify,
   _loadVolunteers, _loadTeams, _loadTeam, _loadForms, _loadTurfs,
-  RootLoader, Loader, Icon, DialogSaving,
+  RootLoader, Icon, DialogSaving,
 } from '../common.js';
 
 import { CardTurf } from './Turf.js';
@@ -361,7 +363,7 @@ export class CardTeam extends Component {
     const { team } = this.state;
 
     if (!team || this.state.loading) {
-      return (<Loader />);
+      return (<CircularProgress />);
     }
 
     return (

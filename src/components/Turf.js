@@ -7,6 +7,8 @@ import ReactPaginate from 'react-paginate';
 import Select from 'react-select';
 import t from 'tcomb-form';
 
+import CircularProgress from '@material-ui/core/CircularProgress';
+
 import { faStreetView } from '@fortawesome/free-solid-svg-icons';
 
 import { us_states } from 'ourvoiceusa-sdk-js';
@@ -17,7 +19,7 @@ import { CardTeam } from './Teams.js';
 import {
   _fetch, notify_error, notify_success, _handleSelectChange, _searchStringify,
   _loadTurfs, _loadTurf, _loadTeams, _loadVolunteers,
-  PlacesAutocomplete, RootLoader, Loader, Icon, DialogSaving,
+  PlacesAutocomplete, RootLoader, Icon, DialogSaving,
 } from '../common.js';
 
 export default class App extends Component {
@@ -504,7 +506,7 @@ const TurfOptions = (props) => {
               isSearchable={true}
               placeholder="Select district for this turf"
             />
-            :<Loader />}
+            :<CircularProgress />}
           </div>
           :''}
         </div>
@@ -646,7 +648,7 @@ export class CardTurf extends Component {
     const { turf } = this.state;
 
     if (!turf || this.state.loading) {
-      return (<Loader />);
+      return (<CircularProgress />);
     }
 
     return (

@@ -5,7 +5,6 @@ import { faSync } from '@fortawesome/free-solid-svg-icons';
 
 import GooglePlacesAutocomplete from 'react-places-autocomplete';
 import {NotificationManager} from 'react-notifications';
-import LoaderSpinner from 'react-loader-spinner';
 
 import Modal from '@material-ui/core/Modal';
 import CircularProgress from '@material-ui/core/CircularProgress';
@@ -51,12 +50,8 @@ export const Icon = (props) => (
   <FontAwesomeIcon style={{width: 25}} data-tip={(props['data-tip']?props['data-tip']:props.icon.iconName)} {...props} />
 )
 
-export const Loader = (props) => (
-  <LoaderSpinner type="ThreeDots" {...props} />
-)
-
 export const RootLoader = (props) => {
-  if (props.flag) return (<Loader />);
+  if (props.flag) return (<CircularProgress />);
   else return (
     <div>
       <Icon icon={faSync} color="green" onClick={props.func} data-tip="Reload Data" />

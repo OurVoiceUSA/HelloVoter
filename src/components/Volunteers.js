@@ -11,12 +11,13 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import Avatar from '@material-ui/core/Avatar';
 
 import {
   notify_error, notify_success, _fetch, _searchStringify, _handleSelectChange,
   _loadVolunteers, _loadVolunteer, _loadTeams, _loadForms, _loadTurfs,
-  RootLoader, Loader, Icon, PlacesAutocomplete, DialogSaving,
+  RootLoader, Icon, PlacesAutocomplete, DialogSaving,
 } from '../common.js';
 
 import { CardTurf } from './Turf.js';
@@ -412,7 +413,7 @@ export class CardVolunteer extends Component {
     const { volunteer } = this.state;
 
     if (!volunteer || this.state.loading) {
-      return (<Loader />);
+      return (<CircularProgress />);
     }
 
     if (this.props.edit) return (

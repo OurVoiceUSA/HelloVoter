@@ -6,6 +6,8 @@ import Select from 'react-select';
 import Modal from 'react-modal';
 import t from 'tcomb-form';
 
+import CircularProgress from '@material-ui/core/CircularProgress';
+
 import { faTimesCircle, faPlusCircle, faClipboard } from '@fortawesome/free-solid-svg-icons';
 
 import { CardVolunteer } from './Volunteers.js';
@@ -14,7 +16,7 @@ import { CardTeam } from './Teams.js';
 import {
   _fetch, notify_error, notify_success, _handleSelectChange, _searchStringify,
   _loadForms, _loadForm, _loadVolunteers, _loadTeams,
-  RootLoader, Icon, Loader, DialogSaving,
+  RootLoader, Icon, DialogSaving,
 } from '../common.js';
 
 Modal.setAppElement(document.getElementById('root'));
@@ -521,7 +523,7 @@ export class CardForm extends Component {
     const { form } = this.state;
 
     if (!form || this.state.loading) {
-      return (<Loader />);
+      return (<CircularProgress />);
     }
 
     return (
