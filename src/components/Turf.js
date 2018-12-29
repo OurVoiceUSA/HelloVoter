@@ -8,6 +8,10 @@ import Select from 'react-select';
 import t from 'tcomb-form';
 
 import CircularProgress from '@material-ui/core/CircularProgress';
+import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogActions from '@material-ui/core/DialogActions';
 
 import { faStreetView } from '@fortawesome/free-solid-svg-icons';
 
@@ -66,8 +70,17 @@ export default class App extends Component {
       search: "",
       perPage: perPage,
       pageNum: 1,
+      menuDelete: false,
     };
   }
+
+  handleClickDelete = () => {
+    this.setState({ menuDelete: true });
+  };
+
+  handleCloseDelete = () => {
+    this.setState({ menuDelete: false });
+  };
 
   handlePageNumChange(obj) {
     localStorage.setItem('volunteersperpage', obj.value);
@@ -158,17 +171,17 @@ export default class App extends Component {
   }
 
   _deleteTurf = async (id) => {
-    this.setState({saving: true});
+    this.setState({saving: true, menuDelete: false});
     try {
       await _fetch(this.props.server, '/volunteer/v1/turf/delete', 'POST', {turfId: id});
+      notify_success("Turf has been deleted.");
     } catch (e) {
       notify_error(e, "Unable to delete turf.");
-      return;
     }
     this.setState({saving: false});
+
     this._loadData();
     window.location.href = "/HelloVoter/#/turf/";
-    notify_success("Turf has been deleted.");
   }
 
   _createTurf = async () => {
@@ -229,15 +242,14 @@ export default class App extends Component {
           geometry: geometry,
         });
       }
+      notify_success("Turf has been created.");
     } catch (e) {
       notify_error(e, "Unable to create turf.");
-      return this.setState({saving: false});
     }
     this.setState({saving: false});
 
     window.location.href = "/HelloVoter/#/turf/";
     this._loadData();
-    notify_success("Turf has been created.");
   }
 
   urlFromDist(state, type, value) {
@@ -391,7 +403,25 @@ export default class App extends Component {
               <br />
               <br />
               <br />
-              <button onClick={() => this._deleteTurf(props.match.params.id)}>Delete Turf</button>
+              <Button onClick={this.handleClickDelete} color="primary">
+                Delete Turf
+              </Button>
+              <Dialog
+                open={this.state.menuDelete}
+                onClose={this.handleCloseDelete}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+              >
+                <DialogTitle id="alert-dialog-title">Are you sure you wish to delete this turf?</DialogTitle>
+                <DialogActions>
+                  <Button onClick={this.handleCloseDelete} color="primary" autoFocus>
+                    No
+                  </Button>
+                  <Button onClick={() => this._deleteTurf(props.match.params.id)} color="primary">
+                    Yes
+                  </Button>
+                </DialogActions>
+              </Dialog>
             </div>
           )} />
           <DialogSaving flag={this.state.saving} />

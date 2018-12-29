@@ -7,6 +7,10 @@ import Modal from 'react-modal';
 import t from 'tcomb-form';
 
 import CircularProgress from '@material-ui/core/CircularProgress';
+import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogActions from '@material-ui/core/DialogActions';
 
 import { faTimesCircle, faPlusCircle, faClipboard } from '@fortawesome/free-solid-svg-icons';
 
@@ -103,6 +107,7 @@ export default class App extends Component {
       search: "",
       perPage: perPage,
       pageNum: 1,
+      menuDelete: false,
     };
 
     this.formServerItems = t.struct({
@@ -127,6 +132,14 @@ export default class App extends Component {
     this.onTypeSearch = this.onTypeSearch.bind(this);
     this.handlePageNumChange = this.handlePageNumChange.bind(this);
   }
+
+  handleClickDelete = () => {
+    this.setState({ menuDelete: true });
+  };
+
+  handleCloseDelete = () => {
+    this.setState({ menuDelete: false });
+  };
 
   handlePageNumChange(obj) {
     localStorage.setItem('volunteersperpage', obj.value);
@@ -230,9 +243,10 @@ export default class App extends Component {
   }
 
   _deleteForm = async (id) => {
-    this.setState({saving: true});
+    this.setState({saving: true, menuDelete: false});
     try {
       await _fetch(this.props.server, '/volunteer/v1/form/delete', 'POST', {formId: id});
+      notify_success("Form has been deleted.");
     } catch (e) {
       notify_error(e, "Unable to delete form.");
     }
@@ -240,7 +254,6 @@ export default class App extends Component {
 
     window.location.href = "/HelloVoter/#/forms/";
     this._loadData();
-    notify_success("Form has been deleted.");
   }
 
   _createForm = async () => {
@@ -353,7 +366,25 @@ export default class App extends Component {
               <br />
               <br />
               <br />
-              <button onClick={() => this._deleteForm(props.match.params.id)}>Delete Form</button>
+              <Button onClick={this.handleClickDelete} color="primary">
+                Delete Form
+              </Button>
+              <Dialog
+                open={this.state.menuDelete}
+                onClose={this.handleCloseDelete}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+              >
+                <DialogTitle id="alert-dialog-title">Are you sure you wish to delete this form?</DialogTitle>
+                <DialogActions>
+                  <Button onClick={this.handleCloseDelete} color="primary" autoFocus>
+                    No
+                  </Button>
+                  <Button onClick={() => this._deleteForm(props.match.params.id)} color="primary">
+                    Yes
+                  </Button>
+                </DialogActions>
+              </Dialog>
             </div>
           )} />
           <DialogSaving flag={this.state.saving} />

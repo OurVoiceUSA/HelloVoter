@@ -75,7 +75,7 @@ export const DialogSaving = (props) => {
           padding: 40,
         }}>
         <center>
-          Saving...<br /><br />
+          Saving changes...<br /><br />
           <CircularProgress disableShrink />
         </center>
         </div>
