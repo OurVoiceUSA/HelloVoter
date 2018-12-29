@@ -8,6 +8,7 @@ import jwt_decode from 'jwt-decode';
 import queryString from 'query-string';
 import ReactTooltip from 'react-tooltip';
 
+import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import Volunteers from './components/Volunteers';
 import Teams from './components/Teams';
@@ -228,18 +229,8 @@ class App extends Component {
     this.setState({server: {}});
   }
 
-  doSave = async () => {
-
-    let json = this.refs.mainForm.getValue();
-    if (json === null) return;
-
-    if (json.ack !== true) return;
-
-    let ret = await this.singHello(json.server);
-
-    if (ret.flag !== true) console.warn((ret.error?'Error':'Connection Successful'), ret.msg, [{text: 'OK'}], { cancelable: false });
-    else console.warn(ret)
-
+  doSave = async (event) => {
+    await this.singHello(event.target.server.value);
   }
 
   singHello = async (server) => {
@@ -306,26 +297,8 @@ class App extends Component {
     const { classes } = this.props;
     let { server } = this.state;
 
-    if (!server.hostname) {
-      return (
-        <div align="center">
-          <br />
-          <strong>{process.env.REACT_APP_NAME}</strong>
-          <div>Version {process.env.REACT_APP_VERSION}</div>
-          <br />
-          <t.form.Form
-            ref="mainForm"
-            type={this.formServerItems}
-            options={this.formServerOptions}
-            onChange={this.onChange}
-            value={this.state.connectForm}
-          />
-          <div className="form-group">
-            <button type="submit" className="btn btn-primary" onClick={this.doSave}>Connect to Server</button>
-          </div>
-        </div>
-      );
-    }
+    if (!server.hostname)
+      return (<Login refer={this} />);
 
     return (
       <Router>
