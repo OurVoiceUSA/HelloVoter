@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
+import NumberFormat from 'react-number-format';
+import filesize from 'filesize';
 
-import { faShieldAlt, faUser, faUsers, faMap, faClipboard, faChartPie, faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
+import { faShieldAlt, faUser, faUsers, faMap, faClipboard, faChartPie, faMapMarkerAlt, faDatabase } from '@fortawesome/free-solid-svg-icons';
 
 import { _fetch, notify_error, RootLoader, Icon } from '../common.js';
 
@@ -43,7 +45,8 @@ export default class App extends Component {
         <CardDashboard name="Turf" stat={this.state.data.turfs} icon={faMap} />
         <CardDashboard name="Forms" stat={this.state.data.forms} icon={faClipboard} />
         <CardDashboard name="Questions" stat={this.state.data.questions} icon={faChartPie} />
-        <CardDashboard name="Addresses" stat={this.state.data.addresses} icon={faMapMarkerAlt} />
+        <CardDashboard name="Addresses" stat={(<NumberFormat value={this.state.data.addresses} displayType={'text'} thousandSeparator={true} />)} icon={faMapMarkerAlt} />
+        <CardDashboard name="Database size" stat={filesize((this.state.data.dbsize?this.state.data.dbsize:0), {round: 1})} icon={faDatabase} />
       </RootLoader>
     );
   }
