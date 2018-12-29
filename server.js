@@ -298,6 +298,7 @@ async function dashboard(req, res) {
       questions: (await cqa('match (a:Question) return count(a)')).data[0],
       forms: (await cqa('match (a:Form) return count(a)')).data[0],
       addresses: (await cqa('match (a:Address) return count(a)')).data[0],
+      dbsize: (await cqa('CALL apoc.monitor.store() YIELD totalStoreSize return totalStoreSize')).data[0],
       version: version,
     });
     else {
