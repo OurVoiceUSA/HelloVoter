@@ -297,7 +297,7 @@ async function dashboard(req, res) {
       turfs: (await cqa('match (a:Turf) return count(a)')).data[0],
       questions: (await cqa('match (a:Question) return count(a)')).data[0],
       forms: (await cqa('match (a:Form) return count(a)')).data[0],
-      addresses: (await cqa('match (a:Address) return count(a)')),
+      addresses: (await cqa('match (a:Address) return count(a)')).data[0],
       version: version,
     });
     else {
