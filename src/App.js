@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import { HashRouter as Router, Route, Redirect, Link, Switch } from 'react-router-dom';
+import { HashRouter as Router, Route, Link, Switch } from 'react-router-dom';
 import {NotificationContainer} from 'react-notifications';
 import 'react-notifications/lib/notifications.css';
 import t from 'tcomb-form';
@@ -37,6 +37,10 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Avatar from '@material-ui/core/Avatar';
+import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogActions from '@material-ui/core/DialogActions';
 
 import DashboardIcon from '@material-ui/icons/Dashboard';
 import PersonIcon from '@material-ui/icons/Person';
@@ -144,6 +148,7 @@ class App extends Component {
 
     this.state = {
       open: true,
+      menuLogout: false,
       server: {
         hostname: localStorage.getItem('server'),
         jwt: localStorage.getItem('jwt'),
@@ -194,6 +199,14 @@ class App extends Component {
 
     this.setState({google_maps_key: data.google_maps_key});
   }
+
+  handleClickLogout = () => {
+    this.setState({ menuLogout: true });
+  };
+
+  handleCloseLogout = () => {
+    this.setState({ menuLogout: false });
+  };
 
   onChange(connectForm) {
     this.setState({connectForm})
@@ -435,14 +448,12 @@ class App extends Component {
               </List>
               <Divider />
               <List>
-                <Link to={'/logout/'}>
-                  <ListItem button>
-                    <ListItemIcon>
-                      <IndeterminateCheckBoxIcon />
-                    </ListItemIcon>
-                    <ListItemText primary="Logout" />
-                  </ListItem>
-                </Link>
+                <ListItem button onClick={this.handleClickLogout}>
+                  <ListItemIcon>
+                    <IndeterminateCheckBoxIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Logout" />
+                </ListItem>
             </List>
             <Divider />
             <List>
@@ -479,13 +490,25 @@ class App extends Component {
               <Route path="/analytics/" render={() => <Analytics server={server} />} />
               <Route path="/settings/" render={() => <Settings server={server} />} />
               <Route path="/jwt/" render={(props) => <Jwt {...props} refer={this} />} />
-              <Route path="/logout/" render={(props) => {
-                this._logout();
-                return (<Redirect to="/" />)
-              }} />
               <Route path="/about/" render={() => <About server={server} />} />
               <Route component={NoMatch} />
             </Switch>
+            <Dialog
+              open={this.state.menuLogout}
+              onClose={this.handleCloseLogout}
+              aria-labelledby="alert-dialog-title"
+              aria-describedby="alert-dialog-description"
+            >
+              <DialogTitle id="alert-dialog-title">Are you sure you wish to logout?</DialogTitle>
+              <DialogActions>
+                <Button onClick={this.handleCloseLogout} color="primary" autoFocus>
+                  No
+                </Button>
+                <Button onClick={() => this._logout()} color="primary">
+                  Yes
+                </Button>
+              </DialogActions>
+            </Dialog>
           </main>
         </div>
       </Router>
