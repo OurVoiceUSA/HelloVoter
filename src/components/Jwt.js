@@ -14,14 +14,13 @@ export default class App extends Component {
     try {
       jwt = this.props.location.pathname.split('/').pop();
       jwt_decode(jwt);
+      this.props.refer._loadData(jwt);
     } catch (e) {
       notify_error(e, "Unable to extract jwt from URI");
       jwt = 'error';
     }
 
     this.state = {jwt: jwt};
-    this.props.refer.setState({jwt: jwt});
-    localStorage.setItem('jwt', jwt);
   }
 
   render() {

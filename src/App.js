@@ -149,10 +149,7 @@ class App extends Component {
     this.state = {
       open: true,
       menuLogout: false,
-      server: {
-        hostname: localStorage.getItem('server'),
-        jwt: localStorage.getItem('jwt'),
-      },
+      server: {},
       qserver: v.server,
     };
 
@@ -162,13 +159,29 @@ class App extends Component {
   }
 
   componentDidMount() {
-    this._loadKeys();
+    this._loadData();
+  }
+
+  _loadData = async (jwt) => {
+    if (jwt)
+      localStorage.setItem('jwt', jwt);
+
+    this.setState({
+      server: {
+        hostname: localStorage.getItem('server'),
+        jwt: (jwt?jwt:localStorage.getItem('jwt')),
+      },
+    });
+
+    // don't load if no jwt
+    if (jwt) this._loadKeys();
   }
 
   _loadKeys = async () => {
-    if (!this.state.server.hostname) return;
+    // don't load if already loaded
+    if (this.state.google_maps_key) return;
 
-    let res = await _fetch(this.state.server, '/volunteer/v1/google_maps_key')
+    let res = await _fetch(this.state.server, '/volunteer/v1/google_maps_key');
     let data = await res.json();
 
     // load google places API
@@ -194,10 +207,14 @@ class App extends Component {
 
   getUserProp(prop) {
     let item;
+
+    if (!this.state.server.jwt) return null;
+
     try {
       item = jwt_decode(this.state.server.jwt)[prop];
     } catch (e) {
       notify_error(e, "Holy crap this error should never happen!! Better dust off that résumé...");
+      console.warn(e);
     }
     return item;
   }
@@ -221,7 +238,7 @@ class App extends Component {
       res = await fetch('https://'+server+'/volunteer/v1/hello', {
         method: 'POST',
         headers: {
-          'Authorization': 'Bearer '+(this.state.jwt?this.state.jwt:"of the one ring"),
+          'Authorization': 'Bearer '+(this.state.server.jwt?this.state.server.jwt:"of the one ring"),
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({longitude: -118, latitude: 40}),
@@ -246,9 +263,6 @@ class App extends Component {
       }
 
       let body = await res.json();
-
-      this.setState({server: {hostname: server}});
-      localStorage.setItem('server', server);
 
       if (body.data.ready !== true) return {error: false, msg: "The server said: "+body.msg};
       else {
@@ -307,7 +321,7 @@ class App extends Component {
                 noWrap
                 className={classes.title}
               >
-                <div style={{margin: 10}}>HelloVoter @ {this.state.server.hostname}</div>
+                <div style={{margin: 10}}>HelloVoter @ {server.hostname}</div>
               </Typography>
               <Avatar alt="Remy Sharp" src={this.getUserProp('avatar')} className={classes.avatar} />
               {this.getUserProp('name')}
