@@ -3,7 +3,6 @@ import React, { Component } from 'react';
 import { HashRouter as Router, Route, Link, Switch } from 'react-router-dom';
 import {NotificationContainer} from 'react-notifications';
 import 'react-notifications/lib/notifications.css';
-import t from 'tcomb-form';
 import jwt_decode from 'jwt-decode';
 import queryString from 'query-string';
 import ReactTooltip from 'react-tooltip';
@@ -154,27 +153,7 @@ class App extends Component {
         hostname: localStorage.getItem('server'),
         jwt: localStorage.getItem('jwt'),
       },
-      connectForm: {server: v.server},
-    };
-
-    this.formServerItems = t.struct({
-      server: t.String,
-      ack: t.subtype(t.Boolean, function (s) { return s }), // boolean that fails validation if not selected
-    });
-
-    this.formServerOptions = {
-      fields: {
-        server: {
-          label: 'Server Domain Name',
-          help: 'Enter the domain name of the server you wish to connect to.',
-          error: 'You must enter a domain name.',
-        },
-        ack: {
-          label: 'Terms of Use',
-          help: 'By checking this you acknowledge that the server to which you are connecting is not affiliated with Our Voice USA and the data you send and receive is governed by that server\'s terms of use.',
-          error: 'You must acknowledge the terms of use.',
-        },
-      },
+      qserver: v.server,
     };
 
     this.onChange = this.onChange.bind(this);

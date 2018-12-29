@@ -60,7 +60,7 @@ function LogIn(props) {
         <form className={classes.form} onSubmit={(e) => { e.preventDefault(); props.refer.doSave(e); }} >
           <FormControl margin="normal" required fullWidth>
             <InputLabel htmlFor="domain">Server Address</InputLabel>
-            <Input id="server" name="server" autoComplete="server" autoFocus />
+            <Input id="server" name="server" autoComplete="server" autoFocus defaultValue={props.refer.state.qserver} />
           </FormControl>
           <FormControlLabel
             control={<Checkbox value="ack" color="primary" required />}
