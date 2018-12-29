@@ -122,13 +122,15 @@ export default class App extends Component {
   }
 
   _loadData = async () => {
-    let teams = [];
     this.setState({loading: true, search: ""});
+    let teams = [];
+
     try {
       teams = await _loadTeams(this);
     } catch (e) {
       notify_error(e, "Unable to load volunteers.");
     }
+
     this.setState({loading: false, teams});
   }
 
@@ -141,7 +143,7 @@ export default class App extends Component {
 
     this.state.teams.forEach(t => {
       if (this.state.search && !_searchStringify(t).includes(this.state.search)) return;
-        list.push(t);
+      list.push(t);
     });
 
     return (

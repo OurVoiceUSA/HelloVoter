@@ -328,7 +328,7 @@ export default class App extends Component {
   }
 
   _loadData = async () => {
-    this.setState({loading: true, search: ""})
+    this.setState({loading: true, search: ""});
     let turf = [];
 
     try {
@@ -337,7 +337,7 @@ export default class App extends Component {
       notify_error(e, "Unable to load turf.");
     }
     this.setState(this.initState());
-    this.setState({loading: false, turf: turf})
+    this.setState({loading: false, turf})
   }
 
   render() {

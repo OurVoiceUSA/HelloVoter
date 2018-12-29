@@ -173,12 +173,13 @@ export async function _loadTeams(refer, byType, id) {
     else if (byType === 'form') call = 'form/assigned/team/list?formId='+id
 
     let res = await _fetch(refer.props.server, '/volunteer/v1/'+call);
-    teams = await res.json();
+    let data = await res.json();
+    teams = (data.data?data.data:[]);
   } catch (e) {
     notify_error(e, "Unable to load teams data.");
   }
 
-  return teams.data;
+  return teams;
 }
 
 export async function _loadForm(refer, id) {
