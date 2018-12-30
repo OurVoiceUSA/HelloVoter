@@ -113,8 +113,8 @@ export default class App extends PureComponent {
         </View>
 
         <View style={{flexDirection: 'row', justifyContent: 'center'}}>
-          <Text style={{fontSize: 16, fontWeight: 'bold', color: 'blue'}} onPress={() => {this.openGitHub('OVMobile')}}>
-            https://github.com/OurVoiceUSA/OVMobile
+          <Text style={{fontSize: 16, fontWeight: 'bold', color: 'blue'}} onPress={() => {this.openGitHub('HelloVoter')}}>
+            https://github.com/OurVoiceUSA/HelloVoter
           </Text>
         </View>
 

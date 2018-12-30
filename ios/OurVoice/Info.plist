@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>OurVoice</string>
+	<string>HelloVoter</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -17,7 +17,7 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.7.9</string>
+	<string>1.8.0</string>
 	<key>CFBundleSignature</key>
 	<string>org.ourvoiceusa.ovios</string>
 	<key>CFBundleURLTypes</key>
@@ -34,7 +34,7 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>35</string>
+	<string>36</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>LSRequiresIPhoneOS</key>
@@ -50,24 +50,24 @@
 			</dict>
 		</dict>
 	</dict>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>We use your location information to find your district, and for the canvassing tool.</string>
-	<key>NSMotionUsageDescription</key>
-	<string>We use your device motion data for augmented reality in the canvassing tool.</string>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>You may choose to play your device music while canvassing.</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
 	<string>You may choose to sync data in the canvassing tool via bluetooth.</string>
 	<key>NSCalendarsUsageDescription</key>
 	<string>You may choose to schedule canvassing activities via your device calendar.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>You may choose to take a photo as part of the canvassing tool form.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>We use your location information to find your district, and for the canvassing tool.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>We use your device motion data for augmented reality in the canvassing tool.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>You may choose to save a photo from the canvassing to your photo library.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>You may choose to save a photo from the canvassing to your photo library.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>You may choose to verbally dictate to the canvassing tool form.</string>
-	<key>NSAppleMusicUsageDescription</key>
-	<string>You may choose to play your device music while canvassing.</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Entypo.ttf</string>

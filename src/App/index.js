@@ -29,7 +29,7 @@ export default App = StackNavigator({
   HomeScreen: {
     screen: HomeScreenPage,
     navigationOptions: ({navigation}) => ({
-      title: 'OurVoice',
+      title: 'HelloVoter',
       headerBackTitle: 'Back',
       headerRight: <SettingsButton nav={navigation} />,
     }),

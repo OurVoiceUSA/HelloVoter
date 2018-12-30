@@ -1,4 +1,4 @@
-rootProject.name = 'OurVoice'
+rootProject.name = 'HelloVoter'
 include ':react-native-geocoder'
 project(':react-native-geocoder').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-geocoder/android')
 include ':react-native-maps'

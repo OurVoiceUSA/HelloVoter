@@ -902,7 +902,7 @@ export default class App extends OVComponent {
   }
 
   _canvassGuidelinesUrlHandler() {
-    const url = "https://github.com/OurVoiceUSA/OVMobile/blob/master/docs/Canvassing-Guidelines.md";
+    const url = "https://github.com/OurVoiceUSA/HelloVoter/blob/master/docs/Canvassing-Guidelines.md";
     return Linking.openURL(url).catch(() => null);
   }
 

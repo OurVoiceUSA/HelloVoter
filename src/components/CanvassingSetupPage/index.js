@@ -65,7 +65,8 @@ export default class App extends PureComponent {
       SelectModeScreen: false,
       ConnectServerScreen: false,
       SmLoginScreen: false,
-      server: (__DEV__?{server: wsbase.replace('https://','')}:null),
+      //server: (__DEV__?{server: wsbase.replace('https://','')}:null),
+      server: null,
       serverLoading: false,
     };
 
@@ -425,12 +426,12 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
   }
 
   _canvassGuidelinesUrlHandler() {
-    const url = "https://github.com/OurVoiceUSA/OVMobile/blob/master/docs/Canvassing-Guidelines.md";
+    const url = "https://github.com/OurVoiceUSA/HelloVoter/blob/master/docs/Canvassing-Guidelines.md";
     return Linking.openURL(url).catch(() => null);
   }
 
   _canvassUrlHandler() {
-    const url = "https://github.com/OurVoiceUSA/OVMobile/blob/master/docs/Canvassing.md";
+    const url = "https://github.com/OurVoiceUSA/HelloVoter/blob/master/docs/Canvassing.md";
     return Linking.openURL(url).catch(() => null);
   }
 
