@@ -568,7 +568,8 @@ function turfList(req, res) {
     return cqdo(req, res, 'match (a:Volunteer {id:{id}})-[:MEMBERS]-(b:Team)-[:ASSIGNED]-(c:Turf) return c UNION match (a:Volunteer {id:{id}})-[:ASSIGNED]-(c:Turf) return c{.id, .name, .created'+(geom?', .geometry':'')+'}', req.user);
 }
 
-function turfCreate(req, res) {
+async function turfCreate(req, res) {
+  if (!req.user.admin) return 403(res, "Permission denied.");
   if (!valid(req.body.name)) return _400(res, "Invalid value to parameter 'name'.");
   if (typeof req.body.geometry !== "object" || typeof req.body.geometry.coordinates !== "object") return _400(res, "Invalid value to parameter 'geometry'.");
 
@@ -584,12 +585,36 @@ function turfCreate(req, res) {
   req.body.turfId = uuidv4();
   req.body.author_id = req.user.id;
 
-  return cqdo(req, res, 'match (a:Volunteer {id:{author_id}}) create (b:Turf {id:{turfId}, created: timestamp(), name:{name}, geometry: {geometry}, wkt:{wkt}})-[:AUTHOR]->(a) WITH collect(b) AS t CALL spatial.addNodes(\'turf\', t) YIELD count return count', req.body, true);
+  try {
+    // create Turf
+    await cqa('match (a:Volunteer {id:{author_id}}) create (b:Turf {id:{turfId}, created: timestamp(), name:{name}, geometry: {geometry}, wkt:{wkt}})-[:AUTHOR]->(a) WITH collect(b) AS t CALL spatial.addNodes(\'turf\', t) YIELD count return count', req.body);
+
+    // TODO: enqueue these queries
+
+    // create Turf spatial index
+    await cqa('call spatial.addWKTLayer({turfId}, "wkt")', req.body);
+
+    // TODO: add Address nodes within Turf spatial to index in batches
+
+  } catch(e) {
+    return _500(res, e);
+  }
+
+  return res.json(req.body);
 }
 
-function turfDelete(req, res) {
+async function turfDelete(req, res) {
+  if (!req.user.admin) return 403(res, "Permission denied.");
   if (!valid(req.body.turfId)) return _400(res, "Invalid value to parameter 'turfId'.");
-  return cqdo(req, res, 'match (a:Turf {id:{turfId}}) detach delete a', req.body, true);
+  
+  try {
+    await cqa('match (a:Turf {id:{turfId}}) detach delete a', req.body);
+    await cqa('call spatial.removeLayer({turfId})', req.body);
+  } catch(e) {
+    return _500(res, e);
+  }
+
+  return res.json({});
 }
 
 function turfAssignedTeamList(req, res) {
