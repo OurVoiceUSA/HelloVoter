@@ -171,7 +171,7 @@ async function volunteerCanSee(ida, idb) {
 
 async function onMyTurf(ida, idb) {
   try {
-    let ref = await cqa('match (a:Volunteer {id:{ida}})-[:MEMBERS {leader:true}]-(:Team)-[]-(t:Turf) where t.wkt is not null call spatial.intersects("volunteer", t.wkt) yield node where node.id = {idb} return node', {ida: ida, idb: idb});
+    let ref = await cqa('match (a:Volunteer {id:{ida}})-[:MEMBERS {leader:true}]-(:Team)-[]-(t:Turf) where t.wkt is not null call spatial.intersects("volunteer", t.wkt) yield node where node.id = {idb} return node UNION match (a:Volunteer {id:{ida}})-[:MEMBERS {leader:true}]-(:Team)-[:MEMBERS]-(b:Volunteer {id:{idb}}) return b as node', {ida: ida, idb: idb});
     if (ref.data.length > 0) return true;
   } catch (e) {
     console.warn(e);
