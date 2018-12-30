@@ -99,7 +99,7 @@ export default class App extends Component {
     }
     this.setState({saving: false});
 
-    window.location.href = "/HelloVoter/#/teams/";
+    window.location.href = "/HelloVoterHQ/#/teams/";
     this._loadData();
   }
 
@@ -117,7 +117,7 @@ export default class App extends Component {
     }
     this.setState({saving: false});
 
-    window.location.href = "/HelloVoter/#/teams/";
+    window.location.href = "/HelloVoterHQ/#/teams/";
     this._loadData();
   }
 

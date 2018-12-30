@@ -1,10 +1,10 @@
 ## Introduction
 
-Our Voice USA is a 501(c)(3) non-profit, non-partisian organization for civic education. We are writing tools to engage everyday citizens with the political process by providing easy access to civic information that's relevant to the individual.
+Our Voice USA is a 501(c)(3) non-profit, non-partisan organization for civic education. We are writing tools to engage everyday citizens with the political process by providing easy access to civic information that's relevant to the individual.
 
 ## Features
 
-This is an administrative user interface for OVMobile and canvass-broker. Create teams, manage users, cut turf, and import data.
+This is an administrative user interface for HelloVoter and volunteer-broker. Create teams, manage users, cut turf, and import data.
 
 ## Development Setup
 

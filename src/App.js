@@ -257,7 +257,7 @@ class App extends Component {
         case 400:
           return {error: true, msg: "The server didn't understand the request sent from this device."};
         case 401:
-          window.location.href = sm_oauth_url+"/gm?app=HelloVoter";
+          window.location.href = sm_oauth_url+"/gm?app=HelloVoterHQ";
           return {error: false, flag: true};
         case 403:
           return {error: true, msg: "We're sorry, but your request to volunteer with this server has been rejected."};
@@ -324,7 +324,7 @@ class App extends Component {
                 noWrap
                 className={classes.title}
               >
-                <div style={{margin: 10}}>HelloVoter @ {server.hostname}</div>
+                <div style={{margin: 10}}>HelloVoterHQ @ {server.hostname}</div>
               </Typography>
               <Avatar alt="Remy Sharp" src={this.getUserProp('avatar')} className={classes.avatar} />
               {this.getUserProp('name')}
@@ -434,7 +434,7 @@ class App extends Component {
                   <ListItemText primary="About" />
                 </ListItem>
               </Link>
-              <a target="_blank" rel="noopener noreferrer" href="https://github.com/OurVoiceUSA/HelloVoter/tree/mast
+              <a target="_blank" rel="noopener noreferrer" href="https://github.com/OurVoiceUSA/HelloVoterHQ/tree/mast
   er/docs/">
                 <ListItem button>
                   <ListItemIcon>
@@ -493,7 +493,7 @@ const NoMatch = ({ location }) => (
       <br /><br />
       <code>{location.pathname}</code>
       <br /><br />
-      If you feel this page is in error, <a target="_blank" rel="noopener noreferrer" href="https://github.com/OurVoiceUSA/HelloVoter/issues/new">
+      If you feel this page is in error, <a target="_blank" rel="noopener noreferrer" href="https://github.com/OurVoiceUSA/HelloVoterHQ/issues/new">
       report an issue</a> and the coders will take a look.
     </div>
   </div>

@@ -181,7 +181,7 @@ export default class App extends Component {
     this.setState({saving: false});
 
     this._loadData();
-    window.location.href = "/HelloVoter/#/turf/";
+    window.location.href = "/HelloVoterHQ/#/turf/";
   }
 
   _createTurf = async () => {
@@ -248,7 +248,7 @@ export default class App extends Component {
     }
     this.setState({saving: false});
 
-    window.location.href = "/HelloVoter/#/turf/";
+    window.location.href = "/HelloVoterHQ/#/turf/";
     this._loadData();
   }
 

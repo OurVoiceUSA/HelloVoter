@@ -55,7 +55,7 @@ function LogIn(props) {
           <LockIcon />
         </Avatar>
         <Typography component="h1" variant="h5">
-          Sign in to HelloVoter
+          Sign in to HelloVoterHQ
         </Typography>
         <form className={classes.form} onSubmit={(e) => { e.preventDefault(); props.refer.doSave(e); }} >
           <FormControl margin="normal" required fullWidth>

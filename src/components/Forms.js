@@ -252,7 +252,7 @@ export default class App extends Component {
     }
     this.setState({saving: false});
 
-    window.location.href = "/HelloVoter/#/forms/";
+    window.location.href = "/HelloVoterHQ/#/forms/";
     this._loadData();
   }
 
@@ -295,7 +295,7 @@ export default class App extends Component {
     }
     this.setState({saving: false});
 
-    window.location.href = "/HelloVoter/#/forms/";
+    window.location.href = "/HelloVoterHQ/#/forms/";
     this._loadData();
   }
 
