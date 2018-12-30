@@ -326,8 +326,11 @@ class App extends Component {
               >
                 <div style={{margin: 10}}>HelloVoterHQ @ {server.hostname}</div>
               </Typography>
-              <Avatar alt="Remy Sharp" src={this.getUserProp('avatar')} className={classes.avatar} />
-              {this.getUserProp('name')}
+              <Avatar
+                alt="Remy Sharp"
+                src={this.getUserProp('avatar')}
+                className={classes.avatar}
+                onClick={() => window.location.href='/HelloVoterHQ/#/volunteers/view/'+this.getUserProp('id')} />
             </Toolbar>
           </AppBar>
           <Drawer
