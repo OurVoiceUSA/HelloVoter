@@ -2,7 +2,7 @@
   "name": "HelloVoterHQ",
   "version": "0.1.0",
   "private": true,
-  "homepage": "/HelloVoter",
+  "homepage": "/HelloVoterHQ",
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.12",
     "@fortawesome/free-brands-svg-icons": "^5.6.3",
