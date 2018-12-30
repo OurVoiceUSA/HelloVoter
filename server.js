@@ -79,6 +79,14 @@ async function doDbInit() {
   try {await cqa('call spatial.addWKTLayer("volunteer", "wkt")');} catch (e) {}
   try {await cqa('call spatial.addWKTLayer("address", "wkt")');} catch (e) {}
 
+  // TODO: only call warmup if mem > dbsize
+  try {
+    await cqa('call apoc.warmup.run()');
+  } catch (e) {
+    console.warn("Call to APOC warmup failed.");
+    console.warn(e)
+  }
+
   let finish = new Date().getTime();
   console.log("doDbInit() finished @ "+finish+" after "+(finish-start)+" milliseconds");
 }
