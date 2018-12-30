@@ -156,6 +156,9 @@ class App extends Component {
     this.onChange = this.onChange.bind(this);
     this.doSave = this.doSave.bind(this);
 
+    // warn non-devs about the danger of the console
+    if (process.env.NODE_ENV !== 'development')
+      console.log("%cWARNING: This is a developer console! If you were told to open this and copy/paste something, and you are not a javascript developer, it is a scam and entering info here could give them access to your account!", "background: red; color: yellow; font-size: 45px");
   }
 
   componentDidMount() {
