@@ -64,6 +64,9 @@ cqa('return timestamp()').catch((e) => {console.error("Unable to connect to data
 });
 
 async function doDbInit() {
+  let start = new Date().getTime();
+  console.log("doDbInit() started @ "+start);
+
   await cqa('create constraint on (a:Volunteer) assert a.id is unique');
   await cqa('create constraint on (a:Team) assert a.name is unique');
   await cqa('create constraint on (a:Turf) assert a.name is unique');
@@ -75,6 +78,9 @@ async function doDbInit() {
   try {await cqa('call spatial.addWKTLayer("turf", "wkt")');} catch (e) {}
   try {await cqa('call spatial.addWKTLayer("volunteer", "wkt")');} catch (e) {}
   try {await cqa('call spatial.addWKTLayer("address", "wkt")');} catch (e) {}
+
+  let finish = new Date().getTime();
+  console.log("doDbInit() finished @ "+finish+" after "+(finish-start)+" milliseconds");
 }
 
 function getConfig(item, required, def) {
