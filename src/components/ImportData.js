@@ -312,7 +312,7 @@ File selection can be donw with:
 
           <div>
             <div style={{display: 'flex'}}>
-              <div style={{width: 150}}>Joy Awesome</div>
+              <div style={{width: 150}}>Joy B. Awesome</div>
             </div>
             <br />
             <div style={{display: 'flex'}}>
