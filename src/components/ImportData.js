@@ -136,7 +136,7 @@ OLD CODE
         onFileLoaded={this.preProcess}
       />
       <br />
-      <h3>Select a file to get to the next menu!</h3>
+      <h3>Select a CSV file to get to the next menu!</h3>
       (Also want the user to be able to drag&drop files.)
     </div>
   );
