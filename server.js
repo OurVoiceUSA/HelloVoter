@@ -77,8 +77,8 @@ async function doDbInit() {
   await cqa('create constraint on (a:Unit) assert a.id is unique');
   await cqa('create constraint on (a:Survey) assert a.id is unique');
   try {await cqa('call spatial.addWKTLayer("turf", "wkt")');} catch (e) {}
-  try {await cqa('call spatial.addWKTLayer("volunteer", "simplepoint")');} catch (e) {}
   try {await cqa('call spatial.addWKTLayer("region", "wkt")');} catch (e) {}
+  try {await cqa('call spatial.addPointLayerXY("volunteer", "homelng", "homelat");');} catch (e) {}
 
   // regions with no shapes
   delete us_states.FM;
@@ -95,7 +95,7 @@ async function doDbInit() {
         let res = await fetch('https://raw.githubusercontent.com/OurVoiceUSA/districts/gh-pages/states/'+state+'/shape.geojson');
         let geometry = await res.json();
         let wkt = wkx.Geometry.parseGeoJSON(geometry).toEwkt().split(';')[1];
-        await cqa('call spatial.addWKTLayer({region}, "simplepoint")', {region: region});
+        await cqa('call spatial.addPointLayerXY({region}, "lng", "lat");', {region: region});
         await cqa('create (a:Region {name:{state}, region:{region}, geometry: {geometry}, wkt:{wkt}}) with collect(a) as nodes call spatial.addNodes("region", nodes) yield count return count', {state: state, region: region, geometry: JSON.stringify(geometry), wkt: wkt});
       }
     } catch (e) {
