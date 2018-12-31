@@ -78,7 +78,7 @@ async function doDbInit() {
   await cqa('create constraint on (a:Survey) assert a.id is unique');
   try {await cqa('call spatial.addWKTLayer("turf", "wkt")');} catch (e) {}
   try {await cqa('call spatial.addWKTLayer("region", "wkt")');} catch (e) {}
-  try {await cqa('call spatial.addPointLayerXY("address", "homelng", "homelat");');} catch (e) {}
+  try {await cqa('call spatial.addPointLayerXY("address", "lng", "lat");');} catch (e) {}
   try {await cqa('call spatial.addPointLayerXY("volunteer", "homelng", "homelat");');} catch (e) {}
 
   // regions with no shapes
