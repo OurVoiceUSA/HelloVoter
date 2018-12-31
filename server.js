@@ -630,9 +630,11 @@ async function turfCreate(req, res) {
     // TODO: enqueue these queries
 
     // create Turf spatial index
-    await cqa('call spatial.addWKTLayer({turfId}, "wkt")', req.body);
+    await cqa('call spatial.addPointLayerXY({turfId}, "lng", "lat")', req.body);
 
-    // TODO: add Address nodes within Turf spatial to index in batches
+    // add Address nodes within Turf spatial to index
+    // TODO: this is very heap intensive on large data sets, and can run the database out of memory
+    await cqa('match (a:Turf {id:{turfId}}) call spatial.intersects("address", a.wkt) yield node with collect(node) as nodes call spatial.addNodes({turfId}, nodes) yield count return count', req.body);
 
   } catch(e) {
     return _500(res, e);
