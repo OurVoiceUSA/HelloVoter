@@ -1,11 +1,19 @@
 import React, { Component } from 'react';
 
 import CSVReader from 'react-csv-reader';
+import Select from 'react-select';
+
+import Checkbox from '@material-ui/core/Checkbox';
+
 import t from 'tcomb-form';
 
 import CircularProgress from '@material-ui/core/CircularProgress';
 
-import { notify_error, notify_success } from '../common.js';
+import { notify_error, notify_success, Icon } from '../common.js';
+
+import {
+  faFileCsv,
+} from '@fortawesome/free-solid-svg-icons';
 
 const HEADER = t.enums({
   'address1': 'Address 1',
@@ -115,12 +123,187 @@ export default class App extends Component {
         );
     }
 
+
+/*
+
+NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
+NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
+
+File selection can be donw with:
+
+<CSVReader
+  label="Data Importa"
+  onError={this.preProcessError}
+  onFileLoaded={this.preProcess}
+/>
+
+*/
+
     return (
-      <CSVReader
-        label="Data Importa"
-        onError={this.preProcessError}
-        onFileLoaded={this.preProcess}
-      />
+      <div>
+
+        <div style={{display: 'flex'}}>
+          <h3>Import Data</h3> &nbsp;&nbsp;&nbsp;
+          <Icon icon={faFileCsv} size="3x" />
+        </div>
+
+        <div style={{display: 'flex'}}>
+
+          <div style={{width: 150}}>Name:</div> <div style={{width: 450}}><Select
+            value={[
+              {value: 1, label: "First Name"},
+              {value: 1, label: "Middle Initial"},
+              {value: 1, label: "Last Name"},
+            ]}
+            isMulti={true}
+            placeholder="None"
+          /></div>
+          <Checkbox value="ack" color="primary" />
+        </div>
+
+        <div style={{display: 'flex'}}>
+
+          <div style={{width: 150}}>Street Address:</div> <div style={{width: 450}}><Select
+            value={[
+              {value: 1, label: "Street #"},
+              {value: 1, label: "Street Name"},
+            ]}
+            isMulti={true}
+            placeholder="None"
+          /></div>
+          <Checkbox value="ack" color="primary" />
+        </div>
+
+        <div style={{display: 'flex'}}>
+
+          <div style={{width: 150}}>City</div> <div style={{width: 450}}><Select
+            value={[
+              {value: 1, label: "City Name"},
+            ]}
+            isMulti={true}
+            placeholder="None"
+          /></div>
+          <Checkbox value="ack" color="primary" />
+        </div>
+
+        <div style={{display: 'flex'}}>
+
+          <div style={{width: 150}}>State</div> <div style={{width: 450}}><Select
+            value={[
+            ]}
+            isMulti={true}
+            placeholder="None"
+          /></div>
+          <Checkbox value="ack" color="primary" />
+        </div>
+
+        <div style={{display: 'flex'}}>
+
+          <div style={{width: 150}}>Zip</div> <div style={{width: 450}}><Select
+            value={[
+              {value: 1, label: "Postal Code"},
+            ]}
+            isMulti={true}
+            placeholder="None"
+          /></div>
+          <Checkbox value="ack" color="primary" />
+        </div>
+
+        <div style={{display: 'flex'}}>
+
+          <div style={{width: 150}}>Country</div> <div style={{width: 450}}><Select
+            value={[
+            ]}
+            isMulti={true}
+            placeholder="None"
+          /></div>
+          <Checkbox value="ack" color="primary" />
+        </div>
+
+        <div style={{display: 'flex'}}>
+
+          <div style={{width: 150}}>Longitude</div> <div style={{width: 450}}><Select
+            value={[
+              {value: 1, label: "Position"},
+            ]}
+            isMulti={true}
+            placeholder="None"
+          /></div>
+          <Checkbox value="ack" color="primary" checked />
+          <div style={{width: 200}}><Select
+            value={[
+              {value: 1, label: "delimited by space"},
+            ]}
+            placeholder="None"
+          /></div>
+          <div style={{width: 150}}><Select
+            value={[
+              {value: 1, label: "1st value"},
+            ]}
+            placeholder="None"
+          /></div>
+
+        </div>
+
+        <div style={{display: 'flex'}}>
+
+          <div style={{width: 150}}>Latitude</div> <div style={{width: 450}}><Select
+            value={[
+              {value: 1, label: "Position"},
+            ]}
+            isMulti={true}
+            placeholder="None"
+          /></div>
+          <Checkbox value="ack" color="primary" checked />
+          <div style={{width: 200}}><Select
+            value={[
+              {value: 1, label: "delimited by space"},
+            ]}
+            placeholder="None"
+          /></div>
+          <div style={{width: 150}}><Select
+            value={[
+              {value: 1, label: "2st value"},
+            ]}
+            placeholder="None"
+          /></div>
+
+        </div>
+
+        <h3>Sample Record based on selection</h3>
+
+        <div style={{display: 'flex'}}>
+          <div style={{width: 150}}>Name:</div> <div>Joe Average</div>
+        </div>
+        <br />
+        <div style={{display: 'flex'}}>
+          <div style={{width: 150}}>Street Address:</div> <div>838 Wilshire Pl</div>
+        </div>
+        <br />
+        <div style={{display: 'flex'}}>
+          <div style={{width: 150}}>City:</div> <div>Salt Lake City</div>
+        </div>
+        <br />
+        <div style={{display: 'flex'}}>
+          <div style={{width: 150}}>State:</div> <div>NULL</div>
+        </div>
+        <br />
+        <div style={{display: 'flex'}}>
+          <div style={{width: 150}}>Zip:</div> <div>84102</div>
+        </div>
+        <br />
+        <div style={{display: 'flex'}}>
+          <div style={{width: 150}}>Country:</div> <div>NULL</div>
+        </div>
+        <br />
+        <div style={{display: 'flex'}}>
+          <div style={{width: 150}}>Longitude:</div> <div>-111.8688189</div>
+        </div>
+        <br />
+        <div style={{display: 'flex'}}>
+          <div style={{width: 150}}>Latitude</div> <div>40.7554569</div>
+        </div>
+      </div>
     );
   }
 }
