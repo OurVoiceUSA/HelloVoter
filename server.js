@@ -10,7 +10,7 @@ import jwt from 'jsonwebtoken';
 import bodyParser from 'body-parser';
 import http from 'http';
 import fs from 'fs';
-import {ingeojson} from 'ourvoiceusa-sdk-js';
+import {ingeojson, asyncForEach, us_states} from 'ourvoiceusa-sdk-js';
 import circleToPolygon from 'circle-to-polygon';
 import wkx from 'wkx';
 import neo4j from 'neo4j-driver';
@@ -70,14 +70,38 @@ async function doDbInit() {
   await cqa('create constraint on (a:Volunteer) assert a.id is unique');
   await cqa('create constraint on (a:Team) assert a.name is unique');
   await cqa('create constraint on (a:Turf) assert a.name is unique');
+  await cqa('create constraint on (a:Region) assert a.region is unique');
   await cqa('create constraint on (a:Form) assert a.id is unique');
   await cqa('create constraint on (a:Question) assert a.key is unique');
   await cqa('create constraint on (a:Address) assert a.id is unique');
   await cqa('create constraint on (a:Unit) assert a.id is unique');
   await cqa('create constraint on (a:Survey) assert a.id is unique');
   try {await cqa('call spatial.addWKTLayer("turf", "wkt")');} catch (e) {}
-  try {await cqa('call spatial.addWKTLayer("volunteer", "wkt")');} catch (e) {}
-  try {await cqa('call spatial.addWKTLayer("address", "wkt")');} catch (e) {}
+  try {await cqa('call spatial.addWKTLayer("volunteer", "simplepoint")');} catch (e) {}
+  try {await cqa('call spatial.addWKTLayer("region", "wkt")');} catch (e) {}
+
+  // regions with no shapes
+  delete us_states.FM;
+  delete us_states.MH;
+  delete us_states.PW;
+
+  // create a region layer for each item in us_states
+  await asyncForEach(Object.keys(us_states), async (state) => {
+    try {
+      let region = 'region_'+state.toLowerCase();
+      let ref = await cqa('match (a {layer:{region}})-[:LAYER]-(:ReferenceNode {name:"spatial_root"}) return a', {region: region});
+      if (ref.data.length === 0) {
+        console.log("Creating region for "+state);
+        let res = await fetch('https://raw.githubusercontent.com/OurVoiceUSA/districts/gh-pages/states/'+state+'/shape.geojson');
+        let geometry = await res.json();
+        let wkt = wkx.Geometry.parseGeoJSON(geometry).toEwkt().split(';')[1];
+        await cqa('call spatial.addWKTLayer({region}, "simplepoint")', {region: region});
+        await cqa('create (a:Region {name:{state}, region:{region}, geometry: {geometry}, wkt:{wkt}}) with collect(a) as nodes call spatial.addNodes("region", nodes) yield count return count', {state: state, region: region, geometry: JSON.stringify(geometry), wkt: wkt});
+      }
+    } catch (e) {
+      console.warn(e);
+    }
+  });
 
   // TODO: only call warmup if mem > dbsize
   try {
