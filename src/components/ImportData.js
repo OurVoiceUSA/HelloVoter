@@ -91,6 +91,10 @@ export default class App extends Component {
 
     if (this.state.loading) return (<CircularProgress />);
 
+/*
+
+OLD CODE
+
     if (this.state.headers.length) {
       let obj = {};
 
@@ -122,22 +126,20 @@ export default class App extends Component {
         </div>
         );
     }
-
-
-/*
-
-NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
-NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
-
-File selection can be donw with:
-
-<CSVReader
-  label="Data Importa"
-  onError={this.preProcessError}
-  onFileLoaded={this.preProcess}
-/>
-
 */
+
+  if (!this.state.headers.length) return (
+    <div>
+      <CSVReader
+        label="Data Importa"
+        onError={this.preProcessError}
+        onFileLoaded={this.preProcess}
+      />
+      <br />
+      <h3>Select a file to get to the next menu!</h3>
+      (Also want the user to be able to drag&drop files.)
+    </div>
+  );
 
     return (
       <div>
