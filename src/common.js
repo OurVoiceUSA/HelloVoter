@@ -9,6 +9,8 @@ import {NotificationManager} from 'react-notifications';
 import Modal from '@material-ui/core/Modal';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
+import { mockFetch } from './mocks.js';
+
 export function notify_success(msg) {
   NotificationManager.success(msg, 'Success', 3000);
 }
@@ -19,15 +21,13 @@ export function notify_error(e, msg) {
 }
 
 export async function _fetch(server, uri, method, body) {
+  if (server.mock) return mockFetch(server.jwt, uri, method, body);
+
   if (!method) method = 'GET';
 
   if (!server.hostname) {
     notify_error({}, "API server definition error.");
     return;
-  }
-
-  if (server.mock) {
-    throw "MOCKED";
   }
 
   let res = await fetch('https://'+server.hostname+uri, {

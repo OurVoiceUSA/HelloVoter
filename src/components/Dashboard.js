@@ -40,7 +40,7 @@ export default class App extends Component {
       <RootLoader flag={this.state.loading} func={this._loadData}>
         <CardDashboard name="Volunteers" stat={this.state.data.volunteers} icon={faUser} />
         <CardDashboard name="Teams" stat={this.state.data.teams} icon={faUsers} />
-        <CardDashboard name="Turf" stat={this.state.data.turfs} icon={faMap} />
+        <CardDashboard name="Turfs" stat={this.state.data.turfs} icon={faMap} />
         <CardDashboard name="Forms" stat={this.state.data.forms} icon={faClipboard} />
         <CardDashboard name="Questions" stat={this.state.data.questions} icon={faChartPie} />
         <CardDashboard name="Addresses" stat={(<NumberFormat value={this.state.data.addresses} displayType={'text'} thousandSeparator={true} />)} icon={faMapMarkerAlt} />

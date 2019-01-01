@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 
 import Select from 'react-select';
 
+import { mocked_users } from '../mocks.js';
+
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -103,15 +105,7 @@ const ServerLiveOrMocked = (props) => {
 
   if (props.mock) return (
     <Select
-      options={[
-        {value: {"id": "test:admin", "name": "Administrator", "avatar": "https://cdn0.iconfinder.com/data/icons/viking-2/500/viking_4-512.png"}, label: "Administrator"},
-        {value: {"id": "test:regionleader", "name": "Team A Leader", "avatar": "https://cdn.iconscout.com/icon/premium/png-256-thumb/thor-3-159482.png"}, label: "Region Leader"},
-        {value: {"id": "test:teamaleader", "name": "Team A Leader", "avatar": "https://cdn.iconscout.com/icon/premium/png-256-thumb/thor-3-159482.png"}, label: "Team A Leader"},
-        {value: {"id": "test:teambleader", "name": "Team B Leader", "avatar": "https://cdn.iconscout.com/icon/premium/png-256-thumb/thor-3-159482.png"}, label: "Team B Leader"},
-        {value: {"id": "test:teamamember", "name": "Team A Member", "avatar": "https://d1nhio0ox7pgb.cloudfront.net/_img/o_collection_png/green_dark_grey/256x256/plain/chess_piece_rook.png"}, label: "Team A Member"},
-        {value: {"id": "test:teambmember", "name": "Team B Member", "avatar": "https://d1nhio0ox7pgb.cloudfront.net/_img/o_collection_png/green_dark_grey/256x256/plain/chess_piece_rook.png"}, label: "Team B Member"},
-        {value: {"id": "test:solo", "name": "Team C Member", "avatar": "http://comic-cons.xyz/wp-content/uploads/Star-Wars-avatars-Movie-Han-Solo-Harrison-Ford.jpg"}, label: "Solo Volunteer"},
-      ]}
+      options={mocked_users}
       placeholder="Choose a user to mock"
       onChange={(obj) => props.refer.setState({user: obj.value})}
     />

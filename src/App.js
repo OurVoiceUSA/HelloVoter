@@ -166,13 +166,19 @@ class App extends Component {
   }
 
   _loadData = async (jwt) => {
+    let mock = false;
+
     if (jwt)
       localStorage.setItem('jwt', jwt);
+
+    let hostname = localStorage.getItem('server');
+    if (hostname === "npm start") mock = true;
 
     this.setState({
       server: {
         hostname: localStorage.getItem('server'),
         jwt: (jwt?jwt:localStorage.getItem('jwt')),
+        mock: mock,
       },
     });
 
@@ -231,7 +237,7 @@ class App extends Component {
     // mocked user
     if (user) {
       let token = jwt.sign(user, 'shhhhh');
-      localStorage.setItem('server', "mocked");
+      localStorage.setItem('server', "npm start");
       localStorage.setItem('jwt', token);
       this.setState({server: {
         hostname: "npm start",
