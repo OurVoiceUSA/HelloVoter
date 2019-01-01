@@ -5,8 +5,6 @@ import Select from 'react-select';
 
 import Checkbox from '@material-ui/core/Checkbox';
 
-import t from 'tcomb-form';
-
 import CircularProgress from '@material-ui/core/CircularProgress';
 
 import { notify_error, notify_success, Icon } from '../common.js';
@@ -14,14 +12,6 @@ import { notify_error, notify_success, Icon } from '../common.js';
 import {
   faFileCsv,
 } from '@fortawesome/free-solid-svg-icons';
-
-const HEADER = t.enums({
-  'address1': 'Address 1',
-  'address2': 'Address 2',
-  'city': 'City',
-  'state': 'State',
-  'zip': 'Zip Code',
-}, 'HEADER');
 
 export default class App extends Component {
 
@@ -49,35 +39,6 @@ export default class App extends Component {
   onHeadersSubmit = (evt) => {
     evt.preventDefault();
 
-  /*
-    const value = this.refs.form.getValue();
-
-    if (value) {
-      // required import fields
-      let address1 = null;
-      let address2 = null;
-      let city = null;
-      let state = null;
-      let zip = null;
-
-      for (let val in value) {
-        let v = value[val];
-        if (v === 'address1') address1 = val;
-        if (v === 'address2') address2 = val;
-        if (v === 'city') city = val;
-        if (v === 'state') state = val;
-        if (v === 'zip') zip = val;
-      }
-
-      if (address1 == null || address2 == null || city == null || state == null || zip == null) {
-        this.setState({formError: 'All address elements must be assigned'});
-        return;
-      }
-
-      this.processData(address1, address2, city, state, zip);
-    }
-  */
-
     this.setState({loading: true});
     // fake data loaded after 3 seconds
     setTimeout(() => {
@@ -91,55 +52,18 @@ export default class App extends Component {
 
     if (this.state.loading) return (<CircularProgress />);
 
-/*
-
-OLD CODE
-
-    if (this.state.headers.length) {
-      let obj = {};
-
-      let FormOptions = {fields: {}};
-
-      for (let h in this.state.headers) {
-        obj[h] = t.maybe(HEADER);
-        FormOptions.fields[h] = {label: this.state.headers[h]};
-      }
-
-      let FormSchema = t.struct(obj);
-
-      return (
-        <div>
-          Assign each header to its data type <br />
-
-          <form onSubmit={this.onHeadersSubmit}>
-            <t.form.Form ref="form" type={FormSchema} options={FormOptions} />
-            <div className="form-group">
-              <button type="submit" className="btn btn-primary">Save</button>
-            </div>
-          </form>
-
-          <hr />
-            NOTE: This import tool does not work on all spreadsheet files, as there is no standard format.
-            We do our best to accommodate the most common patterns. Contact someone you know who's
-            good with Microsoft&copy; Excel or LibreOffice&copy; and they can reformat your spreadsheet
-            file so it works with this import tool.
-        </div>
-        );
-    }
-*/
-
-  if (!this.state.headers.length) return (
-    <div>
-      <CSVReader
-        label="Data Importa"
-        onError={this.preProcessError}
-        onFileLoaded={this.preProcess}
-      />
-      <br />
-      <h3>Select a CSV file to get to the next menu!</h3>
-      (Also want the user to be able to drag&drop files.)
-    </div>
-  );
+    if (!this.state.headers.length) return (
+      <div>
+        <CSVReader
+          label="Data Importa"
+          onError={this.preProcessError}
+          onFileLoaded={this.preProcess}
+        />
+        <br />
+        <h3>Select a CSV file to get to the next menu!</h3>
+        (Also want the user to be able to drag&drop files.)
+      </div>
+    );
 
     return (
       <div>
