@@ -130,6 +130,21 @@ const mock_solo_volunteer = {
     teamperms: [],
     forms: [form_a],
 }};
+const mock_denied = {
+  id: "test:denied",
+  locked: true,
+  name: "Denied Volunteer",
+  avatar: "https://cdn1.iconfinder.com/data/icons/users-vol-3/32/user-man-lock-block-512.png",
+  homeaddress: "Who cares?",
+  ass: {
+    ready: false,
+    direct: false,
+    turf: [],
+    teams: [],
+    teamperms: [],
+    forms: [],
+  }
+}
 
 export const mocked_users = [
   {value: mock_admin, label: mock_admin.name},
@@ -139,6 +154,7 @@ export const mocked_users = [
   {value: mock_team_b_leader, label: mock_team_b_leader.name},
   {value: mock_team_b_member, label: mock_team_b_member.name},
   {value: mock_solo_volunteer, label: mock_solo_volunteer.name},
+  {value: mock_denied, label: mock_denied.name},
 ];
 
 export async function mockFetch(token, uri, method, body) {
@@ -153,21 +169,21 @@ export async function mockFetch(token, uri, method, body) {
   switch (user.id) {
     case "test:admin":
       volunteer = mock_admin;
-      volunteers = [mock_admin, mock_region_leader, mock_team_a_leader, mock_team_b_leader, mock_team_a_member, mock_team_b_member, mock_solo_volunteer];
+      volunteers = [mock_admin, mock_region_leader, mock_team_a_leader, mock_team_b_leader, mock_team_a_member, mock_team_b_member, mock_solo_volunteer, mock_denied];
       teams = [team_a, team_b];
       turfs = [turf_region, turf_a, turf_b];
       forms = [form_a, form_b];
       break;
     case "test:regionleader":
       volunteer = mock_region_leader;
-      volunteers = [mock_region_leader, mock_team_a_leader, mock_team_b_leader, mock_team_a_member, mock_team_b_member, mock_solo_volunteer];
+      volunteers = [mock_region_leader, mock_team_a_leader, mock_team_b_leader, mock_team_a_member, mock_team_b_member, mock_solo_volunteer, mock_denied];
       teams = [team_a, team_b];
       turfs = [turf_region, turf_a, turf_b];
       forms = [form_a, form_b];
       break;
     case "test:teamaleader":
       volunteer = mock_team_a_leader;
-      volunteers = [mock_team_a_leader, mock_team_a_member, mock_solo_volunteer];
+      volunteers = [mock_team_a_leader, mock_team_a_member, mock_solo_volunteer, mock_denied];
       teams = [team_a];
       turfs = [turf_a];
       forms = volunteer.ass.forms;
