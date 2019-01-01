@@ -41,7 +41,7 @@ export async function _fetch(server, uri, method, body) {
 
   if (res.status >= 400) throw new Error(await res.text());
 
-  return res;
+  return res.json();
 }
 
 export function _browserLocation(props) {
@@ -98,8 +98,7 @@ export function _searchStringify(obj) {
 export async function _loadVolunteer(refer, id) {
   let volunteer = {};
   try {
-    let res = await _fetch(refer.state.server, '/volunteer/v1/volunteer/get?id='+id);
-    volunteer = await res.json();
+    volunteer = await _fetch(refer.state.server, '/volunteer/v1/volunteer/get?id='+id);
   } catch (e) {
     notify_error(e, "Unable to load volunteer info.");
   }
@@ -116,8 +115,7 @@ export async function _loadVolunteers(refer, byType, id) {
     else if (byType === 'turf') call = 'turf/assigned/volunteer/list?turfId='+id;
     else if (byType === 'form') call = 'form/assigned/volunteer/list?formId='+id;
 
-    let res = await _fetch(refer.props.server, '/volunteer/v1/'+call);
-    volunteers = await res.json();
+    volunteers = await _fetch(refer.props.server, '/volunteer/v1/'+call);
   } catch (e) {
     notify_error(e, "Unable to load volunteer data.");
   }
@@ -129,8 +127,7 @@ export async function _loadTurf(refer, id) {
   let turf = {};
 
   try {
-    let res = await _fetch(refer.state.server, '/volunteer/v1/turf/get?turfId='+id);
-    turf = await res.json();
+    turf = await _fetch(refer.state.server, '/volunteer/v1/turf/get?turfId='+id);
   } catch (e) {
     notify_error(e, "Unable to load turf data.");
   }
@@ -144,8 +141,7 @@ export async function _loadTurfs(refer, teamId, flag) {
   try {
     let call = 'turf/list'+(flag?'?geometry=true':'');
     if (teamId) call = 'team/turf/list?teamId='+teamId+(flag?'&geometry=true':'');
-    let res = await _fetch(refer.props.server, '/volunteer/v1/'+call);
-    let data = await res.json();
+    let data = await _fetch(refer.props.server, '/volunteer/v1/'+call);
     turf = (data.data?data.data:[]);
   } catch (e) {
     notify_error(e, "Unable to load turf data.");
@@ -158,8 +154,7 @@ export async function _loadTeam(refer, id) {
   let team = {};
 
   try {
-    let res = await _fetch(refer.state.server, '/volunteer/v1/team/get?teamId='+id);
-    team = await res.json();
+    team = await _fetch(refer.state.server, '/volunteer/v1/team/get?teamId='+id);
   } catch (e) {
     notify_error(e, "Unable to load team data.");
   }
@@ -176,8 +171,7 @@ export async function _loadTeams(refer, byType, id) {
     if (byType === 'turf') call = 'turf/assigned/team/list?turfId='+id;
     else if (byType === 'form') call = 'form/assigned/team/list?formId='+id
 
-    let res = await _fetch(refer.props.server, '/volunteer/v1/'+call);
-    let data = await res.json();
+    let data = await _fetch(refer.props.server, '/volunteer/v1/'+call);
     teams = (data.data?data.data:[]);
   } catch (e) {
     notify_error(e, "Unable to load teams data.");
@@ -190,8 +184,7 @@ export async function _loadForm(refer, id) {
   let form = {};
 
   try {
-    let res = await _fetch(refer.state.server, '/volunteer/v1/form/get?formId='+id);
-    form = await res.json();
+    form = await _fetch(refer.state.server, '/volunteer/v1/form/get?formId='+id);
   } catch (e) {
     notify_error(e, "Unable to load form data.");
   }
@@ -208,8 +201,7 @@ export async function _loadForms(refer, teamId) {
     if (teamId) uri = 'team/form/list?teamId='+teamId;
     else uri = 'form/list';
 
-    let res = await _fetch(refer.props.server, '/volunteer/v1/'+uri);
-    let data = await res.json();
+    let data = await _fetch(refer.props.server, '/volunteer/v1/'+uri);
     forms = (data.data?data.data:[]);
   } catch (e) {
     notify_error(e, "Unable to load form data.");
@@ -221,8 +213,7 @@ export async function _loadForms(refer, teamId) {
 export async function _loadAddresses(refer) {
   let addresses = {};
   try {
-    let res = await _fetch(refer.props.server, '/volunteer/v1/sync', 'POST', {nodes: {}});
-    addresses = await res.json();
+    addresses = await _fetch(refer.props.server, '/volunteer/v1/sync', 'POST', {nodes: {}});
   } catch (e) {
     notify_error(e, "Unable to load address information.");
   }

@@ -27,9 +27,7 @@ export default class App extends Component {
     this.setState({loading: true})
 
     try {
-      let res = await _fetch(this.props.server, '/volunteer/v1/dashboard');
-
-      data = await res.json();
+      data = await _fetch(this.props.server, '/volunteer/v1/dashboard');
     } catch (e) {
       notify_error(e, "Unable to load dashboard info.");
     }

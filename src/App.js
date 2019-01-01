@@ -184,8 +184,7 @@ class App extends Component {
     // don't load if already loaded
     if (this.state.google_maps_key) return;
 
-    let res = await _fetch(this.state.server, '/volunteer/v1/google_maps_key');
-    let data = await res.json();
+    let data = await _fetch(this.state.server, '/volunteer/v1/google_maps_key');
 
     // load google places API
     var aScript = document.createElement('script');

@@ -20,9 +20,7 @@ export default class App extends Component {
   componentDidMount = async () => {
     let data = {};
     try {
-      let res = await _fetch(this.props.server, '/volunteer/v1/dashboard');
-
-      data = await res.json();
+      let data = await _fetch(this.props.server, '/volunteer/v1/dashboard');
     } catch (e) {
       notify_error(e, "Unable to load dashboard info.");
     }
