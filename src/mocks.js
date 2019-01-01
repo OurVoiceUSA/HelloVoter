@@ -4,6 +4,8 @@ const sleep = m => new Promise(r => setTimeout(r, m));
 
 const team_a = {id: "test:teama", name: "Team A"};
 const team_b = {id: "test:teamb", name: "Team B"};
+const form_a = {id: "test:forma", name: "Form A"};
+const form_b = {id: "test:formb", name: "Form B"};
 
 const mock_admin = {
   "id": "test:admin",
@@ -39,7 +41,7 @@ const mock_team_a_leader = {
     turf: [],
     teams: [team_a],
     teamperms: [{leader: true}],
-    forms: [],
+    forms: [form_a],
 }};
 const mock_team_b_leader = {
   "id": "test:teambleader",
@@ -51,7 +53,7 @@ const mock_team_b_leader = {
     turf: [],
     teams: [team_b],
     teamperms: [{leader: true}],
-    forms: [],
+    forms: [form_b],
 }};
 const mock_team_a_member = {
   "id": "test:teamamember",
@@ -63,7 +65,7 @@ const mock_team_a_member = {
     turf: [],
     teams: [team_a],
     teamperms: [{}],
-    forms: [],
+    forms: [form_a],
 }};
 const mock_team_b_member = {
   "id": "test:teambmember",
@@ -75,7 +77,7 @@ const mock_team_b_member = {
     turf: [team_b],
     teams: [],
     teamperms: [{}],
-    forms: [],
+    forms: [form_b],
 }};
 const mock_solo_volunteer = {
   "id": "test:solo",
@@ -83,11 +85,11 @@ const mock_solo_volunteer = {
   "avatar": "http://comic-cons.xyz/wp-content/uploads/Star-Wars-avatars-Movie-Han-Solo-Harrison-Ford.jpg",
   ass: {
     ready: true,
-    direct: false,
+    direct: true,
     turf: [],
     teams: [],
     teamperms: [],
-    forms: [],
+    forms: [form_a],
 }};
 
 export const mocked_users = [
@@ -101,7 +103,7 @@ export const mocked_users = [
 ];
 
 export async function mockFetch(token, uri, method, body) {
-  let dashboard, volunteers, teams;
+  let id, dashboard, volunteer, volunteers, teams, forms;
 
   // fake wait time
   await sleep(500);
@@ -111,32 +113,46 @@ export async function mockFetch(token, uri, method, body) {
   // define test data based on user
   switch (user.id) {
     case "test:admin":
+      volunteer = mock_admin;
       volunteers = [mock_admin, mock_region_leader, mock_team_a_leader, mock_team_b_leader, mock_team_a_member, mock_team_b_member, mock_solo_volunteer];
       teams = [team_a, team_b];
+      forms = [form_a, form_b];
       break;
     case "test:regionleader":
+      volunteer = mock_region_leader;
       volunteers = [mock_region_leader, mock_team_a_leader, mock_team_b_leader, mock_team_a_member, mock_team_b_member, mock_solo_volunteer];
       teams = [team_a, team_b];
+      forms = [form_a, form_b];
       break;
     case "test:teamaleader":
+      volunteer = mock_team_a_leader;
       volunteers = [mock_team_a_leader, mock_team_a_member, mock_solo_volunteer];
       teams = [team_a];
+      forms = volunteer.ass.forms;
       break;
     case "test:teambleader":
+      volunteer = mock_team_b_leader;
       volunteers = [mock_team_b_leader, mock_team_b_member];
       teams = [team_b];
+      forms = volunteer.ass.forms;
       break;
     case "test:teamamember":
+      volunteer = mock_team_a_member;
       volunteers = [mock_team_a_leader, mock_team_a_member];
       teams = [team_a];
+      forms = volunteer.ass.forms;
       break;
     case "test:teambmember":
+      volunteer = mock_team_b_member;
       volunteers = [mock_team_b_leader, mock_team_b_member];
       teams = [team_b];
+      forms = volunteer.ass.forms;
       break;
     case "test:solo":
+      volunteer = mock_solo_volunteer;
       volunteers = [mock_solo_volunteer];
       teams = [];
+      forms = volunteer.ass.forms;
       break;
     default:
       console.warn("User not mocked: "+user.id);
@@ -146,15 +162,18 @@ export async function mockFetch(token, uri, method, body) {
 
   // return test data based on URI
   switch (true) {
-    case /dashboard/.test(uri): return dashboard;
-    case /volunteer\/list/.test(uri): return volunteers;
-    case /volunteer\/get/.test(uri):
-      let id = uri.split('=').pop();
-      for (let i in mocked_users) {
-        if (mocked_users[i].value.id === id) return mocked_users[i].value;
-      }
+    case /v1\/dashboard/.test(uri): return dashboard;
+    case /v1\/volunteer\/list/.test(uri): return volunteers;
+    case /v1\/volunteer\/get/.test(uri):
+      id = uri.split('=').pop();
+      for (let i in mocked_users) if (mocked_users[i].value.id === id) return mocked_users[i].value;
       return {};
-    case /team\/list/.test(uri): return {data: teams};
+    case /v1\/team\/list/.test(uri): return {data: teams};
+    case /v1\/form\/list/.test(uri): return {data: forms};
+    case /v1\/form\/get/.test(uri):
+      id = uri.split('=').pop();
+      for (let i in forms) if (forms[i].id === id) return forms[i];
+      return {};
     default:
       console.warn("URI not mocked: "+uri);
       break;
