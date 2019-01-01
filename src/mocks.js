@@ -118,6 +118,7 @@ const mock_solo_volunteer = {
   "id": "test:solo",
   "name": "Solo Volunteer",
   "avatar": "http://comic-cons.xyz/wp-content/uploads/Star-Wars-avatars-Movie-Han-Solo-Harrison-Ford.jpg",
+  "homeaddress": "1234 Nerf Herder Rd., Millennium, Falcon, Galaxy Far Away",
   ass: {
     ready: true,
     direct: true,
