@@ -40,10 +40,10 @@ team_b.turfs = [turf_b];
 team_b.forms = [form_b];
 
 const mock_admin = {
-  "id": "test:admin",
+  id: "test:admin",
   admin: true,
-  "name": "Administrator",
-  "avatar": "https://cdn0.iconfinder.com/data/icons/viking-2/500/viking_4-512.png",
+  name": "Administrator",
+  avatar": "https://cdn0.iconfinder.com/data/icons/viking-2/500/viking_4-512.png",
   ass: {
     ready: false,
     direct: false,
@@ -53,9 +53,9 @@ const mock_admin = {
     forms: [],
 }};
 const mock_region_leader = {
-  "id": "test:regionleader",
-  "name": "Region Leader",
-  "avatar": "https://cdn.iconscout.com/icon/premium/png-256-thumb/thor-3-159482.png",
+  id: "test:regionleader",
+  name: "Region Leader",
+  avatar: "https://cdn.iconscout.com/icon/premium/png-256-thumb/thor-3-159482.png",
   ass: {
     ready: false,
     direct: false,
@@ -66,9 +66,9 @@ const mock_region_leader = {
     forms: [],
 }};
 const mock_team_a_leader = {
-  "id": "test:teamaleader",
-  "name": "Team A Leader",
-  "avatar": "https://cdn.iconscout.com/icon/premium/png-256-thumb/thor-3-159482.png",
+  id: "test:teamaleader",
+  name: "Team A Leader",
+  avatar: "https://cdn.iconscout.com/icon/premium/png-256-thumb/thor-3-159482.png",
   ass: {
     ready: true,
     direct: false,
@@ -79,9 +79,9 @@ const mock_team_a_leader = {
     forms: [form_a],
 }};
 const mock_team_b_leader = {
-  "id": "test:teambleader",
-  "name": "Team B Leader",
-  "avatar": "https://cdn.iconscout.com/icon/premium/png-256-thumb/thor-3-159482.png",
+  id: "test:teambleader",
+  name: "Team B Leader",
+  avatar: "https://cdn.iconscout.com/icon/premium/png-256-thumb/thor-3-159482.png",
   ass: {
     ready: true,
     direct: false,
@@ -92,9 +92,9 @@ const mock_team_b_leader = {
     forms: [form_b],
 }};
 const mock_team_a_member = {
-  "id": "test:teamamember",
-  "name": "Team A Member",
-  "avatar": "https://d1nhio0ox7pgb.cloudfront.net/_img/o_collection_png/green_dark_grey/256x256/plain/chess_piece_rook.png",
+  id: "test:teamamember",
+  name: "Team A Member",
+  avatar: "https://d1nhio0ox7pgb.cloudfront.net/_img/o_collection_png/green_dark_grey/256x256/plain/chess_piece_rook.png",
   ass: {
     ready: true,
     direct: false,
@@ -104,9 +104,9 @@ const mock_team_a_member = {
     forms: [form_a],
 }};
 const mock_team_b_member = {
-  "id": "test:teambmember",
-  "name": "Team B Member",
-  "avatar": "https://d1nhio0ox7pgb.cloudfront.net/_img/o_collection_png/green_dark_grey/256x256/plain/chess_piece_rook.png",
+  id: "test:teambmember",
+  name: "Team B Member",
+  avatar: "https://d1nhio0ox7pgb.cloudfront.net/_img/o_collection_png/green_dark_grey/256x256/plain/chess_piece_rook.png",
   ass: {
     ready: true,
     direct: false,
@@ -116,10 +116,12 @@ const mock_team_b_member = {
     forms: [form_b],
 }};
 const mock_solo_volunteer = {
-  "id": "test:solo",
-  "name": "Solo Volunteer",
-  "avatar": "http://comic-cons.xyz/wp-content/uploads/Star-Wars-avatars-Movie-Han-Solo-Harrison-Ford.jpg",
-  "homeaddress": "1234 Nerf Herder Rd., Millennium, Falcon, Galaxy Far Away",
+  id: "test:solo",
+  name: "Solo Volunteer",
+  avatar: "http://comic-cons.xyz/wp-content/uploads/Star-Wars-avatars-Movie-Han-Solo-Harrison-Ford.jpg",
+  homeaddress: "1234 Nerf Herder Rd., Millennium, Falcon, Galaxy Far Away",
+  homelng: -118.3281370,
+  homelat: 33.9208231,
   ass: {
     ready: true,
     direct: true,
