@@ -52,7 +52,7 @@ export default class App extends Component {
 
     if (this.state.loading) return (<CircularProgress />);
 
-    if (!this.state.headers.length) return (
+    if (this.state.headers.length) return (
       <div>
         <CSVReader
           label="Data Importa"
@@ -64,6 +64,21 @@ export default class App extends Component {
         (Also want the user to be able to drag&drop files.)
       </div>
     );
+
+    let sample_headers_from_csv = [
+      "First Name",
+      "Middle Initial",
+      "Last Name",
+      "Street #",
+      "Street Name",
+      "City Name",
+      "Postal Code",
+      "Position",
+    ];
+
+    // convert headers to Select
+    let core_options = [];
+    sample_headers_from_csv.forEach((i) => core_options.push({value: i, label: i}));
 
     return (
       <div>
@@ -77,10 +92,11 @@ export default class App extends Component {
 
           <div style={{width: 150}}>Name:</div> <div style={{width: 450}}><Select
             value={[
-              {value: 1, label: "First Name"},
-              {value: 1, label: "Middle Initial"},
-              {value: 1, label: "Last Name"},
+              {value: "First Name", label: "First Name"},
+              {value: "Middle Initial", label: "Middle Initial"},
+              {value: "Last Name", label: "Last Name"},
             ]}
+            options={core_options}
             isMulti={true}
             placeholder="None"
           /></div>
@@ -91,9 +107,10 @@ export default class App extends Component {
 
           <div style={{width: 150}}>Street Address:</div> <div style={{width: 450}}><Select
             value={[
-              {value: 1, label: "Street #"},
-              {value: 1, label: "Street Name"},
+              {value: "Street #", label: "Street #"},
+              {value: "Street Name", label: "Street Name"},
             ]}
+            options={core_options}
             isMulti={true}
             placeholder="None"
           /></div>
@@ -104,8 +121,9 @@ export default class App extends Component {
 
           <div style={{width: 150}}>City</div> <div style={{width: 450}}><Select
             value={[
-              {value: 1, label: "City Name"},
+              {value: "City Name", label: "City Name"},
             ]}
+            options={core_options}
             isMulti={true}
             placeholder="None"
           /></div>
@@ -117,6 +135,7 @@ export default class App extends Component {
           <div style={{width: 150}}>State</div> <div style={{width: 450}}><Select
             value={[
             ]}
+            options={core_options}
             isMulti={true}
             placeholder="None"
           /></div>
@@ -127,8 +146,9 @@ export default class App extends Component {
 
           <div style={{width: 150}}>Zip</div> <div style={{width: 450}}><Select
             value={[
-              {value: 1, label: "Postal Code"},
+              {value: "Postal Code", label: "Postal Code"},
             ]}
+            options={core_options}
             isMulti={true}
             placeholder="None"
           /></div>
@@ -140,6 +160,7 @@ export default class App extends Component {
           <div style={{width: 150}}>Country</div> <div style={{width: 450}}><Select
             value={[
             ]}
+            options={core_options}
             isMulti={true}
             placeholder="None"
           /></div>
@@ -149,22 +170,32 @@ export default class App extends Component {
         <div style={{display: 'flex'}}>
 
           <div style={{width: 150}}>Longitude</div> <div style={{width: 450}}><Select
-            value={[
-              {value: 1, label: "Position"},
-            ]}
-            isMulti={true}
+            value={
+              {value: "Position", label: "Position"}
+            }
+            options={core_options}
+            isMulti={false} // can't be multi value when splitting on a delimiter
             placeholder="None"
           /></div>
           <Checkbox value="ack" color="primary" checked />
           <div style={{width: 200}}><Select
             value={[
-              {value: 1, label: "delimited by space"},
+              {value: "space", label: "delimited by space"},
+            ]}
+            options={[
+              {value: "comma", label: "delimited by comma"},
+              {value: "space", label: "delimited by space"},
             ]}
             placeholder="None"
           /></div>
           <div style={{width: 150}}><Select
-            value={[
+            value={
+              {value: 1, label: "1st value"}
+            }
+            options={[
               {value: 1, label: "1st value"},
+              {value: 2, label: "2nd value"},
+              {value: "last", label: "last value"},
             ]}
             placeholder="None"
           /></div>
@@ -174,22 +205,32 @@ export default class App extends Component {
         <div style={{display: 'flex'}}>
 
           <div style={{width: 150}}>Latitude</div> <div style={{width: 450}}><Select
-            value={[
-              {value: 1, label: "Position"},
-            ]}
-            isMulti={true}
+            value={
+              {value: "Position", label: "Position"}
+            }
+            options={core_options}
+            isMulti={false} // can't be multi value when splitting on a delimiter
             placeholder="None"
           /></div>
           <Checkbox value="ack" color="primary" checked />
           <div style={{width: 200}}><Select
             value={[
-              {value: 1, label: "delimited by space"},
+              {value: "space", label: "delimited by space"},
+            ]}
+            options={[
+              {value: "comma", label: "delimited by comma"},
+              {value: "space", label: "delimited by space"},
             ]}
             placeholder="None"
           /></div>
           <div style={{width: 150}}><Select
-            value={[
-              {value: 1, label: "2st value"},
+            value={
+              {value: 2, label: "2nd value"}
+            }
+            options={[
+              {value: 1, label: "1st value"},
+              {value: 2, label: "2nd value"},
+              {value: "last", label: "last value"},
             ]}
             placeholder="None"
           /></div>
