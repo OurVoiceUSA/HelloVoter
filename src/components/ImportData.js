@@ -52,7 +52,7 @@ export default class App extends Component {
 
     if (this.state.loading) return (<CircularProgress />);
 
-    if (this.state.headers.length) return (
+    if (!this.state.headers.length) return (
       <div>
         <CSVReader
           label="Data Importa"
