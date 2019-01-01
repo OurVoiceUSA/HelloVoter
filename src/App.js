@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import { HashRouter as Router, Route, Link, Switch } from 'react-router-dom';
 import {NotificationContainer} from 'react-notifications';
 import 'react-notifications/lib/notifications.css';
-import jwt_decode from 'jwt-decode';
+import jwt from 'jsonwebtoken';
 import queryString from 'query-string';
 import ReactTooltip from 'react-tooltip';
 
@@ -214,7 +214,7 @@ class App extends Component {
     if (!this.state.server.jwt) return null;
 
     try {
-      item = jwt_decode(this.state.server.jwt)[prop];
+      item = jwt.decode(this.state.server.jwt)[prop];
     } catch (e) {
       notify_error(e, "Holy crap this error should never happen!! Better dust off that résumé...");
       console.warn(e);
@@ -225,11 +225,24 @@ class App extends Component {
   _logout() {
     localStorage.removeItem('server');
     localStorage.removeItem('jwt');
-    this.setState({server: {}});
+    this.setState({menuLogout: false, server: {}});
   }
 
-  doSave = async (event) => {
-    await this.singHello(event.target.server.value);
+  doSave = async (event, user) => {
+    // mocked user
+    if (user) {
+      let token = jwt.sign(user, 'shhhhh');
+      localStorage.setItem('server', "mocked");
+      localStorage.setItem('jwt', token);
+      this.setState({server: {
+        hostname: "npm start",
+        jwt: token,
+        mock: true,
+      }});
+    } else {
+      // live poll
+      await this.singHello(event.target.server.value);
+    }
   }
 
   singHello = async (server) => {

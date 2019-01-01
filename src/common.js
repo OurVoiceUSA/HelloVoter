@@ -26,6 +26,10 @@ export async function _fetch(server, uri, method, body) {
     return;
   }
 
+  if (server.mock) {
+    throw "MOCKED";
+  }
+
   let res = await fetch('https://'+server.hostname+uri, {
     method: method,
     headers: {
