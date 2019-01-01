@@ -38,7 +38,7 @@ const mock_team_a_leader = {
     direct: false,
     turf: [],
     teams: [team_a],
-    teamperms: [],
+    teamperms: [{leader: true}],
     forms: [],
 }};
 const mock_team_b_leader = {
@@ -50,7 +50,7 @@ const mock_team_b_leader = {
     direct: false,
     turf: [],
     teams: [team_b],
-    teamperms: [],
+    teamperms: [{leader: true}],
     forms: [],
 }};
 const mock_team_a_member = {
@@ -62,7 +62,7 @@ const mock_team_a_member = {
     direct: false,
     turf: [],
     teams: [team_a],
-    teamperms: [],
+    teamperms: [{}],
     forms: [],
 }};
 const mock_team_b_member = {
@@ -74,7 +74,7 @@ const mock_team_b_member = {
     direct: false,
     turf: [team_b],
     teams: [],
-    teamperms: [],
+    teamperms: [{}],
     forms: [],
 }};
 const mock_solo_volunteer = {
@@ -147,7 +147,13 @@ export async function mockFetch(token, uri, method, body) {
   // return test data based on URI
   switch (true) {
     case /dashboard/.test(uri): return dashboard;
-    case /volunteer\/list/.test(uri): console.log(volunteers); return volunteers;
+    case /volunteer\/list/.test(uri): return volunteers;
+    case /volunteer\/get/.test(uri):
+      let id = uri.split('=').pop();
+      for (let i in mocked_users) {
+        if (mocked_users[i].value.id === id) return mocked_users[i].value;
+      }
+      return {};
     case /team\/list/.test(uri): return {data: teams};
     default:
       console.warn("URI not mocked: "+uri);
