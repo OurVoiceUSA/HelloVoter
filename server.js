@@ -67,6 +67,14 @@ async function doDbInit() {
   let start = new Date().getTime();
   console.log("doDbInit() started @ "+start);
 
+  // TODO: only call warmup if mem > dbsize
+  try {
+    await cqa('call apoc.warmup.run()');
+  } catch (e) {
+    console.warn("Call to APOC warmup failed.");
+    console.warn(e)
+  }
+
   await cqa('create constraint on (a:Volunteer) assert a.id is unique');
   await cqa('create constraint on (a:Team) assert a.name is unique');
   await cqa('create constraint on (a:Turf) assert a.name is unique');
@@ -103,14 +111,6 @@ async function doDbInit() {
       console.warn(e);
     }
   });
-
-  // TODO: only call warmup if mem > dbsize
-  try {
-    await cqa('call apoc.warmup.run()');
-  } catch (e) {
-    console.warn("Call to APOC warmup failed.");
-    console.warn(e)
-  }
 
   let finish = new Date().getTime();
   console.log("doDbInit() finished @ "+finish+" after "+(finish-start)+" milliseconds");
