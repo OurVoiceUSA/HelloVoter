@@ -286,8 +286,8 @@ export async function mockFetch(token, uri, method, body) {
     case /v1\/turf\/assigned\/volunteer\/list/.test(uri):
       for (let i in volunteers) {
         if (volunteers[i].ass.direct) {
-          for (let f in volunteers[i].ass.turfs)
-            if (volunteers[i].ass.turfs[f].id === id) arr.push(volunteers[i]);
+          for (let t in volunteers[i].ass.turf)
+            if (volunteers[i].ass.turf[t].id === id) arr.push(volunteers[i]);
         }
       }
       return arr;
@@ -301,7 +301,7 @@ export async function mockFetch(token, uri, method, body) {
       }
       return {data: arr};
     case /v1\/turf\/get/.test(uri):
-      for (let i in turfs) if (turfs[i].id === id) return turfs[i];
+      for (let i in turfs) if (turfs[i].id === id) return {data: [turfs[i]]};
       return {};
     case /v1\/form\/assigned\/volunteer\/list/.test(uri):
       for (let i in volunteers) {
