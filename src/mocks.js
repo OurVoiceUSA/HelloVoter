@@ -216,6 +216,13 @@ export async function mockFetch(token, uri, method, body) {
       turfs = [turf_a];
       forms = volunteer.ass.forms;
       break;
+    case "test:denied":
+      volunteer = mock_denied;
+      volunteers = [mock_denied];
+      teams = [];
+      turfs = [];
+      forms = [];
+      break;
     default:
       throw new Error("User not mocked: "+user.id);
   }
