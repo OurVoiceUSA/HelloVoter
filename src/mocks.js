@@ -190,7 +190,7 @@ export async function mockFetch(token, uri, method, body) {
       forms = volunteer.ass.forms;
       break;
     default:
-      console.warn("User not mocked: "+user.id);
+      throw new Error("User not mocked: "+user.id);
   }
 
   dashboard = {volunteers: volunteers.length, teams: teams.length, turfs: 0, forms: 0, questions: 0, addresses: 0, dbsize: 0};
@@ -230,9 +230,6 @@ export async function mockFetch(token, uri, method, body) {
       for (let i in forms) if (forms[i].id === id) return forms[i];
       return {};
     default:
-      console.warn("URI not mocked: "+uri);
-      break;
+      throw new Error("URI not mocked: "+uri);
   }
-
-  return {};
 }
