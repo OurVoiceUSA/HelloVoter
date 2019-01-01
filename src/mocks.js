@@ -138,7 +138,7 @@ export const mocked_users = [
 ];
 
 export async function mockFetch(token, uri, method, body) {
-  let id, arr = [], obj = {}, dashboard, volunteer, volunteers, teams, forms;
+  let id, arr = [], obj = {}, dashboard, volunteer, volunteers, teams, turfs, forms;
 
   // fake wait time
   await sleep(500);
@@ -151,49 +151,56 @@ export async function mockFetch(token, uri, method, body) {
       volunteer = mock_admin;
       volunteers = [mock_admin, mock_region_leader, mock_team_a_leader, mock_team_b_leader, mock_team_a_member, mock_team_b_member, mock_solo_volunteer];
       teams = [team_a, team_b];
+      turfs = [turf_region, turf_a, turf_b];
       forms = [form_a, form_b];
       break;
     case "test:regionleader":
       volunteer = mock_region_leader;
       volunteers = [mock_region_leader, mock_team_a_leader, mock_team_b_leader, mock_team_a_member, mock_team_b_member, mock_solo_volunteer];
       teams = [team_a, team_b];
+      turfs = [turf_region, turf_a, turf_b];
       forms = [form_a, form_b];
       break;
     case "test:teamaleader":
       volunteer = mock_team_a_leader;
       volunteers = [mock_team_a_leader, mock_team_a_member, mock_solo_volunteer];
       teams = [team_a];
+      turfs = [turf_a];
       forms = volunteer.ass.forms;
       break;
     case "test:teambleader":
       volunteer = mock_team_b_leader;
       volunteers = [mock_team_b_leader, mock_team_b_member];
       teams = [team_b];
+      turfs = [turf_b];
       forms = volunteer.ass.forms;
       break;
     case "test:teamamember":
       volunteer = mock_team_a_member;
       volunteers = [mock_team_a_leader, mock_team_a_member];
       teams = [team_a];
+      turfs = [turf_a];
       forms = volunteer.ass.forms;
       break;
     case "test:teambmember":
       volunteer = mock_team_b_member;
       volunteers = [mock_team_b_leader, mock_team_b_member];
       teams = [team_b];
+      turfs = [turf_b];
       forms = volunteer.ass.forms;
       break;
     case "test:solo":
       volunteer = mock_solo_volunteer;
       volunteers = [mock_solo_volunteer];
       teams = [];
+      turfs = [turf_a];
       forms = volunteer.ass.forms;
       break;
     default:
       throw new Error("User not mocked: "+user.id);
   }
 
-  dashboard = {volunteers: volunteers.length, teams: teams.length, turfs: 0, forms: 0, questions: 0, addresses: 0, dbsize: 0};
+  dashboard = {volunteers: volunteers.length, teams: teams.length, turfs: turfs.length, forms: forms.length, questions: 0, addresses: 0, dbsize: 0};
 
   // return test data based on URI
   switch (true) {
