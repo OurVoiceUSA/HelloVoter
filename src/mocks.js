@@ -260,6 +260,7 @@ export async function mockFetch(token, uri, method, body) {
       for (let i in mocked_users) if (mocked_users[i].value.id === id) return mocked_users[i].value;
       return {};
     case /v1\/team\/list/.test(uri): return {data: teams};
+    case /v1\/turf\/list/.test(uri): return {data: turfs};
     case /v1\/form\/list/.test(uri): return {data: forms};
     case /v1\/form\/assigned\/volunteer\/list/.test(uri):
       id = uri.split('=').pop();
