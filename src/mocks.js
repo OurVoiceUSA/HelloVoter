@@ -2,10 +2,42 @@ import jwt from 'jsonwebtoken';
 
 const sleep = m => new Promise(r => setTimeout(r, m));
 
-const team_a = {id: "test:teama", name: "Team A"};
-const team_b = {id: "test:teamb", name: "Team B"};
-const form_a = {id: "test:forma", name: "Form A"};
-const form_b = {id: "test:formb", name: "Form B"};
+const team_a = {
+  id: "test:teama",
+  name: "Team A",
+};
+const team_b = {
+  id: "test:teamb",
+  name: "Team B",
+};
+
+const form_a = {
+  id: "test:forma",
+  name: "Form A",
+};
+const form_b = {
+  id: "test:formb",
+  name: "Form B",
+};
+
+const turf_region = {
+  id: "test:reagion",
+  name: "Test Region",
+};
+const turf_a = {
+  id: "test:turfa",
+  name: "Turf A",
+};
+const turf_b = {
+  id: "test:turfb",
+  name: "Turf B",
+};
+
+team_a.turfs = [turf_a];
+team_a.forms = [form_a];
+
+team_b.turfs = [turf_b];
+team_b.forms = [form_b];
 
 const mock_admin = {
   "id": "test:admin",
@@ -26,6 +58,7 @@ const mock_region_leader = {
   ass: {
     ready: false,
     direct: false,
+    leader: true,
     turf: [],
     teams: [],
     teamperms: [],
@@ -38,6 +71,7 @@ const mock_team_a_leader = {
   ass: {
     ready: true,
     direct: false,
+    leader: true,
     turf: [],
     teams: [team_a],
     teamperms: [{leader: true}],
@@ -50,6 +84,7 @@ const mock_team_b_leader = {
   ass: {
     ready: true,
     direct: false,
+    leader: true,
     turf: [],
     teams: [team_b],
     teamperms: [{leader: true}],
@@ -103,7 +138,7 @@ export const mocked_users = [
 ];
 
 export async function mockFetch(token, uri, method, body) {
-  let id, dashboard, volunteer, volunteers, teams, forms;
+  let id, arr = [], obj = {}, dashboard, volunteer, volunteers, teams, forms;
 
   // fake wait time
   await sleep(500);
@@ -170,6 +205,26 @@ export async function mockFetch(token, uri, method, body) {
       return {};
     case /v1\/team\/list/.test(uri): return {data: teams};
     case /v1\/form\/list/.test(uri): return {data: forms};
+    case /v1\/form\/assigned\/volunteer\/list/.test(uri):
+      id = uri.split('=').pop();
+      for (let i in volunteers) {
+        if (volunteers[i].ass.direct) {
+          for (let f in volunteers[i].ass.forms)
+            if (volunteers[i].ass.forms[f].id === id) arr.push(volunteers[i]);
+        }
+      }
+      return arr;
+    case /v1\/form\/assigned\/team\/list/.test(uri):
+      id = uri.split('=').pop();
+      for (let i in teams) {
+        for (let f in teams[i].forms) {
+          if (teams[i].forms[f].id === id) {
+            arr.push(teams[i].forms[f]);
+          }
+        }
+      }
+      obj.data = arr;
+      return obj;
     case /v1\/form\/get/.test(uri):
       id = uri.split('=').pop();
       for (let i in forms) if (forms[i].id === id) return forms[i];
