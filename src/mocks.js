@@ -130,6 +130,20 @@ const mock_solo_volunteer = {
     teamperms: [],
     forms: [form_a],
 }};
+const mock_unassigned = {
+  id: "test:unassigned",
+  name: "Unassigned Volunteer",
+  avatar: "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/emojione/151/shrug_1f937.png",
+  homeaddress: "Please help me!",
+  ass: {
+    ready: false,
+    direct: false,
+    turf: [],
+    teams: [],
+    teamperms: [],
+    forms: [],
+  }
+}
 const mock_denied = {
   id: "test:denied",
   locked: true,
@@ -154,6 +168,7 @@ export const mocked_users = [
   {value: mock_team_b_leader, label: mock_team_b_leader.name},
   {value: mock_team_b_member, label: mock_team_b_member.name},
   {value: mock_solo_volunteer, label: mock_solo_volunteer.name},
+  {value: mock_unassigned, label: mock_unassigned.name},
   {value: mock_denied, label: mock_denied.name},
 ];
 
@@ -169,14 +184,14 @@ export async function mockFetch(token, uri, method, body) {
   switch (user.id) {
     case "test:admin":
       volunteer = mock_admin;
-      volunteers = [mock_admin, mock_region_leader, mock_team_a_leader, mock_team_b_leader, mock_team_a_member, mock_team_b_member, mock_solo_volunteer, mock_denied];
+      volunteers = [mock_admin, mock_region_leader, mock_team_a_leader, mock_team_b_leader, mock_team_a_member, mock_team_b_member, mock_solo_volunteer, mock_unassigned, mock_denied];
       teams = [team_a, team_b];
       turfs = [turf_region, turf_a, turf_b];
       forms = [form_a, form_b];
       break;
     case "test:regionleader":
       volunteer = mock_region_leader;
-      volunteers = [mock_region_leader, mock_team_a_leader, mock_team_b_leader, mock_team_a_member, mock_team_b_member, mock_solo_volunteer, mock_denied];
+      volunteers = [mock_region_leader, mock_team_a_leader, mock_team_b_leader, mock_team_a_member, mock_team_b_member, mock_solo_volunteer, mock_unassigned, mock_denied];
       teams = [team_a, team_b];
       turfs = [turf_region, turf_a, turf_b];
       forms = [form_a, form_b];
@@ -190,7 +205,7 @@ export async function mockFetch(token, uri, method, body) {
       break;
     case "test:teambleader":
       volunteer = mock_team_b_leader;
-      volunteers = [mock_team_b_leader, mock_team_b_member];
+      volunteers = [mock_team_b_leader, mock_team_b_member, mock_unassigned];
       teams = [team_b];
       turfs = [turf_b];
       forms = volunteer.ass.forms;
@@ -215,6 +230,13 @@ export async function mockFetch(token, uri, method, body) {
       teams = [];
       turfs = [turf_a];
       forms = volunteer.ass.forms;
+      break;
+    case "test:unassigned":
+      volunteer = mock_unassigned;
+      volunteers = [mock_unassigned];
+      teams = [];
+      turfs = [];
+      forms = [];
       break;
     case "test:denied":
       volunteer = mock_denied;
