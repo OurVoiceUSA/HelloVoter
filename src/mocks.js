@@ -41,6 +41,7 @@ team_b.forms = [form_b];
 
 const mock_admin = {
   "id": "test:admin",
+  admin: true,
   "name": "Administrator",
   "avatar": "https://cdn0.iconfinder.com/data/icons/viking-2/500/viking_4-512.png",
   ass: {
