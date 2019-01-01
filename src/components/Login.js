@@ -56,7 +56,6 @@ class LogIn extends Component {
 
     this.state = {
       mock: (process.env.NODE_ENV === 'development'), // default to true if development
-      user: null,
       classes: props.classes,
     };
 
@@ -75,7 +74,7 @@ class LogIn extends Component {
           <Typography component="h1" variant="h5">
             Sign in to HelloVoterHQ
           </Typography>
-          <form className={classes.form} onSubmit={(e) => { e.preventDefault(); this.props.refer.doSave(e, this.state.user); }} >
+          <form className={classes.form} onSubmit={(e) => { e.preventDefault(); this.props.refer.doSave(e); }} >
             {(process.env.NODE_ENV === 'development')?
             <FormControlLabel
               control={<Checkbox id="mock" name="mock" value="mock" color="primary" checked={this.state.mock} onChange={(e, c) => this.setState({mock: c})} />}
@@ -107,7 +106,7 @@ const ServerLiveOrMocked = (props) => {
     <Select
       options={mocked_users}
       placeholder="Choose a user to mock"
-      onChange={(obj) => props.refer.setState({user: obj.value})}
+      onChange={(obj) => props.refer.props.refer.doSave(null, obj.value)}
     />
   );
 
