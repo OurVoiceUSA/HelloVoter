@@ -47,7 +47,7 @@ const mock_admin = {
   ass: {
     ready: false,
     direct: false,
-    turf: [],
+    turf: [turf_a, turf_b],
     teams: [],
     teamperms: [],
     forms: [],
@@ -60,7 +60,7 @@ const mock_region_leader = {
     ready: false,
     direct: false,
     leader: true,
-    turf: [],
+    turf: [turf_a, turf_b],
     teams: [],
     teamperms: [],
     forms: [],
@@ -73,7 +73,7 @@ const mock_team_a_leader = {
     ready: true,
     direct: false,
     leader: true,
-    turf: [],
+    turf: [turf_a],
     teams: [team_a],
     teamperms: [{leader: true}],
     forms: [form_a],
@@ -86,7 +86,7 @@ const mock_team_b_leader = {
     ready: true,
     direct: false,
     leader: true,
-    turf: [],
+    turf: [turf_b],
     teams: [team_b],
     teamperms: [{leader: true}],
     forms: [form_b],
@@ -98,7 +98,7 @@ const mock_team_a_member = {
   ass: {
     ready: true,
     direct: false,
-    turf: [],
+    turf: [turf_a],
     teams: [team_a],
     teamperms: [{}],
     forms: [form_a],
@@ -110,8 +110,8 @@ const mock_team_b_member = {
   ass: {
     ready: true,
     direct: false,
-    turf: [team_b],
-    teams: [],
+    turf: [turf_b],
+    teams: [team_b],
     teamperms: [{}],
     forms: [form_b],
 }};
@@ -125,7 +125,7 @@ const mock_solo_volunteer = {
   ass: {
     ready: true,
     direct: true,
-    turf: [],
+    turf: [turf_a],
     teams: [],
     teamperms: [],
     forms: [form_a],
@@ -173,7 +173,9 @@ export const mocked_users = [
 ];
 
 export async function mockFetch(token, uri, method, body) {
-  let id, arr = [], obj = {}, dashboard, volunteer, volunteers, teams, turfs, forms;
+  let id, arr = [], dashboard, volunteer, volunteers, teams, turfs, forms;
+
+  if (uri.match(/=/)) id = uri.split('=').pop();
 
   // fake wait time
   await sleep(500);
@@ -256,14 +258,52 @@ export async function mockFetch(token, uri, method, body) {
     case /v1\/dashboard/.test(uri): return dashboard;
     case /v1\/volunteer\/list/.test(uri): return volunteers;
     case /v1\/volunteer\/get/.test(uri):
-      id = uri.split('=').pop();
       for (let i in mocked_users) if (mocked_users[i].value.id === id) return mocked_users[i].value;
       return {};
     case /v1\/team\/list/.test(uri): return {data: teams};
+    case /v1\/team\/get/.test(uri):
+      for (let i in teams) if (teams[i].id === id) arr.push(teams[i]);
+      return {data: arr};
+    case /v1\/team\/members\/list/.test(uri):
+      for (let i in volunteers) {
+        for (let t in volunteers[i].ass.teams) {
+            if (volunteers[i].ass.teams[t].id === id) arr.push(volunteers[i]);
+          }
+      }
+      return arr;
+    case /v1\/team\/turf\/list/.test(uri):
+      for (let i in teams) {
+        if (teams[i].id === id) arr = teams[i].turfs;
+      }
+      return {data: arr};
     case /v1\/turf\/list/.test(uri): return {data: turfs};
     case /v1\/form\/list/.test(uri): return {data: forms};
+    case /v1\/team\/form\/list/.test(uri):
+      for (let i in teams) {
+        if (teams[i].id === id) arr = teams[i].forms;
+      }
+      return {data: arr};
+    case /v1\/turf\/assigned\/volunteer\/list/.test(uri):
+      for (let i in volunteers) {
+        if (volunteers[i].ass.direct) {
+          for (let f in volunteers[i].ass.turfs)
+            if (volunteers[i].ass.turfs[f].id === id) arr.push(volunteers[i]);
+        }
+      }
+      return arr;
+    case /v1\/turf\/assigned\/team\/list/.test(uri):
+      for (let i in teams) {
+        for (let f in teams[i].turfs) {
+          if (teams[i].turfs[f].id === id) {
+            arr.push(teams[i].turfs[f]);
+          }
+        }
+      }
+      return {data: arr};
+    case /v1\/turf\/get/.test(uri):
+      for (let i in turfs) if (turfs[i].id === id) return turfs[i];
+      return {};
     case /v1\/form\/assigned\/volunteer\/list/.test(uri):
-      id = uri.split('=').pop();
       for (let i in volunteers) {
         if (volunteers[i].ass.direct) {
           for (let f in volunteers[i].ass.forms)
@@ -272,7 +312,6 @@ export async function mockFetch(token, uri, method, body) {
       }
       return arr;
     case /v1\/form\/assigned\/team\/list/.test(uri):
-      id = uri.split('=').pop();
       for (let i in teams) {
         for (let f in teams[i].forms) {
           if (teams[i].forms[f].id === id) {
@@ -280,10 +319,8 @@ export async function mockFetch(token, uri, method, body) {
           }
         }
       }
-      obj.data = arr;
-      return obj;
+      return {data: arr};
     case /v1\/form\/get/.test(uri):
-      id = uri.split('=').pop();
       for (let i in forms) if (forms[i].id === id) return forms[i];
       return {};
     default:
