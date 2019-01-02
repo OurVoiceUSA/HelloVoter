@@ -24,6 +24,7 @@ const ovi_config = {
   neo4j_host: getConfig("neo4j_host", false, 'localhost'),
   neo4j_user: getConfig("neo4j_user", false, 'neo4j'),
   neo4j_pass: getConfig("neo4j_pass", false, 'neo4j'),
+  redis_url: getConfig("redis_url", false, null),
   jwt_pub_key: getConfig("jwt_pub_key", false, null),
   google_maps_key: getConfig("google_maps_key", false, null),
   sm_oauth_url: getConfig("sm_oauth_url", false, 'https://ws.ourvoiceusa.org/auth'),
@@ -57,24 +58,22 @@ if (ovi_config.jwt_pub_key) {
 }
 
 // bull queue
-var nq = new queue('neo4j'); // TODO: configure redis
-nq.process(async (job) => {
-  switch (job.data.task) {
-    case 'turfCreate':
-      await doTurfCreate(job.data.input);
-      break;
-    default:
-      throw new Error("Undefined task "+job.data.task);
-  }
-  return Promise.resolve({});
-}).catch((e) => console.log(e));
+var nq = new queue('neo4j', ovi_config.redis_url);
 
 async function doTurfCreate(args) {
   await cqa('call spatial.addPointLayerXY({turfId}, "lng", "lat")', args);
 
   // add Address nodes within Turf spatial to index
-  // TODO: this is very heap intensive on large data sets, and can run the database out of memory
-  await cqa('match (a:Turf {id:{turfId}}) call spatial.intersects("address", a.wkt) yield node with collect(node) as nodes call spatial.addNodes({turfId}, nodes) yield count return count', args);
+
+  // NOTE: passing "args" cqa() to a call within an apoc call has sytax issues;
+  //       since "turfId" isn't from user input, so we're OK to inject it as a string
+  let ref = await cqa('call apoc.periodic.iterate("match (a:Turf {id:\\"'+args.turfId+'\\"}) call spatial.intersects(\\"address\\", a.wkt) yield node with collect(node) as nodes return nodes", "call spatial.addNodes(\\"'+args.turfId+'\\", nodes) yield count return count", {iterateList:true}) yield wasTerminated')
+
+  // not enough heap space on the match can result in an OOM - apoc catches it for us and yields a termination flag
+  // if this happens, mark the job as failed
+  if (ref.data[0] === true) throw new Error("apoc.periodic.iterate() yielded 'wasTerminated: true'");
+
+  return ref;
 }
 
 // async'ify neo4j
@@ -89,6 +88,23 @@ cqa('return timestamp()').catch((e) => {console.error("Unable to connect to data
 async function doDbInit() {
   let start = new Date().getTime();
   console.log("doDbInit() started @ "+start);
+
+  try {
+    nq.process(async (job) => {
+      let ret;
+      switch (job.data.task) {
+        case 'turfCreate':
+          ret = await doTurfCreate(job.data.input);
+          break;
+        default:
+          throw new Error("Undefined task "+job.data.task);
+      }
+      return Promise.resolve(ret);
+    });
+  } catch (e) {
+    console.warn("Unable to setup bull job processor queue.");
+    console.warn(e);
+  }
 
   // TODO: only call warmup if mem > dbsize
   try {
@@ -107,10 +123,10 @@ async function doDbInit() {
   await cqa('create constraint on (a:Address) assert a.id is unique');
   await cqa('create constraint on (a:Unit) assert a.id is unique');
   await cqa('create constraint on (a:Survey) assert a.id is unique');
-  try {await cqa('call spatial.addWKTLayer("turf", "wkt")');} catch (e) {}
-  try {await cqa('call spatial.addWKTLayer("region", "wkt")');} catch (e) {}
-  try {await cqa('call spatial.addPointLayerXY("address", "lng", "lat");');} catch (e) {}
-  try {await cqa('call spatial.addPointLayerXY("volunteer", "homelng", "homelat");');} catch (e) {}
+  if (!spatialLayerExists("turf")) try {await cqa('call spatial.addWKTLayer("turf", "wkt")');} catch (e) {}
+  if (!spatialLayerExists("region")) try {await cqa('call spatial.addWKTLayer("region", "wkt")');} catch (e) {}
+  if (!spatialLayerExists("address")) try {await cqa('call spatial.addPointLayerXY("address", "lng", "lat");');} catch (e) {}
+  if (!spatialLayerExists("volunteer")) try {await cqa('call spatial.addPointLayerXY("volunteer", "homelng", "homelat");');} catch (e) {}
 
   // regions with no shapes
   delete us_states.FM;
@@ -137,6 +153,12 @@ async function doDbInit() {
 
   let finish = new Date().getTime();
   console.log("doDbInit() finished @ "+finish+" after "+(finish-start)+" milliseconds");
+}
+
+async function spatialLayerExists(layer) {
+  let ref = await cqa('match (a {layer:{layer}})-[:LAYER]-(:ReferenceNode {name:"spatial_root"}) return count(a)', {layer: layer});
+  if (ref.data[0] === 0) return false;
+  return true;
 }
 
 function getConfig(item, required, def) {

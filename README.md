@@ -14,8 +14,11 @@ Start by configuring the `.env` file:
     export NEO4J_HOST=<your neo4j server>
     export NEO4J_USER=<your neo4j user>
     export NEO4J_PASS=<your neo4j password>
+    export REDIS_URL=redis://<redis server>:<redis port>
     export DEBUG=1
     EOF
+
+NOTE: Providing a `REDIS_URL` is encouraged, but not required. It's used for enqueuing certain tasks as background jobs to improve performance for the UI. Configuring it is very highly recommended on large databases (1 million adresses or more).
 
 Then, install dependancies with `npm install`, source in the configuration with `source .env`, and start with `npm start`.
 
