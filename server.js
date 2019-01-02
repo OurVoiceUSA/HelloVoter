@@ -13,6 +13,7 @@ import fs from 'fs';
 import {ingeojson, asyncForEach, us_states} from 'ourvoiceusa-sdk-js';
 import circleToPolygon from 'circle-to-polygon';
 import wkx from 'wkx';
+import queue from 'bull';
 import neo4j from 'neo4j-driver';
 import BoltAdapter from 'node-neo4j-bolt-adapter';
 import * as secrets from "docker-secrets-nodejs";
@@ -55,10 +56,32 @@ if (ovi_config.jwt_pub_key) {
   });
 }
 
+// bull queue
+var nq = new queue('neo4j'); // TODO: configure redis
+nq.process(async (job) => {
+  switch (job.data.task) {
+    case 'turfCreate':
+      await doTurfCreate(job.data.input);
+      break;
+    default:
+      throw new Error("Undefined task "+job.data.task);
+  }
+  return Promise.resolve({});
+}).catch((e) => console.log(e));
+
+async function doTurfCreate(args) {
+  await cqa('call spatial.addPointLayerXY({turfId}, "lng", "lat")', args);
+
+  // add Address nodes within Turf spatial to index
+  // TODO: this is very heap intensive on large data sets, and can run the database out of memory
+  await cqa('match (a:Turf {id:{turfId}}) call spatial.intersects("address", a.wkt) yield node with collect(node) as nodes call spatial.addNodes({turfId}, nodes) yield count return count', args);
+}
+
 // async'ify neo4j
 const authToken = neo4j.auth.basic(ovi_config.neo4j_user, ovi_config.neo4j_pass);
 const db = new BoltAdapter(neo4j.driver('bolt://'+ovi_config.neo4j_host, authToken));
 
+// database connect
 cqa('return timestamp()').catch((e) => {console.error("Unable to connect to database."); process.exit(1)}).then(() => {
   doDbInit();
 });
@@ -627,21 +650,26 @@ async function turfCreate(req, res) {
   try {
     // create Turf
     await cqa('match (a:Volunteer {id:{author_id}}) create (b:Turf {id:{turfId}, created: timestamp(), name:{name}, geometry: {geometry}, wkt:{wkt}})-[:AUTHOR]->(a) WITH collect(b) AS t CALL spatial.addNodes(\'turf\', t) YIELD count return count', req.body);
-
-    // TODO: enqueue these queries
-
-    // create Turf spatial index
-    await cqa('call spatial.addPointLayerXY({turfId}, "lng", "lat")', req.body);
-
-    // add Address nodes within Turf spatial to index
-    // TODO: this is very heap intensive on large data sets, and can run the database out of memory
-    await cqa('match (a:Turf {id:{turfId}}) call spatial.intersects("address", a.wkt) yield node with collect(node) as nodes call spatial.addNodes({turfId}, nodes) yield count return count', req.body);
-
   } catch(e) {
     return _500(res, e);
   }
 
-  return res.json(req.body);
+  let job;
+
+  try {
+    // enqueue job to process turf
+    job = await nq.add({
+      task: 'turfCreate',
+      input: req.body,
+    });
+  } catch (e) {
+    console.warn(e);
+    console.log("Unable to enqueue job, attempting it on the main worker thread");
+    job = {id: 0};
+    await doTurfCreate(req.body);
+  }
+
+  return res.json({jobId: job.id});
 }
 
 async function turfDelete(req, res) {
