@@ -90,6 +90,16 @@ async function doDbInit() {
   let start = new Date().getTime();
   console.log("doDbInit() started @ "+start);
 
+  // make sure we have the plugins we need
+  try {
+    await cqa('call spatial.procedures()');
+    await cqa('call apoc.config.map()');
+  } catch (e) {
+    console.error("The APOC and SPATIAL plugins are required for this application to function.");
+    console.error(e);
+    process.exit(1);
+  }
+
   try {
     if (!ovi_config.redis_url) throw new Error("REDIS_URL is not set");
 
