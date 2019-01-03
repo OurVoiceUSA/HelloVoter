@@ -45,8 +45,8 @@ if (ov_config.jwt_pub_key) {
   });
 }
 
-// bull queue
-var nq = new queue('neo4j', ov_config.redis_url);
+// bull queue for intensive jobs against the neo4j host
+var nq = new queue(ov_config.neo4j_host, ov_config.redis_url);
 
 async function doTurfCreate(args) {
   await cqa('call spatial.addPointLayerXY({turfId}, "lng", "lat")', args);
@@ -90,14 +90,21 @@ async function doDbInit() {
   try {
     if (!ov_config.redis_url) throw new Error("REDIS_URL is not set");
 
-    let cpus = os.cpus().length;
+    let concurrency = 1;
 
-    // community edition of neo4j limits CPUs to 4
-    let ref = await cqa('call dbms.components() yield edition');
-    if (ref.data[0] !== 'enterprise' && cpus > 4) cpus = 4;
+    // if job concurrency is enabled, look at CPU count and neo4j edition
+    if (ov_config.job_concurrency) {
+      let cpus = os.cpus().length;
 
-    // limit job queue to half the CPUs available to neo4j so jobs don't grind the database to a halt
-    nq.process((cpus/2), async (job) => {
+      // community edition of neo4j limits CPUs to 4
+      let ref = await cqa('call dbms.components() yield edition');
+      if (ref.data[0] !== 'enterprise' && cpus > 4) cpus = 4;
+
+      // limit job queue to half the CPUs available to neo4j so jobs don't grind the database to a halt
+      concurrency = Math.ceil(cpus/2);
+    }
+
+    nq.process(concurrency, async (job) => {
       let ret;
       switch (job.data.task) {
         case 'turfCreate':
