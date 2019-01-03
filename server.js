@@ -10,6 +10,7 @@ import jwt from 'jsonwebtoken';
 import bodyParser from 'body-parser';
 import http from 'http';
 import fs from 'fs';
+import os from 'os';
 import {ingeojson, asyncForEach, us_states} from 'ourvoiceusa-sdk-js';
 import circleToPolygon from 'circle-to-polygon';
 import wkx from 'wkx';
@@ -90,7 +91,14 @@ async function doDbInit() {
   console.log("doDbInit() started @ "+start);
 
   try {
-    nq.process(async (job) => {
+    let cpus = os.cpus().length;
+
+    // community edition of neo4j limits CPUs to 4
+    let ref = await cqa('call dbms.components() yield edition');
+    if (ref.data[0] !== 'enterprise' && cpus > 4) cpus = 4;
+
+    // limit job queue to half the CPUs available to neo4j so jobs don't grind the database to a halt
+    nq.process((cpus/2), async (job) => {
       let ret;
       switch (job.data.task) {
         case 'turfCreate':
