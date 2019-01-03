@@ -17,32 +17,19 @@ import wkx from 'wkx';
 import queue from 'bull';
 import neo4j from 'neo4j-driver';
 import BoltAdapter from 'node-neo4j-bolt-adapter';
-import * as secrets from "docker-secrets-nodejs";
 
-const ovi_config = {
-  server_port: getConfig("server_port", false, 8080),
-  ip_header: getConfig("client_ip_header", false, null),
-  neo4j_host: getConfig("neo4j_host", false, 'localhost'),
-  neo4j_user: getConfig("neo4j_user", false, 'neo4j'),
-  neo4j_pass: getConfig("neo4j_pass", false, 'neo4j'),
-  redis_url: getConfig("redis_url", false, null),
-  jwt_pub_key: getConfig("jwt_pub_key", false, null),
-  google_maps_key: getConfig("google_maps_key", false, null),
-  sm_oauth_url: getConfig("sm_oauth_url", false, 'https://ws.ourvoiceusa.org/auth'),
-  wabase: getConfig("wabase", false, 'https://apps.ourvoiceusa.org'),
-  DEBUG: getConfig("debug", false, false),
-};
+import { ov_config } from './ov_config.js';
 
 var version = require('./package.json').version;
 
 var public_key;
 var jwt_iss = 'ourvoiceusa.org';
 
-if (ovi_config.jwt_pub_key) {
-  public_key = fs.readFileSync(ovi_config.jwt_pub_key);
+if (ov_config.jwt_pub_key) {
+  public_key = fs.readFileSync(ov_config.jwt_pub_key);
 } else {
-  console.log("JWT_PUB_KEY not defined, attempting to fetch from "+ovi_config.sm_oauth_url+'/pubkey');
-  fetch(ovi_config.sm_oauth_url+'/pubkey')
+  console.log("JWT_PUB_KEY not defined, attempting to fetch from "+ov_config.sm_oauth_url+'/pubkey');
+  fetch(ov_config.sm_oauth_url+'/pubkey')
   .then(res => {
     jwt_iss = res.headers.get('x-jwt-iss');
     if (res.status !== 200) throw "http code "+res.status;
@@ -52,14 +39,14 @@ if (ovi_config.jwt_pub_key) {
     public_key = body;
   })
   .catch((e) => {
-    console.log("Unable to read SM_OAUTH_URL "+ovi_config.sm_oauth_url);
+    console.log("Unable to read SM_OAUTH_URL "+ov_config.sm_oauth_url);
     console.log(e);
     process.exit(1);
   });
 }
 
 // bull queue
-var nq = new queue('neo4j', ovi_config.redis_url);
+var nq = new queue('neo4j', ov_config.redis_url);
 
 async function doTurfCreate(args) {
   await cqa('call spatial.addPointLayerXY({turfId}, "lng", "lat")', args);
@@ -78,8 +65,8 @@ async function doTurfCreate(args) {
 }
 
 // async'ify neo4j
-const authToken = neo4j.auth.basic(ovi_config.neo4j_user, ovi_config.neo4j_pass);
-const db = new BoltAdapter(neo4j.driver('bolt://'+ovi_config.neo4j_host, authToken));
+const authToken = neo4j.auth.basic(ov_config.neo4j_user, ov_config.neo4j_pass);
+const db = new BoltAdapter(neo4j.driver('bolt://'+ov_config.neo4j_host, authToken));
 
 // database connect
 cqa('return timestamp()').catch((e) => {console.error("Unable to connect to database."); process.exit(1)}).then(() => {
@@ -101,7 +88,7 @@ async function doDbInit() {
   }
 
   try {
-    if (!ovi_config.redis_url) throw new Error("REDIS_URL is not set");
+    if (!ov_config.redis_url) throw new Error("REDIS_URL is not set");
 
     let cpus = os.cpus().length;
 
@@ -181,20 +168,6 @@ async function spatialLayerExists(layer) {
   return true;
 }
 
-function getConfig(item, required, def) {
-  let value = secrets.get(item);
-  if (!value) {
-    if (required) {
-      let msg = "Missing config: "+item.toUpperCase();
-      console.log(msg);
-      throw msg;
-    } else {
-      return def;
-    }
-  }
-  return value;
-}
-
 function valid(str) {
   if (!str) return false;
   return true;
@@ -203,7 +176,7 @@ function valid(str) {
 async function dbwrap() {
     var params = Array.prototype.slice.call(arguments);
     var func = params.shift();
-    if (ovi_config.DEBUG) {
+    if (ov_config.DEBUG) {
       let funcName = func.replace('Async', '');
       console.log('DEBUG: '+funcName+' '+params[0]+';');
       console.log('DEBUG: :params '+JSON.stringify(params[1]));
@@ -216,7 +189,7 @@ async function cqa(q, p) {
 }
 
 function getClientIP(req) {
-  if (ovi_config.ip_header) return req.header(ovi_config.ip_header);
+  if (ov_config.ip_header) return req.header(ov_config.ip_header);
   else return req.connection.remoteAddress;
 }
 
@@ -353,7 +326,7 @@ function poke(req, res) {
 
 function towebapp(req, res) {
   let host = req.header('host');
-  res.redirect(ovi_config.wabase+'/HelloVoterHQ/'+(host?'?server='+host:''));
+  res.redirect(ov_config.wabase+'/HelloVoterHQ/'+(host?'?server='+host:''));
 }
 
 // they say that time's supposed to heal ya but i ain't done much healin'
@@ -425,7 +398,7 @@ async function dashboard(req, res) {
 
 async function google_maps_key(req, res) {
   let ass = await volunteerAssignments(req.user);
-  if (ass.ready || req.user.admin) return res.json({google_maps_key: ovi_config.google_maps_key });
+  if (ass.ready || req.user.admin) return res.json({google_maps_key: ov_config.google_maps_key });
   else return _401(res, "No soup for you");
 }
 
@@ -1022,7 +995,7 @@ async function sync(req, res) {
           // TODO: survey: object of question keys and answers
           break;
         default:
-          if (ovi_config.DEBUG) {
+          if (ov_config.DEBUG) {
             console.warn("Unknown type: "+node.type);
             console.warn(node);
           }
@@ -1086,10 +1059,10 @@ app.use(bodyParser.json({limit: '5mb'}));
 app.use(cors({exposedHeaders: ['x-sm-oauth-url']}));
 
 // require ip_header if config for it is set
-if (!ovi_config.DEBUG && ovi_config.ip_header) {
+if (!ov_config.DEBUG && ov_config.ip_header) {
   app.use(function (req, res, next) {
-    if (!req.header(ovi_config.ip_header)) {
-      console.log('Connection without '+ovi_config.ip_header+' header');
+    if (!req.header(ov_config.ip_header)) {
+      console.log('Connection without '+ov_config.ip_header+' header');
       _400(res, "Missing required header.");
     }
     else next();
@@ -1110,7 +1083,7 @@ app.use(async function (req, res, next) {
     } catch (e) {}
   }
 
-  res.set('x-sm-oauth-url', ovi_config.sm_oauth_url);
+  res.set('x-sm-oauth-url', ov_config.sm_oauth_url);
   res.on('finish', logIt, req, res);
 
   req.user = {};
@@ -1211,12 +1184,12 @@ app.post('/volunteer/v1/question/assigned/add', questionAssignedAdd);
 app.post('/volunteer/v1/question/assigned/remove', questionAssignedRemove);
 app.post('/volunteer/v1/sync', sync);
 
-Object.keys(ovi_config).forEach((k) => {
+Object.keys(ov_config).forEach((k) => {
   delete process.env[k.toUpperCase()];
 });
 require = null;
 
-if (!ovi_config.DEBUG) {
+if (!ov_config.DEBUG) {
   process.on('SIGUSR1', () => {
     //process.exit(1);
     throw "Caught SIGUSR1, exiting."
@@ -1224,7 +1197,7 @@ if (!ovi_config.DEBUG) {
 }
 
 // Launch the server
-const server = app.listen(ovi_config.server_port, () => {
+const server = app.listen(ov_config.server_port, () => {
   const { address, port } = server.address();
   console.log('volunteer-broker express');
   console.log(`Listening at http://${address}:${port}`);

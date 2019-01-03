@@ -10,7 +10,7 @@ COPY package-lock.json .
 RUN npm install
 
 COPY poke.js .
-COPY server.js .
+COPY server.js ov_config.js ./
 
 FROM node:dubnium-alpine
 
