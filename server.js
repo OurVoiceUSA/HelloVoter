@@ -91,6 +91,8 @@ async function doDbInit() {
   console.log("doDbInit() started @ "+start);
 
   try {
+    if (!ovi_config.redis_url) throw new Error("REDIS_URL is not set");
+
     let cpus = os.cpus().length;
 
     // community edition of neo4j limits CPUs to 4
@@ -110,7 +112,7 @@ async function doDbInit() {
       return Promise.resolve(ret);
     });
   } catch (e) {
-    console.warn("Unable to setup bull job processor queue.");
+    console.warn("Unable to setup bull job processor queue due to the error below. This will poorly affect application response times on large databases.");
     console.warn(e);
   }
 
