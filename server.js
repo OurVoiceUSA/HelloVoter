@@ -49,7 +49,7 @@ if (ov_config.jwt_pub_key) {
 var nq = new queue(ov_config.neo4j_host, ov_config.redis_url);
 
 async function doTurfCreate(args) {
-  await cqa('call spatial.addPointLayerXY({turfId}, "lng", "lat")', args);
+  await cqa('call spatial.addPointLayerXY({turfId}, "lng", "lat", "geohash")', args);
 
   // add Address nodes within Turf spatial to index
 
@@ -137,10 +137,12 @@ async function doDbInit() {
   await cqa('create constraint on (a:Address) assert a.id is unique');
   await cqa('create constraint on (a:Unit) assert a.id is unique');
   await cqa('create constraint on (a:Survey) assert a.id is unique');
-  if (!spatialLayerExists("turf")) try {await cqa('call spatial.addWKTLayer("turf", "wkt")');} catch (e) {}
-  if (!spatialLayerExists("region")) try {await cqa('call spatial.addWKTLayer("region", "wkt")');} catch (e) {}
-  if (!spatialLayerExists("address")) try {await cqa('call spatial.addPointLayerXY("address", "lng", "lat");');} catch (e) {}
-  if (!spatialLayerExists("volunteer")) try {await cqa('call spatial.addPointLayerXY("volunteer", "homelng", "homelat");');} catch (e) {}
+  if (!await spatialLayerExists("turf")) try {await cqa('call spatial.addWKTLayer("turf", "wkt")');} catch (e) {}
+  if (!await spatialLayerExists("region")) try {await cqa('call spatial.addWKTLayer("region", "wkt")');} catch (e) {}
+  // rtree index layer for faster intersects() lookups
+  if (!await spatialLayerExists("volunteer")) try {await cqa('call spatial.addPointLayerXY("volunteer", "homelng", "homelat", "rtree")');} catch (e) {}
+  // geohash index layer for faster withinDistance() lookups
+  if (!await spatialLayerExists("address")) try {await cqa('call spatial.addPointLayerXY("address", "lng", "lat", "geohash");');} catch (e) {}
 
   // regions with no shapes
   delete us_states.FM;
@@ -151,14 +153,13 @@ async function doDbInit() {
   await asyncForEach(Object.keys(us_states), async (state) => {
     try {
       let region = 'region_'+state.toLowerCase();
-      let ref = await cqa('match (a {layer:{region}})-[:LAYER]-(:ReferenceNode {name:"spatial_root"}) return a', {region: region});
+      let ref = await cqa('match (a:Region {region:{region}}) return a', {region: region});
       if (ref.data.length === 0) {
         console.log("Creating region for "+state);
         let res = await fetch('https://raw.githubusercontent.com/OurVoiceUSA/districts/gh-pages/states/'+state+'/shape.geojson');
         let geometry = await res.json();
         let wkt = wkx.Geometry.parseGeoJSON(geometry).toEwkt().split(';')[1];
-        await cqa('call spatial.addPointLayerXY({region}, "lng", "lat");', {region: region});
-        await cqa('create (a:Region {name:{state}, region:{region}, geometry: {geometry}, wkt:{wkt}}) with collect(a) as nodes call spatial.addNodes("region", nodes) yield count return count', {state: state, region: region, geometry: JSON.stringify(geometry), wkt: wkt});
+        await cqa('create (a:Region {name:{state}, region:{region}, geometry: {geometry}, wkt:{wkt}}) with a call spatial.addNode("region", a) yield node return count(node)', {state: state, region: region, geometry: JSON.stringify(geometry), wkt: wkt});
       }
     } catch (e) {
       console.warn(e);
