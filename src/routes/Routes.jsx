@@ -1,16 +1,18 @@
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
-import Dashboard from '../components/Dashboard';
-import Volunteers from '../components/Volunteers';
-import Teams from '../components/Teams';
-import Turf from '../components/Turf';
-import Forms from '../components/Forms';
-import Map from '../components/Map';
-import ImportData from '../components/ImportData';
-import Analytics from '../components/Analytics';
-import Settings from '../components/Settings';
-import Jwt from '../components/Jwt';
-import About from '../components/About';
+import {
+  Dashboard,
+  Volunteers,
+  Teams,
+  Turf,
+  Forms,
+  Map,
+  ImportData,
+  Analytics,
+  Settings,
+  Jwt,
+  About
+} from '../components';
 import NoMatch from './NoMatch';
 
 // <Routes />

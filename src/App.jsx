@@ -7,10 +7,8 @@ import jwt from 'jsonwebtoken';
 import queryString from 'query-string';
 import ReactTooltip from 'react-tooltip';
 
-import Login from './components/Login';
-import { Header, Sidebar } from './components/header';
+import { Header, Sidebar, LogoutDialog, Login } from './components';
 import Routes from './routes/Routes';
-import LogoutDialogue from './components/LogoutDialog';
 
 import 'typeface-roboto';
 import { withStyles } from '@material-ui/core/styles';
@@ -236,7 +234,7 @@ class App extends Component {
             <div className={classes.appBarSpacer} />
             <NotificationContainer />
             <Routes server={server} />
-            <LogoutDialogue
+            <LogoutDialog
               menuLogout={this.state.menuLogout}
               handleCloseLogout={this.handleCloseLogout}
               _logout={this._logout}
