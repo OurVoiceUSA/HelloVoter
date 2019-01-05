@@ -13,6 +13,13 @@ import Jwt from '../components/Jwt';
 import About from '../components/About';
 import NoMatch from './NoMatch';
 
+// <Routes />
+/*
+  Props
+  {
+    server: <server description>
+  }
+*/
 export const Routes = ({ server }) => (
   <Switch>
     <Route exact={true} path="/" render={() => <Dashboard server={server} />} />
