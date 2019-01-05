@@ -48,18 +48,28 @@ if (ov_config.jwt_pub_key) {
 // bull queue for intensive jobs against the neo4j host
 var nq = new queue(ov_config.neo4j_host, ov_config.redis_url);
 
-async function doTurfCreate(args) {
-  await cqa('call spatial.addPointLayerXY({turfId}, "lng", "lat", "geohash")', args);
+async function doTurfCreateLayer(args) {
+  // create layer for this turf
+  await cqa('call spatial.addPointLayer({turfId}, "rtree")', args);
 
-  // add Address nodes within Turf spatial to index
+  // TODO: limit based on heap ... but no less than 1,000,000 if we can avoid it, RTREE needs to be edited in large batches to stay performant
+  let limit = 2000000;
+  let count = limit;
 
-  // NOTE: passing "args" cqa() to a call within an apoc call has sytax issues;
-  //       since "turfId" isn't from user input, so we're OK to inject it as a string
-  let ref = await cqa('call apoc.periodic.iterate("match (a:Turf {id:\\"'+args.turfId+'\\"}) call spatial.intersects(\\"address\\", a.wkt) yield node with collect(node) as nodes return nodes", "call spatial.addNodes(\\"'+args.turfId+'\\", nodes) yield count return count", {iterateList:true}) yield wasTerminated')
+  // get the bbox of this turf
+  // NOTE: when spatial works with neo4j 3.5 (fixes a point() index bug) -- we can combine this query with the one below
+  let ref = await cqa('match (a:Turf {id:{turfId}}) return a.bbox[0], a.bbox[1], a.bbox[2], a.bbox[3]', args);
+  let bbox = ref.data[0];
 
-  // not enough heap space on the match can result in an OOM - apoc catches it for us and yields a termination flag
-  // if this happens, mark the job as failed
-  if (ref.data[0] === true) throw new Error("apoc.periodic.iterate() yielded 'wasTerminated: true'");
+  while (count === limit) {
+    ref = await cqa('match (a:Address) where point({longitude: '+bbox[0]+', latitude: '+bbox[1]+'}) < a.position < point({longitude: '+bbox[2]+', latitude: '+bbox[3]+'}) and not (a)-[:RTREE_REFERENCE]-()-[:RTREE_CHILD*..10]-()-[:RTREE_ROOT]-({layer:{turfId}})-[:LAYER]-(:ReferenceNode {name:"spatial_root"}) with collect(a)[..2000000] as nodes call spatial.addNodes({turfId}, nodes) yield count return count', args);
+    count = ref.data[0];
+    console.log("Processed "+count+" records for "+args.turfId);
+  }
+
+  // TODO: this was created from a bbox of the turf; trim nodes from this layer that don't intersects() the actual geometry
+  //       the spatial plugin doesn't currently have a 'removeNodes', so our queries will just have to call intersects each time:
+  //       match (a:Turf {id:{turfId}}) call spatial.intersects(a.id, a.wkt)
 
   return ref;
 }
@@ -108,7 +118,7 @@ async function doDbInit() {
       let ret;
       switch (job.data.task) {
         case 'turfCreate':
-          ret = await doTurfCreate(job.data.input);
+          ret = await doTurfCreateLayer(job.data.input);
           break;
         default:
           throw new Error("Undefined task "+job.data.task);
@@ -128,21 +138,20 @@ async function doDbInit() {
     console.warn(e)
   }
 
+  await cqa('create constraint on (a:Address) assert a.id is unique');
+  await cqa('create index on :Address(position)');
   await cqa('create constraint on (a:Volunteer) assert a.id is unique');
   await cqa('create constraint on (a:Team) assert a.name is unique');
   await cqa('create constraint on (a:Turf) assert a.name is unique');
   await cqa('create constraint on (a:Region) assert a.region is unique');
   await cqa('create constraint on (a:Form) assert a.id is unique');
   await cqa('create constraint on (a:Question) assert a.key is unique');
-  await cqa('create constraint on (a:Address) assert a.id is unique');
   await cqa('create constraint on (a:Unit) assert a.id is unique');
   await cqa('create constraint on (a:Survey) assert a.id is unique');
   if (!await spatialLayerExists("turf")) try {await cqa('call spatial.addWKTLayer("turf", "wkt")');} catch (e) {}
   if (!await spatialLayerExists("region")) try {await cqa('call spatial.addWKTLayer("region", "wkt")');} catch (e) {}
   // rtree index layer for faster intersects() lookups
   if (!await spatialLayerExists("volunteer")) try {await cqa('call spatial.addPointLayerXY("volunteer", "homelng", "homelat", "rtree")');} catch (e) {}
-  // geohash index layer for faster withinDistance() lookups
-  if (!await spatialLayerExists("address")) try {await cqa('call spatial.addPointLayerXY("address", "lng", "lat", "geohash");');} catch (e) {}
 
   // regions with no shapes
   delete us_states.FM;
@@ -678,18 +687,19 @@ async function turfCreate(req, res) {
   }
 
   let job;
+  let input = {turfId: req.body.turfId};
 
   try {
     // enqueue job to process turf
     job = await nq.add({
       task: 'turfCreate',
-      input: req.body,
+      input: input,
     });
   } catch (e) {
     console.warn(e);
     console.log("Unable to enqueue job, attempting it on the main worker thread");
     job = {id: 0};
-    await doTurfCreate(req.body);
+    await doTurfCreateLayer(input);
   }
 
   return res.json({jobId: job.id});
