@@ -27,9 +27,9 @@ import {
   DialogSaving
 } from '../common.js';
 
-import { CardTurf } from './Turf.jsx';
-import { CardForm } from './Forms.js';
-import { CardVolunteer } from './Volunteers.jsx';
+import { CardTurf } from './Turf';
+import { CardForm } from './Forms';
+import { CardVolunteer } from './Volunteers';
 
 import { faUsers } from '@fortawesome/free-solid-svg-icons';
 

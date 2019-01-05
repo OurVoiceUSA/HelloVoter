@@ -107,7 +107,7 @@ var premade = {
   }
 };
 
-export default class App extends Component {
+export default class Forms extends Component {
   constructor(props) {
     super(props);
 

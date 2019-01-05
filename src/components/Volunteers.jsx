@@ -31,9 +31,9 @@ import {
   DialogSaving
 } from '../common.js';
 
-import { CardTurf } from './Turf.js';
-import { CardForm } from './Forms.js';
-import { CardTeam } from './Teams.js';
+import { CardTurf } from './Turf';
+import { CardForm } from './Forms';
+import { CardTeam } from './Teams';
 
 import {
   faCrown,
@@ -48,7 +48,7 @@ import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en';
 TimeAgo.locale(en);
 
-export default class App extends Component {
+export default class Volunteers extends Component {
   constructor(props) {
     super(props);
 

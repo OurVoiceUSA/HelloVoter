@@ -17,8 +17,8 @@ import { faStreetView } from '@fortawesome/free-solid-svg-icons';
 
 import { us_states } from 'ourvoiceusa-sdk-js';
 
-import { CardVolunteer } from './Volunteers.jsx';
-import { CardTeam } from './Teams.js';
+import { CardVolunteer } from './Volunteers';
+import { CardTeam } from './Teams';
 
 import {
   _fetch,
