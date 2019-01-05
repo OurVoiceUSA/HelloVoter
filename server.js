@@ -138,16 +138,25 @@ async function doDbInit() {
     console.warn(e)
   }
 
-  await cqa('create constraint on (a:Address) assert a.id is unique');
-  await cqa('create index on :Address(position)');
-  await cqa('create constraint on (a:Volunteer) assert a.id is unique');
-  await cqa('create constraint on (a:Team) assert a.name is unique');
-  await cqa('create constraint on (a:Turf) assert a.name is unique');
-  await cqa('create constraint on (a:Region) assert a.region is unique');
-  await cqa('create constraint on (a:Form) assert a.id is unique');
-  await cqa('create constraint on (a:Question) assert a.key is unique');
-  await cqa('create constraint on (a:Unit) assert a.id is unique');
-  await cqa('create constraint on (a:Survey) assert a.id is unique');
+  let indexes = [
+    {label: 'Address', property: 'id', create: 'create constraint on (a:Address) assert a.id is unique'},
+    {label: 'Address', property: 'position', create: 'create index on :Address(position)'},
+    {label: 'Volunteer', property: 'id', create: 'create constraint on (a:Volunteer) assert a.id is unique'},
+    {label: 'Team', property: 'name', create: 'create constraint on (a:Team) assert a.name is unique'},
+    {label: 'Turf', property: 'name', create: 'create constraint on (a:Turf) assert a.name is unique'},
+    {label: 'Region', property: 'region', create: 'create constraint on (a:Region) assert a.region is unique'},
+    {label: 'Form', property: 'id', create: 'create constraint on (a:Form) assert a.id is unique'},
+    {label: 'Question', property: 'key', create: 'create constraint on (a:Question) assert a.key is unique'},
+    {label: 'Unit', property: 'id', create: 'create constraint on (a:Unit) assert a.id is unique'},
+    {label: 'Survey', property: 'id', create: 'create constraint on (a:Survey) assert a.id is unique'},
+  ];
+
+  // create any indexes we need if they don't exist
+  await asyncForEach(indexes, async (index) => {
+    let ref = await cqa('call db.indexes() yield label, properties with * where label = {label} and {property} in properties return count(*)', index);
+    if (ref.data[0] === 0) await cqa(index.create);
+  });
+
   if (!await spatialLayerExists("turf")) try {await cqa('call spatial.addWKTLayer("turf", "wkt")');} catch (e) {}
   if (!await spatialLayerExists("region")) try {await cqa('call spatial.addWKTLayer("region", "wkt")');} catch (e) {}
   // rtree index layer for faster intersects() lookups
