@@ -62,9 +62,10 @@ async function doTurfCreateLayer(args) {
   let bbox = ref.data[0];
 
   while (count === limit) {
+    let start = new Date().getTime();
     ref = await cqa('match (a:Address) where point({longitude: '+bbox[0]+', latitude: '+bbox[1]+'}) < a.position < point({longitude: '+bbox[2]+', latitude: '+bbox[3]+'}) and not (a)-[:RTREE_REFERENCE]-()-[:RTREE_CHILD*..10]-()-[:RTREE_ROOT]-({layer:{turfId}})-[:LAYER]-(:ReferenceNode {name:"spatial_root"}) with collect(a)[..2000000] as nodes call spatial.addNodes({turfId}, nodes) yield count return count', args);
     count = ref.data[0];
-    console.log("Processed "+count+" records for "+args.turfId);
+    console.log("Processed "+count+" records for "+args.turfId+" in "+((new Date().getTime())-start)+" milliseconds");
   }
 
   // TODO: this was created from a bbox of the turf; trim nodes from this layer that don't intersects() the actual geometry
