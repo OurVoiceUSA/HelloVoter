@@ -1,5 +1,5 @@
 import Header from './Header';
 import Sidebar from './Sidebar';
-import SideMenu from './MenuItems';
+import MenuItems from './MenuItems';
 
-export { Header, Sidebar, SideMenu };
+export { Header, Sidebar, MenuItems };
