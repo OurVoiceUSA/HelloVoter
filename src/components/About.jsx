@@ -12,7 +12,8 @@ export default class App extends Component {
     super(props);
 
     this.state = {
-      cb_version: null
+      cb_version: null,
+      neo4j_version: null,
     };
   }
 
@@ -24,7 +25,10 @@ export default class App extends Component {
       notify_error(e, 'Unable to load dashboard info.');
     }
 
-    this.setState({ cb_version: data.version ? data.version : 'unknown' });
+    this.setState({
+      cb_version: data.version ? data.version : 'unknown',
+      neo4j_version: data.neo4j_version ? data.neo4j_version : 'unknown',
+    });
   };
 
   render() {
@@ -36,6 +40,13 @@ export default class App extends Component {
         <div>
           {this.state.cb_version ? (
             'volunteer-broker version ' + this.state.cb_version
+          ) : (
+            <CircularProgress height={15} />
+          )}
+        </div>
+        <div>
+          {this.state.neo4j_version ? (
+            'Neo4j version ' + this.state.neo4j_version
           ) : (
             <CircularProgress height={15} />
           )}

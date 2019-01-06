@@ -50,7 +50,7 @@ const mock_admin = {
   ass: {
     ready: false,
     direct: false,
-    turf: [turf_a, turf_b],
+    turfs: [turf_a, turf_b],
     teams: [],
     teamperms: [],
     forms: [],
@@ -63,7 +63,7 @@ const mock_region_leader = {
     ready: false,
     direct: false,
     leader: true,
-    turf: [turf_a, turf_b],
+    turfs: [turf_a, turf_b],
     teams: [],
     teamperms: [],
     forms: [],
@@ -76,7 +76,7 @@ const mock_team_a_leader = {
     ready: true,
     direct: false,
     leader: true,
-    turf: [turf_a],
+    turfs: [turf_a],
     teams: [team_a],
     teamperms: [{leader: true}],
     forms: [form_a],
@@ -89,7 +89,7 @@ const mock_team_b_leader = {
     ready: true,
     direct: false,
     leader: true,
-    turf: [turf_b],
+    turfs: [turf_b],
     teams: [team_b],
     teamperms: [{leader: true}],
     forms: [form_b],
@@ -101,7 +101,7 @@ const mock_team_a_member = {
   ass: {
     ready: true,
     direct: false,
-    turf: [turf_a],
+    turfs: [turf_a],
     teams: [team_a],
     teamperms: [{}],
     forms: [form_a],
@@ -113,7 +113,7 @@ const mock_team_b_member = {
   ass: {
     ready: true,
     direct: false,
-    turf: [turf_b],
+    turfs: [turf_b],
     teams: [team_b],
     teamperms: [{}],
     forms: [form_b],
@@ -128,7 +128,7 @@ const mock_solo_volunteer = {
   ass: {
     ready: true,
     direct: true,
-    turf: [turf_a],
+    turfs: [turf_a],
     teams: [],
     teamperms: [],
     forms: [form_a],
@@ -141,7 +141,7 @@ const mock_unassigned = {
   ass: {
     ready: false,
     direct: false,
-    turf: [],
+    turfs: [],
     teams: [],
     teamperms: [],
     forms: [],
@@ -156,7 +156,7 @@ const mock_denied = {
   ass: {
     ready: false,
     direct: false,
-    turf: [],
+    turfs: [],
     teams: [],
     teamperms: [],
     forms: [],
@@ -289,8 +289,8 @@ export async function mockFetch(token, uri, method, body) {
     case /v1\/turf\/assigned\/volunteer\/list/.test(uri):
       for (let i in volunteers) {
         if (volunteers[i].ass.direct) {
-          for (let t in volunteers[i].ass.turf)
-            if (volunteers[i].ass.turf[t].id === id) arr.push(volunteers[i]);
+          for (let t in volunteers[i].ass.turfs)
+            if (volunteers[i].ass.turfs[t].id === id) arr.push(volunteers[i]);
         }
       }
       return arr;

@@ -546,8 +546,8 @@ export class CardVolunteer extends Component {
       });
     });
 
-    if (volunteer.ass.turf.length) {
-      let t = volunteer.ass.turf[0];
+    if (volunteer.ass.turfs.length) {
+      let t = volunteer.ass.turfs[0];
       selectedTurfOption = {
         value: _searchStringify(t),
         id: t.id,
@@ -709,7 +709,7 @@ export const CardVolunteerFull = props => (
         {props.volunteer.ass.forms.map(f => (
           <CardForm key={f.id} form={f} refer={props.refer} />
         ))}
-        {props.volunteer.ass.turf.map(t => (
+        {props.volunteer.ass.turfs.map(t => (
           <CardTurf key={t.id} turf={t} refer={props.refer} />
         ))}
       </div>
