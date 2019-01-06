@@ -27,6 +27,7 @@ export class MapSelect extends React.Component {
         <div style={{ width: labelWidth }}>{label}:</div>{' '}
         <div style={{ width }}>
           <ReactSelect
+            className="map-select-input"
             value={value}
             options={options}
             isMulti={isMulti}
