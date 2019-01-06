@@ -49,28 +49,16 @@ if (ov_config.jwt_pub_key) {
 var nq = new queue(ov_config.neo4j_host, ov_config.redis_url);
 
 async function doTurfCreateLayer(args) {
-  // create layer for this turf
-  await cqa('call spatial.addPointLayer({turfId}, "rtree")', args);
-
   // TODO: limit based on heap ... but no less than 1,000,000 if we can avoid it, RTREE needs to be edited in large batches to stay performant
-  let limit = 2000000;
-  let count = limit;
+  args.limit = 2000000;
+  let count = args.limit;
 
-  // get the bbox of this turf
-  // NOTE: when spatial works with neo4j 3.5 (fixes a point() index bug) -- we can combine this query with the one below
-  let ref = await cqa('match (a:Turf {id:{turfId}}) return a.bbox[0], a.bbox[1], a.bbox[2], a.bbox[3]', args);
-  let bbox = ref.data[0];
-
-  while (count === limit) {
+  while (count === args.limit) {
     let start = new Date().getTime();
-    ref = await cqa('match (a:Address) where point({longitude: '+bbox[0]+', latitude: '+bbox[1]+'}) < a.position < point({longitude: '+bbox[2]+', latitude: '+bbox[3]+'}) and not (a)-[:RTREE_REFERENCE]-()-[:RTREE_CHILD*..10]-()-[:RTREE_ROOT]-({layer:{turfId}})-[:LAYER]-(:ReferenceNode {name:"spatial_root"}) with collect(a)[..2000000] as nodes call spatial.addNodes({turfId}, nodes) yield count return count', args);
+    ref = await cqa('match (a:Turf {id:{turfId}}) call spatial.intersects("address", a.wkt) yield nodes unwind nodes as node where not (node)-[:WITHIN]->(a) with node limit {limit} merge (node)-[:WITHIN]->(a) return count(node)', args);
     count = ref.data[0];
     console.log("Processed "+count+" records for "+args.turfId+" in "+((new Date().getTime())-start)+" milliseconds");
   }
-
-  // TODO: this was created from a bbox of the turf; trim nodes from this layer that don't intersects() the actual geometry
-  //       the spatial plugin doesn't currently have a 'removeNodes', so our queries will just have to call intersects each time:
-  //       match (a:Turf {id:{turfId}}) call spatial.intersects(a.id, a.wkt)
 
   return ref;
 }
@@ -158,10 +146,18 @@ async function doDbInit() {
     if (ref.data[0] === 0) await cqa(index.create);
   });
 
-  if (!await spatialLayerExists("turf")) try {await cqa('call spatial.addWKTLayer("turf", "wkt")');} catch (e) {}
-  if (!await spatialLayerExists("region")) try {await cqa('call spatial.addWKTLayer("region", "wkt")');} catch (e) {}
-  // rtree index layer for faster intersects() lookups
-  if (!await spatialLayerExists("volunteer")) try {await cqa('call spatial.addPointLayerXY("volunteer", "homelng", "homelat", "rtree")');} catch (e) {}
+  let spatialLayers = [
+    {name: "turf", create: 'call spatial.addWKTLayer("turf", "wkt")'},
+    {name: "region", create: 'call spatial.addWKTLayer("region", "wkt")'},
+    {name: "volunteer", create: 'call spatial.addPointLayerXY("volunteer", "homelng", "homelat", "rtree")'},
+    {name: "address", create: 'call spatial.addPointLayer("address", "rtree")'},
+  ];
+
+  // create any spatial layers we need if they don't exist
+  await asyncForEach(spatialLayers, async (layer) => {
+    let ref = await cqa('match (a {layer:{layer}})-[:LAYER]-(:ReferenceNode {name:"spatial_root"}) return count(a)', {layer: layer});
+    if (ref.data[0] === 0) await cqa(layer.create);
+  });
 
   // regions with no shapes
   delete us_states.FM;
@@ -187,12 +183,6 @@ async function doDbInit() {
 
   let finish = new Date().getTime();
   console.log("doDbInit() finished @ "+finish+" after "+(finish-start)+" milliseconds");
-}
-
-async function spatialLayerExists(layer) {
-  let ref = await cqa('match (a {layer:{layer}})-[:LAYER]-(:ReferenceNode {name:"spatial_root"}) return count(a)', {layer: layer});
-  if (ref.data[0] === 0) return false;
-  return true;
 }
 
 function valid(str) {
