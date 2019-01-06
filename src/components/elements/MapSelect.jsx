@@ -41,6 +41,7 @@ export class MapSelect extends React.Component {
 
   _renderCheckbox = ({ checked }) => (
     <Checkbox
+      className="ck-bx"
       onChange={() => this._handleCheck()}
       value="ack"
       color="primary"
@@ -50,7 +51,7 @@ export class MapSelect extends React.Component {
 
   _renderMapOptions = () => (
     <React.Fragment>
-      <div style={{ width: 160 }}>
+      <div className="map-option-1" style={{ width: 160 }}>
         <ReactSelect
           value={[{ value: 'space', label: 'delimited by space' }]}
           options={[
@@ -60,7 +61,7 @@ export class MapSelect extends React.Component {
           placeholder="None"
         />
       </div>
-      <div style={{ width: 150 }}>
+      <div className="map-option-2" style={{ width: 150 }}>
         <ReactSelect
           value={{ value: 1, label: '1st value' }}
           options={[
