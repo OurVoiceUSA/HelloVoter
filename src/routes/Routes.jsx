@@ -20,7 +20,7 @@ import NoMatch from './NoMatch';
     server: <server description>
   }
 */
-export const Routes = ({ server }) => (
+export const Routes = ({ server, refer }) => (
   <Switch>
     <Route exact={true} path="/" render={() => <Dashboard server={server} />} />
     <Route path="/volunteers/" render={() => <Volunteers server={server} />} />
@@ -34,7 +34,7 @@ export const Routes = ({ server }) => (
     <Route path="/import/" render={() => <ImportData server={server} />} />
     <Route path="/analytics/" render={() => <Analytics server={server} />} />
     <Route path="/settings/" render={() => <Settings server={server} />} />
-    <Route path="/jwt/" render={props => <Jwt {...props} refer={this} />} />
+    <Route path="/jwt/" render={props => <Jwt {...props} refer={refer} />} />
     <Route path="/about/" render={() => <About server={server} />} />
     <Route component={NoMatch} />
   </Switch>
