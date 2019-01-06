@@ -233,7 +233,7 @@ class App extends Component {
           <main className={classes.content}>
             <div className={classes.appBarSpacer} />
             <NotificationContainer />
-            <Routes server={server} />
+            <Routes server={server} refer={this} />
             <LogoutDialog
               menuLogout={this.state.menuLogout}
               handleCloseLogout={this.handleCloseLogout}
