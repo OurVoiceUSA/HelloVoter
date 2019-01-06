@@ -289,7 +289,7 @@ async function volunteerAssignments(user) {
   let obj = {
     ready: false,
     direct: false,
-    turf: [],
+    turfs: [],
     teams: [],
     teamperms: [],
     forms: [],
@@ -300,11 +300,11 @@ async function volunteerAssignments(user) {
     ref = await cqa('match (a:Volunteer {id:{id}}) optional match (a)-[:ASSIGNED]-(b:Form) optional match (a)-[:ASSIGNED]-(c:Turf) return collect(distinct(b)), collect(distinct(c))', user);
     if (user.autoturf || ref.data[0][0].length > 0 || ref.data[0][1].length) {
       obj.forms = obj.forms.concat(ref.data[0][0]);
-      obj.turf = obj.turf.concat(ref.data[0][1]);
+      obj.turfs = obj.turf.concat(ref.data[0][1]);
       obj.direct = true;
 
       if (user.autoturf && user.homelng && user.homelat) {
-        obj.turf = [{id: 'auto', geometry: circleToPolygon([user.homelng,user.homelat],1000)}];
+        obj.turfs = [{id: 'auto', geometry: circleToPolygon([user.homelng,user.homelat],1000)}];
       }
     }
 
@@ -313,7 +313,7 @@ async function volunteerAssignments(user) {
       ref = await cqa('match (a:Volunteer {id:{id}}) optional match (a)-[r:MEMBERS]-(b:Team) optional match (b)-[:ASSIGNED]-(c:Turf) optional match (d:Form)-[:ASSIGNED]-(b) return collect(distinct(b)), collect(distinct(c)), collect(distinct(d)), collect(distinct(r))', user);
       if (ref.data[0][0].length > 0 || ref.data[0][1].length > 0 || ref.data[0][2].length > 0) {
         obj.teams = obj.teams.concat(ref.data[0][0]);
-        obj.turf = obj.turf.concat(ref.data[0][1]);
+        obj.turfs = obj.turfs.concat(ref.data[0][1]);
         obj.forms = obj.forms.concat(ref.data[0][2]);
         obj.teamperms = obj.teamperms.concat(ref.data[0][3]);
         // iterate through teamperms to see if this volunteer is a leader
@@ -329,7 +329,7 @@ async function volunteerAssignments(user) {
   // TODO: dedupe, someone can be assigned directly to turf/forms and indirectly via a team
   // TODO: add questions to forms, like in formGet()
 
-  if (obj.turf.length > 0 && obj.forms.length > 0)
+  if (obj.turfs.length > 0 && obj.forms.length > 0)
     obj.ready = true;
 
   return obj;
@@ -402,7 +402,7 @@ async function dashboard(req, res) {
       return res.json({
         volunteers: (await cqa('match (a:Volunteer {id:{id}})-[:MEMBERS {leader:true}]-(:Team)-[]-(t:Turf) where t.wkt is not null call spatial.intersects("volunteer", t.wkt) yield node return node UNION match (a:Volunteer {id:{id}}) return a as node UNION match (a:Volunteer {id:{id}})-[:MEMBERS]-(:Team)-[:MEMBERS]-(c:Volunteer) return distinct(c) as node', req.user)).data.length,
         teams: ass.teams.length,
-        turfs: ass.turf.length,
+        turfs: ass.turfs.length,
         questions: 'N/A',
         forms: ass.forms.length,
         addresses: 'N/A',
