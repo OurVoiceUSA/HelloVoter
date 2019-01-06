@@ -130,6 +130,7 @@ async function doDbInit() {
   let indexes = [
     {label: 'Address', property: 'id', create: 'create constraint on (a:Address) assert a.id is unique'},
     {label: 'Address', property: 'position', create: 'create index on :Address(position)'},
+    {label: 'Address', property: 'bbox', create: 'create index on :Address(bbox)'},
     {label: 'Volunteer', property: 'id', create: 'create constraint on (a:Volunteer) assert a.id is unique'},
     {label: 'Team', property: 'name', create: 'create constraint on (a:Team) assert a.name is unique'},
     {label: 'Turf', property: 'name', create: 'create constraint on (a:Turf) assert a.name is unique'},
