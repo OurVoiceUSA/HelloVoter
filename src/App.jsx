@@ -210,8 +210,6 @@ class App extends Component {
 
     if (!server.hostname) return <Login refer={this} />;
 
-    console.log(this.state);
-
     return (
       <Router>
         <div className={classes.root}>
@@ -233,7 +231,11 @@ class App extends Component {
           <main className={classes.content}>
             <div className={classes.appBarSpacer} />
             <NotificationContainer />
-            <Routes server={server} refer={this} />
+            <Routes
+              server={server}
+              refer={this}
+              google_maps_key={this.state.google_maps_key}
+            />
             <LogoutDialog
               menuLogout={this.state.menuLogout}
               handleCloseLogout={this.handleCloseLogout}

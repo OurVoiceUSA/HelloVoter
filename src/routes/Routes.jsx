@@ -22,7 +22,7 @@ import NoMatch from './NoMatch';
     server: <server description>
   }
 */
-export const Routes = ({ server, refer }) => (
+export const Routes = ({ server, refer, google_maps_key }) => (
   <Switch>
     <Route exact={true} path="/" render={() => <Dashboard server={server} />} />
     <Route path="/volunteers/" render={() => <Volunteers server={server} />} />
@@ -31,7 +31,7 @@ export const Routes = ({ server, refer }) => (
     <Route path="/forms/" render={() => <Forms server={server} />} />
     <Route
       path="/map/"
-      render={() => <Map server={server} apiKey={this.state.google_maps_key} />}
+      render={() => <Map server={server} apiKey={google_maps_key} />}
     />
     <Route path="/import/" render={() => <ImportData server={server} />} />
     <Route path="/analytics/" render={() => <Analytics server={server} />} />
