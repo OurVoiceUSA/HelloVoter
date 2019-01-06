@@ -155,7 +155,7 @@ async function doDbInit() {
 
   // create any spatial layers we need if they don't exist
   await asyncForEach(spatialLayers, async (layer) => {
-    let ref = await cqa('match (a {layer:{layer}})-[:LAYER]-(:ReferenceNode {name:"spatial_root"}) return count(a)', {layer: layer});
+    let ref = await cqa('match (a {layer:{layer}})-[:LAYER]-(:ReferenceNode {name:"spatial_root"}) return count(a)', {layer: layer.name});
     if (ref.data[0] === 0) await cqa(layer.create);
   });
 
@@ -385,6 +385,7 @@ function uncle(req, res) {
 
 async function dashboard(req, res) {
   try {
+    let neo4j_version = ((await cqa('call apoc.monitor.kernel() yield kernelVersion return split(split(kernelVersion, ",")[1], " ")[2]'))).data[0];
     if (req.user.admin === true) return res.json({
       volunteers: (await cqa('match (a:Volunteer) return count(a)')).data[0],
       teams: (await cqa('match (a:Team) return count(a)')).data[0],
@@ -394,6 +395,7 @@ async function dashboard(req, res) {
       addresses: (await cqa('match (a:Address) return count(a)')).data[0],
       dbsize: (await cqa('CALL apoc.monitor.store() YIELD totalStoreSize return totalStoreSize')).data[0],
       version: version,
+      neo4j_version: neo4j_version,
     });
     else {
       let ass = await volunteerAssignments(req.user);
@@ -405,6 +407,7 @@ async function dashboard(req, res) {
         forms: ass.forms.length,
         addresses: 'N/A',
         version: (ass.ready?version:null),
+        neo4j_version: (ass.ready?neo4j_version:null),
       });
     }
   } catch (e) {
