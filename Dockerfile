@@ -3,6 +3,8 @@ FROM node:dubnium
 RUN mkdir -p /app
 WORKDIR /app
 
+RUN git clone https://github.com/OurVoiceUSA/districts.git
+
 COPY .babelrc .
 COPY package.json .
 COPY package-lock.json .
