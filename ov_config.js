@@ -8,7 +8,7 @@ export const ov_config = {
   neo4j_user: getConfig("neo4j_user", false, 'neo4j'),
   neo4j_pass: getConfig("neo4j_pass", false, 'neo4j'),
   redis_url: getConfig("redis_url", false, null),
-  job_concurrency: getConfig("job_concurrency", false, false),
+  job_concurrency: getConfig("job_concurrency", false, 1),
   jwt_pub_key: getConfig("jwt_pub_key", false, null),
   google_maps_key: getConfig("google_maps_key", false, null),
   sm_oauth_url: getConfig("sm_oauth_url", false, 'https://ws.ourvoiceusa.org/auth'),
