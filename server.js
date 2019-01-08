@@ -17,6 +17,8 @@ import wkx from 'wkx';
 import queue from 'bull';
 import neo4j from 'neo4j-driver';
 import BoltAdapter from 'node-neo4j-bolt-adapter';
+import FormData from 'form-data';
+import papa from 'papaparse';
 
 import { ov_config } from './ov_config.js';
 
@@ -48,19 +50,46 @@ if (ov_config.jwt_pub_key) {
 // bull queue for intensive jobs against the neo4j host
 var nq = new queue(ov_config.neo4j_host, ov_config.redis_url);
 
-async function doTurfCreateLayer(args) {
-  // TODO: limit based on heap ... but no less than 1,000,000 if we can avoid it, RTREE needs to be edited in large batches to stay performant
-  args.limit = 2000000;
+async function doTurfIndexing(args) {
+  let start = new Date().getTime();
+  let ref = await cqa('CALL apoc.periodic.iterate("match (a:Turf {id:\\"'+args.turfId+'\\"}) call spatial.intersects(\\"address\\", a.wkt) yield node return node, a", "merge (node)-[:WITHIN]->(a)", {batchSize:10000,iterateList:true}) yield total return total', args);
+  let total = ref.data[0];
+  console.log("Processed "+total+" records for "+args.turfId+" in "+((new Date().getTime())-start)+" milliseconds");
+
+  return {total: total};
+}
+
+async function doGeocode(args) {
+  // census has a limit of 10,000 per batch
+  args.limit = 10000;
   let count = args.limit;
 
   while (count === args.limit) {
-    let start = new Date().getTime();
-    ref = await cqa('match (a:Turf {id:{turfId}}) call spatial.intersects("address", a.wkt) yield nodes unwind nodes as node where not (node)-[:WITHIN]->(a) with node limit {limit} merge (node)-[:WITHIN]->(a) return count(node)', args);
-    count = ref.data[0];
-    console.log("Processed "+count+" records for "+args.turfId+" in "+((new Date().getTime())-start)+" milliseconds");
+
+    let file = 'row,street,city,state,zip\n';
+
+    let fd = new FormData();
+    fd.append('benchmark', 'Public_AR_Current');
+    fd.append('returntype', 'locations');
+    fd.append('addressFile', file, 'import.csv');
+
+    try {
+      let res = await fetch('https://geocoding.geo.census.gov/geocoder/locations/addressbatch', {
+        method: 'POST',
+        body: fd
+      });
+
+      // return is a csv file
+      let pp = papa.parse(await res.text());
+
+      // pp.data is an array of arrays with format:
+      // row,input address,"Match",Exact/Non_Exact/Tie/No_Match,STREET,CITY,STATE,ZIP,"longitude,latitude",some number,"R"
+
+    } catch (e) {
+      console.warn(e);
+    }
   }
 
-  return ref;
 }
 
 // async'ify neo4j
@@ -107,7 +136,7 @@ async function doDbInit() {
       let ret;
       switch (job.data.task) {
         case 'turfCreate':
-          ret = await doTurfCreateLayer(job.data.input);
+          ret = await doTurfIndexing(job.data.input);
           break;
         default:
           throw new Error("Undefined task "+job.data.task);
@@ -667,7 +696,7 @@ function turfList(req, res) {
 }
 
 async function turfCreate(req, res) {
-  if (!req.user.admin) return 403(res, "Permission denied.");
+  if (!req.user.admin) return _403(res, "Permission denied.");
   if (!valid(req.body.name)) return _400(res, "Invalid value to parameter 'name'.");
   if (typeof req.body.geometry !== "object" || typeof req.body.geometry.coordinates !== "object") return _400(res, "Invalid value to parameter 'geometry'.");
 
@@ -703,7 +732,7 @@ async function turfCreate(req, res) {
     console.warn(e);
     console.log("Unable to enqueue job, attempting it on the main worker thread");
     job = {id: 0};
-    await doTurfCreateLayer(input);
+    await doTurfIndexing(input);
   }
 
   return res.json({jobId: job.id});
@@ -715,7 +744,6 @@ async function turfDelete(req, res) {
   
   try {
     await cqa('match (a:Turf {id:{turfId}}) detach delete a', req.body);
-    await cqa('call spatial.removeLayer({turfId})', req.body);
   } catch(e) {
     return _500(res, e);
   }

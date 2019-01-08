@@ -30,6 +30,7 @@
     "express-async-await": "^1.1.0",
     "express-jwt": "^5.3.1",
     "express-logging": "^1.1.1",
+    "form-data": "^2.3.3",
     "jsonwebtoken": "^8.4.0",
     "jwt-decode": "^2.2.0",
     "logops": "^2.1.0",
@@ -37,6 +38,7 @@
     "node-fetch": "^2.3.0",
     "node-neo4j-bolt-adapter": "^1.0.6",
     "ourvoiceusa-sdk-js": "github:OurVoiceUSA/ourvoiceusa-sdk-js",
+    "papaparse": "^4.6.2",
     "uuid": "^3.3.2",
     "wkx": "^0.4.6"
   }
