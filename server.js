@@ -157,7 +157,7 @@ async function doDbInit() {
 
   // create any indexes we need if they don't exist
   await asyncForEach(indexes, async (index) => {
-    let ref = await cqa('call db.indexes() yield label, properties with * where label = {label} and {property} in properties return count(*)', index);
+    let ref = await cqa('call db.indexes() yield tokenNames, properties with * where {label} in tokenNames and {property} in properties return count(*)', index);
     if (ref.data[0] === 0) await cqa(index.create);
   });
 
