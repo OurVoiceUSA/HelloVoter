@@ -114,6 +114,15 @@ async function doDbInit() {
     process.exit(1);
   }
 
+  // indexing changed in 3.5 and we do not support the old ones
+  let arr = (await neo4j_version()).split('.');
+  let ver = Number.parseFloat(arr[0]+'.'+arr[1]);
+
+  if (ver < 3.5) {
+    console.warn("Neo4j version 3.5 or higher is required.");
+    process.exit(1);
+  }
+
   try {
     if (!ov_config.redis_url) throw new Error("REDIS_URL is not set");
 
@@ -398,9 +407,13 @@ function uncle(req, res) {
   return res.json({name: "Bob"});
 }
 
+async function neo4j_version() {
+  return ((await cqa('call apoc.monitor.kernel() yield kernelVersion return split(split(kernelVersion, ",")[1], " ")[2]'))).data[0];
+}
+
 async function dashboard(req, res) {
   try {
-    let neo4j_version = ((await cqa('call apoc.monitor.kernel() yield kernelVersion return split(split(kernelVersion, ",")[1], " ")[2]'))).data[0];
+    let nv = await neo4j_version();
     if (req.user.admin === true) return res.json({
       volunteers: (await cqa('match (a:Volunteer) return count(a)')).data[0],
       teams: (await cqa('match (a:Team) return count(a)')).data[0],
@@ -410,7 +423,7 @@ async function dashboard(req, res) {
       addresses: (await cqa('match (a:Address) return count(a)')).data[0],
       dbsize: (await cqa('CALL apoc.monitor.store() YIELD totalStoreSize return totalStoreSize')).data[0],
       version: version,
-      neo4j_version: neo4j_version,
+      neo4j_version: nv,
     });
     else {
       let ass = await volunteerAssignments(req.user);
@@ -422,7 +435,7 @@ async function dashboard(req, res) {
         forms: ass.forms.length,
         addresses: 'N/A',
         version: (ass.ready?version:null),
-        neo4j_version: (ass.ready?neo4j_version:null),
+        neo4j_version: (ass.ready?nv:null),
       });
     }
   } catch (e) {
