@@ -251,7 +251,9 @@ export async function mockFetch(token, uri, method, body) {
       forms = [];
       break;
     default:
-      throw new Error("User not mocked: "+user.id);
+      let err = new Error("User not mocked: "+user.id);
+      err.mock = true;
+      throw err;
   }
 
   dashboard = {volunteers: volunteers.length, teams: teams.length, turfs: turfs.length, forms: forms.length, questions: 0, addresses: 0, dbsize: 0};
@@ -327,6 +329,8 @@ export async function mockFetch(token, uri, method, body) {
       for (let i in forms) if (forms[i].id === id) return forms[i];
       return {};
     default:
-      throw new Error("URI not mocked: "+uri);
+      let err = new Error("URI not mocked: "+uri);
+      err.mock = true;
+      throw err;
   }
 }
