@@ -18,6 +18,7 @@ import neo4j from 'neo4j-driver';
 import BoltAdapter from 'node-neo4j-bolt-adapter';
 import FormData from 'form-data';
 import papa from 'papaparse';
+import jmx from 'jmx';
 
 import { ov_config } from './ov_config.js';
 
@@ -45,6 +46,14 @@ if (ov_config.jwt_pub_key) {
     process.exit(1);
   });
 }
+
+var jmxclient = jmx.createClient({
+  host: ov_config.neo4j_host,
+  port: ov_config.neo4j_jmx_port,
+  username: ov_config.neo4j_jmx_user,
+  password: ov_config.neo4j_jmx_pass,
+});
+var jvmconfig = {};
 
 // bull queue for intensive jobs against the neo4j host
 var nq = new queue(ov_config.neo4j_host, ov_config.redis_url);
@@ -97,8 +106,69 @@ const db = new BoltAdapter(neo4j.driver('bolt://'+ov_config.neo4j_host, authToke
 
 // database connect
 cqa('return timestamp()').catch((e) => {console.error("Unable to connect to database."); process.exit(1)}).then(() => {
-  doDbInit();
+  doStartupTasks();
 });
+
+// tasks to do on startup, in sequence
+async function doStartupTasks() {
+  await doJmxInit();
+  await doDbInit();
+  await postDbInit();
+}
+
+async function doJmxInit() {
+  let start = new Date().getTime();
+  console.log("doJmxInit() started @ "+start);
+
+  try {
+    let data;
+
+    await new Promise((resolve, reject) => {
+      jmxclient.on('connect', resolve);
+      jmxclient.on('error', reject);
+      jmxclient.connect();
+    });
+
+    data = await new Promise((resolve, reject) => {
+      jmxclient.getAttribute("java.lang:type=Memory", "HeapMemoryUsage", resolve); //, function(data) {
+    });
+
+    let max = data.getSync('max');
+    jvmconfig.maxheap = max.longValue;
+
+    data = await new Promise((resolve, reject) => {
+      jmxclient.getAttribute("java.lang:type=OperatingSystem", "TotalPhysicalMemorySize", resolve);
+    });
+
+    jvmconfig.totalmemory = data.longValue;
+
+    data = await new Promise((resolve, reject) => {
+      jmxclient.getAttribute("java.lang:type=OperatingSystem", "AvailableProcessors", resolve);
+    });
+
+    jvmconfig.numcpus = data;
+
+    // close the connection
+    // TODO: hold it open and actively monitor the system
+    jmxclient.disconnect();
+
+  } catch (e) {
+    console.warn("Unable to connect to JMX, see error below. As a result, we won't be able to optimize database queries, nor can we honor the JOB_CONCURRENCY connfiguration.");
+    console.warn(e);
+  }
+
+  // community edition maxes at 4 cpus
+  if (jvmconfig.numcpus) {
+    let ref = await cqa('call dbms.components() yield edition');
+    if (ref.data[0] !== 'enterprise' && jvmconfig.numcpus > 4) {
+      console.warn("WARNING: Your neo4j database host has "+jvmconfig.numcpus+" CPUs but you're not running enterprise edition, so only up to 4 are actually utilized by neo4j.");
+      jvmconfig.numcpus = 4;
+    }
+  }
+
+  let finish = new Date().getTime();
+  console.log("doJmxInit() finished @ "+finish+" after "+(finish-start)+" milliseconds");
+}
 
 async function doDbInit() {
   let start = new Date().getTime();
@@ -123,12 +193,25 @@ async function doDbInit() {
     process.exit(1);
   }
 
-  // TODO: only call warmup if mem > dbsize
-  try {
-    await cqa('call apoc.warmup.run()');
-  } catch (e) {
-    console.warn("Call to APOC warmup failed.");
-    console.warn(e)
+  // only call warmup there's enough room to cache the database
+  if (!jvmconfig.maxheap || !jvmconfig.totalmemory) {
+    console.warn("WARNING: Unable to determine neo4j max heap or total memory. Not initiating database warmup.");
+  } else {
+    // we're assumiong the host neo4j is running on is dedicated to it; available memory is total system memory minus jvm max heap
+    // TODO: check against dbms.memory.pagecache.size configuration as well
+    let am = jvmconfig.totalmemory-jvmconfig.maxheap;
+    let ds = await neo4j_db_size();
+    if (am < ds) {
+      console.warn("WARNING: Database size exceeds available system memory (mem: "+am+" vs. db: "+ds+"). Not initiating database warmup.");
+    } else {
+      try {
+        console.log("Calling apoc.warmup.run(); this may take several minutes.");
+        await cqa('call apoc.warmup.run()');
+      } catch (e) {
+        console.warn("Call to APOC warmup failed.");
+        console.warn(e)
+      }
+    }
   }
 
   let indexes = [
@@ -166,8 +249,6 @@ async function doDbInit() {
 
   let finish = new Date().getTime();
   console.log("doDbInit() finished @ "+finish+" after "+(finish-start)+" milliseconds");
-
-  postDbInit();
 }
 
 async function postDbInit() {
@@ -199,7 +280,21 @@ async function postDbInit() {
   try {
     if (!ov_config.redis_url) throw new Error("REDIS_URL is not set");
 
-    nq.process(ov_config.job_concurrency, async (job) => {
+    let concurrency = ov_config.job_concurrency;
+
+    // don't let job_concurrency go overboard
+    if (concurrency > 1) {
+      if (!jvmconfig.numcpus) {
+        concurrency = 1;
+        console.warn("WARNING: Unable to determine number of CPUs available to neo4j. Unable to honor your JOB_CONCURRENCY setting.");
+      }
+      if (jvmconfig.numcpus > (concurrency/3)) {
+        concurrency = Math.floor(jvmconfig.numcpus/3);
+        console.warn("WARNING: JOB_CONCURRENCY is set way too high. Lowering it "+concurrency);
+      }
+    }
+
+    nq.process(concurrency, async (job) => {
       let ret;
       switch (job.data.task) {
         case 'turfCreate':
@@ -421,6 +516,10 @@ async function neo4j_version() {
   return ((await cqa('call apoc.monitor.kernel() yield kernelVersion return split(split(kernelVersion, ",")[1], " ")[2]'))).data[0];
 }
 
+async function neo4j_db_size() {
+  return (await cqa('CALL apoc.monitor.store() YIELD totalStoreSize return totalStoreSize')).data[0];
+}
+
 async function dashboard(req, res) {
   try {
     let nv = await neo4j_version();
@@ -431,7 +530,7 @@ async function dashboard(req, res) {
       questions: (await cqa('match (a:Question) return count(a)')).data[0],
       forms: (await cqa('match (a:Form) return count(a)')).data[0],
       addresses: (await cqa('match (a:Address) return count(a)')).data[0],
-      dbsize: (await cqa('CALL apoc.monitor.store() YIELD totalStoreSize return totalStoreSize')).data[0],
+      dbsize: await neo4j_db_size(),
       version: version,
       neo4j_version: nv,
     });
