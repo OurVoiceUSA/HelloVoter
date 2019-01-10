@@ -123,25 +123,6 @@ async function doDbInit() {
     process.exit(1);
   }
 
-  try {
-    if (!ov_config.redis_url) throw new Error("REDIS_URL is not set");
-
-    nq.process(ov_config.job_concurrency, async (job) => {
-      let ret;
-      switch (job.data.task) {
-        case 'turfCreate':
-          ret = await doTurfIndexing(job.data.input);
-          break;
-        default:
-          throw new Error("Undefined task "+job.data.task);
-      }
-      return Promise.resolve(ret);
-    });
-  } catch (e) {
-    console.warn("Unable to setup bull job processor queue due to the error below. This will poorly affect application response times on large databases.");
-    console.warn(e);
-  }
-
   // TODO: only call warmup if mem > dbsize
   try {
     await cqa('call apoc.warmup.run()');
@@ -183,6 +164,16 @@ async function doDbInit() {
     if (ref.data[0] === 0) await cqa(layer.create);
   });
 
+  let finish = new Date().getTime();
+  console.log("doDbInit() finished @ "+finish+" after "+(finish-start)+" milliseconds");
+
+  postDbInit();
+}
+
+async function postDbInit() {
+  let start = new Date().getTime();
+  console.log("postDbInit() started @ "+start);
+
   // regions with no shapes
   delete us_states.FM;
   delete us_states.MH;
@@ -205,8 +196,27 @@ async function doDbInit() {
     }
   });
 
+  try {
+    if (!ov_config.redis_url) throw new Error("REDIS_URL is not set");
+
+    nq.process(ov_config.job_concurrency, async (job) => {
+      let ret;
+      switch (job.data.task) {
+        case 'turfCreate':
+          ret = await doTurfIndexing(job.data.input);
+          break;
+        default:
+          throw new Error("Undefined task "+job.data.task);
+      }
+      return Promise.resolve(ret);
+    });
+  } catch (e) {
+    console.warn("Unable to setup bull job processor queue due to the error below. This will poorly affect application response times on large databases.");
+    console.warn(e);
+  }
+
   let finish = new Date().getTime();
-  console.log("doDbInit() finished @ "+finish+" after "+(finish-start)+" milliseconds");
+  console.log("postDbInit() finished @ "+finish+" after "+(finish-start)+" milliseconds");
 }
 
 function valid(str) {
