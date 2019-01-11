@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "JUNIT_REPORT_PATH=test-result/result.xml JUNIT_REPORT_STACK=1 mocha --timeout 25000 --colors --reporter mocha-jenkins-reporter || true",
-    "start": "node node_modules/nodemon/bin/nodemon.js --exec babel-node server.js"
+    "start": "node node_modules/nodemon/bin/nodemon.js --signal SIGKILL --exec babel-node server.js"
   },
   "author": "Our Voice USA",
   "license": "AGPL-3.0",
