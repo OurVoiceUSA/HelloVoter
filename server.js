@@ -1131,10 +1131,19 @@ queueTasks.doProcessImport = async function (filename) {
   // TODO: we only merge :Address here - can still have dupe Unit & Person nodes
   await cqa('call apoc.periodic.iterate("match (a:Address) match (b:Address {id:a.id}) with a, count(b) as count where count > 1 return distinct(a.id) as id", "match (a:Address {id:{id}}) with collect(a) as nodes call apoc.refactor.mergeNodes(nodes) yield node return node", {iterateList:false})');
 
-  // TODO: queue job in a single processor queue that does addNodes
-  //   match (a:Address)-[:SOURCE]-(:ImportRecord)-[:FILE]-(b:ImportFile {filename:{filename}}) where not exists(a.bbox) and not a.position = point({longitude: 0, latitude: 0}) with a limit 10000 with collect(a) as nodes call spatial.addNodes('address', nodes) yield count return count
+  // aquire a write lock so we can only do addNodes from a single job at a time, for heap safety
+  // TODO: limit based on max heap
+  limit = 10000;
+  count = limit;
 
-  // TODO: once addNodes is done, merge with all relivant turfs
+  while (count === limit) {
+    let start = new Date().getTime();
+    let ref = await cqa('merge (a:LockSpatialAddNodes) with collect(a) as lock call apoc.lock.nodes(lock) match (a:Address)-[:SOURCE]-(:ImportRecord)-[:FILE]-(:ImportFile {filename:{filename}}) where not exists(a.bbox) and not a.position = point({longitude: 0, latitude: 0}) with a limit {limit} with collect(distinct(a)) as nodes call spatial.addNodes("address", nodes) yield count return count', {filename: filename, limit: limit});
+    count = ref.data[0];
+    console.log("Processed "+count+" records into spatial.addNodes() for "+filename+" in "+((new Date().getTime())-start)+" milliseconds");
+  }
+
+  // TODO: finish it off with merge these new addresses with all relivant turfs
 }
 
 async function doGeocode(data) {
