@@ -174,7 +174,7 @@ async function doDbInit() {
 
   let indexes = [
     {label: 'Person', property: 'id', create: 'create constraint on (a:Person) assert a.id is unique'},
-    {label: 'Address', property: 'id', create: 'create constraint on (a:Address) assert a.id is unique'},
+    {label: 'Address', property: 'id', create: 'create index on :Address(id)'}, // asserting a.id is unique causes issues so we handle dupes manually
     {label: 'Address', property: 'position', create: 'create index on :Address(position)'},
     {label: 'Address', property: 'bbox', create: 'create index on :Address(bbox)'},
     {label: 'Volunteer', property: 'id', create: 'create constraint on (a:Volunteer) assert a.id is unique'},
@@ -1111,7 +1111,18 @@ queueTasks.doProcessImport = async function (filename) {
     {batchSize:10000,iterateList:true})
     `);
 
-  // TODO: do geocoding
+  // geocoding
+  // census has a limit of 10k per batch
+  let limit = 10000;
+  let count = limit;
+
+  while (count === limit) {
+    let ref = await cqa('match (a:ImportFile {filename:{filename}})<-[:FILE]-(b:ImportRecord)<-[:SOURCE]-(c:Address) where c.position is null return c limit {limit}', {filename: filename, limit: limit});
+    count = ref.data.length;
+    if (count) await doGeocode(ref.data);
+  }
+
+  // TODO: find instances of duplicate Address(id) and merge them into a single node
 
   // TODO: queue job in a single processor queue that does addNodes
   //   match (a:Address)-[:SOURCE]-(:ImportRecord)-[:FILE]-(b:ImportFile {filename:{filename}}) where not exists(a.bbox) and not a.position = point({longitude: 0, latitude: 0}) with a limit 10000 with collect(a) as nodes call spatial.addNodes('address', nodes) yield count return count
@@ -1119,35 +1130,75 @@ queueTasks.doProcessImport = async function (filename) {
   // TODO: once addNodes is done, merge with all relivant turfs
 }
 
-async function doGeocode(args) {
-  // census has a limit of 10,000 per batch
-  args.limit = 10000;
-  let count = args.limit;
+async function doGeocode(data) {
+  let file = "";
 
-  while (count === args.limit) {
+  // build the "file" to submit
+  for (let i in data) {
+    // assign a row number to each item
+    data[i].idx = i;
+    file += i+","+data[i].street+","+data[i].city+","+data[i].state+","+data[i].zip+"\n"
+  }
 
-    let file = 'row,street,city,state,zip\n';
+  let fd = new FormData();
+  fd.append('benchmark', 'Public_AR_Current');
+  fd.append('returntype', 'locations');
+  fd.append('addressFile', file, 'import.csv');
 
-    let fd = new FormData();
-    fd.append('benchmark', 'Public_AR_Current');
-    fd.append('returntype', 'locations');
-    fd.append('addressFile', file, 'import.csv');
+  try {
+    let res = await fetch('https://geocoding.geo.census.gov/geocoder/locations/addressbatch', {
+      method: 'POST',
+      body: fd
+    });
 
-    try {
-      let res = await fetch('https://geocoding.geo.census.gov/geocoder/locations/addressbatch', {
-        method: 'POST',
-        body: fd
-      });
+    // they return a csv file, parse it
+    let pp = papa.parse(await res.text());
 
-      // return is a csv file
-      let pp = papa.parse(await res.text());
-
-      // pp.data is an array of arrays with format:
-      // row,input address,"Match",Exact/Non_Exact/Tie/No_Match,STREET,CITY,STATE,ZIP,"longitude,latitude",some number,some letter
-
-    } catch (e) {
-      console.warn(e);
+    // map pp.data back into data
+    for (let i in pp.data) {
+      for (let e in data) {
+        if (pp.data[i][0] === data[e].idx) {
+          data[e].pp = pp.data[i];
+        }
+      }
     }
+
+    // pp has format of:
+    // 0   1             2       3                            4                          5                    6           7
+    // row,input address,"Match",Exact/Non_Exact/Tie/No_Match,"STREET, CITY, STATE, ZIP","longitude,latitude",some number,L or R side of road
+    for (let i in data) {
+      let lng = 0, lat = 0;
+
+      // ensure we have a pp array
+      if (!data[i].pp) data[i].pp = [];
+
+      // set lat/lng if we got it
+      if (data[i].pp[5]) {
+        let pos = data[i].pp[5].split(",");
+        lat = pos[0];
+        lng = pos[1];
+      }
+      data[i].longitude = lng;
+      data[i].latitude = lat;
+
+      // if we got an address back, update it
+      if (data[i].pp[4]) {
+        let addr = data[i].pp[4].split(", ")
+        data[i].street = addr[0];
+        data[i].city = addr[1];
+        data[i].state = addr[2];
+        data[i].zip = addr[3];
+      }
+    }
+
+    // update database
+    await cqa('unwind {data} as r match (a:Address {id:r.id}) set a.street = r.street, a.city = r.city, a.state = r.state, a.zip = r.zip, a.longitude = toFloat(r.longitude), a.latitude = toFloat(r.latitude), a.position = point({longitude: toFloat(r.longitude), latitude: toFloat(r.latitude)})', {data: data});
+
+    // update ids
+    await cqa('unwind {data} as r match (a:Address {id:r.id}) set a.id = apoc.util.md5([toLower(a.street), toLower(a.city), toLower(a.state), substring(a.zip,0,5)])', {data: data});
+
+  } catch (e) {
+    console.warn(e);
   }
 
 }
