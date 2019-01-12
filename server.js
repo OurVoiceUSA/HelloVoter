@@ -1143,7 +1143,12 @@ queueTasks.doProcessImport = async function (filename) {
     console.log("Processed "+count+" records into spatial.addNodes() for "+filename+" in "+((new Date().getTime())-start)+" milliseconds");
   }
 
-  // TODO: finish it off with merge these new addresses with all relivant turfs
+  // finish it off by adding these news addresses to all relivant turfs
+  // TODO: only search :Address as a result of this import file (sub-param apoc issue)
+  let start = new Date().getTime();
+  let ref = await cqa('CALL apoc.periodic.iterate("match (a:Address) call spatial.intersects(\\"turf\\", {longitude: a.longitude, latitude: a.latitude}) yield node return a, node", "merge (a)-[:WITHIN]->(node)", {batchSize:10000,iterateList:true}) yield total return total');
+  let total = ref.data[0];
+  console.log("Processed "+total+" records into turfs for "+filename+" in "+((new Date().getTime())-start)+" milliseconds");
 }
 
 async function doGeocode(data) {
@@ -1191,8 +1196,8 @@ async function doGeocode(data) {
       // set lat/lng if we got it
       if (data[i].pp[5]) {
         let pos = data[i].pp[5].split(",");
-        lat = pos[0];
-        lng = pos[1];
+        lng = pos[0];
+        lat = pos[1];
       }
       data[i].longitude = lng;
       data[i].latitude = lat;
