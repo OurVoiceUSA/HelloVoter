@@ -183,6 +183,18 @@ export default class App extends Component {
         </div>
 
         <div style={{ display: 'flex' }}>
+          <div style={{ width: 150 }}>Unit/Apartment #:</div>{' '}
+          <div style={{ width: 450 }}>
+            <Select
+              options={core_options}
+              isMulti={true}
+              placeholder="None"
+            />
+          </div>
+          <Checkbox value="ack" color="primary" />
+        </div>
+
+        <div style={{ display: 'flex' }}>
           <div style={{ width: 150 }}>City</div>{' '}
           <div style={{ width: 450 }}>
             <Select
