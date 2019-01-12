@@ -286,7 +286,11 @@ async function dbwrap() {
     if (ov_config.DEBUG) {
       let funcName = func.replace('Async', '');
       console.log('DEBUG: '+funcName+' '+params[0]+';');
-      console.log('DEBUG: :params '+JSON.stringify(params[1]));
+      if (params[1]) {
+        let str = "";
+        str += JSON.stringify(params[1]);
+        console.log('DEBUG: :params '+str.substring(0, 1024));
+      }
     }
     return db[func](params[0], params[1]);
 }
