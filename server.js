@@ -187,6 +187,7 @@ async function doDbInit() {
     {label: 'Survey', property: 'id', create: 'create constraint on (a:Survey) assert a.id is unique'},
     {label: 'ImportFile', property: 'filename', create: 'create constraint on (a:ImportFile) assert a.filename is unique'},
     {label: 'ImportRecord', property: 'id', create: 'create constraint on (a:ImportRecord) assert a.id is unique'},
+    {label: 'ImportRecord', property: 'processed', create: 'create index on :ImportRecord(processed)'},
   ];
 
   // create any indexes we need if they don't exist
@@ -1062,6 +1063,7 @@ function questionAssignedRemove(req, res) {
 }
 
 var queueTasks = {};
+
 queueTasks.doTurfIndexing = async function (input) {
   let start = new Date().getTime();
   let ref = await cqa('CALL apoc.periodic.iterate("match (a:Turf {id:\\"'+input.turfId+'\\"}) call spatial.intersects(\\"address\\", a.wkt) yield node return node, a", "merge (node)-[:WITHIN]->(a)", {batchSize:10000,iterateList:true}) yield total return total', input);
@@ -1069,6 +1071,45 @@ queueTasks.doTurfIndexing = async function (input) {
   console.log("Processed "+total+" records for "+input.turfId+" in "+((new Date().getTime())-start)+" milliseconds");
 
   return {total: total};
+}
+
+queueTasks.doProcessImport = async function (filename) {
+  // if no pid, create with randomUUID()
+  await cqa('match (a:ImportFile {filename:{filename}})<-[:FILE]-(b:ImportRecord) where b.pid = "" set b.pid = randomUUID()', {filename: filename});
+
+  // TODO: want to reference (a:ImportFile) in the apoc.periodic.iterate() calls below; having a hard time with the sub-parameterized syntax
+
+  // non-unit addresses
+  await cqa(`
+    CALL apoc.periodic.iterate("match (b:ImportRecord {processed:0}) where b.unit = '' return b",
+      "merge (c:Address {id:apoc.util.md5([toLower(b.street), toLower(b.city), toLower(b.state), substring(b.zip,0,5)])})
+        on create set b.processed = timestamp(), c += {created: timestamp(), updated: timestamp(), longitude: toFloat(b.lng), latitude: toFloat(b.lat), position: point({longitude: toFloat(b.lng), latitude: toFloat(b.lat)}), street:b.street, city:b.city, state:b.state, zip:b.zip}
+      merge (c)-[:SOURCE]->(b)
+      with b,c
+      where not b.name = ''
+      merge (b)<-[:SOURCE]-(d:Person {id:b.pid, name:b.name})-[:LIVES_AT]->(c)",
+    {batchSize:10000,iterateList:true})
+  `);
+
+  // multi-unit addresses
+  await cqa(`
+    CALL apoc.periodic.iterate("match (b:ImportRecord {processed:0}) where not b.unit = '' return b",
+      "merge (c:Address {id:apoc.util.md5([toLower(b.street), toLower(b.city), toLower(b.state), substring(b.zip,0,5)])})
+        on create set b.processed = timestamp(), c += {created: timestamp(), updated: timestamp(), longitude: toFloat(b.lng), latitude: toFloat(b.lat), position: point({longitude: toFloat(b.lng), latitude: toFloat(b.lat)}), street:b.street, city:b.city, state:b.state, zip:b.zip}
+      merge (e:Unit {name:b.unit})-[:AT]->(c)
+      merge (c)-[:SOURCE]->(b)<-[:SOURCE]-(e)
+      with b,e
+      where not b.name = '' 
+      merge (b)<-[:SOURCE]-(d:Person {id:b.pid, name:b.name})-[:LIVES_AT]->(e)",
+    {batchSize:10000,iterateList:true})
+    `);
+
+  // TODO: do geocoding
+
+  // TODO: queue job in a single processor queue that does addNodes
+  //   match (a:Address)-[:SOURCE]-(:ImportRecord)-[:FILE]-(b:ImportFile {filename:{filename}}) where not exists(a.bbox) and not a.position = point({longitude: 0, latitude: 0}) with a limit 10000 with collect(a) as nodes call spatial.addNodes('address', nodes) yield count return count
+
+  // TODO: once addNodes is done, merge with all relivant turfs
 }
 
 async function importBegin(req, res) {
@@ -1091,7 +1132,8 @@ async function importBegin(req, res) {
 async function importAdd(req, res) {
   if (req.user.admin !== true) return _403(res, "Permission denied.");
   try {
-    await cqa('match (a:ImportFile {filename:{filename}}) unwind {data} as r merge (b:ImportRecord {id:apoc.util.md5([r[0],r[1],r[2],r[3],r[4],r[5],r[6],r[7],r[8]])}) on create set b += {pid:r[0], name:r[1], street:r[2], unit:r[3], city:r[4], state:r[5], zip:r[6], lng:r[7], lat:r[8]} merge (b)-[:ORIGIN]->(a)', req.body);
+    // TODO: iterate through req.body.data and normalize address data
+    await cqa('match (a:ImportFile {filename:{filename}}) unwind {data} as r merge (b:ImportRecord {id:apoc.util.md5([r[0],r[1],r[2],r[3],r[4],r[5],r[6],r[7],r[8]])}) on create set b += {pid:r[0], name:r[1], street:r[2], unit:r[3], city:r[4], state:r[5], zip:r[6], lng:r[7], lat:r[8], processed:0} merge (b)-[:FILE]->(a)', req.body);
   } catch (e) {
     return _500(res, e);
   }
@@ -1108,8 +1150,7 @@ async function importEnd(req, res) {
     return _500(res, e);
   }
 
-  // TODO: queue the job that manages post processing (doGeocode, etc)
-  // if no pid, create :Person with randomUUID()
+  await queueTaskOrExec('doProcessImport', req.body.filename);
   return res.json({});
 }
 
@@ -1137,7 +1178,7 @@ async function doGeocode(args) {
       let pp = papa.parse(await res.text());
 
       // pp.data is an array of arrays with format:
-      // row,input address,"Match",Exact/Non_Exact/Tie/No_Match,STREET,CITY,STATE,ZIP,"longitude,latitude",some number,"R"
+      // row,input address,"Match",Exact/Non_Exact/Tie/No_Match,STREET,CITY,STATE,ZIP,"longitude,latitude",some number,some letter
 
     } catch (e) {
       console.warn(e);
