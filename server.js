@@ -58,48 +58,6 @@ var jvmconfig = {};
 // bull queue for intensive jobs against the neo4j host
 var nq = new queue(ov_config.neo4j_host, ov_config.redis_url);
 
-async function doTurfIndexing(args) {
-  let start = new Date().getTime();
-  let ref = await cqa('CALL apoc.periodic.iterate("match (a:Turf {id:\\"'+args.turfId+'\\"}) call spatial.intersects(\\"address\\", a.wkt) yield node return node, a", "merge (node)-[:WITHIN]->(a)", {batchSize:10000,iterateList:true}) yield total return total', args);
-  let total = ref.data[0];
-  console.log("Processed "+total+" records for "+args.turfId+" in "+((new Date().getTime())-start)+" milliseconds");
-
-  return {total: total};
-}
-
-async function doGeocode(args) {
-  // census has a limit of 10,000 per batch
-  args.limit = 10000;
-  let count = args.limit;
-
-  while (count === args.limit) {
-
-    let file = 'row,street,city,state,zip\n';
-
-    let fd = new FormData();
-    fd.append('benchmark', 'Public_AR_Current');
-    fd.append('returntype', 'locations');
-    fd.append('addressFile', file, 'import.csv');
-
-    try {
-      let res = await fetch('https://geocoding.geo.census.gov/geocoder/locations/addressbatch', {
-        method: 'POST',
-        body: fd
-      });
-
-      // return is a csv file
-      let pp = papa.parse(await res.text());
-
-      // pp.data is an array of arrays with format:
-      // row,input address,"Match",Exact/Non_Exact/Tie/No_Match,STREET,CITY,STATE,ZIP,"longitude,latitude",some number,"R"
-
-    } catch (e) {
-      console.warn(e);
-    }
-  }
-
-}
-
 // async'ify neo4j
 const authToken = neo4j.auth.basic(ov_config.neo4j_user, ov_config.neo4j_pass);
 const db = new BoltAdapter(neo4j.driver('bolt://'+ov_config.neo4j_host, authToken));
@@ -215,6 +173,7 @@ async function doDbInit() {
   }
 
   let indexes = [
+    {label: 'Person', property: 'id', create: 'create constraint on (a:Person) assert a.id is unique'},
     {label: 'Address', property: 'id', create: 'create constraint on (a:Address) assert a.id is unique'},
     {label: 'Address', property: 'position', create: 'create index on :Address(position)'},
     {label: 'Address', property: 'bbox', create: 'create index on :Address(bbox)'},
@@ -226,6 +185,8 @@ async function doDbInit() {
     {label: 'Question', property: 'key', create: 'create constraint on (a:Question) assert a.key is unique'},
     {label: 'Unit', property: 'id', create: 'create constraint on (a:Unit) assert a.id is unique'},
     {label: 'Survey', property: 'id', create: 'create constraint on (a:Survey) assert a.id is unique'},
+    {label: 'ImportFile', property: 'filename', create: 'create constraint on (a:ImportFile) assert a.filename is unique'},
+    {label: 'ImportRecord', property: 'id', create: 'create constraint on (a:ImportRecord) assert a.id is unique'},
   ];
 
   // create any indexes we need if they don't exist
@@ -1093,6 +1054,90 @@ function questionAssignedRemove(req, res) {
   return cqdo(req, res, 'match (a:Question {key:{key}})-[r:ASSIGNED]-(b:Form {id:{formId}}) delete r', req.body, true);
 }
 
+async function doTurfIndexing(args) {
+  let start = new Date().getTime();
+  let ref = await cqa('CALL apoc.periodic.iterate("match (a:Turf {id:\\"'+args.turfId+'\\"}) call spatial.intersects(\\"address\\", a.wkt) yield node return node, a", "merge (node)-[:WITHIN]->(a)", {batchSize:10000,iterateList:true}) yield total return total', args);
+  let total = ref.data[0];
+  console.log("Processed "+total+" records for "+args.turfId+" in "+((new Date().getTime())-start)+" milliseconds");
+
+  return {total: total};
+}
+
+async function importBegin(req, res) {
+  if (req.user.admin !== true) return _403(res, "Permission denied.");
+
+  // TODO: validate that req.body.filename is a file name
+  req.body.id = req.user.id;
+  try {
+    let ref = await cqa('match (a:ImportFile {filename:{filename}}) where a.submitted is not null return count(a)', req.body);
+    if (ref.data[0] !== 0) return _403(res, "Import File already exists.");
+
+    await cqa('match (a:Volunteer {id:{id}}) merge (b:ImportFile {filename:{filename}}) on create set b += {created: timestamp()} merge (a)-[:IMPORTED]->(b)', req.body);
+  } catch (e) {
+    return _500(res, e);
+  }
+
+  return res.json({});
+}
+
+async function importAdd(req, res) {
+  if (req.user.admin !== true) return _403(res, "Permission denied.");
+  try {
+    await cqa('match (a:ImportFile {filename:{filename}}) unwind {data} as r merge (b:ImportRecord {id:apoc.util.md5([r[0],r[1],r[2],r[3],r[4],r[5],r[6],r[7],r[8]])}) on create set b += {pid:r[0], name:r[1], street:r[2], unit:r[3], city:r[4], state:r[5], zip:r[6], lng:r[7], lat:r[8]} merge (b)-[:ORIGIN]->(a)', req.body);
+  } catch (e) {
+    return _500(res, e);
+  }
+
+  return res.json({});
+}
+
+async function importEnd(req, res) {
+  if (req.user.admin !== true) return _403(res, "Permission denied.");
+  try {
+    let ref = await cqa('match (a:ImportFile {filename:{filename}}) where a.submitted is null set a.submitted = timestamp() return count(a)', req.body);
+    if (ref.data[0] !== 1) return _403(res, "Import File already submitted for processing.");
+  } catch (e) {
+    return _500(res, e);
+  }
+
+  // TODO: queue the job that manages post processing (doGeocode, etc)
+  // if no pid, create :Person with randomUUID()
+  return res.json({});
+}
+
+async function doGeocode(args) {
+  // census has a limit of 10,000 per batch
+  args.limit = 10000;
+  let count = args.limit;
+
+  while (count === args.limit) {
+
+    let file = 'row,street,city,state,zip\n';
+
+    let fd = new FormData();
+    fd.append('benchmark', 'Public_AR_Current');
+    fd.append('returntype', 'locations');
+    fd.append('addressFile', file, 'import.csv');
+
+    try {
+      let res = await fetch('https://geocoding.geo.census.gov/geocoder/locations/addressbatch', {
+        method: 'POST',
+        body: fd
+      });
+
+      // return is a csv file
+      let pp = papa.parse(await res.text());
+
+      // pp.data is an array of arrays with format:
+      // row,input address,"Match",Exact/Non_Exact/Tie/No_Match,STREET,CITY,STATE,ZIP,"longitude,latitude",some number,"R"
+
+    } catch (e) {
+      console.warn(e);
+    }
+  }
+
+}
+
 // sync
 
 async function sync(req, res) {
@@ -1339,6 +1384,9 @@ app.post('/volunteer/v1/question/delete', questionDelete);
 app.get('/volunteer/v1/question/assigned/list', questionAssignedList);
 app.post('/volunteer/v1/question/assigned/add', questionAssignedAdd);
 app.post('/volunteer/v1/question/assigned/remove', questionAssignedRemove);
+app.post('/volunteer/v1/import/begin', importBegin);
+app.post('/volunteer/v1/import/add', importAdd);
+app.post('/volunteer/v1/import/end', importEnd);
 app.post('/volunteer/v1/sync', sync);
 
 Object.keys(ov_config).forEach((k) => {
