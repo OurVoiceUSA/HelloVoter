@@ -256,14 +256,7 @@ async function postDbInit() {
     }
 
     nq.process(concurrency, async (job) => {
-      let ret;
-      switch (job.data.task) {
-        case 'turfCreate':
-          ret = await doTurfIndexing(job.data.input);
-          break;
-        default:
-          throw new Error("Undefined task "+job.data.task);
-      }
+      let ret = await queueTasks[job.data.task](job.data.input);
       return Promise.resolve(ret);
     });
   } catch (e) {
@@ -273,6 +266,29 @@ async function postDbInit() {
 
   let finish = new Date().getTime();
   console.log("postDbInit() finished @ "+finish+" after "+(finish-start)+" milliseconds");
+}
+
+async function queueTaskOrExec() {
+  let job;
+
+  var params = Array.prototype.slice.call(arguments);
+  var func = params.shift();
+
+  try {
+    if (!ov_config.redis_url) throw new Error("REDIS_URL is not set");
+    // enqueue job to process turf
+    job = await nq.add({
+      task: func,
+      input: params[0],
+    });
+  } catch (e) {
+    console.warn(e);
+    console.log("Unable to enqueue job, attempting it on the main worker thread");
+    job = {id: 0};
+    await queueTasks[func](params[0]);
+  }
+
+  return job;
 }
 
 function valid(str) {
@@ -791,21 +807,8 @@ async function turfCreate(req, res) {
     return _500(res, e);
   }
 
-  let job;
   let input = {turfId: req.body.turfId};
-
-  try {
-    // enqueue job to process turf
-    job = await nq.add({
-      task: 'turfCreate',
-      input: input,
-    });
-  } catch (e) {
-    console.warn(e);
-    console.log("Unable to enqueue job, attempting it on the main worker thread");
-    job = {id: 0};
-    await doTurfIndexing(input);
-  }
+  let job = await queueTaskOrExec('doTurfIndexing', input);
 
   return res.json({jobId: job.id});
 }
@@ -1058,11 +1061,12 @@ function questionAssignedRemove(req, res) {
   return cqdo(req, res, 'match (a:Question {key:{key}})-[r:ASSIGNED]-(b:Form {id:{formId}}) delete r', req.body, true);
 }
 
-async function doTurfIndexing(args) {
+var queueTasks = {};
+queueTasks.doTurfIndexing = async function (input) {
   let start = new Date().getTime();
-  let ref = await cqa('CALL apoc.periodic.iterate("match (a:Turf {id:\\"'+args.turfId+'\\"}) call spatial.intersects(\\"address\\", a.wkt) yield node return node, a", "merge (node)-[:WITHIN]->(a)", {batchSize:10000,iterateList:true}) yield total return total', args);
+  let ref = await cqa('CALL apoc.periodic.iterate("match (a:Turf {id:\\"'+input.turfId+'\\"}) call spatial.intersects(\\"address\\", a.wkt) yield node return node, a", "merge (node)-[:WITHIN]->(a)", {batchSize:10000,iterateList:true}) yield total return total', input);
   let total = ref.data[0];
-  console.log("Processed "+total+" records for "+args.turfId+" in "+((new Date().getTime())-start)+" milliseconds");
+  console.log("Processed "+total+" records for "+input.turfId+" in "+((new Date().getTime())-start)+" milliseconds");
 
   return {total: total};
 }
