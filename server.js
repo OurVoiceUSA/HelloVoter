@@ -1087,7 +1087,10 @@ queueTasks.doProcessImport = async function (filename) {
       merge (c)-[:SOURCE]->(b)
       with b,c
       where not b.name = ''
-      merge (b)<-[:SOURCE]-(d:Person {id:b.pid, name:b.name})-[:LIVES_AT]->(c)",
+      merge (d:Person {id:b.pid})
+        on create set d.name = b.name
+      merge (d)-[:SOURCE]->(b)
+      merge (d)-[:LIVES_AT]->(c)",
     {batchSize:10000,iterateList:true})
   `);
 
@@ -1097,10 +1100,14 @@ queueTasks.doProcessImport = async function (filename) {
       "merge (c:Address {id:apoc.util.md5([toLower(b.street), toLower(b.city), toLower(b.state), substring(b.zip,0,5)])})
         on create set b.processed = timestamp(), c += {created: timestamp(), updated: timestamp(), longitude: toFloat(b.lng), latitude: toFloat(b.lat), position: point({longitude: toFloat(b.lng), latitude: toFloat(b.lat)}), street:b.street, city:b.city, state:b.state, zip:b.zip}
       merge (e:Unit {name:b.unit})-[:AT]->(c)
-      merge (c)-[:SOURCE]->(b)<-[:SOURCE]-(e)
+      merge (c)-[:SOURCE]->(b)
+      merge (e)-[:SOURCE]->(b)
       with b,e
       where not b.name = '' 
-      merge (b)<-[:SOURCE]-(d:Person {id:b.pid, name:b.name})-[:LIVES_AT]->(e)",
+      merge (d:Person {id:b.pid})
+        on create set d.name = b.name
+      merge (d)-[:SOURCE]->(b)
+      merge (d)-[:LIVES_AT]->(e)",
     {batchSize:10000,iterateList:true})
     `);
 
@@ -1110,6 +1117,39 @@ queueTasks.doProcessImport = async function (filename) {
   //   match (a:Address)-[:SOURCE]-(:ImportRecord)-[:FILE]-(b:ImportFile {filename:{filename}}) where not exists(a.bbox) and not a.position = point({longitude: 0, latitude: 0}) with a limit 10000 with collect(a) as nodes call spatial.addNodes('address', nodes) yield count return count
 
   // TODO: once addNodes is done, merge with all relivant turfs
+}
+
+async function doGeocode(args) {
+  // census has a limit of 10,000 per batch
+  args.limit = 10000;
+  let count = args.limit;
+
+  while (count === args.limit) {
+
+    let file = 'row,street,city,state,zip\n';
+
+    let fd = new FormData();
+    fd.append('benchmark', 'Public_AR_Current');
+    fd.append('returntype', 'locations');
+    fd.append('addressFile', file, 'import.csv');
+
+    try {
+      let res = await fetch('https://geocoding.geo.census.gov/geocoder/locations/addressbatch', {
+        method: 'POST',
+        body: fd
+      });
+
+      // return is a csv file
+      let pp = papa.parse(await res.text());
+
+      // pp.data is an array of arrays with format:
+      // row,input address,"Match",Exact/Non_Exact/Tie/No_Match,STREET,CITY,STATE,ZIP,"longitude,latitude",some number,some letter
+
+    } catch (e) {
+      console.warn(e);
+    }
+  }
+
 }
 
 async function importBegin(req, res) {
@@ -1152,39 +1192,6 @@ async function importEnd(req, res) {
 
   await queueTaskOrExec('doProcessImport', req.body.filename);
   return res.json({});
-}
-
-async function doGeocode(args) {
-  // census has a limit of 10,000 per batch
-  args.limit = 10000;
-  let count = args.limit;
-
-  while (count === args.limit) {
-
-    let file = 'row,street,city,state,zip\n';
-
-    let fd = new FormData();
-    fd.append('benchmark', 'Public_AR_Current');
-    fd.append('returntype', 'locations');
-    fd.append('addressFile', file, 'import.csv');
-
-    try {
-      let res = await fetch('https://geocoding.geo.census.gov/geocoder/locations/addressbatch', {
-        method: 'POST',
-        body: fd
-      });
-
-      // return is a csv file
-      let pp = papa.parse(await res.text());
-
-      // pp.data is an array of arrays with format:
-      // row,input address,"Match",Exact/Non_Exact/Tie/No_Match,STREET,CITY,STATE,ZIP,"longitude,latitude",some number,some letter
-
-    } catch (e) {
-      console.warn(e);
-    }
-  }
-
 }
 
 // sync
