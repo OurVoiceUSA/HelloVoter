@@ -1074,6 +1074,8 @@ queueTasks.doTurfIndexing = async function (input) {
 }
 
 queueTasks.doProcessImport = async function (filename) {
+  // TODO: status update to queue after each db query
+
   // if no pid, create with randomUUID()
   await cqa('match (a:ImportFile {filename:{filename}})<-[:FILE]-(b:ImportRecord) where b.pid = "" set b.pid = randomUUID()', {filename: filename});
 
@@ -1084,6 +1086,7 @@ queueTasks.doProcessImport = async function (filename) {
     CALL apoc.periodic.iterate("match (b:ImportRecord {processed:0}) where b.unit = '' return b",
       "merge (c:Address {id:apoc.util.md5([toLower(b.street), toLower(b.city), toLower(b.state), substring(b.zip,0,5)])})
         on create set b.processed = timestamp(), c += {created: timestamp(), updated: timestamp(), longitude: toFloat(b.lng), latitude: toFloat(b.lat), position: point({longitude: toFloat(b.lng), latitude: toFloat(b.lat)}), street:b.street, city:b.city, state:b.state, zip:b.zip}
+        on match set b.processed = timestamp()
       merge (c)-[:SOURCE]->(b)
       with b,c
       where not b.name = ''
@@ -1099,6 +1102,7 @@ queueTasks.doProcessImport = async function (filename) {
     CALL apoc.periodic.iterate("match (b:ImportRecord {processed:0}) where not b.unit = '' return b",
       "merge (c:Address {id:apoc.util.md5([toLower(b.street), toLower(b.city), toLower(b.state), substring(b.zip,0,5)])})
         on create set b.processed = timestamp(), c += {created: timestamp(), updated: timestamp(), longitude: toFloat(b.lng), latitude: toFloat(b.lat), position: point({longitude: toFloat(b.lng), latitude: toFloat(b.lat)}), street:b.street, city:b.city, state:b.state, zip:b.zip}
+        on match set b.processed = timestamp()
       merge (e:Unit {name:b.unit})-[:AT]->(c)
       merge (c)-[:SOURCE]->(b)
       merge (e)-[:SOURCE]->(b)
@@ -1123,6 +1127,7 @@ queueTasks.doProcessImport = async function (filename) {
   }
 
   // TODO: find instances of duplicate Address(id) and merge them into a single node
+  // match (a:Address) match (b:Address {id:a.id}) with a.id as id, count(b) as count where count > 1 return id, count;
 
   // TODO: queue job in a single processor queue that does addNodes
   //   match (a:Address)-[:SOURCE]-(:ImportRecord)-[:FILE]-(b:ImportFile {filename:{filename}}) where not exists(a.bbox) and not a.position = point({longitude: 0, latitude: 0}) with a limit 10000 with collect(a) as nodes call spatial.addNodes('address', nodes) yield count return count
