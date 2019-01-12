@@ -1121,13 +1121,15 @@ queueTasks.doProcessImport = async function (filename) {
   let count = limit;
 
   while (count === limit) {
-    let ref = await cqa('match (a:ImportFile {filename:{filename}})<-[:FILE]-(b:ImportRecord)<-[:SOURCE]-(c:Address) where c.position is null return c limit {limit}', {filename: filename, limit: limit});
+    let ref = await cqa('match (:ImportFile {filename:{filename}})<-[:FILE]-(:ImportRecord)<-[:SOURCE]-(a:Address) where a.position is null return a limit {limit}', {filename: filename, limit: limit});
     count = ref.data.length;
     if (count) await doGeocode(ref.data);
   }
 
-  // TODO: find instances of duplicate Address(id) and merge them into a single node
-  // match (a:Address) match (b:Address {id:a.id}) with a.id as id, count(b) as count where count > 1 return id, count;
+  // find instances of duplicate Address(id) and merge them into a single node
+  // TODO: only search :Address as a result of this import file (sub-param apoc issue)
+  // TODO: we only merge :Address here - can still have dupe Unit & Person nodes
+  await cqa('call apoc.periodic.iterate("match (a:Address) match (b:Address {id:a.id}) with a, count(b) as count where count > 1 return distinct(a.id) as id", "match (a:Address {id:{id}}) with collect(a) as nodes call apoc.refactor.mergeNodes(nodes) yield node return node", {iterateList:false})');
 
   // TODO: queue job in a single processor queue that does addNodes
   //   match (a:Address)-[:SOURCE]-(:ImportRecord)-[:FILE]-(b:ImportFile {filename:{filename}}) where not exists(a.bbox) and not a.position = point({longitude: 0, latitude: 0}) with a limit 10000 with collect(a) as nodes call spatial.addNodes('address', nodes) yield count return count
