@@ -64,9 +64,21 @@ describe('<MapSelect />', () => {
 
   // SEND FORMATTED DATA VIA CALLBACK
   it('Sends formatted data to callback passed in', () => {
-    const getReturnedMock = jest.fn();
-    shallow(<MapSelect getReturned={getReturnedMock} checkbox />);
-    expect(getReturnedMock).toHaveBeenCalledWith(
+    const sendFormatMock = jest.fn();
+    const select = shallow(<MapSelect sendFormat={sendFormatMock} checkbox />);
+    select
+      .find('.map-select-input')
+      .at(0)
+      .simulate('change', {
+        target: {
+          value: [
+            { label: 'First Name', value: 'firstName' },
+            { label: 'Middle Name', value: 'middleName' },
+            { label: 'Last Name', value: 'lastName' }
+          ]
+        }
+      });
+    expect(sendFormatMock).toHaveBeenCalledWith(
       'firstName middleName lastName'
     );
   });

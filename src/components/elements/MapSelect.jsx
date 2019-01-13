@@ -12,12 +12,19 @@ export class MapSelect extends React.Component {
     });
 
   _setValue = value => {
+    const { sendFormat } = this.props;
     if (Array.isArray(value)) {
-      return this.setState({
-        value: value.map(({ value }) => value).join(' ')
-      });
+      return this.setState(
+        {
+          value: value.map(({ value }) => value).join(' ')
+        },
+        () => sendFormat && sendFormat(this.state.value)
+      );
     }
-    return this.setState({ value });
+    return this.setState(
+      { value },
+      () => sendFormat && sendFormat(this.state.value)
+    );
   };
 
   render() {
