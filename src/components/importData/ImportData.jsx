@@ -66,8 +66,6 @@ export default class ImportData extends Component {
         </div>
       );
 
-    console.log('Import Data State: ', this.state);
-
     // convert headers to Select
     let core_options = [];
     sample_headers_from_csv.forEach(i =>
