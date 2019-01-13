@@ -1,5 +1,5 @@
-import { ImportMapper } from './ImportMapper';
+import { ImportMapForm } from './ImportMapForm';
 import { ImportPreview } from './ImportPreview';
 import ImportData from './ImportData';
 
-export { ImportMapper, ImportPreview, ImportData };
+export { ImportMapForm, ImportPreview, ImportData };

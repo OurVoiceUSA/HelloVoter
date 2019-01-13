@@ -1,7 +1,7 @@
 import React from 'react';
 import { MapSelect } from '../elements';
 
-export const ImportMapper = ({ options }) => (
+export const ImportMapForm = ({ options }) => (
   <React.Fragment>
     <MapSelect
       label="Name"

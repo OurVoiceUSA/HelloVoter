@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import CSVReader from 'react-csv-reader';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { faFileCsv } from '@fortawesome/free-solid-svg-icons';
-import { ImportPreview, ImportMapper } from './';
+import { ImportPreview, ImportMapForm } from './';
 import { notify_error, notify_success, Icon } from '../../common.js';
 
 const sample_headers_from_csv = [
@@ -80,7 +80,7 @@ export default class ImportData extends Component {
           <h3>Import Data</h3> &nbsp;&nbsp;&nbsp;
           <Icon icon={faFileCsv} size="3x" />
         </div>
-        <ImportMapper
+        <ImportMapForm
           options={this.state.data.headers}
           core_options={core_options}
         />
