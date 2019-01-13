@@ -18,14 +18,7 @@ export class MapSelect extends React.Component {
     });
 
   _setValue = value => {
-    console.log('SET VALUE', value);
     const { sendFormat } = this.props;
-    if (Array.isArray(value)) {
-      return this.setState(
-        { value },
-        () => sendFormat && sendFormat(this.state.value)
-      );
-    }
     return this.setState(
       { value },
       () => sendFormat && sendFormat(this.state.value)

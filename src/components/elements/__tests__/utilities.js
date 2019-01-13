@@ -13,6 +13,12 @@ export const singleSelectChange = ele =>
       value: 'firstName'
     });
 
+export const addSelectValue = (ele, ...args) =>
+  ele
+    .find('.map-select-input')
+    .at(0)
+    .simulate('change', args);
+
 export const activateCheckBox = parent =>
   parent
     .find('.ck-bx')

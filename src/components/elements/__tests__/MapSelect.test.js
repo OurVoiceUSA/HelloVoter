@@ -7,7 +7,8 @@ import {
   activateCheckBox,
   activateMapSelectChange,
   multiValue,
-  singleValue
+  singleValue,
+  addSelectValue
 } from './utilities';
 
 describe('<MapSelect />', () => {
@@ -55,6 +56,15 @@ describe('<MapSelect />', () => {
     const select = shallow(<MapSelect checkbox />);
     multiSelectChange(select);
     expect(select.state().value).toEqual(multiValue);
+  });
+
+  it('Correctly updates state as multi values are selected', () => {
+    const select = shallow(<MapSelect checkbox />);
+    const value1 = { label: 'Test', value: 'test' };
+    const value2 = { label: 'Test 2', value: 'test2' };
+    addSelectValue(select, value1);
+    addSelectValue(select, value1, value2);
+    expect(select.state().value).toEqual([value1, value2]);
   });
 
   it('Sends formatted data to callback passed in', () => {
