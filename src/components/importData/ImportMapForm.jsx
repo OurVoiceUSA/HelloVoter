@@ -17,17 +17,11 @@ export const ImportMapForm = ({ headers = [] }) => {
 
       <MapSelect label="City" options={options} checkbox isMulti />
 
-      <MapSelect label="State" options={options} value={[]} checkbox isMulti />
+      <MapSelect label="State" options={options} checkbox isMulti />
 
       <MapSelect label="Zip" options={options} checkbox isMulti />
 
-      <MapSelect
-        label="Country"
-        options={options}
-        value={[]}
-        checkbox
-        isMulti
-      />
+      <MapSelect label="Country" options={options} checkbox isMulti />
 
       <MapSelect label="Longitude" options={options} checkbox isMulti />
 
