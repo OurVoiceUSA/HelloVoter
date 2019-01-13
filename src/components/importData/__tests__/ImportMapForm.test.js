@@ -9,8 +9,14 @@ describe('<ImportMapper />', () => {
   });
 
   it('takes options array an populates mapSelects option values', () => {
-    const mapper = mount(<ImportMapForm options={['test1', 'test2']} />);
+    const mapper = mount(<ImportMapForm headers={['test1', 'test2']} />);
     const select = findInnerElement(mapper, '.map-select-input');
     expect(select.options.length).toEqual(2);
+  });
+
+  it('takes options array an populates mapSelects option in the correct format', () => {
+    const mapper = mount(<ImportMapForm headers={['test1', 'test2']} />);
+    const select = findInnerElement(mapper, '.map-select-input');
+    expect(select.options[0]).toEqual({ label: 'test1', value: 'test1' });
   });
 });

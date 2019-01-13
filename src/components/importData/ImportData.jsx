@@ -81,7 +81,7 @@ export default class ImportData extends Component {
           <Icon icon={faFileCsv} size="3x" />
         </div>
         <ImportMapForm
-          options={this.state.data.headers}
+          headers={this.state.data.headers}
           core_options={core_options}
         />
         <ImportPreview />
