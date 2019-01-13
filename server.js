@@ -1076,6 +1076,7 @@ queueTasks.doTurfIndexing = async function (input) {
 
 queueTasks.doProcessImport = async function (filename) {
   // TODO: status update to queue after each db query
+  let stats;
 
   // get when this file import was started
   let ts = (await cqa('match (a:ImportFile {filename:{filename}}) return a.created', {filename: filename})).data[0];
@@ -1084,6 +1085,9 @@ queueTasks.doProcessImport = async function (filename) {
   await cqa('match (a:ImportFile {filename:{filename}})<-[:FILE]-(b:ImportRecord) where b.pid = "" set b.pid = randomUUID()', {filename: filename});
 
   // TODO: want to reference (a:ImportFile) in the apoc.periodic.iterate() calls below; having a hard time with the sub-parameterized syntax
+
+  // parse_start
+  await cqa('match (a:ImportFile {filename:{filename}}) set a.parse_start = timestamp()', {filename: filename});
 
   // non-unit addresses
   await cqa(`
@@ -1119,6 +1123,11 @@ queueTasks.doProcessImport = async function (filename) {
     {batchSize:10000,iterateList:true})
     `);
 
+  // parse_end + num_*, geocode_start
+  stats = await cqa('match (a:ImportFile {filename:{filename}})<-[:FILE]-(b:ImportRecord)<-[:SOURCE]-(c:Address)<-[:LIVES_AT*1..2]-(d:Person) return count(distinct(b)), count(distinct(c)), count(distinct(d))', {filename: filename});
+  let num_addresses = stats.data[0][1]; // save for below
+  await cqa('match (a:ImportFile {filename:{filename}}) set a.parse_end = timestamp(), a.geocode_start = timestamp(), a.num_records = toInt({num_records}), a.num_addresses = toInt({num_addresses}), a.num_people = toInt({num_people})', {filename: filename, num_records: stats.data[0][0], num_addresses: stats.data[0][1], num_people: stats.data[0][2]});
+
   // geocoding
   // census has a limit of 10k per batch
   let limit = 10000;
@@ -1130,10 +1139,17 @@ queueTasks.doProcessImport = async function (filename) {
     if (count) await doGeocode(ref.data);
   }
 
+  // geocode_end, geocode_success/fail, dedupe_start
+  stats = await cqa('match (:ImportFile {filename:{filename}})<-[:FILE]-(:ImportRecord)<-[:SOURCE]-(a:Address) where a.position = point({longitude: 0, latitude: 0}) return count(a)', {filename: filename});
+  await cqa('match (a:ImportFile {filename:{filename}}) set a.geocode_end = timestamp(), a.geocode_success = toInt({geocode_success}), a.goecode_fail = toInt({goecode_fail}), a.dedupe_start = timestamp()', {filename: filename, geocode_success: (num_addresses-stats.data[0]), goecode_fail: stats.data[0]});
+
   // find instances of duplicate Address(id) and merge them into a single node
   // TODO: only search :Address as a result of this import file (sub-param apoc issue)
   // TODO: we only merge :Address here - can still have dupe Unit & Person nodes
-  await cqa('call apoc.periodic.iterate("match (a:Address) where a.created >= '+ts+' match (b:Address {id:a.id}) with a, count(b) as count where count > 1 return distinct(a.id) as id", "match (a:Address {id:{id}}) with collect(a) as nodes call apoc.refactor.mergeNodes(nodes) yield node return node", {iterateList:false})');
+  stats = await cqa('call apoc.periodic.iterate("match (a:Address) where a.created >= '+ts+' match (b:Address {id:a.id}) with a, count(b) as count where count > 1 return distinct(a.id) as id", "match (a:Address {id:{id}}) with collect(a) as nodes call apoc.refactor.mergeNodes(nodes) yield node return node", {iterateList:false}) yield total return total');
+
+  // dedupe_end, dupes, index_start
+  await cqa('match (a:ImportFile {filename:{filename}}) set a.dedupe_end = timestamp(), a.dupes_address = toInt({dupes_address}), a.index_start = timestamp()', {filename: filename, dupes_address: stats.data[0]});
 
   // aquire a write lock so we can only do addNodes from a single job at a time, for heap safety
   // TODO: limit based on max heap
@@ -1142,20 +1158,27 @@ queueTasks.doProcessImport = async function (filename) {
 
   while (count === limit) {
     let start = new Date().getTime();
-    let ref = await cqa('merge (a:LockSpatialAddNodes) with collect(a) as lock call apoc.lock.nodes(lock) match (a:Address)-[:SOURCE]-(:ImportRecord)-[:FILE]-(:ImportFile {filename:{filename}}) where not exists(a.bbox) and not a.position = point({longitude: 0, latitude: 0}) with a limit {limit} with collect(distinct(a)) as nodes call spatial.addNodes("address", nodes) yield count return count', {filename: filename, limit: limit});
+    let ref = await cqa('merge (a:LockSpatialAddNodes) with collect(a) as lock call apoc.lock.nodes(lock) match (a:Address)-[:SOURCE]-(:ImportRecord)-[:FILE]-(:ImportFile {filename:{filename}}) where not exists(a.bbox) and not a.position = point({longitude: 0, latitude: 0}) with distinct(a) limit {limit} with collect(distinct(a)) as nodes call spatial.addNodes("address", nodes) yield count return count', {filename: filename, limit: limit});
     count = ref.data[0];
     console.log("Processed "+count+" records into spatial.addNodes() for "+filename+" in "+((new Date().getTime())-start)+" milliseconds");
   }
 
+  // index_end, turfadd_start
+  await cqa('match (a:ImportFile {filename:{filename}}) set a.index_end = timestamp(), a.turfadd_start = timestamp()', {filename: filename});
+
   // finish it off by adding these news addresses to all relivant turfs
   // TODO: only search :Address as a result of this import file (sub-param apoc issue)
   let start = new Date().getTime();
-  let ref = await cqa('CALL apoc.periodic.iterate("match (a:Address) where a.created >= '+ts+' call spatial.intersects(\\"turf\\", {longitude: a.longitude, latitude: a.latitude}) yield node return a, node", "merge (a)-[:WITHIN]->(node)", {batchSize:10000,iterateList:true}) yield total return total');
+  let ref = await cqa('CALL apoc.periodic.iterate("match (a:Address) where a.created >= '+ts+' and not a.position = point({longitude: 0, latitude: 0}) call spatial.intersects(\\"turf\\", {longitude: a.longitude, latitude: a.latitude}) yield node return a, node", "merge (a)-[:WITHIN]->(node)", {batchSize:10000,iterateList:true}) yield total return total');
   let total = ref.data[0];
   console.log("Processed "+total+" records into turfs for "+filename+" in "+((new Date().getTime())-start)+" milliseconds");
+
+  // turfadd_end, completed
+  await cqa('match (a:ImportFile {filename:{filename}}) set a.turfadd_end = timestamp(), a.completed = timestamp()', {filename: filename});
 }
 
 async function doGeocode(data) {
+  let start = new Date().getTime();
   let file = "";
 
   // build the "file" to submit
@@ -1222,10 +1245,16 @@ async function doGeocode(data) {
     // update ids
     await cqa('unwind {data} as r match (a:Address {id:r.id}) set a.id = apoc.util.md5([toLower(a.street), toLower(a.city), toLower(a.state), substring(a.zip,0,5)])', {data: data});
 
+    console.log("Geocoded "+data.length+" records in "+((new Date().getTime())-start)+" milliseconds.");
+
   } catch (e) {
     console.warn(e);
   }
 
+}
+
+async function importList(req, res) {
+  return cqdo(req, res, 'match (a:ImportFile) return a order by a.created desc', {}, true);
 }
 
 async function importBegin(req, res) {
@@ -1516,6 +1545,7 @@ app.post('/volunteer/v1/question/delete', questionDelete);
 app.get('/volunteer/v1/question/assigned/list', questionAssignedList);
 app.post('/volunteer/v1/question/assigned/add', questionAssignedAdd);
 app.post('/volunteer/v1/question/assigned/remove', questionAssignedRemove);
+app.get('/volunteer/v1/import/list', importList);
 app.post('/volunteer/v1/import/begin', importBegin);
 app.post('/volunteer/v1/import/add', importAdd);
 app.post('/volunteer/v1/import/end', importEnd);
