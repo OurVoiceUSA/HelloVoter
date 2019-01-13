@@ -6,7 +6,9 @@ Here we answer the most frequently asked questions that we get.
 
 There are laws that regulate voter data, and digital content in general, that vary from State to State, even from County to County. Also, keeping accurate and up to date is expensive; prohibitively so on a national scale. As such, Our Voice USA has opted to, for the foreseeable future, not be in the business of providing canvassing data.
 
-We do, however, provide an import tool so you can import your own data that you acquire through your own means. It's currently in development, the repository of code is here: https://github.com/OurVoiceUSA/canvassing-import
+More information about where to get voter files and the applicable laws, visit http://voterlist.electproject.org/
+
+We do provide an import tool so you can import your own data that you acquire through your own means. It's currently in development, find the code here: https://github.com/OurVoiceUSA/HelloVoterHQ
 
 ### Where can I get data?
 
@@ -30,7 +32,7 @@ No. Your data goes directly from your device to your Dropbox account. You have f
 
 ### Will you integrate with cloud storage other than Dropbox?
 
-Eventually, Our Voice USA will code a server-side application to be used with the app that you can host anywhere. Or better yet - you can code this and share it with everyone! We appreciate any contributions.
+Our Voice USA has a server-side application in development to be used with the app that you can host anywhere.
 
 ### How many people can be on a canvassing team?
 
