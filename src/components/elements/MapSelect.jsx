@@ -20,15 +20,19 @@ export class MapSelect extends React.Component {
     });
 
   _setValue = value => {
-    const { sendFormat } = this.props;
+    const { updateFormats, label } = this.props;
     return this.setState(
       { value },
-      () => sendFormat && sendFormat(this.state.value)
+      () => updateFormats && updateFormats(label, this.state)
     );
   };
 
   _setMapValue = (prop, value) => {
-    this.setState({ [prop]: value });
+    const { updateFormats, label } = this.props;
+    this.setState(
+      { [prop]: value },
+      () => updateFormats && updateFormats(label, this.state)
+    );
   };
 
   render() {

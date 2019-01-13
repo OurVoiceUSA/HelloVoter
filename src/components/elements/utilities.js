@@ -7,6 +7,18 @@ export const testOptions = [
   { label: 'Test 6', value: 6 }
 ];
 
+export const currentMapState = {
+  checked: false,
+  isMulti: true,
+  map1: '',
+  map2: '',
+  value: [
+    { label: 'First Name', value: 'firstName' },
+    { label: 'Middle Name', value: 'middleName' },
+    { label: 'Last Name', value: 'lastName' }
+  ]
+};
+
 const duplicate = (amt = 'none', array) => {
   if (amt === 'none') return array;
   var duplicateArr = [];

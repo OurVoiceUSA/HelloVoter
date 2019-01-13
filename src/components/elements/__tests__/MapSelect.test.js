@@ -9,7 +9,8 @@ import {
   multiValue,
   singleValue,
   addSelectValue,
-  findInnerElement
+  findInnerElement,
+  currentMapState
 } from '../utilities';
 
 describe('<MapSelect />', () => {
@@ -53,11 +54,13 @@ describe('<MapSelect />', () => {
     expect(select.state().value).toEqual([value1, value2]);
   });
 
-  it('Sends formatted data to callback passed in', () => {
-    const sendFormatMock = jest.fn();
-    const select = shallow(<MapSelect sendFormat={sendFormatMock} checkbox />);
+  it('Sends formatted data to callback passed in (updateFormats)', () => {
+    const updateFormatsMock = jest.fn();
+    const select = shallow(
+      <MapSelect label="Test" updateFormats={updateFormatsMock} checkbox />
+    );
     multiSelectChange(select);
-    expect(sendFormatMock).toHaveBeenCalledWith(multiValue);
+    expect(updateFormatsMock).toHaveBeenCalledWith('Test', currentMapState);
   });
 
   it('Clears value and makes this.state.isMulti false when splitting on delimeter', () => {

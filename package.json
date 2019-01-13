@@ -42,7 +42,8 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test"
+    "test": "react-scripts test",
+    "all-tests": "react-scripts test --verbose"
   },
   "eslintConfig": {
     "extends": "react-app"
