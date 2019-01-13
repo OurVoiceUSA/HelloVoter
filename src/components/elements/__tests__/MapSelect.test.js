@@ -73,6 +73,17 @@ describe('<MapSelect />', () => {
     expect(select.state().value).toEqual('');
   });
 
+  it('Correctly sets value after new delimeter value is set', () => {
+    const select = shallow(<MapSelect checkbox />);
+    multiSelectChange(select);
+    activateCheckBox(select);
+    expect(select.state().isMulti).toEqual(false);
+    expect(select.state().checked).toEqual(true);
+    expect(select.state().value).toEqual('');
+    singleSelectChange(select);
+    expect(select.state().value).toEqual('firstName');
+  });
+
   it('Changes map dropdown 1 state value on change', () => {
     const select = shallow(<MapSelect checkbox />);
     activateCheckBox(select);
