@@ -1,6 +1,4 @@
 import React from 'react';
-import Checkbox from '@material-ui/core/Checkbox';
-import Select from 'react-select';
 import { MapSelect } from '../elements';
 
 export const ImportMapper = ({ core_options }) => (

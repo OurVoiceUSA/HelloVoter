@@ -93,4 +93,10 @@ describe('<MapSelect />', () => {
     activateMapSelectChange(select, '.map-option-2', 1, 'map2');
     expect(select.state().map2).toEqual({ label: 'map2', value: 1 });
   });
+
+  it('Receives options from parent component, and populates the dropdown with them.', () => {
+    const select = shallow(<MapSelect options={['test1', 'test2']} checkbox />);
+    const mapSelect = findInnerElement(select, '.map-select-input');
+    expect(mapSelect.options.length).toEqual(2);
+  });
 });

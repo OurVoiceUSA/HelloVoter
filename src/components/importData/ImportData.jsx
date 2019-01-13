@@ -66,6 +66,8 @@ export default class ImportData extends Component {
         </div>
       );
 
+    console.log('Import Data State: ', this.state);
+
     // convert headers to Select
     let core_options = [];
     sample_headers_from_csv.forEach(i =>
@@ -78,7 +80,10 @@ export default class ImportData extends Component {
           <h3>Import Data</h3> &nbsp;&nbsp;&nbsp;
           <Icon icon={faFileCsv} size="3x" />
         </div>
-        <ImportMapper core_options={core_options} />
+        <ImportMapper
+          options={this.state.data.headers}
+          core_options={core_options}
+        />
         <ImportPreview />
       </div>
     );
