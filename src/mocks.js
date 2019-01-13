@@ -328,6 +328,11 @@ export async function mockFetch(token, uri, method, body) {
     case /v1\/form\/get/.test(uri):
       for (let i in forms) if (forms[i].id === id) return forms[i];
       return {};
+    case /v1\/import\/list/.test(uri):
+      return {data: [
+        {"num_records":13,"created":1547358700935,"geocode_end":1547358701184,"parse_start":1547358701112,"completed":1547358701239,"turfadd_start":1547358701225,"geocode_success":9,"index_end":1547358701225,"parse_end":1547358701133,"num_people":26,"submitted":1547358701098,"filename":"Test1.csv","index_start":1547358701215,"dupes":0,"num_addresses":11,"turfadd_end":1547358701239,"dedupe_end":1547358701215,"goecode_fail":2,"dedupe_start":1547358701184,"geocode_start":1547358701133},
+        {"num_records":8157,"created":1547358415884,"geocode_end":1547358418708,"parse_start":1547358416123,"completed":1547358420927,"turfadd_start":1547358418726,"geocode_success":8146,"index_end":1547358418726,"parse_end":1547358416339,"num_people":18,"submitted":1547358416078,"filename":"Test2.csv","dupes":0,"index_start":1547358418716,"num_addresses":8157,"turfadd_end":1547358420927,"dedupe_end":1547358418716,"goecode_fail":11,"dedupe_start":1547358418708,"geocode_start":1547358416339},
+      ]};
     default:
       let err = new Error("URI not mocked: "+uri);
       err.mock = true;
