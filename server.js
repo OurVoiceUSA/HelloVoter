@@ -175,6 +175,7 @@ async function doDbInit() {
   let indexes = [
     {label: 'Person', property: 'id', create: 'create constraint on (a:Person) assert a.id is unique'},
     {label: 'Address', property: 'id', create: 'create index on :Address(id)'}, // asserting a.id is unique causes issues so we handle dupes manually
+    {label: 'Address', property: 'created', create: 'create index on :Address(created)'},
     {label: 'Address', property: 'position', create: 'create index on :Address(position)'},
     {label: 'Address', property: 'bbox', create: 'create index on :Address(bbox)'},
     {label: 'Volunteer', property: 'id', create: 'create constraint on (a:Volunteer) assert a.id is unique'},
@@ -1076,6 +1077,9 @@ queueTasks.doTurfIndexing = async function (input) {
 queueTasks.doProcessImport = async function (filename) {
   // TODO: status update to queue after each db query
 
+  // get when this file import was started
+  let ts = (await cqa('match (a:ImportFile {filename:{filename}}) return a.created', {filename: filename})).data[0];
+
   // if no pid, create with randomUUID()
   await cqa('match (a:ImportFile {filename:{filename}})<-[:FILE]-(b:ImportRecord) where b.pid = "" set b.pid = randomUUID()', {filename: filename});
 
@@ -1129,7 +1133,7 @@ queueTasks.doProcessImport = async function (filename) {
   // find instances of duplicate Address(id) and merge them into a single node
   // TODO: only search :Address as a result of this import file (sub-param apoc issue)
   // TODO: we only merge :Address here - can still have dupe Unit & Person nodes
-  await cqa('call apoc.periodic.iterate("match (a:Address) match (b:Address {id:a.id}) with a, count(b) as count where count > 1 return distinct(a.id) as id", "match (a:Address {id:{id}}) with collect(a) as nodes call apoc.refactor.mergeNodes(nodes) yield node return node", {iterateList:false})');
+  await cqa('call apoc.periodic.iterate("match (a:Address) where a.created >= '+ts+' match (b:Address {id:a.id}) with a, count(b) as count where count > 1 return distinct(a.id) as id", "match (a:Address {id:{id}}) with collect(a) as nodes call apoc.refactor.mergeNodes(nodes) yield node return node", {iterateList:false})');
 
   // aquire a write lock so we can only do addNodes from a single job at a time, for heap safety
   // TODO: limit based on max heap
@@ -1146,7 +1150,7 @@ queueTasks.doProcessImport = async function (filename) {
   // finish it off by adding these news addresses to all relivant turfs
   // TODO: only search :Address as a result of this import file (sub-param apoc issue)
   let start = new Date().getTime();
-  let ref = await cqa('CALL apoc.periodic.iterate("match (a:Address) call spatial.intersects(\\"turf\\", {longitude: a.longitude, latitude: a.latitude}) yield node return a, node", "merge (a)-[:WITHIN]->(node)", {batchSize:10000,iterateList:true}) yield total return total');
+  let ref = await cqa('CALL apoc.periodic.iterate("match (a:Address) where a.created >= '+ts+' call spatial.intersects(\\"turf\\", {longitude: a.longitude, latitude: a.latitude}) yield node return a, node", "merge (a)-[:WITHIN]->(node)", {batchSize:10000,iterateList:true}) yield total return total');
   let total = ref.data[0];
   console.log("Processed "+total+" records into turfs for "+filename+" in "+((new Date().getTime())-start)+" milliseconds");
 }
