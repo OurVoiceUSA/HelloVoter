@@ -5,17 +5,6 @@ import { faFileCsv } from '@fortawesome/free-solid-svg-icons';
 import { ImportPreview, ImportMapForm } from './';
 import { notify_error, notify_success, Icon } from '../../common.js';
 
-// const sample_headers_from_csv = [
-//   'First Name',
-//   'Middle Initial',
-//   'Last Name',
-//   'Street #',
-//   'Street Name',
-//   'City Name',
-//   'Postal Code',
-//   'Position'
-// ];
-
 export default class ImportData extends Component {
   constructor(props) {
     super(props);
@@ -75,11 +64,11 @@ export default class ImportData extends Component {
         </div>
       );
 
-    // convert headers to Select
-    // let core_options = [];
-    // sample_headers_from_csv.forEach(i =>
-    //   core_options.push({ value: i, label: i })
-    // );
+    console.log(this.state);
+    // TODO:
+    // format data with format object
+    // pass first formatted data result index to <ImportPreview /> and display
+    // create submit import data <Button />
 
     return (
       <div>
