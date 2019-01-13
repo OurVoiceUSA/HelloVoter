@@ -138,6 +138,11 @@ export default class App extends Component {
         </div>
 
         <div style={{ display: 'flex' }}>
+          Street Address is required. Everything else is optional, but the more fields you assign, the less likely they'll fail to imoprt.
+        </div>
+        <br />
+
+        <div style={{ display: 'flex' }}>
             <div style={{ width: 150 }}>Unique Record ID:</div>{' '}
           <div style={{ width: 450 }}>
             <Select
@@ -234,19 +239,6 @@ export default class App extends Component {
         </div>
 
         <div style={{ display: 'flex' }}>
-          <div style={{ width: 150 }}>Country</div>{' '}
-          <div style={{ width: 450 }}>
-            <Select
-              value={[]}
-              options={core_options}
-              isMulti={true}
-              placeholder="None"
-            />
-          </div>
-          <Checkbox value="ack" color="primary" />
-        </div>
-
-        <div style={{ display: 'flex' }}>
           <div style={{ width: 150 }}>Longitude</div>{' '}
           <div style={{ width: 450 }}>
             <Select
@@ -319,12 +311,21 @@ export default class App extends Component {
         <div style={{ display: 'flex' }}>
           <div>
             <div style={{ display: 'flex' }}>
+              <div style={{ width: 150 }}>Unique Record ID:</div> <div>(auto-generate)</div>
+            </div>
+            <br />
+            <div style={{ display: 'flex' }}>
               <div style={{ width: 150 }}>Name:</div> <div>Joe Average</div>
             </div>
             <br />
             <div style={{ display: 'flex' }}>
               <div style={{ width: 150 }}>Street Address:</div>{' '}
               <div>838 Wilshire Pl</div>
+            </div>
+            <br />
+            <div style={{ display: 'flex' }}>
+              <div style={{ width: 150 }}>Unit/Apartment #:</div>{' '}
+              <div>NULL</div>
             </div>
             <br />
             <div style={{ display: 'flex' }}>
@@ -337,10 +338,6 @@ export default class App extends Component {
             <br />
             <div style={{ display: 'flex' }}>
               <div style={{ width: 150 }}>Zip:</div> <div>84102</div>
-            </div>
-            <br />
-            <div style={{ display: 'flex' }}>
-              <div style={{ width: 150 }}>Country:</div> <div>NULL</div>
             </div>
             <br />
             <div style={{ display: 'flex' }}>
@@ -359,11 +356,19 @@ export default class App extends Component {
 
           <div>
             <div style={{ display: 'flex' }}>
+              <div style={{ width: 150 }}>(auto-generate)</div>
+            </div>
+            <br />
+            <div style={{ display: 'flex' }}>
               <div style={{ width: 150 }}>Joy B. Awesome</div>
             </div>
             <br />
             <div style={{ display: 'flex' }}>
               <div style={{ width: 150 }}>828 E Sego Ave</div>
+            </div>
+            <br />
+            <div style={{ display: 'flex' }}>
+              <div style={{ width: 150 }}>NULL</div>
             </div>
             <br />
             <div style={{ display: 'flex' }}>
@@ -376,10 +381,6 @@ export default class App extends Component {
             <br />
             <div style={{ display: 'flex' }}>
               <div style={{ width: 150 }}>84102</div>
-            </div>
-            <br />
-            <div style={{ display: 'flex' }}>
-              <div style={{ width: 150 }}>NULL</div>
             </div>
             <br />
             <div style={{ display: 'flex' }}>
@@ -397,11 +398,19 @@ export default class App extends Component {
 
           <div>
             <div style={{ display: 'flex' }}>
+              <div style={{ width: 150 }}>(auto-generate)</div>
+            </div>
+            <br />
+            <div style={{ display: 'flex' }}>
               <div style={{ width: 150 }}>Jake Abomination</div>
             </div>
             <br />
             <div style={{ display: 'flex' }}>
               <div style={{ width: 150 }}>857 Wilshire Pl</div>
+            </div>
+            <br />
+            <div style={{ display: 'flex' }}>
+              <div style={{ width: 150 }}>NULL</div>
             </div>
             <br />
             <div style={{ display: 'flex' }}>
@@ -414,10 +423,6 @@ export default class App extends Component {
             <br />
             <div style={{ display: 'flex' }}>
               <div style={{ width: 150 }}>84102</div>
-            </div>
-            <br />
-            <div style={{ display: 'flex' }}>
-              <div style={{ width: 150 }}>NULL</div>
             </div>
             <br />
             <div style={{ display: 'flex' }}>
