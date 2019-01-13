@@ -16,7 +16,7 @@ const sample_headers_from_csv = [
   'Position'
 ];
 
-export default class ImporterData extends Component {
+export default class ImportData extends Component {
   constructor(props) {
     super(props);
 

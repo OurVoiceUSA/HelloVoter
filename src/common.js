@@ -16,6 +16,7 @@ export function notify_success(msg) {
 }
 
 export function notify_error(e, msg) {
+  if (e.mock) msg = e.message;
   NotificationManager.error(msg, 'Error', 6000);
   console.warn(e);
 }
@@ -93,6 +94,17 @@ export function _searchStringify(obj) {
   let o = JSON.parse(JSON.stringify(obj));
   delete o.last_seen;
   return JSON.stringify(o).toLowerCase();
+}
+
+export async function _loadImports(refer) {
+  let imports = [];
+  try {
+    let data = await _fetch(refer.state.server, '/volunteer/v1/import/list');
+    imports = (data.data?data.data:[]);
+  } catch (e) {
+    notify_error(e, "Unable to load import info.");
+  }
+  return imports;
 }
 
 export async function _loadVolunteer(refer, id) {
