@@ -11,6 +11,15 @@ export class MapSelect extends React.Component {
       checked: !this.state.checked
     });
 
+  _setValue = value => {
+    if (Array.isArray(value)) {
+      return this.setState({
+        value: value.map(({ value }) => value).join(' ')
+      });
+    }
+    return this.setState({ value });
+  };
+
   render() {
     const {
       label = '',
@@ -30,6 +39,7 @@ export class MapSelect extends React.Component {
             className="map-select-input"
             value={value}
             options={options}
+            onChange={e => this._setValue(e.target.value)}
             isMulti={isMulti}
             placeholder="None"
           />
