@@ -1,7 +1,7 @@
 import React from 'react';
 import { shallow, mount } from 'enzyme';
 import { ImportMapper } from '../';
-import { findInnerElement } from './utilities';
+import { findInnerElement } from '../utilities';
 
 describe('<ImportMapper />', () => {
   it('renders without crashing', () => {

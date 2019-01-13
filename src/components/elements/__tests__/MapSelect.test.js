@@ -10,7 +10,7 @@ import {
   singleValue,
   addSelectValue,
   findInnerElement
-} from './utilities';
+} from '../utilities';
 
 describe('<MapSelect />', () => {
   it('renders without crashing', () => {
