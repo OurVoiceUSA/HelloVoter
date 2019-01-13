@@ -42,3 +42,9 @@ export const singleValue = {
   value: 'firstName',
   label: 'First Name'
 };
+
+export const findInnerElement = (parent, className) =>
+  parent
+    .find(className)
+    .at(0)
+    .props();

@@ -8,7 +8,8 @@ import {
   activateMapSelectChange,
   multiValue,
   singleValue,
-  addSelectValue
+  addSelectValue,
+  findInnerElement
 } from './utilities';
 
 describe('<MapSelect />', () => {
@@ -18,25 +19,10 @@ describe('<MapSelect />', () => {
 
   it('When checkbox checked, it renders two dropdowns.', () => {
     const select = shallow(<MapSelect checkbox />);
-    const checkbox = select
-      .find('.ck-bx')
-      .at(0)
-      .props();
-
+    const checkbox = findInnerElement(select, '.ck-bx');
     checkbox.onChange();
-
-    // finding checkbox 1, if not there test fails
-    select
-      .find('.map-option-1')
-      .at(0)
-      .props();
-
-    // finding checkbox 2, if not there test fails
-    select
-      .find('.map-option-2')
-      .at(0)
-      .props();
-
+    findInnerElement(select, '.map-option-1');
+    findInnerElement(select, '.map-option-2');
     expect(select.state().checked).toEqual(true);
   });
 
