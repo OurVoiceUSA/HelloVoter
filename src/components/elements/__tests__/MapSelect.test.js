@@ -100,20 +100,6 @@ describe('<MapSelect />', () => {
     expect(mapSelect.options.length).toEqual(2);
   });
 
-  it('calculates & populates 2nd map dropdown based on current values', () => {
-    const select = shallow(
-      <MapSelect
-        options={['test 1', 'test 2', 'test 3', 'test 4', 'test 5', 'test 6']}
-        checkbox
-        checked
-      />
-    );
-    const map2Update = { value: 4, label: '4th value' };
-    multiSelectChange(select, 2);
-    const mapOption2 = findInnerElement(select, '.map-option-2');
-    expect(mapOption2.options[3]).toEqual(map2Update);
-  });
-
   it('calculates "last", value based on length of values selected.', () => {
     const select = shallow(
       <MapSelect
@@ -122,7 +108,7 @@ describe('<MapSelect />', () => {
         checked
       />
     );
-    const map2Update = { value: 'last', label: 'Last value' };
+    const map2Update = { value: 'last', label: 'last value' };
     multiSelectChange(select, 2);
     const mapOption2 = findInnerElement(select, '.map-option-2');
     expect(mapOption2.options[mapOption2.options.length - 1]).toEqual(

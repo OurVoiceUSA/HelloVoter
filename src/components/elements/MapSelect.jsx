@@ -31,25 +31,6 @@ export class MapSelect extends React.Component {
     this.setState({ [prop]: value });
   };
 
-  _calcMapOptions = (value = []) =>
-    Array.isArray(value) &&
-    value.map((val, i) => {
-      if (i === 0) {
-        return { value: 1, label: '1st value' };
-      } else if (i === 1) {
-        return { value: 2, label: '2nd value' };
-      } else if (i === 2) {
-        return { value: 3, label: '3rd value' };
-      } else if (i + 1 === value.length) {
-        return {
-          value: 'last',
-          label: 'Last value'
-        };
-      }
-
-      return { value: i + 1, label: `${i + 1}th value` };
-    });
-
   render() {
     const {
       label = '',
@@ -95,7 +76,7 @@ export class MapSelect extends React.Component {
     />
   );
 
-  _renderMapOptions = ({ map1 = '', map2 = '', value = [] }) => (
+  _renderMapOptions = ({ map1 = '', map2 = '', value = '' }) => (
     <React.Fragment>
       <div style={{ width: 160 }}>
         <ReactSelect
@@ -114,7 +95,11 @@ export class MapSelect extends React.Component {
           className="map-option-2"
           onChange={e => this._setMapValue('map2', e)}
           value={map2}
-          options={this._calcMapOptions(value)}
+          options={[
+            { value: 1, label: '1st value' },
+            { value: 2, label: '2nd value' },
+            { value: 'last', label: 'last value' }
+          ]}
           placeholder="None"
         />
       </div>
