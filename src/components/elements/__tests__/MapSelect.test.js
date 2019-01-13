@@ -1,5 +1,5 @@
 import React from 'react';
-import { shallow, mount } from 'enzyme';
+import { shallow } from 'enzyme';
 import { MapSelect } from '../';
 import {
   multiSelectChange,
@@ -9,9 +9,7 @@ import {
   multiValue,
   singleValue,
   addSelectValue,
-  findInnerElement,
-  simulateUserSelect,
-  clickCheckBox
+  findInnerElement
 } from '../utilities';
 
 describe('<MapSelect />', () => {
@@ -103,9 +101,32 @@ describe('<MapSelect />', () => {
   });
 
   it('calculates & populates 2nd map dropdown based on current values', () => {
-    const select = shallow(<MapSelect checkbox checked />);
+    const select = shallow(
+      <MapSelect
+        options={['test 1', 'test 2', 'test 3', 'test 4', 'test 5', 'test 6']}
+        checkbox
+        checked
+      />
+    );
+    const map2Update = { value: 4, label: '4th value' };
+    multiSelectChange(select, 2);
     const mapOption2 = findInnerElement(select, '.map-option-2');
-    mapOption2.onChange({ label: 'test 4', value: 4 });
-    expect(mapOption2.value).toEqual({ label: ' test 4', value: 4 });
+    expect(mapOption2.options[3]).toEqual(map2Update);
+  });
+
+  it('calculates "last", value based on length of values selected.', () => {
+    const select = shallow(
+      <MapSelect
+        options={['test 1', 'test 2', 'test 3', 'test 4', 'test 5', 'test 6']}
+        checkbox
+        checked
+      />
+    );
+    const map2Update = { value: 'last', label: 'Last value' };
+    multiSelectChange(select, 2);
+    const mapOption2 = findInnerElement(select, '.map-option-2');
+    expect(mapOption2.options[mapOption2.options.length - 1]).toEqual(
+      map2Update
+    );
   });
 });

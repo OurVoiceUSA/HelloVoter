@@ -5,9 +5,11 @@ import './mapselect.css';
 
 export class MapSelect extends React.Component {
   state = {
-    checked: false,
+    checked: this.props.checked || false,
     isMulti: this.props.isMulti || true,
-    value: this.props.value
+    value: this.props.value,
+    map1: '',
+    map2: ''
   };
 
   _handleCheck = () =>
@@ -29,6 +31,25 @@ export class MapSelect extends React.Component {
     this.setState({ [prop]: value });
   };
 
+  _calcMapOptions = (value = []) =>
+    Array.isArray(value) &&
+    value.map((val, i) => {
+      if (i === 0) {
+        return { value: 1, label: '1st value' };
+      } else if (i === 1) {
+        return { value: 2, label: '2nd value' };
+      } else if (i === 2) {
+        return { value: 3, label: '3rd value' };
+      } else if (i + 1 === value.length) {
+        return {
+          value: 'last',
+          label: 'Last value'
+        };
+      }
+
+      return { value: i + 1, label: `${i + 1}th value` };
+    });
+
   render() {
     const {
       label = '',
@@ -36,7 +57,7 @@ export class MapSelect extends React.Component {
       checkbox = false,
       dimensions: { width, labelWidth } = { width: 450, labelWidth: 150 }
     } = this.props;
-    const { checked, isMulti, value } = this.state;
+    const { checked, isMulti, value, map1, map2 } = this.state;
 
     return (
       <div className="mapselect">
@@ -52,7 +73,13 @@ export class MapSelect extends React.Component {
           />
         </div>
         {checkbox ? this._renderCheckbox({ checked }) : ''}
-        {checked ? this._renderMapOptions() : ''}
+        {checked
+          ? this._renderMapOptions({
+              map1,
+              map2,
+              value
+            })
+          : ''}
       </div>
     );
   }
@@ -61,19 +88,20 @@ export class MapSelect extends React.Component {
     <Checkbox
       className="ck-bx"
       onChange={() => this._handleCheck()}
+      onClick={() => this._handleCheck()}
       value="ack"
       color="primary"
       checked={checked}
     />
   );
 
-  _renderMapOptions = () => (
+  _renderMapOptions = ({ map1 = '', map2 = '', value = [] }) => (
     <React.Fragment>
       <div style={{ width: 160 }}>
         <ReactSelect
           className="map-option-1"
           onChange={e => this._setMapValue('map1', e)}
-          value={[{ value: 'space', label: 'delimited by space' }]}
+          value={map1}
           options={[
             { value: 'comma', label: 'delimited by comma' },
             { value: 'space', label: 'delimited by space' }
@@ -85,12 +113,8 @@ export class MapSelect extends React.Component {
         <ReactSelect
           className="map-option-2"
           onChange={e => this._setMapValue('map2', e)}
-          value={{ value: 1, label: '1st value' }}
-          options={[
-            { value: 1, label: '1st value' },
-            { value: 2, label: '2nd value' },
-            { value: 'last', label: 'last value' }
-          ]}
+          value={map2}
+          options={this._calcMapOptions(value)}
           placeholder="None"
         />
       </div>

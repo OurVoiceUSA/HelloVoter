@@ -7,11 +7,21 @@ export const testOptions = [
   { label: 'Test 6', value: 6 }
 ];
 
-export const multiSelectChange = ele =>
+const duplicate = (amt = 'none', array) => {
+  if (amt === 'none') return array;
+  var duplicateArr = [];
+  for (let i = 0; i < amt; i++) {
+    duplicateArr = duplicateArr.concat(array);
+  }
+
+  return duplicateArr;
+};
+
+export const multiSelectChange = (ele, amt) =>
   ele
     .find('.map-select-input')
     .at(0)
-    .simulate('change', multiValue);
+    .simulate('change', duplicate(amt, multiValue));
 
 export const singleSelectChange = ele =>
   ele
@@ -53,7 +63,6 @@ export const simulateUserSelect = (parent, className, value) =>
     .find(className)
     .at(0)
     .props();
-// .simulate('change', { target: { value } });
 
 export const multiValue = [
   { value: 'firstName', label: 'First Name' },
