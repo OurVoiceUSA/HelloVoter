@@ -88,12 +88,14 @@ describe('<MapSelect />', () => {
   // MAP DROPDOWN SELECT HANDLING
   it('Changes map dropdown 1 state value on change', () => {
     const select = shallow(<MapSelect checkbox />);
+    // select checkbox
     select
       .find('.ck-bx')
       .at(0)
       .props()
       .onChange();
 
+    // pick map value
     select
       .find('.map-option-1')
       .at(0)

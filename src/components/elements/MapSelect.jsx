@@ -15,9 +15,7 @@ export class MapSelect extends React.Component {
     const { sendFormat } = this.props;
     if (Array.isArray(value)) {
       return this.setState(
-        {
-          value: value.map(({ value }) => value).join(' ')
-        },
+        { value: value.map(({ value }) => value).join(' ') },
         () => sendFormat && sendFormat(this.state.value)
       );
     }
@@ -25,6 +23,12 @@ export class MapSelect extends React.Component {
       { value },
       () => sendFormat && sendFormat(this.state.value)
     );
+  };
+
+  _setMapValue = (prop, value) => {
+    this.setState({
+      [prop]: value
+    });
   };
 
   render() {
@@ -69,8 +73,10 @@ export class MapSelect extends React.Component {
 
   _renderMapOptions = () => (
     <React.Fragment>
-      <div className="map-option-1" style={{ width: 160 }}>
+      <div style={{ width: 160 }}>
         <ReactSelect
+          className="map-option-1"
+          onChange={e => this._setMapValue('map1', e.target.value)}
           value={[{ value: 'space', label: 'delimited by space' }]}
           options={[
             { value: 'comma', label: 'delimited by comma' },
@@ -79,8 +85,10 @@ export class MapSelect extends React.Component {
           placeholder="None"
         />
       </div>
-      <div className="map-option-2" style={{ width: 150 }}>
+      <div style={{ width: 150 }}>
         <ReactSelect
+          className="map-option-2"
+          onChange={e => this._setMapValue('map2', e.target.value)}
           value={{ value: 1, label: '1st value' }}
           options={[
             { value: 1, label: '1st value' },
