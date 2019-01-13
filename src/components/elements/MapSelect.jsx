@@ -4,11 +4,13 @@ import Checkbox from '@material-ui/core/Checkbox';
 import './mapselect.css';
 
 export class MapSelect extends React.Component {
-  state = { checked: false };
+  state = { checked: false, isMulti: this.props.isMulti || true };
 
   _handleCheck = () =>
     this.setState({
-      checked: !this.state.checked
+      checked: !this.state.checked,
+      isMulti: !this.state.isMulti,
+      value: ''
     });
 
   _setValue = value => {
@@ -26,9 +28,7 @@ export class MapSelect extends React.Component {
   };
 
   _setMapValue = (prop, value) => {
-    this.setState({
-      [prop]: value
-    });
+    this.setState({ [prop]: value });
   };
 
   render() {
@@ -37,10 +37,9 @@ export class MapSelect extends React.Component {
       value = '',
       options = [],
       checkbox = false,
-      isMulti = false,
       dimensions: { width, labelWidth } = { width: 450, labelWidth: 150 }
     } = this.props;
-    const { checked } = this.state;
+    const { checked, isMulti } = this.state;
 
     return (
       <div className="mapselect">

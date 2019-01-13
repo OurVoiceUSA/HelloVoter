@@ -1,6 +1,12 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { MapSelect } from '../';
+import {
+  multiSelectChange,
+  singleSelectChange,
+  activateCheckBox,
+  activateMapSelectChange
+} from './utilities';
 
 describe('<MapSelect />', () => {
   it('renders without crashing', () => {
@@ -16,11 +22,13 @@ describe('<MapSelect />', () => {
 
     checkbox.onChange();
 
+    // finding checkbox 1, if not there test fails
     select
       .find('.map-option-1')
       .at(0)
       .props();
 
+    // finding checkbox 2, if not there test fails
     select
       .find('.map-option-2')
       .at(0)
@@ -35,90 +43,47 @@ describe('<MapSelect />', () => {
     expect(checkbox.checked).toEqual(false);
   });
 
-  // ADD ON CHANGE HANDLER FOR MAIN DROPDOWN
   it('Changes dropdown value when new option is selected', () => {
     const select = shallow(<MapSelect isMulti={false} checkbox />);
-    select
-      .find('.map-select-input')
-      .at(0)
-      .simulate('change', { target: { value: 'firstName' } });
+    singleSelectChange(select);
     expect(select.state().value).toEqual('firstName');
   });
-  // ADD MULTI VALUE CHANGE HANDLING VIA DROPDOWN
+
   it('Changes dropdown value when several options are selected', () => {
     const select = shallow(<MapSelect checkbox />);
-    select
-      .find('.map-select-input')
-      .at(0)
-      .simulate('change', {
-        target: {
-          value: [
-            { label: 'First Name', value: 'firstName' },
-            { label: 'Middle Name', value: 'middleName' },
-            { label: 'Last Name', value: 'lastName' }
-          ]
-        }
-      });
+    multiSelectChange(select);
     expect(select.state().value).toEqual('firstName middleName lastName');
   });
 
-  // SEND FORMATTED DATA VIA CALLBACK
   it('Sends formatted data to callback passed in', () => {
     const sendFormatMock = jest.fn();
     const select = shallow(<MapSelect sendFormat={sendFormatMock} checkbox />);
-    select
-      .find('.map-select-input')
-      .at(0)
-      .simulate('change', {
-        target: {
-          value: [
-            { label: 'First Name', value: 'firstName' },
-            { label: 'Middle Name', value: 'middleName' },
-            { label: 'Last Name', value: 'lastName' }
-          ]
-        }
-      });
+    multiSelectChange(select);
     expect(sendFormatMock).toHaveBeenCalledWith(
       'firstName middleName lastName'
     );
   });
 
-  // TODO :
+  it('Clears value and makes this.state.isMulti false when splitting on delimeter', () => {
+    const select = shallow(<MapSelect checkbox />);
+    multiSelectChange(select);
+    activateCheckBox(select);
+    expect(select.state().isMulti).toEqual(false);
+    expect(select.state().checked).toEqual(true);
+    expect(select.state().value).toEqual('');
+  });
 
-  // MAP DROPDOWN SELECT HANDLING
   it('Changes map dropdown 1 state value on change', () => {
     const select = shallow(<MapSelect checkbox />);
-    // select checkbox
-    select
-      .find('.ck-bx')
-      .at(0)
-      .props()
-      .onChange();
-
-    // pick map value
-    select
-      .find('.map-option-1')
-      .at(0)
-      .simulate('change', { target: { value: 'space' } });
-
+    activateCheckBox(select);
+    activateMapSelectChange(select, '.map-option-1', 'space');
     expect(select.state().map1).toEqual('space');
   });
 
   it('Changes map dropdown 2 state value on change', () => {
     const select = shallow(<MapSelect checkbox />);
-    select
-      .find('.ck-bx')
-      .at(0)
-      .props()
-      .onChange();
-
-    select
-      .find('.map-option-2')
-      .at(0)
-      .simulate('change', { target: { value: 1 } });
-
+    activateCheckBox(select);
+    activateMapSelectChange(select, '.map-option-2', 1);
     expect(select.state().map2).toEqual(1);
   });
-
-  // COMMA DELIMETED CAN ONLY HAVE 1 SELECT VALUE
 });
