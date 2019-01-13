@@ -5,7 +5,9 @@ import {
   multiSelectChange,
   singleSelectChange,
   activateCheckBox,
-  activateMapSelectChange
+  activateMapSelectChange,
+  multiValue,
+  singleValue
 } from './utilities';
 
 describe('<MapSelect />', () => {
@@ -46,22 +48,20 @@ describe('<MapSelect />', () => {
   it('Changes dropdown value when new option is selected', () => {
     const select = shallow(<MapSelect isMulti={false} checkbox />);
     singleSelectChange(select);
-    expect(select.state().value).toEqual('firstName');
+    expect(select.state().value).toEqual(singleValue);
   });
 
   it('Changes dropdown value when several options are selected', () => {
     const select = shallow(<MapSelect checkbox />);
     multiSelectChange(select);
-    expect(select.state().value).toEqual('firstName middleName lastName');
+    expect(select.state().value).toEqual(multiValue);
   });
 
   it('Sends formatted data to callback passed in', () => {
     const sendFormatMock = jest.fn();
     const select = shallow(<MapSelect sendFormat={sendFormatMock} checkbox />);
     multiSelectChange(select);
-    expect(sendFormatMock).toHaveBeenCalledWith(
-      'firstName middleName lastName'
-    );
+    expect(sendFormatMock).toHaveBeenCalledWith(multiValue);
   });
 
   it('Clears value and makes this.state.isMulti false when splitting on delimeter', () => {
@@ -81,20 +81,20 @@ describe('<MapSelect />', () => {
     expect(select.state().checked).toEqual(true);
     expect(select.state().value).toEqual('');
     singleSelectChange(select);
-    expect(select.state().value).toEqual('firstName');
+    expect(select.state().value).toEqual(singleValue);
   });
 
   it('Changes map dropdown 1 state value on change', () => {
     const select = shallow(<MapSelect checkbox />);
     activateCheckBox(select);
-    activateMapSelectChange(select, '.map-option-1', 'space');
-    expect(select.state().map1).toEqual('space');
+    activateMapSelectChange(select, '.map-option-1', 'space', 'map1');
+    expect(select.state().map1).toEqual({ label: 'map1', value: 'space' });
   });
 
   it('Changes map dropdown 2 state value on change', () => {
     const select = shallow(<MapSelect checkbox />);
     activateCheckBox(select);
-    activateMapSelectChange(select, '.map-option-2', 1);
-    expect(select.state().map2).toEqual(1);
+    activateMapSelectChange(select, '.map-option-2', 1, 'map2');
+    expect(select.state().map2).toEqual({ label: 'map2', value: 1 });
   });
 });

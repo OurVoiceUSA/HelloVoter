@@ -4,7 +4,11 @@ import Checkbox from '@material-ui/core/Checkbox';
 import './mapselect.css';
 
 export class MapSelect extends React.Component {
-  state = { checked: false, isMulti: this.props.isMulti || true };
+  state = {
+    checked: false,
+    isMulti: this.props.isMulti || true,
+    value: this.props.value
+  };
 
   _handleCheck = () =>
     this.setState({
@@ -14,10 +18,11 @@ export class MapSelect extends React.Component {
     });
 
   _setValue = value => {
+    console.log('SET VALUE', value);
     const { sendFormat } = this.props;
     if (Array.isArray(value)) {
       return this.setState(
-        { value: value.map(({ value }) => value).join(' ') },
+        { value },
         () => sendFormat && sendFormat(this.state.value)
       );
     }
@@ -34,12 +39,11 @@ export class MapSelect extends React.Component {
   render() {
     const {
       label = '',
-      value = '',
       options = [],
       checkbox = false,
       dimensions: { width, labelWidth } = { width: 450, labelWidth: 150 }
     } = this.props;
-    const { checked, isMulti } = this.state;
+    const { checked, isMulti, value } = this.state;
 
     return (
       <div className="mapselect">
@@ -49,7 +53,7 @@ export class MapSelect extends React.Component {
             className="map-select-input"
             value={value}
             options={options}
-            onChange={e => this._setValue(e.target.value)}
+            onChange={e => this._setValue(e)}
             isMulti={isMulti}
             placeholder="None"
           />
@@ -75,7 +79,7 @@ export class MapSelect extends React.Component {
       <div style={{ width: 160 }}>
         <ReactSelect
           className="map-option-1"
-          onChange={e => this._setMapValue('map1', e.target.value)}
+          onChange={e => this._setMapValue('map1', e)}
           value={[{ value: 'space', label: 'delimited by space' }]}
           options={[
             { value: 'comma', label: 'delimited by comma' },
@@ -87,7 +91,7 @@ export class MapSelect extends React.Component {
       <div style={{ width: 150 }}>
         <ReactSelect
           className="map-option-2"
-          onChange={e => this._setMapValue('map2', e.target.value)}
+          onChange={e => this._setMapValue('map2', e)}
           value={{ value: 1, label: '1st value' }}
           options={[
             { value: 1, label: '1st value' },

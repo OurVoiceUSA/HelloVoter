@@ -2,33 +2,15 @@ export const multiSelectChange = ele =>
   ele
     .find('.map-select-input')
     .at(0)
-    .simulate('change', {
-      target: {
-        value: [
-          {
-            label: 'First Name',
-            value: 'firstName'
-          },
-          {
-            label: 'Middle Name',
-            value: 'middleName'
-          },
-          {
-            label: 'Last Name',
-            value: 'lastName'
-          }
-        ]
-      }
-    });
+    .simulate('change', multiValue);
 
 export const singleSelectChange = ele =>
   ele
     .find('.map-select-input')
     .at(0)
     .simulate('change', {
-      target: {
-        value: 'firstName'
-      }
+      label: 'First Name',
+      value: 'firstName'
     });
 
 export const activateCheckBox = parent =>
@@ -38,12 +20,19 @@ export const activateCheckBox = parent =>
     .props()
     .onChange();
 
-export const activateMapSelectChange = (parent, className, value) =>
+export const activateMapSelectChange = (parent, className, value, label) =>
   parent
     .find(className)
     .at(0)
-    .simulate('change', {
-      target: {
-        value
-      }
-    });
+    .simulate('change', { label, value });
+
+export const multiValue = [
+  { value: 'firstName', label: 'First Name' },
+  { value: 'middleName', label: 'Middle Name' },
+  { value: 'lastName', label: 'Last Name' }
+];
+
+export const singleValue = {
+  value: 'firstName',
+  label: 'First Name'
+};
