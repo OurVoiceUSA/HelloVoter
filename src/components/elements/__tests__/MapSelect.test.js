@@ -1,5 +1,5 @@
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 import { MapSelect } from '../';
 import {
   multiSelectChange,
@@ -9,7 +9,9 @@ import {
   multiValue,
   singleValue,
   addSelectValue,
-  findInnerElement
+  findInnerElement,
+  simulateUserSelect,
+  clickCheckBox
 } from '../utilities';
 
 describe('<MapSelect />', () => {
@@ -98,5 +100,12 @@ describe('<MapSelect />', () => {
     const select = shallow(<MapSelect options={['test1', 'test2']} checkbox />);
     const mapSelect = findInnerElement(select, '.map-select-input');
     expect(mapSelect.options.length).toEqual(2);
+  });
+
+  it('calculates & populates 2nd map dropdown based on current values', () => {
+    const select = shallow(<MapSelect checkbox checked />);
+    const mapOption2 = findInnerElement(select, '.map-option-2');
+    mapOption2.onChange({ label: 'test 4', value: 4 });
+    expect(mapOption2.value).toEqual({ label: ' test 4', value: 4 });
   });
 });
