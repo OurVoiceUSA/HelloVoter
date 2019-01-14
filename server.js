@@ -1169,7 +1169,7 @@ queueTasks.doProcessImport = async function (filename) {
   // finish it off by adding these news addresses to all relivant turfs
   // TODO: only search :Address as a result of this import file (sub-param apoc issue)
   let start = new Date().getTime();
-  let ref = await cqa('CALL apoc.periodic.iterate("match (a:Address) where a.created >= '+ts+' and not a.position = point({longitude: 0, latitude: 0}) call spatial.intersects(\\"turf\\", {longitude: a.longitude, latitude: a.latitude}) yield node return a, node", "merge (a)-[:WITHIN]->(node)", {batchSize:10000,iterateList:true}) yield total return total');
+  let ref = await cqa('CALL apoc.periodic.iterate("match (a:Address) where a.created >= '+ts+' and not a.position = point({longitude: 0, latitude: 0}) call spatial.intersects(\\"turf\\", a.position) yield node return a, node", "merge (a)-[:WITHIN]->(node)", {batchSize:10000,iterateList:true}) yield total return total');
   let total = ref.data[0];
   console.log("Processed "+total+" records into turfs for "+filename+" in "+((new Date().getTime())-start)+" milliseconds");
 
@@ -1278,7 +1278,7 @@ async function importAdd(req, res) {
   if (req.user.admin !== true) return _403(res, "Permission denied.");
   try {
     // TODO: iterate through req.body.data and normalize address data
-    await cqa('match (a:ImportFile {filename:{filename}}) unwind {data} as r merge (b:ImportRecord {id:apoc.util.md5([r[0],r[1],r[2],r[3],r[4],r[5],r[6],r[7],r[8]])}) on create set b += {pid:r[0], name:r[1], street:r[2], unit:r[3], city:r[4], state:r[5], zip:r[6], lng:r[7], lat:r[8], processed:0} merge (b)-[:FILE]->(a)', req.body);
+    await cqa('match (a:ImportFile {filename:{filename}}) with collect(a) as lock call apoc.lock.nodes(lock) match (a:ImportFile {filename:{filename}}) unwind {data} as r merge (b:ImportRecord {id:apoc.util.md5([r[0],r[1],r[2],r[3],r[4],r[5],r[6],r[7],r[8]])}) on create set b += {pid:r[0], name:r[1], street:r[2], unit:r[3], city:r[4], state:r[5], zip:r[6], lng:r[7], lat:r[8], processed:0} merge (b)-[:FILE]->(a)', req.body);
   } catch (e) {
     return _500(res, e);
   }
