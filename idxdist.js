@@ -2,7 +2,7 @@
 to run this script, do these one-time steps:
 
 * npm install
-* git clone git clone https://github.com/OurVoiceUSA/districts.git
+* git clone https://github.com/OurVoiceUSA/districts.git
 
 then:
 
