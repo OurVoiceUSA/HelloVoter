@@ -17,6 +17,12 @@ describe('<ImportMapper />', () => {
       formats: formatObject1
     });
 
-    expect(mapper.state().mapped[0]).toEqual(['foo', 'bar', 'test']);
+    expect(mapper.state().mapped[0]).toEqual([
+      'HAYDEE ACEVEDO',
+      'CANAL ST',
+      '12428',
+      'ELLENVILLE',
+      'NY'
+    ]);
   });
 });
