@@ -11,7 +11,7 @@ import {
   addSelectValue,
   findInnerElement,
   currentMapState
-} from '../utilities';
+} from '../__mocks__/utilities';
 
 describe('<MapSelect />', () => {
   it('renders without crashing', () => {

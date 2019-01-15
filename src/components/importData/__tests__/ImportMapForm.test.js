@@ -1,7 +1,7 @@
 import React from 'react';
 import { shallow, mount } from 'enzyme';
 import { ImportMapForm } from '..';
-import { findInnerElement } from '../utilities';
+import { findInnerElement } from '../__mocks__/utilities';
 
 describe('<ImportMapper />', () => {
   it('renders without crashing', () => {

@@ -5,6 +5,17 @@ import { faFileCsv } from '@fortawesome/free-solid-svg-icons';
 import { ImportPreview, ImportMapForm } from './';
 import { notify_error, notify_success, Icon } from '../../common.js';
 
+const map_format = [
+  'Unique Record ID',
+  'Name',
+  'Street Address',
+  'City',
+  'State',
+  'Zip',
+  'Longitude',
+  'Latitude'
+];
+
 export default class ImportData extends Component {
   constructor(props) {
     super(props);
@@ -13,7 +24,9 @@ export default class ImportData extends Component {
       loading: false,
       data: null,
       headers: [],
-      formats: {}
+      map_format,
+      formats: {},
+      mapped: []
     };
   }
 
@@ -64,7 +77,6 @@ export default class ImportData extends Component {
         </div>
       );
 
-    console.log(this.state);
     // TODO:
     // format data with format object
     // pass first formatted data result index to <ImportPreview /> and display
