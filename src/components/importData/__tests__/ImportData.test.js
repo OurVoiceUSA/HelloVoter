@@ -17,6 +17,8 @@ describe('<ImportMapper />', () => {
       formats: formatObject1
     });
 
+    mapper.instance().updateMapped();
+
     expect(mapper.state().mapped[0]).toEqual([
       '',
       'HAYDEE ACEVEDO',
