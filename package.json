@@ -17,6 +17,7 @@
     "google-maps-react": "^2.0.2",
     "javascript-time-ago": "^1.0.34",
     "jsonwebtoken": "^8.4.0",
+    "lodash": "^4.17.11",
     "ourvoiceusa-sdk-js": "github:OurVoiceUSA/ourvoiceusa-sdk-js",
     "query-string": "^6.2.0",
     "react": "^16.7.0",

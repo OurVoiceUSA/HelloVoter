@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import CSVReader from 'react-csv-reader';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { faFileCsv } from '@fortawesome/free-solid-svg-icons';
+import map from 'lodash/map';
 import { ImportPreview, ImportMapForm } from './';
 import { notify_error, notify_success, Icon } from '../../common.js';
 import { pipe } from './utilities';
@@ -112,8 +113,8 @@ export default class ImportData extends Component {
 
   parseData = arr => {
     const { data } = this.state;
-    return data.map(item => {
-      return arr.map(head => {
+    return map(data, item => {
+      return map(arr, head => {
         if (head.indexes) {
           return head.indexes
             .reduce((total, next) => `${total.trim()} ${item[next].trim()}`, '')
