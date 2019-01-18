@@ -18,11 +18,11 @@ import neo4j from 'neo4j-driver';
 import BoltAdapter from 'node-neo4j-bolt-adapter';
 import FormData from 'form-data';
 import papa from 'papaparse';
-import jmx from 'jmx';
 
 import { ov_config } from './ov_config.js';
 
 var version = require('./package.json').version;
+var _require = require; // so we can lazy load a module later on
 
 var public_key;
 var jwt_iss = 'ourvoiceusa.org';
@@ -47,12 +47,8 @@ if (ov_config.jwt_pub_key) {
   });
 }
 
-var jmxclient = jmx.createClient({
-  host: ov_config.neo4j_host,
-  port: ov_config.neo4j_jmx_port,
-  username: ov_config.neo4j_jmx_user,
-  password: ov_config.neo4j_jmx_pass,
-});
+var jmx;
+var jmxclient = {};
 var jvmconfig = {};
 
 // bull queue for intensive jobs against the neo4j host
@@ -81,6 +77,14 @@ async function doJmxInit() {
   try {
     let data;
 
+    jmx = _require('jmx');
+
+    jmxclient = jmx.createClient({
+      host: ov_config.neo4j_host,
+      port: ov_config.neo4j_jmx_port,
+      username: ov_config.neo4j_jmx_user,
+      password: ov_config.neo4j_jmx_pass,
+    });
     await new Promise((resolve, reject) => {
       jmxclient.on('connect', resolve);
       jmxclient.on('error', reject);
