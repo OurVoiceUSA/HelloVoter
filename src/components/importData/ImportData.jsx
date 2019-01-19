@@ -122,8 +122,6 @@ export default class ImportData extends Component {
             .reduce((total, next) => `${total.trim()} ${item[next].trim()}`, '')
             .trim();
         } else if (indexes) {
-          console.log('HEAD:::::', format);
-          console.log(item[indexes].split(format.map1.value));
           return item[indexes].split(format.map1.value)[format.map2.value];
         }
 
