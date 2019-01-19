@@ -127,7 +127,8 @@ queue.on('checkQueue', async function () {
   console.log("Checking queue for tasks to run...");
   try {
     let ref = await cqa('match (a:QueueTask {active: true}) return count(a)');
-    if (ref.data[0] >= concurrency) {
+    let running = ref.data[0];
+    if (running >= concurrency) {
       console.log("Too many tasks running to start another.");
       return;
     }
@@ -139,6 +140,9 @@ queue.on('checkQueue', async function () {
     }
 
     queue.emit('doTask', job.data[0].id);
+
+    // check again if we have capacity to run more
+    if ((running+1) < concurrency) queue.emit('checkQueue');
 
   } catch (e) {
     console.warn("Houston we have a problem.");
