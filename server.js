@@ -1492,17 +1492,7 @@ app.use(async function (req, res, next) {
 
   if (req.method == 'OPTIONS') return next(); // skip OPTIONS requests
 
-  // log activity
-  function logIt() {
-    if (!req.user.id) return;
-    let obj = (req.body ? req.body : req.query);
-    try {
-      cqa('match (a:Volunteer {id:{id}}) merge (l:Log {uri:{uri}}) merge (a)-[:HTTP {code:{code},time:timestamp(),input:{input}}]-(l)', {id: req.user.id, code: res.statusCode, uri: req.route.path, input: JSON.stringify(obj)});
-    } catch (e) {}
-  }
-
   res.set('x-sm-oauth-url', ov_config.sm_oauth_url);
-  res.on('finish', logIt, req, res);
 
   req.user = {};
 
