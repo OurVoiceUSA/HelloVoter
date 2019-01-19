@@ -152,6 +152,7 @@ async function doStartupTasks() {
   await doJmxInit();
   await doDbInit();
   await postDbInit();
+  doExpressStartup();
 }
 
 async function doJmxInit() {
@@ -1453,136 +1454,140 @@ async function sync(req, res) {
 }
 
 // Initialize http server
-const app = expressAsync(express());
-app.disable('x-powered-by');
-app.use(expressLogging(logger));
-app.use(bodyParser.json({limit: '5mb'}));
-app.use(cors({exposedHeaders: ['x-sm-oauth-url']}));
+function doExpressStartup() {
 
-// require ip_header if config for it is set
-if (!ov_config.DEBUG && ov_config.ip_header) {
-  app.use(function (req, res, next) {
-    if (!req.header(ov_config.ip_header)) {
-      console.log('Connection without '+ov_config.ip_header+' header');
-      _400(res, "Missing required header.");
+  const app = expressAsync(express());
+  app.disable('x-powered-by');
+  app.use(expressLogging(logger));
+  app.use(bodyParser.json({limit: '5mb'}));
+  app.use(cors({exposedHeaders: ['x-sm-oauth-url']}));
+
+  // require ip_header if config for it is set
+  if (!ov_config.DEBUG && ov_config.ip_header) {
+    app.use(function (req, res, next) {
+      if (!req.header(ov_config.ip_header)) {
+        console.log('Connection without '+ov_config.ip_header+' header');
+       _400(res, "Missing required header.");
+      }
+      else next();
+    });
+  }
+
+  // add req.user if there's a valid JWT
+  app.use(async function (req, res, next) {
+
+    if (req.method == 'OPTIONS') return next(); // skip OPTIONS requests
+
+    res.set('x-sm-oauth-url', ov_config.sm_oauth_url);
+
+    req.user = {};
+
+    // uri whitelist
+    switch (req.url) {
+      case '/':
+      case '/poke':
+      case '/volunteer/':
+        return next();
+      default:
+        break;
     }
-    else next();
+
+    try {
+      let u;
+      if (!req.header('authorization')) return _400(res, "Missing required header.");
+      u = jwt.verify(req.header('authorization').split(' ')[1], public_key);
+
+      // verify props
+      if (!u.id) return _400(res, "Your token is missing a required parameter.");
+      if (u.iss !== jwt_iss) return _403(res, "Your token was issued for a different domain.");
+
+      if (!u.email) u.email = "";
+      if (!u.avatar) u.avatar = "";
+
+      let a = await cqa('merge (a:Volunteer {id:{id}}) on match set a += {last_seen: timestamp(), name:{name}, email:{email}, avatar:{avatar}} on create set a += {created: timestamp(), last_seen: timestamp(), name:{name}, email:{email}, avatar:{avatar}} return a', u);
+      if (a.data.length === 1) {
+        req.user = a.data[0];
+      } else return _500(res, {});
+
+      if (req.user.locked) return _403(res, "Your account is locked.");
+
+    } catch (e) {
+      console.warn(e);
+      return _401(res, "Invalid token.");
+    }
+
+    next();
   });
+
+  // internal routes
+  app.get('/poke', poke);
+
+  // ws routes
+  app.get('/', towebapp);
+  app.get('/volunteer/', towebapp);
+  app.post('/volunteer/v1/hello', hello);
+  app.get('/volunteer/v1/uncle', uncle);
+  app.get('/volunteer/v1/dashboard', dashboard);
+  app.get('/volunteer/v1/google_maps_key', google_maps_key);
+  app.get('/volunteer/v1/volunteer/list', volunteerList);
+  app.get('/volunteer/v1/volunteer/get', volunteerGet);
+  app.post('/volunteer/v1/volunteer/update', volunteerUpdate);
+  app.post('/volunteer/v1/volunteer/lock', volunteerLock);
+  app.post('/volunteer/v1/volunteer/unlock', volunteerUnlock);
+  app.get('/volunteer/v1/team/list', teamList);
+  app.get('/volunteer/v1/team/get', teamGet);
+  app.post('/volunteer/v1/team/create', teamCreate);
+  app.post('/volunteer/v1/team/delete', teamDelete);
+  app.get('/volunteer/v1/team/members/list', teamMembersList);
+  app.post('/volunteer/v1/team/members/add', teamMembersAdd);
+  app.post('/volunteer/v1/team/members/remove', teamMembersRemove);
+  app.post('/volunteer/v1/team/members/promote', teamMembersPromote);
+  app.post('/volunteer/v1/team/members/demote', teamMembersDemote);
+  app.get('/volunteer/v1/team/turf/list', teamTurfList);
+  app.post('/volunteer/v1/team/turf/add', teamTurfAdd);
+  app.post('/volunteer/v1/team/turf/remove', teamTurfRemove);
+  app.get('/volunteer/v1/team/form/list', teamFormList);
+  app.post('/volunteer/v1/team/form/add', teamFormAdd);
+  app.post('/volunteer/v1/team/form/remove', teamFormRemove);
+  app.get('/volunteer/v1/turf/list', turfList);
+  app.get('/volunteer/v1/turf/get', turfGet);
+  app.post('/volunteer/v1/turf/create', turfCreate);
+  app.post('/volunteer/v1/turf/delete', turfDelete);
+  app.get('/volunteer/v1/turf/assigned/team/list', turfAssignedTeamList);
+  app.post('/volunteer/v1/turf/assigned/team/add', turfAssignedTeamAdd);
+  app.post('/volunteer/v1/turf/assigned/team/remove', turfAssignedTeamRemove);
+  app.get('/volunteer/v1/turf/assigned/volunteer/list', turfAssignedVolunteerList);
+  app.post('/volunteer/v1/turf/assigned/volunteer/add', turfAssignedVolunteerAdd);
+  app.post('/volunteer/v1/turf/assigned/volunteer/remove', turfAssignedVolunteerRemove);
+  app.get('/volunteer/v1/form/get', formGet);
+  app.get('/volunteer/v1/form/list', formList);
+  app.post('/volunteer/v1/form/create', formCreate);
+  app.post('/volunteer/v1/form/delete', formDelete);
+  app.get('/volunteer/v1/form/assigned/team/list', formAssignedTeamList);
+  app.post('/volunteer/v1/form/assigned/team/add', formAssignedTeamAdd);
+  app.post('/volunteer/v1/form/assigned/team/remove', formAssignedTeamRemove);
+  app.get('/volunteer/v1/form/assigned/volunteer/list', formAssignedVolunteerList);
+  app.post('/volunteer/v1/form/assigned/volunteer/add', formAssignedVolunteerAdd);
+  app.post('/volunteer/v1/form/assigned/volunteer/remove', formAssignedVolunteerRemove);
+  app.get('/volunteer/v1/question/get', questionGet);
+  app.get('/volunteer/v1/question/list', questionList);
+  app.post('/volunteer/v1/question/create', questionCreate);
+  app.post('/volunteer/v1/question/delete', questionDelete);
+  app.get('/volunteer/v1/question/assigned/list', questionAssignedList);
+  app.post('/volunteer/v1/question/assigned/add', questionAssignedAdd);
+  app.post('/volunteer/v1/question/assigned/remove', questionAssignedRemove);
+  app.get('/volunteer/v1/import/list', importList);
+  app.post('/volunteer/v1/import/begin', importBegin);
+  app.post('/volunteer/v1/import/add', importAdd);
+  app.post('/volunteer/v1/import/end', importEnd);
+  app.post('/volunteer/v1/sync', sync);
+  
+  // Launch the server
+  const server = app.listen(ov_config.server_port, () => {
+    const { address, port } = server.address();
+    console.log('express.js startup');
+    console.log(`Listening at http://${address}:${port}`);
+  });
+  
 }
-
-// add req.user if there's a valid JWT
-app.use(async function (req, res, next) {
-
-  if (req.method == 'OPTIONS') return next(); // skip OPTIONS requests
-
-  res.set('x-sm-oauth-url', ov_config.sm_oauth_url);
-
-  req.user = {};
-
-  // uri whitelist
-  switch (req.url) {
-    case '/':
-    case '/poke':
-    case '/volunteer/':
-      return next();
-    default:
-      break;
-  }
-
-  try {
-    let u;
-    if (!req.header('authorization')) return _400(res, "Missing required header.");
-    u = jwt.verify(req.header('authorization').split(' ')[1], public_key);
-
-    // verify props
-    if (!u.id) return _400(res, "Your token is missing a required parameter.");
-    if (u.iss !== jwt_iss) return _403(res, "Your token was issued for a different domain.");
-
-    if (!u.email) u.email = "";
-    if (!u.avatar) u.avatar = "";
-
-    let a = await cqa('merge (a:Volunteer {id:{id}}) on match set a += {last_seen: timestamp(), name:{name}, email:{email}, avatar:{avatar}} on create set a += {created: timestamp(), last_seen: timestamp(), name:{name}, email:{email}, avatar:{avatar}} return a', u);
-    if (a.data.length === 1) {
-      req.user = a.data[0];
-    } else return _500(res, {});
-
-    if (req.user.locked) return _403(res, "Your account is locked.");
-
-  } catch (e) {
-    console.warn(e);
-    return _401(res, "Invalid token.");
-  }
-
-  next();
-});
-
-// internal routes
-app.get('/poke', poke);
-
-// ws routes
-app.get('/', towebapp);
-app.get('/volunteer/', towebapp);
-app.post('/volunteer/v1/hello', hello);
-app.get('/volunteer/v1/uncle', uncle);
-app.get('/volunteer/v1/dashboard', dashboard);
-app.get('/volunteer/v1/google_maps_key', google_maps_key);
-app.get('/volunteer/v1/volunteer/list', volunteerList);
-app.get('/volunteer/v1/volunteer/get', volunteerGet);
-app.post('/volunteer/v1/volunteer/update', volunteerUpdate);
-app.post('/volunteer/v1/volunteer/lock', volunteerLock);
-app.post('/volunteer/v1/volunteer/unlock', volunteerUnlock);
-app.get('/volunteer/v1/team/list', teamList);
-app.get('/volunteer/v1/team/get', teamGet);
-app.post('/volunteer/v1/team/create', teamCreate);
-app.post('/volunteer/v1/team/delete', teamDelete);
-app.get('/volunteer/v1/team/members/list', teamMembersList);
-app.post('/volunteer/v1/team/members/add', teamMembersAdd);
-app.post('/volunteer/v1/team/members/remove', teamMembersRemove);
-app.post('/volunteer/v1/team/members/promote', teamMembersPromote);
-app.post('/volunteer/v1/team/members/demote', teamMembersDemote);
-app.get('/volunteer/v1/team/turf/list', teamTurfList);
-app.post('/volunteer/v1/team/turf/add', teamTurfAdd);
-app.post('/volunteer/v1/team/turf/remove', teamTurfRemove);
-app.get('/volunteer/v1/team/form/list', teamFormList);
-app.post('/volunteer/v1/team/form/add', teamFormAdd);
-app.post('/volunteer/v1/team/form/remove', teamFormRemove);
-app.get('/volunteer/v1/turf/list', turfList);
-app.get('/volunteer/v1/turf/get', turfGet);
-app.post('/volunteer/v1/turf/create', turfCreate);
-app.post('/volunteer/v1/turf/delete', turfDelete);
-app.get('/volunteer/v1/turf/assigned/team/list', turfAssignedTeamList);
-app.post('/volunteer/v1/turf/assigned/team/add', turfAssignedTeamAdd);
-app.post('/volunteer/v1/turf/assigned/team/remove', turfAssignedTeamRemove);
-app.get('/volunteer/v1/turf/assigned/volunteer/list', turfAssignedVolunteerList);
-app.post('/volunteer/v1/turf/assigned/volunteer/add', turfAssignedVolunteerAdd);
-app.post('/volunteer/v1/turf/assigned/volunteer/remove', turfAssignedVolunteerRemove);
-app.get('/volunteer/v1/form/get', formGet);
-app.get('/volunteer/v1/form/list', formList);
-app.post('/volunteer/v1/form/create', formCreate);
-app.post('/volunteer/v1/form/delete', formDelete);
-app.get('/volunteer/v1/form/assigned/team/list', formAssignedTeamList);
-app.post('/volunteer/v1/form/assigned/team/add', formAssignedTeamAdd);
-app.post('/volunteer/v1/form/assigned/team/remove', formAssignedTeamRemove);
-app.get('/volunteer/v1/form/assigned/volunteer/list', formAssignedVolunteerList);
-app.post('/volunteer/v1/form/assigned/volunteer/add', formAssignedVolunteerAdd);
-app.post('/volunteer/v1/form/assigned/volunteer/remove', formAssignedVolunteerRemove);
-app.get('/volunteer/v1/question/get', questionGet);
-app.get('/volunteer/v1/question/list', questionList);
-app.post('/volunteer/v1/question/create', questionCreate);
-app.post('/volunteer/v1/question/delete', questionDelete);
-app.get('/volunteer/v1/question/assigned/list', questionAssignedList);
-app.post('/volunteer/v1/question/assigned/add', questionAssignedAdd);
-app.post('/volunteer/v1/question/assigned/remove', questionAssignedRemove);
-app.get('/volunteer/v1/import/list', importList);
-app.post('/volunteer/v1/import/begin', importBegin);
-app.post('/volunteer/v1/import/add', importAdd);
-app.post('/volunteer/v1/import/end', importEnd);
-app.post('/volunteer/v1/sync', sync);
-
-// Launch the server
-const server = app.listen(ov_config.server_port, () => {
-  const { address, port } = server.address();
-  console.log('volunteer-broker express');
-  console.log(`Listening at http://${address}:${port}`);
-});
 
