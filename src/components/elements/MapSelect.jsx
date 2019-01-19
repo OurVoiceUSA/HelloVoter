@@ -12,12 +12,19 @@ export class MapSelect extends React.Component {
     map2: { value: 0, label: '1st value' }
   };
 
-  _handleCheck = () =>
-    this.setState({
-      checked: !this.state.checked,
-      isMulti: !this.state.isMulti,
-      value: ''
-    });
+  _handleCheck = () => {
+    const { updateFormats, label } = this.props;
+    this.setState(
+      {
+        checked: !this.state.checked,
+        isMulti: !this.state.isMulti,
+        value: '',
+        map1: { value: ',', label: 'delimited by comma' },
+        map2: { value: 0, label: '1st value' }
+      },
+      () => updateFormats && updateFormats(label, this.state)
+    );
+  };
 
   _setValue = value => {
     const { updateFormats, label } = this.props;

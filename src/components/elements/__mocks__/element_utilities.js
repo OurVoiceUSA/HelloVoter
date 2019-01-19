@@ -7,6 +7,22 @@ export const testOptions = [
   { label: 'Test 6', value: 6 }
 ];
 
+export const mockedOptionMap = {
+  checked: true,
+  isMulti: false,
+  map1: { label: 'delimited by comma', value: ',' },
+  map2: { label: '1st value', value: 0 },
+  value: ''
+};
+
+export const uncheckedOptionMap = {
+  checked: false,
+  isMulti: true,
+  map1: { label: 'delimited by comma', value: ',' },
+  map2: { label: '1st value', value: 0 },
+  value: ''
+};
+
 export const currentMapState = {
   checked: false,
   isMulti: true,
@@ -53,9 +69,14 @@ export const addSelectValue = (ele, ...args) =>
 export const activateCheckBox = parent =>
   parent
     .find('.ck-bx')
-    .at(0)
     .props()
     .onChange();
+
+export const deactivateCheckBox = parent =>
+  parent
+    .find('.ck-bx')
+    .props()
+    .onClick();
 
 export const clickCheckBox = parent =>
   parent

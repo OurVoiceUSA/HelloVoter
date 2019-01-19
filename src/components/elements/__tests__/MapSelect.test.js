@@ -5,12 +5,15 @@ import {
   multiSelectChange,
   singleSelectChange,
   activateCheckBox,
+  deactivateCheckBox,
   activateMapSelectChange,
   multiValue,
   singleValue,
   addSelectValue,
   findInnerElement,
-  currentMapState
+  currentMapState,
+  mockedOptionMap,
+  uncheckedOptionMap
 } from '../__mocks__/element_utilities';
 
 describe('<MapSelect />', () => {
@@ -101,5 +104,18 @@ describe('<MapSelect />', () => {
     const select = shallow(<MapSelect options={['test1', 'test2']} checkbox />);
     const mapSelect = findInnerElement(select, '.map-select-input');
     expect(mapSelect.options.length).toEqual(2);
+  });
+
+  it('removes value data when checkbox toggled', () => {
+    const updateFormatsMock = jest.fn();
+    const select = shallow(
+      <MapSelect label="Test" updateFormats={updateFormatsMock} checkbox />
+    );
+    activateCheckBox(select);
+    activateMapSelectChange(select, '.map-option-2', 1, 'map2');
+    expect(updateFormatsMock).toHaveBeenCalledWith('Test', mockedOptionMap);
+
+    deactivateCheckBox(select);
+    expect(updateFormatsMock).toHaveBeenCalledWith('Test', uncheckedOptionMap);
   });
 });
