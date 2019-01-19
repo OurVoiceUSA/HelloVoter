@@ -55,7 +55,7 @@ var concurrency = ov_config.job_concurrency;
 
 var queue = new EventEmitter()
 
-queue.on('queueTask', async function (task, input) {
+async function queueTask(task, input) {
   let job;
 
   // create QueueTask object in database -- either we can execute now (active: true, started: timestamp()) or we have to wait (active: false)
@@ -79,7 +79,9 @@ queue.on('queueTask', async function (task, input) {
   } else {
     console.log("Enqueued task "+task);
   }
-});
+
+  return job.data[0].a;
+}
 
 queue.on('doTask', async function (id) {
   let task; 
@@ -863,9 +865,9 @@ async function turfCreate(req, res) {
     return _500(res, e);
   }
 
-  queue.emit('queueTask', 'doTurfIndexing', {turfId: req.body.turfId});
+  let job = await queueTask('doTurfIndexing', {turfId: req.body.turfId});
 
-  return res.json({});
+  return res.json(job);
 }
 
 async function turfDelete(req, res) {
@@ -1349,9 +1351,9 @@ async function importEnd(req, res) {
     return _500(res, e);
   }
 
-  queue.emit('queueTask', 'doProcessImport', {filename: req.body.filename});
+  let job = await queueTask('doProcessImport', {filename: req.body.filename});
 
-  return res.json({});
+  return res.json(job);
 }
 
 // sync
