@@ -8,8 +8,8 @@ export class MapSelect extends React.Component {
     checked: this.props.checked || false,
     isMulti: this.props.isMulti || true,
     value: this.props.value,
-    map1: '',
-    map2: ''
+    map1: { value: ',', label: 'delimited by comma' },
+    map2: { value: 0, label: '1st value' }
   };
 
   _handleCheck = () =>

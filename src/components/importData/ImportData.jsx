@@ -122,7 +122,9 @@ export default class ImportData extends Component {
             .reduce((total, next) => `${total.trim()} ${item[next].trim()}`, '')
             .trim();
         } else if (indexes) {
-          return item[indexes].split(format.map1.value)[format.map2.value];
+          return item[indexes]
+            ? item[indexes].split(format.map1.value)[format.map2.value]
+            : '';
         }
 
         return '';
@@ -146,8 +148,6 @@ export default class ImportData extends Component {
           (Also want the user to be able to drag&drop files.)
         </div>
       );
-
-    // console.log('FORMATS: ', this.state.formats);
 
     // TODO:
     // format data with format object

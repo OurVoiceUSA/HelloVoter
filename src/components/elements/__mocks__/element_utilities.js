@@ -10,8 +10,8 @@ export const testOptions = [
 export const currentMapState = {
   checked: false,
   isMulti: true,
-  map1: '',
-  map2: '',
+  map1: { value: ',', label: 'delimited by comma' },
+  map2: { value: 0, label: '1st value' },
   value: [
     { label: 'First Name', value: 'firstName' },
     { label: 'Middle Name', value: 'middleName' },
