@@ -7,10 +7,8 @@ import jwt from 'jsonwebtoken';
 import queryString from 'query-string';
 import ReactTooltip from 'react-tooltip';
 
-import Login from './components/Login';
-import { Header, Sidebar } from './components/header';
+import { Header, Sidebar, LogoutDialog, Login } from './components';
 import Routes from './routes/Routes';
-import LogoutDialogue from './components/LogoutDialog';
 
 import 'typeface-roboto';
 import { withStyles } from '@material-ui/core/styles';
@@ -212,8 +210,6 @@ class App extends Component {
 
     if (!server.hostname) return <Login refer={this} />;
 
-    console.log(this.state);
-
     return (
       <Router>
         <div className={classes.root}>
@@ -235,8 +231,12 @@ class App extends Component {
           <main className={classes.content}>
             <div className={classes.appBarSpacer} />
             <NotificationContainer />
-            <Routes server={server} refer={this} />
-            <LogoutDialogue
+            <Routes
+              server={server}
+              refer={this}
+              google_maps_key={this.state.google_maps_key}
+            />
+            <LogoutDialog
               menuLogout={this.state.menuLogout}
               handleCloseLogout={this.handleCloseLogout}
               _logout={this._logout}

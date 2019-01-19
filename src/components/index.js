@@ -2,7 +2,7 @@ import About from './About';
 import Analytics from './Analytics';
 import Dashboard from './Dashboard';
 import Forms from './Forms';
-import ImportData from './ImportData';
+import { ImportData } from './importData/index';
 import Jwt from './Jwt';
 import Login from './Login';
 import LogoutDialog from './LogoutDialog';

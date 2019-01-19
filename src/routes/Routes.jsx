@@ -1,16 +1,18 @@
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
-import Dashboard from '../components/Dashboard';
-import Volunteers from '../components/Volunteers';
-import Teams from '../components/Teams';
-import Turf from '../components/Turf';
-import Forms from '../components/Forms';
-import Map from '../components/Map';
-import ImportData from '../components/ImportData';
-import Analytics from '../components/Analytics';
-import Settings from '../components/Settings';
-import Jwt from '../components/Jwt';
-import About from '../components/About';
+import {
+  Dashboard,
+  Volunteers,
+  Teams,
+  Turf,
+  Forms,
+  Map,
+  ImportData,
+  Analytics,
+  Settings,
+  Jwt,
+  About
+} from '../components';
 import NoMatch from './NoMatch';
 
 // <Routes />
@@ -20,7 +22,7 @@ import NoMatch from './NoMatch';
     server: <server description>
   }
 */
-export const Routes = ({ server, refer }) => (
+export const Routes = ({ server, refer, google_maps_key }) => (
   <Switch>
     <Route exact={true} path="/" render={() => <Dashboard server={server} />} />
     <Route path="/volunteers/" render={() => <Volunteers server={server} />} />
@@ -29,7 +31,7 @@ export const Routes = ({ server, refer }) => (
     <Route path="/forms/" render={() => <Forms server={server} />} />
     <Route
       path="/map/"
-      render={() => <Map server={server} apiKey={this.state.google_maps_key} />}
+      render={() => <Map server={server} apiKey={google_maps_key} />}
     />
     <Route path="/import/" render={() => <ImportData server={server} />} />
     <Route path="/analytics/" render={() => <Analytics server={server} />} />
