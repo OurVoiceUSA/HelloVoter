@@ -4,7 +4,7 @@ Our Voice USA is a 501(c)(3) non-profit, non-partisian organization for civic ed
 
 ## Features
 
-This is in development, and will be the API backend to the OVMobile canvass functions for large operations. The current production mobile app uses Dropbox for data sharing and storage.
+This is in development, and will be the API backend to the HelloVoter canvass functions for large operations. The current production mobile app uses Dropbox for data sharing and storage.
 
 ## Setup
 
@@ -25,7 +25,7 @@ For this server, configure an `.env` file. The following is a complete list of v
     SM_OAUTH_URL=https://ws.ourvoiceusa.org/auth
     JWT_PUB_KEY=SM_OAUTH_URL/pubkey
     WABASE=https://apps.ourvoiceusa.org
-    DEBUG=0
+    DEBUG=
 
 Then, install dependancies with `npm install`, and start with `npm start`.
 
