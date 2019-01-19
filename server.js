@@ -150,7 +150,8 @@ async function doStartupTasks() {
   await doJmxInit();
   await doDbInit();
   await postDbInit();
-  // TODO: check for "hung" tasks; ie, restarted while one was running
+  // assume any "active" tasks on startup died on whatever shut us down, and mark them as failed
+  await cqa('match (a:QueueTask {active: true}) set a.active = false, a.completed = timestamp(), a.success = false');
   queue.emit('checkQueue');
 }
 
