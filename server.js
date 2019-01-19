@@ -147,11 +147,13 @@ queue.on('checkQueue', async function () {
   }
 });
 
-// tasks to do on startup, in sequence
+// tasks to do on startup
 async function doStartupTasks() {
+  // required to do in sequence
   await doJmxInit();
   await doDbInit();
-  await postDbInit();
+  // can happen in parallel
+  postDbInit();
   doExpressStartup();
 }
 
