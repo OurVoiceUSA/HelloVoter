@@ -83,12 +83,12 @@ export default class ImportData extends Component {
           name: item,
           format: formats[item]
         };
-      } else {
-        return {
-          name: item,
-          format: null
-        };
       }
+
+      return {
+        name: item,
+        format: null
+      };
     });
   };
 
@@ -149,10 +149,6 @@ export default class ImportData extends Component {
         </div>
       );
 
-    // TODO:
-    // format data with format object
-    // pass first formatted data result index to <ImportPreview /> and display
-    // create submit import data <Button />
     return (
       <div>
         <div style={{ display: 'flex' }}>
@@ -163,7 +159,10 @@ export default class ImportData extends Component {
           headers={this.state.headers}
           updateFormats={this.updateFormats}
         />
-        <ImportPreview />
+        <ImportPreview
+          titles={map_format}
+          records={this.state.mapped.slice(0, 3)}
+        />
       </div>
     );
   }
