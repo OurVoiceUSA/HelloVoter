@@ -88,8 +88,8 @@ export class MapSelect extends React.Component {
           onChange={e => this._setMapValue('map1', e)}
           value={map1}
           options={[
-            { value: 'comma', label: 'delimited by comma' },
-            { value: 'space', label: 'delimited by space' }
+            { value: ',', label: 'delimited by comma' },
+            { value: ' ', label: 'delimited by space' }
           ]}
           placeholder="None"
         />
@@ -100,9 +100,9 @@ export class MapSelect extends React.Component {
           onChange={e => this._setMapValue('map2', e)}
           value={map2}
           options={[
-            { value: 1, label: '1st value' },
-            { value: 2, label: '2nd value' },
-            { value: 'last', label: 'last value' }
+            { value: 0, label: '1st value' },
+            { value: 1, label: '2nd value' },
+            { value: 2, label: 'last value' }
           ]}
           placeholder="None"
         />

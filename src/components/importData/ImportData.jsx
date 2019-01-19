@@ -77,32 +77,37 @@ export default class ImportData extends Component {
   };
 
   generateFormats = (formats, map_format) => {
-    const { repeat } = this;
-    var Formats = [];
-    repeat(map_format, item => {
+    return map(map_format, item => {
       if (formats[item]) {
-        Formats.push({
+        return {
           name: item,
           format: formats[item]
-        });
+        };
       } else {
-        Formats.push({
+        return {
           name: item,
           format: null
-        });
+        };
       }
     });
-
-    return Formats;
   };
 
   getAllIndexes = arr =>
-    arr.map(({ name, format }) => {
-      if (format) {
+    map(arr, ({ name, format }) => {
+      if (format && Array.isArray(format.value)) {
         const indexes = format.value.map(f =>
           this.state.headers.findIndex(i => i === f.value)
         );
         return { name, format, indexes };
+      } else if (format) {
+        const indexes = this.state.headers.findIndex(
+          i => i === format.value.value
+        );
+        return {
+          name,
+          format,
+          indexes
+        };
       }
 
       return { name, format, indexes: null };
@@ -111,22 +116,20 @@ export default class ImportData extends Component {
   parseData = arr => {
     const { data } = this.state;
     return map(data, item => {
-      return map(arr, head => {
-        if (head.indexes) {
-          return head.indexes
+      return map(arr, ({ indexes, format }) => {
+        if (indexes && Array.isArray(indexes)) {
+          return indexes
             .reduce((total, next) => `${total.trim()} ${item[next].trim()}`, '')
             .trim();
+        } else if (indexes) {
+          console.log('HEAD:::::', format);
+          console.log(item[indexes].split(format.map1.value));
+          return item[indexes].split(format.map1.value)[format.map2.value];
         }
 
         return '';
       });
     });
-  };
-
-  repeat = (arr, callback) => {
-    for (var i = 0; i < arr.length; i++) {
-      callback(arr[i]);
-    }
   };
 
   render() {
@@ -146,7 +149,7 @@ export default class ImportData extends Component {
         </div>
       );
 
-    console.log('FORMATS: ', this.state.formats);
+    // console.log('FORMATS: ', this.state.formats);
 
     // TODO:
     // format data with format object

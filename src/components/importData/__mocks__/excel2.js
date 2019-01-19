@@ -28,33 +28,19 @@ export const formatObject2 = {
     map1: '',
     map2: ''
   },
-  // City: {
-  //   checked: false,
-  //   isMulti: true,
-  //   value: [{ value: 'city ', label: 'city ' }],
-  //   map1: '',
-  //   map2: ''
-  // },
-  // State: {
-  //   checked: false,
-  //   isMulti: true,
-  //   value: [{ value: 'state', label: 'state' }],
-  //   map1: '',
-  //   map2: ''
-  // },
   Longitude: {
     checked: true,
     isMulti: false,
     value: { value: 'location', label: 'location' },
-    map1: { label: 'map1', value: 'comma' },
-    map2: { label: 'map2', value: 1 }
+    map1: { label: 'map1', value: ',' },
+    map2: { label: 'map2', value: 0 }
   },
   Latitude: {
     checked: true,
     isMulti: false,
     value: { value: 'location', label: 'location' },
-    map1: { label: 'map1', value: 'comma' },
-    map2: { label: 'map2', value: 2 }
+    map1: { label: 'map1', value: ',' },
+    map2: { label: 'map2', value: 1 }
   }
 };
 
