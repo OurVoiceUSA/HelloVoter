@@ -97,12 +97,12 @@ queue.on('doTask', async function (id) {
     let ret = await queueTasks[task](JSON.parse(job.data[0].input));
 
     // mark job as success
-    await cqa('match (a:QueueTask {id:{id}}) set a.active = false, a.complated = timestamp(), success = true', {id: id});
+    await cqa('match (a:QueueTask {id:{id}}) set a.active = false, a.complated = timestamp(), a.success = true', {id: id});
   } catch (e) {
     console.warn("Caught exception while executing task: "+task);
     console.warn(e);
     // mark job as failed
-    await cqa('match (a:QueueTask {id:{id}}) set a.active = false, a.complated = timestamp(), success = false', {id: id});
+    await cqa('match (a:QueueTask {id:{id}}) set a.active = false, a.complated = timestamp(), a.success = false', {id: id});
   }
 
   let finish = new Date().getTime();
