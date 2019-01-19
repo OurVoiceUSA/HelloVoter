@@ -55,6 +55,15 @@ var concurrency = ov_config.job_concurrency;
 
 var queue = new EventEmitter()
 
+// async'ify neo4j
+const authToken = neo4j.auth.basic(ov_config.neo4j_user, ov_config.neo4j_pass);
+const db = new BoltAdapter(neo4j.driver('bolt://'+ov_config.neo4j_host, authToken));
+
+// database connect
+cqa('return timestamp()').catch((e) => {console.error("Unable to connect to database."); process.exit(1)}).then(() => {
+  doStartupTasks();
+});
+
 async function queueTask(task, input) {
   let job;
 
@@ -136,15 +145,6 @@ queue.on('checkQueue', async function () {
     console.warn(e);
     return;
   }
-});
-
-// async'ify neo4j
-const authToken = neo4j.auth.basic(ov_config.neo4j_user, ov_config.neo4j_pass);
-const db = new BoltAdapter(neo4j.driver('bolt://'+ov_config.neo4j_host, authToken));
-
-// database connect
-cqa('return timestamp()').catch((e) => {console.error("Unable to connect to database."); process.exit(1)}).then(() => {
-  doStartupTasks();
 });
 
 // tasks to do on startup, in sequence
@@ -1578,18 +1578,6 @@ app.post('/volunteer/v1/import/begin', importBegin);
 app.post('/volunteer/v1/import/add', importAdd);
 app.post('/volunteer/v1/import/end', importEnd);
 app.post('/volunteer/v1/sync', sync);
-
-Object.keys(ov_config).forEach((k) => {
-  delete process.env[k.toUpperCase()];
-});
-require = null;
-
-if (!ov_config.DEBUG) {
-  process.on('SIGUSR1', () => {
-    //process.exit(1);
-    throw "Caught SIGUSR1, exiting."
-  });
-}
 
 // Launch the server
 const server = app.listen(ov_config.server_port, () => {
