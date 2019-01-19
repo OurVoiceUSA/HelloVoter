@@ -10,7 +10,7 @@ import jwt from 'jsonwebtoken';
 import bodyParser from 'body-parser';
 import http from 'http';
 import fs from 'fs';
-import {ingeojson, asyncForEach, us_states} from 'ourvoiceusa-sdk-js';
+import {ingeojson, asyncForEach} from 'ourvoiceusa-sdk-js';
 import circleToPolygon from 'circle-to-polygon';
 import wkx from 'wkx';
 import EventEmitter from 'events';
@@ -152,9 +152,6 @@ async function doStartupTasks() {
   await doJmxInit();
   await doDbInit();
   await postDbInit();
-  // assume any "active" tasks on startup died on whatever shut us down, and mark them as failed
-  await cqa('match (a:QueueTask {active: true}) set a.active = false, a.completed = timestamp(), a.success = false');
-  queue.emit('checkQueue');
 }
 
 async function doJmxInit() {
@@ -287,7 +284,6 @@ async function doDbInit() {
     {label: 'Team', property: 'name', create: 'create constraint on (a:Team) assert a.name is unique'},
     {label: 'Turf', property: 'id', create: 'create constraint on (a:Turf) assert a.id is unique'},
     {label: 'Turf', property: 'name', create: 'create constraint on (a:Turf) assert a.name is unique'},
-    {label: 'Region', property: 'region', create: 'create constraint on (a:Region) assert a.region is unique'},
     {label: 'Form', property: 'id', create: 'create constraint on (a:Form) assert a.id is unique'},
     {label: 'Question', property: 'key', create: 'create constraint on (a:Question) assert a.key is unique'},
     {label: 'Unit', property: 'id', create: 'create constraint on (a:Unit) assert a.id is unique'},
@@ -305,7 +301,6 @@ async function doDbInit() {
 
   let spatialLayers = [
     {name: "turf", create: 'call spatial.addWKTLayer("turf", "wkt")'},
-    {name: "region", create: 'call spatial.addWKTLayer("region", "wkt")'},
     {name: "volunteer", create: 'call spatial.addPointLayerXY("volunteer", "homelng", "homelat", "rtree")'},
     {name: "address", create: 'call spatial.addPointLayer("address", "rtree")'},
   ];
@@ -324,27 +319,9 @@ async function postDbInit() {
   let start = new Date().getTime();
   console.log("postDbInit() started @ "+start);
 
-  // regions with no shapes
-  delete us_states.FM;
-  delete us_states.MH;
-  delete us_states.PW;
-
-  // create a region layer for each item in us_states
-  await asyncForEach(Object.keys(us_states), async (state) => {
-    try {
-      let region = 'region_'+state.toLowerCase();
-      let ref = await cqa('match (a:Region {region:{region}}) return a', {region: region});
-      if (ref.data.length === 0) {
-        console.log("Creating region for "+state);
-        let res = await fetch('https://raw.githubusercontent.com/OurVoiceUSA/districts/gh-pages/states/'+state+'/shape.geojson');
-        let geometry = await res.json();
-        let wkt = wkx.Geometry.parseGeoJSON(geometry).toEwkt().split(';')[1];
-        await cqa('create (a:Region {name:{state}, region:{region}, geometry: {geometry}, wkt:{wkt}}) with a call spatial.addNode("region", a) yield node return count(node)', {state: state, region: region, geometry: JSON.stringify(geometry), wkt: wkt});
-      }
-    } catch (e) {
-      console.warn(e);
-    }
-  });
+  // assume any "active" tasks on startup died on whatever shut us down, and mark them as failed
+  await cqa('match (a:QueueTask {active: true}) set a.active = false, a.completed = timestamp(), a.success = false');
+  queue.emit('checkQueue');
 
   let finish = new Date().getTime();
   console.log("postDbInit() finished @ "+finish+" after "+(finish-start)+" milliseconds");
