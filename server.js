@@ -205,9 +205,9 @@ async function doJmxInit() {
   }
 
   // community edition maxes at 4 cpus
-  if (jvmconfig.numcpus) {
+  if (jvmconfig.numcpus && jvmconfig.numcpus > 4) {
     let ref = await cqa('call dbms.components() yield edition');
-    if (ref.data[0] !== 'enterprise' && jvmconfig.numcpus > 4) {
+    if (ref.data[0] !== 'enterprise') {
       console.warn("WARNING: Your neo4j database host has "+jvmconfig.numcpus+" CPUs but you're not running enterprise edition, so only up to 4 are actually utilized by neo4j.");
       jvmconfig.numcpus = 4;
     }
