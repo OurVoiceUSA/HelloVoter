@@ -1,6 +1,7 @@
 import React from 'react';
-import { shallow } from 'enzyme';
-import { ImportData } from '..';
+import { shallow, mount } from 'enzyme';
+import { ImportMap } from '..';
+import { findInnerElement } from '../__mocks__';
 import {
   testHeaders1,
   testBody1,
@@ -13,24 +14,32 @@ import {
   formatObject3
 } from '../__mocks__';
 
-describe('<ImportMapper />', () => {
+describe('<ImportMap />', () => {
   it('renders without crashing', () => {
-    shallow(<ImportData />);
+    shallow(<ImportMap />);
+  });
+
+  it('takes options array an populates mapSelects option values', () => {
+    const mapper = mount(<ImportMap headers={['test1', 'test2']} />);
+    const select = findInnerElement(mapper, '.map-select-input');
+    expect(select.options.length).toEqual(2);
+  });
+
+  it('takes options array an populates mapSelects option in the correct format', () => {
+    const mapper = mount(<ImportMap headers={['test1', 'test2']} />);
+    const select = findInnerElement(mapper, '.map-select-input');
+    expect(select.options[0]).toEqual({ label: 'test1', value: 'test1' });
   });
 
   it('uses format stored in state, to format excel file to new mapping.', () => {
-    const mapper = shallow(<ImportData />);
+    const mapper = shallow(<ImportMap />);
     mapper.setState({
       data: testBody1,
       headers: testHeaders1,
       formats: formatObject1
     });
 
-    mapper
-      .instance()
-      .getMapped([
-        ['', 'HAYDEE ACEVEDO', 'CANAL ST', 'ELLENVILLE', 'NY', '12428', '', '']
-      ]);
+    mapper.instance().updateMapped();
 
     expect(mapper.state().mapped[0]).toEqual([
       '',
@@ -45,18 +54,14 @@ describe('<ImportMapper />', () => {
   });
 
   it('uses format stored in state, to format excel file to new mapping of comma delimeted single-value dropdowns.', () => {
-    const mapper = shallow(<ImportData />);
+    const mapper = shallow(<ImportMap />);
     mapper.setState({
       data: testBody2,
       headers: testHeaders2,
       formats: formatObject2
     });
 
-    mapper
-      .instance()
-      .getMapped([
-        ['', 'HAYDEE ACEVEDO', 'CANAL ST', '', '', '12428', '1234', '5677']
-      ]);
+    mapper.instance().updateMapped();
 
     expect(mapper.state().mapped[0]).toEqual([
       '',
@@ -71,18 +76,14 @@ describe('<ImportMapper />', () => {
   });
 
   it('uses format stored in state, to format excel file to new mapping of space  delimeted single-value dropdowns.', () => {
-    const mapper = shallow(<ImportData />);
+    const mapper = shallow(<ImportMap />);
     mapper.setState({
       data: testBody3,
       headers: testHeaders3,
       formats: formatObject3
     });
 
-    mapper
-      .instance()
-      .getMapped([
-        ['', 'HAYDEE ACEVEDO', 'CANAL ST', '', '', '12428', '1234', '5677']
-      ]);
+    mapper.instance().updateMapped();
 
     expect(mapper.state().mapped[0]).toEqual([
       '',

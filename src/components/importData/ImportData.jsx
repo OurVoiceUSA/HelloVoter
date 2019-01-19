@@ -2,36 +2,34 @@ import React, { Component } from 'react';
 import CSVReader from 'react-csv-reader';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { faFileCsv } from '@fortawesome/free-solid-svg-icons';
-import map from 'lodash/map';
-import { ImportPreview, ImportMapForm } from './';
-import { notify_error, notify_success, Icon } from '../../common.js';
-import { pipe } from './utilities';
-
-const map_format = [
-  'Unique Record ID',
-  'Name',
-  'Street Address',
-  'City',
-  'State',
-  'Zip',
-  'Longitude',
-  'Latitude'
-];
+import { ImportPreview, ImportMap, ListImports } from './';
+import { map_format } from './constants';
+import {
+  notify_error,
+  notify_success,
+  _fetch,
+  _loadImports,
+  Icon,
+  RootLoader
+} from '../../common';
 
 export default class ImportData extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      loading: false,
-      data: null,
-      headers: [],
-      map_format,
-      formats: {},
-      mapped: []
-    };
+  componentDidMount() {
+    this._loadData();
   }
 
+  state = {
+    server: this.props.server,
+    loading: false,
+    data: null,
+    headers: [],
+    mapped: [],
+    imports: [],
+    perPage: localStorage.getItem('importsperpage') || 5,
+    pageNum: 1
+  };
+
+  // #region import methods
   preProcessError(e) {
     notify_error(e, 'Failed to preprocess the import file.');
   }
@@ -50,89 +48,53 @@ export default class ImportData extends Component {
     // fake data loaded after 3 seconds
     setTimeout(() => {
       notify_success('Data has been imported.');
-      this.setState({
-        loading: false,
-        headers: []
-      });
+      this.setState({ loading: false, headers: [] });
     }, 3000);
   };
 
-  updateFormats = (field, obj) =>
-    this.setState({ formats: { ...this.state.formats, [field]: obj } }, () =>
-      this.updateMapped()
-    );
+  sendData = async () => {
+    // This is an example of the "flow" of a data import; once the user submits,
+    // send the data in this manner .. start with a "import/begin", send the data in batches
+    // with "import/add", and finish with a call to "import/end"
 
-  updateMapped = () =>
-    this.setState({
-      mapped: this.mapData(this.state) || []
+    let filename = 'Test1.csv';
+    await _fetch(this.props.server, '/volunteer/v1/import/begin', 'POST', {
+      filename: filename
     });
-
-  mapData = ({ formats, map_format }) => {
-    const { generateFormats, getAllIndexes, parseData } = this;
-    return pipe(
-      generateFormats,
-      getAllIndexes,
-      parseData
-    )(formats, map_format);
-  };
-
-  generateFormats = (formats, map_format) => {
-    return map(map_format, item => {
-      if (formats[item]) {
-        return {
-          name: item,
-          format: formats[item]
-        };
-      }
-
-      return {
-        name: item,
-        format: null
-      };
+    await _fetch(this.props.server, '/volunteer/v1/import/add', 'POST', {
+      filename: filename,
+      data: []
+    });
+    await _fetch(this.props.server, '/volunteer/v1/import/add', 'POST', {
+      filename: filename,
+      data: []
+    });
+    await _fetch(this.props.server, '/volunteer/v1/import/end', 'POST', {
+      filename: filename
     });
   };
 
-  getAllIndexes = arr =>
-    map(arr, ({ name, format }) => {
-      if (format && Array.isArray(format.value)) {
-        const indexes = format.value.map(f =>
-          this.state.headers.findIndex(i => i === f.value)
-        );
-        return { name, format, indexes };
-      } else if (format) {
-        const indexes = this.state.headers.findIndex(
-          i => i === format.value.value
-        );
-        return {
-          name,
-          format,
-          indexes
-        };
-      }
-
-      return { name, format, indexes: null };
-    });
-
-  parseData = arr => {
-    const { data } = this.state;
-    return map(data, item => {
-      return map(arr, ({ indexes, format }) => {
-        if (indexes && Array.isArray(indexes)) {
-          return indexes
-            .reduce((total, next) => `${total.trim()} ${item[next].trim()}`, '')
-            .trim();
-        } else if (indexes) {
-          return item[indexes]
-            ? item[indexes].split(format.map1.value)[format.map2.value]
-            : '';
-        }
-
-        return '';
-      });
-    });
+  _loadData = async () => {
+    let imports = [];
+    this.setState({ loading: true });
+    try {
+      imports = await _loadImports(this);
+    } catch (e) {
+      notify_error(e, 'Unable to load import data.');
+    }
+    this.setState({ loading: false, imports });
   };
+
+  getMapped = mapped => this.setState({ mapped });
+
+  handlePageClick = data => {
+    this.setState({ pageNum: data.selected + 1 });
+  };
+
+  // #endregion
 
   render() {
+    const { mapped = [], perPage, pageNum, imports } = this.state;
     if (this.state.loading) return <CircularProgress />;
 
     if (!this.state.headers.length)
@@ -145,7 +107,17 @@ export default class ImportData extends Component {
           />
           <br />
           <h3>Select a CSV file to get to the next menu!</h3>
-          (Also want the user to be able to drag&drop files.)
+          <br />
+          <br />
+          <RootLoader flag={this.state.loading} func={() => this._loadData()}>
+            <ListImports
+              perPage={perPage}
+              pageNum={pageNum}
+              imports={imports}
+              handlePageClick={this.handlePageClick}
+              handlePageNumChange={this.handlePageNumChange}
+            />
+          </RootLoader>
         </div>
       );
 
@@ -155,13 +127,15 @@ export default class ImportData extends Component {
           <h3>Import Data</h3> &nbsp;&nbsp;&nbsp;
           <Icon icon={faFileCsv} size="3x" />
         </div>
-        <ImportMapForm
+        <ImportMap
           headers={this.state.headers}
-          updateFormats={this.updateFormats}
+          data={this.state.data}
+          getMapped={this.getMapped}
         />
         <ImportPreview
+          key={this}
           titles={map_format}
-          records={this.state.mapped.slice(0, 3)}
+          records={mapped.slice(0, 3)}
         />
       </div>
     );
