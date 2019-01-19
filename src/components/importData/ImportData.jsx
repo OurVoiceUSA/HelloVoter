@@ -58,12 +58,9 @@ export default class ImportData extends Component {
   };
 
   updateFormats = (field, obj) =>
-    this.setState({
-      formats: {
-        ...this.state.formats,
-        [field]: obj
-      }
-    });
+    this.setState({ formats: { ...this.state.formats, [field]: obj } }, () =>
+      this.updateMapped()
+    );
 
   updateMapped = () =>
     this.setState({
@@ -149,11 +146,12 @@ export default class ImportData extends Component {
         </div>
       );
 
+    console.log('FORMATS: ', this.state.formats);
+
     // TODO:
     // format data with format object
     // pass first formatted data result index to <ImportPreview /> and display
     // create submit import data <Button />
-
     return (
       <div>
         <div style={{ display: 'flex' }}>
