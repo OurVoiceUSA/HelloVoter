@@ -277,6 +277,8 @@ async function doDbInit() {
   }
 
   let indexes = [
+    {label: 'Attribute', property: 'id', create: 'create constraint on (a:Attribute) assert a.id is unique'},
+    {label: 'Attribute', property: 'name', create: 'create constraint on (a:Attribute) assert a.name is unique'},
     {label: 'Person', property: 'id', create: 'create constraint on (a:Person) assert a.id is unique'},
     {label: 'Address', property: 'id', create: 'create index on :Address(id)'}, // asserting a.id is unique causes issues so we handle dupes manually
     {label: 'Address', property: 'created', create: 'create index on :Address(created)'},
@@ -312,6 +314,31 @@ async function doDbInit() {
   await asyncForEach(spatialLayers, async (layer) => {
     let ref = await cqa('match (a {layer:{layer}})-[:LAYER]-(:ReferenceNode {name:"spatial_root"}) return count(a)', {layer: layer.name});
     if (ref.data[0] === 0) await cqa(layer.create);
+  });
+
+  // TODO: load race/language data from a 3rd party and have the client do "autocomplete" type functionality
+
+  // common attributes that should be interchangeable between systems
+  let defaultAttributes = [
+    {id: "4a320f76-ef7b-4d73-ae2a-8f4ccf5de344", name: "Party Affiliation", type: "string", multi: false, values: ["No Party Preference","Democratic","Republican","Green","Libertarian"]},
+    {id: "dcfc1fbb-4609-4900-bbb3-1c4afb2a5127", name: "Registered to Vote", type: "boolean", multi: false},
+    {id: "432634fd-dc28-457d-ae1f-d6fa8d242d30", name: "Subscribe to Carpool Vote", type: "boolean", multi: false},
+    {id: "134095d5-c1c8-46ad-9952-cc66e2934f9e", name: "Receive Notifications", type: "string", multi: true, values: ["Phone","Text","Email"]},
+    {id: "7d3466e5-2cee-491e-b3f4-bfea3a4b010a", name: "Phone Number", type: "string", multi: true},
+    {id: "b687b86e-8fe3-4235-bb78-1919bcca00db", name: "Email Address", type: "string", multi: true},
+    {id: "9a903e4f-66ea-4625-bacf-43abb53c6cfc", name: "Date of Birth", type: "string", multi: false},
+    {id: "f6a41b03-0dc8-4d59-90bf-033db6a96214", name: "US Military Veteran", type: "boolean", multi: false},
+    {id: "689dc96a-a1db-4b20-9443-e69185675d28", name: "Health Insurance", type: "boolean", multi: false},
+    {id: "2ad269f5-2712-4a0e-a3d4-be3074a695b6", name: "Race and Ethnicity", type: "string", multi: true, values: ["Prefer not to say","African American","Asian","Hispanic","Latino","Native American","Pacific Islander","White"]},
+    {id: "59f09d32-b782-4a32-b7f1-4ffe81975167", name: "Spoken Languages", type: "string", multi: false, values: ["English","Spanish","Chinese","Arabic","French","German"]},
+  ];
+
+  await asyncForEach(defaultAttributes, async (attribute) => {
+    let ref = await cqa('match (a:Attribute {id:{id}}) return count(a)', {id: attribute.id});
+    if (ref.data[0] === 0) {
+      await cqa('create (:Attribute {id:{id},name:{name},type:{type},multi:{multi}})', attribute);
+      if (attribute.values) await cqa('match (a:Attribute {id:{id}}) set a.values = {values}', attribute);
+    }
   });
 
   let finish = new Date().getTime();
