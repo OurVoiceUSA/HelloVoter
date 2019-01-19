@@ -6,21 +6,61 @@ Our Voice USA is a 501(c)(3) non-profit, non-partisian organization for civic ed
 
 This is in development, and will be the API backend to the OVMobile canvass functions for large operations. The current production mobile app uses Dropbox for data sharing and storage.
 
-## Development Setup
+## Setup
 
-Start by configuring the `.env` file:
+You need a Neo4j database with the `spatial` and `apoc` plugins installed. See the Neo4j Setup below for more information.
 
-    cat << EOF > .env
-    export NEO4J_HOST=<your neo4j server>
-    export NEO4J_USER=<your neo4j user>
-    export NEO4J_PASS=<your neo4j password>
-    export REDIS_URL=redis://<redis server>:<redis port>
-    export DEBUG=1
-    EOF
+For this server, configure an `.env` file. The following is a complete list of variables and their defaults:
 
-NOTE: Providing a `REDIS_URL` is encouraged, but not required. It's used for enqueuing certain tasks as background jobs to improve performance for the UI. Configuring it is very highly recommended on large databases (1 million adresses or more).
+    SERVER_PORT=8080
+    NEO4J_HOST=localhost
+    NEO4J_USER=neo4j
+    NEO4J_PASS=neo4j
+    NEO4J_JMX_PORT=9999
+    NEO4J_JMX_USER=monitor
+    NEO4J_JMX_PASS=Neo4j
+    IP_HEADER=
+    GOOGLE_MAPS_KEY=
+    JOB_CONCURRENCY=1
+    SM_OAUTH_URL=https://ws.ourvoiceusa.org/auth
+    JWT_PUB_KEY=SM_OAUTH_URL/pubkey
+    WABASE=https://apps.ourvoiceusa.org
+    DEBUG=0
 
-Then, install dependancies with `npm install`, source in the configuration with `source .env`, and start with `npm start`.
+Then, install dependancies with `npm install`, and start with `npm start`.
+
+## Configuration
+
+* `SERVER_PORT`: Port for node to listen on for http requests.
+* `NEO4J_HOST`: Hostname of your neo4j server.
+* `NEO4J_USER`: Username to use to connect to neo4j.
+* `NEO4J_PASS`: Password to use to connect to neo4j.
+* `NEO4J_JMX_PORT`: The port on your `NEO4J_HOST` that exposes JMX. This port isn't exposed by default by Neo4j. See "Neo4j Configuration" below for how to set this up on the database side.
+* `NEO4J_JMX_USER`: Username to use to connect to neo4j jmx.
+* `NEO4J_JMX_PASS`: Password to use to connect to neo4j jmx.
+* `IP_HEADER`: Name of the header to check for, if you're behind an http reverse proxy and want to deny direct http requests.
+* `GOOGLE_MAPS_KEY`: API Key for Google maps. Get one here: https://developers.google.com/maps/documentation/javascript/get-api-key
+* `JOB_CONCURRENCY`: Number of import jobs that can run in parallel. This is only relevant if you're using Neo4j Enterprise Edition, as Community Edition is limited to 4 CPUs, and the minimum CPUs required for parallel jobs is 6.
+* `SM_OAUTH_URL`: URL of the oauth provider.
+* `JWT_PUB_KEY`: Path to the public key of the oauth provider.
+* `WABASE`: URL of the HelloVoterHQ react application.
+* `DEBUG`: Whether or not cypher and other debugging info is sent to the console log.
+
+## Neo4j Setup
+
+The default initial username/password is neo4j/neo4j, you'll want to change this immediatly. See here: https://neo4j.com/docs/operations-manual/current/configuration/set-initial-password/
+
+If running Neo4j in Docker, you can set the initial username/password by setting this environment variable:
+
+     NEO4J_AUTH=neo4j/newpassword
+
+Two plugins are required for how we use Neo4j; `spatial` and `apoc`. Have a look at our `neo4j/Dockerfile` for reference.
+
+Enabling JMX is recommended, but not required. Without it, you will be unable to use `JOB_CONCURRENCY`, and certain imports may run slower than they otherwise would. To enable JMX, add the java arguments below, and be sure to replace the `NEO4J_HOST` at the end with your hostname:
+
+    NEO4J_dbms_jvm_additional="-Dcom.sun.management.jmxremote.authenticate=true -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.password.file=/var/lib/neo4j/conf/jmx.password -Dcom.sun.management.jmxremote.access.file=/var/lib/neo4j/conf/jmx.access -Dcom.sun.management.jmxremote.port=9999 -Djava.rmi.server.hostname=NEO4J_HOST"
+
+You can change the default JMX username/password by editing the jmx.access and jmx.password files (normally in /var/lib/neo4j/conf). Be sure you set them in your .env file as well.
 
 ## Contributing
 

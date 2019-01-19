@@ -1,5 +1,8 @@
 
 import * as secrets from "docker-secrets-nodejs";
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 export const ov_config = {
   server_port: getConfig("server_port", false, 8080),
@@ -10,7 +13,6 @@ export const ov_config = {
   neo4j_jmx_port: getConfig("neo4j_jmx_port", false, 9999),
   neo4j_jmx_user: getConfig("noej4_jmx_user", false, "monitor"),
   neo4j_jmx_pass: getConfig("noej4_jmx_pass", false, "Neo4j"),
-  redis_url: getConfig("redis_url", false, null),
   job_concurrency: parseInt(getConfig("job_concurrency", false, 1)),
   jwt_pub_key: getConfig("jwt_pub_key", false, null),
   google_maps_key: getConfig("google_maps_key", false, null),

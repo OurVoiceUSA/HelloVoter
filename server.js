@@ -13,7 +13,7 @@ import fs from 'fs';
 import {ingeojson, asyncForEach, us_states} from 'ourvoiceusa-sdk-js';
 import circleToPolygon from 'circle-to-polygon';
 import wkx from 'wkx';
-import queue from 'bull';
+import EventEmitter from 'events';
 import neo4j from 'neo4j-driver';
 import BoltAdapter from 'node-neo4j-bolt-adapter';
 import FormData from 'form-data';
@@ -51,8 +51,90 @@ var jmx;
 var jmxclient = {};
 var jvmconfig = {};
 
-// bull queue for intensive jobs against the neo4j host
-var nq = new queue(ov_config.neo4j_host, ov_config.redis_url);
+var concurrency = ov_config.job_concurrency;
+
+var queue = new EventEmitter()
+
+queue.on('queueTask', async function (task, input) {
+  let job;
+
+  // create QueueTask object in database -- either we can execute now (active: true, started: timestamp()) or we have to wait (active: false)
+  try {
+    job = await cqa('match (a:QueueTask {active: true}) with count(a) as jobs call apoc.do.when(jobs < '+concurrency+', "create (a:QueueTask {id: randomUUID(), created: timestamp(), started: timestamp(), active: true}) return a", "create (a:QueueTask {id: randomUUID(), created: timestamp(), active: false}) return a", {}) yield value return value');
+    // TODO: fix having to issue update with task/input because of apoc sub-query param issue
+    await cqa('match (a:QueueTask {id: {id}}) set a.task = {task}, a.input = {input}', {
+      id: job.data[0].a.id,
+      task: task,
+      input: JSON.stringify(input),
+    });
+  } catch (e) {
+    console.warn("Houston we have a problem.");
+    console.warn(e);
+    return;
+  }
+
+  // find out whether we execute or enqueue
+  if (job.data[0].a.active) {
+    queue.emit('doTask', job.data[0].a.id);
+  } else {
+    console.log("Enqueued task "+task);
+  }
+});
+
+queue.on('doTask', async function (id) {
+  let task; 
+  let start = new Date().getTime();
+
+  try {
+    let job = await cqa('match (a:QueueTask {id:{id}}) return a', {id: id});
+
+    if (!job.data[0])
+      throw new Error("QueueTask with id "+id+" does not exist.");
+
+    task = job.data[0].task;
+    console.log(task+"() started @ "+start);
+
+    let ret = await queueTasks[task](JSON.parse(job.data[0].input));
+
+    // mark job as success
+    await cqa('match (a:QueueTask {id:{id}}) set a.active = false, a.complated = timestamp(), success = true', {id: id});
+  } catch (e) {
+    console.warn("Caught exception while executing task: "+task);
+    console.warn(e);
+    // mark job as failed
+    await cqa('match (a:QueueTask {id:{id}}) set a.active = false, a.complated = timestamp(), success = false', {id: id});
+  }
+
+  let finish = new Date().getTime();
+  console.log(task+"() finished @ "+finish+" after "+(finish-start)+" milliseconds");
+
+  // check to see if there's another job to execute
+  queue.emit('checkQueue');
+});
+
+queue.on('checkQueue', async function () {
+  console.log("Checking queue for tasks to run...");
+  try {
+    let ref = await cqa('match (a:QueueTask {active: true}) return count(a)');
+    if (ref.data[0] >= concurrency) {
+      console.log("Too many tasks running to start another.");
+      return;
+    }
+
+    let job = await cqa('match (a:QueueTask) where a.active = false and not exists(a.started) with a limit 1 set a.active = true, a.started = timestamp() return a');
+    if (!job.data[0]) {
+      console.log("No tasks in queue to execute.");
+      return;
+    }
+
+    queue.emit('doTask', job.data[0].id);
+
+  } catch (e) {
+    console.warn("Houston we have a problem.");
+    console.warn(e);
+    return;
+  }
+});
 
 // async'ify neo4j
 const authToken = neo4j.auth.basic(ov_config.neo4j_user, ov_config.neo4j_pass);
@@ -68,6 +150,8 @@ async function doStartupTasks() {
   await doJmxInit();
   await doDbInit();
   await postDbInit();
+  // TODO: check for "hung" tasks; ie, restarted while one was running
+  queue.emit('checkQueue');
 }
 
 async function doJmxInit() {
@@ -115,7 +199,7 @@ async function doJmxInit() {
     jmxclient.disconnect();
 
   } catch (e) {
-    console.warn("Unable to connect to JMX, see error below. As a result, we won't be able to optimize database queries, nor can we honor the JOB_CONCURRENCY connfiguration.");
+    console.warn("Unable to connect to JMX, see error below. As a result, we won't be able to optimize database queries, nor can we honor the JOB_CONCURRENCY configuration.");
     console.warn(e);
   }
 
@@ -125,6 +209,19 @@ async function doJmxInit() {
     if (ref.data[0] !== 'enterprise' && jvmconfig.numcpus > 4) {
       console.warn("WARNING: Your neo4j database host has "+jvmconfig.numcpus+" CPUs but you're not running enterprise edition, so only up to 4 are actually utilized by neo4j.");
       jvmconfig.numcpus = 4;
+    }
+  }
+
+  // don't let job_concurrency go overboard
+  if (concurrency > 1) {
+    if (!jvmconfig.numcpus) {
+      concurrency = 1;
+      console.warn("WARNING: Unable to determine number of CPUs available to neo4j. Unable to honor your JOB_CONCURRENCY setting.");
+    }
+    if (jvmconfig.numcpus <= (concurrency*3)) {
+      concurrency = Math.floor(jvmconfig.numcpus/3);
+      if (concurrency < 1) concurrency = 1;
+      console.warn("WARNING: JOB_CONCURRENCY is set way too high for this database. Lowering it "+concurrency);
     }
   }
 
@@ -193,6 +290,7 @@ async function doDbInit() {
     {label: 'ImportFile', property: 'filename', create: 'create constraint on (a:ImportFile) assert a.filename is unique'},
     {label: 'ImportRecord', property: 'id', create: 'create constraint on (a:ImportRecord) assert a.id is unique'},
     {label: 'ImportRecord', property: 'processed', create: 'create index on :ImportRecord(processed)'},
+    {label: 'QueueTask', property: 'id', create: 'create constraint on (a:QueueTask) assert a.id is unique'},
   ];
 
   // create any indexes we need if they don't exist
@@ -244,57 +342,8 @@ async function postDbInit() {
     }
   });
 
-  try {
-    if (!ov_config.redis_url) throw new Error("REDIS_URL is not set");
-
-    let concurrency = ov_config.job_concurrency;
-
-    // don't let job_concurrency go overboard
-    if (concurrency > 1) {
-      if (!jvmconfig.numcpus) {
-        concurrency = 1;
-        console.warn("WARNING: Unable to determine number of CPUs available to neo4j. Unable to honor your JOB_CONCURRENCY setting.");
-      }
-      if (jvmconfig.numcpus > (concurrency/3)) {
-        concurrency = Math.floor(jvmconfig.numcpus/3);
-        console.warn("WARNING: JOB_CONCURRENCY is set way too high. Lowering it "+concurrency);
-      }
-    }
-
-    nq.process(concurrency, async (job) => {
-      let ret = await queueTasks[job.data.task](job.data.input);
-      return Promise.resolve(ret);
-    });
-  } catch (e) {
-    console.warn("Unable to setup bull job processor queue due to the error below. This will poorly affect application response times on large databases.");
-    console.warn(e);
-  }
-
   let finish = new Date().getTime();
   console.log("postDbInit() finished @ "+finish+" after "+(finish-start)+" milliseconds");
-}
-
-async function queueTaskOrExec() {
-  let job;
-
-  var params = Array.prototype.slice.call(arguments);
-  var func = params.shift();
-
-  try {
-    if (!ov_config.redis_url) throw new Error("REDIS_URL is not set");
-    // enqueue job to process turf
-    job = await nq.add({
-      task: func,
-      input: params[0],
-    });
-  } catch (e) {
-    console.warn(e);
-    console.log("Unable to enqueue job, attempting it on the main worker thread");
-    job = {id: 0};
-    await queueTasks[func](params[0]);
-  }
-
-  return job;
 }
 
 function valid(str) {
@@ -813,10 +862,9 @@ async function turfCreate(req, res) {
     return _500(res, e);
   }
 
-  let input = {turfId: req.body.turfId};
-  let job = await queueTaskOrExec('doTurfIndexing', input);
+  queue.emit('queueTask', 'doTurfIndexing', {turfId: req.body.turfId});
 
-  return res.json({jobId: job.id});
+  return res.json({});
 }
 
 async function turfDelete(req, res) {
@@ -1078,8 +1126,9 @@ queueTasks.doTurfIndexing = async function (input) {
   return {total: total};
 }
 
-queueTasks.doProcessImport = async function (filename) {
+queueTasks.doProcessImport = async function (input) {
   // TODO: status update to queue after each db query
+  let filename = input.filename;
   let stats;
 
   // get when this file import was started
@@ -1162,7 +1211,7 @@ queueTasks.doProcessImport = async function (filename) {
 
   while (count === limit) {
     let start = new Date().getTime();
-    let ref = await cqa('merge (a:LockSpatialAddNodes) with collect(a) as lock call apoc.lock.nodes(lock) match (a:Address)-[:SOURCE]-(:ImportRecord)-[:FILE]-(:ImportFile {filename:{filename}}) where not exists(a.bbox) and not a.position = point({longitude: 0, latitude: 0}) with distinct(a) limit {limit} with collect(distinct(a)) as nodes call spatial.addNodes("address", nodes) yield count return count', {filename: filename, limit: limit});
+    let ref = await cqa('match (a:ReferenceNode {name:"spatial_root"}) with collect(a) as lock call apoc.lock.nodes(lock) match (a:Address)-[:SOURCE]-(:ImportRecord)-[:FILE]-(:ImportFile {filename:{filename}}) where not exists(a.bbox) and not a.position = point({longitude: 0, latitude: 0}) with distinct(a) limit {limit} with collect(distinct(a)) as nodes call spatial.addNodes("address", nodes) yield count return count', {filename: filename, limit: limit});
     count = ref.data[0];
     console.log("Processed "+count+" records into spatial.addNodes() for "+filename+" in "+((new Date().getTime())-start)+" milliseconds");
   }
@@ -1299,7 +1348,8 @@ async function importEnd(req, res) {
     return _500(res, e);
   }
 
-  await queueTaskOrExec('doProcessImport', req.body.filename);
+  queue.emit('queueTask', 'doProcessImport', {filename: req.body.filename});
+
   return res.json({});
 }
 
