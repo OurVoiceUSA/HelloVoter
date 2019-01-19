@@ -96,7 +96,7 @@ queue.on('doTask', async function (id) {
     task = job.data[0].task;
     console.log(task+"() started @ "+start);
 
-    let ret = await queueTasks[task](JSON.parse(job.data[0].input));
+    let ret = await queueTasks[task](id, JSON.parse(job.data[0].input));
 
     // mark job as success
     await cqa('match (a:QueueTask {id:{id}}) set a.active = false, a.completed = timestamp(), a.success = true', {id: id});
@@ -284,12 +284,12 @@ async function doDbInit() {
     {label: 'Address', property: 'bbox', create: 'create index on :Address(bbox)'},
     {label: 'Volunteer', property: 'id', create: 'create constraint on (a:Volunteer) assert a.id is unique'},
     {label: 'Team', property: 'name', create: 'create constraint on (a:Team) assert a.name is unique'},
+    {label: 'Turf', property: 'id', create: 'create constraint on (a:Turf) assert a.id is unique'},
     {label: 'Turf', property: 'name', create: 'create constraint on (a:Turf) assert a.name is unique'},
     {label: 'Region', property: 'region', create: 'create constraint on (a:Region) assert a.region is unique'},
     {label: 'Form', property: 'id', create: 'create constraint on (a:Form) assert a.id is unique'},
     {label: 'Question', property: 'key', create: 'create constraint on (a:Question) assert a.key is unique'},
     {label: 'Unit', property: 'id', create: 'create constraint on (a:Unit) assert a.id is unique'},
-    {label: 'Survey', property: 'id', create: 'create constraint on (a:Survey) assert a.id is unique'},
     {label: 'ImportFile', property: 'filename', create: 'create constraint on (a:ImportFile) assert a.filename is unique'},
     {label: 'ImportRecord', property: 'id', create: 'create constraint on (a:ImportRecord) assert a.id is unique'},
     {label: 'ImportRecord', property: 'processed', create: 'create index on :ImportRecord(processed)'},
@@ -1120,8 +1120,9 @@ function questionAssignedRemove(req, res) {
 
 var queueTasks = {};
 
-queueTasks.doTurfIndexing = async function (input) {
+queueTasks.doTurfIndexing = async function (jobId, input) {
   let start = new Date().getTime();
+  await cqa('match (a:Turf {id:{turfId}}) with a match (b:QueueTask {id:{jobId}}) merge (a)-[:PROCESSED_BY]->(b)', {turfId: input.turfId, jobId: jobId});
   let ref = await cqa('CALL apoc.periodic.iterate("match (a:Turf {id:\\"'+input.turfId+'\\"}) call spatial.intersects(\\"address\\", a.wkt) yield node return node, a", "merge (node)-[:WITHIN]->(a)", {batchSize:10000,iterateList:true}) yield total return total', input);
   let total = ref.data[0];
   console.log("Processed "+total+" records for "+input.turfId+" in "+((new Date().getTime())-start)+" milliseconds");
@@ -1129,10 +1130,12 @@ queueTasks.doTurfIndexing = async function (input) {
   return {total: total};
 }
 
-queueTasks.doProcessImport = async function (input) {
+queueTasks.doProcessImport = async function (jobId, input) {
   // TODO: status update to queue after each db query
   let filename = input.filename;
   let stats;
+
+  await cqa('match (a:ImportFile {filename:{filename}}) with a match (b:QueueTask {id:{jobId}}) merge (a)-[:PROCESSED_BY]->(b)', {filename: filename, jobId: jobId});
 
   // get when this file import was started
   let ts = (await cqa('match (a:ImportFile {filename:{filename}}) return a.created', {filename: filename})).data[0];
