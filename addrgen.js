@@ -50,7 +50,7 @@ async function doYerThang() {
     };
   });
 
-  let headers = 'name,birthday,party,street,unit,city,state,zip,lng,lat';
+  let headers = 'id,name,birthday,party,street,unit,city,state,zip,lng,lat';
   let addrs = [];
 
   // generate a list of random addresses
@@ -101,7 +101,7 @@ function whoLivesHere(a, u) {
   if (getRandomInt(3) === 0) n += getRandomInt(2);
 
   for (let i = 0; i < n; i++) {
-    console.log(randomPerson()+','+randomBirthday()+','+randomParty()+','+a.street+','+u+','+a.city+','+a.state+','+a.zip+','+a.lng+','+a.lat);
+    console.log(getRandomInt(9999999999)+','+randomPerson()+','+randomBirthday()+','+randomParty()+','+a.street+','+u+','+a.city+','+a.state+','+a.zip+','+a.lng+','+a.lat);
   }
 }
 
