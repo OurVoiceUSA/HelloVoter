@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import CSVReader from 'react-csv-reader';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import Button from '@material-ui/core/Button/Button';
+import Divider from '@material-ui/core/Divider';
 import { faFileCsv } from '@fortawesome/free-solid-svg-icons';
 import { ImportPreview, ImportMap, ListImports } from './';
 import { fields } from './constants';
@@ -34,11 +36,11 @@ export default class ImportData extends Component {
     notify_error(e, 'Failed to preprocess the import file.');
   }
 
-  preProcess = async data => {
+  preProcess = async (data, filename) => {
     let headers = data.shift();
     data.pop();
 
-    this.setState({ data, headers });
+    this.setState({ data, headers, filename });
   };
 
   onHeadersSubmit = evt => {
@@ -141,6 +143,14 @@ export default class ImportData extends Component {
           data={data}
           getMapped={this.getMapped}
         />
+        <Divider variant="middle" />
+        <br />
+        <Button variant="contained" color="primary">
+          Import
+        </Button>
+        <br />
+        <br />
+        <Divider variant="middle" />
         <ImportPreview
           key={this}
           titles={fields}
