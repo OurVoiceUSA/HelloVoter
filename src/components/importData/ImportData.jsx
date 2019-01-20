@@ -3,7 +3,7 @@ import CSVReader from 'react-csv-reader';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { faFileCsv } from '@fortawesome/free-solid-svg-icons';
 import { ImportPreview, ImportMap, ListImports } from './';
-import { map_format } from './constants';
+import { fields } from './constants';
 import {
   notify_error,
   notify_success,
@@ -129,12 +129,13 @@ export default class ImportData extends Component {
         </div>
         <ImportMap
           headers={this.state.headers}
+          fields={fields}
           data={this.state.data}
           getMapped={this.getMapped}
         />
         <ImportPreview
           key={this}
-          titles={map_format}
+          titles={fields}
           records={mapped.slice(0, 3)}
         />
       </div>

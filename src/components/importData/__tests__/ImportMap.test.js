@@ -1,6 +1,7 @@
 import React from 'react';
 import { shallow, mount } from 'enzyme';
 import { ImportMap } from '..';
+import { fields } from '../constants';
 import { findInnerElement } from '../__mocks__';
 import {
   testHeaders1,
@@ -20,19 +21,23 @@ describe('<ImportMap />', () => {
   });
 
   it('takes options array an populates mapSelects option values', () => {
-    const mapper = mount(<ImportMap headers={['test1', 'test2']} />);
+    const mapper = mount(
+      <ImportMap fields={fields} headers={['test1', 'test2']} />
+    );
     const select = findInnerElement(mapper, '.map-select-input');
     expect(select.options.length).toEqual(2);
   });
 
   it('takes options array an populates mapSelects option in the correct format', () => {
-    const mapper = mount(<ImportMap headers={['test1', 'test2']} />);
+    const mapper = mount(
+      <ImportMap fields={fields} headers={['test1', 'test2']} />
+    );
     const select = findInnerElement(mapper, '.map-select-input');
     expect(select.options[0]).toEqual({ label: 'test1', value: 'test1' });
   });
 
   it('uses format stored in state, to format excel file to new mapping.', () => {
-    const mapper = shallow(<ImportMap />);
+    const mapper = shallow(<ImportMap fields={fields} />);
     mapper.setState({
       data: testBody1,
       headers: testHeaders1,
@@ -45,6 +50,7 @@ describe('<ImportMap />', () => {
       '',
       'HAYDEE ACEVEDO',
       'CANAL ST',
+      '',
       'ELLENVILLE',
       'NY',
       '12428',
@@ -54,7 +60,7 @@ describe('<ImportMap />', () => {
   });
 
   it('uses format stored in state, to format excel file to new mapping of comma delimeted single-value dropdowns.', () => {
-    const mapper = shallow(<ImportMap />);
+    const mapper = shallow(<ImportMap fields={fields} />);
     mapper.setState({
       data: testBody2,
       headers: testHeaders2,
@@ -69,6 +75,7 @@ describe('<ImportMap />', () => {
       'CANAL ST',
       '',
       '',
+      '',
       '12428',
       '1234',
       '5677'
@@ -76,7 +83,7 @@ describe('<ImportMap />', () => {
   });
 
   it('uses format stored in state, to format excel file to new mapping of space  delimeted single-value dropdowns.', () => {
-    const mapper = shallow(<ImportMap />);
+    const mapper = shallow(<ImportMap fields={fields} />);
     mapper.setState({
       data: testBody3,
       headers: testHeaders3,
@@ -89,6 +96,7 @@ describe('<ImportMap />', () => {
       '',
       'HAYDEE ACEVEDO',
       'CANAL ST',
+      '',
       '',
       '',
       '12428',

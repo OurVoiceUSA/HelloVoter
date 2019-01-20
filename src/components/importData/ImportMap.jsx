@@ -1,14 +1,14 @@
 import React from 'react';
 import map from 'lodash/map';
 import { MapSelect } from '../elements';
-import { map_format } from './constants';
+import { fields } from './constants';
 import { pipe } from './utilities';
 
 export class ImportMap extends React.Component {
   state = {
     data: this.props.data || [],
     headers: this.props.headers || [],
-    map_format: map_format,
+    fields: fields,
     formats: {},
     mapped: []
   };
@@ -32,17 +32,17 @@ export class ImportMap extends React.Component {
       () => this.props.getMapped && this.props.getMapped(this.state.mapped)
     );
 
-  mapData = ({ formats, map_format }) => {
+  mapData = ({ formats, fields }) => {
     const { generateFormats, getAllIndexes, parseData } = this;
     return pipe(
       generateFormats,
       getAllIndexes,
       parseData
-    )(formats, map_format);
+    )(formats, fields);
   };
 
-  generateFormats = (formats, map_format) => {
-    return map(map_format, item => {
+  generateFormats = (formats, fields) => {
+    return map(fields, item => {
       if (formats[item]) {
         return {
           name: item,
@@ -101,74 +101,22 @@ export class ImportMap extends React.Component {
     const {
       updateFormats = () => console.warn('Cannot find update format function.')
     } = this;
+    const { fields = [] } = this.props;
     const { headers = [] } = this.state;
     const options = this.formatHeaders(headers);
 
     return (
       <React.Fragment>
-        <MapSelect
-          label="Unique Record ID"
-          updateFormats={updateFormats}
-          options={options}
-          checkbox
-          isMulti
-        />
-
-        <MapSelect
-          label="Name"
-          updateFormats={updateFormats}
-          options={options}
-          checkbox
-          isMulti
-        />
-
-        <MapSelect
-          label="Street Address"
-          updateFormats={updateFormats}
-          options={options}
-          checkbox
-          isMulti
-        />
-
-        <MapSelect
-          label="City"
-          updateFormats={updateFormats}
-          options={options}
-          checkbox
-          isMulti
-        />
-
-        <MapSelect
-          label="State"
-          updateFormats={updateFormats}
-          options={options}
-          checkbox
-          isMulti
-        />
-
-        <MapSelect
-          label="Zip"
-          updateFormats={updateFormats}
-          options={options}
-          checkbox
-          isMulti
-        />
-
-        <MapSelect
-          label="Longitude"
-          updateFormats={updateFormats}
-          options={options}
-          checkbox
-          isMulti
-        />
-
-        <MapSelect
-          label="Latitude"
-          updateFormats={updateFormats}
-          options={options}
-          checkbox
-          isMulti
-        />
+        {fields.map(field => (
+          <MapSelect
+            key={field}
+            label={field}
+            updateFormats={updateFormats}
+            options={options}
+            checkbox
+            isMulti
+          />
+        ))}
       </React.Fragment>
     );
   }

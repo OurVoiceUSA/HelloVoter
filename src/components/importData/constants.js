@@ -1,7 +1,8 @@
-export const map_format = [
+export const fields = [
   'Unique Record ID',
   'Name',
   'Street Address',
+  'Unit',
   'City',
   'State',
   'Zip',
