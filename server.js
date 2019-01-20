@@ -111,12 +111,15 @@ queue.on('doTask', async function (id) {
     let ret = await queueTasks[task](id, JSON.parse(job.data[0].input));
 
     // mark job as success
-    await cqa('match (a:QueueTask {id:{id}}) set a.active = false, a.completed = timestamp(), a.success = true', {id: id});
+    await cqa('match (a:QueueTask {id:{id}}) set a.active = false, a.completed = timestamp(), a.success = true, a.error = null', {id: id});
   } catch (e) {
     console.warn("Caught exception while executing task: "+task);
     console.warn(e);
     // mark job as failed
-    await cqa('match (a:QueueTask {id:{id}}) set a.active = false, a.completed = timestamp(), a.success = false', {id: id});
+    await cqa('match (a:QueueTask {id:{id}}) set a.active = false, a.completed = timestamp(), a.success = false, a.error = {error}', {
+      id: id,
+      error: e.toString(),
+    });
   }
 
   let finish = new Date().getTime();
@@ -357,7 +360,7 @@ async function postDbInit() {
   console.log("postDbInit() started @ "+start);
 
   // assume any "active" tasks on startup died on whatever shut us down, and mark them as failed
-  await cqa('match (a:QueueTask {active: true}) set a.active = false, a.completed = timestamp(), a.success = false');
+  await cqa('match (a:QueueTask {active: true}) set a.active = false, a.completed = timestamp(), a.success = false, a.error = "Task was active upon server startup and thus marked as failed."');
   queue.emit('checkQueue');
 
   let finish = new Date().getTime();
