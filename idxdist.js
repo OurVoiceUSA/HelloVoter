@@ -13,14 +13,8 @@ then:
 import fs from 'fs';
 import wkx from 'wkx';
 import {asyncForEach} from 'ourvoiceusa-sdk-js';
-import neo4j from 'neo4j-driver';
-import BoltAdapter from 'node-neo4j-bolt-adapter';
 
-import { ov_config } from './ov_config.js';
-
-// async'ify neo4j
-const authToken = neo4j.auth.basic(ov_config.neo4j_user, ov_config.neo4j_pass);
-const db = new BoltAdapter(neo4j.driver('bolt://'+ov_config.neo4j_host, authToken));
+import { cqa } from './neo4j.js';
 
 doYerThang();
 
@@ -106,24 +100,5 @@ async function doYerThang() {
   });
 
   process.exit(0);
-}
-
-async function dbwrap() {
-    var params = Array.prototype.slice.call(arguments);
-    var func = params.shift();
-    if (ov_config.DEBUG) {
-      let funcName = func.replace('Async', '');
-      console.log('DEBUG: '+funcName+' '+params[0]+';');
-      if (params[1]) {
-        let str = "";
-        str += JSON.stringify(params[1]);
-        console.log('DEBUG: :params '+str.substring(0, 1024));
-      }
-    }
-    return db[func](params[0], params[1]);
-}
-
-async function cqa(q, p) {
-  return dbwrap('cypherQueryAsync', q, p);
 }
 

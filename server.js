@@ -14,12 +14,11 @@ import {ingeojson, asyncForEach, sleep} from 'ourvoiceusa-sdk-js';
 import circleToPolygon from 'circle-to-polygon';
 import wkx from 'wkx';
 import EventEmitter from 'events';
-import neo4j from 'neo4j-driver';
-import BoltAdapter from 'node-neo4j-bolt-adapter';
 import FormData from 'form-data';
 import papa from 'papaparse';
 
 import { ov_config } from './ov_config.js';
+import { cqa } from './neo4j.js';
 
 var version = require('./package.json').version;
 var _require = require; // so we can lazy load a module later on
@@ -54,10 +53,6 @@ var jvmconfig = {};
 var concurrency = ov_config.job_concurrency;
 
 var queue = new EventEmitter()
-
-// async'ify neo4j
-const authToken = neo4j.auth.basic(ov_config.neo4j_user, ov_config.neo4j_pass);
-const db = new BoltAdapter(neo4j.driver('bolt://'+ov_config.neo4j_host, authToken));
 
 // database connect
 cqa('return timestamp()').catch((e) => {console.error("Unable to connect to database."); process.exit(1)}).then(() => {
@@ -378,25 +373,6 @@ async function postDbInit() {
 function valid(str) {
   if (!str) return false;
   return true;
-}
-
-async function dbwrap() {
-    var params = Array.prototype.slice.call(arguments);
-    var func = params.shift();
-    if (ov_config.DEBUG) {
-      let funcName = func.replace('Async', '');
-      console.log('DEBUG: '+funcName+' '+params[0]+';');
-      if (params[1]) {
-        let str = "";
-        str += JSON.stringify(params[1]);
-        console.log('DEBUG: :params '+str.substring(0, 1024));
-      }
-    }
-    return db[func](params[0], params[1]);
-}
-
-async function cqa(q, p) {
-  return dbwrap('cypherQueryAsync', q, p);
 }
 
 function getClientIP(req) {
