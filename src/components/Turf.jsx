@@ -563,116 +563,127 @@ const ListTurf = props => {
   );
 };
 
-const TurfOptions = props => {
-  if (!props.refer.state.selectedDrawOption) return <br />;
+class TurfOptions extends Component {
 
-  let stateOptions = [];
-  Object.keys(us_states).map(k =>
-    stateOptions.push({ value: k, label: us_states[k] })
-  );
+  handleStateChange = selectedStateOption => {
+    this.setState(
+      {
+        typeOptions: [
+          { value: 'state', label: 'State' },
+          { value: 'cd', label: 'Congressional' },
+          { value: 'sldu', label: us_states[selectedStateOption.value].upperHouse },
+          { value: 'sldl', label: us_states[selectedStateOption.value].lowerHouse }
+        ]
+      }
+    )
+    this.props.refer.handleStateChange(selectedStateOption);
+  }
 
-  let typeOptions = [
-    { value: 'state', label: 'State' },
-    { value: 'cd', label: 'Congressional' },
-    { value: 'sldu', label: 'State Senate' },
-    { value: 'sldl', label: 'State House' }
-  ];
+  render() {
 
-  switch (props.refer.state.selectedDrawOption.value) {
-    case 'select':
-      return (
-        <div>
+    if (!this.props.refer.state.selectedDrawOption) return <br />;
+
+    let stateOptions = [];
+    Object.keys(us_states).map(k =>
+      stateOptions.push({ value: k, label: us_states[k].name })
+    );
+
+    switch (this.props.refer.state.selectedDrawOption.value) {
+      case 'select':
+        return (
           <div>
-            <br />
-            State or region:
-            <Select
-              value={props.refer.state.selectedStateOption}
-              onChange={props.refer.handleStateChange}
-              options={stateOptions}
-              isSearchable={true}
-              placeholder="Select state or region"
-            />
-          </div>
-          {props.refer.state.selectedStateOption ? (
             <div>
               <br />
-              District Type:
+              State or region:
               <Select
-                value={props.refer.state.selectedTypeOption}
-                onChange={props.refer.handleTypeChange}
-                onMenuClose={props.refer.selectedTypeFetch}
-                options={typeOptions}
-                isSearchable={false}
-                placeholder="Select district for this turf"
+                value={this.props.refer.state.selectedStateOption}
+                onChange={this.handleStateChange}
+                options={stateOptions}
+                isSearchable={true}
+                placeholder="Select state or region"
               />
             </div>
-          ) : (
-            ''
-          )}
-
-          {props.refer._showDistrictOption() ? (
-            <div>
-              <br />
-              District Number:
-              {props.refer.state.districtOptions.length ? (
+            {this.props.refer.state.selectedStateOption ? (
+              <div>
+                <br />
+                District Type:
                 <Select
-                  value={props.refer.state.selectedDistrictOption}
-                  onChange={props.refer.handleDistrictChange}
-                  options={props.refer.state.districtOptions}
-                  isSearchable={true}
+                  value={this.props.refer.state.selectedTypeOption}
+                  onChange={this.props.refer.handleTypeChange}
+                  onMenuClose={this.props.refer.selectedTypeFetch}
+                  options={this.state.typeOptions}
+                  isSearchable={false}
                   placeholder="Select district for this turf"
                 />
-              ) : (
-                <CircularProgress />
-              )}
-            </div>
-          ) : (
-            ''
-          )}
-        </div>
-      );
-    case 'import':
-      return (
-        <div>
-          <br />
-          <input
-            type="file"
-            accept=".geojson,.json"
-            onChange={e => props.refer.handleImportFiles(e.target.files)}
-          />
-        </div>
-      );
-    case 'radius':
-      return (
-        <div>
-          <br />
-          Type the address:
-          <PlacesAutocomplete
-            debounce={500}
-            value={props.refer.state.address}
-            onChange={props.refer.onTypeAddress}
-            onSelect={props.refer.submitAddress}
-          />
-        </div>
-      );
-    case 'draw':
-      return (
-        <div>
-          <br />
-          Use a{' '}
-          <a
-            target="_blank"
-            rel="noopener noreferrer"
-            href="https://google-developers.appspot.com/maps/documentation/utils/geojson/"
-          >
-            GeoJSON Draw Tool
-          </a>
-          , save the file, and then select the "Import GeoJSON shape file"
-          option.
-        </div>
-      );
-    default:
-      return <div>Unknown generation method.</div>;
+              </div>
+            ) : (
+              ''
+            )}
+
+            {this.props.refer._showDistrictOption() ? (
+              <div>
+                <br />
+                District Number:
+                {this.props.refer.state.districtOptions.length ? (
+                  <Select
+                    value={this.props.refer.state.selectedDistrictOption}
+                    onChange={this.props.refer.handleDistrictChange}
+                    options={this.props.refer.state.districtOptions}
+                    isSearchable={true}
+                    placeholder="Select district for this turf"
+                  />
+                ) : (
+                  <CircularProgress />
+                )}
+              </div>
+            ) : (
+              ''
+            )}
+          </div>
+        );
+      case 'import':
+        return (
+          <div>
+            <br />
+            <input
+              type="file"
+              accept=".geojson,.json"
+              onChange={e => this.props.refer.handleImportFiles(e.target.files)}
+            />
+          </div>
+        );
+      case 'radius':
+        return (
+          <div>
+            <br />
+            Type the address:
+            <PlacesAutocomplete
+              debounce={500}
+              value={this.props.refer.state.address}
+              onChange={this.props.refer.onTypeAddress}
+              onSelect={this.props.refer.submitAddress}
+            />
+          </div>
+        );
+      case 'draw':
+        return (
+          <div>
+            <br />
+            Use a{' '}
+            <a
+              target="_blank"
+              rel="noopener noreferrer"
+              href="https://google-developers.appspot.com/maps/documentation/utils/geojson/"
+            >
+              GeoJSON Draw Tool
+            </a>
+            , save the file, and then select the "Import GeoJSON shape file"
+            option.
+          </div>
+        );
+      default:
+        return <div>Unknown generation method.</div>;
+    }
   }
 };
 
