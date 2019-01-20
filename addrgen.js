@@ -50,18 +50,15 @@ async function doYerThang() {
     };
   });
 
-  let headers = 'id,name,birthday,party,street,unit,city,state,zip,lng,lat';
+  let headers = 'id,first name,last name,birthday,party,street,unit,city,state,zip,"lng,lat"';
   let addrs = [];
 
   // generate a list of random addresses
   for (let i = 0; i < 100; i++) {
     let addr = {};
 
-    let arr = randomWords(2);
-    arr = arr.map(v => v = ucfirst(v));
-
-    addr.street = getRandomInt(9999)+' '+arr[0]+' Dr';
-    addr.city = arr[1]+' City';
+    addr.street = getRandomInt(9999)+' '+randomWord()+' Dr';
+    addr.city = randomWord()+' City';
     // hardcode to a single state, for now
     //let state = states[getRandomInt(states.length)];
     addr.state = 'UT';
@@ -101,14 +98,12 @@ function whoLivesHere(a, u) {
   if (getRandomInt(3) === 0) n += getRandomInt(2);
 
   for (let i = 0; i < n; i++) {
-    console.log(getRandomInt(9999999999)+','+randomPerson()+','+randomBirthday()+','+randomParty()+','+a.street+','+u+','+a.city+','+a.state+','+a.zip+','+a.lng+','+a.lat);
+    console.log(getRandomInt(9999999999)+','+randomWord()+','+randomWord()+','+randomBirthday()+','+randomParty()+','+a.street+','+u+','+a.city+','+a.state+','+a.zip+',"'+a.lng+','+a.lat+'"');
   }
 }
 
-function randomPerson() {
-  let arr = randomWords(2);
-  arr = arr.map(v => v = ucfirst(v));
-  return arr[0]+' '+arr[1];
+function randomWord() {
+  return ucfirst(randomWords());
 }
 
 function randomBirthday() {
