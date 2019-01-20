@@ -94,10 +94,18 @@ export default class ImportData extends Component {
   // #endregion
 
   render() {
-    const { mapped = [], perPage, pageNum, imports } = this.state;
-    if (this.state.loading) return <CircularProgress />;
+    const {
+      mapped = [],
+      data = [],
+      headers = [],
+      perPage,
+      pageNum,
+      imports,
+      loading
+    } = this.state;
+    if (loading) return <CircularProgress />;
 
-    if (!this.state.headers.length)
+    if (!headers.length)
       return (
         <div>
           <CSVReader
@@ -109,7 +117,7 @@ export default class ImportData extends Component {
           <h3>Select a CSV file to get to the next menu!</h3>
           <br />
           <br />
-          <RootLoader flag={this.state.loading} func={() => this._loadData()}>
+          <RootLoader flag={loading} func={() => this._loadData()}>
             <ListImports
               perPage={perPage}
               pageNum={pageNum}
@@ -128,9 +136,9 @@ export default class ImportData extends Component {
           <Icon icon={faFileCsv} size="3x" />
         </div>
         <ImportMap
-          headers={this.state.headers}
+          headers={headers}
           fields={fields}
-          data={this.state.data}
+          data={data}
           getMapped={this.getMapped}
         />
         <ImportPreview
