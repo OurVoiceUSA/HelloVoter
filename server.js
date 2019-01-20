@@ -10,7 +10,7 @@ import jwt from 'jsonwebtoken';
 import bodyParser from 'body-parser';
 import http from 'http';
 import fs from 'fs';
-import {ingeojson, asyncForEach} from 'ourvoiceusa-sdk-js';
+import {ingeojson, asyncForEach, sleep} from 'ourvoiceusa-sdk-js';
 import circleToPolygon from 'circle-to-polygon';
 import wkx from 'wkx';
 import EventEmitter from 'events';
@@ -97,6 +97,7 @@ async function queueTask(task, pattern, input) {
 
 queue.on('doTask', async function (id) {
   let task; 
+  let error = false;
   let start = new Date().getTime();
 
   try {
@@ -120,10 +121,17 @@ queue.on('doTask', async function (id) {
       id: id,
       error: e.toString(),
     });
+    error = true;
   }
 
   let finish = new Date().getTime();
   console.log(task+"() finished @ "+finish+" after "+(finish-start)+" milliseconds");
+
+  // if we encountered an error, wait a bit before we trigger another queue check
+  if (error) {
+    console.warn("Due to queue task error, waiting 10 seconds before triggering checkQueue again.");
+    await sleep(10000);
+  }
 
   // check to see if there's another job to execute
   queue.emit('checkQueue');
