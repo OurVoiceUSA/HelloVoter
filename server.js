@@ -64,18 +64,21 @@ cqa('return timestamp()').catch((e) => {console.error("Unable to connect to data
   doStartupTasks();
 });
 
-async function queueTask(task, input) {
+async function queueTask(task, pattern, input) {
   let job;
 
   // create QueueTask object in database -- either we can execute now (active: true, started: timestamp()) or we have to wait (active: false)
   try {
     job = await cqa('match (a:QueueTask {active: true}) with count(a) as jobs call apoc.do.when(jobs < '+concurrency+', "create (a:QueueTask {id: randomUUID(), created: timestamp(), started: timestamp(), active: true}) return a", "create (a:QueueTask {id: randomUUID(), created: timestamp(), active: false}) return a", {}) yield value return value');
+
+    // build args for QueueTask update + link to pattern object
+    let args = JSON.parse(JSON.stringify(input)); // deep copy to get pattern params
+    args.input = JSON.stringify(input);
+    args.jobId = job.data[0].a.id;
+    args.task = task;
+
     // TODO: fix having to issue update with task/input because of apoc sub-query param issue
-    await cqa('match (a:QueueTask {id: {id}}) set a.task = {task}, a.input = {input}', {
-      id: job.data[0].a.id,
-      task: task,
-      input: JSON.stringify(input),
-    });
+    await cqa('match (a:QueueTask {id:{jobId}}) set a.task = {task}, a.input = {input} with a match (b:'+pattern+') merge (b)-[:PROCESSED_BY]->(a)', args);
   } catch (e) {
     console.warn("Houston we have a problem.");
     console.warn(e);
@@ -877,7 +880,7 @@ async function turfCreate(req, res) {
     return _500(res, e);
   }
 
-  let job = await queueTask('doTurfIndexing', {turfId: req.body.turfId});
+  let job = await queueTask('doTurfIndexing', 'Turf {id:{turfId}}', {turfId: req.body.turfId});
 
   return res.json(job);
 }
@@ -1134,7 +1137,7 @@ var queueTasks = {};
 
 queueTasks.doTurfIndexing = async function (jobId, input) {
   let start = new Date().getTime();
-  await cqa('match (a:Turf {id:{turfId}}) with a match (b:QueueTask {id:{jobId}}) merge (a)-[:PROCESSED_BY]->(b)', {turfId: input.turfId, jobId: jobId});
+
   let ref = await cqa('CALL apoc.periodic.iterate("match (a:Turf {id:\\"'+input.turfId+'\\"}) call spatial.intersects(\\"address\\", a.wkt) yield node return node, a", "merge (node)-[:WITHIN]->(a)", {batchSize:10000,iterateList:true}) yield total return total', input);
   let total = ref.data[0];
   console.log("Processed "+total+" records for "+input.turfId+" in "+((new Date().getTime())-start)+" milliseconds");
@@ -1146,8 +1149,6 @@ queueTasks.doProcessImport = async function (jobId, input) {
   // TODO: status update to queue after each db query
   let filename = input.filename;
   let stats;
-
-  await cqa('match (a:ImportFile {filename:{filename}}) with a match (b:QueueTask {id:{jobId}}) merge (a)-[:PROCESSED_BY]->(b)', {filename: filename, jobId: jobId});
 
   // get when this file import was started
   let ts = (await cqa('match (a:ImportFile {filename:{filename}}) return a.created', {filename: filename})).data[0];
@@ -1366,7 +1367,7 @@ async function importEnd(req, res) {
     return _500(res, e);
   }
 
-  let job = await queueTask('doProcessImport', {filename: req.body.filename});
+  let job = await queueTask('doProcessImport', 'ImportFile {filename:{filename}}', {filename: req.body.filename});
 
   return res.json(job);
 }
