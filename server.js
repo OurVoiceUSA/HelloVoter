@@ -294,7 +294,7 @@ async function doDbInit() {
     {label: 'Turf', property: 'id', create: 'create constraint on (a:Turf) assert a.id is unique'},
     {label: 'Turf', property: 'name', create: 'create constraint on (a:Turf) assert a.name is unique'},
     {label: 'Form', property: 'id', create: 'create constraint on (a:Form) assert a.id is unique'},
-    {label: 'Question', property: 'key', create: 'create constraint on (a:Question) assert a.key is unique'},
+    {label: 'Attribute', property: 'key', create: 'create constraint on (a:Attribute) assert a.key is unique'},
     {label: 'Unit', property: 'id', create: 'create constraint on (a:Unit) assert a.id is unique'},
     {label: 'ImportFile', property: 'filename', create: 'create constraint on (a:ImportFile) assert a.filename is unique'},
     {label: 'ImportRecord', property: 'id', create: 'create constraint on (a:ImportRecord) assert a.id is unique'},
@@ -507,7 +507,7 @@ async function volunteerAssignments(user) {
   }
 
   // TODO: dedupe, someone can be assigned directly to turf/forms and indirectly via a team
-  // TODO: add questions to forms, like in formGet()
+  // TODO: add attributes to forms, like in formGet()
 
   if (obj.turfs.length > 0 && obj.forms.length > 0)
     obj.ready = true;
@@ -578,7 +578,7 @@ async function dashboard(req, res) {
       volunteers: (await cqa('match (a:Volunteer) return count(a)')).data[0],
       teams: (await cqa('match (a:Team) return count(a)')).data[0],
       turfs: (await cqa('match (a:Turf) return count(a)')).data[0],
-      questions: (await cqa('match (a:Question) return count(a)')).data[0],
+      attributes: (await cqa('match (a:Attribute) return count(a)')).data[0],
       forms: (await cqa('match (a:Form) return count(a)')).data[0],
       addresses: (await cqa('match (a:Address) return count(a)')).data[0],
       dbsize: await neo4j_db_size(),
@@ -591,7 +591,7 @@ async function dashboard(req, res) {
         volunteers: (await cqa('match (a:Volunteer {id:{id}})-[:MEMBERS {leader:true}]-(:Team)-[]-(t:Turf) where t.wkt is not null call spatial.intersects("volunteer", t.wkt) yield node return node UNION match (a:Volunteer {id:{id}}) return a as node UNION match (a:Volunteer {id:{id}})-[:MEMBERS]-(:Team)-[:MEMBERS]-(c:Volunteer) return distinct(c) as node', req.user)).data.length,
         teams: ass.teams.length,
         turfs: ass.turfs.length,
-        questions: 'N/A',
+        attributes: 'N/A',
         forms: ass.forms.length,
         addresses: 'N/A',
         version: (ass.ready?version:null),
@@ -973,13 +973,13 @@ async function formGet(req, res) {
     form = a.data[0][0];
     form.author_id = a.data[0][1].id;
     form.author = a.data[0][1].name;
-    form.questions = {};
-    let b = await cqa('match (a:Question)-[:ASSIGNED]-(b:Form {id:{formId}}) return a', req.query);
+    form.attributes = {};
+    let b = await cqa('match (a:Attribute)-[:COMPILED_ON]->(b:Form {id:{formId}}) return a', req.query);
     // convert from an array of objects to an objects of objects
     b.data.forEach((q) => {
       let key = q.key;
-      form.questions[key] = q;
-      delete form.questions[key].key;
+      form.attributes[key] = q;
+      delete form.attributes[key].key;
     });
   } catch (e) {
     return _500(res, e);
@@ -996,23 +996,23 @@ function formList(req, res) {
 }
 
 async function formCreate(req, res) {
-  if (!valid(req.body.name) || !valid(req.body.questions) || !valid(req.body.questions_order) ||
-    typeof req.body.questions !== "object" || typeof req.body.questions_order !== "object")
-    return _400(res, "Invalid value to parameter 'name' or 'questions' or 'questions_order'.");
+  if (!valid(req.body.name) || !valid(req.body.attributes) || !valid(req.body.attributes_order) ||
+    typeof req.body.attributes !== "object" || typeof req.body.attributes_order !== "object")
+    return _400(res, "Invalid value to parameter 'name' or 'attributes' or 'attributes_order'.");
 
   req.body.formId = uuidv4();
   req.body.author_id = req.user.id;
 
   try {
-    await cqa('match (a:Volunteer {id:{author_id}}) create (b:Form {created: timestamp(), updated: timestamp(), id:{formId}, name:{name}, questions_order:{questions_order}, version:1})-[:AUTHOR]->(a)', req.body);
+    await cqa('match (a:Volunteer {id:{author_id}}) create (b:Form {created: timestamp(), updated: timestamp(), id:{formId}, name:{name}, attributes_order:{attributes_order}, version:1})-[:AUTHOR]->(a)', req.body);
 
-    // question is an object of objects, whos schema is; key: {label: , optional: , type: }
-    Object.keys(req.body.questions).forEach(async (key) => {
-      let q = req.body.questions[key];
+    // attribute is an object of objects, whos schema is; key: {label: , optional: , type: }
+    Object.keys(req.body.attributes).forEach(async (key) => {
+      let q = req.body.attributes[key];
       q.key = key;
       q.author_id = req.user.id;
       q.formId = req.body.formId;
-      await cqa('match (a:Volunteer {id:{author_id}}) match (b:Form {id:{formId}}) create (b)<-[:ASSIGNED]-(c:Question {key:{key}, label:{label}, optional:{optional}, type:{type}})-[:AUTHOR]->(a)', q);
+      await cqa('match (a:Volunteer {id:{author_id}}) match (b:Form {id:{formId}}) create (b)<-[:COMPILED_ON]-(c:Attribute {id:{attrId}, name:{name}, optional:{optional}, type:{type}})-[:AUTHOR]->(a)', q);
     });
   } catch (e) {
     return _500(res, e);
@@ -1065,17 +1065,17 @@ function formAssignedVolunteerRemove(req, res) {
   return cqdo(req, res, 'match (a:Form {id:{formId}})-[r:ASSIGNED]-(b:Volunteer {id:{cId}}) delete r', req.body, true);
 }
 
-// question
+// attribute
 
-async function questionGet(req, res) {
-  if (!valid(req.query.key)) return _400(res, "Invalid value to parameter 'key'.");
+async function attributeGet(req, res) {
+  if (!valid(req.query.id)) return _400(res, "Invalid value to parameter 'id'.");
   if (!req.user.admin) return _403(res, "Permission denied.");
 
   let q = {};
 
   try {
     // TODO: use cqdo() and format the code in the cypher return rather than in javascript code
-    let a = await cqa('match (a:Question {key:{key}})-[:AUTHOR]-(b:Volunteer) return a,b', req.query);
+    let a = await cqa('match (a:Attribute {id:{id}})-[:AUTHOR]-(b:Volunteer) return a,b', req.query);
 
     if (a.data.length === 1) {
       q = a.data[0][0];
@@ -1089,45 +1089,45 @@ async function questionGet(req, res) {
   return res.json(q);
 }
 
-function questionList(req, res) {
-  return cqdo(req, res, 'match (a:Question) return a', {}, true);
+function attributeList(req, res) {
+  return cqdo(req, res, 'match (a:Attribute) return a', {}, true);
 }
 
-function questionCreate(req, res) {
-   if (!valid(req.body.key) || !valid(req.body.label) || !valid(req.body.type)) return _400(res, "Invalid value to parameter 'key' or 'label' or 'type'.");
+function attributeCreate(req, res) {
+   if (!valid(req.body.name) || !valid(req.body.type)) return _400(res, "Invalid value to parameter 'name' or 'type'.");
    req.body.author_id = req.user.id;
 
    switch (req.body.type) {
-     case 'String':
-     case 'TEXTBOX':
-     case 'Number':
-     case 'Boolean':
+     case 'string':
+     case 'textbox':
+     case 'number':
+     case 'boolean':
      case 'SAND':
        break;
      default: return _400(res, "Invalid value to parameter 'type'.");
    }
 
-   return cqdo(req, res, 'match (a:Volunteer {id:{author_id}}) create (b:Question {created: timestamp(), key:{key}, label:{label}, type:{type}})-[:AUTHOR]->(a)', req.body, true);
+   return cqdo(req, res, 'match (a:Volunteer {id:{author_id}}) create (b:Attribute {id:randomUUID(), created: timestamp(), name:{name}, type:{type}})-[:AUTHOR]->(a)', req.body, true);
 }
 
-function questionDelete(req, res) {
-  if (!valid(req.body.key)) return _400(res, "Invalid value to parameter 'key'.");
-  return cqdo(req, res, 'match (a:Question {key:{key}}) detach delete a', req.body, true);
+function attributeDelete(req, res) {
+  if (!valid(req.body.id)) return _400(res, "Invalid value to parameter 'id'.");
+  return cqdo(req, res, 'match (a:Attribute {id:{id}}) detach delete a', req.body, true);
 }
 
-function questionAssignedList(req, res) {
-  if (!valid(req.query.key)) return _400(res, "Invalid value to parameter 'key'.");
-  return cqdo(req, res, 'match (a:Question {key:{key}})-[:ASSIGNED]-(b:Form) return b', req.query, true);
+function attributeFormList(req, res) {
+  if (!valid(req.query.id)) return _400(res, "Invalid value to parameter 'id'.");
+  return cqdo(req, res, 'match (a:Attribute {id:{id}})-[:COMPILED_ON]-(b:Form) return b', req.query, true);
 }
 
-function questionAssignedAdd(req, res) {
-  if (!valid(req.body.key) || !valid(req.body.formId)) return _400(res, "Invalid value to parameter 'key' or 'formId'.");
-  return cqdo(req, res, 'match (a:Question {key:{key}}), (b:Form {id:{formId}}) merge (a)-[:ASSIGNED]->(b)', req.body, true);
+function attributeFormAdd(req, res) {
+  if (!valid(req.body.id) || !valid(req.body.formId)) return _400(res, "Invalid value to parameter 'key' or 'formId'.");
+  return cqdo(req, res, 'match (a:Attribute {id:{id}}) with a match (b:Form {id:{formId}}) merge (a)-[:COMPILED_ON]->(b)', req.body, true);
 }
 
-function questionAssignedRemove(req, res) {
-  if (!valid(req.body.key) || !valid(req.body.formId)) return _400(res, "Invalid value to parameter 'key' or 'formId'.");
-  return cqdo(req, res, 'match (a:Question {key:{key}})-[r:ASSIGNED]-(b:Form {id:{formId}}) delete r', req.body, true);
+function attributeFormRemove(req, res) {
+  if (!valid(req.body.id) || !valid(req.body.formId)) return _400(res, "Invalid value to parameter 'key' or 'formId'.");
+  return cqdo(req, res, 'match (a:Attribute {id:{id}})-[r:COMPILED_ON]-(b:Form {id:{formId}}) delete r', req.body, true);
 }
 
 var queueTasks = {};
@@ -1427,7 +1427,7 @@ async function sync(req, res) {
           break;
         case 'survey':
           await cqa('merge (a:Survey {id:{id}}) on create set a += {created:{created},updated:{updated},last_seen:timestamp(),status:{status}} on match set a += {created:{created},updated:{updated},last_seen:timestamp(),status:{status}}', node);
-          // TODO: survey: object of question keys and answers
+          // TODO: survey: object of attribute keys and answers
           break;
         default:
           if (ov_config.DEBUG) {
@@ -1602,13 +1602,13 @@ function doExpressStartup() {
   app.get('/volunteer/v1/form/assigned/volunteer/list', formAssignedVolunteerList);
   app.post('/volunteer/v1/form/assigned/volunteer/add', formAssignedVolunteerAdd);
   app.post('/volunteer/v1/form/assigned/volunteer/remove', formAssignedVolunteerRemove);
-  app.get('/volunteer/v1/question/get', questionGet);
-  app.get('/volunteer/v1/question/list', questionList);
-  app.post('/volunteer/v1/question/create', questionCreate);
-  app.post('/volunteer/v1/question/delete', questionDelete);
-  app.get('/volunteer/v1/question/assigned/list', questionAssignedList);
-  app.post('/volunteer/v1/question/assigned/add', questionAssignedAdd);
-  app.post('/volunteer/v1/question/assigned/remove', questionAssignedRemove);
+  app.get('/volunteer/v1/attribute/get', attributeGet);
+  app.get('/volunteer/v1/attribute/list', attributeList);
+  app.post('/volunteer/v1/attribute/create', attributeCreate);
+  app.post('/volunteer/v1/attribute/delete', attributeDelete);
+  app.get('/volunteer/v1/attribute/form/list', attributeFormList);
+  app.post('/volunteer/v1/attribute/form/add', attributeFormAdd);
+  app.post('/volunteer/v1/attribute/form/remove', attributeFormRemove);
   app.get('/volunteer/v1/import/list', importList);
   app.post('/volunteer/v1/import/begin', importBegin);
   app.post('/volunteer/v1/import/add', importAdd);
