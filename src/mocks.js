@@ -1,6 +1,5 @@
 import jwt from 'jsonwebtoken';
-
-const sleep = m => new Promise(r => setTimeout(r, m));
+import {sleep} from 'ourvoiceusa-sdk-js';
 
 const team_a = {
   id: "test:teama",
