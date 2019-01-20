@@ -571,8 +571,8 @@ class TurfOptions extends Component {
         typeOptions: [
           { value: 'state', label: 'State' },
           { value: 'cd', label: 'Congressional' },
-          { value: 'sldu', label: us_states[selectedStateOption.value].upperHouse },
-          { value: 'sldl', label: us_states[selectedStateOption.value].lowerHouse }
+          { value: 'sldu', label: us_states[selectedStateOption.value].sldu },
+          { value: 'sldl', label: us_states[selectedStateOption.value].sldl }
         ]
       }
     )
