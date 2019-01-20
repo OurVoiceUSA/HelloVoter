@@ -50,7 +50,7 @@ async function doYerThang() {
     };
   });
 
-  let headers = 'name,street,unit,city,state,zip,lng,lat';
+  let headers = 'name,birthday,party,street,unit,city,state,zip,lng,lat';
   let addrs = [];
 
   // generate a list of random addresses
@@ -101,7 +101,7 @@ function whoLivesHere(a, u) {
   if (getRandomInt(3) === 0) n += getRandomInt(2);
 
   for (let i = 0; i < n; i++) {
-    console.log(randomPerson()+','+a.street+','+u+','+a.city+','+a.state+','+a.zip+','+a.lng+','+a.lat);
+    console.log(randomPerson()+','+randomBirthday()+','+randomParty()+','+a.street+','+u+','+a.city+','+a.state+','+a.zip+','+a.lng+','+a.lat);
   }
 }
 
@@ -109,6 +109,23 @@ function randomPerson() {
   let arr = randomWords(2);
   arr = arr.map(v => v = ucfirst(v));
   return arr[0]+' '+arr[1];
+}
+
+function randomBirthday() {
+  let year = 1900+getRandomInt(103);
+  let month = getRandomInt(13);
+  let day = getRandomInt(29);
+  return year+'-'+month+'-'+day;
+}
+
+function randomParty() {
+  switch (getRandomInt(6)) {
+    case 0: return 'Democratic';
+    case 1: return 'Republican';
+    case 2: return 'Libertarian';
+    case 4: return 'Green';
+    default: return 'No Party Preference';
+  }
 }
 
 function getRandomInt(max) {
