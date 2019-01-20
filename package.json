@@ -10,10 +10,12 @@
   "author": "Our Voice USA",
   "license": "AGPL-3.0",
   "devDependencies": {
-    "nodemon": "^1.18.9",
     "chai": "^4.2.0",
     "mocha": "^5.2.0",
     "mocha-jenkins-reporter": "^0.4.1",
+    "nodemon": "^1.18.9",
+    "random-points-on-polygon": "0.0.4",
+    "random-words": "^1.1.0",
     "supertest": "^3.3.0"
   },
   "nodemonConfig": {
