@@ -1143,8 +1143,6 @@ queueTasks.doProcessImport = async function (jobId, input) {
   // if no pid, create with randomUUID()
   await cqa('match (a:ImportFile {filename:{filename}})<-[:FILE]-(b:ImportRecord) where b.pid = "" set b.pid = randomUUID()', {filename: filename});
 
-  // TODO: want to reference (a:ImportFile) in the apoc.periodic.iterate() calls below; having a hard time with the sub-parameterized syntax
-
   // parse_start
   await cqa('match (a:ImportFile {filename:{filename}}) set a.parse_start = timestamp()', {filename: filename});
 
@@ -1203,9 +1201,8 @@ queueTasks.doProcessImport = async function (jobId, input) {
   await cqa('match (a:ImportFile {filename:{filename}}) set a.geocode_end = timestamp(), a.geocode_success = toInt({geocode_success}), a.goecode_fail = toInt({goecode_fail}), a.dedupe_start = timestamp()', {filename: filename, geocode_success: (num_addresses-stats.data[0]), goecode_fail: stats.data[0]});
 
   // find instances of duplicate Address(id) and merge them into a single node
-  // TODO: only search :Address as a result of this import file (sub-param apoc issue)
   // TODO: we only merge :Address here - can still have dupe Unit & Person nodes
-  stats = await cqa('call apoc.periodic.iterate("match (a:Address) where a.created >= '+ts+' match (b:Address {id:a.id}) with a, count(b) as count where count > 1 return distinct(a.id) as id", "match (a:Address {id:{id}}) with collect(a) as nodes call apoc.refactor.mergeNodes(nodes) yield node return node", {iterateList:false}) yield total return total');
+  stats = await cqa('match (a:ImportFile {filename: {filename}}) call apoc.periodic.iterate("match (a:Address)-[:SOURCE]->(:ImportRecord)-[:FILE]->(:ImportFile {filename:\\""+a.filename+"\\"}) match (b:Address {id:a.id}) with a, count(b) as count where count > 1 return distinct(a.id) as id", "match (a:Address {id:{id}}) with collect(a) as nodes call apoc.refactor.mergeNodes(nodes) yield node return node", {iterateList:false}) yield total return total', {filename: filename});
 
   // dedupe_end, dupes, index_start
   await cqa('match (a:ImportFile {filename:{filename}}) set a.dedupe_end = timestamp(), a.dupes_address = toInt({dupes_address}), a.index_start = timestamp()', {filename: filename, dupes_address: stats.data[0]});
@@ -1226,9 +1223,8 @@ queueTasks.doProcessImport = async function (jobId, input) {
   await cqa('match (a:ImportFile {filename:{filename}}) set a.index_end = timestamp(), a.turfadd_start = timestamp()', {filename: filename});
 
   // finish it off by adding these news addresses to all relivant turfs
-  // TODO: only search :Address as a result of this import file (sub-param apoc issue)
   let start = new Date().getTime();
-  let ref = await cqa('CALL apoc.periodic.iterate("match (a:Address) where a.created >= '+ts+' and not a.position = point({longitude: 0, latitude: 0}) call spatial.intersects(\\"turf\\", a.position) yield node return a, node", "merge (a)-[:WITHIN]->(node)", {batchSize:10000,iterateList:true}) yield total return total');
+  let ref = await cqa('match (a:ImportFile {filename: {filename}}) CALL apoc.periodic.iterate("match (a:Address)-[:SOURCE]->(:ImportRecord)-[:FILE]->(:ImportFile {filename:\\""+a.filename+"\\"}) where not a.position = point({longitude: 0, latitude: 0}) call spatial.intersects(\\"turf\\", a.position) yield node return a, node", "merge (a)-[:WITHIN]->(node)", {batchSize:10000,iterateList:true}) yield total return total', {filename: filename});
   let total = ref.data[0];
   console.log("Processed "+total+" records into turfs for "+filename+" in "+((new Date().getTime())-start)+" milliseconds");
 
