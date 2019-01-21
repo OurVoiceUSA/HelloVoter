@@ -1160,7 +1160,7 @@ queueTasks.doProcessImport = async function (jobId, input) {
       merge (d:Person {id:b.pid})
         on create set d.name = b.name
       merge (d)-[:SOURCE]->(b)
-      merge (d)-[:LIVES_AT]->(c)",
+      merge (d)-[:RESIDENCE]->(c)",
     {batchSize:10000,iterateList:true})
   `);
 
@@ -1178,12 +1178,12 @@ queueTasks.doProcessImport = async function (jobId, input) {
       merge (d:Person {id:b.pid})
         on create set d.name = b.name
       merge (d)-[:SOURCE]->(b)
-      merge (d)-[:LIVES_AT]->(e)",
+      merge (d)-[:RESIDENCE]->(e)",
     {batchSize:10000,iterateList:true})
     `);
 
   // parse_end + num_*, geocode_start
-  stats = await cqa('match (a:ImportFile {filename:{filename}})<-[:FILE]-(b:ImportRecord)<-[:SOURCE]-(c:Address)<-[:LIVES_AT*1..2]-(d:Person) return count(distinct(b)), count(distinct(c)), count(distinct(d))', {filename: filename});
+  stats = await cqa('match (a:ImportFile {filename:{filename}})<-[:FILE]-(b:ImportRecord)<-[:SOURCE]-(c:Address)<-[:RESIDENCE*1..2]-(d:Person) return count(distinct(b)), count(distinct(c)), count(distinct(d))', {filename: filename});
   let num_addresses = stats.data[0][1]; // save for below
   await cqa('match (a:ImportFile {filename:{filename}}) set a.parse_end = timestamp(), a.geocode_start = timestamp(), a.num_records = toInt({num_records}), a.num_addresses = toInt({num_addresses}), a.num_people = toInt({num_people})', {filename: filename, num_records: stats.data[0][0], num_addresses: stats.data[0][1], num_people: stats.data[0][2]});
 
@@ -1318,6 +1318,7 @@ async function importList(req, res) {
 
 async function importBegin(req, res) {
   if (req.user.admin !== true) return _403(res, "Permission denied.");
+  if (!valid(req.body.filename)) return _400(res, "Invalid value to parameter 'filename'.");
 
   // TODO: validate that req.body.filename is a file name
   req.body.id = req.user.id;
@@ -1335,6 +1336,8 @@ async function importBegin(req, res) {
 
 async function importAdd(req, res) {
   if (req.user.admin !== true) return _403(res, "Permission denied.");
+  if (!valid(req.body.filename)) return _400(res, "Invalid value to parameter 'filename'.");
+
   try {
     // TODO: iterate through req.body.data and normalize address data
     await cqa('match (a:ImportFile {filename:{filename}}) with collect(a) as lock call apoc.lock.nodes(lock) match (a:ImportFile {filename:{filename}}) unwind {data} as r merge (b:ImportRecord {id:apoc.util.md5([r[0],r[1],r[2],r[3],r[4],r[5],r[6],r[7],r[8]])}) on create set b += {pid:r[0], name:r[1], street:r[2], unit:r[3], city:r[4], state:r[5], zip:r[6], lng:r[7], lat:r[8], processed:0} merge (b)-[:FILE]->(a)', req.body);
@@ -1347,6 +1350,8 @@ async function importAdd(req, res) {
 
 async function importEnd(req, res) {
   if (req.user.admin !== true) return _403(res, "Permission denied.");
+  if (!valid(req.body.filename)) return _400(res, "Invalid value to parameter 'filename'.");
+
   try {
     let ref = await cqa('match (a:ImportFile {filename:{filename}}) where a.submitted is null set a.submitted = timestamp() return count(a)', req.body);
     if (ref.data[0] !== 1) return _403(res, "Import File already submitted for processing.");
