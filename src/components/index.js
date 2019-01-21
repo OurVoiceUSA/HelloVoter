@@ -10,7 +10,7 @@ import LogoutDialog from './LogoutDialog';
 import Map from './Map';
 import Settings from './Settings';
 import Teams from './Teams';
-import Turf from './Turf';
+import { Turf } from './Turf';
 import Volunteers from './Volunteers';
 import { Header, Sidebar } from './header';
 
