@@ -310,6 +310,7 @@ async function doDbInit() {
     {label: 'ImportRecord', property: 'id', create: 'create constraint on (a:ImportRecord) assert a.id is unique'},
     {label: 'ImportRecord', property: 'processed', create: 'create index on :ImportRecord(processed)'},
     {label: 'QueueTask', property: 'id', create: 'create constraint on (a:QueueTask) assert a.id is unique'},
+    {label: 'QueueTask', property: 'created', create: 'create index on :QueueTask(created)'},
   ];
 
   // create any indexes we need if they don't exist
