@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
+import TableHead from '@material-ui/core/TableHead';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableFooter from '@material-ui/core/TableFooter';
@@ -13,6 +14,7 @@ import FirstPageIcon from '@material-ui/icons/FirstPage';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 import LastPageIcon from '@material-ui/icons/LastPage';
+import prettyMs from 'pretty-ms';
 
 const actionsStyles = theme => ({
   root: {
@@ -24,7 +26,7 @@ const actionsStyles = theme => ({
 
 const jobRuntime = (start, end) => {
   if (end)
-    return Math.ceil((end-start)/1000);
+    return prettyMs(end-start);
   else
     return "";
 }
@@ -118,8 +120,6 @@ class ListImports extends Component {
   constructor(props) {
     super(props);
 
-    let token;
-
     this.state = {
       rows: this.props.imports,
       page: 0, // ?? this.props.pageNum,
@@ -141,38 +141,47 @@ class ListImports extends Component {
     const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
 
     /*
-    "created"
-    "submitted"
-    "parse_start"
-    "num_records"
+    Items not yet shown in the table:
     "num_people"
     "num_addresses"
-    "geocode_start"
     "geocode_success"
     "goecode_fail"
-    "dedupe_start"
     "dupes_address"
-    "index_start"
-    "turfadd_start"
-    "completed"
     */
 
     return (
       <Paper className={classes.root}>
         <div className={classes.tableWrapper}>
           <Table className={classes.table}>
+            <TableHead>
+              <TableRow>
+                <TableCell>Import File</TableCell>
+                <TableCell align="right">Upload Time</TableCell>
+                <TableCell align="right">Queue Delay</TableCell>
+                <TableCell align="right">Parse Time</TableCell>
+                <TableCell align="right">Record Count</TableCell>
+                <TableCell align="right">Geocode Time</TableCell>
+                <TableCell align="right">Dedupe Time</TableCell>
+                <TableCell align="right">Index Time</TableCell>
+                <TableCell align="right">Turf Index Time</TableCell>
+                <TableCell align="right">Total Time</TableCell>
+              </TableRow>
+            </TableHead>
             <TableBody>
               {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => (
                 <TableRow key={row.id}>
                   <TableCell component="th" scope="row">
                     {row.filename}
                   </TableCell>
+                  <TableCell align="right">{jobRuntime(row.created, row.submitted)}</TableCell>
+                  <TableCell align="right">{jobRuntime(row.submitted, row.parse_start)}</TableCell>
                   <TableCell align="right">{jobRuntime(row.parse_start, row.parse_end)}</TableCell>
+                  <TableCell align="right">{row.num_records}</TableCell>
                   <TableCell align="right">{jobRuntime(row.geocode_start, row.geocode_end)}</TableCell>
                   <TableCell align="right">{jobRuntime(row.dedupe_start, row.dedupe_end)}</TableCell>
                   <TableCell align="right">{jobRuntime(row.index_start, row.index_end)}</TableCell>
                   <TableCell align="right">{jobRuntime(row.turfadd_start, row.turfadd_end)}</TableCell>
-                  <TableCell align="right">{jobRuntime(row.parse_start, row.completed)}</TableCell>
+                  <TableCell align="right">{jobRuntime(row.created, row.completed)}</TableCell>
                 </TableRow>
               ))}
               {emptyRows > 0 && (

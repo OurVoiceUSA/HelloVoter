@@ -19,6 +19,7 @@
     "jsonwebtoken": "^8.4.0",
     "lodash": "^4.17.11",
     "ourvoiceusa-sdk-js": "github:OurVoiceUSA/ourvoiceusa-sdk-js",
+    "pretty-ms": "^4.0.0",
     "query-string": "^6.2.0",
     "react": "^16.7.0",
     "react-csv-reader": "^1.1.0",
