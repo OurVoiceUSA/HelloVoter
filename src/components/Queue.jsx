@@ -19,7 +19,7 @@ import formatNumber from 'simple-format-number';
 import prettyMs from 'pretty-ms';
 
 import {
-  _fetch,
+  _fetch, RootLoader,
 } from '../common.js';
 
 const actionsStyles = theme => ({
@@ -166,6 +166,9 @@ class Queue extends Component {
 
   _loadData = async () => {
     let rows = [];
+
+    this.setState({loading: true});
+
     let obj = await _fetch(
       this.state.server,
       '/volunteer/v1/queue/list',
@@ -178,7 +181,7 @@ class Queue extends Component {
         return q;
       });
     }
-    this.setState({rows});
+    this.setState({rows, loading: false});
   }
 
   render() {
@@ -188,7 +191,7 @@ class Queue extends Component {
 
     return (
       <Paper className={classes.root}>
-        <div className={classes.tableWrapper}>
+        <RootLoader className={classes.tableWrapper} flag={this.state.loading} func={() => this._loadData()}>
           <Table className={classes.table}>
             <TableHead>
               <TableRow>
@@ -249,7 +252,7 @@ class Queue extends Component {
               </TableRow>
             </TableFooter>
           </Table>
-        </div>
+        </RootLoader>
       </Paper>
     );
   }
