@@ -8,6 +8,7 @@ import TableCell from '@material-ui/core/TableCell';
 import TableFooter from '@material-ui/core/TableFooter';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
+import Tooltip from '@material-ui/core/Tooltip';
 import Paper from '@material-ui/core/Paper';
 import IconButton from '@material-ui/core/IconButton';
 import FirstPageIcon from '@material-ui/icons/FirstPage';
@@ -161,16 +162,36 @@ class ListImports extends Component {
           <Table className={classes.table}>
             <TableHead>
               <TableRow>
-                <TableCell>Import File</TableCell>
-                <TableCell align="right">Upload Time</TableCell>
-                <TableCell align="right">Queue Delay</TableCell>
-                <TableCell align="right">Parse Time</TableCell>
-                <TableCell align="right">Record Count</TableCell>
-                <TableCell align="right">Geocode Time</TableCell>
-                <TableCell align="right">Dedupe Time</TableCell>
-                <TableCell align="right">Index Time</TableCell>
-                <TableCell align="right">Turf Index Time</TableCell>
-                <TableCell align="right">Total Time</TableCell>
+                <Tooltip title="The file name of the imported file.">
+                  <TableCell>Import File</TableCell>
+                </Tooltip>
+                <Tooltip title="The time it took the file to go from the uploader's computer to the server.">
+                  <TableCell align="right">Upload Time</TableCell>
+                </Tooltip>
+                <Tooltip title="The time this import had to wait in queue for other jobs to finish.">
+                  <TableCell align="right">Queue Delay</TableCell>
+                </Tooltip>
+                <Tooltip title="The file name of the imported file.">
+                  <TableCell align="right">Parse Time</TableCell>
+                </Tooltip>
+                <Tooltip title="The number of unique records contained in the import file.">
+                  <TableCell align="right">Record Count</TableCell>
+                </Tooltip>
+                <Tooltip title="The time it took the system to geocode the addresses in the import file.">
+                  <TableCell align="right">Geocode Time</TableCell>
+                </Tooltip>
+                <Tooltip title="The time it took the system to identify and remove duplicates as a result of this import.">
+                  <TableCell align="right">Dedupe Time</TableCell>
+                </Tooltip>
+                <Tooltip title="The time it took to add these addresses to the master database index.">
+                  <TableCell align="right">Index Time</TableCell>
+                </Tooltip>
+                <Tooltip title="The time it took the system to index each address to turfs it belongs to.">
+                  <TableCell align="right">Turf Index Time</TableCell>
+                </Tooltip>
+                <Tooltip title="The total time the import took from file upload start to complete finish.">
+                  <TableCell align="right">Total Time</TableCell>
+                </Tooltip>
               </TableRow>
             </TableHead>
             <TableBody>
