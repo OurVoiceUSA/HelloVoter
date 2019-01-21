@@ -1137,9 +1137,6 @@ queueTasks.doProcessImport = async function (jobId, input) {
   let filename = input.filename;
   let stats;
 
-  // get when this file import was started
-  let ts = (await cqa('match (a:ImportFile {filename:{filename}}) return a.created', {filename: filename})).data[0];
-
   // if no pid, create with randomUUID()
   await cqa('match (a:ImportFile {filename:{filename}})<-[:FILE]-(b:ImportRecord) where b.pid = "" set b.pid = randomUUID()', {filename: filename});
 
@@ -1147,8 +1144,8 @@ queueTasks.doProcessImport = async function (jobId, input) {
   await cqa('match (a:ImportFile {filename:{filename}}) set a.parse_start = timestamp()', {filename: filename});
 
   // non-unit addresses
-  await cqa(`
-    CALL apoc.periodic.iterate("match (b:ImportRecord {processed:0}) where b.unit = '' return b",
+  await cqa(`match (a:ImportFile {filename:{filename}})
+    CALL apoc.periodic.iterate("match (a)<-[:FILE]-(b:ImportRecord {processed:0}) where b.unit = '' return b",
       "merge (c:Address {id:apoc.util.md5([toLower(b.street), toLower(b.city), toLower(b.state), substring(b.zip,0,5)])})
         on create set b.processed = timestamp(), c += {created: timestamp(), updated: timestamp(), longitude: toFloat(b.lng), latitude: toFloat(b.lat), position: point({longitude: toFloat(b.lng), latitude: toFloat(b.lat)}), street:b.street, city:b.city, state:b.state, zip:b.zip}
         on match set b.processed = timestamp()
@@ -1159,12 +1156,12 @@ queueTasks.doProcessImport = async function (jobId, input) {
         on create set d.name = b.name
       merge (d)-[:SOURCE]->(b)
       merge (d)-[:RESIDENCE]->(c)",
-    {batchSize:10000,iterateList:true})
-  `);
+    {batchSize:10000,iterateList:true}) yield total return total
+  `, {filename: filename});
 
   // multi-unit addresses
-  await cqa(`
-    CALL apoc.periodic.iterate("match (b:ImportRecord {processed:0}) where not b.unit = '' return b",
+  await cqa(`match (a:ImportFile {filename:{filename}})
+    CALL apoc.periodic.iterate("match (a)<-[:FILE]-(b:ImportRecord {processed:0}) where not b.unit = '' return b",
       "merge (c:Address {id:apoc.util.md5([toLower(b.street), toLower(b.city), toLower(b.state), substring(b.zip,0,5)])})
         on create set b.processed = timestamp(), c += {created: timestamp(), updated: timestamp(), longitude: toFloat(b.lng), latitude: toFloat(b.lat), position: point({longitude: toFloat(b.lng), latitude: toFloat(b.lat)}), street:b.street, city:b.city, state:b.state, zip:b.zip}
         on match set b.processed = timestamp()
@@ -1177,8 +1174,8 @@ queueTasks.doProcessImport = async function (jobId, input) {
         on create set d.name = b.name
       merge (d)-[:SOURCE]->(b)
       merge (d)-[:RESIDENCE]->(e)",
-    {batchSize:10000,iterateList:true})
-    `);
+    {batchSize:10000,iterateList:true}) yield total return total
+    `, {filename: filename});
 
   // parse_end + num_*, geocode_start
   stats = await cqa('match (a:ImportFile {filename:{filename}})<-[:FILE]-(b:ImportRecord)<-[:SOURCE]-(c:Address)<-[:RESIDENCE*1..2]-(d:Person) return count(distinct(b)), count(distinct(c)), count(distinct(d))', {filename: filename});
@@ -1322,7 +1319,7 @@ async function importBegin(req, res) {
     let ref = await cqa('match (a:ImportFile {filename:{filename}}) where a.submitted is not null return count(a)', req.body);
     if (ref.data[0] !== 0) return _403(res, "Import File already exists.");
 
-    await cqa('match (a:Volunteer {id:{id}}) merge (b:ImportFile {filename:{filename}}) on create set b += {created: timestamp()} merge (a)-[:IMPORTED]->(b)', req.body);
+    await cqa('match (a:Volunteer {id:{id}}) merge (b:ImportFile {filename:{filename}}) on create set b += {created: timestamp()} merge (a)-[:IMPORTED_BY]->(b)', req.body);
   } catch (e) {
     return _500(res, e);
   }
