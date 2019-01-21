@@ -305,6 +305,7 @@ async function doDbInit() {
     {label: 'Form', property: 'id', create: 'create constraint on (a:Form) assert a.id is unique'},
     {label: 'Attribute', property: 'key', create: 'create constraint on (a:Attribute) assert a.key is unique'},
     {label: 'Unit', property: 'id', create: 'create constraint on (a:Unit) assert a.id is unique'},
+    {label: 'ImportFile', property: 'id', create: 'create constraint on (a:ImportFile) assert a.id is unique'},
     {label: 'ImportFile', property: 'filename', create: 'create constraint on (a:ImportFile) assert a.filename is unique'},
     {label: 'ImportRecord', property: 'id', create: 'create constraint on (a:ImportRecord) assert a.id is unique'},
     {label: 'ImportRecord', property: 'processed', create: 'create index on :ImportRecord(processed)'},
@@ -1305,6 +1306,10 @@ async function doGeocode(data) {
 
 }
 
+async function queueList(req, res) {
+  return cqdo(req, res, 'match (a:QueueTask)<-[:PROCESSED_BY]-(b) return a, labels(b)[0], b{.id,.name,.filename} order by a.created desc', {}, true);
+}
+
 async function importList(req, res) {
   return cqdo(req, res, 'match (a:ImportFile) return a order by a.created desc', {}, true);
 }
@@ -1319,7 +1324,7 @@ async function importBegin(req, res) {
     let ref = await cqa('match (a:ImportFile {filename:{filename}}) where a.submitted is not null return count(a)', req.body);
     if (ref.data[0] !== 0) return _403(res, "Import File already exists.");
 
-    await cqa('match (a:Volunteer {id:{id}}) merge (b:ImportFile {filename:{filename}}) on create set b += {created: timestamp()} merge (a)-[:IMPORTED_BY]->(b)', req.body);
+    await cqa('match (a:Volunteer {id:{id}}) merge (b:ImportFile {filename:{filename}}) on create set b += {id: randomUUID(), created: timestamp()} merge (a)-[:IMPORTED_BY]->(b)', req.body);
   } catch (e) {
     return _500(res, e);
   }
@@ -1595,6 +1600,7 @@ function doExpressStartup() {
   app.get('/volunteer/v1/attribute/form/list', attributeFormList);
   app.post('/volunteer/v1/attribute/form/add', attributeFormAdd);
   app.post('/volunteer/v1/attribute/form/remove', attributeFormRemove);
+  app.get('/volunteer/v1/queue/list', queueList);
   app.get('/volunteer/v1/import/list', importList);
   app.post('/volunteer/v1/import/begin', importBegin);
   app.post('/volunteer/v1/import/add', importAdd);
