@@ -2,13 +2,16 @@ import React, { Component } from 'react';
 import CSVReader from 'react-csv-reader';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { faFileCsv } from '@fortawesome/free-solid-svg-icons';
-import { ImportPreview, ImportMap, ListImports } from './';
+import { ImportPreview, ImportMap } from './';
+import { PaperTable } from '../elements';
 import { map_format } from './constants';
 import {
   notify_error,
   notify_success,
   _fetch,
   _loadImports,
+  jobRuntime,
+  jobNumber,
   Icon,
   RootLoader
 } from '../../common';
@@ -93,6 +96,15 @@ export default class ImportData extends Component {
 
   // #endregion
 
+  /*
+  Items not yet shown in the table:
+  "num_people"
+  "num_addresses"
+  "geocode_success"
+  "goecode_fail"
+  "dupes_address"
+  */
+
   render() {
     const { mapped = [], perPage, pageNum, imports } = this.state;
     if (this.state.loading) return <CircularProgress />;
@@ -110,10 +122,71 @@ export default class ImportData extends Component {
           <br />
           <br />
           <RootLoader flag={this.state.loading} func={() => this._loadData()}>
-            <ListImports
+            <PaperTable
               perPage={perPage}
               pageNum={pageNum}
-              imports={imports}
+              spec={[
+                {
+                  header: "Import File",
+                  tooltip: "The file name of the imported file.",
+                  params: ['filename']
+                },
+                {
+                  header: "Upload Time",
+                  tooltip: "The time it took the file to go from the uploader's computer to the server.",
+                  func: jobRuntime,
+                  params: ['created', 'submitted']
+                },
+                {
+                  header: "Queue Delay",
+                  tooltip: "The time this import had to wait in queue for other jobs to finish.",
+                  func: jobRuntime,
+                  params: ['submitted', 'parse_start'],
+                },
+                {
+                  header: "Prase time",
+                  tooltip: "The file name of the imported file.",
+                  func: jobRuntime,
+                  params: ['parse_start', 'parse_end'],
+                },
+                {
+                  header: "Record Count",
+                  tooltip: "The number of unique records contained in the import file.",
+                  func: jobNumber,
+                  params: ['num_records'],
+                },
+                {
+                  header: "Geocode Time",
+                  tooltip: "The time it took the system to geocode the addresses in the import file.",
+                  func: jobRuntime,
+                  params: ['geocode_start', 'geocode_end'],
+                },
+                {
+                  header: "Dedupe Time",
+                  tooltip: "The time it took the system to identify and remove duplicates as a result of this import.",
+                  func: jobRuntime,
+                  params: ['dedupe_start', 'dedupe_end'],
+                },
+                {
+                  header: "Index Time",
+                  tooltip: "The time it took to add these addresses to the master database index.",
+                  func: jobRuntime,
+                  params: ['index_start', 'index_end'],
+                },
+                {
+                  header: "Turf Index Time",
+                  tooltip: "The time it took the system to index each address to turfs it belongs to.",
+                  func: jobRuntime,
+                  params: ['turfadd_start', 'turfadd_end'],
+                },
+                {
+                  header: "Total Time",
+                  tooltip: "The total time the import took from file upload start to complete finish.",
+                  func: jobRuntime,
+                  params: ['created', 'completed'],
+                },
+              ]}
+              rows={imports}
               handlePageClick={this.handlePageClick}
               handlePageNumChange={this.handlePageNumChange}
             />

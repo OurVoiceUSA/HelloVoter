@@ -1,3 +1,4 @@
 import { MapSelect } from './MapSelect';
+import PaperTable from './PaperTable';
 
-export { MapSelect };
+export { MapSelect, PaperTable };

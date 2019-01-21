@@ -5,11 +5,25 @@ import { faSync } from '@fortawesome/free-solid-svg-icons';
 
 import GooglePlacesAutocomplete from 'react-places-autocomplete';
 import { NotificationManager } from 'react-notifications';
+import formatNumber from 'simple-format-number';
+import prettyMs from 'pretty-ms';
 
 import Modal from '@material-ui/core/Modal';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
 import { mockFetch } from './mocks.js';
+
+export function jobRuntime(start, end) {
+  if (end)
+    return prettyMs(end-start);
+  else
+    return "";
+}
+
+export function jobNumber(num) {
+  if (num) return formatNumber(num, { fractionDigits: 0 })
+  else return "";
+}
 
 export function notify_success(msg) {
   NotificationManager.success(msg, 'Success', 3000);
