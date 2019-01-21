@@ -14,6 +14,7 @@ import FirstPageIcon from '@material-ui/icons/FirstPage';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 import LastPageIcon from '@material-ui/icons/LastPage';
+import formatNumber from 'simple-format-number';
 import prettyMs from 'pretty-ms';
 
 const actionsStyles = theme => ({
@@ -29,6 +30,11 @@ const jobRuntime = (start, end) => {
     return prettyMs(end-start);
   else
     return "";
+}
+
+const jobNumber = (num) => {
+  if (num) return formatNumber(num, { fractionDigits: 0 })
+  else return "";
 }
 
 class TablePaginationActions extends Component {
@@ -176,7 +182,7 @@ class ListImports extends Component {
                   <TableCell align="right">{jobRuntime(row.created, row.submitted)}</TableCell>
                   <TableCell align="right">{jobRuntime(row.submitted, row.parse_start)}</TableCell>
                   <TableCell align="right">{jobRuntime(row.parse_start, row.parse_end)}</TableCell>
-                  <TableCell align="right">{row.num_records}</TableCell>
+                  <TableCell align="right">{jobNumber(row.num_records)}</TableCell>
                   <TableCell align="right">{jobRuntime(row.geocode_start, row.geocode_end)}</TableCell>
                   <TableCell align="right">{jobRuntime(row.dedupe_start, row.dedupe_end)}</TableCell>
                   <TableCell align="right">{jobRuntime(row.index_start, row.index_end)}</TableCell>
