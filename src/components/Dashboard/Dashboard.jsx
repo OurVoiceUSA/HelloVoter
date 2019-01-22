@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import NumberFormat from 'react-number-format';
 import filesize from 'filesize';
 
+import './Dashboard.css';
+
 import {
   faShieldAlt,
   faUser,
@@ -14,7 +16,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { arrayMove, sortableContainer, sortableElement } from 'react-sortable-hoc';
 
-import { _fetch, notify_error, RootLoader, Icon } from '../common.js';
+import { _fetch, notify_error, RootLoader, Icon } from '../../common.js';
 
 export default class App extends Component {
   constructor(props) {
@@ -114,7 +116,7 @@ export default class App extends Component {
 }
 
 const _Cards = props => {
-  return <div>
+  return <div className="dashboard-container">
     {
       props.cards.map((card, index) => 
         <CardDashboard
