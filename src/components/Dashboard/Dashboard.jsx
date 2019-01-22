@@ -2,10 +2,7 @@ import React, { Component } from 'react';
 import NumberFormat from 'react-number-format';
 import filesize from 'filesize';
 
-import './Dashboard.css';
-
 import {
-  faShieldAlt,
   faUser,
   faUsers,
   faMap,
@@ -14,18 +11,22 @@ import {
   faMapMarkerAlt,
   faDatabase,
 } from '@fortawesome/free-solid-svg-icons';
-import { arrayMove, sortableContainer, sortableElement } from 'react-sortable-hoc';
 
-import { _fetch, notify_error, RootLoader, Icon } from '../../common.js';
+import { arrayMove } from 'react-sortable-hoc';
+import { _fetch, notify_error, RootLoader } from '../../common.js';
+import { Cards } from './Cards';
 
 export default class App extends Component {
   constructor(props) {
     super(props);
 
+    const dash = (localStorage.getItem('dash') || 'vol,team,turf,form,ques,addr,dbsz').split(',');
+
     this.state = {
       loading: true,
       data: {},
       cards: [],
+      dash,
     };
   }
 
@@ -33,9 +34,11 @@ export default class App extends Component {
     this._loadData();
   }
 
-  onSortEnd = ({oldIndex, newIndex}) => {
+  onSortEnd = ({ oldIndex, newIndex }) => {
+    const dash = arrayMove(this.state.dash, oldIndex, newIndex);
+    localStorage.setItem('dash', dash.map(n => n));
     this.setState(() => ({
-      cards: arrayMove(this.state.cards, oldIndex, newIndex),
+      dash,
     }));
   }
 
@@ -47,36 +50,35 @@ export default class App extends Component {
 
     try {
       data = await _fetch(this.props.server, '/volunteer/v1/dashboard');
-      cards = [
-        {
+      cards = {
+        vol: {
           name: 'Volunteers',
           stat: data.volunteers,
           icon: faUser,
         },
-        {
+        team: {
           name: 'Teams',
           stat: data.teams,
           icon: faUsers,
         },
-        {
+        turf: {
           name: 'Turfs',
           stat: data.turfs,
           icon: faMap,
         },
-        {
+        form: {
           name: 'Forms',
           stat: data.forms,
           icon: faClipboard,
         },
-        {
+        ques: {
           name: 'Questions',
           stat: data.questions,
           icon: faChartPie,
         },
-        {
+        addr: {
           name: 'Addresses',
-          stat: 
-          (
+          stat: (
             <NumberFormat
               value={data.addresses}
               displayType={'text'}
@@ -85,15 +87,14 @@ export default class App extends Component {
           ),
           icon: faMapMarkerAlt,
         },
-        {
+        dbsz: {
           name: 'Database size',
           stat: filesize(data.dbsize ? data.dbsize : 0, {
             round: 1,
           }),
           icon: faDatabase,
         },
-      ];
-
+      };
     } catch (e) {
       notify_error(e, 'Unable to load dashboard info.');
     }
@@ -109,43 +110,9 @@ export default class App extends Component {
           axis="xy"
           onSortEnd={this.onSortEnd}
           cards={this.state.cards}
+          dash={this.state.dash}
         />
       </RootLoader>
     );
   }
 }
-
-const _Cards = props => {
-  return <div className="dashboard-container">
-    {
-      props.cards.map((card, index) => 
-        <CardDashboard
-          name={card.name}
-          stat={card.stat}
-          icon={card.icon}
-          index={index}
-        />
-      )
-    }
-  </div>;
-};
-
-const Cards = sortableContainer(_Cards);
-
-const _CardDashboard = props => (
-  <div style={{ display: 'flex', padding: '10px' }} className="dashboard-card">
-    <div style={{ padding: '5px 10px' }}>
-      <Icon
-        style={{ width: 50, height: 50, color: 'gray' }}
-        icon={props.icon ? props.icon : faShieldAlt}
-      />
-    </div>
-    <div style={{ flex: 1, overflow: 'auto' }}>
-      <h3>
-        {props.name}: {props.stat}
-      </h3>
-    </div>
-  </div>
-);
-
-const CardDashboard = sortableElement(_CardDashboard);
