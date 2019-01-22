@@ -151,7 +151,7 @@ class PaperTable extends Component {
               {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => (
                 <TableRow key={row.id}>
                   {spec.map(spec => (
-                    <TableCell align="right">{(spec.func?spec.func(row[spec.params[0]], row[spec.params[1]]):row[spec.params[0]])}</TableCell>
+                    <TableCell>{(spec.func?spec.func(row[spec.params[0]], row[spec.params[1]]):row[spec.params[0]])}</TableCell>
                   ))}
                 </TableRow>
               ))}

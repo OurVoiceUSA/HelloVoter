@@ -135,7 +135,7 @@ export default class ImportData extends Component {
                   header: "Upload Time",
                   tooltip: "The time it took the file to go from the uploader's computer to the server.",
                   func: jobRuntime,
-                  params: ['created', 'submitted']
+                  params: ['created', 'submitted'],
                 },
                 {
                   header: "Queue Delay",
