@@ -19,14 +19,14 @@ import LastPageIcon from '@material-ui/icons/LastPage';
 const specVal = (row, spec) => {
   if (spec.func) {
     if (spec.params) {
-      return spec.func(row[spec.params[0]], row[spec.params[1]])
+      return spec.func(row[spec.params[0]], row[spec.params[1]]);
     } else {
       return spec.func(row);
     }
   } else {
     return row[spec.params[0]];
   }
-}
+};
 
 const actionsStyles = theme => ({
   root: {

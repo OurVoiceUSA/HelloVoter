@@ -8,26 +8,26 @@ import {
 } from '../common.js';
 
 const tsToStr = (ts) => {
-  return new Date(ts).toString()
-}
+  return new Date(ts).toString();
+};
 
 const jobStatus = (job) => {
-  if (typeof job.success === "boolean") {
-    if (job.success) return "successful";
-    else return "failed";
+  if (typeof job.success === 'boolean') {
+    if (job.success) return 'successful';
+    else return 'failed';
   } else {
-    if (job.started) return "running";
-    else return "waiting";
+    if (job.started) return 'running';
+    else return 'waiting';
   }
-}
+};
 
 const taskObjFromQueue = (type, obj) => {
   switch (type) {
-    case "ImportFile": return "Import file "+obj.filename;
-    case "Turf": return "Turf "+obj.name;
-    default: return "Unknown";
+  case 'ImportFile': return 'Import file '+obj.filename;
+  case 'Turf': return 'Turf '+obj.name;
+  default: return 'Unknown';
   }
-}
+};
 
 export default class Queue extends Component {
 
@@ -36,19 +36,9 @@ export default class Queue extends Component {
 
     this.state = {
       rows: [],
-      page: 0,
-      rowsPerPage: 5,
       server: this.props.server,
     };
   }
-
-  handleChangePage = (event, page) => {
-    this.setState({ page });
-  };
-
-  handleChangeRowsPerPage = event => {
-    this.setState({ rowsPerPage: event.target.value });
-  };
 
   componentDidMount() {
     this._loadData();
@@ -75,45 +65,43 @@ export default class Queue extends Component {
   }
 
   render() {
-    const { classes } = this.props;
-    const { rows, rowsPerPage, page } = this.state;
-    const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
+    const { rows, } = this.state;
 
     return (
       <RootLoader flag={this.state.loading} func={() => this._loadData()}>
         <PaperTable
           spec={[
             {
-              header: "Enqueu Time",
-              tooltip: "The date/time that this job entered the queue.",
+              header: 'Enqueu Time',
+              tooltip: 'The date/time that this job entered the queue.',
               func: tsToStr,
               params: ['created'],
             },
             {
-              header: "Task",
-              tooltip: "The operation that this queue manages.",
+              header: 'Task',
+              tooltip: 'The operation that this queue manages.',
               params: ['task'],
             },
             {
-              header: "Queue Delay",
-              tooltip: "The time this task had to wait in queue for other jobs to finish.",
+              header: 'Queue Delay',
+              tooltip: 'The time this task had to wait in queue for other jobs to finish.',
               func: jobRuntime,
               params: ['created', 'started'],
             },
             {
-              header: "Runtime",
-              tooltip: "The time it took for this task to complete.",
+              header: 'Runtime',
+              tooltip: 'The time it took for this task to complete.',
               func: jobRuntime,
               params: ['started', 'completed'],
             },
             {
-              header: "Status",
-              tooltip: "The status of this particular task.",
+              header: 'Status',
+              tooltip: 'The status of this particular task.',
               func: jobStatus,
             },
             {
-              header: "Task Reference",
-              tooltip: "The particular item that queued task was processing.",
+              header: 'Task Reference',
+              tooltip: 'The particular item that queued task was processing.',
               func: taskObjFromQueue,
               params: ['type', 'obj'],
             },

@@ -218,20 +218,20 @@ export default class Forms extends Component {
 
   inputTypeToReadable(type) {
     switch (type) {
-      case 'String':
-        return 'Text Input';
-      case 'TEXTBOX':
-        return 'Text Box';
-      case 'Number':
-        return 'Number';
-      case 'Boolean':
-        return 'On/Off Switch';
-      case 'SAND':
-        return 'Agree/Disagree';
-      case 'List':
-        return 'Select from List';
-      default:
-        return type;
+    case 'String':
+      return 'Text Input';
+    case 'TEXTBOX':
+      return 'Text Box';
+    case 'Number':
+      return 'Number';
+    case 'Boolean':
+      return 'On/Off Switch';
+    case 'SAND':
+      return 'Agree/Disagree';
+    case 'List':
+      return 'Select from List';
+    default:
+      return type;
     }
   }
 

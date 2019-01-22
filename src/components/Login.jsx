@@ -76,11 +76,11 @@ class LogIn extends Component {
           </Typography>
           <form className={classes.form} onSubmit={(e) => { e.preventDefault(); this.props.refer.doSave(e); }} >
             {(process.env.NODE_ENV === 'development')?
-            <FormControlLabel
-              control={<Checkbox id="mock" name="mock" value="mock" color="primary" checked={this.state.mock} onChange={(e, c) => this.setState({mock: c})} />}
-              label="DEVELOPMENT MODE"
-            />
-            :""}
+              <FormControlLabel
+                control={<Checkbox id="mock" name="mock" value="mock" color="primary" checked={this.state.mock} onChange={(e, c) => this.setState({mock: c})} />}
+                label="DEVELOPMENT MODE"
+              />
+              :''}
             <ServerLiveOrMocked mock={this.state.mock} refer={this} qserver={this.props.refer.state.qserver} />
             <Button
               type="submit"
@@ -122,6 +122,6 @@ const ServerLiveOrMocked = (props) => {
       />
     </div>
   );
-}
+};
 
 export default withStyles(styles)(LogIn);

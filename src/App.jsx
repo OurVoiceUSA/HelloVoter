@@ -156,25 +156,25 @@ class App extends Component {
         return { error: true, msg: 'Missing required header.' };
 
       switch (res.status) {
-        case 200:
-          break; // valid - break to proceed
-        case 400:
-          return {
-            error: true,
-            msg:
-              "The server didn't understand the request sent from this device."
-          };
-        case 401:
-          window.location.href = sm_oauth_url + '/gm?app=HelloVoterHQ';
-          return { error: false, flag: true };
-        case 403:
-          return {
-            error: true,
-            msg:
-              "We're sorry, but your request to volunteer with this server has been rejected."
-          };
-        default:
-          return { error: true, msg: 'Unknown error connecting to server.' };
+      case 200:
+        break; // valid - break to proceed
+      case 400:
+        return {
+          error: true,
+          msg:
+              'The server didn\'t understand the request sent from this device.'
+        };
+      case 401:
+        window.location.href = sm_oauth_url + '/gm?app=HelloVoterHQ';
+        return { error: false, flag: true };
+      case 403:
+        return {
+          error: true,
+          msg:
+              'We\'re sorry, but your request to volunteer with this server has been rejected.'
+        };
+      default:
+        return { error: true, msg: 'Unknown error connecting to server.' };
       }
 
       let body = await res.json();

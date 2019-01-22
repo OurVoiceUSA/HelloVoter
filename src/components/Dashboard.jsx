@@ -24,12 +24,12 @@ export default class App extends Component {
   _loadData = async () => {
     let data = {};
 
-    this.setState({loading: true})
+    this.setState({loading: true});
 
     try {
       data = await _fetch(this.props.server, '/volunteer/v1/dashboard');
     } catch (e) {
-      notify_error(e, "Unable to load dashboard info.");
+      notify_error(e, 'Unable to load dashboard info.');
     }
 
     this.setState({data: data, loading: false});
@@ -53,10 +53,10 @@ export default class App extends Component {
 const CardDashboard = (props) => (
   <div style={{display: 'flex', padding: '10px'}}>
     <div style={{padding: '5px 10px'}}>
-      <Icon style={{width: 50, height: 50, color: "gray"}} icon={(props.icon?props.icon:faShieldAlt)} />
+      <Icon style={{width: 50, height: 50, color: 'gray'}} icon={(props.icon?props.icon:faShieldAlt)} />
     </div>
     <div style={{flex: 1, overflow: 'auto'}}>
       <h3>{props.name}: {props.stat}</h3>
     </div>
   </div>
-)
+);

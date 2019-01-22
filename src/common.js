@@ -17,12 +17,12 @@ export function jobRuntime(start, end) {
   if (end)
     return prettyMs(end-start);
   else
-    return "";
+    return '';
 }
 
 export function jobNumber(num) {
-  if (num) return formatNumber(num, { fractionDigits: 0 })
-  else return "";
+  if (num) return formatNumber(num, { fractionDigits: 0 });
+  else return '';
 }
 
 export function notify_success(msg) {
