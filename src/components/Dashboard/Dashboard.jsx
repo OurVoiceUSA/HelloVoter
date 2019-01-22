@@ -133,7 +133,7 @@ const _Cards = props => {
 const Cards = sortableContainer(_Cards);
 
 const _CardDashboard = props => (
-  <div style={{ display: 'flex', padding: '10px' }}>
+  <div style={{ display: 'flex', padding: '10px' }} className="dashboard-card">
     <div style={{ padding: '5px 10px' }}>
       <Icon
         style={{ width: 50, height: 50, color: 'gray' }}
