@@ -107,6 +107,11 @@ export default class Queue extends Component {
               params: ['started', 'completed'],
             },
             {
+              header: "Status",
+              tooltip: "The status of this particular task.",
+              func: jobStatus,
+            },
+            {
               header: "Task Reference",
               tooltip: "The particular item that queued task was processing.",
               func: taskObjFromQueue,

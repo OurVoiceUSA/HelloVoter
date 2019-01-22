@@ -16,6 +16,18 @@ import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 import LastPageIcon from '@material-ui/icons/LastPage';
 
+const specVal = (row, spec) => {
+  if (spec.func) {
+    if (spec.params) {
+      return spec.func(row[spec.params[0]], row[spec.params[1]])
+    } else {
+      return spec.func(row);
+    }
+  } else {
+    return row[spec.params[0]];
+  }
+}
+
 const actionsStyles = theme => ({
   root: {
     flexShrink: 0,
@@ -150,8 +162,8 @@ class PaperTable extends Component {
             <TableBody>
               {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => (
                 <TableRow key={row.id}>
-                  {spec.map(spec => (
-                    <TableCell>{(spec.func?spec.func(row[spec.params[0]], row[spec.params[1]]):row[spec.params[0]])}</TableCell>
+                  {spec.map(s => (
+                    <TableCell>{specVal(row, s)}</TableCell>
                   ))}
                 </TableRow>
               ))}
