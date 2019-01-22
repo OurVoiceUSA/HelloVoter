@@ -483,7 +483,7 @@ export class CardVolunteer extends Component {
             key="auto"
             turf={{
               id: 'auto',
-              name: "Area surrounnding this volunteer's home address"
+              name: 'Area surrounnding this volunteer\'s home address'
             }}
             refer={this}
             icon={faHome}

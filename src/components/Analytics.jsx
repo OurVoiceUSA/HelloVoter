@@ -55,7 +55,7 @@ export default class App extends Component {
           >
             {
               data01.map((entry, index) => (
-                <Cell key={`slice-${index}`} fill={["red","blue","yellow","grey"][index]} />
+                <Cell key={`slice-${index}`} fill={['red','blue','yellow','grey'][index]} />
               ))
             }
             <Label value="Volunteering" position="outside" />
@@ -76,7 +76,7 @@ export default class App extends Component {
           >
             {
               data02.map((entry, index) => (
-                <Cell key={`slice-${index}`} fill={["red","blue","yellow","grey"][index]} />
+                <Cell key={`slice-${index}`} fill={['red','blue','yellow','grey'][index]} />
               ))
             }
             <Label width={50} position="center">

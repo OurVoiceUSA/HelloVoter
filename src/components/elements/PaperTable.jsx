@@ -15,8 +15,18 @@ import FirstPageIcon from '@material-ui/icons/FirstPage';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 import LastPageIcon from '@material-ui/icons/LastPage';
-import formatNumber from 'simple-format-number';
-import prettyMs from 'pretty-ms';
+
+const specVal = (row, spec) => {
+  if (spec.func) {
+    if (spec.params) {
+      return spec.func(row[spec.params[0]], row[spec.params[1]]);
+    } else {
+      return spec.func(row);
+    }
+  } else {
+    return row[spec.params[0]];
+  }
+};
 
 const actionsStyles = theme => ({
   root: {
@@ -25,18 +35,6 @@ const actionsStyles = theme => ({
     marginLeft: theme.spacing.unit * 2.5,
   },
 });
-
-const jobRuntime = (start, end) => {
-  if (end)
-    return prettyMs(end-start);
-  else
-    return "";
-}
-
-const jobNumber = (num) => {
-  if (num) return formatNumber(num, { fractionDigits: 0 })
-  else return "";
-}
 
 class TablePaginationActions extends Component {
   handleFirstPageButtonClick = event => {
@@ -122,13 +120,14 @@ const styles = theme => ({
   },
 });
 
-class ListImports extends Component {
+class PaperTable extends Component {
 
   constructor(props) {
     super(props);
 
     this.state = {
-      rows: this.props.imports,
+      spec: this.props.spec,
+      rows: this.props.rows,
       page: 0, // ?? this.props.pageNum,
       rowsPerPage: 5, // ?? this.props.perPage,
     };
@@ -144,17 +143,8 @@ class ListImports extends Component {
 
   render() {
     const { classes } = this.props;
-    const { rows, rowsPerPage, page } = this.state;
+    const { rows, spec, rowsPerPage, page } = this.state;
     const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
-
-    /*
-    Items not yet shown in the table:
-    "num_people"
-    "num_addresses"
-    "geocode_success"
-    "goecode_fail"
-    "dupes_address"
-    */
 
     return (
       <Paper className={classes.root}>
@@ -162,53 +152,19 @@ class ListImports extends Component {
           <Table className={classes.table}>
             <TableHead>
               <TableRow>
-                <Tooltip title="The file name of the imported file.">
-                  <TableCell>Import File</TableCell>
-                </Tooltip>
-                <Tooltip title="The time it took the file to go from the uploader's computer to the server.">
-                  <TableCell align="right">Upload Time</TableCell>
-                </Tooltip>
-                <Tooltip title="The time this import had to wait in queue for other jobs to finish.">
-                  <TableCell align="right">Queue Delay</TableCell>
-                </Tooltip>
-                <Tooltip title="The file name of the imported file.">
-                  <TableCell align="right">Parse Time</TableCell>
-                </Tooltip>
-                <Tooltip title="The number of unique records contained in the import file.">
-                  <TableCell align="right">Record Count</TableCell>
-                </Tooltip>
-                <Tooltip title="The time it took the system to geocode the addresses in the import file.">
-                  <TableCell align="right">Geocode Time</TableCell>
-                </Tooltip>
-                <Tooltip title="The time it took the system to identify and remove duplicates as a result of this import.">
-                  <TableCell align="right">Dedupe Time</TableCell>
-                </Tooltip>
-                <Tooltip title="The time it took to add these addresses to the master database index.">
-                  <TableCell align="right">Index Time</TableCell>
-                </Tooltip>
-                <Tooltip title="The time it took the system to index each address to turfs it belongs to.">
-                  <TableCell align="right">Turf Index Time</TableCell>
-                </Tooltip>
-                <Tooltip title="The total time the import took from file upload start to complete finish.">
-                  <TableCell align="right">Total Time</TableCell>
-                </Tooltip>
+                {spec.map(spec => (
+                  <Tooltip title={spec.tooltip}>
+                    <TableCell>{spec.header}</TableCell>
+                  </Tooltip>
+                ))}
               </TableRow>
             </TableHead>
             <TableBody>
               {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => (
                 <TableRow key={row.id}>
-                  <TableCell component="th" scope="row">
-                    {row.filename}
-                  </TableCell>
-                  <TableCell align="right">{jobRuntime(row.created, row.submitted)}</TableCell>
-                  <TableCell align="right">{jobRuntime(row.submitted, row.parse_start)}</TableCell>
-                  <TableCell align="right">{jobRuntime(row.parse_start, row.parse_end)}</TableCell>
-                  <TableCell align="right">{jobNumber(row.num_records)}</TableCell>
-                  <TableCell align="right">{jobRuntime(row.geocode_start, row.geocode_end)}</TableCell>
-                  <TableCell align="right">{jobRuntime(row.dedupe_start, row.dedupe_end)}</TableCell>
-                  <TableCell align="right">{jobRuntime(row.index_start, row.index_end)}</TableCell>
-                  <TableCell align="right">{jobRuntime(row.turfadd_start, row.turfadd_end)}</TableCell>
-                  <TableCell align="right">{jobRuntime(row.created, row.completed)}</TableCell>
+                  {spec.map(s => (
+                    <TableCell>{specVal(row, s)}</TableCell>
+                  ))}
                 </TableRow>
               ))}
               {emptyRows > 0 && (
@@ -241,8 +197,8 @@ class ListImports extends Component {
   }
 }
 
-ListImports.propTypes = {
+PaperTable.propTypes = {
   classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(ListImports);
+export default withStyles(styles)(PaperTable);
