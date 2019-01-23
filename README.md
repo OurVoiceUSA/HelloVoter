@@ -84,6 +84,8 @@ Test Automation for Android may have issues due to a newer version of react nati
 
 Thank you for your interest in contributing to us! To avoid potential legal headaches and to allow distribution on Apple's App Store please sign our CLA (Contributors License Agreement). We handle this via pull request hooks on GitHub provided by https://cla-assistant.io/
 
+Please also read our [code of conduct](CODE_OF_CONDUCT.md).
+
 ## License
 
 	Software License Agreement (GPLv3+)
