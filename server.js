@@ -1318,6 +1318,7 @@ async function importList(req, res) {
 async function importBegin(req, res) {
   if (req.user.admin !== true) return _403(res, "Permission denied.");
   if (!valid(req.body.filename)) return _400(res, "Invalid value to parameter 'filename'.");
+  if (typeof req.body.attributes !== 'object') return _400(res, "Invalid value to parameter 'attributes'.");
 
   // TODO: validate that req.body.filename is a file name
   req.body.id = req.user.id;
@@ -1325,7 +1326,7 @@ async function importBegin(req, res) {
     let ref = await cqa('match (a:ImportFile {filename:{filename}}) where a.submitted is not null return count(a)', req.body);
     if (ref.data[0] !== 0) return _403(res, "Import File already exists.");
 
-    await cqa('match (a:Volunteer {id:{id}}) merge (b:ImportFile {filename:{filename}}) on create set b += {id: randomUUID(), created: timestamp()} merge (a)-[:IMPORTED_BY]->(b)', req.body);
+    await cqa('match (a:Volunteer {id:{id}}) merge (b:ImportFile {filename:{filename}}) on create set b += {id: randomUUID(), created: timestamp(), attributes: {attributes}} merge (a)-[:IMPORTED_BY]->(b)', req.body);
   } catch (e) {
     return _500(res, e);
   }
@@ -1338,8 +1339,14 @@ async function importAdd(req, res) {
   if (!valid(req.body.filename)) return _400(res, "Invalid value to parameter 'filename'.");
 
   try {
-    // TODO: iterate through req.body.data and normalize address data
-    await cqa('match (a:ImportFile {filename:{filename}}) with collect(a) as lock call apoc.lock.nodes(lock) match (a:ImportFile {filename:{filename}}) unwind {data} as r merge (b:ImportRecord {id:apoc.util.md5([r[0],r[1],r[2],r[3],r[4],r[5],r[6],r[7],r[8]])}) on create set b += {pid:r[0], name:r[1], street:r[2], unit:r[3], city:r[4], state:r[5], zip:r[6], lng:r[7], lat:r[8], processed:0} merge (b)-[:FILE]->(a)', req.body);
+    // TODO: verify data[0].length matches attriutes.length+9
+    // convert attriutes to part of a cypher query
+    let attrq = "";
+    let ref = await cqa('match (a:ImportFile {filename:{filename}}) return a.attributes', req.body);
+    for (let i = 0; i < ref.data[0].length; i++) {
+      attrq += ref.data[0][i]+':r['+(i+9)+'],';
+    }
+    await cqa('match (a:ImportFile {filename:{filename}}) with collect(a) as lock call apoc.lock.nodes(lock) match (a:ImportFile {filename:{filename}}) unwind {data} as r merge (b:ImportRecord {id:apoc.util.md5([r[0],r[1],r[2],r[3],r[4],r[5],r[6],r[7],r[8]])}) on create set b += {pid:r[0], name:r[1], street:r[2], unit:r[3], city:r[4], state:r[5], zip:r[6], lng:r[7], lat:r[8],'+attrq+' processed:0} merge (b)-[:FILE]->(a)', req.body);
   } catch (e) {
     return _500(res, e);
   }
