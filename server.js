@@ -1208,7 +1208,16 @@ queueTasks.doProcessImport = async function (jobId, input) {
   await cqa('call spatial.addPointLayer({filename})', {filename: filename});
 
   // add this import file's nodes to the temporary point layer
-  await cqa('match (a:ReferenceNode {name:"spatial_root"}) with collect(a) as lock call apoc.lock.nodes(lock) match (:ImportFile {filename:{filename}})<-[:FILE]-(:ImportRecord)<-[:SOURCE]-(a:Address) with collect(a) as nodes call spatial.addNodes({filename}, nodes) yield count return count', {filename: filename});
+  // TODO: parallel imports of files above the below transaction limit have a possibility of a org.neo4j.kernel.DeadlockDetectedException
+  limit = 100000;
+  count = limit;
+
+  while (count === limit) {
+    let start = new Date().getTime();
+    let ref = await cqa('match (a:ReferenceNode {name:"spatial_root"}) with collect(a) as lock call apoc.lock.nodes(lock) match (:ImportFile {filename:{filename}})<-[:FILE]-(:ImportRecord)<-[:SOURCE]-(a:Address) where not exists(a.bbox) and not a.position = point({longitude: 0, latitude: 0}) with distinct(a) limit {limit} with collect(a) as nodes call spatial.addNodes({filename}, nodes) yield count return count', {filename: filename, limit: limit});
+    count = ref.data[0];
+    console.log("Processed "+count+" records into spatial.addNodes() for temporary layer for "+filename+" in "+((new Date().getTime())-start)+" milliseconds");
+  }
 
   // fetch turfs that touch the bbox of this import set
   let ref = await cqa('match (:ImportFile {filename:{filename}})<-[:FILE]-(:ImportRecord)<-[:SOURCE]-(a:Address) with min(a.position) as min, max(a.position) as max call spatial.intersects("turf", "POLYGON(("+min.x+" "+min.y+", "+max.x+" "+min.y+", "+max.x+" "+max.y+", "+min.x+" "+max.y+", "+min.x+" "+min.y+"))") yield node return node.id', {filename: filename});
@@ -1223,7 +1232,7 @@ queueTasks.doProcessImport = async function (jobId, input) {
   });
 
   // remove the temporary point layer
-  await cqa('match (a:Address)-[r:RTREE_REFERENCE]-()-[:RTREE_CHILD*0..10]-()-[:RTREE_ROOT]-({layer:{filename}})-[:LAYER]-(:ReferenceNode {name:"spatial_root"}) delete r', {filename: filename});
+  await cqa('match (a:Address)-[r:RTREE_REFERENCE]-()-[:RTREE_CHILD*0..10]-()-[:RTREE_ROOT]-({layer:{filename}})-[:LAYER]-(:ReferenceNode {name:"spatial_root"}) set a.bbox = null delete r', {filename: filename});
   await cqa('call spatial.removeLayer({filename})', {filename: filename});
 
   // turfadd_start, index_start
