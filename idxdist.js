@@ -32,6 +32,18 @@ async function doYerThang() {
   let cds = fs.readdirSync('./districts/cds/'+cdyear);
   let states = fs.readdirSync('./districts/states');
 
+  let us_cities = JSON.parse(fs.readFileSync('./us_cities.geojson'));
+
+  await asyncForEach(us_cities.features, async (city) => {
+    if (city.geometry) {
+      let wkt = wkx.Geometry.parseGeoJSON(city.geometry).toEwkt().split(';')[1];
+      try {
+        await cqa('create (a:District {name:{name}, geometry: {geo}, wkt: {wkt}}) with a call spatial.addNode("district", a) yield node return count(node)',
+          {name: city.properties.state+' '+city.properties.city, geo: JSON.stringify(city.geometry), wkt: wkt});
+      } catch (e) {console.log(e)}
+    }
+  });
+
   await asyncForEach(cds, async (cd) => {
     let ref = await cqa('match (a:District {name:{name}}) return count(a)', {name: cd});
     if (ref.data[0] === 0) {
