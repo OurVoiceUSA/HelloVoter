@@ -64,16 +64,11 @@ async function queueTask(task, pattern, input) {
 
   // create QueueTask object in database -- either we can execute now (active: true, started: timestamp()) or we have to wait (active: false)
   try {
-    job = await cqa('match (a:QueueTask {active: true}) with count(a) as jobs call apoc.do.when(jobs < '+concurrency+', "create (a:QueueTask {id: randomUUID(), created: timestamp(), started: timestamp(), active: true}) return a", "create (a:QueueTask {id: randomUUID(), created: timestamp(), active: false}) return a", {}) yield value return value');
-
-    // build args for QueueTask update + link to pattern object
     let args = JSON.parse(JSON.stringify(input)); // deep copy to get pattern params
     args.input = JSON.stringify(input);
-    args.jobId = job.data[0].a.id;
     args.task = task;
 
-    // TODO: fix having to issue update with task/input because of apoc sub-query param issue
-    await cqa('match (a:QueueTask {id:{jobId}}) set a.task = {task}, a.input = {input} with a match (b:'+pattern+') merge (b)-[:PROCESSED_BY]->(a)', args);
+    job = await cqa('match (a:QueueTask {active: true}) with count(a) as jobs call apoc.do.when(jobs < 3, "create (a:QueueTask {id: randomUUID(), created: timestamp(), started: timestamp(), task: task, input: input, active: true}) return a", "create (a:QueueTask {id: randomUUID(), created: timestamp(), task: task, input: input, active: false}) return a", {task: {task}, input: {input}}) yield value match (a:QueueTask {id:value.a.id}) match (b:'+pattern+') merge (b)-[:PROCESSED_BY]->(a) return a', args);
   } catch (e) {
     console.warn("Houston we have a problem.");
     console.warn(e);
@@ -81,13 +76,13 @@ async function queueTask(task, pattern, input) {
   }
 
   // find out whether we execute or enqueue
-  if (job.data[0].a.active) {
-    queue.emit('doTask', job.data[0].a.id);
+  if (job.data[0].active) {
+    queue.emit('doTask', job.data[0].id);
   } else {
     console.log("Enqueued task "+task);
   }
 
-  return job.data[0].a;
+  return job.data[0];
 }
 
 queue.on('doTask', async function (id) {
