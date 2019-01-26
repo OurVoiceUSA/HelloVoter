@@ -486,6 +486,8 @@ export class CardTeam extends Component {
       });
     });
 
+    const CardTurf = (turfs.length < 100?CardTurf:(props) => (<div>{props.turf.name}</div>));
+
     turfs.forEach(t => {
       turfOptions.push({
         value: _searchStringify(t),
