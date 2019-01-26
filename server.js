@@ -1201,8 +1201,33 @@ queueTasks.doProcessImport = async function (jobId, input) {
   // TODO: we only merge :Address here - can still have dupe Unit & Person nodes
   stats = await cqa('match (a:ImportFile {filename: {filename}}) call apoc.periodic.iterate("match (a:Address)-[:SOURCE]->(:ImportRecord)-[:FILE]->(:ImportFile {filename:\\""+a.filename+"\\"}) match (b:Address {id:a.id}) with a, count(b) as count where count > 1 return distinct(a.id) as id", "match (a:Address {id:{id}}) with collect(a) as nodes call apoc.refactor.mergeNodes(nodes) yield node return node", {iterateList:false}) yield total return total', {filename: filename});
 
-  // dedupe_end, dupes, index_start
-  await cqa('match (a:ImportFile {filename:{filename}}) set a.dedupe_end = timestamp(), a.dupes_address = toInt({dupes_address}), a.index_start = timestamp()', {filename: filename, dupes_address: stats.data[0]});
+  // dedupe_end, dupes, turfadd_start
+  await cqa('match (a:ImportFile {filename:{filename}}) set a.dedupe_end = timestamp(), a.dupes_address = toInt({dupes_address}), a.turfadd_start = timestamp()', {filename: filename, dupes_address: stats.data[0]});
+
+  // create a temporary point layer to do turf indexing
+  await cqa('call spatial.addPointLayer({filename})', {filename: filename});
+
+  // add this import file's nodes to the temporary point layer
+  await cqa('match (a:ReferenceNode {name:"spatial_root"}) with collect(a) as lock call apoc.lock.nodes(lock) match (:ImportFile {filename:{filename}})<-[:FILE]-(:ImportRecord)<-[:SOURCE]-(a:Address) with collect(a) as nodes call spatial.addNodes({filename}, nodes) yield count return count', {filename: filename});
+
+  // fetch turfs that touch the bbox of this import set
+  let ref = await cqa('match (:ImportFile {filename:{filename}})<-[:FILE]-(:ImportRecord)<-[:SOURCE]-(a:Address) with min(a.position) as min, max(a.position) as max call spatial.intersects("turf", "POLYGON(("+min.x+" "+min.y+", "+max.x+" "+min.y+", "+max.x+" "+max.y+", "+min.x+" "+max.y+", "+min.x+" "+min.y+"))") yield node return node.id', {filename: filename});
+
+  // loop through each turfId and add it to 
+  await asyncForEach(ref.data, async (turfId) => {
+    // TODO: refactor; this is a copy/paste of doTurfIndexing, it's just done on a different spatial layer
+    let st = new Date().getTime();
+    let t = await cqa('CALL apoc.periodic.iterate("match (a:Turf {id:\\"'+turfId+'\\"}) call spatial.intersects(\\"'+filename+'\\", a.wkt) yield node return node, a", "merge (node)-[:WITHIN]->(a)", {batchSize:10000,iterateList:true}) yield total return total', input);
+    let total = t.data[0];
+    console.log("Processed "+total+" records for "+turfId+" in "+((new Date().getTime())-st)+" milliseconds");
+  });
+
+  // remove the temporary point layer
+  await cqa('match (a:Address)-[r:RTREE_REFERENCE]-()-[:RTREE_CHILD*0..10]-()-[:RTREE_ROOT]-({layer:{filename}})-[:LAYER]-(:ReferenceNode {name:"spatial_root"}) delete r', {filename: filename});
+  await cqa('call spatial.removeLayer({filename})', {filename: filename});
+
+  // turfadd_start, index_start
+  await cqa('match (a:ImportFile {filename:{filename}}) set a.turfadd_end = timestamp(), a.index_start = timestamp()', {filename: filename});
 
   // aquire a write lock so we can only do addNodes from a single job at a time, for heap safety
   // TODO: limit based on max heap
@@ -1216,17 +1241,8 @@ queueTasks.doProcessImport = async function (jobId, input) {
     console.log("Processed "+count+" records into spatial.addNodes() for "+filename+" in "+((new Date().getTime())-start)+" milliseconds");
   }
 
-  // index_end, turfadd_start
-  await cqa('match (a:ImportFile {filename:{filename}}) set a.index_end = timestamp(), a.turfadd_start = timestamp()', {filename: filename});
-
-  // finish it off by adding these news addresses to all relivant turfs
-  let start = new Date().getTime();
-  let ref = await cqa('match (a:ImportFile {filename: {filename}}) CALL apoc.periodic.iterate("match (a:Address)-[:SOURCE]->(:ImportRecord)-[:FILE]->(:ImportFile {filename:\\""+a.filename+"\\"}) where not a.position = point({longitude: 0, latitude: 0}) return distinct(a) as a", "call spatial.intersects(\\"turf\\", a.position) yield node merge (a)-[:WITHIN]->(node)", {batchSize:1}) yield total return total', {filename: filename});
-  let total = ref.data[0];
-  console.log("Processed "+total+" records into turfs for "+filename+" in "+((new Date().getTime())-start)+" milliseconds");
-
   // turfadd_end, completed
-  await cqa('match (a:ImportFile {filename:{filename}}) set a.turfadd_end = timestamp(), a.completed = timestamp()', {filename: filename});
+  await cqa('match (a:ImportFile {filename:{filename}}) set a.index_end = timestamp(), a.completed = timestamp()', {filename: filename});
 }
 
 async function doGeocode(data) {
