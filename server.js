@@ -338,7 +338,7 @@ async function doDbInit() {
     {id: "f6a41b03-0dc8-4d59-90bf-033db6a96214", name: "US Military Veteran", type: "boolean", multi: false},
     {id: "689dc96a-a1db-4b20-9443-e69185675d28", name: "Health Insurance", type: "boolean", multi: false},
     {id: "2ad269f5-2712-4a0e-a3d4-be3074a695b6", name: "Race and Ethnicity", type: "string", multi: true, values: ["Prefer not to say","African American","Asian","Hispanic","Latino","Native American","Pacific Islander","White"]},
-    {id: "59f09d32-b782-4a32-b7f1-4ffe81975167", name: "Spoken Languages", type: "string", multi: false, values: ["English","Spanish","Chinese","Arabic","French","German"]},
+    {id: "59f09d32-b782-4a32-b7f1-4ffe81975167", name: "Spoken Languages", type: "string", multi: true, values: ["English","Spanish","Chinese","Arabic","French","German"]},
   ];
 
   await asyncForEach(defaultAttributes, async (attribute) => {
