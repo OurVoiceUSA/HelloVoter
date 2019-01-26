@@ -168,16 +168,16 @@ export default class ImportData extends Component {
                   params: ['dedupe_start', 'dedupe_end'],
                 },
                 {
-                  header: 'Index Time',
-                  tooltip: 'The time it took to add these addresses to the master database index.',
-                  func: jobRuntime,
-                  params: ['index_start', 'index_end'],
-                },
-                {
                   header: 'Turf Index Time',
                   tooltip: 'The time it took the system to index each address to turfs it belongs to.',
                   func: jobRuntime,
                   params: ['turfadd_start', 'turfadd_end'],
+                },
+                {
+                  header: 'Address Index Time',
+                  tooltip: 'The time it took to add these addresses to the master database index.',
+                  func: jobRuntime,
+                  params: ['index_start', 'index_end'],
                 },
                 {
                   header: 'Total Time',
