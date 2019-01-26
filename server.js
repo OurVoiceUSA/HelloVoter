@@ -334,7 +334,7 @@ async function doDbInit() {
     {id: "134095d5-c1c8-46ad-9952-cc66e2934f9e", name: "Receive Notifications", type: "string", multi: true, values: ["Phone","Text","Email"]},
     {id: "7d3466e5-2cee-491e-b3f4-bfea3a4b010a", name: "Phone Number", type: "string", multi: true},
     {id: "b687b86e-8fe3-4235-bb78-1919bcca00db", name: "Email Address", type: "string", multi: true},
-    {id: "9a903e4f-66ea-4625-bacf-43abb53c6cfc", name: "Date of Birth", type: "string", multi: false},
+    {id: "9a903e4f-66ea-4625-bacf-43abb53c6cfc", name: "Date of Birth", type: "date", multi: false},
     {id: "f6a41b03-0dc8-4d59-90bf-033db6a96214", name: "US Military Veteran", type: "boolean", multi: false},
     {id: "689dc96a-a1db-4b20-9443-e69185675d28", name: "Health Insurance", type: "boolean", multi: false},
     {id: "2ad269f5-2712-4a0e-a3d4-be3074a695b6", name: "Race and Ethnicity", type: "string", multi: true, values: ["Prefer not to say","African American","Asian","Hispanic","Latino","Native American","Pacific Islander","White"]},
