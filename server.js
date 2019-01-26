@@ -303,12 +303,10 @@ async function doDbInit() {
     {label: 'Turf', property: 'id', create: 'create constraint on (a:Turf) assert a.id is unique'},
     {label: 'Turf', property: 'name', create: 'create constraint on (a:Turf) assert a.name is unique'},
     {label: 'Form', property: 'id', create: 'create constraint on (a:Form) assert a.id is unique'},
-    {label: 'Attribute', property: 'key', create: 'create constraint on (a:Attribute) assert a.key is unique'},
     {label: 'Unit', property: 'id', create: 'create constraint on (a:Unit) assert a.id is unique'},
     {label: 'ImportFile', property: 'id', create: 'create constraint on (a:ImportFile) assert a.id is unique'},
     {label: 'ImportFile', property: 'filename', create: 'create constraint on (a:ImportFile) assert a.filename is unique'},
     {label: 'ImportRecord', property: 'id', create: 'create constraint on (a:ImportRecord) assert a.id is unique'},
-    {label: 'ImportRecord', property: 'processed', create: 'create index on :ImportRecord(processed)'},
     {label: 'QueueTask', property: 'id', create: 'create constraint on (a:QueueTask) assert a.id is unique'},
     {label: 'QueueTask', property: 'created', create: 'create index on :QueueTask(created)'},
   ];
@@ -1145,12 +1143,13 @@ queueTasks.doProcessImport = async function (jobId, input) {
   // parse_start
   await cqa('match (a:ImportFile {filename:{filename}}) set a.parse_start = timestamp()', {filename: filename});
 
+  let limit = 100000;
+
   // non-unit addresses
   await cqa(`match (a:ImportFile {filename:{filename}})
-    CALL apoc.periodic.iterate("match (a)<-[:FILE]-(b:ImportRecord {processed:0}) where b.unit = '' return b",
+    CALL apoc.periodic.iterate("match (a)<-[:FILE]-(b:ImportRecord) where b.unit = '' return b",
       "merge (c:Address {id:apoc.util.md5([toLower(b.street), toLower(b.city), toLower(b.state), substring(b.zip,0,5)])})
-        on create set b.processed = timestamp(), c += {created: timestamp(), updated: timestamp(), longitude: toFloat(b.lng), latitude: toFloat(b.lat), position: point({longitude: toFloat(b.lng), latitude: toFloat(b.lat)}), street:b.street, city:b.city, state:b.state, zip:b.zip}
-        on match set b.processed = timestamp()
+        on create set c += {created: timestamp(), updated: timestamp(), longitude: toFloat(b.lng), latitude: toFloat(b.lat), position: point({longitude: toFloat(b.lng), latitude: toFloat(b.lat)}), street:b.street, city:b.city, state:b.state, zip:b.zip}
       merge (c)-[:SOURCE]->(b)
       with b,c
       where not b.name = ''
@@ -1158,15 +1157,14 @@ queueTasks.doProcessImport = async function (jobId, input) {
         on create set d.name = b.name
       merge (d)-[:SOURCE]->(b)
       merge (d)-[:RESIDENCE]->(c)",
-    {batchSize:10000,iterateList:true}) yield total return total
-  `, {filename: filename});
+    {batchSize:{limit},iterateList:true}) yield total return total
+  `, {filename: filename, limit: limit});
 
   // multi-unit addresses
   await cqa(`match (a:ImportFile {filename:{filename}})
-    CALL apoc.periodic.iterate("match (a)<-[:FILE]-(b:ImportRecord {processed:0}) where not b.unit = '' return b",
+    CALL apoc.periodic.iterate("match (a)<-[:FILE]-(b:ImportRecord) where not b.unit = '' return b",
       "merge (c:Address {id:apoc.util.md5([toLower(b.street), toLower(b.city), toLower(b.state), substring(b.zip,0,5)])})
-        on create set b.processed = timestamp(), c += {created: timestamp(), updated: timestamp(), longitude: toFloat(b.lng), latitude: toFloat(b.lat), position: point({longitude: toFloat(b.lng), latitude: toFloat(b.lat)}), street:b.street, city:b.city, state:b.state, zip:b.zip}
-        on match set b.processed = timestamp()
+        on create set c += {created: timestamp(), updated: timestamp(), longitude: toFloat(b.lng), latitude: toFloat(b.lat), position: point({longitude: toFloat(b.lng), latitude: toFloat(b.lat)}), street:b.street, city:b.city, state:b.state, zip:b.zip}
       merge (e:Unit {name:b.unit})-[:AT]->(c)
       merge (c)-[:SOURCE]->(b)
       merge (e)-[:SOURCE]->(b)
@@ -1176,17 +1174,22 @@ queueTasks.doProcessImport = async function (jobId, input) {
         on create set d.name = b.name
       merge (d)-[:SOURCE]->(b)
       merge (d)-[:RESIDENCE]->(e)",
-    {batchSize:10000,iterateList:true}) yield total return total
-    `, {filename: filename});
+    {batchSize:{limit},iterateList:true}) yield total return total
+    `, {filename: filename, limit: limit});
+
+  // loop through attributes and create them per person
+  await cqa('match (a:Person)-[:SOURCE]->(b:ImportRecord)-[:FILE]->(c:ImportFile {filename:{filename}})-[:ATTRIBUTES]->(d:Attribute) create (e:PersonAttribute {value:b[d.name]})-[:ATTRIBUTE_OF {current:true}]->(a) create (e)-[:COLLECTED_ON]->(c) create (e)-[:ATTRIBUTE_TYPE]->(d)', {filename: filename});
+
+  // loop through attributes with multi:false and remove {current:true} property on older sources
 
   // parse_end + num_*, geocode_start
-  stats = await cqa('match (a:ImportFile {filename:{filename}})<-[:FILE]-(b:ImportRecord)<-[:SOURCE]-(c:Address)<-[:RESIDENCE*1..2]-(d:Person) return count(distinct(b)), count(distinct(c)), count(distinct(d))', {filename: filename});
+  stats = await cqa('match (a:ImportFile {filename:{filename}})<-[:FILE]-(b:ImportRecord)<-[:SOURCE]-(c:Address)-[*0..1]-()-[:RESIDENCE]-(d:Person) return count(distinct(b)), count(distinct(c)), count(distinct(d))', {filename: filename});
   let num_addresses = stats.data[0][1]; // save for below
   await cqa('match (a:ImportFile {filename:{filename}}) set a.parse_end = timestamp(), a.geocode_start = timestamp(), a.num_records = toInt({num_records}), a.num_addresses = toInt({num_addresses}), a.num_people = toInt({num_people})', {filename: filename, num_records: stats.data[0][0], num_addresses: stats.data[0][1], num_people: stats.data[0][2]});
 
   // geocoding
   // census has a limit of 10k per batch
-  let limit = 10000;
+  limit = 10000;
   let count = limit;
 
   while (count === limit) {
@@ -1208,7 +1211,7 @@ queueTasks.doProcessImport = async function (jobId, input) {
 
   // aquire a write lock so we can only do addNodes from a single job at a time, for heap safety
   // TODO: limit based on max heap
-  limit = 10000;
+  limit = 100000;
   count = limit;
 
   while (count === limit) {
@@ -1223,7 +1226,7 @@ queueTasks.doProcessImport = async function (jobId, input) {
 
   // finish it off by adding these news addresses to all relivant turfs
   let start = new Date().getTime();
-  let ref = await cqa('match (a:ImportFile {filename: {filename}}) CALL apoc.periodic.iterate("match (a:Address)-[:SOURCE]->(:ImportRecord)-[:FILE]->(:ImportFile {filename:\\""+a.filename+"\\"}) where not a.position = point({longitude: 0, latitude: 0}) call spatial.intersects(\\"turf\\", a.position) yield node return a, node", "merge (a)-[:WITHIN]->(node)", {batchSize:10000,iterateList:true}) yield total return total', {filename: filename});
+  let ref = await cqa('match (a:ImportFile {filename: {filename}}) CALL apoc.periodic.iterate("match (a:Address)-[:SOURCE]->(:ImportRecord)-[:FILE]->(:ImportFile {filename:\\""+a.filename+"\\"}) where not a.position = point({longitude: 0, latitude: 0}) return distinct(a) as a", "call spatial.intersects(\\"turf\\", a.position) yield node merge (a)-[:WITHIN]->(node)", {batchSize:1}) yield total return total', {filename: filename});
   let total = ref.data[0];
   console.log("Processed "+total+" records into turfs for "+filename+" in "+((new Date().getTime())-start)+" milliseconds");
 
@@ -1326,7 +1329,8 @@ async function importBegin(req, res) {
     let ref = await cqa('match (a:ImportFile {filename:{filename}}) where a.submitted is not null return count(a)', req.body);
     if (ref.data[0] !== 0) return _403(res, "Import File already exists.");
 
-    await cqa('match (a:Volunteer {id:{id}}) merge (b:ImportFile {filename:{filename}}) on create set b += {id: randomUUID(), created: timestamp(), attributes: {attributes}} merge (a)-[:IMPORTED_BY]->(b)', req.body);
+    // attributes property stores which order they come in as
+    await cqa('match (a:Volunteer {id:{id}}) merge (b:ImportFile {filename:{filename}}) on create set b += {id: randomUUID(), created: timestamp(), attributes: {attributes}} merge (a)-[:IMPORTED_BY]->(b) with b unwind {attributes} as attr match (a:Attribute {name:attr}) merge (b)-[:ATTRIBUTES]->(a)', req.body);
   } catch (e) {
     return _500(res, e);
   }
@@ -1340,13 +1344,15 @@ async function importAdd(req, res) {
 
   try {
     // TODO: verify data[0].length matches attriutes.length+9
+    // TODO: verify each attribute exists
     // convert attriutes to part of a cypher query
     let attrq = "";
     let ref = await cqa('match (a:ImportFile {filename:{filename}}) return a.attributes', req.body);
     for (let i = 0; i < ref.data[0].length; i++) {
-      attrq += ref.data[0][i]+':r['+(i+9)+'],';
+      attrq += '`'+ref.data[0][i]+'`:r['+(i+9)+']';
+      if (i < (ref.data[0].length-1)) attrq += ',';
     }
-    await cqa('match (a:ImportFile {filename:{filename}}) with collect(a) as lock call apoc.lock.nodes(lock) match (a:ImportFile {filename:{filename}}) unwind {data} as r merge (b:ImportRecord {id:apoc.util.md5([r[0],r[1],r[2],r[3],r[4],r[5],r[6],r[7],r[8]])}) on create set b += {pid:r[0], name:r[1], street:r[2], unit:r[3], city:r[4], state:r[5], zip:r[6], lng:r[7], lat:r[8],'+attrq+' processed:0} merge (b)-[:FILE]->(a)', req.body);
+    await cqa('match (a:ImportFile {filename:{filename}}) with collect(a) as lock call apoc.lock.nodes(lock) match (a:ImportFile {filename:{filename}}) unwind {data} as r merge (b:ImportRecord {id:apoc.util.md5([r[0],r[1],r[2],r[3],r[4],r[5],r[6],r[7],r[8]])}) on create set b += {pid:r[0], name:r[1], street:r[2], unit:r[3], city:r[4], state:r[5], zip:r[6], lng:r[7], lat:r[8],'+attrq+'} merge (b)-[:FILE]->(a)', req.body);
   } catch (e) {
     return _500(res, e);
   }
