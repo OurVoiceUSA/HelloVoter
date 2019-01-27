@@ -1199,7 +1199,7 @@ queueTasks.doProcessImport = async function (jobId, input) {
 
   // find instances of duplicate Address(id) and merge them into a single node
   // TODO: we only merge :Address here - can still have dupe Unit & Person nodes
-  stats = await cqa('match (a:ImportFile {filename: {filename}}) call apoc.periodic.iterate("match (a:Address)-[:SOURCE]->(:ImportRecord)-[:FILE]->(:ImportFile {filename:\\""+a.filename+"\\"}) match (b:Address {id:a.id}) with a, count(b) as count where count > 1 return distinct(a.id) as id", "match (a:Address {id:{id}}) with collect(a) as nodes call apoc.refactor.mergeNodes(nodes) yield node return node", {iterateList:false}) yield total return total', {filename: filename});
+  stats = await cqa('match (a:ImportFile {filename: {filename}}) call apoc.periodic.iterate("match (aa:Address)-[:SOURCE]->(:ImportRecord)-[:FILE]->(:ImportFile {filename:\\""+a.filename+"\\"}) with distinct(aa) as a match (b:Address {id:a.id}) with a, count(b) as count where count > 1 return distinct(a.id) as id", "match (a:Address {id:{id}}) with collect(a) as nodes call apoc.refactor.mergeNodes(nodes) yield node return node", {iterateList:false}) yield total return total', {filename: filename});
 
   // dedupe_end, dupes, turfadd_start
   await cqa('match (a:ImportFile {filename:{filename}}) set a.dedupe_end = timestamp(), a.dupes_address = toInt({dupes_address}), a.turfadd_start = timestamp()', {filename: filename, dupes_address: stats.data[0]});
