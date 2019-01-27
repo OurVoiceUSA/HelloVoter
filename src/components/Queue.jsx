@@ -21,6 +21,11 @@ const jobStatus = (job) => {
   }
 };
 
+const showErrorIfError = (job) => {
+  if (job.error) return job.error;
+  else return null;
+};
+
 const taskObjFromQueue = (type, obj) => {
   switch (type) {
   case 'ImportFile': return 'Import file '+obj.filename;
@@ -98,6 +103,7 @@ export default class Queue extends Component {
               header: 'Status',
               tooltip: 'The status of this particular task.',
               func: jobStatus,
+              funcItemTooltip: showErrorIfError,
             },
             {
               header: 'Task Reference',

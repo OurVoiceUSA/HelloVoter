@@ -162,9 +162,17 @@ class PaperTable extends Component {
             <TableBody>
               {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => (
                 <TableRow key={row.id}>
-                  {spec.map(s => (
-                    <TableCell>{specVal(row, s)}</TableCell>
-                  ))}
+                  {spec.map(s => {
+                    if (s.funcItemTooltip && s.funcItemTooltip(row)) {
+                      return (
+                        <Tooltip title={row.error}>
+                          <TableCell>{specVal(row, s)}</TableCell>
+                        </Tooltip>
+                      );
+                    } else {
+                      return (<TableCell>{specVal(row, s)}</TableCell>);
+                    }
+                  })}
                 </TableRow>
               ))}
               {emptyRows > 0 && (
