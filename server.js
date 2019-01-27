@@ -289,7 +289,7 @@ async function doDbInit() {
     {label: 'Attribute', property: 'name', create: 'create constraint on (a:Attribute) assert a.name is unique'},
     {label: 'Person', property: 'id', create: 'create constraint on (a:Person) assert a.id is unique'},
     {label: 'Address', property: 'id', create: 'create index on :Address(id)'}, // asserting a.id is unique causes issues so we handle dupes manually
-    {label: 'Address', property: 'created', create: 'create index on :Address(created)'},
+    {label: 'Address', property: 'updated', create: 'create index on :Address(updated)'},
     {label: 'Address', property: 'position', create: 'create index on :Address(position)'},
     {label: 'Address', property: 'bbox', create: 'create index on :Address(bbox)'},
     {label: 'Volunteer', property: 'id', create: 'create constraint on (a:Volunteer) assert a.id is unique'},
