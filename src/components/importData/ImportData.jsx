@@ -144,8 +144,8 @@ export default class ImportData extends Component {
                   params: ['submitted', 'parse_start'],
                 },
                 {
-                  header: 'Prase time',
-                  tooltip: 'The file name of the imported file.',
+                  header: 'Parse time',
+                  tooltip: 'The time it took to aggregate address, people, and attribute data into the database.',
                   func: jobRuntime,
                   params: ['parse_start', 'parse_end'],
                 },
