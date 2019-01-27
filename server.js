@@ -1222,6 +1222,8 @@ queueTasks.doProcessImport = async function (jobId, input) {
   // fetch turfs that touch the bbox of this import set
   let ref = await cqa('match (:ImportFile {filename:{filename}})<-[:FILE]-(:ImportRecord)<-[:SOURCE]-(a:Address) with min(a.position) as min, max(a.position) as max call spatial.intersects("turf", "POLYGON(("+min.x+" "+min.y+", "+max.x+" "+min.y+", "+max.x+" "+max.y+", "+min.x+" "+max.y+", "+min.x+" "+min.y+"))") yield node return node.id', {filename: filename});
 
+  console.log("Records for "+filename+" may exist in up to "+ref.data.length+" turfs; begin turf index processing.");
+
   // loop through each turfId and add it to 
   await asyncForEach(ref.data, async (turfId) => {
     // TODO: refactor; this is a copy/paste of doTurfIndexing, it's just done on a different spatial layer
