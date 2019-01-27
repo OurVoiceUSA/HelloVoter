@@ -286,7 +286,6 @@ async function doDbInit() {
 
   let indexes = [
     {label: 'Attribute', property: 'id', create: 'create constraint on (a:Attribute) assert a.id is unique'},
-    {label: 'Attribute', property: 'name', create: 'create constraint on (a:Attribute) assert a.name is unique'},
     {label: 'Person', property: 'id', create: 'create constraint on (a:Person) assert a.id is unique'},
     {label: 'Address', property: 'id', create: 'create index on :Address(id)'}, // asserting a.id is unique causes issues so we handle dupes manually
     {label: 'Address', property: 'updated', create: 'create index on :Address(updated)'},
