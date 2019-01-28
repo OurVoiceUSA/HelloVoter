@@ -1351,7 +1351,7 @@ async function importBegin(req, res) {
     if (ref.data[0] !== 0) return _403(res, "Import File already exists.");
 
     // attributes property stores which order they come in as
-    await cqa('match (a:Volunteer {id:{id}}) merge (b:ImportFile {filename:{filename}}) on create set b += {id: randomUUID(), created: timestamp(), attributes: {attributes}} merge (a)-[:IMPORTED_BY]->(b) with b unwind {attributes} as attr match (a:Attribute {name:attr}) merge (b)-[:ATTRIBUTES]->(a)', req.body);
+    await cqa('match (a:Volunteer {id:{id}}) merge (b:ImportFile {filename:{filename}}) on create set b += {id: randomUUID(), created: timestamp(), attributes: {attributes}} merge (b)-[:IMPORTED_BY]->(a) with b unwind {attributes} as attr match (a:Attribute {name:attr}) merge (b)-[:ATTRIBUTES]->(a)', req.body);
   } catch (e) {
     return _500(res, e);
   }
