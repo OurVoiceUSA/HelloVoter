@@ -74,23 +74,14 @@ class LogIn extends Component {
           <Typography component="h1" variant="h5">
             Sign in to HelloVoterHQ
           </Typography>
-          <form className={classes.form} onSubmit={(e) => { e.preventDefault(); this.props.refer.doSave(e); }} >
+          <form className={classes.form} onSubmit={(e) => { e.preventDefault(); this.props.refer.doSave(e, this.state.target); }} >
             {(process.env.NODE_ENV === 'development')?
-            <FormControlLabel
-              control={<Checkbox id="mock" name="mock" value="mock" color="primary" checked={this.state.mock} onChange={(e, c) => this.setState({mock: c})} />}
-              label="DEVELOPMENT MODE"
-            />
-            :""}
-            <ServerLiveOrMocked mock={this.state.mock} refer={this} qserver={this.props.refer.state.qserver} />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              color="primary"
-              className={classes.submit}
-            >
-              Sign in
-            </Button>
+              <FormControlLabel
+                control={<Checkbox id="mock" name="mock" value="mock" color="primary" checked={this.state.mock} onChange={(e, c) => this.setState({mock: c})} />}
+                label="DEVELOPMENT MODE"
+              />
+              :''}
+            <ServerLiveOrMocked classes={classes} mock={this.state.mock} refer={this} qserver={this.props.refer.state.qserver} />
           </form>
         </Paper>
         <br />
@@ -106,7 +97,7 @@ const ServerLiveOrMocked = (props) => {
     <Select
       options={mocked_users}
       placeholder="Choose a user to mock"
-      onChange={(obj) => props.refer.props.refer.doSave(null, obj.value)}
+      onChange={(obj) => props.refer.props.refer.doSave(null, null, obj.value)}
     />
   );
 
@@ -120,8 +111,28 @@ const ServerLiveOrMocked = (props) => {
         control={<Checkbox value="ack" color="primary" required />}
         label="By checking this box you acknowledge that the server to which you are connecting is not affiliated with Our Voice USA and the data you send and receive is governed by that server's terms of use."
       />
+      <Button
+        type="submit"
+        fullWidth
+        variant="contained"
+        color="primary"
+        className={props.classes.submit}
+        onClick={() => props.refer.setState({target: 'google'})}
+      >
+        Google Sign In
+      </Button>
+      <Button
+        type="submit"
+        fullWidth
+        variant="contained"
+        color="secondary"
+        onClick={() => props.refer.setState({target: 'facebook'})}
+        className={props.classes.submit}
+      >
+        Facebook Sign In
+      </Button>
     </div>
   );
-}
+};
 
 export default withStyles(styles)(LogIn);

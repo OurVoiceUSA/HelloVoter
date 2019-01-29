@@ -114,7 +114,7 @@ class App extends Component {
     this.setState({ menuLogout: false, server: {} });
   };
 
-  doSave = async (event, user) => {
+  doSave = async (event, target, user) => {
     // mocked user
     if (user) {
       let token = jwt.sign(user, 'shhhhh');
@@ -129,11 +129,11 @@ class App extends Component {
       });
     } else {
       // live poll
-      await this.singHello(event.target.server.value);
+      await this.singHello(event.target.server.value, target);
     }
   };
 
-  singHello = async server => {
+  singHello = async (server, target) => {
     let res;
 
     localStorage.setItem('server', server);
@@ -156,25 +156,28 @@ class App extends Component {
         return { error: true, msg: 'Missing required header.' };
 
       switch (res.status) {
-        case 200:
-          break; // valid - break to proceed
-        case 400:
-          return {
-            error: true,
-            msg:
-              "The server didn't understand the request sent from this device."
-          };
-        case 401:
-          window.location.href = sm_oauth_url + '/gm?app=HelloVoterHQ';
-          return { error: false, flag: true };
-        case 403:
-          return {
-            error: true,
-            msg:
-              "We're sorry, but your request to volunteer with this server has been rejected."
-          };
-        default:
-          return { error: true, msg: 'Unknown error connecting to server.' };
+      case 200:
+        break; // valid - break to proceed
+      case 400:
+        return {
+          error: true,
+          msg:
+              'The server didn\'t understand the request sent from this device.'
+        };
+      case 401:
+        let sm = '';
+        if (target === 'google') sm = 'gm';
+        if (target === 'facebook') sm = 'fm';
+        window.location.href = sm_oauth_url + '/'+sm+'/?app=HelloVoterHQ';
+        return { error: false, flag: true };
+      case 403:
+        return {
+          error: true,
+          msg:
+              'We\'re sorry, but your request to volunteer with this server has been rejected.'
+        };
+      default:
+        return { error: true, msg: 'Unknown error connecting to server.' };
       }
 
       let body = await res.json();

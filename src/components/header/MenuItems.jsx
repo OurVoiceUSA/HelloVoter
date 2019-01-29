@@ -12,6 +12,7 @@ import MapIcon from '@material-ui/icons/Map';
 import AssignmentIcon from '@material-ui/icons/Assignment';
 import NavigationIcon from '@material-ui/icons/Navigation';
 import PresentToAllIcon from '@material-ui/icons/PresentToAll';
+import WorkIcon from '@material-ui/icons/Work';
 import BarChartIcon from '@material-ui/icons/BarChart';
 import SettingsIcon from '@material-ui/icons/Settings';
 import IndeterminateCheckBoxIcon from '@material-ui/icons/IndeterminateCheckBox';
@@ -75,6 +76,14 @@ const MenuItems = ({ handleClickLogout }) => (
             <PresentToAllIcon />
           </ListItemIcon>
           <ListItemText primary="Import Data" />
+        </ListItem>
+      </Link>
+      <Link to={'/queue/'}>
+        <ListItem button>
+          <ListItemIcon>
+            <WorkIcon />
+          </ListItemIcon>
+          <ListItemText primary="System Queue" />
         </ListItem>
       </Link>
       <Link to={'/analytics/'}>

@@ -16,6 +16,8 @@ Install dependencies with `npm install` and start with `npm start`.
 
 Thank you for your interest in contributing to us! To avoid potential legal headaches please sign our CLA (Contributors License Agreement). We handle this via pull request hooks on GitHub provided by https://cla-assistant.io/
 
+Please also read our [code of conduct](CODE_OF_CONDUCT.md).
+
 ## License
 
         Software License Agreement (AGPLv3+)

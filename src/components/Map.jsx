@@ -33,10 +33,10 @@ export class App extends Component {
 
     // only care about address objects
     Object.keys(data).forEach((d) => {
-      if (data[d] && data[d].type === "address") {
+      if (data[d] && data[d].type === 'address') {
         addresses.push(data[d]);
       }
-    })
+    });
 
     this.setState({turfs, addresses});
   }
@@ -54,7 +54,7 @@ export class App extends Component {
       this.setState({
         showingInfoWindow: false,
         activeMarker: null
-      })
+      });
     }
   };
 
@@ -75,7 +75,7 @@ export class App extends Component {
           <Marker
             key={idx}
             onClick={this.onMarkerClick}
-            title={a.address.join(" ")}
+            title={a.address.join(' ')}
             position={{lat: a.latlng.latitude, lng: a.latlng.longitude}} />
         ))}
         {polygons.map((p, idx) => (

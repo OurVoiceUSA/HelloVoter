@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import { Route, Redirect } from 'react-router'
+import { Route, Redirect } from 'react-router';
 import jwt from 'jsonwebtoken';
 import {notify_error} from '../common.js';
 
@@ -16,7 +16,7 @@ export default class App extends Component {
       jwt.decode(token);
       this.props.refer._loadData(token);
     } catch (e) {
-      notify_error(e, "Unable to extract jwt from URI");
+      notify_error(e, 'Unable to extract jwt from URI');
       token = 'error';
     }
 
@@ -30,6 +30,6 @@ export default class App extends Component {
       <Route render={() => (
         <Redirect to="/" />
       )} />
-    )
+    );
   }
 }

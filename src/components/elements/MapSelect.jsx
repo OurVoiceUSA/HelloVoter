@@ -67,10 +67,10 @@ export class MapSelect extends React.Component {
         {checkbox ? this._renderCheckbox({ checked }) : ''}
         {checked
           ? this._renderMapOptions({
-              map1,
-              map2,
-              value
-            })
+            map1,
+            map2,
+            value
+          })
           : ''}
       </div>
     );

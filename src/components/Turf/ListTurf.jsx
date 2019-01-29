@@ -1,33 +1,20 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+
 import ReactPaginate from 'react-paginate';
 import Select from 'react-select';
-import List from '@material-ui/core/List';
 
-const CardImport = props => {
-  return (
-    <div>
-      {JSON.stringify(props.import)}
-      <br />
-      <br />
-      <br />
-    </div>
-  );
-};
+import { CardTurf } from './CardTurf';
 
-const ListImports = ({
-  perPage,
-  imports,
-  pageNum,
-  handlePageClick,
-  handlePageNumChange
-}) => {
+export const ListTurf = props => {
+  const perPage = props.refer.state.perPage;
   let paginate = <div />;
   let list = [];
 
-  imports.forEach((i, idx) => {
+  props.turf.forEach((t, idx) => {
     let tp = Math.floor(idx / perPage) + 1;
-    if (tp !== pageNum) return;
-    list.push(<CardImport key={i.filename} import={i} />);
+    if (tp !== props.refer.state.pageNum) return;
+    list.push(<CardTurf key={t.id} turf={t} refer={props.refer} />);
   });
 
   paginate = (
@@ -37,10 +24,10 @@ const ListImports = ({
         nextLabel={'next'}
         breakLabel={'...'}
         breakClassName={'break-me'}
-        pageCount={imports.length / perPage}
+        pageCount={props.turf.length / perPage}
         marginPagesDisplayed={1}
         pageRangeDisplayed={8}
-        onPageChange={handlePageClick}
+        onPageChange={props.refer.handlePageClick}
         containerClassName={'pagination'}
         subContainerClassName={'pages pagination'}
         activeClassName={'active'}
@@ -50,7 +37,7 @@ const ListImports = ({
         # Per Page{' '}
         <Select
           value={{ value: perPage, label: perPage }}
-          onChange={handlePageNumChange}
+          onChange={props.refer.handlePageNumChange}
           options={[
             { value: 5, label: 5 },
             { value: 10, label: 10 },
@@ -65,12 +52,15 @@ const ListImports = ({
 
   return (
     <div>
-      <h3>Import History</h3>
+      <h3>
+        {props.type}Turf ({props.turf.length})
+      </h3>
+      <Link to={'/turf/add'}>
+        <button>Add Turf</button>
+      </Link>
       {paginate}
-      <List component="nav">{list}</List>
+      {list}
       {paginate}
     </div>
   );
 };
-
-export default ListImports;

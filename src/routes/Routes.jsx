@@ -8,6 +8,7 @@ import {
   Forms,
   Map,
   ImportData,
+  Queue,
   Analytics,
   Settings,
   Jwt,
@@ -34,6 +35,7 @@ export const Routes = ({ server, refer, google_maps_key }) => (
       render={() => <Map server={server} apiKey={google_maps_key} />}
     />
     <Route path="/import/" render={() => <ImportData server={server} />} />
+    <Route path="/queue/" render={() => <Queue server={server} />} />
     <Route path="/analytics/" render={() => <Analytics server={server} />} />
     <Route path="/settings/" render={() => <Settings server={server} />} />
     <Route path="/jwt/" render={props => <Jwt {...props} refer={refer} />} />
