@@ -61,21 +61,37 @@ export default class ImportData extends Component {
     // send the data in this manner .. start with a "import/begin", send the data in batches
     // with "import/add", and finish with a call to "import/end"
 
-    let filename = 'Test1.csv';
-    await _fetch(this.props.server, '/volunteer/v1/import/begin', 'POST', {
+    // let filename = 'Test1.csv';
+    // await _fetch(this.props.server, '/volunteer/v1/import/begin', 'POST', {
+    //   filename: filename,
+    // });
+    // await _fetch(this.props.server, '/volunteer/v1/import/add', 'POST', {
+    //   filename: filename,
+    //   data: [],
+    // });
+    // await _fetch(this.props.server, '/volunteer/v1/import/add', 'POST', {
+    //   filename: filename,
+    //   data: [],
+    // });
+    // await _fetch(this.props.server, '/volunteer/v1/import/end', 'POST', {
+    //   filename: filename,
+    // });
+    const filename = 'Test1.csv';
+    const { mapped: data } = this.state;
+
+    await _fetch('/import/begin', 'POST', {
       filename: filename,
+      attributes: ['Party Affiliation', 'Date of Birth', 'Spoken Languages'],
     });
-    await _fetch(this.props.server, '/volunteer/v1/import/add', 'POST', {
-      filename: filename,
-      data: [],
-    });
-    await _fetch(this.props.server, '/volunteer/v1/import/add', 'POST', {
-      filename: filename,
-      data: [],
-    });
-    await _fetch(this.props.server, '/volunteer/v1/import/end', 'POST', {
-      filename: filename,
-    });
+    console.log('Sending ' + data.length + ' records to server.');
+    while (data.length) {
+      let arr = [];
+      for (let i = 0; i < 1000; i++) {
+        if (data.length) arr.push(data.pop());
+      }
+      await _fetch('/import/add', 'POST', { filename: filename, data: arr });
+    }
+    await _fetch('/import/end', 'POST', { filename: filename });
   };
 
   _loadData = async () => {
