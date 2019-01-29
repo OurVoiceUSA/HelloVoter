@@ -57,25 +57,6 @@ export default class ImportData extends Component {
   };
 
   sendData = async () => {
-    // This is an example of the "flow" of a data import; once the user submits,
-    // send the data in this manner .. start with a "import/begin", send the data in batches
-    // with "import/add", and finish with a call to "import/end"
-
-    // let filename = 'Test1.csv';
-    // await _fetch(this.props.server, '/volunteer/v1/import/begin', 'POST', {
-    //   filename: filename,
-    // });
-    // await _fetch(this.props.server, '/volunteer/v1/import/add', 'POST', {
-    //   filename: filename,
-    //   data: [],
-    // });
-    // await _fetch(this.props.server, '/volunteer/v1/import/add', 'POST', {
-    //   filename: filename,
-    //   data: [],
-    // });
-    // await _fetch(this.props.server, '/volunteer/v1/import/end', 'POST', {
-    //   filename: filename,
-    // });
     const { mapped: data, filename } = this.state;
 
     await _fetch(this.props.server, '/volunteer/v1/import/begin', 'POST', {
