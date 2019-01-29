@@ -1,4 +1,4 @@
-import React  from 'react';
+import React from 'react';
 import { sortableContainer } from 'react-sortable-hoc';
 import { CardDashboard } from './CardDashboard';
 
@@ -8,7 +8,7 @@ const _Cards = props => {
   return (
     <div className="dashboard-container">
       {props.dash.map((item, index) => {
-        const card = props.cards[item];
+        const card = props.cards[item] || {};
         return (
           <CardDashboard
             name={card.name}
