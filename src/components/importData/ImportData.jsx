@@ -76,10 +76,9 @@ export default class ImportData extends Component {
     // await _fetch(this.props.server, '/volunteer/v1/import/end', 'POST', {
     //   filename: filename,
     // });
-    const filename = 'Test1.csv';
-    const { mapped: data } = this.state;
+    const { mapped: data, filename } = this.state;
 
-    await _fetch('/import/begin', 'POST', {
+    await _fetch(this.props.server, '/volunteer/v1/import/begin', 'POST', {
       filename: filename,
       attributes: ['Party Affiliation', 'Date of Birth', 'Spoken Languages'],
     });
@@ -89,9 +88,9 @@ export default class ImportData extends Component {
       for (let i = 0; i < 1000; i++) {
         if (data.length) arr.push(data.pop());
       }
-      await _fetch('/import/add', 'POST', { filename: filename, data: arr });
+      await _fetch(this.props.server, '/volunteer/v1/import/add', 'POST', { filename: filename, data: arr });
     }
-    await _fetch('/import/end', 'POST', { filename: filename });
+    await _fetch(this.props.server, '/volunteer/v1/import/end', 'POST', { filename: filename });
   };
 
   _loadData = async () => {
@@ -173,7 +172,7 @@ export default class ImportData extends Component {
         />
         <Divider variant="middle" />
         <br />
-        <Button variant="contained" color="primary">
+        <Button variant="contained" color="primary" onClick={() => this.sendData()}>
           Import
         </Button>
         <br />
