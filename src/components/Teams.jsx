@@ -24,7 +24,7 @@ import {
   _loadTurfs,
   RootLoader,
   Icon,
-  DialogSaving
+  DialogSaving,
 } from '../common.js';
 
 import { CardTurf } from './Turf';
@@ -50,20 +50,20 @@ export default class App extends Component {
       search: '',
       perPage: perPage,
       pageNum: 1,
-      menuDelete: false
+      menuDelete: false,
     };
 
     this.formServerItems = t.struct({
-      name: t.String
+      name: t.String,
     });
 
     this.formServerOptions = {
       fields: {
         server: {
           label: 'Team Name',
-          error: 'You must enter a team name.'
-        }
-      }
+          error: 'You must enter a team name.',
+        },
+      },
     };
 
     this.onTypeSearch = this.onTypeSearch.bind(this);
@@ -94,7 +94,7 @@ export default class App extends Component {
   onTypeSearch(event) {
     this.setState({
       search: event.target.value.toLowerCase(),
-      pageNum: 1
+      pageNum: 1,
     });
   }
 
@@ -102,7 +102,7 @@ export default class App extends Component {
     this.setState({ saving: true, menuDelete: false });
     try {
       await _fetch(this.props.server, '/volunteer/v1/team/delete', 'POST', {
-        teamId: id
+        teamId: id,
       });
       notify_success('Team has been deleted.');
     } catch (e) {
@@ -122,7 +122,7 @@ export default class App extends Component {
 
     try {
       await _fetch(this.props.server, '/volunteer/v1/team/create', 'POST', {
-        name: json.name
+        name: json.name,
       });
       notify_success('Team has been created.');
     } catch (e) {
@@ -283,7 +283,7 @@ const ListTeams = props => {
             { value: 10, label: 10 },
             { value: 25, label: 25 },
             { value: 50, label: 50 },
-            { value: 100, label: 100 }
+            { value: 100, label: 100 },
           ]}
         />
       </div>
@@ -314,7 +314,7 @@ export class CardTeam extends Component {
       team: this.props.team,
       selectedMembersOption: [],
       selectedFormsOption: [],
-      selectedTurfOption: []
+      selectedTurfOption: [],
     };
   }
 
@@ -448,7 +448,7 @@ export class CardTeam extends Component {
         turfSelected,
         turfs,
         formSelected,
-        forms
+        forms,
       ] = await Promise.all([
         _loadTeam(this, this.props.id),
         _loadVolunteers(this.props.refer),
@@ -456,7 +456,7 @@ export class CardTeam extends Component {
         _loadTurfs(this.props.refer, this.props.id),
         _loadTurfs(this.props.refer),
         _loadForms(this.props.refer, this.props.id),
-        _loadForms(this.props.refer)
+        _loadForms(this.props.refer),
       ]);
     } catch (e) {
       notify_error(e, 'Unable to load team info.');
@@ -474,7 +474,7 @@ export class CardTeam extends Component {
       memberOptions.push({
         value: _searchStringify(c),
         id: c.id,
-        label: <CardVolunteer key={c.id} volunteer={c} refer={this} />
+        label: <CardVolunteer key={c.id} volunteer={c} refer={this} />,
       });
     });
 
@@ -482,17 +482,17 @@ export class CardTeam extends Component {
       selectedMembersOption.push({
         value: _searchStringify(c),
         id: c.id,
-        label: <CardVolunteer key={c.id} volunteer={c} refer={this} />
+        label: <CardVolunteer key={c.id} volunteer={c} refer={this} />,
       });
     });
 
-    const CardTurf = (turfs.length < 100?CardTurf:(props) => (<div>{props.turf.name}</div>));
+    // const CardTurf = (turfs.length < 100?CardTurf:(props) => (<div>{props.turf.name}</div>));
 
     turfs.forEach(t => {
       turfOptions.push({
         value: _searchStringify(t),
         id: t.id,
-        label: <CardTurf key={t.id} turf={t} refer={this} />
+        label: <CardTurf key={t.id} turf={t} refer={this} />,
       });
     });
 
@@ -500,7 +500,7 @@ export class CardTeam extends Component {
       selectedTurfOption.push({
         value: _searchStringify(t),
         id: t.id,
-        label: <CardTurf key={t.id} turf={t} refer={this} />
+        label: <CardTurf key={t.id} turf={t} refer={this} />,
       });
     });
 
@@ -508,7 +508,7 @@ export class CardTeam extends Component {
       formOptions.push({
         value: _searchStringify(f),
         id: f.id,
-        label: <CardForm key={f.id} form={f} refer={this} />
+        label: <CardForm key={f.id} form={f} refer={this} />,
       });
     });
 
@@ -516,7 +516,7 @@ export class CardTeam extends Component {
       selectedFormsOption.push({
         value: _searchStringify(f),
         id: f.id,
-        label: <CardForm key={f.id} form={f} refer={this} />
+        label: <CardForm key={f.id} form={f} refer={this} />,
       });
     });
 
@@ -528,7 +528,7 @@ export class CardTeam extends Component {
       selectedMembersOption,
       selectedTurfOption,
       selectedFormsOption,
-      loading: false
+      loading: false,
     });
   };
 

@@ -1,19 +1,20 @@
 import React, { Component } from 'react';
 import CSVReader from 'react-csv-reader';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import Button from '@material-ui/core/Button/Button';
+import Divider from '@material-ui/core/Divider';
 import { faFileCsv } from '@fortawesome/free-solid-svg-icons';
 import { ImportPreview, ImportMap } from './';
-import { PaperTable } from '../elements';
-import { map_format } from './constants';
+import { PaperTable } from '../Elements';
+import { fields } from './constants';
+import { PAPER_TABLE_SPEC } from './utilities';
 import {
   notify_error,
   notify_success,
   _fetch,
   _loadImports,
-  jobRuntime,
-  jobNumber,
   Icon,
-  RootLoader
+  RootLoader,
 } from '../../common';
 
 export default class ImportData extends Component {
@@ -29,7 +30,7 @@ export default class ImportData extends Component {
     mapped: [],
     imports: [],
     perPage: localStorage.getItem('importsperpage') || 5,
-    pageNum: 1
+    pageNum: 1,
   };
 
   // #region import methods
@@ -37,11 +38,11 @@ export default class ImportData extends Component {
     notify_error(e, 'Failed to preprocess the import file.');
   }
 
-  preProcess = async data => {
+  preProcess = async (data, filename) => {
     let headers = data.shift();
     data.pop();
 
-    this.setState({ data, headers });
+    this.setState({ data, headers, filename });
   };
 
   onHeadersSubmit = evt => {
@@ -60,21 +61,37 @@ export default class ImportData extends Component {
     // send the data in this manner .. start with a "import/begin", send the data in batches
     // with "import/add", and finish with a call to "import/end"
 
-    let filename = 'Test1.csv';
-    await _fetch(this.props.server, '/volunteer/v1/import/begin', 'POST', {
-      filename: filename
-    });
-    await _fetch(this.props.server, '/volunteer/v1/import/add', 'POST', {
+    // let filename = 'Test1.csv';
+    // await _fetch(this.props.server, '/volunteer/v1/import/begin', 'POST', {
+    //   filename: filename,
+    // });
+    // await _fetch(this.props.server, '/volunteer/v1/import/add', 'POST', {
+    //   filename: filename,
+    //   data: [],
+    // });
+    // await _fetch(this.props.server, '/volunteer/v1/import/add', 'POST', {
+    //   filename: filename,
+    //   data: [],
+    // });
+    // await _fetch(this.props.server, '/volunteer/v1/import/end', 'POST', {
+    //   filename: filename,
+    // });
+    const filename = 'Test1.csv';
+    const { mapped: data } = this.state;
+
+    await _fetch('/import/begin', 'POST', {
       filename: filename,
-      data: []
+      attributes: ['Party Affiliation', 'Date of Birth', 'Spoken Languages'],
     });
-    await _fetch(this.props.server, '/volunteer/v1/import/add', 'POST', {
-      filename: filename,
-      data: []
-    });
-    await _fetch(this.props.server, '/volunteer/v1/import/end', 'POST', {
-      filename: filename
-    });
+    console.log('Sending ' + data.length + ' records to server.');
+    while (data.length) {
+      let arr = [];
+      for (let i = 0; i < 1000; i++) {
+        if (data.length) arr.push(data.pop());
+      }
+      await _fetch('/import/add', 'POST', { filename: filename, data: arr });
+    }
+    await _fetch('/import/end', 'POST', { filename: filename });
   };
 
   _loadData = async () => {
@@ -106,10 +123,18 @@ export default class ImportData extends Component {
   */
 
   render() {
-    const { mapped = [], perPage, pageNum, imports } = this.state;
-    if (this.state.loading) return <CircularProgress />;
+    const {
+      mapped = [],
+      data = [],
+      headers = [],
+      perPage,
+      pageNum,
+      imports,
+      loading,
+    } = this.state;
+    if (loading) return <CircularProgress />;
 
-    if (!this.state.headers.length)
+    if (!headers.length)
       return (
         <div>
           <CSVReader
@@ -125,67 +150,7 @@ export default class ImportData extends Component {
             <PaperTable
               perPage={perPage}
               pageNum={pageNum}
-              spec={[
-                {
-                  header: 'Import File',
-                  tooltip: 'The file name of the imported file.',
-                  params: ['filename']
-                },
-                {
-                  header: 'Upload Time',
-                  tooltip: 'The time it took the file to go from the uploader\'s computer to the server.',
-                  func: jobRuntime,
-                  params: ['created', 'submitted'],
-                },
-                {
-                  header: 'Queue Delay',
-                  tooltip: 'The time this import had to wait in queue for other jobs to finish.',
-                  func: jobRuntime,
-                  params: ['submitted', 'parse_start'],
-                },
-                {
-                  header: 'Parse time',
-                  tooltip: 'The time it took to aggregate address, people, and attribute data into the database.',
-                  func: jobRuntime,
-                  params: ['parse_start', 'parse_end'],
-                },
-                {
-                  header: 'Record Count',
-                  tooltip: 'The number of unique records contained in the import file.',
-                  func: jobNumber,
-                  params: ['num_records'],
-                },
-                {
-                  header: 'Geocode Time',
-                  tooltip: 'The time it took the system to geocode the addresses in the import file.',
-                  func: jobRuntime,
-                  params: ['geocode_start', 'geocode_end'],
-                },
-                {
-                  header: 'Dedupe Time',
-                  tooltip: 'The time it took the system to identify and remove duplicates as a result of this import.',
-                  func: jobRuntime,
-                  params: ['dedupe_start', 'dedupe_end'],
-                },
-                {
-                  header: 'Turf Index Time',
-                  tooltip: 'The time it took the system to index each address to turfs it belongs to.',
-                  func: jobRuntime,
-                  params: ['turfadd_start', 'turfadd_end'],
-                },
-                {
-                  header: 'Address Index Time',
-                  tooltip: 'The time it took to add these addresses to the master database index.',
-                  func: jobRuntime,
-                  params: ['index_start', 'index_end'],
-                },
-                {
-                  header: 'Total Time',
-                  tooltip: 'The total time the import took from file upload start to complete finish.',
-                  func: jobRuntime,
-                  params: ['created', 'completed'],
-                },
-              ]}
+              spec={PAPER_TABLE_SPEC}
               rows={imports}
               handlePageClick={this.handlePageClick}
               handlePageNumChange={this.handlePageNumChange}
@@ -201,13 +166,22 @@ export default class ImportData extends Component {
           <Icon icon={faFileCsv} size="3x" />
         </div>
         <ImportMap
-          headers={this.state.headers}
-          data={this.state.data}
+          headers={headers}
+          fields={fields}
+          data={data}
           getMapped={this.getMapped}
         />
+        <Divider variant="middle" />
+        <br />
+        <Button variant="contained" color="primary">
+          Import
+        </Button>
+        <br />
+        <br />
+        <Divider variant="middle" />
         <ImportPreview
           key={this}
-          titles={map_format}
+          titles={fields}
           records={mapped.slice(0, 3)}
         />
       </div>
