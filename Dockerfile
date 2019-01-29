@@ -16,8 +16,8 @@ COPY package-lock.json .
 
 RUN npm install
 
-COPY poke.js .
 HEALTHCHECK --interval=15s --timeout=5s --start-period=5s CMD node /app/poke.js
+COPY lib lib
 COPY *.js ./
 
 EXPOSE 8080
