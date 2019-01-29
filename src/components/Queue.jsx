@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { PaperTable } from './Elements';
+import { PaperTable } from './elements';
 
 import { _fetch, jobRuntime, RootLoader } from '../common.js';
 

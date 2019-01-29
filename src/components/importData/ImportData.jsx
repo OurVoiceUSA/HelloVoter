@@ -5,7 +5,7 @@ import Button from '@material-ui/core/Button/Button';
 import Divider from '@material-ui/core/Divider';
 import { faFileCsv } from '@fortawesome/free-solid-svg-icons';
 import { ImportPreview, ImportMap } from './';
-import { PaperTable } from '../Elements';
+import { PaperTable } from '../elements';
 import { fields } from './constants';
 import { PAPER_TABLE_SPEC } from './utilities';
 import {
