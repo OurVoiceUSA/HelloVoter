@@ -1,6 +1,6 @@
 import React from 'react';
 import map from 'lodash/map';
-import { MapSelect } from '../elements';
+import { MapSelect } from '../Elements';
 import { fields } from './constants';
 import { pipe } from './utilities';
 
@@ -10,13 +10,13 @@ export class ImportMap extends React.Component {
     headers: this.props.headers || [],
     fields: fields,
     formats: {},
-    mapped: []
+    mapped: [],
   };
 
   formatHeaders = headers =>
     headers.map(i => ({
       value: i,
-      label: i
+      label: i,
     }));
 
   updateFormats = (field, obj) =>
@@ -27,7 +27,7 @@ export class ImportMap extends React.Component {
   updateMapped = () =>
     this.setState(
       {
-        mapped: this.mapData(this.state) || []
+        mapped: this.mapData(this.state) || [],
       },
       () => this.props.getMapped && this.props.getMapped(this.state.mapped)
     );
@@ -46,13 +46,13 @@ export class ImportMap extends React.Component {
       if (formats[item]) {
         return {
           name: item,
-          format: formats[item]
+          format: formats[item],
         };
       }
 
       return {
         name: item,
-        format: null
+        format: null,
       };
     });
   };
@@ -71,7 +71,7 @@ export class ImportMap extends React.Component {
         return {
           name,
           format,
-          indexes
+          indexes,
         };
       }
 
@@ -99,7 +99,7 @@ export class ImportMap extends React.Component {
 
   render() {
     const {
-      updateFormats = () => console.warn('Cannot find update format function.')
+      updateFormats = () => console.warn('Cannot find update format function.'),
     } = this;
     const { fields = [] } = this.props;
     const { headers = [] } = this.state;

@@ -1,17 +1,13 @@
 import React, { Component } from 'react';
-import { PaperTable } from './elements';
+import { PaperTable } from './Elements';
 
-import {
-  _fetch,
-  jobRuntime,
-  RootLoader,
-} from '../common.js';
+import { _fetch, jobRuntime, RootLoader } from '../common.js';
 
-const tsToStr = (ts) => {
+const tsToStr = ts => {
   return new Date(ts).toString();
 };
 
-const jobStatus = (job) => {
+const jobStatus = job => {
   if (typeof job.success === 'boolean') {
     if (job.success) return 'successful';
     else return 'failed';
@@ -21,21 +17,23 @@ const jobStatus = (job) => {
   }
 };
 
-const showErrorIfError = (job) => {
+const showErrorIfError = job => {
   if (job.error) return job.error;
   else return null;
 };
 
 const taskObjFromQueue = (type, obj) => {
   switch (type) {
-  case 'ImportFile': return 'Import file '+obj.filename;
-  case 'Turf': return 'Turf '+obj.name;
-  default: return 'Unknown';
+    case 'ImportFile':
+      return 'Import file ' + obj.filename;
+    case 'Turf':
+      return 'Turf ' + obj.name;
+    default:
+      return 'Unknown';
   }
 };
 
 export default class Queue extends Component {
-
   constructor(props) {
     super(props);
 
@@ -52,12 +50,9 @@ export default class Queue extends Component {
   _loadData = async () => {
     let rows = [];
 
-    this.setState({loading: true});
+    this.setState({ loading: true });
 
-    let obj = await _fetch(
-      this.state.server,
-      '/volunteer/v1/queue/list',
-    );
+    let obj = await _fetch(this.state.server, '/volunteer/v1/queue/list');
     if (obj.data) {
       rows = obj.data.map(r => {
         let q = r[0];
@@ -66,11 +61,11 @@ export default class Queue extends Component {
         return q;
       });
     }
-    this.setState({rows, loading: false});
-  }
+    this.setState({ rows, loading: false });
+  };
 
   render() {
-    const { rows, } = this.state;
+    const { rows } = this.state;
 
     return (
       <RootLoader flag={this.state.loading} func={() => this._loadData()}>
@@ -89,7 +84,8 @@ export default class Queue extends Component {
             },
             {
               header: 'Queue Delay',
-              tooltip: 'The time this task had to wait in queue for other jobs to finish.',
+              tooltip:
+                'The time this task had to wait in queue for other jobs to finish.',
               func: jobRuntime,
               params: ['created', 'started'],
             },
