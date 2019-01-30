@@ -5,7 +5,7 @@ import Button from '@material-ui/core/Button/Button';
 import Divider from '@material-ui/core/Divider';
 import { faFileCsv } from '@fortawesome/free-solid-svg-icons';
 import { ImportPreview, ImportMap } from './';
-import { PaperTable } from '../elements';
+import { PaperTable } from '../Elements';
 import { fields } from './constants';
 import { PAPER_TABLE_SPEC } from './utilities';
 import {
@@ -69,9 +69,14 @@ export default class ImportData extends Component {
       for (let i = 0; i < 1000; i++) {
         if (data.length) arr.push(data.pop());
       }
-      await _fetch(this.props.server, '/volunteer/v1/import/add', 'POST', { filename: filename, data: arr });
+      await _fetch(this.props.server, '/volunteer/v1/import/add', 'POST', {
+        filename: filename,
+        data: arr,
+      });
     }
-    await _fetch(this.props.server, '/volunteer/v1/import/end', 'POST', { filename: filename });
+    await _fetch(this.props.server, '/volunteer/v1/import/end', 'POST', {
+      filename: filename,
+    });
   };
 
   _loadData = async () => {
@@ -153,7 +158,11 @@ export default class ImportData extends Component {
         />
         <Divider variant="middle" />
         <br />
-        <Button variant="contained" color="primary" onClick={() => this.sendData()}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => this.sendData()}
+        >
           Import
         </Button>
         <br />

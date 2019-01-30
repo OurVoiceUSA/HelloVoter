@@ -2,7 +2,7 @@ import About from './About';
 import Analytics from './Analytics';
 import Dashboard from './Dashboard';
 import Forms from './Forms';
-import { ImportData } from './importData/index';
+import { ImportData } from './ImportData/index';
 import Queue from './Queue';
 import Jwt from './Jwt';
 import Login from './Login';
@@ -12,7 +12,7 @@ import Settings from './Settings';
 import Teams from './Teams';
 import { Turf } from './Turf';
 import Volunteers from './Volunteers';
-import { Header, Sidebar } from './header';
+import { Header, Sidebar } from './Header';
 
 export {
   About,
