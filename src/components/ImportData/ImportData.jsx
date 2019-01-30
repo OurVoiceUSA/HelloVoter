@@ -5,7 +5,7 @@ import Button from '@material-ui/core/Button/Button';
 import Divider from '@material-ui/core/Divider';
 import { faFileCsv } from '@fortawesome/free-solid-svg-icons';
 import { ImportPreview, ImportMap } from './';
-import { PaperTable } from '../Elements';
+import { PaperTable } from '../elements';
 import { fields } from './constants';
 import { PAPER_TABLE_SPEC } from './utilities';
 import {
@@ -57,29 +57,9 @@ export default class ImportData extends Component {
   };
 
   sendData = async () => {
-    // This is an example of the "flow" of a data import; once the user submits,
-    // send the data in this manner .. start with a "import/begin", send the data in batches
-    // with "import/add", and finish with a call to "import/end"
+    const { mapped: data, filename } = this.state;
 
-    // let filename = 'Test1.csv';
-    // await _fetch(this.props.server, '/volunteer/v1/import/begin', 'POST', {
-    //   filename: filename,
-    // });
-    // await _fetch(this.props.server, '/volunteer/v1/import/add', 'POST', {
-    //   filename: filename,
-    //   data: [],
-    // });
-    // await _fetch(this.props.server, '/volunteer/v1/import/add', 'POST', {
-    //   filename: filename,
-    //   data: [],
-    // });
-    // await _fetch(this.props.server, '/volunteer/v1/import/end', 'POST', {
-    //   filename: filename,
-    // });
-    const filename = 'Test1.csv';
-    const { mapped: data } = this.state;
-
-    await _fetch('/import/begin', 'POST', {
+    await _fetch(this.props.server, '/volunteer/v1/import/begin', 'POST', {
       filename: filename,
       attributes: ['Party Affiliation', 'Date of Birth', 'Spoken Languages'],
     });
@@ -89,9 +69,9 @@ export default class ImportData extends Component {
       for (let i = 0; i < 1000; i++) {
         if (data.length) arr.push(data.pop());
       }
-      await _fetch('/import/add', 'POST', { filename: filename, data: arr });
+      await _fetch(this.props.server, '/volunteer/v1/import/add', 'POST', { filename: filename, data: arr });
     }
-    await _fetch('/import/end', 'POST', { filename: filename });
+    await _fetch(this.props.server, '/volunteer/v1/import/end', 'POST', { filename: filename });
   };
 
   _loadData = async () => {
@@ -173,7 +153,7 @@ export default class ImportData extends Component {
         />
         <Divider variant="middle" />
         <br />
-        <Button variant="contained" color="primary">
+        <Button variant="contained" color="primary" onClick={() => this.sendData()}>
           Import
         </Button>
         <br />

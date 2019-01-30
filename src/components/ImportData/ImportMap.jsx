@@ -1,6 +1,6 @@
 import React from 'react';
 import map from 'lodash/map';
-import { MapSelect } from '../Elements';
+import { MapSelect } from '../elements';
 import { fields } from './constants';
 import { pipe } from './utilities';
 

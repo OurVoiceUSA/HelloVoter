@@ -337,6 +337,12 @@ export async function mockFetch(token, uri, method, body) {
       {'num_records':950,'created':1548086736815,'geocode_end':1548086738747,'parse_start':1548086738293,'completed':1548086739623,'turfadd_start':1548086739135,'geocode_success':802,'index_end':1548086739135,'parse_end':1548086738719,'dupes_address':310,'num_people':950,'submitted':1548086738264,'filename':'js2.csv','index_start':1548086738969,'num_addresses':802,'turfadd_end':1548086739623,'goecode_fail':0,'dedupe_end':1548086738969,'id':'ec9143e5-10d2-4bd6-9421-ab76505deb79','dedupe_start':1548086738747,'geocode_start':1548086738719},
       {'num_records':935,'created':1548086729045,'geocode_end':1548086732950,'parse_start':1548086731455,'completed':1548086734292,'turfadd_start':1548086733572,'geocode_success':799,'index_end':1548086733572,'parse_end':1548086732823,'dupes_address':289,'num_people':935,'submitted':1548086731273,'filename':'js1.csv','index_start':1548086733326,'num_addresses':799,'turfadd_end':1548086734292,'goecode_fail':0,'dedupe_end':1548086733326,'id':'f48bfd84-0b39-42b9-8bb7-97f5ca32634b','dedupe_start':1548086732950,'geocode_start':1548086732823},
     ]};
+  case /v1\/import\/begin/.test(uri):
+    return {};
+  case /v1\/import\/add/.test(uri):
+    return {};
+  case /v1\/import\/end/.test(uri):
+    return {};
   case /v1\/queue\/list/.test(uri):
     return {data:[
       [{'input':'{"turfId":"eca53cb8-09f1-4aa9-9f25-41e9d7f5b751"}','task':'doTurfIndexing','success':null,'created':1548093446682,'active':false,'started':null,'completed':null,'id':'21fe5221-44cd-485c-9121-d4f0a93ebd67'},'Turf',{'name':'Utah State House 1','id':'eca53cb8-09f1-4aa9-9f25-41e9d7f5b751','filename':null}],
