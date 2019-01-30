@@ -5,7 +5,7 @@ import Button from '@material-ui/core/Button/Button';
 import Divider from '@material-ui/core/Divider';
 import { faFileCsv } from '@fortawesome/free-solid-svg-icons';
 import { ImportPreview, ImportMap } from './';
-import { PaperTable } from '../Elements';
+import { PaperTable, ProgressBar } from '../Elements';
 import { fields } from './constants';
 import { PAPER_TABLE_SPEC } from './utilities';
 import {
@@ -31,6 +31,8 @@ export default class ImportData extends Component {
     imports: [],
     perPage: localStorage.getItem('importsperpage') || 5,
     pageNum: 1,
+    submitting: false,
+    completed: 0,
   };
 
   // #region import methods
@@ -58,12 +60,12 @@ export default class ImportData extends Component {
 
   sendData = async () => {
     const { mapped: data, filename } = this.state;
+    const total = data.length;
 
     await _fetch(this.props.server, '/volunteer/v1/import/begin', 'POST', {
       filename: filename,
       attributes: ['Party Affiliation', 'Date of Birth', 'Spoken Languages'],
     });
-    console.log('Sending ' + data.length + ' records to server.');
     while (data.length) {
       let arr = [];
       for (let i = 0; i < 1000; i++) {
@@ -73,6 +75,13 @@ export default class ImportData extends Component {
         filename: filename,
         data: arr,
       });
+      const percentage = Math.ceil(((total - data.length) / total) * 100);
+      this.setState(
+        {
+          completed: percentage,
+        },
+        () => this.state.completed === 100 && this.setState({ completed: true })
+      );
     }
     await _fetch(this.props.server, '/volunteer/v1/import/end', 'POST', {
       filename: filename,
@@ -116,8 +125,12 @@ export default class ImportData extends Component {
       pageNum,
       imports,
       loading,
+      completed,
+      submitting,
     } = this.state;
     if (loading) return <CircularProgress />;
+
+    console.log(submitting);
 
     if (!headers.length)
       return (
@@ -146,6 +159,7 @@ export default class ImportData extends Component {
 
     return (
       <div>
+        <ProgressBar display={submitting} completed={completed} />
         <div style={{ display: 'flex' }}>
           <h3>Import Data</h3> &nbsp;&nbsp;&nbsp;
           <Icon icon={faFileCsv} size="3x" />

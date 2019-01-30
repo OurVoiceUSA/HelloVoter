@@ -1,0 +1,24 @@
+.progress-bar {
+  height: 10px;
+  width: 100%;
+  margin: 10px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.progress-bar-hidden {
+  display: none;
+}
+
+.MuiLinearProgress-root-343 {
+  width: 100%;
+}
+
+.progress-complete {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  height: 15px;
+  color: green;
+}
