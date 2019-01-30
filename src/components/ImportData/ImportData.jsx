@@ -130,8 +130,6 @@ export default class ImportData extends Component {
     } = this.state;
     if (loading) return <CircularProgress />;
 
-    console.log(submitting);
-
     if (!headers.length)
       return (
         <div>
