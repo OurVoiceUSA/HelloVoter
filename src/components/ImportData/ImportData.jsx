@@ -61,11 +61,30 @@ export default class ImportData extends Component {
       filename: filename,
       attributes: [],
     });
+
+    let seps = ['#', 'apt', 'unit', 'ste'];
+    let sepm = seps.map((i) => i = new RegExp('.* '+i+' ', 'i'));
+    let sepr = seps.map((i) => i = new RegExp(' '+i+' .*', 'i'));
+
     while (data.length) {
       let arr = [];
       for (let i = 0; i < 1000; i++) {
-        if (data.length) arr.push(data.pop());
+        if (data.length) {
+          let row = data.pop();
+          // make a reasonable attempt to break Unit from street address
+          if (!row[3]) {
+            for (let e in seps) {
+              if (row[2].match(sepm[e])) {
+                row[3] = row[2].replace(sepm[e], "").trim(); // extract unit from address
+                row[2] = row[2].replace(sepr[e], "").trim(); // remove unit from address
+                break;
+              }
+            }
+          }
+          arr.push(row);
+        }
       }
+
       await _fetch(this.props.server, '/volunteer/v1/import/add', 'POST', {
         filename: filename,
         data: arr,
