@@ -94,6 +94,7 @@ const MenuItems = ({ handleClickLogout }) => (
           <ListItemText primary="Analytics" />
         </ListItem>
       </Link>
+{/*
       <Link to={'/settings/'}>
         <ListItem button>
           <ListItemIcon>
@@ -102,6 +103,7 @@ const MenuItems = ({ handleClickLogout }) => (
           <ListItemText primary="Settings" />
         </ListItem>
       </Link>
+*/}
     </List>
     <Divider />
     <List>
