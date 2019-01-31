@@ -17,6 +17,17 @@ import {
   RootLoader,
 } from '../../common';
 
+const defaultState = {
+  loading: false,
+  data: null,
+  headers: [],
+  mapped: [],
+  perPage: localStorage.getItem('importsperpage') || 5,
+  pageNum: 1,
+  submitting: false,
+  completed: 0,
+};
+
 export default class ImportData extends Component {
   componentDidMount() {
     this._loadData();
@@ -24,15 +35,8 @@ export default class ImportData extends Component {
 
   state = {
     server: this.props.server,
-    loading: false,
-    data: null,
-    headers: [],
-    mapped: [],
     imports: [],
-    perPage: localStorage.getItem('importsperpage') || 5,
-    pageNum: 1,
-    submitting: false,
-    completed: 0,
+    ...defaultState,
   };
 
   // #region import methods
@@ -96,8 +100,12 @@ export default class ImportData extends Component {
     } catch (e) {
       notify_error(e, 'Unable to load import data.');
     }
-    this.setState({ loading: false, imports });
+    this.setState({ loading: false, imports }, () => {
+      this._resetState();
+    });
   };
+
+  _resetState = () => this.setState({ ...defaultState });
 
   getMapped = mapped => this.setState({ mapped });
 
@@ -116,6 +124,8 @@ export default class ImportData extends Component {
   "dupes_address"
   */
 
+  // TODO:: load data after completed & reset component state.
+
   render() {
     const {
       mapped = [],
@@ -126,7 +136,6 @@ export default class ImportData extends Component {
       imports,
       loading,
       completed,
-      submitting,
     } = this.state;
     if (loading) return <CircularProgress />;
 
@@ -157,7 +166,7 @@ export default class ImportData extends Component {
 
     return (
       <div>
-        <ProgressBar display={submitting} completed={completed} />
+        <ProgressBar completed={completed} />
         <div style={{ display: 'flex' }}>
           <h3>Import Data</h3> &nbsp;&nbsp;&nbsp;
           <Icon icon={faFileCsv} size="3x" />
@@ -173,7 +182,7 @@ export default class ImportData extends Component {
         <Button
           variant="contained"
           color="primary"
-          onClick={() => this.sendData()}
+          onClick={() => this.sendData().then(() => this._loadData())}
         >
           Import
         </Button>
