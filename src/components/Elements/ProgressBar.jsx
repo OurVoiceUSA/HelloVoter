@@ -23,7 +23,12 @@ const ProgressBar = ({ completed }) => (
       </div>
     ) : (
       <React.Fragment>
-        <LinearProgress variant="determinate" value={completed} />
+        <h3 style={{ marginTop: '5px' }}>Processing...</h3>
+        <LinearProgress
+          style={{ width: '90%', paddingTop: '10px' }}
+          variant="determinate"
+          value={completed}
+        />
       </React.Fragment>
     )}
   </div>
