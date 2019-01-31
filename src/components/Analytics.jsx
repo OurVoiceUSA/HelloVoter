@@ -1,20 +1,10 @@
 import React, { Component } from 'react';
 
-import {PieChart, Pie, Cell, Legend, Label, LabelList} from 'recharts';
+import {PieChart, Pie, Cell, Legend, Label} from 'recharts';
 
-const data01 = [
-  { name: 'Republican', value: 400, v: 89, color: 'red' },
-  { name: 'Democratic', value: 300, v: 100 },
-  { name: 'UUP', value: 200, v: 200 },
-  { name: 'Unaffiliated', value: 200, v: 20 },
-];
-
-const data02 = [
-  { name: 'Republican', value: 2400 },
-  { name: 'Democratic', value: 4567 },
-  { name: 'UUP', value: 1398 },
-  { name: 'Unaffiliated', value: 9800 },
-];
+import {
+  _fetch,
+} from '../common.js';
 
 const renderLabelContent = (props) => {
   const { value, percent, x, y, midAngle } = props;
@@ -33,8 +23,26 @@ export default class App extends Component {
     super(props);
 
     this.state = {
+      party_breakdown: [],
       animation: true,
     };
+  }
+
+  componentDidMount() {
+    this._loadData();
+  }
+
+  _loadData = async () => {
+    this.setState({ loading: true });
+
+    let party_breakdown = [];
+    let data = await _fetch(this.props.server, '/volunteer/v1/analytics/list');
+
+    if (data && data.data) {
+      data.data.map(d => party_breakdown.push({name: d[0], value: d[1]}))
+    }
+
+    this.setState({ party_breakdown, loading: false })
   }
 
   render() {
@@ -44,28 +52,8 @@ export default class App extends Component {
         <PieChart width={800} height={400}>
           <Legend />
           <Pie
-            data={data01}
+            data={this.state.party_breakdown}
             dataKey="value"
-            cx={200}
-            cy={200}
-            startAngle={180}
-            endAngle={0}
-            outerRadius={80}
-            label
-          >
-            {
-              data01.map((entry, index) => (
-                <Cell key={`slice-${index}`} fill={['red','blue','yellow','grey'][index]} />
-              ))
-            }
-            <Label value="Volunteering" position="outside" />
-            <LabelList position="outside" />
-          </Pie>
-          <Pie
-            data={data02}
-            dataKey="value"
-            cx={600}
-            cy={200}
             startAngle={180}
             endAngle={-180}
             innerRadius={60}
@@ -75,12 +63,12 @@ export default class App extends Component {
             isAnimationActive={this.state.animation}
           >
             {
-              data02.map((entry, index) => (
+              this.state.party_breakdown.map((entry, index) => (
                 <Cell key={`slice-${index}`} fill={['red','blue','yellow','grey'][index]} />
               ))
             }
             <Label width={50} position="center">
-              Agreed with you
+              Party Affiliation
             </Label>
           </Pie>
         </PieChart>
