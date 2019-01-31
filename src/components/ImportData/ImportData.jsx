@@ -77,7 +77,7 @@ export default class ImportData extends Component {
       filename: filename,
     });
 
-    this.setState({ completed: true })
+    this.setState({ completed: true });
     notify_success('Upload complete! An import job has been queued and will process soon.');
 
     setTimeout(() => {

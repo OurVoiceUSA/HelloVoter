@@ -39,10 +39,10 @@ export default class App extends Component {
     let data = await _fetch(this.props.server, '/volunteer/v1/analytics/list');
 
     if (data && data.data) {
-      data.data.map(d => party_breakdown.push({name: d[0], value: d[1]}))
+      data.data.map(d => party_breakdown.push({name: d[0], value: d[1]}));
     }
 
-    this.setState({ party_breakdown, loading: false })
+    this.setState({ party_breakdown, loading: false });
   }
 
   render() {
