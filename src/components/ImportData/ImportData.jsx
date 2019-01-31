@@ -19,6 +19,7 @@ import {
 
 const defaultState = {
   loading: false,
+  sending: false,
   data: null,
   headers: [],
   mapped: [],
@@ -51,24 +52,14 @@ export default class ImportData extends Component {
     this.setState({ data, headers, filename });
   };
 
-  onHeadersSubmit = evt => {
-    evt.preventDefault();
-
-    this.setState({ loading: true });
-    // fake data loaded after 3 seconds
-    setTimeout(() => {
-      notify_success('Data has been imported.');
-      this.setState({ loading: false, headers: [] });
-    }, 3000);
-  };
-
   sendData = async () => {
     const { mapped: data, filename } = this.state;
     const total = data.length;
 
+    this.setState({sending: true, completed: 1});
     await _fetch(this.props.server, '/volunteer/v1/import/begin', 'POST', {
       filename: filename,
-      attributes: ['Party Affiliation', 'Date of Birth', 'Spoken Languages'],
+      attributes: [],
     });
     while (data.length) {
       let arr = [];
@@ -80,16 +71,20 @@ export default class ImportData extends Component {
         data: arr,
       });
       const percentage = Math.ceil(((total - data.length) / total) * 100);
-      this.setState(
-        {
-          completed: percentage,
-        },
-        () => this.state.completed === 100 && this.setState({ completed: true })
-      );
+      this.setState({ completed: percentage });
     }
     await _fetch(this.props.server, '/volunteer/v1/import/end', 'POST', {
       filename: filename,
     });
+
+    this.setState({ completed: true })
+    notify_success('Data has been imported.');
+
+    setTimeout(() => {
+      this.setState({ sending: false});
+      this._loadData();
+    }, 3000);
+
   };
 
   _loadData = async () => {
@@ -180,9 +175,10 @@ export default class ImportData extends Component {
         <Divider variant="middle" />
         <br />
         <Button
+          disabled={this.state.sending}
           variant="contained"
           color="primary"
-          onClick={() => this.sendData().then(() => this._loadData())}
+          onClick={() => this.sendData()}
         >
           Import
         </Button>
