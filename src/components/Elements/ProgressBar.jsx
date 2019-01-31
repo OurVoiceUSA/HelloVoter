@@ -10,7 +10,7 @@ const styles = {
   },
 };
 
-const ProgressBar = ({ completed }) => (
+const ProgressBar = ({ title, completed }) => (
   <div
     className={`progress-bar progress-bar-${
       completed === 0 ? 'hidden' : 'shown'
@@ -23,7 +23,7 @@ const ProgressBar = ({ completed }) => (
       </div>
     ) : (
       <React.Fragment>
-        <h3 style={{ marginTop: '5px' }}>Processing...</h3>
+        <h3 style={{ marginTop: '5px' }}>{title}</h3>
         <LinearProgress
           style={{ width: '90%', paddingTop: '10px' }}
           variant="determinate"

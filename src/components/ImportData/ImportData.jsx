@@ -78,7 +78,7 @@ export default class ImportData extends Component {
     });
 
     this.setState({ completed: true })
-    notify_success('Data has been imported.');
+    notify_success('Upload complete! An import job has been queued and will process soon.');
 
     setTimeout(() => {
       this.setState({ sending: false});
@@ -161,7 +161,7 @@ export default class ImportData extends Component {
 
     return (
       <div>
-        <ProgressBar completed={completed} />
+        <ProgressBar title="Uploading import file..." completed={completed} />
         <div style={{ display: 'flex' }}>
           <h3>Import Data</h3> &nbsp;&nbsp;&nbsp;
           <Icon icon={faFileCsv} size="3x" />
