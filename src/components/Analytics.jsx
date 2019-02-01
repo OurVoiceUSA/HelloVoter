@@ -1,9 +1,12 @@
 import React, { Component } from 'react';
 
+import Checkbox from '@material-ui/core/Checkbox';
+
 import {PieChart, Pie, Cell, Legend, Label} from 'recharts';
 
 import {
   _fetch,
+  RootLoader,
 } from '../common.js';
 
 const renderLabelContent = (props) => {
@@ -36,10 +39,10 @@ export default class App extends Component {
     this.setState({ loading: true });
 
     let party_breakdown = [];
-    let data = await _fetch(this.props.server, '/volunteer/v1/analytics/list');
+    let data = await _fetch(this.props.server, '/volunteer/v1/analytics/list'+(this.state.include_null?'?include_null=true':''));
 
     if (data && data.data) {
-      data.data.map(d => party_breakdown.push({name: d[0], value: d[1]}));
+      data.data.map(d => party_breakdown.push({name: (d[0]?d[0]:'No Data'), value: d[1]}));
     }
 
     this.setState({ party_breakdown, loading: false });
@@ -47,8 +50,11 @@ export default class App extends Component {
 
   render() {
     return (
-      <div>
+      <RootLoader flag={this.state.loading} func={() => this._loadData()}>
         <h3>Analytics</h3>
+        <Checkbox color="primary" checked={this.state.include_null} onChange={(e, c) => {
+          this.setState({include_null: c}, async () => await this._loadData());
+        }} /> Include records with "No Data"
         <PieChart width={800} height={400}>
           <Legend />
           <Pie
@@ -72,7 +78,7 @@ export default class App extends Component {
             </Label>
           </Pie>
         </PieChart>
-      </div>
+      </RootLoader>
     );
   }
 }
