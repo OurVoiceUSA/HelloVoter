@@ -62,7 +62,7 @@ export default class ImportData extends Component {
       attributes: [],
     });
 
-    let seps = ['#', 'apt', 'unit', 'ste'];
+    let seps = ['#', 'apt', 'unit', 'ste', 'spc'];
     let sepm = seps.map((i) => i = new RegExp('.* '+i+' ', 'i'));
     let sepr = seps.map((i) => i = new RegExp(' '+i+' .*', 'i'));
 
