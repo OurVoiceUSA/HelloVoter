@@ -7,5 +7,6 @@ export const fields = [
   'State',
   'Zip',
   'Longitude',
-  'Latitude'
+  'Latitude',
+  'Party Affiliation'
 ];

@@ -59,7 +59,7 @@ export default class ImportData extends Component {
     this.setState({sending: true, completed: 1});
     await _fetch(this.props.server, '/volunteer/v1/import/begin', 'POST', {
       filename: filename,
-      attributes: [],
+      attributes: ['Party Affiliation'],
     });
 
     let seps = ['#', 'apt', 'unit', 'ste', 'spc'];
