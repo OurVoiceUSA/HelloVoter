@@ -16,6 +16,7 @@ import SettingsPage from '../components/SettingsPage';
 import CanvassingSetupPage from '../components/CanvassingSetupPage';
 import CanvassingSettingsPage from '../components/CanvassingSettingsPage';
 import CanvassingPage from '../components/CanvassingPage';
+import LegacyCanvassingPage from '../components/LegacyCanvassingPage';
 import ListMultiUnitPage from '../components/ListMultiUnitPage';
 import SurveyPage from '../components/SurveyPage';
 import CreateSurveyPage from '../components/CreateSurveyPage';
@@ -54,6 +55,12 @@ export default App = StackNavigator({
   },
   Canvassing: {
     screen: CanvassingPage,
+    navigationOptions: ({navigation}) => ({
+      title: 'Canvassing',
+    }),
+  },
+  LegacyCanvassing: {
+    screen: LegacyCanvassingPage,
     navigationOptions: ({navigation}) => ({
       title: 'Canvassing',
     }),

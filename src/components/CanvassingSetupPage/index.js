@@ -127,7 +127,7 @@ export default class App extends PureComponent {
     try {
       let jwt = await storage.get('OV_JWT');
 
-      res = await fetch('https://'+server+'/canvass/v1/hello', {
+      res = await fetch('https://'+server+'/volunteer/v1/hello', {
         method: 'POST',
         headers: {
           'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
@@ -178,7 +178,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
         // TODO: use form data from body.data.forms[0] and save it in the forms_local cache
         // TODO: if there's more than one form in body.data.forms - don't navigate
 
-        res = await fetch('https://'+server+'/canvass/v1/form/get?id='+body.data.forms[0].id, {
+        res = await fetch('https://'+server+'/volunteer/v1/form/get?id='+body.data.forms[0].id, {
           headers: {
             'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
             'Content-Type': 'application/json',
@@ -401,7 +401,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
                 if (json.backend === "dropbox" && !user.dropbox)
                   this.setState({SelectModeScreen: true});
                 else
-                  navigate('Canvassing', {dbx: (json.backend === "dropbox" ? dbx : null), form: json, user: user});
+                  navigate('LegacyCanvassing', {dbx: (json.backend === "dropbox" ? dbx : null), form: json, user: user});
               }}>
               <View style={{flexDirection: 'row'}}>
                 <Icon style={{margin: 5, marginRight: 10}} name={icon} size={size} color={color} />
@@ -611,7 +611,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
                     name="forward"
                     backgroundColor="#d7d7d7"
                     color="#000000"
-                    onPress={() => navigate('Canvassing', {dbx: null, form: sampleForm})}
+                    onPress={() => navigate('LegacyCanvassing', {dbx: null, form: sampleForm})}
                     {...iconStyles}>
                     Demo with a Sample Form
                   </Icon.Button>

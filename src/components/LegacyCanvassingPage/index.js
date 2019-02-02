@@ -21,14 +21,21 @@ import {
 import OVComponent from '../OVComponent';
 
 import { NavigationActions } from 'react-navigation';
+import { Dropbox } from 'dropbox';
+import DeviceInfo from 'react-native-device-info';
 import storage from 'react-native-storage-wrapper';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import sha1 from 'sha1';
-import { MapView, Polygon, PROVIDER_GOOGLE } from 'react-native-maps'
+import { Marker, Callout, Polygon, PROVIDER_GOOGLE } from 'react-native-maps'
+import MapView from 'react-native-maps-super-cluster'
+import encoding from 'encoding';
+import { transliterate as tr } from 'transliteration/src/main/browser';
 import { _doGeocode, _getApiToken, _fileReaderAsync } from '../../common';
 import KnockPage from '../KnockPage';
 import Modal from 'react-native-simple-modal';
 import TimeAgo from 'javascript-time-ago'
+import pako from 'pako';
+import base64 from 'base-64';
 import en from 'javascript-time-ago/locale/en'
 import t from 'tcomb-form-native';
 import _ from 'lodash';
@@ -71,6 +78,7 @@ export default class App extends OVComponent {
       last_sync: 0,
       loading: false,
       netInfo: 'none',
+      exportRunning: false,
       syncRunning: false,
       serviceError: null,
       locationAccess: null,
@@ -81,10 +89,13 @@ export default class App extends OVComponent {
       fAddress: {},
       pAddress: {},
       asyncStorageKey: 'OV_CANVASS_PINS@'+props.navigation.state.params.form.id,
+      settingsStorageKey: 'OV_CANVASS_SETTINGS',
+      canvassSettings: {},
       DisclosureKey : 'OV_DISCLOUSER',
       isModalVisible: false,
       isKnockMenuVisible: false,
       showDisclosure: "true",
+      dbx: props.navigation.state.params.dbx,
       form: props.navigation.state.params.form,
       user: props.navigation.state.params.user,
       geofence: props.navigation.state.params.form.geofence,
@@ -105,6 +116,7 @@ export default class App extends OVComponent {
   componentDidMount() {
     this.requestLocationPermission();
     this.setupConnectionListener();
+    this._getCanvassSettings();
     this._getNodesAsyncStorage();
     this.LoadDisclosure(); //Updates showDisclosure state if the user previously accepted
   }
@@ -129,6 +141,9 @@ export default class App extends OVComponent {
         case 'bluetooth':
         case 'ethernet':
           state = 'wifi';
+          // TODO: this doesn't trigger a sync when you first open the app, only because settings aren't loaded yet
+          //       need more rubost state change logic
+          if (this.state.canvassSettings.auto_sync && !this.state.syncRunning) this._syncNodes(false);
           break;
         case 'cellular':
         case 'wimax':
@@ -139,8 +154,14 @@ export default class App extends OVComponent {
     this.setState({netInfo: state});
   }
 
+  _syncable() {
+    if (this.state.dbx) return true;
+    return (this.state.server?true:false);
+  }
+
   syncingOk() {
     if (this.state.netInfo === 'none') return false;
+    if (this.state.canvassSettings.sync_on_cellular !== true && this.state.netInfo !== 'wifi') return false;
     return true;
   }
 
@@ -256,7 +277,7 @@ export default class App extends OVComponent {
     let epoch = this.getEpoch();
 
     node.updated = epoch;
-    node.canvasser = 'You';
+    node.canvasser = (this.state.dbx ? this.state.user.dropbox.name.display_name : 'You');
     if (!node.id) node.id = sha1(epoch+JSON.stringify(node)+this.state.currentNode.id);
 
     let dupe = this.getNodeById(node.id);
@@ -327,18 +348,105 @@ export default class App extends OVComponent {
     } catch (error) {}
   }
 
+  _nodesFromJtxt(str) {
+    let store;
+
+    try {
+      store = JSON.parse(pako.ungzip(base64.decode(str), { to: 'string' }));
+    } catch (e) {
+      try {
+        store = JSON.parse(str);
+      } catch (e) {
+        return {};
+      }
+    }
+
+    if (!store.nodes) store.nodes = {};
+
+    // check for old version 1 format and convert
+    if (store.pins) {
+      for (let p in store.pins) {
+        let pin = store.pins[p];
+
+        // address had "unit" in it - splice it out
+        let unit = pin.address.splice(1, 1);
+        // "city" started with a space... a bug
+        pin.address[1] = pin.address[1].trim();
+
+        // ensure latlng aren't strings
+        if (pin.latlng) {
+          pin.latlng.longitude = parseFloat(pin.latlng.longitude);
+          pin.latlng.latitude = parseFloat(pin.latlng.latitude);
+        }
+
+        let id = sha1(JSON.stringify(pin.address));
+        let pid = id;
+
+        if (!store.nodes[id]) {
+          store.nodes[id] = {
+            type: "address",
+            id: id,
+            created: pin.id,
+            updated: pin.id,
+            canvasser: store.canvasser,
+            latlng: pin.latlng,
+            address: pin.address,
+            multi_unit: ((unit && unit[0] !== null && unit[0] !== "")?true:false),
+          };
+        }
+
+        if (unit && unit[0] !== null && unit[0] !== "") {
+          id = sha1(pid+unit[0]);
+          store.nodes[id] = {
+            type: "unit",
+            id: id,
+            parent_id: pid,
+            created: pin.id,
+            updated: pin.id,
+            canvasser: store.canvasser,
+            unit: unit[0],
+          };
+        }
+
+        let status = '';
+        switch (pin.color) {
+          case 'green': status = 'home'; break;
+          case 'yellow': status = 'not home'; break;
+          case 'red': status = 'not interested'; break;
+        }
+
+        let survey_id = sha1(id+JSON.stringify(pin.survey)+pin.id);
+
+        store.nodes[survey_id] = {
+          type: "survey",
+          id: survey_id,
+          parent_id: id,
+          created: pin.id,
+          updated: pin.id,
+          canvasser: store.canvasser,
+          status: status,
+          survey: pin.survey,
+        };
+      }
+
+    }
+
+    return store.nodes;
+  }
+
   _getNodesAsyncStorage = async () => {
     try {
       const value = await storage.get(this.state.asyncStorageKey);
       if (value !== null) {
-        this.myNodes = JSON.parse(value);
+        this.myNodes = this._nodesFromJtxt(value);
         this.allNodes = this.myNodes;
       }
     } catch (e) {}
 
     this.updateMarkers();
 
-    await this._syncNodes(false);
+    // even if sycn isn't OK over cellular - do the initial sync anyway
+    if (this._syncable()) await this._syncNodes(false);
 
   }
 
@@ -346,7 +454,10 @@ export default class App extends OVComponent {
     let nodes = [];
     let nodeList;
 
-    nodeList = this.mergeNodes([this.allNodes]);
+    if (this.state.canvassSettings.show_only_my_turf === true)
+      nodeList = this.mergeNodes([this.turfNodes, this.myNodes]);
+    else
+      nodeList = this.mergeNodes([this.allNodes]);
 
     for (let n in nodeList) {
       let node = nodeList[n];
@@ -366,23 +477,115 @@ export default class App extends OVComponent {
     return true;
   }
 
+  _getCanvassSettings = async () => {
+    let canvassSettings = {};
+    try {
+      const value = await storage.get(this.state.settingsStorageKey);
+      if (value !== null) {
+        canvassSettings = JSON.parse(value);
+        this.setState({ canvassSettings });
+      }
+    } catch (e) {
+      // don't continue with the below questions on storage fetch error
+      return;
+    }
+
+    if (!this._syncable()) return;
+
+    if (canvassSettings.sync_on_cellular !== true && canvassSettings.asked_sync_on_cellular !== true)
+      this.alertPush({
+        title: 'Sync over cellular',
+        description: 'Would you like to enable syncing of your data over your cellular connection?',
+        funcs: [
+          {text: 'Yes', onPress: async () => {
+            let { canvassSettings } = this.state;
+            canvassSettings.asked_sync_on_cellular = true;
+            canvassSettings.sync_on_cellular = true;
+            await this._setCanvassSettings(canvassSettings);
+            this.alertFinish();
+          }},
+          {text: 'No', onPress: async () => {
+            let { canvassSettings } = this.state;
+            canvassSettings.asked_sync_on_cellular = true;
+            await this._setCanvassSettings(canvassSettings);
+            this.alertFinish();
+          }},
+        ]
+      });
+
+    if (canvassSettings.auto_sync !== true && canvassSettings.asked_auto_sync !== true)
+      this.alertPush({
+        title: 'Automatially sync data',
+        description: 'Would you like your data to automatically sync as you canvass, if a data connection is available?',
+        funcs: [
+          {text: 'Yes', onPress: async () => {
+            let { canvassSettings } = this.state;
+            canvassSettings.asked_auto_sync = true;
+            canvassSettings.auto_sync = true;
+            await this._setCanvassSettings(canvassSettings);
+          }},
+          {text: 'No', onPress: async () => {
+            let { canvassSettings } = this.state;
+            canvassSettings.asked_auto_sync = true;
+            await this._setCanvassSettings(canvassSettings);
+          }},
+        ]
+      });
+
+  }
+
+  _setCanvassSettings = async (canvassSettings) => {
+    const { form, dbx } = this.state;
+
+    let rmshare = false;
+
+    if (this.state.canvassSettings.share_progress !== canvassSettings.share_progress && canvassSettings.share_progress === false) rmshare = true;
+
+    try {
+      let str = JSON.stringify(canvassSettings);
+      await storage.set(this.state.settingsStorageKey, str);
+      this.setState({canvassSettings});
+    } catch (e) {}
+
+    if (rmshare) {
+      try {
+        let res = await dbx.filesListFolder({path: form.folder_path});
+        for (let i in res.entries) {
+          item = res.entries[i];
+          if (item['.tag'] != 'folder') continue;
+          if (item.path_display.match(/@/))
+            await dbx.filesDelete({ path: item.path_display+'/exported.jtrf' });
+        }
+      } catch (e) {}
+    }
+
+    this.updateMarkers();
+  }
+
   timeFormat(epoch) {
     let date = new Date(epoch);
     return date.toLocaleDateString('en-us')+" "+date.toLocaleTimeString('en-us');
+  }
+
+  _nodesToJtxt(nodes) {
+    return base64.encode(pako.gzip(JSON.stringify({
+      formId: this.state.form.id,
+      nodes: nodes,
+    }), { to: 'string' }));
   }
 
   _saveNodes = async (nodes) => {
     this.myNodes = nodes;
 
     try {
-      await storage.set(this.state.asyncStorageKey, JSON.stringify(nodes));
+      await storage.set(this.state.asyncStorageKey, this._nodesToJtxt(nodes));
     } catch (error) {
       console.warn(error);
     }
 
     this.updateMarkers();
 
-    if (this.syncingOk() && !this.state.syncRunning) this._syncNodes(false);
+    if (this.state.canvassSettings.auto_sync && this.syncingOk() && !this.state.syncRunning) this._syncNodes(false);
   }
 
   mergeNodes(stores, time) {
@@ -426,7 +629,8 @@ export default class App extends OVComponent {
 
     this.setState({syncRunning: true});
 
-    ret = await this._syncServer();
+    if (this.state.server) ret = await this._syncServer();
+    else ret = await this._syncDropbox();
 
     this.setState({syncRunning: false});
     this.updateMarkers();
@@ -477,8 +681,106 @@ export default class App extends OVComponent {
     return ret;
   }
 
+  _syncDropbox = async () => {
+    let { dbx, form, user } = this.state;
+    let folders = [];
+    let allsrc = [this.allNodes];
+    let ret = {error: false};
+
+    try {
+      // download other jtxt files on this account
+      let res = await dbx.filesListFolder({path: form.folder_path});
+      if (res.entries.length === 0) throw "The form's folder is missing!";
+
+      for (let i in res.entries) {
+        let item = res.entries[i];
+        if (item['.tag'] === 'folder') folders.push(item.path_display);
+        if (item.path_display.match(/\.jtxt$/) && !item.path_display.match(DeviceInfo.getUniqueID())) {
+          try {
+            let data = await dbx.filesDownload({ path: item.path_display });
+            allsrc.push(this._nodesFromJtxt(await _fileReaderAsync(data.fileBlob)));
+          } catch (e) {}
+        }
+      }
+
+      // download "turf" for this device
+      try {
+        let data = await dbx.filesDownload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtrf' });
+        this.turfNodes = this._nodesFromJtxt(await _fileReaderAsync(data.fileBlob));
+        allsrc.push(this.turfNodes);
+      } catch (e) {}
+
+      // download exported "turf" for this account
+      try {
+        let data = await dbx.filesDownload({ path: form.folder_path+'/exported.jtrf' });
+        allsrc.push(this._nodesFromJtxt(await _fileReaderAsync(data.fileBlob)));
+      } catch (e) {}
+
+      await dbx.filesUpload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtxt', contents: encoding.convert(tr(this._nodesToJtxt(this.myNodes)), 'ISO-8859-1'), mute: true, mode: {'.tag': 'overwrite'} });
+      allsrc.push(this.myNodes);
+
+      // extra sync stuff for the form owner
+      if (user.dropbox.account_id == form.author_id) {
+        // download all sub-folder .jtxt files
+        // TODO: do in paralell... let objs = await Promise.all(pro.map(p => p.catch(e => e)));
+        for (let f in folders) {
+          try {
+            let res = await dbx.filesListFolder({path: folders[f]});
+            for (let i in res.entries) {
+              let item = res.entries[i];
+              if (item.path_display.match(/\.jtxt$/)) {
+                let data = await dbx.filesDownload({ path: item.path_display });
+                allsrc.push(this._nodesFromJtxt(await _fileReaderAsync(data.fileBlob)));
+              }
+            }
+          } catch (e) {
+            console.warn(e);
+          }
+        }
+
+        let exportedFile = encoding.convert(tr(this._nodesToJtxt(this.mergeNodes(allsrc))), 'ISO-8859-1');
+        await dbx.filesUpload({ path: form.folder_path+'/exported.jtrf', contents: exportedFile, mute: true, mode: {'.tag': 'overwrite'} });
+
+        // copy exported.jtrf to all sub-folders if configured in settings
+        if (this.state.canvassSettings.share_progress === true) {
+          for (let f in folders) {
+            let folder = folders[f];
+            if (folder.match(/@/)) {
+              try {
+                await dbx.filesUpload({ path: folder+'/exported.jtrf', contents: exportedFile, mute: true, mode: {'.tag': 'overwrite'} });
+              } catch (e) {
+                console.warn(e);
+              }
+            }
+          }
+        }
+      }
+
+    } catch (e) {
+      ret.error = true;
+    }
+
+    this.allNodes = this.mergeNodes(allsrc);
+
+    return ret;
+  }
+
   getNodeById(id) {
     return (this.allNodes[id] ? this.allNodes[id] : {});
+  }
+
+  updateNodeById = async (id, prop, value) => {
+    let node = this.getNodeById(id);
+
+    if (!node.id) return;
+
+    node[prop] = value;
+    node.updated = this.getEpoch();
+
+    this.myNodes[id] = node;
+    this.allNodes[id] = node;
+
+    await this._saveNodes(this.myNodes);
   }
 
   getChildNodesByIdTypes(id, types) {
@@ -543,9 +845,194 @@ export default class App extends OVComponent {
     return "not visited";
   }
 
+  doExport = async (refer) => {
+    let { dbx, form } = this.state;
+
+    refer.setState({exportRunning: true});
+    let success = false;
+
+    try {
+      await this._syncNodes(false);
+
+      // convert to .csv file and upload
+      let keys = Object.keys(form.questions);
+      let csv = "Street,City,State,Zip,Unit,longitude,latitude,canvasser,datetime,status,"+keys.join(",")+"\n";
+
+      for (let a in this.allNodes) {
+        let node = this.allNodes[a];
+        if (node.type !== "survey") continue;
+
+        let addr = this.getNodeById(node.parent_id);
+
+        // orphaned survey
+        if (!addr.id) continue
+
+        // unit
+        let unit = {};
+        if (addr.type === "unit") {
+          unit = addr;
+          addr = this.getNodeById(addr.parent_id);
+        }
+
+        if (this.state.canvassSettings.only_export_home === true && node.status !== 'home') continue;
+
+        csv += (addr.address?addr.address.map((x) => '"'+(x?x:'')+'"').join(','):'')+
+          ","+(unit.unit?unit.unit:'')+
+          ","+(addr.latlng?addr.latlng.longitude:'')+
+          ","+(addr.latlng?addr.latlng.latitude:'')+
+          ","+node.canvasser+
+          ","+this.timeFormat(node.updated)+
+          ","+node.status;
+        for (let key in keys) {
+          let value = '';
+          if (node.survey && node.survey[keys[key]]) value = node.survey[keys[key]];
+          csv += ',"'+value+'"';
+        }
+        csv += "\n";
+      }
+
+      // csv file
+      await dbx.filesUpload({ path: form.folder_path+'/'+form.name+'.csv', contents: encoding.convert(tr(csv), 'ISO-8859-1'), mute: false, mode: {'.tag': 'overwrite'} });
+      success = true;
+    } catch(e) {
+      console.warn(e);
+    }
+
+    refer.setState({ exportRunning: false }, refer.exportDone(success));
+  }
+
   _canvassGuidelinesUrlHandler() {
     const url = "https://github.com/OurVoiceUSA/HelloVoter/blob/master/docs/Canvassing-Guidelines.md";
     return Linking.openURL(url).catch(() => null);
+  }
+
+  renderMarker = (marker) => {
+    let status = {
+        home: 0, 'not home': 0, 'not interested': 0, 'not visited': 0,
+    };
+
+    if (marker.multi_unit) {
+      let units = this.getChildNodesByIdTypes(marker.id, ["unit"]);
+      for (let u in units) {
+        let stat = this.getLastStatus(units[u]);
+        status[stat]++;
+      }
+    }
+
+    return (
+      <Marker
+        key={marker.id}
+        coordinate={marker.latlng}
+        //image={(marker.landmark?require("../../../img/spacexfh.png"):null)}
+        draggable={(marker.image?false:this.state.canvassSettings.draggable_pins)}
+        onDragEnd={(e) => {
+          this.updateNodeById(marker.id, 'latlng', e.nativeEvent.coordinate);
+        }}
+        pinColor={this.getPinColor(marker)}>
+        <Callout onPress={() => {
+          //if (!marker.landmark)
+          this.doMarkerPress(marker);
+        }}>
+          <View style={{backgroundColor: '#FFFFFF', padding: 5, width: 175}}>
+            <Text style={{fontWeight: 'bold'}}>{marker.address.join("\n")}</Text>
+            <Text>{(marker.multi_unit ? 'Multi-unit address' : this.getLastInteraction(marker.id))}</Text>
+            {marker.multi_unit &&
+              <View style={{flex: 1, flexDirection: 'row'}}>
+                <View style={{marginRight: 5}}>
+                  <Text style={{fontSize: 13}}>Home:</Text>
+                  <Text style={{fontSize: 13}}>Not Home:</Text>
+                  <Text style={{fontSize: 13}}>Not Interested:</Text>
+                  <Text style={{fontSize: 13}}>Not Visited:</Text>
+                </View>
+                <View style={{marginRight: 5}}>
+                  <Text style={{fontSize: 13}}>{status['home']}</Text>
+                  <Text style={{fontSize: 13}}>{status['not home']}</Text>
+                  <Text style={{fontSize: 13}}>{status['not interested']}</Text>
+                  <Text style={{fontSize: 13}}>{status['not visited']}</Text>
+                </View>
+              </View>
+            }
+          </View>
+        </Callout>
+      </Marker>
+    );
+  }
+
+  renderCluster = (cluster, onPress) => {
+    const pointCount = cluster.pointCount,
+      coordinate = cluster.coordinate,
+      clusterId = cluster.clusterId;
+
+    const clusteringEngine = this.map.getClusteringEngine(),
+      leaves = clusteringEngine.getLeaves(clusterId, Infinity);
+
+    let status = {
+      house: {
+        home: 0, 'not home': 0, 'not interested': 0, 'not visited': 0,
+      },
+      'multi-unit': {
+        home: 0, 'not home': 0, 'not interested': 0, 'not visited': 0,
+      }
+    };
+
+    for (let l in leaves) {
+      let node = leaves[l].properties.item;
+      if (node.multi_unit) {
+        let units = this.getChildNodesByIdTypes(node.id, ["unit"]);
+        for (let u in units) {
+          let stat = this.getLastStatus(units[u]);
+          status['multi-unit'][stat]++;
+        }
+      } else {
+        let stat = this.getLastStatus(node);
+        status['house'][stat]++;
+      }
+    }
+
+    const size = 25 + ((pointCount+"").length*5);
+
+    return (
+      <Marker key={clusterId} coordinate={coordinate}>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={{
+            backgroundColor: '#ffffff', width: size, height: size, borderRadius: size,
+            borderWidth: 1, borderColor: '#000000',
+            alignItems: 'center', justifyContent: 'center', margin: 2.5,
+            }}>
+            <Text>{pointCount}</Text>
+          </TouchableOpacity>
+        </View>
+        <Callout>
+          <View style={{backgroundColor: '#FFFFFF', padding: 5, width: 225}}>
+            <View style={{flex: 1, alignItems: 'center'}}>
+              <View style={{flex: 1, flexDirection: 'row'}}>
+                <View style={{marginRight: 5}}>
+                  <Text style={{fontSize: 13, textDecorationLine: 'underline'}}>Status</Text>
+                  <Text style={{fontSize: 13}}>Home:</Text>
+                  <Text style={{fontSize: 13}}>Not Home:</Text>
+                  <Text style={{fontSize: 13}}>Not Interested:</Text>
+                  <Text style={{fontSize: 13}}>Not Visited:</Text>
+                </View>
+                <View style={{marginRight: 5}}>
+                  <Text style={{fontSize: 13, textDecorationLine: 'underline'}}>House</Text>
+                  <Text style={{fontSize: 13}}>{status['house']['home']}</Text>
+                  <Text style={{fontSize: 13}}>{status['house']['not home']}</Text>
+                  <Text style={{fontSize: 13}}>{status['house']['not interested']}</Text>
+                  <Text style={{fontSize: 13}}>{status['house']['not visited']}</Text>
+                </View>
+                <View>
+                  <Text style={{fontSize: 13, textDecorationLine: 'underline'}}>Multi-Unit</Text>
+                  <Text style={{fontSize: 13}}>{status['multi-unit']['home']}</Text>
+                  <Text style={{fontSize: 13}}>{status['multi-unit']['not home']}</Text>
+                  <Text style={{fontSize: 13}}>{status['multi-unit']['not interested']}</Text>
+                  <Text style={{fontSize: 13}}>{status['multi-unit']['not visited']}</Text>
+                </View>
+              </View>
+            </View>
+          </View>
+        </Callout>
+      </Marker>
+    )
   }
 
   render() {
@@ -648,6 +1135,13 @@ export default class App extends OVComponent {
       geofence = geojson2polygons(this.state.geofence, true);
     }
 
+    let maxZoom = 15; // high (default)
+
+    switch (this.state.canvassSettings.pin_clustering_zoom) {
+      case 'medium': maxZoom = 14; break;
+      case 'low': maxZoom = 13; break;
+    }
+
     return (
       <View style={styles.container}>
 
@@ -663,6 +1157,17 @@ export default class App extends OVComponent {
             let latitudeDelta = region.latitudeDelta;
             let longitudeDelta = region.longitudeDelta;
 
+            switch (this.state.canvassSettings.pin_clustering_zoom) {
+              case "medium":
+                latitudeDelta = 0.0075;
+                longitudeDelta = 0.0075;
+                break;
+              case "low":
+                latitudeDelta = 0.015;
+                longitudeDelta = 0.015;
+                break;
+            }
+
             this.map.getMapRef().animateToRegion({
               latitude: myPosition.latitude,
               longitude: myPosition.longitude,
@@ -675,22 +1180,14 @@ export default class App extends OVComponent {
           showsUserLocation={true}
           followsUserLocation={false}
           keyboardShouldPersistTaps={true}
+          data={this.state.markers}
+          renderMarker={this.renderMarker}
+          renderCluster={this.renderCluster}
+          radius={50}
+          minZoom={0}
+          maxZoom={maxZoom}
           {...this.props}>
           {geofence.map((polygon, idx) => <Polygon key={idx} coordinates={polygon} strokeWidth={2} fillColor="rgba(0,0,0,0)" />)}
-          {this.state.markers.map((marker) => {
-            return (
-              <MapView.Marker
-                key={marker.id}
-                coordinate={marker.latlng}
-                pinColor={this.getPinColor(marker)}>
-                <MapView.Callout onPress={() => this.doMarkerPress(marker)}>
-                  <View style={{backgroundColor: '#FFFFFF', padding: 5, width: 175}}>
-                    <Text style={{fontWeight: 'bold'}}>{marker.address.join("\n")}</Text>
-                    <Text>{(marker.multi_unit ? 'Multi-unit address' : this.getLastInteraction(marker.id))}</Text>
-                  </View>
-                </MapView.Callout>
-              </MapView.Marker>
-          )})}
         </MapView>
         }
 
@@ -715,6 +1212,42 @@ export default class App extends OVComponent {
               {...iconStyles} />
           </TouchableOpacity>
           }
+
+          {this._syncable() &&
+          <View>
+            {this.state.syncRunning &&
+            <View style={styles.iconContainer}>
+              <ActivityIndicator size="large" />
+            </View>
+            ||
+            <TouchableOpacity style={styles.iconContainer}
+              onPress={() => {
+                if (this.state.netInfo === 'none') {
+                  Alert.alert('Sync failed.', 'You are not connected to the internet.', [{text: 'OK'}], { cancelable: false });
+                } else if (!this.syncingOk()) {
+                  Alert.alert('Sync failed.', 'You are not connected to wifi. To sync over your cellular connection, enable \'Sync over cellular\' in settings.', [{text: 'OK'}], { cancelable: false });
+                } else {
+                  this._syncNodes(true);
+                }
+              }}>
+              <Icon
+                name="refresh"
+                size={50}
+                color={(this.syncingOk() ? "#00a86b" : "#d3d3d3")}
+                {...iconStyles} />
+            </TouchableOpacity>
+            }
+          </View>
+          }
+
+          <TouchableOpacity style={styles.iconContainer}
+            onPress={() => {navigate("CanvassingSettingsPage", {refer: this})}}>
+            <Icon
+              name="cog"
+              size={50}
+              color="#808080"
+              {...iconStyles} />
+          </TouchableOpacity>
 
         </View>
 

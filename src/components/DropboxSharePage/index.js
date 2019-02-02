@@ -86,7 +86,7 @@ export default class App extends PureComponent {
         shared_folder_id: SharingShareFolderLaunch.shared_folder_id,
         members: [{member: {email: email, '.tag': 'email'}, access_level: {'.tag': 'editor'}}],
         quiet: false,
-        custom_message: 'You have been invited to the canvassing campaign '+form.name+' managed by '+form.author+'! Login to Dropbox with the Our Voice App to participate. Find links to download the mobile app here: https://ourvoiceusa.org/our-voice-app/',
+        custom_message: 'You have been invited to the canvassing campaign '+form.name+' managed by '+form.author+'! Login to Dropbox with the HelloVoter App to participate. Find links to download the mobile app here: https://ourvoiceusa.org/ovapp/',
       });
     } catch (error) {
       console.warn(error);
