@@ -3,7 +3,6 @@ import React, { Component } from 'react';
 import { HashRouter as Router, Route, Link } from 'react-router-dom';
 import ReactPaginate from 'react-paginate';
 import Select from 'react-select';
-import Modal from 'react-modal';
 import t from 'tcomb-form';
 
 import CircularProgress from '@material-ui/core/CircularProgress';
@@ -14,7 +13,6 @@ import DialogActions from '@material-ui/core/DialogActions';
 
 import {
   faTimesCircle,
-  faPlusCircle,
   faClipboard
 } from '@fortawesome/free-solid-svg-icons';
 
@@ -36,8 +34,6 @@ import {
   Icon,
   DialogSaving
 } from '../common.js';
-
-Modal.setAppElement(document.getElementById('root'));
 
 const customStyles = {
   content: {
@@ -68,46 +64,6 @@ var addItem = {
   type: FTYPE
 };
 
-var options = {
-  fields: {
-    key: {
-      label: 'Input Key',
-      help: 'The spreadsheet column name.'
-    },
-    label: {
-      label: 'Input Label',
-      help: 'Label the user sees on the form.'
-    },
-    type: {
-      help: 'The type of input the user can enter.'
-    }
-  }
-};
-
-var premade = {
-  FullName: { label: 'Full Name', type: 'String', optional: true },
-  Phone: { label: 'Phone Number', type: 'Number', optional: true },
-  Email: { label: 'Email Address', type: 'String', optional: true },
-  RegisteredToVote: {
-    label: 'Are you registered to vote?',
-    type: 'Boolean',
-    optional: true
-  },
-  PartyAffiliation: {
-    label: 'Party Affiliation',
-    type: 'List',
-    optional: true,
-    options: [
-      'No Party Preference',
-      'Democratic',
-      'Republican',
-      'Green',
-      'Libertarian',
-      'Other'
-    ]
-  }
-};
-
 export default class Forms extends Component {
   constructor(props) {
     super(props);
@@ -116,7 +72,7 @@ export default class Forms extends Component {
     if (!perPage) perPage = 5;
 
     // TODO: this is only for brand new forms
-    let fields = JSON.parse(JSON.stringify(premade)); // deep copy
+    let fields = {};
     let order = Object.keys(fields);
     this.mainForm = t.struct({
       name: t.String
@@ -151,9 +107,6 @@ export default class Forms extends Component {
     };
 
     this.onChange = this.onChange.bind(this);
-    this.openModal = this.openModal.bind(this);
-    this.closeModal = this.closeModal.bind(this);
-    this.doAddCustom = this.doAddCustom.bind(this);
     this.onTypeSearch = this.onTypeSearch.bind(this);
     this.handlePageNumChange = this.handlePageNumChange.bind(this);
   }
@@ -180,42 +133,6 @@ export default class Forms extends Component {
       search: event.target.value.toLowerCase(),
       pageNum: 1
     });
-  }
-
-  openModal() {
-    this.setState({ customForm: t.struct(addItem) });
-  }
-
-  closeModal() {
-    this.setState({ customForm: null });
-  }
-
-  doAddCustom() {
-    let { fields, order } = this.state;
-
-    let ref = this.customForm.getValue();
-    if (ref === null) return;
-    let json = JSON.parse(JSON.stringify(ref)); // deep copy
-
-    let key = json.key;
-    delete json.key;
-    json.optional = true; // backwards compatability
-
-    // check for duplicate keys
-    if (fields[key]) {
-      //return Alert.alert('Error', 'Duplicate Input Key. Change your Input Key to add this item.', [{text: 'OK'}], { cancelable: false });    }
-      notify_error({}, 'Duplicate entry.');
-      return;
-    }
-
-    fields[key] = json;
-    order[order.length] = key;
-
-    this.setState({ customForm: null, fields: fields, order: order });
-  }
-
-  doShowCustom() {
-    this.setState({ customForm: t.struct(addItem) });
   }
 
   inputTypeToReadable(type) {
@@ -265,14 +182,21 @@ export default class Forms extends Component {
     this.setState({ loading: true });
     let forms = [];
     let attributes = [];
+    let fields = {};
 
     try {
       forms = await _loadForms(this);
       attributes = await _loadAttributes(this);
+
+      // convert attributes to fields
+      attributes.forEach(a => {
+        fields[a.id] = { label: a.name, type: a.type, optional: true, options: a.values };
+        //if (a.values) fields[a.id].options =
+      });
     } catch (e) {
       notify_error(e, 'Unable to load forms.');
     }
-    this.setState({ forms, attributes, loading: false });
+    this.setState({ forms, attributes, fields, loading: false });
   };
 
   _deleteForm = async id => {
@@ -321,8 +245,7 @@ export default class Forms extends Component {
 
       obj = {
         name: formName,
-        questions: this.state.fields,
-        questions_order: this.state.order
+        attributes: Object.keys(this.state.fields),
       };
 
       await _fetch(this.props.server, '/volunteer/v1/form/create', 'POST', obj);
@@ -380,13 +303,6 @@ export default class Forms extends Component {
                   value={this.state.addFormForm}
                 />
 
-                <div style={{ margin: 25 }}>
-                  Items in your Volunteering form:{' '}
-                  <button onClick={this.openModal}>
-                    <Icon icon={faPlusCircle} /> Add Item
-                  </button>
-                </div>
-
                 {Object.keys(this.state.fields).map(f => {
                   let field = this.state.fields[f];
                   return (
@@ -405,27 +321,6 @@ export default class Forms extends Component {
                   Create Form
                 </button>
 
-                <Modal
-                  isOpen={this.state.customForm !== null}
-                  onAfterOpen={this.afterOpenModal}
-                  onRequestClose={this.closeModal}
-                  style={customStyles}
-                  contentLabel="Add item to form"
-                >
-                  <t.form.Form
-                    ref={ref => (this.customForm = ref)}
-                    type={this.customFormItems}
-                    options={options}
-                    onChange={this.onChange}
-                    value={this.state.customForm}
-                  />
-                  <button onClick={this.doAddCustom}>Add this item</button>
-                  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-                  &nbsp; &nbsp; &nbsp;
-                  <button onClick={() => this.setState({ customForm: null })}>
-                    Dismiss
-                  </button>
-                </Modal>
               </div>
             )}
           />
