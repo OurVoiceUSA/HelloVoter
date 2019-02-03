@@ -10,6 +10,7 @@ import { CardTeam } from '../Teams';
 import { CardTurfFull } from './CardTurfFull';
 
 import {
+  API_BASE_URI,
   _fetch,
   notify_error,
   notify_success,
@@ -48,7 +49,7 @@ export class CardTurf extends Component {
       for (let i in obj.add) {
         await _fetch(
           this.state.server,
-          '/volunteer/v1/turf/assigned/team/add',
+          API_BASE_URI+'/turf/assigned/team/add',
           'POST',
           { teamId: obj.add[i], turfId: this.props.id }
         );
@@ -57,7 +58,7 @@ export class CardTurf extends Component {
       for (let i in obj.rm) {
         await _fetch(
           this.state.server,
-          '/volunteer/v1/turf/assigned/team/remove',
+          API_BASE_URI+'/turf/assigned/team/remove',
           'POST',
           { teamId: obj.rm[i], turfId: this.props.id }
         );
@@ -82,7 +83,7 @@ export class CardTurf extends Component {
       for (let i in obj.add) {
         await _fetch(
           this.state.server,
-          '/volunteer/v1/turf/assigned/volunteer/add',
+          API_BASE_URI+'/turf/assigned/volunteer/add',
           'POST',
           { cId: obj.add[i], turfId: this.props.id }
         );
@@ -91,7 +92,7 @@ export class CardTurf extends Component {
       for (let i in obj.rm) {
         await _fetch(
           this.state.server,
-          '/volunteer/v1/turf/assigned/volunteer/remove',
+          API_BASE_URI+'/turf/assigned/volunteer/remove',
           'POST',
           { cId: obj.rm[i], turfId: this.props.id }
         );

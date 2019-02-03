@@ -8,7 +8,9 @@ import { ImportPreview, ImportMap } from './';
 import { PaperTable, ProgressBar } from '../Elements';
 import { fields } from './constants';
 import { PAPER_TABLE_SPEC } from './utilities';
+
 import {
+  API_BASE_URI,
   notify_error,
   notify_success,
   _fetch,
@@ -57,7 +59,7 @@ export default class ImportData extends Component {
     const total = data.length;
 
     this.setState({sending: true, completed: 1});
-    await _fetch(this.props.server, '/volunteer/v1/import/begin', 'POST', {
+    await _fetch(this.props.server, API_BASE_URI+'/import/begin', 'POST', {
       filename: filename,
       attributes: ['Party Affiliation'],
     });
@@ -85,14 +87,14 @@ export default class ImportData extends Component {
         }
       }
 
-      await _fetch(this.props.server, '/volunteer/v1/import/add', 'POST', {
+      await _fetch(this.props.server, API_BASE_URI+'/import/add', 'POST', {
         filename: filename,
         data: arr,
       });
       const percentage = Math.ceil(((total - data.length) / total) * 100);
       this.setState({ completed: percentage });
     }
-    await _fetch(this.props.server, '/volunteer/v1/import/end', 'POST', {
+    await _fetch(this.props.server, API_BASE_URI+'/import/end', 'POST', {
       filename: filename,
     });
 

@@ -1,7 +1,12 @@
 import React, { Component } from 'react';
 import { PaperTable } from './Elements';
 
-import { _fetch, jobRuntime, RootLoader } from '../common.js';
+import {
+  API_BASE_URI,
+  _fetch,
+  jobRuntime,
+  RootLoader
+} from '../common.js';
 
 const tsToStr = ts => {
   return new Date(ts).toString();
@@ -52,7 +57,7 @@ export default class Queue extends Component {
 
     this.setState({ loading: true });
 
-    let obj = await _fetch(this.state.server, '/volunteer/v1/queue/list');
+    let obj = await _fetch(this.state.server, API_BASE_URI+'/queue/list');
     if (obj.data) {
       rows = obj.data.map(r => {
         let q = r[0];

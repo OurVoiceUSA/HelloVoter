@@ -13,6 +13,8 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 
 import { mockFetch } from './mocks.js';
 
+export const API_BASE_URI = '/HelloVoterHQ/api/v1';
+
 export function jobRuntime(start, end) {
   if (end)
     return prettyMs(end-start);
@@ -136,7 +138,7 @@ export function _searchStringify(obj) {
 export async function _loadImports(refer) {
   let imports = [];
   try {
-    let data = await _fetch(refer.state.server, '/volunteer/v1/import/list');
+    let data = await _fetch(refer.state.server, API_BASE_URI+'/import/list');
     imports = data && data.data ? data.data : [];
   } catch (e) {
     notify_error(e, 'Unable to load import info.');
@@ -149,7 +151,7 @@ export async function _loadVolunteer(refer, id) {
   try {
     volunteer = await _fetch(
       refer.state.server,
-      '/volunteer/v1/volunteer/get?id=' + id
+      API_BASE_URI+'/volunteer/get?id=' + id
     );
   } catch (e) {
     notify_error(e, 'Unable to load volunteer info.');
@@ -169,7 +171,7 @@ export async function _loadVolunteers(refer, byType, id) {
     else if (byType === 'form')
       call = 'form/assigned/volunteer/list?formId=' + id;
 
-    volunteers = await _fetch(refer.props.server, '/volunteer/v1/' + call);
+    volunteers = await _fetch(refer.props.server, API_BASE_URI+'/' + call);
   } catch (e) {
     notify_error(e, 'Unable to load volunteer data.');
   }
@@ -183,7 +185,7 @@ export async function _loadTurf(refer, id) {
   try {
     turf = await _fetch(
       refer.state.server,
-      '/volunteer/v1/turf/get?turfId=' + id
+      API_BASE_URI+'/turf/get?turfId=' + id
     );
   } catch (e) {
     notify_error(e, 'Unable to load turf data.');
@@ -199,7 +201,7 @@ export async function _loadTurfs(refer, teamId, flag) {
     let call = 'turf/list' + (flag ? '?geometry=true' : '');
     if (teamId)
       call = 'team/turf/list?teamId=' + teamId + (flag ? '&geometry=true' : '');
-    let data = await _fetch(refer.props.server, '/volunteer/v1/' + call);
+    let data = await _fetch(refer.props.server, API_BASE_URI+'/' + call);
     turf = data.data ? data.data : [];
   } catch (e) {
     notify_error(e, 'Unable to load turf data.');
@@ -214,7 +216,7 @@ export async function _loadTeam(refer, id) {
   try {
     team = await _fetch(
       refer.state.server,
-      '/volunteer/v1/team/get?teamId=' + id
+      API_BASE_URI+'/team/get?teamId=' + id
     );
   } catch (e) {
     notify_error(e, 'Unable to load team data.');
@@ -232,7 +234,7 @@ export async function _loadTeams(refer, byType, id) {
     if (byType === 'turf') call = 'turf/assigned/team/list?turfId=' + id;
     else if (byType === 'form') call = 'form/assigned/team/list?formId=' + id;
 
-    let data = await _fetch(refer.props.server, '/volunteer/v1/' + call);
+    let data = await _fetch(refer.props.server, API_BASE_URI+'/' + call);
     teams = data.data ? data.data : [];
   } catch (e) {
     notify_error(e, 'Unable to load teams data.');
@@ -247,7 +249,7 @@ export async function _loadForm(refer, id) {
   try {
     form = await _fetch(
       refer.state.server,
-      '/volunteer/v1/form/get?formId=' + id
+      API_BASE_URI+'/form/get?formId=' + id
     );
   } catch (e) {
     notify_error(e, 'Unable to load form data.');
@@ -265,7 +267,7 @@ export async function _loadForms(refer, teamId) {
     if (teamId) uri = 'team/form/list?teamId=' + teamId;
     else uri = 'form/list';
 
-    let data = await _fetch(refer.props.server, '/volunteer/v1/' + uri);
+    let data = await _fetch(refer.props.server, API_BASE_URI+'/' + uri);
     forms = data.data ? data.data : [];
   } catch (e) {
     notify_error(e, 'Unable to load form data.');
@@ -278,7 +280,7 @@ export async function _loadAttributes(refer) {
   let forms = [];
 
   try {
-    let data = await _fetch(refer.props.server, '/volunteer/v1/attribute/list');
+    let data = await _fetch(refer.props.server, API_BASE_URI+'/attribute/list');
     forms = data.data ? data.data : [];
   } catch (e) {
     notify_error(e, 'Unable to load attribute data.');
@@ -290,7 +292,7 @@ export async function _loadAttributes(refer) {
 export async function _loadAddresses(refer) {
   let addresses = {};
   try {
-    addresses = await _fetch(refer.props.server, '/volunteer/v1/sync', 'POST', {
+    addresses = await _fetch(refer.props.server, API_BASE_URI+'/sync', 'POST', {
       nodes: {}
     });
   } catch (e) {

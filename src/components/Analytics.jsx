@@ -6,6 +6,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import {PieChart, Pie, Cell, Legend, Label} from 'recharts';
 
 import {
+  API_BASE_URI,
   _fetch,
   _loadTurfs,
   _searchStringify,
@@ -64,7 +65,7 @@ export default class App extends Component {
 
     let party_breakdown = [];
 
-    let uri = '/volunteer/v1/analytics/list?turfId=';
+    let uri = API_BASE_URI+'/analytics/list?turfId=';
     if (this.state.selectedTurfOption && this.state.selectedTurfOption.id) uri += this.state.selectedTurfOption.id;
     if (this.state.include_null) uri += '&include_null=true';
 

@@ -14,6 +14,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import { CardTurf, ListTurf, TurfOptions } from './index';
 
 import {
+  API_BASE_URI,
   _fetch,
   notify_error,
   notify_success,
@@ -174,7 +175,7 @@ export default class App extends Component {
   _deleteTurf = async id => {
     this.setState({ saving: true, menuDelete: false });
     try {
-      await _fetch(this.props.server, '/volunteer/v1/turf/delete', 'POST', {
+      await _fetch(this.props.server, API_BASE_URI+'/turf/delete', 'POST', {
         turfId: id,
       });
       notify_success('Turf has been deleted.');
@@ -264,7 +265,7 @@ export default class App extends Component {
           name = json.name + ' ' + obj.name;
         else name = json.name;
 
-        await _fetch(this.props.server, '/volunteer/v1/turf/create', 'POST', {
+        await _fetch(this.props.server, API_BASE_URI+'/turf/create', 'POST', {
           name: name,
           geometry: geometry,
         });

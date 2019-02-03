@@ -13,7 +13,14 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 import { arrayMove } from 'react-sortable-hoc';
-import { _fetch, notify_error, RootLoader } from '../../common.js';
+
+import {
+  API_BASE_URI,
+  _fetch,
+  notify_error,
+  RootLoader
+} from '../../common.js';
+
 import { Cards } from './Cards';
 
 export default class App extends Component {
@@ -49,7 +56,7 @@ export default class App extends Component {
     this.setState({ loading: true });
 
     try {
-      data = await _fetch(this.props.server, '/volunteer/v1/dashboard');
+      data = await _fetch(this.props.server, API_BASE_URI+'/dashboard');
       cards = {
         vol: {
           name: 'Volunteers',

@@ -14,7 +14,12 @@ import 'typeface-roboto';
 import { withStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 
-import { _fetch, notify_error } from './common.js';
+import {
+  API_BASE_URI,
+  _fetch,
+  notify_error
+} from './common.js';
+
 import styles from './app.styles';
 
 class App extends Component {
@@ -65,7 +70,7 @@ class App extends Component {
     // don't load if already loaded
     if (this.state.google_maps_key) return;
 
-    let data = await _fetch(this.state.server, '/volunteer/v1/google_maps_key');
+    let data = await _fetch(this.state.server, API_BASE_URI+'/google_maps_key');
 
     // load google places API
     var aScript = document.createElement('script');
@@ -139,7 +144,7 @@ class App extends Component {
     localStorage.setItem('server', server);
 
     try {
-      res = await fetch('https://' + server + '/volunteer/v1/hello', {
+      res = await fetch('https://' + server + API_BASE_URI+'/hello', {
         method: 'POST',
         headers: {
           Authorization:

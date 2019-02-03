@@ -2,7 +2,12 @@ import React, { Component } from 'react';
 
 import CircularProgress from '@material-ui/core/CircularProgress';
 
-import { _fetch, notify_error, Icon } from '../common.js';
+import {
+  API_BASE_URI,
+  _fetch,
+  notify_error,
+  Icon
+} from '../common.js';
 
 import { faGlobe } from '@fortawesome/free-solid-svg-icons';
 import { faTwitter, faFacebook } from '@fortawesome/free-brands-svg-icons';
@@ -20,7 +25,7 @@ export default class App extends Component {
   componentDidMount = async () => {
     let data = {};
     try {
-      data = await _fetch(this.props.server, '/volunteer/v1/dashboard');
+      data = await _fetch(this.props.server, API_BASE_URI+'/dashboard');
     } catch (e) {
       notify_error(e, 'Unable to load dashboard info.');
     }

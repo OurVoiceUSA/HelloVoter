@@ -12,6 +12,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogActions from '@material-ui/core/DialogActions';
 
 import {
+  API_BASE_URI,
   notify_error,
   notify_success,
   _fetch,
@@ -101,7 +102,7 @@ export default class App extends Component {
   _deleteTeam = async id => {
     this.setState({ saving: true, menuDelete: false });
     try {
-      await _fetch(this.props.server, '/volunteer/v1/team/delete', 'POST', {
+      await _fetch(this.props.server, API_BASE_URI+'/team/delete', 'POST', {
         teamId: id,
       });
       notify_success('Team has been deleted.');
@@ -121,7 +122,7 @@ export default class App extends Component {
     this.setState({ saving: true });
 
     try {
-      await _fetch(this.props.server, '/volunteer/v1/team/create', 'POST', {
+      await _fetch(this.props.server, API_BASE_URI+'/team/create', 'POST', {
         name: json.name,
       });
       notify_success('Team has been created.');
@@ -333,7 +334,7 @@ export class CardTeam extends Component {
       for (let i in obj.add) {
         await _fetch(
           this.state.server,
-          '/volunteer/v1/team/members/add',
+          API_BASE_URI+'/team/members/add',
           'POST',
           { teamId: this.props.id, cId: obj.add[i] }
         );
@@ -342,7 +343,7 @@ export class CardTeam extends Component {
       for (let i in obj.rm) {
         await _fetch(
           this.state.server,
-          '/volunteer/v1/team/members/remove',
+          API_BASE_URI+'/team/members/remove',
           'POST',
           { teamId: this.props.id, cId: obj.rm[i] }
         );
@@ -369,7 +370,7 @@ export class CardTeam extends Component {
       for (let i in obj.add) {
         await _fetch(
           this.state.server,
-          '/volunteer/v1/form/assigned/team/add',
+          API_BASE_URI+'/form/assigned/team/add',
           'POST',
           { formId: obj.add[i], teamId: this.props.id }
         );
@@ -378,7 +379,7 @@ export class CardTeam extends Component {
       for (let i in obj.rm) {
         await _fetch(
           this.state.server,
-          '/volunteer/v1/form/assigned/team/remove',
+          API_BASE_URI+'/form/assigned/team/remove',
           'POST',
           { formId: obj.rm[i], teamId: this.props.id }
         );
@@ -405,7 +406,7 @@ export class CardTeam extends Component {
       for (let i in obj.add) {
         await _fetch(
           this.state.server,
-          '/volunteer/v1/turf/assigned/team/add',
+          API_BASE_URI+'/turf/assigned/team/add',
           'POST',
           { turfId: obj.add[i], teamId: this.props.id }
         );
@@ -414,7 +415,7 @@ export class CardTeam extends Component {
       for (let i in obj.rm) {
         await _fetch(
           this.state.server,
-          '/volunteer/v1/turf/assigned/team/remove',
+          API_BASE_URI+'/turf/assigned/team/remove',
           'POST',
           { turfId: obj.rm[i], teamId: this.props.id }
         );

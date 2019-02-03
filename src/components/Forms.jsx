@@ -20,6 +20,7 @@ import { CardVolunteer } from './Volunteers.jsx';
 import { CardTeam } from './Teams.jsx';
 
 import {
+  API_BASE_URI,
   _fetch,
   notify_error,
   notify_success,
@@ -191,7 +192,7 @@ export default class Forms extends Component {
   _deleteForm = async id => {
     this.setState({ saving: true, menuDelete: false });
     try {
-      await _fetch(this.props.server, '/volunteer/v1/form/delete', 'POST', {
+      await _fetch(this.props.server, API_BASE_URI+'/form/delete', 'POST', {
         formId: id
       });
       notify_success('Form has been deleted.');
@@ -237,7 +238,7 @@ export default class Forms extends Component {
         attributes: Object.keys(this.state.fields),
       };
 
-      await _fetch(this.props.server, '/volunteer/v1/form/create', 'POST', obj);
+      await _fetch(this.props.server, API_BASE_URI+'/form/create', 'POST', obj);
       notify_success('Form has been created.');
     } catch (e) {
       notify_error(e, 'Unable to create form.');
@@ -450,7 +451,7 @@ export class CardForm extends Component {
       for (let i in obj.add) {
         await _fetch(
           this.state.server,
-          '/volunteer/v1/form/assigned/team/add',
+          API_BASE_URI+'/form/assigned/team/add',
           'POST',
           { teamId: obj.add[i], formId: this.props.id }
         );
@@ -459,7 +460,7 @@ export class CardForm extends Component {
       for (let i in obj.rm) {
         await _fetch(
           this.state.server,
-          '/volunteer/v1/form/assigned/team/remove',
+          API_BASE_URI+'/form/assigned/team/remove',
           'POST',
           { teamId: obj.rm[i], formId: this.props.id }
         );
@@ -484,7 +485,7 @@ export class CardForm extends Component {
       for (let i in obj.add) {
         await _fetch(
           this.state.server,
-          '/volunteer/v1/form/assigned/volunteer/add',
+          API_BASE_URI+'/form/assigned/volunteer/add',
           'POST',
           { cId: obj.add[i], formId: this.props.id }
         );
@@ -493,7 +494,7 @@ export class CardForm extends Component {
       for (let i in obj.rm) {
         await _fetch(
           this.state.server,
-          '/volunteer/v1/form/assigned/volunteer/remove',
+          API_BASE_URI+'/form/assigned/volunteer/remove',
           'POST',
           { cId: obj.rm[i], formId: this.props.id }
         );

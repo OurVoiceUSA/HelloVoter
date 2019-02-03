@@ -15,6 +15,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import Avatar from '@material-ui/core/Avatar';
 
 import {
+  API_BASE_URI,
   notify_error,
   notify_success,
   _fetch,
@@ -308,7 +309,7 @@ export class CardVolunteer extends Component {
       for (let i in obj.add) {
         await _fetch(
           this.state.server,
-          '/volunteer/v1/team/members/add',
+          API_BASE_URI+'/team/members/add',
           'POST',
           { teamId: obj.add[i], cId: this.props.id }
         );
@@ -317,7 +318,7 @@ export class CardVolunteer extends Component {
       for (let i in obj.rm) {
         await _fetch(
           this.state.server,
-          '/volunteer/v1/team/members/remove',
+          API_BASE_URI+'/team/members/remove',
           'POST',
           { teamId: obj.rm[i], cId: this.props.id }
         );
@@ -349,7 +350,7 @@ export class CardVolunteer extends Component {
       for (let i in obj.add) {
         await _fetch(
           this.state.server,
-          '/volunteer/v1/team/members/promote',
+          API_BASE_URI+'/team/members/promote',
           'POST',
           { teamId: obj.add[i], cId: this.props.id }
         );
@@ -358,7 +359,7 @@ export class CardVolunteer extends Component {
       for (let i in obj.rm) {
         await _fetch(
           this.state.server,
-          '/volunteer/v1/team/members/demote',
+          API_BASE_URI+'/team/members/demote',
           'POST',
           { teamId: obj.rm[i], cId: this.props.id }
         );
@@ -380,7 +381,7 @@ export class CardVolunteer extends Component {
       if (this.state.selectedFormsOption.value) {
         await _fetch(
           this.state.server,
-          '/volunteer/v1/form/assigned/volunteer/remove',
+          API_BASE_URI+'/form/assigned/volunteer/remove',
           'POST',
           {
             formId: this.state.selectedFormsOption.id,
@@ -391,7 +392,7 @@ export class CardVolunteer extends Component {
       if (selectedFormsOption.value) {
         await _fetch(
           this.state.server,
-          '/volunteer/v1/form/assigned/volunteer/add',
+          API_BASE_URI+'/form/assigned/volunteer/add',
           'POST',
           {
             formId: selectedFormsOption.id,
@@ -415,7 +416,7 @@ export class CardVolunteer extends Component {
       if (this.state.selectedTurfOption.value) {
         await _fetch(
           this.state.server,
-          '/volunteer/v1/turf/assigned/volunteer/remove',
+          API_BASE_URI+'/turf/assigned/volunteer/remove',
           'POST',
           {
             turfId: this.state.selectedTurfOption.id,
@@ -426,7 +427,7 @@ export class CardVolunteer extends Component {
       if (selectedTurfOption.value) {
         await _fetch(
           this.state.server,
-          '/volunteer/v1/turf/assigned/volunteer/add',
+          API_BASE_URI+'/turf/assigned/volunteer/add',
           'POST',
           {
             turfId: selectedTurfOption.id,
@@ -582,7 +583,7 @@ export class CardVolunteer extends Component {
     try {
       await _fetch(
         this.state.server,
-        '/volunteer/v1/volunteer/' + term,
+        API_BASE_URI+'/volunteer/' + term,
         'POST',
         { id: volunteer.id }
       );
@@ -756,7 +757,7 @@ export class VolunteerAddress extends Component {
       let pos = await getLatLng(res[0]);
       await _fetch(
         this.props.refer.state.server,
-        '/volunteer/v1/volunteer/update',
+        API_BASE_URI+'/volunteer/update',
         'POST',
         {
           id: this.props.volunteer.id,
