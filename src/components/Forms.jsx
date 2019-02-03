@@ -29,6 +29,7 @@ import {
   _searchStringify,
   _loadForms,
   _loadForm,
+  _loadAttributes,
   _loadVolunteers,
   _loadTeams,
   RootLoader,
@@ -124,6 +125,7 @@ export default class Forms extends Component {
     this.state = {
       loading: true,
       forms: [],
+      attributes: [],
       fields: fields,
       order: order,
       customForm: null,
@@ -262,13 +264,15 @@ export default class Forms extends Component {
   _loadData = async () => {
     this.setState({ loading: true });
     let forms = [];
+    let attributes = [];
 
     try {
       forms = await _loadForms(this);
+      attributes = await _loadAttributes(this);
     } catch (e) {
       notify_error(e, 'Unable to load forms.');
     }
-    this.setState({ forms, loading: false });
+    this.setState({ forms, attributes, loading: false });
   };
 
   _deleteForm = async id => {

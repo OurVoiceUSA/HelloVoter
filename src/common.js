@@ -274,6 +274,19 @@ export async function _loadForms(refer, teamId) {
   return forms;
 }
 
+export async function _loadAttributes(refer) {
+  let forms = [];
+
+  try {
+    let data = await _fetch(refer.props.server, '/volunteer/v1/attribute/list');
+    forms = data.data ? data.data : [];
+  } catch (e) {
+    notify_error(e, 'Unable to load attribute data.');
+  }
+
+  return forms;
+}
+
 export async function _loadAddresses(refer) {
   let addresses = {};
   try {
