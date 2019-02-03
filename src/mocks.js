@@ -255,7 +255,7 @@ export async function mockFetch(token, uri, method, body) {
     throw err;
   }
 
-  dashboard = {volunteers: volunteers.length, teams: teams.length, turfs: turfs.length, forms: forms.length, questions: 0, addresses: 0, dbsize: 0};
+  dashboard = {volunteers: volunteers.length, teams: teams.length, turfs: turfs.length, forms: forms.length, attributes: 0, addresses: 0, dbsize: 0};
 
   // return test data based on URI
   switch (true) {
@@ -282,6 +282,7 @@ export async function mockFetch(token, uri, method, body) {
     return {data: arr};
   case /v1\/turf\/list/.test(uri): return {data: turfs};
   case /v1\/form\/list/.test(uri): return {data: forms};
+  case /v1\/attribute\/list/.test(uri): return {"data":[{"name":"Party Affiliation","id":"4a320f76-ef7b-4d73-ae2a-8f4ccf5de344","type":"string","values":["No Party Preference","Democratic","Republican","Green","Libertarian"],"multi":false},{"name":"Registered to Vote","id":"dcfc1fbb-4609-4900-bbb3-1c4afb2a5127","type":"boolean","multi":false},{"name":"Subscribe to Carpool Vote","id":"432634fd-dc28-457d-ae1f-d6fa8d242d30","type":"boolean","multi":false},{"name":"Receive Notifications","id":"134095d5-c1c8-46ad-9952-cc66e2934f9e","type":"string","values":["Phone","Text","Email"],"multi":true},{"name":"Phone Number","id":"7d3466e5-2cee-491e-b3f4-bfea3a4b010a","type":"string","multi":true},{"name":"Email Address","id":"b687b86e-8fe3-4235-bb78-1919bcca00db","type":"string","multi":true},{"name":"Date of Birth","id":"9a903e4f-66ea-4625-bacf-43abb53c6cfc","type":"date","multi":false},{"name":"US Military Veteran","id":"f6a41b03-0dc8-4d59-90bf-033db6a96214","type":"boolean","multi":false},{"name":"Health Insurance","id":"689dc96a-a1db-4b20-9443-e69185675d28","type":"boolean","multi":false},{"name":"Race and Ethnicity","id":"2ad269f5-2712-4a0e-a3d4-be3074a695b6","type":"string","values":["Prefer not to say","African American","Asian","Hispanic","Latino","Native American","Pacific Islander","White"],"multi":true},{"name":"Spoken Languages","id":"59f09d32-b782-4a32-b7f1-4ffe81975167","type":"string","values":["English","Spanish","Chinese","Arabic","French","German"],"multi":true}]};
   case /v1\/team\/form\/list/.test(uri):
     for (let i in teams) {
       if (teams[i].id === id) arr = teams[i].forms;
