@@ -4,7 +4,7 @@ Our Voice USA is a 501(c)(3) non-profit, non-partisan organization for civic edu
 
 ## Features
 
-This is an administrative user interface for HelloVoter and volunteer-broker. Create teams, manage users, cut turf, and import data.
+This is an administrative user interface for HelloVoter. Create teams, manage users, cut turf, and import data.
 
 ## Development Setup
 
