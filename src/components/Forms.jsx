@@ -35,17 +35,6 @@ import {
   DialogSaving
 } from '../common.js';
 
-const customStyles = {
-  content: {
-    top: '15%',
-    left: '50%',
-    right: 'auto',
-    bottom: 'auto',
-    marginRight: '-50%',
-    transform: 'translate(-50%, -50%)'
-  }
-};
-
 const FTYPE = t.enums(
   {
     String: 'Text Input',
