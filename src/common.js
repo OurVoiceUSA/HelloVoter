@@ -289,16 +289,14 @@ export async function _loadAttributes(refer) {
   return forms;
 }
 
-export async function _loadAddresses(refer) {
-  let addresses = {};
+export async function _loadAddressData(refer, lng, lat) {
+  let data = [];
   try {
-    addresses = await _fetch(refer.props.server, API_BASE_URI+'/sync', 'POST', {
-      nodes: {}
-    });
+    data = await _fetch(refer.props.server, API_BASE_URI+'/data/get?longitude='+lng+'&latitude='+lat);
   } catch (e) {
     notify_error(e, 'Unable to load address information.');
   }
-  return addresses;
+  return data;
 }
 
 export function _handleSelectChange(oldopt, newopt) {

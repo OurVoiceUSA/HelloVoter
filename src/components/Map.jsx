@@ -4,7 +4,7 @@ import {Map, InfoWindow, Marker, Polygon, GoogleApiWrapper} from 'google-maps-re
 import {geojson2polygons} from 'ourvoiceusa-sdk-js';
 import {geolocated} from 'react-geolocated';
 
-import { _browserLocation, _loadTurf, _loadAddresses } from '../common.js';
+import { _browserLocation, _loadTurfs, _loadAddressData } from '../common.js';
 
 export class App extends Component {
 
@@ -24,21 +24,9 @@ export class App extends Component {
   }
 
   _loadData = async () => {
-    let addresses = [];
+    let turfs = await _loadTurfs(this, null, true);
 
-    let turfs = await _loadTurf(this, null, true);
-    let data = (await _loadAddresses(this)).nodes;
-
-    if (!data) data = {};
-
-    // only care about address objects
-    Object.keys(data).forEach((d) => {
-      if (data[d] && data[d].type === 'address') {
-        addresses.push(data[d]);
-      }
-    });
-
-    this.setState({turfs, addresses});
+    this.setState({turfs});
   }
 
   onMarkerClick = (props, marker, e) => {
@@ -47,6 +35,11 @@ export class App extends Component {
       activeMarker: marker,
       showingInfoWindow: true
     });
+  }
+
+  loadMarkerData = async (mapProps, map) => {
+    let addresses = await _loadAddressData(this, map.center.lng(), map.center.lat());
+    this.setState({addresses});
   }
 
   onMapClicked = (props) => {
@@ -58,11 +51,22 @@ export class App extends Component {
     }
   };
 
+  statusColor(status) {
+    switch (status) {
+    case 'multi': return 'blue';
+    case 'home': return 'green';
+    case 'nothome': return 'yellow';
+    case 'notinterested': return 'red';
+    default: return 'purple';
+    }
+  }
+
   render() {
     let polygons = [];
     const { addresses } = this.state;
 
     let location = _browserLocation(this.props);
+    if (!location.lng || !location.lat) return (<div>Loading map...</div>);
 
     this.state.turfs.forEach((c) => {
       if (c.geometry)
@@ -70,13 +74,23 @@ export class App extends Component {
     });
 
     return (
-      <Map google={this.props.google} zoom={14} center={location} onClick={this.onMapClicked}>
+      <Map
+        google={this.props.google}
+        zoom={14}
+        initialCenter={location}
+        onReady={this.loadMarkerData}
+        onDragend={this.loadMarkerData}
+        onClick={this.onMapClicked}>
         {addresses.map((a, idx) => (
           <Marker
             key={idx}
             onClick={this.onMarkerClick}
-            title={a.address.join(' ')}
-            position={{lat: a.latlng.latitude, lng: a.latlng.longitude}} />
+            title={a.address.street+" "+a.address.city+" "+a.address.state+" "+a.address.zip}
+            icon={{
+              url: "http://maps.google.com/mapfiles/ms/icons/"+this.statusColor(a.address.status)+"-dot.png",
+            }}
+            people={a.people}
+            position={{lng: a.address.longitude, lat: a.address.latitude}} />
         ))}
         {polygons.map((p, idx) => (
           <Polygon
@@ -92,6 +106,7 @@ export class App extends Component {
           visible={this.state.showingInfoWindow}>
           <div>
             <h1>{this.state.selectedPlace.title}</h1>
+            {JSON.stringify(this.state.selectedPlace.people)}
           </div>
         </InfoWindow>
       </Map>
