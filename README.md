@@ -51,8 +51,8 @@ Then setup neo4j with docker:
 
 Finally, setup to run the server and connect to the database:
 
-    git clone https://github.com/OurVoiceUSA/volunteer-broker.git
-    cd volunteer-broker
+    git clone https://github.com/OurVoiceUSA/HelloVoterAPI.git
+    cd HelloVoterAPI
     echo "NEO4J_PASS=$NEO4J_PASS" > .env
     
     npm install
