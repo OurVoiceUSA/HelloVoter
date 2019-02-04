@@ -29,7 +29,7 @@ Then setup neo4j with docker:
     sudo mv jmx.access jmx.password /opt/neo4j/logs/
     (
       cd /opt/neo4j/plugins
-      sudo curl -LO https://github.com/neo4j-contrib/spatial/releases/download/0.25.7-neo4j-3.4.9/neo4j-spatial-0.25.7-neo4j-3.4.9-server-plugin.jar
+      sudo curl -LO https://github.com/neo4j-contrib/spatial/releases/download/0.26.1-neo4j-3.4.9/neo4j-spatial-0.26.1-neo4j-3.4.9-server-plugin.jar
       sudo curl -LO https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases/download/3.5.0.1/apoc-3.5.0.1-all.jar
     )
     sudo chown -R 100:101 /opt/neo4j
