@@ -48,10 +48,8 @@ const mock_admin = {
   avatar: 'https://cdn0.iconfinder.com/data/icons/viking-2/500/viking_4-512.png',
   ass: {
     ready: false,
-    direct: false,
     turfs: [turf_a, turf_b],
     teams: [],
-    teamperms: [],
     forms: [],
   }};
 const mock_region_leader = {
@@ -60,11 +58,9 @@ const mock_region_leader = {
   avatar: 'https://cdn.iconscout.com/icon/premium/png-256-thumb/thor-3-159482.png',
   ass: {
     ready: false,
-    direct: false,
     leader: true,
     turfs: [turf_a, turf_b],
     teams: [],
-    teamperms: [],
     forms: [],
   }};
 const mock_team_a_leader = {
@@ -73,11 +69,9 @@ const mock_team_a_leader = {
   avatar: 'https://cdn.iconscout.com/icon/premium/png-256-thumb/thor-3-159482.png',
   ass: {
     ready: true,
-    direct: false,
     leader: true,
     turfs: [turf_a],
     teams: [team_a],
-    teamperms: [{leader: true}],
     forms: [form_a],
   }};
 const mock_team_b_leader = {
@@ -86,11 +80,9 @@ const mock_team_b_leader = {
   avatar: 'https://cdn.iconscout.com/icon/premium/png-256-thumb/thor-3-159482.png',
   ass: {
     ready: true,
-    direct: false,
     leader: true,
     turfs: [turf_b],
     teams: [team_b],
-    teamperms: [{leader: true}],
     forms: [form_b],
   }};
 const mock_team_a_member = {
@@ -99,10 +91,8 @@ const mock_team_a_member = {
   avatar: 'https://d1nhio0ox7pgb.cloudfront.net/_img/o_collection_png/green_dark_grey/256x256/plain/chess_piece_rook.png',
   ass: {
     ready: true,
-    direct: false,
     turfs: [turf_a],
     teams: [team_a],
-    teamperms: [{}],
     forms: [form_a],
   }};
 const mock_team_b_member = {
@@ -111,10 +101,8 @@ const mock_team_b_member = {
   avatar: 'https://d1nhio0ox7pgb.cloudfront.net/_img/o_collection_png/green_dark_grey/256x256/plain/chess_piece_rook.png',
   ass: {
     ready: true,
-    direct: false,
     turfs: [turf_b],
     teams: [team_b],
-    teamperms: [{}],
     forms: [form_b],
   }};
 const mock_solo_volunteer = {
@@ -126,10 +114,8 @@ const mock_solo_volunteer = {
   homelat: 33.9208231,
   ass: {
     ready: true,
-    direct: true,
     turfs: [turf_a],
     teams: [],
-    teamperms: [],
     forms: [form_a],
   }};
 const mock_unassigned = {
@@ -139,10 +125,8 @@ const mock_unassigned = {
   homeaddress: 'Please help me!',
   ass: {
     ready: false,
-    direct: false,
     turfs: [],
     teams: [],
-    teamperms: [],
     forms: [],
   }
 };
@@ -154,10 +138,8 @@ const mock_denied = {
   homeaddress: 'Who cares?',
   ass: {
     ready: false,
-    direct: false,
     turfs: [],
     teams: [],
-    teamperms: [],
     forms: [],
   }
 };
@@ -196,6 +178,8 @@ export async function mockFetch(token, uri, method, body) {
   case 'test:regionleader':
     volunteer = mock_region_leader;
     volunteers = [mock_region_leader, mock_team_a_leader, mock_team_b_leader, mock_team_a_member, mock_team_b_member, mock_solo_volunteer, mock_unassigned, mock_denied];
+    team_a.leader = true;
+    team_b.leader = true;
     teams = [team_a, team_b];
     turfs = [turf_region, turf_a, turf_b];
     forms = [form_a, form_b];
@@ -203,6 +187,7 @@ export async function mockFetch(token, uri, method, body) {
   case 'test:teamaleader':
     volunteer = mock_team_a_leader;
     volunteers = [mock_team_a_leader, mock_team_a_member, mock_solo_volunteer, mock_denied];
+    team_a.leader = true;
     teams = [team_a];
     turfs = [turf_a];
     forms = volunteer.ass.forms;
@@ -210,6 +195,7 @@ export async function mockFetch(token, uri, method, body) {
   case 'test:teambleader':
     volunteer = mock_team_b_leader;
     volunteers = [mock_team_b_leader, mock_team_b_member, mock_unassigned];
+    team_b.leader = true;
     teams = [team_b];
     turfs = [turf_b];
     forms = volunteer.ass.forms;

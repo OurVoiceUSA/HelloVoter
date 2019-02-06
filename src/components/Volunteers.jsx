@@ -283,8 +283,8 @@ export class CardVolunteer extends Component {
       volunteer: this.props.volunteer,
       selectedTeamsOption: [],
       selectedLeaderOption: [],
-      selectedFormsOption: {},
-      selectedTurfOption: {}
+      selectedFormsOption: [],
+      selectedTurfOption: [],
     };
   }
 
@@ -329,8 +329,8 @@ export class CardVolunteer extends Component {
       notify_success('Team assignments saved.');
       this.setState({
         selectedTeamsOption,
-        selectedFormsOption: {},
-        selectedTurfOption: {},
+        selectedFormsOption: [],
+        selectedTurfOption: [],
         volunteer
       });
     } catch (e) {
@@ -469,8 +469,8 @@ export class CardVolunteer extends Component {
     let leaderOptions = [];
     let selectedTeamsOption = [];
     let selectedLeaderOption = [];
-    let selectedFormsOption = {};
-    let selectedTurfOption = {};
+    let selectedFormsOption = [];
+    let selectedTurfOption = [];
 
     let formOptions = [{ value: '', label: 'None' }];
 
@@ -511,7 +511,7 @@ export class CardVolunteer extends Component {
             id: t.id,
             label: <CardTeam key={t.id} team={t} refer={this} />
           });
-          if (volunteer.ass.teamperms[idx].leader) {
+          if (a.leader) {
             selectedLeaderOption.push({
               value: _searchStringify(t),
               id: t.id,
@@ -532,11 +532,13 @@ export class CardVolunteer extends Component {
 
     if (volunteer.ass.forms.length) {
       let f = volunteer.ass.forms[0];
-      selectedFormsOption = {
-        value: _searchStringify(f),
-        id: f.id,
-        label: <CardForm key={f.id} form={f} refer={this} />
-      };
+      selectedFormsOption = [
+        {
+          value: _searchStringify(f),
+          id: f.id,
+          label: <CardForm key={f.id} form={f} refer={this} />
+        },
+      ];
     }
 
     turf.forEach(t => {
@@ -549,18 +551,20 @@ export class CardVolunteer extends Component {
 
     if (volunteer.ass.turfs.length) {
       let t = volunteer.ass.turfs[0];
-      selectedTurfOption = {
-        value: _searchStringify(t),
-        id: t.id,
-        label: (
-          <CardTurf
-            key={t.id}
-            turf={t}
-            refer={this}
-            icon={volunteer.autoturf ? faHome : null}
-          />
-        )
-      };
+      selectedTurfOption = [
+        {
+          value: _searchStringify(t),
+          id: t.id,
+          label: (
+            <CardTurf
+              key={t.id}
+              turf={t}
+              refer={this}
+              icon={volunteer.autoturf ? faHome : null}
+            />
+          )
+        },
+      ];
     }
 
     this.setState({
@@ -674,34 +678,28 @@ export const CardVolunteerFull = props => (
     # of doors knocked: 0
     <br />
     <br />
-    {props.volunteer.ass.direct ? (
-      <div>
-        This volunteer is not assigned to any teams. To do so, you must remove
-        the direct form and turf assignments below.
-      </div>
-    ) : (
-      <div>
-        Teams this volunteer is a member of:
-        <Select
-          value={props.refer.state.selectedTeamsOption}
-          onChange={props.refer.handleTeamsChange}
-          options={props.refer.state.teamOptions}
-          isMulti={true}
-          isSearchable={true}
-          placeholder="None"
-        />
-        <br />
-        Teams this volunteer is a leader of:
-        <Select
-          value={props.refer.state.selectedLeaderOption}
-          onChange={props.refer.handleLeaderChange}
-          options={props.refer.state.selectedTeamsOption}
-          isMulti={true}
-          isSearchable={true}
-          placeholder="None"
-        />
-      </div>
-    )}
+    <div>
+      Teams this volunteer is a member of:
+      <Select
+        value={props.refer.state.selectedTeamsOption}
+        onChange={props.refer.handleTeamsChange}
+        options={props.refer.state.teamOptions}
+        isMulti={true}
+        isSearchable={true}
+        placeholder="None"
+      />
+      <br />
+      Teams this volunteer is a leader of:
+      <Select
+        value={props.refer.state.selectedLeaderOption}
+        onChange={props.refer.handleLeaderChange}
+        options={props.refer.state.selectedTeamsOption}
+        isMulti={true}
+        isSearchable={true}
+        placeholder="None"
+      />
+    </div>
+
     <br />
     {props.refer.state.selectedTeamsOption.length ? (
       <div>
@@ -714,27 +712,29 @@ export const CardVolunteerFull = props => (
           <CardTurf key={t.id} turf={t} refer={props.refer} />
         ))}
       </div>
-    ) : (
-      <div>
-        Forms this volunteer is directly assigned to:
-        <Select
-          value={props.refer.state.selectedFormsOption}
-          onChange={props.refer.handleFormsChange}
-          options={props.refer.state.formOptions}
-          isSearchable={true}
-          placeholder="None"
-        />
-        <br />
-        Turf this volunteer is directly assigned to:
-        <Select
-          value={props.refer.state.selectedTurfOption}
-          onChange={props.refer.handleTurfChange}
-          options={props.refer.state.turfOptions}
-          isSearchable={true}
-          placeholder="None"
-        />
-      </div>
-    )}
+    ):''
+    }
+    <div>
+      Forms this volunteer is directly assigned to:
+      <Select
+        value={props.refer.state.selectedFormsOption}
+        onChange={props.refer.handleFormsChange}
+        options={props.refer.state.formOptions}
+        isMulti={true}
+        isSearchable={true}
+        placeholder="None"
+      />
+      <br />
+      Turf this volunteer is directly assigned to:
+      <Select
+        value={props.refer.state.selectedTurfOption}
+        onChange={props.refer.handleTurfChange}
+        options={props.refer.state.turfOptions}
+        isMulti={true}
+        isSearchable={true}
+        placeholder="None"
+      />
+    </div>
   </div>
 );
 
