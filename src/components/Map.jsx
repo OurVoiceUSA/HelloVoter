@@ -1,10 +1,19 @@
 import React, { Component } from 'react';
 
 import {Map, InfoWindow, Marker, Polygon, GoogleApiWrapper} from 'google-maps-react';
+import Select from 'react-select';
 import {geojson2polygons} from 'ourvoiceusa-sdk-js';
 import {geolocated} from 'react-geolocated';
 
-import { _browserLocation, _loadTurfs, _loadAddressData } from '../common.js';
+import {
+  _browserLocation,
+  _searchStringify,
+  _loadForms,
+  _loadTurfs,
+  _loadAddressData
+} from '../common.js';
+
+import { CardForm } from './Forms';
 
 export class App extends Component {
 
@@ -16,6 +25,8 @@ export class App extends Component {
       addresses: [],
       showingInfoWindow: false,
       selectedPlace: {},
+      selectedFormsOption: {},
+      formId: null,
     };
   }
 
@@ -24,10 +35,29 @@ export class App extends Component {
   }
 
   _loadData = async () => {
-    let turfs = await _loadTurfs(this, null, true);
+    let turfs = [], forms = [], formOptions = [{label: "None"}];
 
-    this.setState({turfs});
+    [
+      turfs,
+      forms,
+    ] = await Promise.all([
+      _loadTurfs(this, null, true),
+      _loadForms(this),
+    ]);
+
+    forms.forEach(f => {
+      formOptions.push({
+        value: _searchStringify(f),
+        id: f.id,
+        label: <CardForm key={f.id} form={f} refer={this} />,
+      });
+    });
+
+    this.setState({turfs, forms, formOptions});
   }
+
+  handleFormsChange = async selectedFormsOption =>
+    this.setState({selectedFormsOption, formId: selectedFormsOption.id}, () => this.loadMarkerData());
 
   onMarkerClick = (props, marker, e) => {
     this.setState({
@@ -38,7 +68,18 @@ export class App extends Component {
   }
 
   loadMarkerData = async (mapProps, map) => {
-    let addresses = await _loadAddressData(this, map.center.lng(), map.center.lat());
+    let longitude, latitude;
+
+    if (map) {
+      longitude = map.center.lng();
+      latitude = map.center.lat();
+      this.setState({longitude, latitude});
+    } else {
+      longitude = this.state.longitude;
+      latitude = this.state.latitude;
+    }
+
+    let addresses = await _loadAddressData(this, longitude, latitude, this.state.formId);
     this.setState({addresses});
   }
 
@@ -74,42 +115,59 @@ export class App extends Component {
     });
 
     return (
-      <Map
-        google={this.props.google}
-        zoom={14}
-        initialCenter={location}
-        onReady={this.loadMarkerData}
-        onDragend={this.loadMarkerData}
-        onClick={this.onMapClicked}>
-        {addresses.map((a, idx) => (
-          <Marker
-            key={idx}
-            onClick={this.onMarkerClick}
-            title={a.address.street+" "+a.address.city+" "+a.address.state+" "+a.address.zip}
-            icon={{
-              url: "http://maps.google.com/mapfiles/ms/icons/"+this.statusColor(a.address.status)+"-dot.png",
-            }}
-            people={a.people}
-            position={{lng: a.address.longitude, lat: a.address.latitude}} />
-        ))}
-        {polygons.map((p, idx) => (
-          <Polygon
-            key={idx}
-            paths={p}
-            strokeColor="#0000FF"
-            strokeWeight={5}
-            fillColor="#000000"
-            fillOpacity={0} />
-        ))}
-        <InfoWindow
-          marker={this.state.activeMarker}
-          visible={this.state.showingInfoWindow}>
-          <div>
-            <h1>{this.state.selectedPlace.title}</h1>
-            {JSON.stringify(this.state.selectedPlace.people)}
-          </div>
-        </InfoWindow>
-      </Map>
+      <div>
+
+        <div style={{display: 'flex' }}>
+          Show interaction status by Form:
+          <Select
+            value={this.state.selectedFormsOption}
+            onChange={this.handleFormsChange}
+            options={this.state.formOptions}
+            isSearchable={true}
+            placeholder="None"
+          />
+        </div>
+
+        <Map
+          google={this.props.google}
+          zoom={14}
+          initialCenter={location}
+          onReady={this.loadMarkerData}
+          onDragend={this.loadMarkerData}
+          onClick={this.onMapClicked}>
+          {addresses.map((a, idx) => (
+            <Marker
+              key={idx}
+              onClick={this.onMarkerClick}
+              title={a.address.street+" "+a.address.city+" "+a.address.state+" "+a.address.zip}
+              icon={{
+                url: "http://maps.google.com/mapfiles/ms/icons/"+this.statusColor(a.address.status)+"-dot.png",
+              }}
+              units={a.units}
+              people={a.people}
+              position={{lng: a.address.longitude, lat: a.address.latitude}} />
+          ))}
+          {polygons.map((p, idx) => (
+            <Polygon
+              key={idx}
+              paths={p}
+              strokeColor="#0000FF"
+              strokeWeight={5}
+              fillColor="#000000"
+              fillOpacity={0} />
+          ))}
+          <InfoWindow
+            marker={this.state.activeMarker}
+            visible={this.state.showingInfoWindow}>
+            <div>
+              <h1>{this.state.selectedPlace.title}</h1>
+              Units: {JSON.stringify(this.state.selectedPlace.units)}
+              <br />
+              People: {JSON.stringify(this.state.selectedPlace.people)}
+            </div>
+          </InfoWindow>
+        </Map>
+      </div>
     );
   }
 }
