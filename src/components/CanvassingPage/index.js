@@ -24,7 +24,7 @@ import { NavigationActions } from 'react-navigation';
 import storage from 'react-native-storage-wrapper';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import sha1 from 'sha1';
-import { MapView, Polygon, PROVIDER_GOOGLE } from 'react-native-maps'
+import MapView, { PROVIDER_GOOGLE } from 'react-native-maps'
 import { API_BASE_URI, _doGeocode, _getApiToken } from '../../common';
 import KnockPage from '../KnockPage';
 import Modal from 'react-native-simple-modal';
@@ -214,7 +214,7 @@ export default class App extends OVComponent {
     if (jsonStreet === null || jsonCity === null || jsonState === null) return;
 
     try {
-      await this.map.getMapRef().animateToCoordinate(myPosition, 500)
+      await this.map.animateToCoordinate(myPosition, 500)
     } catch (error) {}
 
     let epoch = this.getEpoch();
@@ -552,7 +552,7 @@ export default class App extends OVComponent {
     const { navigate } = this.props.navigation;
     const {
       showDisclosure, myPosition, myNodes, locationAccess, serviceError, form, user,
-      fAddress, loading, dbx, region,
+      fAddress, loading, region,
     } = this.state;
 
     if (showDisclosure === "true") {
@@ -663,7 +663,7 @@ export default class App extends OVComponent {
             let latitudeDelta = region.latitudeDelta;
             let longitudeDelta = region.longitudeDelta;
 
-            this.map.getMapRef().animateToRegion({
+            this.map.animateToRegion({
               latitude: myPosition.latitude,
               longitude: myPosition.longitude,
               latitudeDelta: latitudeDelta,
@@ -676,7 +676,7 @@ export default class App extends OVComponent {
           followsUserLocation={false}
           keyboardShouldPersistTaps={true}
           {...this.props}>
-          {geofence.map((polygon, idx) => <Polygon key={idx} coordinates={polygon} strokeWidth={2} fillColor="rgba(0,0,0,0)" />)}
+          {geofence.map((polygon, idx) => <MapView.Polygon key={idx} coordinates={polygon} strokeWidth={2} fillColor="rgba(0,0,0,0)" />)}
           {this.state.markers.map((marker) => {
             return (
               <MapView.Marker
@@ -707,7 +707,7 @@ export default class App extends OVComponent {
 
           {nomap_content.length == 0 &&
           <TouchableOpacity style={styles.iconContainer}
-            onPress={() => this.map.getMapRef().animateToCoordinate(myPosition, 1000)}>
+            onPress={() => this.map.animateToCoordinate(myPosition, 1000)}>
             <Icon
               name="location-arrow"
               size={50}
