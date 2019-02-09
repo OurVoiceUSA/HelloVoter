@@ -71,7 +71,7 @@ export default class App extends OVComponent {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevState.myPosition !== this.state.myPosition) this._dataGet();
+    if (!_.isEqual(prevState.myPosition, this.state.myPosition)) this._dataGet();
   }
 
   setupConnectionListener = async () => {
