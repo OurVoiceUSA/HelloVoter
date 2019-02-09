@@ -179,19 +179,49 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
 
       if (body.data.ready !== true) return {error: false, msg: "The server said: "+body.msg};
       else {
-        // TODO: use form data from body.data.forms[0] and save it in the forms_local cache
-        // TODO: if there's more than one form in body.data.forms - don't navigate
+        let forms = this.state.forms;
+        let forms_server = [];
+        let forms_local;
 
-        res = await fetch('https://'+server+API_BASE_URI+'/form/get?formId='+body.data.forms[0].id, {
-          headers: {
-            'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
-            'Content-Type': 'application/json',
-          },
-        });
+        this.setState({loading: true});
 
-        let form = await res.json();
+        try {
+          forms_local = JSON.parse(await storage.get('OV_CANVASS_FORMS'));
+          if (forms_local === null) forms_local = [];
+        } catch (e) {
+          console.warn("_loadForms 1: "+e);
+          return;
+        }
 
-        navigate('Canvassing', {server: server, form: form, user: this.state.user});
+        for (let i = 0; i < body.data.forms.length; i++) {
+          res = await fetch('https://'+server+API_BASE_URI+'/form/get?formId='+body.data.forms[i].id, {
+            headers: {
+              'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
+              'Content-Type': 'application/json',
+            },
+          });
+
+          let form = await res.json();
+          form.server = server;
+          form.backend = 'server';
+
+          forms_server.push(form);
+        }
+
+        forms_local = forms_local.concat(forms_server);
+
+        try {
+          await storage.set('OV_CANVASS_FORMS', JSON.stringify(forms_local));
+        } catch (error) {
+        }
+
+        this.setState({forms, loading: false});
+
+        // if there's more than one form in body.data.forms, don't navigate
+        if (forms_server.length === 1) {
+          navigate('Canvassing', {server: server, form: forms_server[0], user: this.state.user});
+        }
+        await this._loadForms();
         return {error: false, flag: true};
       }
     } catch (e) {
@@ -338,6 +368,11 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
         dbxformfound = true;
       }
 
+      if (json.backend === "server") {
+        icon = "cloud-upload";
+        size = 25;
+      }
+
       let swipeoutBtns = [
         {
           text: 'Edit',
@@ -402,10 +437,15 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
             autoClose={true}>
             <TouchableOpacity
               onPress={() => {
-                if (json.backend === "dropbox" && !user.dropbox)
+                if (json.backend === "dropbox" && !user.dropbox) {
                   this.setState({SelectModeScreen: true});
-                else
-                  navigate('LegacyCanvassing', {dbx: (json.backend === "dropbox" ? dbx : null), form: json, user: user});
+                } else {
+                  if (json.backend === "server") {
+                    navigate('Canvassing', {server: json.server, form: json, user: user});
+                 } else {
+                    navigate('LegacyCanvassing', {dbx: (json.backend === "dropbox" ? dbx : null), form: json, user: user});
+                  }
+                }
               }}>
               <View style={{flexDirection: 'row'}}>
                 <Icon style={{margin: 5, marginRight: 10}} name={icon} size={size} color={color} />
