@@ -345,6 +345,19 @@ export default class App extends OVComponent {
         </MapView>
         }
 
+        <View style={styles.buttonContainer}>
+          {nomap_content.length == 0 &&
+          <TouchableOpacity style={styles.iconContainer}
+            onPress={() => this.map.animateToCoordinate(myPosition, 1000)}>
+            <Icon
+              name="location-arrow"
+              size={50}
+              color="#0084b4"
+              {...iconStyles} />
+          </TouchableOpacity>
+          }
+        </View>
+
         <Modal
           open={this.state.isKnockMenuVisible}
           modalStyle={{width: 335, height: 350, backgroundColor: "transparent",
