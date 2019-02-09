@@ -52,13 +52,11 @@ export default class App extends OVComponent {
       currentNode: null,
       markers: [],
       DisclosureKey : 'OV_DISCLOUSER',
-      isModalVisible: false,
       isKnockMenuVisible: false,
       showDisclosure: "true",
       form: props.navigation.state.params.form,
       user: props.navigation.state.params.user,
-      geofence: props.navigation.state.params.form.geofence,
-      geofencename: props.navigation.state.params.form.geofencename,
+      turfs: props.navigation.state.params.form.turfs,
     };
 
     this.handleConnectivityChange = this.handleConnectivityChange.bind(this);
@@ -296,8 +294,9 @@ export default class App extends OVComponent {
     }
 
     let geofence = [];
-    if (this.state.geofence) {
-      geofence = geojson2polygons(this.state.geofence, true);
+    if (this.state.turfs) {
+      for (let i in this.state.turfs)
+        geofence = geofence.concat(geojson2polygons(this.state.turfs[i], true));
     }
 
     return (
