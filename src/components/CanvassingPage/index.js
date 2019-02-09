@@ -23,7 +23,6 @@ import OVComponent from '../OVComponent';
 import { NavigationActions } from 'react-navigation';
 import storage from 'react-native-storage-wrapper';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import sha1 from 'sha1';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps'
 import { API_BASE_URI, _doGeocode, _getApiToken } from '../../common';
 import KnockPage from '../KnockPage';
@@ -36,31 +35,6 @@ import {geojson2polygons, ingeojson} from 'ourvoiceusa-sdk-js';
 
 TimeAgo.locale(en);
 
-var Form = t.form.Form;
-
-var formStreet = t.struct({
-  'street': t.String,
-});
-var formCity = t.struct({
-  'multi_unit': t.Boolean,
-  'city': t.String,
-});
-var formState = t.struct({
-  'state': t.String,
-  'zip': t.String,
-});
-
-const formStyleRow = _.cloneDeep(t.form.Form.stylesheet);
-formStyleRow.fieldset = {
-  flexDirection: 'row'
-};
-formStyleRow.formGroup.normal.flex = 1;
-formStyleRow.formGroup.error.flex = 1;
-
-const formOptRow = {
-  stylesheet: formStyleRow,
-};
-
 export default class App extends OVComponent {
 
   constructor(props) {
@@ -68,19 +42,15 @@ export default class App extends OVComponent {
 
     this.state = {
       server: props.navigation.state.params.server,
-      last_sync: 0,
+      last_fetch: 0,
       loading: false,
       netInfo: 'none',
-      syncRunning: false,
       serviceError: null,
       locationAccess: null,
       myPosition: {latitude: null, longitude: null},
       region: {latitudeDelta: 0.004, longitudeDelta: 0.004},
       currentNode: null,
       markers: [],
-      fAddress: {},
-      pAddress: {},
-      asyncStorageKey: 'OV_CANVASS_PINS@'+props.navigation.state.params.form.id,
       DisclosureKey : 'OV_DISCLOUSER',
       isModalVisible: false,
       isKnockMenuVisible: false,
@@ -91,22 +61,17 @@ export default class App extends OVComponent {
       geofencename: props.navigation.state.params.form.geofencename,
     };
 
-    this.myNodes = {};
-    this.turfNodes = {};
-    this.allNodes = {};
-
-    this.family = {};
-    this.fidx = [];
-
-    this.onChange = this.onChange.bind(this);
     this.handleConnectivityChange = this.handleConnectivityChange.bind(this);
   }
 
   componentDidMount() {
     this.requestLocationPermission();
     this.setupConnectionListener();
-    this._getNodesAsyncStorage();
     this.LoadDisclosure(); //Updates showDisclosure state if the user previously accepted
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.myPosition !== this.state.myPosition) this._dataGet();
   }
 
   setupConnectionListener = async () => {
@@ -152,93 +117,8 @@ export default class App extends OVComponent {
     );
   }
 
-  showConfirmAddress() {
-    const { myPosition } = this.state;
-
-    if (this.state.netInfo === 'none') {
-      this.setState({ isModalVisible: true });
-      return;
-    }
-
-    if (myPosition.latitude !== null && myPosition.longitude !== null) {
-      if (this.state.geofence && !ingeojson(this.state.geofence)) {
-        Alert.alert('Outside District', 'You are outside the district boundary for this canvassing form. You need to be within the boundaries of '+this.state.geofencename+'.', [{text: 'OK'}], { cancelable: false });
-        return;
-      }
-    }
-
-    this.setState({
-      loading: true,
-      isModalVisible: true,
-    });
-
-    setTimeout(async () => {
-      try {
-        if (this.state.locationAccess === false) throw "location access denied";
-
-        let res = await _doGeocode(myPosition.longitude, myPosition.latitude);
-
-        if (!res.error) {
-          let arr = res.address.split(", ");
-          let country = arr[arr.length-1]; // unused
-          let state_zip = arr[arr.length-2];
-          let fAddress = {
-            state: (state_zip?state_zip.split(" ")[0]:null),
-            zip: (state_zip?state_zip.split(" ")[1]:null),
-            city: arr[arr.length-3],
-            street: arr[arr.length-4],
-          };
-
-          this.setState({fAddress});
-        }
-      } catch (error) {}
-      this.setState({loading: false})
-    }, 550);
-  }
-
-  onChange(fAddress) {
-    this.setState({fAddress});
-  }
-
   getEpoch() {
     return Math.floor(new Date().getTime())
-  }
-
-  doConfirmAddress = async () => {
-    const { myPosition, form } = this.state;
-
-    let jsonStreet = this.refs.formStreet.getValue();
-    let jsonCity = this.refs.formCity.getValue();
-    let jsonState = this.refs.formState.getValue();
-
-    if (jsonStreet === null || jsonCity === null || jsonState === null) return;
-
-    try {
-      await this.map.animateToCoordinate(myPosition, 500)
-    } catch (error) {}
-
-    let epoch = this.getEpoch();
-    let fAddress = {
-      street: jsonStreet.street.trim(),
-      multi_unit: jsonCity.multi_unit,
-      city: jsonCity.city.trim(),
-      state: jsonState.state.trim(),
-      zip: jsonState.zip.trim(),
-
-    };
-    let address = [fAddress.street, fAddress.city, fAddress.state, fAddress.zip];
-    let node = {
-      type: "address",
-      id: sha1(JSON.stringify(address)),
-      latlng: {latitude: myPosition.latitude, longitude: myPosition.longitude},
-      address: address,
-      multi_unit: jsonCity.multi_unit,
-    };
-
-    node = await this._addNode(node);
-
-    this.setState({ fAddress: fAddress, pAddress: fAddress, isModalVisible: false });
-    this.doMarkerPress(node);
   }
 
   doMarkerPress(node) {
@@ -252,64 +132,16 @@ export default class App extends OVComponent {
       this.setState({isKnockMenuVisible: true});
   }
 
-  _addNode(node) {
-    let epoch = this.getEpoch();
-
-    node.updated = epoch;
-    node.canvasser = 'You';
-    if (!node.id) node.id = sha1(epoch+JSON.stringify(node)+this.state.currentNode.id);
-
-    let dupe = this.getNodeById(node.id);
-    if (!dupe.id) node.created = epoch;
-    else {
-      // prevent overwriting latlng info with null
-      if (dupe.latlng && (node.latlng.latitude === null || node.latlng.longitude === null))
-        node.latlng = dupe.latlng;
-    }
-
-    this.myNodes[node.id] = node;
-    this.allNodes[node.id] = node;
-
-    this._saveNodes(this.myNodes);
-
-    return node;
-  }
-
   ucFirst(str) {
       return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
-  getLastInteraction(id) {
-    let nodes = this.getChildNodesByIdTypes(id, ["survey", "import"]);
-    const timeAgo = new TimeAgo('en-US')
-    let str;
+  getLastInteraction(marker) {
+    return "Haven't visited";
 
-    if (nodes.length)  {
-      let last = nodes[0];
-      if (last.type === "survey") {
-        // App was released in early 2018 with timestamps in seconds
-        // If the timestamp is earlier than that, assume it's in seconds and convert to milliseconds
-        if (last.updated < 1514764801000) last.updated *= 1000;
-        str = this.ucFirst(last.status)+' '+timeAgo.format(new Date(last.updated));
-      }
-      else
-        str = "Haven't visited";
-    } else {
-      str = "Haven't visited";
-    }
+    //str = this.ucFirst(last.status)+' '+timeAgo.format(new Date(last.updated));
 
     return str;
-  }
-
-  getLatestSurveyInfo(id) {
-    let nodes = this.getChildNodesByIdTypes(id, ["survey", "import"]);
-
-    for (let n in nodes) {
-      let node = nodes[n];
-      if (node.survey) return node.survey;
-    }
-
-    return {};
   }
 
   LoadDisclosure = async () => {
@@ -327,137 +159,22 @@ export default class App extends OVComponent {
     } catch (error) {}
   }
 
-  _getNodesAsyncStorage = async () => {
-    try {
-      const value = await storage.get(this.state.asyncStorageKey);
-      if (value !== null) {
-        this.myNodes = JSON.parse(value);
-        this.allNodes = this.myNodes;
-      }
-    } catch (e) {}
-
-    this.updateMarkers();
-
-    await this._syncNodes(false);
-
-  }
-
-  updateMarkers() {
-    let nodes = [];
-    let nodeList;
-
-    nodeList = this.mergeNodes([this.allNodes]);
-
-    for (let n in nodeList) {
-      let node = nodeList[n];
-      if (node.type === "address" && node.latlng
-        && !Number.isNaN(node.latlng.longitude) && !Number.isNaN(node.latlng.latitude)) {
-        node.location = node.latlng; // supercluster expects latlng to be "location"
-        nodes.push(node);
-      }
-    }
-
-    this.setState({markers: nodes});
-  }
-
-  nodeHasSurvey(node) {
-    let children = this.getChildNodesByIdTypes(node.id, ["survey"]);
-    if (children.length === 0) return false;
-    return true;
-  }
-
   timeFormat(epoch) {
     let date = new Date(epoch);
     return date.toLocaleDateString('en-us')+" "+date.toLocaleTimeString('en-us');
   }
 
-  _saveNodes = async (nodes) => {
-    this.myNodes = nodes;
-
-    try {
-      await storage.set(this.state.asyncStorageKey, JSON.stringify(nodes));
-    } catch (error) {
-      console.warn(error);
-    }
-
-    this.updateMarkers();
-
-    if (this.syncingOk() && !this.state.syncRunning) this._syncNodes(false);
-  }
-
-  mergeNodes(stores, time) {
-    let nodes = {};
-
-    for (let s in stores) {
-      let store = stores[s];
-      for (let n in store) {
-        let node = store[n];
-        if (!nodes[node.id]) nodes[node.id] = node;
-        else {
-          if (node.updated > nodes[node.id].updated) nodes[node.id] = node;
-        }
-        if (nodes[node.id].parent_id) {
-          if (!this.family[nodes[node.id].parent_id])
-            this.family[nodes[node.id].parent_id] = [];
-
-          if (this.fidx.indexOf(node.id) === -1) {
-            this.fidx.push(node.id);
-            this.family[nodes[node.id].parent_id].push(node);
-          }
-        }
-      }
-    }
-
-    // if given a time, sort out everything older than it
-    if (time) for (let n in nodes) if (nodes[n].updated < time) delete nodes[n];
-
-    // sort everything in family
-    for (let f in this.family) {
-      this.family[f] = this.family[f].sort(this.dynamicSort("updated"));
-    }
-
-    return nodes;
-  }
-
-  _syncNodes = async (flag) => {
-    let ret;
-
-    if (this.state.syncRunning === true) return;
-
-    this.setState({syncRunning: true});
-
-    ret = await this._syncServer();
-
-    this.setState({syncRunning: false});
-    this.updateMarkers();
-
-    if (flag) {
-      if (ret.error) {
-        Alert.alert('Error', 'Unable to sync with the server'+(ret.msg?': '+ret.msg:'.'), [{text: 'OK'}], { cancelable: false });
-      } else {
-        Alert.alert('Success', 'Data sync successful!', [{text: 'OK'}], { cancelable: false });
-      }
-    }
-
-  }
-
-  _syncServer = async () => {
+  _dataGet = async (flag) => {
+    const { myPosition } = this.state;
     let ret = {error: false};
 
-    let store = {
-      formId: this.state.form.id,
-      last_sync: this.state.last_sync,
-      nodes: this.mergeNodes([this.myNodes], this.state.last_sync)
-    };
-
     try {
-      let res = await fetch('https://'+this.state.server+API_BASE_URI+'/data/get', {
-        method: 'POST',
+      let res = await fetch('https://'+this.state.server+API_BASE_URI+'/data/get?formId='+this.state.form.id+'&longitude='+myPosition.longitude+'&latitude='+myPosition.latitude, {
+        method: 'GET',
         headers: {
           'Authorization': 'Bearer '+await _getApiToken(),
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(store)
       });
 
       let json = await res.json();
@@ -467,8 +184,7 @@ export default class App extends OVComponent {
         throw "Sync error";
       }
 
-      this.allNodes = this.mergeNodes([this.allNodes,this.myNodes,json.nodes]);
-      this.setState({last_sync: new Date().getTime()});
+      this.setState({markers: json, last_fetch: new Date().getTime()});
     } catch (e) {
       ret.error = true;
       console.warn('error: '+e);
@@ -477,70 +193,21 @@ export default class App extends OVComponent {
     return ret;
   }
 
-  getNodeById(id) {
-    return (this.allNodes[id] ? this.allNodes[id] : {});
-  }
-
-  getChildNodesByIdTypes(id, types) {
-    let nodes = [];
-
-    if (!this.family[id]) return nodes;
-
-    for (let c in this.family[id]) {
-      let node = this.family[id][c];
-      if (types.indexOf(node.type) !== -1) {
-        nodes.unshift(node);
-      }
-    }
-
-    return nodes;
-  }
-
-  dynamicSort(property) {
-    var sortOrder = 1;
-    if(property[0] === "-") {
-        sortOrder = -1;
-        property = property.substr(1);
-    }
-    return function (a,b) {
-      var result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
-      return result * sortOrder;
-    }
-  }
-
-  getPinColor(node) {
-    if (node.multi_unit) return "cyan";
-
-    nodes = this.getChildNodesByIdTypes(node.id, ["survey"]);
+  getPinColor(marker) {
+    if (marker.units.length) return "cyan";
 
     // no interactions
-    if (nodes.length === 0) return "#8b4513";
+    return "#8b4513";
 
+/*
     switch (nodes[0].status) {
       case 'home': return "green";
       case 'not home': return "yellow";
       case 'not interested': return "red";
     }
+*/
 
     return "#8b4513";
-  }
-
-  getLastStatus(node) {
-    if (node.multi_unit) return "multi-unit";
-
-    nodes = this.getChildNodesByIdTypes(node.id, ["survey"]);
-
-    // no interactions
-    if (nodes.length === 0) return "not visited";
-
-    switch (nodes[0].status) {
-      case 'home':
-      case 'not home':
-      case 'not interested':
-        return nodes[0].status;
-    }
-
-    return "not visited";
   }
 
   _canvassGuidelinesUrlHandler() {
@@ -552,7 +219,7 @@ export default class App extends OVComponent {
     const { navigate } = this.props.navigation;
     const {
       showDisclosure, myPosition, myNodes, locationAccess, serviceError, form, user,
-      fAddress, loading, region,
+      loading, region,
     } = this.state;
 
     if (showDisclosure === "true") {
@@ -628,21 +295,6 @@ export default class App extends OVComponent {
       );
     }
 
-/*
-    // TODO: onRegionChangeComplete() to update region lags supercluster real bad,
-             so omitting this for now
-    let landmarks = [];
-
-    if (region.longitudeDelta < 0.035) landmarks = [{
-      id: "spacex",
-      landmark: true,
-      image: "../../../img/spacexfh.png",
-      latlng: { latitude: 33.9208231, longitude: -118.3281370 },
-      location: { latitude: 33.9208231, longitude: -118.3281370 },
-      address: ["1 Rocket Road", "Hawthorne", "CA", "90250"],
-    }];
-*/
-
     let geofence = [];
     if (this.state.geofence) {
       geofence = geojson2polygons(this.state.geofence, true);
@@ -680,115 +332,19 @@ export default class App extends OVComponent {
           {this.state.markers.map((marker) => {
             return (
               <MapView.Marker
-                key={marker.id}
-                coordinate={marker.latlng}
+                key={marker.address.id}
+                coordinate={{longitude: marker.address.longitude, latitude: marker.address.latitude}}
                 pinColor={this.getPinColor(marker)}>
                 <MapView.Callout onPress={() => this.doMarkerPress(marker)}>
                   <View style={{backgroundColor: '#FFFFFF', padding: 5, width: 175}}>
-                    <Text style={{fontWeight: 'bold'}}>{marker.address.join("\n")}</Text>
-                    <Text>{(marker.multi_unit ? 'Multi-unit address' : this.getLastInteraction(marker.id))}</Text>
+                    <Text style={{fontWeight: 'bold'}}>{marker.address.street} {marker.address.city} {marker.address.state} {marker.address.zip}</Text>
+                    <Text>{(marker.units.length ? 'Multi-unit address' : this.getLastInteraction(marker))}</Text>
                   </View>
                 </MapView.Callout>
               </MapView.Marker>
           )})}
         </MapView>
         }
-
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.iconContainer}
-            onPress={() => {this.showConfirmAddress();}}>
-            <Icon
-              name="map-marker"
-              testID="map-marker"
-              size={50}
-              color="#8b4513"
-              {...iconStyles} />
-          </TouchableOpacity>
-
-          {nomap_content.length == 0 &&
-          <TouchableOpacity style={styles.iconContainer}
-            onPress={() => this.map.animateToCoordinate(myPosition, 1000)}>
-            <Icon
-              name="location-arrow"
-              size={50}
-              color="#0084b4"
-              {...iconStyles} />
-          </TouchableOpacity>
-          }
-
-        </View>
-
-        <Modal
-          open={this.state.isModalVisible}
-          modalStyle={{width: 350, height: 400, backgroundColor: "transparent",
-            position: 'absolute', top: (Platform.OS === 'android'?0:100), left: 0, right: 0, bottom: 0}}
-          style={{alignItems: 'center'}}
-          offset={0}
-          overlayBackground={'rgba(0, 0, 0, 0.75)'}
-          animationDuration={200}
-          animationTension={40}
-          modalDidOpen={() => undefined}
-          modalDidClose={() => this.setState({isModalVisible: false})}
-          closeOnTouchOutside={true}
-          disableOnBackPress={false}>
-          <View style={{flexDirection: 'column'}}>
-            <View style={{width: 325, backgroundColor: 'white', marginTop: 5, borderRadius: 15, padding: 10, alignSelf: 'flex-start'}}>
-              {loading &&
-              <View>
-                <Text style={{color: 'blue', fontWeight: 'bold', fontSize: 15}}>Loading Address</Text>
-                <ActivityIndicator size="large" />
-              </View>
-              ||
-              <View>
-                <View style={{flexDirection: 'row'}}>
-                  <Text style={{color: 'blue', fontWeight: 'bold', fontSize: 15}}>Confirm the Address</Text>
-                  <View style={{flexDirection: 'row'}}>
-                    <TouchableOpacity
-                      style={{
-                        backgroundColor: '#d7d7d7', padding: 10, borderRadius: 20, marginLeft: 5,
-                        ...((this.state.pAddress.street && this.state.pAddress.street !== this.state.fAddress.street) ? {} : displayNone)
-                      }}
-                      onPress={() => {this.setState({fAddress: this.state.pAddress})}}>
-                      <Text style={{textAlign: 'center'}}>Use Previous</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={{
-                        backgroundColor: '#d7d7d7', padding: 10, borderRadius: 20, marginLeft: 5,
-                        ...(this.state.netInfo === 'none' ? displayNone : {})
-                      }}
-                      onPress={() => {this.showConfirmAddress();}}>
-                      <Text style={{textAlign: 'center'}}>Retry</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-                <Form
-                 ref="formStreet"
-                 type={formStreet}
-                 onChange={this.onChange}
-                 value={fAddress}
-                />
-                <Form
-                 ref="formCity"
-                 type={formCity}
-                 onChange={this.onChange}
-                 options={formOptRow}
-                 value={fAddress}
-                />
-                <Form
-                 ref="formState"
-                 type={formState}
-                 onChange={this.onChange}
-                 options={formOptRow}
-                 value={fAddress}
-                />
-                <TouchableHighlight style={styles.addButton} onPress={this.doConfirmAddress} underlayColor='#99d9f4'>
-                  <Text style={styles.buttonText}>Add</Text>
-                </TouchableHighlight>
-              </View>
-              }
-            </View>
-          </View>
-        </Modal>
 
         <Modal
           open={this.state.isKnockMenuVisible}
