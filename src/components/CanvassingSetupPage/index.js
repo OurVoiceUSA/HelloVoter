@@ -182,7 +182,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
         // TODO: use form data from body.data.forms[0] and save it in the forms_local cache
         // TODO: if there's more than one form in body.data.forms - don't navigate
 
-        res = await fetch('https://'+server+API_BASE_URI+'/form/get?id='+body.data.forms[0].id, {
+        res = await fetch('https://'+server+API_BASE_URI+'/form/get?formId='+body.data.forms[0].id, {
           headers: {
             'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
             'Content-Type': 'application/json',
@@ -191,7 +191,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
 
         let form = await res.json();
 
-        navigate('Canvassing', {server: server, dbx: null, form: form, user: this.state.user});
+        navigate('Canvassing', {server: server, form: form, user: this.state.user});
         return {error: false, flag: true};
       }
     } catch (e) {
