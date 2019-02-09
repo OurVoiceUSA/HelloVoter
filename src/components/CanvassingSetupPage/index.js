@@ -206,9 +206,10 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
           form.backend = 'server';
 
           forms_server.push(form);
-        }
 
-        forms_local = forms_local.concat(forms_server);
+          // prevent duplicates
+          if (forms_local.map(f => (f?f.id:null)).indexOf(form.id) === -1) forms_local.push(form);
+        }
 
         try {
           await storage.set('OV_CANVASS_FORMS', JSON.stringify(forms_local));
