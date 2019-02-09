@@ -430,6 +430,8 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
         if (this.state.connected !== true || user.dropbox.account_id !== json.author_id)
           swipeoutBtns.shift();
 
+      if (json.backend === 'server') swipeoutBtns.shift();
+
       forms.push(
         <View key={i} style={{margin: 5, flexDirection: 'row'}}>
           <Swipeout
