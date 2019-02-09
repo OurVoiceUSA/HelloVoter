@@ -6,6 +6,8 @@ import RNGooglePlaces from 'react-native-google-places';
 import Geocoder from 'react-native-geocoder';
 import { wsbase } from './config';
 
+export const API_BASE_URI = '/HelloVoterHQ/api/v1';
+
 const JWT = 'OV_JWT';
 const USERLOCAL = 'OV_USER';
 
@@ -162,10 +164,8 @@ export async function _saveUser(user, remote) {
   }
 }
 
-export async function _getJWT(remote) {
-
-  // assemble device info
-  const dinfo = {
+// assemble device info
+export const DINFO = {
     ApplicationName: DeviceInfo.getApplicationName(),
     Brand: DeviceInfo.getBrand(),
     BuildNumber: DeviceInfo.getBuildNumber(),
@@ -188,13 +188,13 @@ export async function _getJWT(remote) {
     UniqueID: DeviceInfo.getUniqueID(),
     UserAgent: DeviceInfo.getUserAgent(),
     Version: DeviceInfo.getVersion(),
-    24Hour: DeviceInfo.is24Hour(),
     Emulator: DeviceInfo.isEmulator(),
     Tablet: DeviceInfo.isTablet(),
     hasNotch: DeviceInfo.hasNotch(),
     Landscape: DeviceInfo.isLandscape(),
-    DeviceType: DeviceInfo.getDeviceType(),
-  };
+};
+
+export async function _getJWT(remote) {
 
   let user = null;
   var localuser = await _getUserLocal();
@@ -226,7 +226,7 @@ export async function _getJWT(remote) {
           'Content-Type': 'application/json',
           'User-Agent': _UserAgent(),
         },
-        body: JSON.stringify(dinfo),
+        body: JSON.stringify(DINFO),
       });
       if (res.status != 200) {
         _rmJWT();

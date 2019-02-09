@@ -25,7 +25,7 @@ import storage from 'react-native-storage-wrapper';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import sha1 from 'sha1';
 import { MapView, Polygon, PROVIDER_GOOGLE } from 'react-native-maps'
-import { _doGeocode, _getApiToken, _fileReaderAsync } from '../../common';
+import { API_BASE_URI, _doGeocode, _getApiToken } from '../../common';
 import KnockPage from '../KnockPage';
 import Modal from 'react-native-simple-modal';
 import TimeAgo from 'javascript-time-ago'
@@ -451,7 +451,7 @@ export default class App extends OVComponent {
     };
 
     try {
-      let res = await fetch('https://'+this.state.server+'/canvass/v1/sync', {
+      let res = await fetch('https://'+this.state.server+API_BASE_URI+'/data/get', {
         method: 'POST',
         headers: {
           'Authorization': 'Bearer '+await _getApiToken(),

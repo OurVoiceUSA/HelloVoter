@@ -24,7 +24,7 @@ import SafariView from 'react-native-safari-view';
 import jwt_decode from 'jwt-decode';
 import SmLoginPage from '../SmLoginPage';
 import { Dropbox } from 'dropbox';
-import { _loginPing, _saveUser, _getApiToken, _fileReaderAsync } from '../../common';
+import { API_BASE_URI, DINFO, _loginPing, _saveUser, _getApiToken, _fileReaderAsync } from '../../common';
 import { wsbase } from '../../config';
 
 var Form = t.form.Form;
@@ -127,13 +127,17 @@ export default class App extends PureComponent {
     try {
       let jwt = await storage.get('OV_JWT');
 
-      res = await fetch('https://'+server+'/volunteer/v1/hello', {
+      res = await fetch('https://'+server+API_BASE_URI+'/hello', {
         method: 'POST',
         headers: {
           'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({longitude: -118, latitude: 40}),
+        body: JSON.stringify({
+          longitude: -118,
+          latitude: 40,
+          dinfo: DINFO,
+        }),
       });
 
       let auth_location = res.headers.get('x-sm-oauth-url');
@@ -178,7 +182,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
         // TODO: use form data from body.data.forms[0] and save it in the forms_local cache
         // TODO: if there's more than one form in body.data.forms - don't navigate
 
-        res = await fetch('https://'+server+'/volunteer/v1/form/get?id='+body.data.forms[0].id, {
+        res = await fetch('https://'+server+API_BASE_URI+'/form/get?id='+body.data.forms[0].id, {
           headers: {
             'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
             'Content-Type': 'application/json',
