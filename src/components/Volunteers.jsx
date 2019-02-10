@@ -615,8 +615,8 @@ export class CardVolunteer extends Component {
             <ListItemText
               primary={volunteer.name}
               secondary={
-                volunteer.homeaddress
-                  ? extract_addr(volunteer.homeaddress)
+                volunteer.locationstr
+                  ? extract_addr(volunteer.locationstr)
                   : 'N/A'
               }
             />
@@ -639,7 +639,7 @@ export class CardVolunteer extends Component {
         <ListItemText
           primary={volunteer.name}
           secondary={
-            volunteer.homeaddress ? extract_addr(volunteer.homeaddress) : 'N/A'
+            volunteer.locationstr ? extract_addr(volunteer.locationstr) : 'N/A'
           }
         />
         <VolunteerBadges volunteer={volunteer} />
@@ -741,8 +741,8 @@ export class VolunteerAddress extends Component {
     super(props);
     this.state = {
       edit: false,
-      address: this.props.volunteer.homeaddress
-        ? this.props.volunteer.homeaddress
+      address: this.props.volunteer.locationstr
+        ? this.props.volunteer.locationstr
         : ''
     };
     this.onTypeAddress = address => this.setState({ address });
@@ -843,7 +843,7 @@ export const VolunteerBadges = props => {
           data-tip="Not ready to volunteer, check assignments"
         />
       );
-    if (!props.volunteer.homeaddress)
+    if (!props.volunteer.locationstr)
       badges.push(
         <Icon
           icon={faHome}
