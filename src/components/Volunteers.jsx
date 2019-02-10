@@ -311,7 +311,7 @@ export class CardVolunteer extends Component {
           this.state.server,
           API_BASE_URI+'/team/members/add',
           'POST',
-          { teamId: obj.add[i], cId: this.props.id }
+          { teamId: obj.add[i], vId: this.props.id }
         );
       }
 
@@ -320,7 +320,7 @@ export class CardVolunteer extends Component {
           this.state.server,
           API_BASE_URI+'/team/members/remove',
           'POST',
-          { teamId: obj.rm[i], cId: this.props.id }
+          { teamId: obj.rm[i], vId: this.props.id }
         );
       }
 
@@ -350,7 +350,7 @@ export class CardVolunteer extends Component {
           this.state.server,
           API_BASE_URI+'/team/members/promote',
           'POST',
-          { teamId: obj.add[i], cId: this.props.id }
+          { teamId: obj.add[i], vId: this.props.id }
         );
       }
 
@@ -359,7 +359,7 @@ export class CardVolunteer extends Component {
           this.state.server,
           API_BASE_URI+'/team/members/demote',
           'POST',
-          { teamId: obj.rm[i], cId: this.props.id }
+          { teamId: obj.rm[i], vId: this.props.id }
         );
       }
 
@@ -386,7 +386,7 @@ export class CardVolunteer extends Component {
           this.state.server,
           API_BASE_URI+'/form/assigned/volunteer/add',
           'POST',
-          { formId: obj.add[i], cId: this.props.id }
+          { formId: obj.add[i], vId: this.props.id }
         );
       }
 
@@ -395,7 +395,7 @@ export class CardVolunteer extends Component {
           this.state.server,
           API_BASE_URI+'/form/assigned/volunteer/remove',
           'POST',
-          { formId: obj.rm[i], cId: this.props.id }
+          { formId: obj.rm[i], vId: this.props.id }
         );
       }
 
@@ -422,7 +422,7 @@ export class CardVolunteer extends Component {
           this.state.server,
           API_BASE_URI+'/turf/assigned/volunteer/add',
           'POST',
-          { turfId: obj.add[i], cId: this.props.id }
+          { turfId: obj.add[i], vId: this.props.id }
         );
       }
 
@@ -431,7 +431,7 @@ export class CardVolunteer extends Component {
           this.state.server,
           API_BASE_URI+'/turf/assigned/volunteer/remove',
           'POST',
-          { turfId: obj.rm[i], cId: this.props.id }
+          { turfId: obj.rm[i], vId: this.props.id }
         );
       }
 

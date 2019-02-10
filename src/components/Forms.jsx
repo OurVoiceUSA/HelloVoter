@@ -487,7 +487,7 @@ export class CardForm extends Component {
           this.state.server,
           API_BASE_URI+'/form/assigned/volunteer/add',
           'POST',
-          { cId: obj.add[i], formId: this.props.id }
+          { vId: obj.add[i], formId: this.props.id }
         );
       }
 
@@ -496,7 +496,7 @@ export class CardForm extends Component {
           this.state.server,
           API_BASE_URI+'/form/assigned/volunteer/remove',
           'POST',
-          { cId: obj.rm[i], formId: this.props.id }
+          { vId: obj.rm[i], formId: this.props.id }
         );
       }
 

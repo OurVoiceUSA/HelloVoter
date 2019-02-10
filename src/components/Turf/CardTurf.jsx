@@ -85,7 +85,7 @@ export class CardTurf extends Component {
           this.state.server,
           API_BASE_URI+'/turf/assigned/volunteer/add',
           'POST',
-          { cId: obj.add[i], turfId: this.props.id }
+          { vId: obj.add[i], turfId: this.props.id }
         );
       }
 
@@ -94,7 +94,7 @@ export class CardTurf extends Component {
           this.state.server,
           API_BASE_URI+'/turf/assigned/volunteer/remove',
           'POST',
-          { cId: obj.rm[i], turfId: this.props.id }
+          { vId: obj.rm[i], turfId: this.props.id }
         );
       }
 
