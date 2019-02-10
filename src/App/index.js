@@ -20,6 +20,7 @@ import LegacyCanvassingPage from '../components/LegacyCanvassingPage';
 import LegacyListMultiUnitPage from '../components/LegacyListMultiUnitPage';
 import ListMultiUnitPage from '../components/ListMultiUnitPage';
 import SurveyPage from '../components/SurveyPage';
+import LegacySurveyPage from '../components/LegacySurveyPage';
 import CreateSurveyPage from '../components/CreateSurveyPage';
 import AboutPage from '../components/AboutPage';
 
@@ -80,6 +81,12 @@ export default App = StackNavigator({
   },
   Survey: {
     screen: SurveyPage,
+    navigationOptions: ({navigation}) => ({
+      title: 'Canvassing Form',
+    }),
+  },
+  LegacySurvey: {
+    screen: LegacySurveyPage,
     navigationOptions: ({navigation}) => ({
       title: 'Canvassing Form',
     }),
