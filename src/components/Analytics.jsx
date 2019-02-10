@@ -75,6 +75,11 @@ export default class App extends Component {
       data.data.map(d => party_breakdown.push({name: (d[0]?d[0]:'No Data'), value: d[1]}));
     }
 
+    // if data has more than 6 elements, combine everything after 6 into the 6th and mark it "other"
+    while (party_breakdown.length > 6) {
+      party_breakdown[5] = {name: "Other", value: party_breakdown[5].value+party_breakdown.pop().value};
+    }
+
     this.setState({ party_breakdown, loading: false });
   }
 
