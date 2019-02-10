@@ -27,6 +27,7 @@ import MapView, { PROVIDER_GOOGLE } from 'react-native-maps'
 import { API_BASE_URI, _doGeocode, _getApiToken } from '../../common';
 import KnockPage from '../KnockPage';
 import Modal from 'react-native-simple-modal';
+import geolib from 'geolib';
 import TimeAgo from 'javascript-time-ago'
 import en from 'javascript-time-ago/locale/en'
 import t from 'tcomb-form-native';
@@ -47,6 +48,7 @@ export default class App extends OVComponent {
       netInfo: 'none',
       serviceError: null,
       myPosition: {latitude: null, longitude: null},
+      lastFetchPosition: {latitude: null, longitude: null},
       region: {latitudeDelta: 0.004, longitudeDelta: 0.004},
       markers: [],
       DisclosureKey : 'OV_DISCLOUSER',
@@ -67,7 +69,14 @@ export default class App extends OVComponent {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (!_.isEqual(prevState.myPosition, this.state.myPosition)) this._dataGet();
+    const { lastFetchPosition, myPosition } = this.state;
+
+    if (
+        (!lastFetchPosition.longitude && myPosition.longitude)
+        ||
+        (lastFetchPosition.longitude && myPosition.longitude &&
+        geolib.getDistanceSimple(lastFetchPosition, myPosition) > 50)
+    ) this._dataGet();
   }
 
   setupConnectionListener = async () => {
@@ -178,7 +187,7 @@ export default class App extends OVComponent {
         throw "Sync error";
       }
 
-      this.setState({markers: json, last_fetch: new Date().getTime()});
+      this.setState({lastFetchPosition: myPosition, markers: json, last_fetch: new Date().getTime()});
     } catch (e) {
       ret.error = true;
       console.warn('error: '+e);
