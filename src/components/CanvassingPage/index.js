@@ -49,7 +49,6 @@ export default class App extends OVComponent {
       locationAccess: null,
       myPosition: {latitude: null, longitude: null},
       region: {latitudeDelta: 0.004, longitudeDelta: 0.004},
-      currentNode: null,
       markers: [],
       DisclosureKey : 'OV_DISCLOUSER',
       isKnockMenuVisible: false,
@@ -119,22 +118,20 @@ export default class App extends OVComponent {
     return Math.floor(new Date().getTime())
   }
 
-  doMarkerPress(node) {
+  doMarkerPress(marker) {
     const { navigate } = this.props.navigation;
 
-    this.setState({currentNode: node});
-
-    if (node.multi_unit === true)
-      navigate('ListMultiUnit', {refer: this, node: node});
+    if (marker.units.length)
+      navigate('ListMultiUnit', {refer: this, marker: marker});
     else
-      this.setState({isKnockMenuVisible: true});
+      this.setState({isKnockMenuVisible: true, currentMarker: marker});
   }
 
   ucFirst(str) {
       return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
-  getLastInteraction(marker) {
+  getLastVisit(marker) {
     return "Haven't visited";
 
     //str = this.ucFirst(last.status)+' '+timeAgo.format(new Date(last.updated));
@@ -192,7 +189,7 @@ export default class App extends OVComponent {
   }
 
   getPinColor(marker) {
-    if (marker.units.length) return "cyan";
+    if (marker.units && marker.units.length) return "cyan";
 
     // no interactions
     return "#8b4513";
@@ -214,7 +211,6 @@ export default class App extends OVComponent {
   }
 
   render() {
-    const { navigate } = this.props.navigation;
     const {
       showDisclosure, myPosition, myNodes, locationAccess, serviceError, form, user,
       loading, region,
@@ -337,7 +333,7 @@ export default class App extends OVComponent {
                 <MapView.Callout onPress={() => this.doMarkerPress(marker)}>
                   <View style={{backgroundColor: '#FFFFFF', padding: 5, width: 175}}>
                     <Text style={{fontWeight: 'bold'}}>{marker.address.street} {marker.address.city} {marker.address.state} {marker.address.zip}</Text>
-                    <Text>{(marker.units.length ? 'Multi-unit address' : this.getLastInteraction(marker))}</Text>
+                    <Text>{(marker.units.length ? 'Multi-unit address' : this.getLastVisit(marker))}</Text>
                   </View>
                 </MapView.Callout>
               </MapView.Marker>
@@ -371,7 +367,7 @@ export default class App extends OVComponent {
           modalDidClose={() => this.setState({isKnockMenuVisible: false})}
           closeOnTouchOutside={true}
           disableOnBackPress={false}>
-          <KnockPage refer={this} funcs={this} />
+          <KnockPage refer={this} marker={this.state.currentMarker} />
         </Modal>
 
       </View>

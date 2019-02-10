@@ -31,7 +31,7 @@ import MapView from 'react-native-maps-super-cluster'
 import encoding from 'encoding';
 import { transliterate as tr } from 'transliteration/src/main/browser';
 import { _doGeocode, _getApiToken, _fileReaderAsync } from '../../common';
-import KnockPage from '../KnockPage';
+import LegacyKnockPage from '../LegacyKnockPage';
 import Modal from 'react-native-simple-modal';
 import TimeAgo from 'javascript-time-ago'
 import pako from 'pako';
@@ -268,7 +268,7 @@ export default class App extends OVComponent {
     this.setState({currentNode: node});
 
     if (node.multi_unit === true)
-      navigate('ListMultiUnit', {refer: this, node: node});
+      navigate('LegacyListMultiUnit', {refer: this, node: node});
     else
       this.setState({isKnockMenuVisible: true});
   }
@@ -1336,7 +1336,7 @@ export default class App extends OVComponent {
           modalDidClose={() => this.setState({isKnockMenuVisible: false})}
           closeOnTouchOutside={true}
           disableOnBackPress={false}>
-          <KnockPage refer={this} funcs={this} />
+          <LegacyKnockPage refer={this} funcs={this} />
         </Modal>
 
       </View>

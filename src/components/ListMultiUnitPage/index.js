@@ -11,7 +11,6 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
-import sha1 from 'sha1';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Modal from 'react-native-simple-modal';
 import KnockPage from '../KnockPage';
@@ -30,91 +29,37 @@ export default class App extends PureComponent {
     super(props);
     this.state = {
       refer: props.navigation.state.params.refer,
-      node: props.navigation.state.params.node,
+      marker: props.navigation.state.params.marker,
       form: props.navigation.state.params.refer.state.form,
       isKnockMenuVisible: false,
-      newUnitModalVisible: false,
     };
-  }
-
-  addUnit = async () => {
-    let { refer, form, node } = this.state;
-
-    let json = this.refs.mainForm.getValue();
-    if (json == null) return;
-
-    let unit = {
-      type: "unit",
-      id: sha1(node.id+json.unit),
-      parent_id: node.id,
-      unit: json.unit,
-    };
-
-    // check for duplicates
-    let check = refer.getNodeById(unit.id);
-    if (!check.id)
-      refer._addNode(unit);
-
-    this.setState({newUnitModalVisible: false});
-    refer.updateMarkers();
   }
 
   render() {
-    const { refer } = this.state;
-
-    let childNodes = refer.getChildNodesByIdTypes(this.state.node.id, ["unit"]).sort(refer.dynamicSort("unit"));
+    const { refer, marker } = this.state;
 
     return (
       <ScrollView style={{flex: 1, backgroundColor: 'white'}} contentContainerStyle={{flexGrow:1}}>
         <View>
-          <Text style={{fontSize: 20, padding: 10}}>{this.state.node.address.join(", ")}</Text>
-
-          <Icon.Button
-            name="plus-circle"
-            backgroundColor="#d7d7d7"
-            color="#000000"
-            onPress={() => {
-              this.setState({ newUnitModalVisible: true });
-            }}
-            {...iconStyles}>
-            Add new unit/apt number
-          </Icon.Button>
-
-          {childNodes.length === 0 &&
-          <View>
-            <View style={{margin: 10}} />
-            <Icon.Button
-              name="minus-circle"
-              backgroundColor="#d7d7d7"
-              color="#000000"
-              onPress={() => {
-                refer.updateNodeById(this.state.node.id, 'multi_unit', false);
-                refer.forceUpdate();
-                this.props.navigation.goBack();
-              }}
-              {...iconStyles}>
-              Update to single-unit address
-            </Icon.Button>
-          </View>
-          }
+          <Text style={{fontSize: 20, padding: 10}}>{marker.address.street} {marker.address.city}</Text>
 
           <FlatList
             scrollEnabled={false}
-            data={childNodes}
-            keyExtractor={(item) => item.id}
+            data={marker.units}
+            keyExtractor={item => item.name}
             renderItem={({item}) => {
               let color = refer.getPinColor(item);
               let icon = (color === "red" ? "ban" : "address-book");
 
               return (
-                <View key={item.id} style={{padding: 10}}>
+                <View key={item.name} style={{padding: 10}}>
                   <TouchableOpacity
                     style={{flexDirection: 'row', alignItems: 'center'}}
                     onPress={() => {
-                      this.setState({ isKnockMenuVisible: true, currentNode: item });
+                      this.setState({ isKnockMenuVisible: true, marker: marker, currentUnit: item });
                     }}>
                     <Icon name={icon} size={40} color={color} style={{margin: 5}} />
-                    <Text>Unit {item.unit} - {refer.getLastInteraction(item.id)}</Text>
+                    <Text>Unit {item.name} - {refer.getLastVisit(item)}</Text>
                   </TouchableOpacity>
                 </View>
               );
@@ -136,37 +81,7 @@ export default class App extends PureComponent {
           modalDidClose={() => this.setState({isKnockMenuVisible: false})}
           closeOnTouchOutside={true}
           disableOnBackPress={false}>
-          <KnockPage refer={this} funcs={refer} />
-        </Modal>
-
-        <Modal
-          open={this.state.newUnitModalVisible}
-          modalStyle={{width: 335, height: 250, backgroundColor: "transparent",
-            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
-          style={{alignItems: 'center'}}
-          offset={0}
-          overlayBackground={'rgba(0, 0, 0, 0.75)'}
-          animationDuration={200}
-          animationTension={40}
-          modalDidOpen={() => undefined}
-          modalDidClose={() => this.setState({newUnitModalVisible: false})}
-          closeOnTouchOutside={true}
-          disableOnBackPress={false}>
-          <View style={styles.container}>
-            <View>
-              <View style={{flex: 1, flexDirection: 'row', margin: 20, alignItems: 'center'}}>
-                <Text>Recording a new unit for this address:</Text>
-              </View>
-
-              <Form
-                ref="mainForm"
-               type={mainForm}
-              />
-              <TouchableHighlight style={styles.button} onPress={this.addUnit} underlayColor='#99d9f4'>
-                <Text style={styles.buttonText}>Add</Text>
-              </TouchableHighlight>
-            </View>
-          </View>
+          <KnockPage refer={refer} marker={marker} unit={this.state.currentUnit} />
         </Modal>
 
       </ScrollView>

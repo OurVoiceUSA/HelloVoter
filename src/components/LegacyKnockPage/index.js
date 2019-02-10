@@ -16,24 +16,38 @@ export default class App extends PureComponent {
     super(props);
     this.state = {
       refer: this.props.refer,
-      marker: this.props.marker,
-      unit: this.props.unit,
+      funcs: this.props.funcs,
     };
   }
 
   render() {
-    const { refer, marker, unit } = this.state;
+    const { refer, funcs } = this.state;
     const { navigate } = refer.props.navigation;
 
-    const place = (unit?unit:marker);
+    let LastInteraction = funcs.getLastInteraction(refer.state.currentNode.id);
+    let info = funcs.getLatestSurveyInfo(refer.state.currentNode.id);
 
-    let LastInteraction = refer.getLastVisit(place);
+    let name = "N/A";
+    let party = "N/A";
+
+    // find me a key that has "name" and "party" in it
+    let keys = Object.keys(funcs.state.form.questions);
+    for (let k in keys) {
+      let key = keys[k];
+      if (info && info[key]) {
+        if (key.match(/name/i))
+          name = info[key];
+        if (key.match(/party/i))
+          party = info[key];
+      }
+    }
 
     return (
       <View style={{flexDirection: 'column'}}>
         <View style={{width: 280, height: 350, backgroundColor: 'white', marginTop: 15, borderRadius: 15, padding: 25, alignSelf: 'flex-start'}}>
           <View>
-            <Text>People: {JSON.stringify(place.people)}</Text>
+            <Text>Name: {name}</Text>
+            <Text>Party: {party}</Text>
             <Text>{LastInteraction}</Text>
 
             <View style={{margin: 5, flexDirection: 'row'}}>
@@ -43,7 +57,7 @@ export default class App extends PureComponent {
                 color="#000000"
                 onPress={() => {
                   refer.setState({ isKnockMenuVisible: false });
-                  navigate('Survey', {refer: refer, info: info});
+                  navigate('LegacySurvey', {refer: refer, funcs: funcs, info: info});
                 }}
                 {...iconStyles}>
                 Take Survey
@@ -56,8 +70,13 @@ export default class App extends PureComponent {
                 backgroundColor="#d7d7d7"
                 color="#000000"
                 onPress={() => {
-                  // TODO: refer.dataAdd()
+                  funcs._addNode({
+                    type: "survey",
+                    parent_id: refer.state.currentNode.id,
+                    status: 'not home',
+                  });
                   refer.setState({ isKnockMenuVisible: false })
+                  funcs.updateMarkers();
                 }}
                 {...iconStyles}>
                 Not Home
@@ -70,13 +89,35 @@ export default class App extends PureComponent {
                 backgroundColor="#d7d7d7"
                 color="#000000"
                 onPress={() => {
-                  // TODO: refer.dataAdd()
+                  funcs._addNode({
+                    type: "survey",
+                    parent_id: refer.state.currentNode.id,
+                    status: 'not interested',
+                  });
                   refer.setState({ isKnockMenuVisible: false });
+                  funcs.updateMarkers();
                 }}
                 {...iconStyles}>
                 Not Interested
               </Icon.Button>
             </View>
+
+            {refer.state.currentNode.type === "address" && !funcs.nodeHasSurvey(refer.state.currentNode) &&
+            <View style={{margin: 5, marginTop: 50, flexDirection: 'row'}}>
+              <Icon.Button
+                name="building"
+                backgroundColor="#d7d7d7"
+                color="#000000"
+                onPress={() => {
+                  refer.setState({ isKnockMenuVisible: false });
+                  funcs.updateNodeById(refer.state.currentNode.id, 'multi_unit', true);
+                  funcs.doMarkerPress(refer.state.currentNode);
+                }}
+                {...iconStyles}>
+                Update to multi-unit
+              </Icon.Button>
+            </View>
+            }
 
           </View>
 
