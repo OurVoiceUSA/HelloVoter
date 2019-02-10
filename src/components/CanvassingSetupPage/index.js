@@ -244,7 +244,6 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
       if (url) this.handleOpenURL({ url });
     });
 
-    this.requestLocationPermission();
     this._loadForms();
   }
 
@@ -717,7 +716,8 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
                     name="cloud-upload"
                     backgroundColor="#d7d7d7"
                     color="#000000"
-                    onPress={() => {
+                    onPress={async () => {
+                      await this.requestLocationPermission();
                       this.setState({SelectModeScreen: false}, () => setTimeout(() => this.setState({ConnectServerScreen: true}), 500))
                     }}
                     {...iconStyles}>
