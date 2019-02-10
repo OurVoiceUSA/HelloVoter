@@ -340,7 +340,9 @@ export default class App extends OVComponent {
                 pinColor={this.getPinColor(marker)}>
                 <MapView.Callout onPress={() => this.doMarkerPress(marker)}>
                   <View style={{backgroundColor: '#FFFFFF', padding: 5, width: 175}}>
-                    <Text style={{fontWeight: 'bold'}}>{marker.address.street} {marker.address.city} {marker.address.state} {marker.address.zip}</Text>
+                    <Text style={{fontWeight: 'bold'}}>
+                      {marker.address.street}, {marker.address.city}, {marker.address.state}, {marker.address.zip}
+                    </Text>
                     <Text>{(marker.units.length ? 'Multi-unit address' : this.getLastVisit(marker))}</Text>
                   </View>
                 </MapView.Callout>

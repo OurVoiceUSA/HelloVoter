@@ -33,7 +33,7 @@ export default class App extends PureComponent {
       <View style={{flexDirection: 'column'}}>
         <View style={{width: 280, height: 350, backgroundColor: 'white', marginTop: 15, borderRadius: 15, padding: 25, alignSelf: 'flex-start'}}>
           <View>
-            <Text>{marker.street} {marker.city}</Text>
+            <Text>{marker.street}, {marker.city}</Text>
             <Text>People: {JSON.stringify(place.people)}</Text>
 
             <View style={{margin: 5, flexDirection: 'row'}}>
