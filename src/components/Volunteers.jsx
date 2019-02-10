@@ -329,8 +329,6 @@ export class CardVolunteer extends Component {
       notify_success('Team assignments saved.');
       this.setState({
         selectedTeamsOption,
-        selectedFormsOption: [],
-        selectedTurfOption: [],
         volunteer
       });
     } catch (e) {
@@ -378,32 +376,33 @@ export class CardVolunteer extends Component {
   handleFormsChange = async selectedFormsOption => {
     this.props.refer.setState({ saving: true });
     try {
-      if (this.state.selectedFormsOption.value) {
-        await _fetch(
-          this.state.server,
-          API_BASE_URI+'/form/assigned/volunteer/remove',
-          'POST',
-          {
-            formId: this.state.selectedFormsOption.id,
-            cId: this.props.id
-          }
-        );
-      }
-      if (selectedFormsOption.value) {
+      let obj = _handleSelectChange(
+        this.state.selectedFormsOption,
+        selectedFormsOption
+      );
+
+      for (let i in obj.add) {
         await _fetch(
           this.state.server,
           API_BASE_URI+'/form/assigned/volunteer/add',
           'POST',
-          {
-            formId: selectedFormsOption.id,
-            cId: this.props.id
-          }
+          { formId: obj.add[i], cId: this.props.id }
         );
       }
+
+      for (let i in obj.rm) {
+        await _fetch(
+          this.state.server,
+          API_BASE_URI+'/form/assigned/volunteer/remove',
+          'POST',
+          { formId: obj.rm[i], cId: this.props.id }
+        );
+      }
+
       // refresh volunteer info
       let volunteer = await _loadVolunteer(this, this.props.id);
       notify_success('Form selection saved.');
-      this.setState({ volunteer, selectedFormsOption });
+      this.setState({ selectedFormsOption, volunteer });
     } catch (e) {
       notify_error(e, 'Unable to add/remove form.');
     }
@@ -413,32 +412,33 @@ export class CardVolunteer extends Component {
   handleTurfChange = async selectedTurfOption => {
     this.props.refer.setState({ saving: true });
     try {
-      if (this.state.selectedTurfOption.value) {
-        await _fetch(
-          this.state.server,
-          API_BASE_URI+'/turf/assigned/volunteer/remove',
-          'POST',
-          {
-            turfId: this.state.selectedTurfOption.id,
-            cId: this.props.id
-          }
-        );
-      }
-      if (selectedTurfOption.value) {
+      let obj = _handleSelectChange(
+        this.state.selectedTurfOption,
+        selectedTurfOption
+      );
+
+      for (let i in obj.add) {
         await _fetch(
           this.state.server,
           API_BASE_URI+'/turf/assigned/volunteer/add',
           'POST',
-          {
-            turfId: selectedTurfOption.id,
-            cId: this.props.id
-          }
+          { turfId: obj.add[i], cId: this.props.id }
         );
       }
+
+      for (let i in obj.rm) {
+        await _fetch(
+          this.state.server,
+          API_BASE_URI+'/turf/assigned/volunteer/remove',
+          'POST',
+          { turfId: obj.rm[i], cId: this.props.id }
+        );
+      }
+
       // refresh volunteer info
       let volunteer = await _loadVolunteer(this, this.props.id);
       notify_success('Turf selection saved.');
-      this.setState({ volunteer, selectedTurfOption });
+      this.setState({ selectedTurfOption, volunteer });
     } catch (e) {
       notify_error(e, 'Unable to add/remove turf.');
     }
@@ -530,16 +530,15 @@ export class CardVolunteer extends Component {
       });
     });
 
-    if (volunteer.ass.forms.length) {
-      let f = volunteer.ass.forms[0];
-      selectedFormsOption = [
-        {
+    volunteer.ass.forms.forEach(f => {
+      if (f.direct) {
+        selectedFormsOption.push({
           value: _searchStringify(f),
           id: f.id,
           label: <CardForm key={f.id} form={f} refer={this} />
-        },
-      ];
-    }
+        });
+      }
+    });
 
     turf.forEach(t => {
       turfOptions.push({
@@ -549,10 +548,9 @@ export class CardVolunteer extends Component {
       });
     });
 
-    if (volunteer.ass.turfs.length) {
-      let t = volunteer.ass.turfs[0];
-      selectedTurfOption = [
-        {
+    volunteer.ass.turfs.forEach(t => {
+      if (t.direct) {
+        selectedTurfOption.push({
           value: _searchStringify(t),
           id: t.id,
           label: (
@@ -563,9 +561,9 @@ export class CardVolunteer extends Component {
               icon={volunteer.autoturf ? faHome : null}
             />
           )
-        },
-      ];
-    }
+        });
+      }
+    });
 
     this.setState({
       loading: false,
@@ -705,10 +703,10 @@ export const CardVolunteerFull = props => (
       <div>
         Forms / Turf this users sees based on the above team(s):
         <br />
-        {props.volunteer.ass.forms.map(f => (
+        {props.volunteer.ass.forms.filter(f => !f.direct).map(f => (
           <CardForm key={f.id} form={f} refer={props.refer} />
         ))}
-        {props.volunteer.ass.turfs.map(t => (
+        {props.volunteer.ass.turfs.filter(t => !t.direct).map(t => (
           <CardTurf key={t.id} turf={t} refer={props.refer} />
         ))}
       </div>
