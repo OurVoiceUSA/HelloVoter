@@ -292,7 +292,7 @@ export async function _loadAttributes(refer) {
 export async function _loadAddressData(refer, lng, lat, formId) {
   let data = [];
   try {
-    data = await _fetch(refer.props.server, API_BASE_URI+'/data/get?longitude='+lng+'&latitude='+lat+(formId?'&formId='+formId:''));
+    data = await _fetch(refer.props.server, API_BASE_URI+'/people/get/byposition?longitude='+lng+'&latitude='+lat+(formId?'&formId='+formId:''));
   } catch (e) {
     notify_error(e, 'Unable to load address information.');
   }
