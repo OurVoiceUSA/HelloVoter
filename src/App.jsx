@@ -152,7 +152,6 @@ class App extends Component {
             (this.state.server.jwt ? this.state.server.jwt : 'of the one ring'),
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ longitude: -118, latitude: 40 })
       });
 
       let sm_oauth_url = res.headers.get('x-sm-oauth-url');
