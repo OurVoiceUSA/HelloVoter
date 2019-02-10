@@ -41,7 +41,7 @@ export default class App extends PureComponent {
     return (
       <ScrollView style={{flex: 1, backgroundColor: 'white'}} contentContainerStyle={{flexGrow:1}}>
         <View>
-          <Text style={{fontSize: 20, padding: 10}}>{marker.address.street} {marker.address.city}</Text>
+          <Text style={{fontSize: 20, padding: 10}}>{marker.address.street}, {marker.address.city}</Text>
 
           <FlatList
             scrollEnabled={false}

@@ -132,7 +132,7 @@ export default class App extends OVComponent {
     if (marker.units.length)
       navigate('ListMultiUnit', {refer: this, marker: marker});
     else
-      this.setState({isKnockMenuVisible: true, currentMarker: marker});
+      this.setState({currentMarker: marker, isKnockMenuVisible: true});
   }
 
   ucFirst(str) {
