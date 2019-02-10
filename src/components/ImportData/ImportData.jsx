@@ -61,7 +61,7 @@ export default class ImportData extends Component {
     this.setState({sending: true, completed: 1});
     await _fetch(this.props.server, API_BASE_URI+'/import/begin', 'POST', {
       filename: filename,
-      attributes: ['Party Affiliation'],
+      attributes: ['Name', 'Party Affiliation'],
     });
 
     let seps = ['#', 'apt', 'unit', 'ste', 'spc'];

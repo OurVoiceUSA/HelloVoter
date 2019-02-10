@@ -1,6 +1,5 @@
 export const fields = [
   'Unique Record ID',
-  'Name',
   'Street Address',
   'Unit',
   'City',
@@ -8,5 +7,6 @@ export const fields = [
   'Zip',
   'Longitude',
   'Latitude',
+  'Name',
   'Party Affiliation'
 ];
