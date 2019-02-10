@@ -33,22 +33,8 @@ export default class App extends PureComponent {
       <View style={{flexDirection: 'column'}}>
         <View style={{width: 280, height: 350, backgroundColor: 'white', marginTop: 15, borderRadius: 15, padding: 25, alignSelf: 'flex-start'}}>
           <View>
+            <Text>{marker.street} {marker.city}</Text>
             <Text>People: {JSON.stringify(place.people)}</Text>
-            <Text>{LastInteraction}</Text>
-
-            <View style={{margin: 5, flexDirection: 'row'}}>
-              <Icon.Button
-                name="check-circle"
-                backgroundColor="#d7d7d7"
-                color="#000000"
-                onPress={() => {
-                  refer.setState({ isKnockMenuVisible: false });
-                  navigate('Survey', {refer: refer, info: info});
-                }}
-                {...iconStyles}>
-                Take Survey
-              </Icon.Button>
-            </View>
 
             <View style={{margin: 5, flexDirection: 'row'}}>
               <Icon.Button

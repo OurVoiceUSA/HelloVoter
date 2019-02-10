@@ -163,7 +163,7 @@ export default class App extends OVComponent {
     let ret = {error: false};
 
     try {
-      let res = await fetch('https://'+this.state.server+API_BASE_URI+'/data/get?formId='+this.state.form.id+'&longitude='+myPosition.longitude+'&latitude='+myPosition.latitude, {
+      let res = await fetch('https://'+this.state.server+API_BASE_URI+'/data/get?formId='+this.state.form.id+'&longitude='+myPosition.longitude+'&latitude='+myPosition.latitude+'&limit=100', {
         method: 'GET',
         headers: {
           'Authorization': 'Bearer '+await _getApiToken(),
