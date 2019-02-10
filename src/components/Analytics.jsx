@@ -116,7 +116,7 @@ export default class App extends Component {
           >
             {
               this.state.party_breakdown.map((entry, index) => (
-                <Cell key={`slice-${index}`} fill={['red','blue','yellow','grey'][index]} />
+                <Cell key={`slice-${index}`} fill={['red','blue','yellow','green','grey'][index]} />
               ))
             }
             <Label width={50} position="center">
