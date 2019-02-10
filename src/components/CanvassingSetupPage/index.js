@@ -27,6 +27,8 @@ import { Dropbox } from 'dropbox';
 import { API_BASE_URI, DINFO, _loginPing, _saveUser, _getApiToken, _fileReaderAsync } from '../../common';
 import { wsbase } from '../../config';
 
+import OVComponent from '../OVComponent';
+
 var Form = t.form.Form;
 
 var sampleForm = {
@@ -51,7 +53,7 @@ var sampleForm = {
   "questions_order":["FullName","Email","Puppy breed preferences","Puppy preferences","Bad Puppy preferences","Puppy breeds","Puppy breed specify","Number of puppies","Puppy puddles","Puppy trees"],
 }
 
-export default class App extends PureComponent {
+export default class App extends OVComponent {
 
   constructor(props) {
     super(props);
@@ -68,6 +70,7 @@ export default class App extends PureComponent {
       //server: (__DEV__?{server: wsbase.replace('https://','')}:null),
       server: null,
       serverLoading: false,
+      myPosition: {latitude: null, longitude: null},
     };
 
     this.onChange = this.onChange.bind(this);
@@ -122,6 +125,7 @@ export default class App extends PureComponent {
 
   singHello = async (server) => {
     const { navigate } = this.props.navigation;
+    const { myPosition } = this.state;
     let ret;
 
     try {
@@ -134,8 +138,8 @@ export default class App extends PureComponent {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          longitude: -118,
-          latitude: 40,
+          longitude: myPosition.longitude,
+          latitude: myPosition.latitude,
           dinfo: DINFO,
         }),
       });
@@ -240,6 +244,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
       if (url) this.handleOpenURL({ url });
     });
 
+    this.requestLocationPermission();
     this._loadForms();
   }
 
@@ -251,7 +256,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
   componentDidUpdate(prevProps, prevState) {
     const { SmLoginScreen, user } = this.state;
     if (prevState.SmLoginScreen && !SmLoginScreen && user.loggedin) {
-      this.singHello(this.state.server.server);
+      this.singHello(this.state.server);
     }
   }
 
@@ -746,6 +751,8 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
             <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
               <View style={{backgroundColor: 'white', padding: 20, borderRadius: 40, borderWidth: 10, borderColor: '#d7d7d7'}}>
 
+                {this.state.locationAccess?
+                <View>
                 <Form
                   ref="mainForm"
                   type={this.formServerItems}
@@ -768,7 +775,13 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
                   <Text>Connect to Server</Text>
                 </TouchableOpacity>
                 }
-
+                </View>
+                :
+                <View style={styles.content}>
+                  <Text>Unable to determine your location.</Text>
+                  <Text>To connect to a canvassing server, you must enable location access. Check your device settings.</Text>
+                </View>
+                }
               </View>
             </View>
           </View>

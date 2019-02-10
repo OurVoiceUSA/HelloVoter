@@ -46,7 +46,6 @@ export default class App extends OVComponent {
       loading: false,
       netInfo: 'none',
       serviceError: null,
-      locationAccess: null,
       myPosition: {latitude: null, longitude: null},
       region: {latitudeDelta: 0.004, longitudeDelta: 0.004},
       markers: [],
