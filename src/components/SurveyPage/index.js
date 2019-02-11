@@ -35,11 +35,18 @@ export default class App extends PureComponent {
 
     const { state } = this.props.navigation;
 
+    let values = {};
+
+    for (let i in state.params.person.attrs) {
+      values[state.params.person.attrs[i].id] = state.params.person.attrs[i].value;
+    };
+
     this.state = {
       refer: state.params.refer,
       funcs: state.params.funcs,
       form: state.params.form,
       person: state.params.person,
+      values: values,
     };
 
     this.doSave = this.doSave.bind(this);
@@ -73,7 +80,6 @@ export default class App extends PureComponent {
   }
 
   render() {
-
     const { form } = this.state;
 
     let newStruct = {};
@@ -143,7 +149,7 @@ export default class App extends PureComponent {
               ref="form"
               type={CanvassForm}
               options={options}
-              value={this.state.person}
+              value={this.state.values}
             />
           </TouchableWithoutFeedback>
         </View>
