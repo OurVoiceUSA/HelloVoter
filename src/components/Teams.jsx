@@ -336,7 +336,7 @@ export class CardTeam extends Component {
           this.state.server,
           API_BASE_URI+'/team/members/add',
           'POST',
-          { teamId: this.props.id, cId: obj.add[i] }
+          { teamId: this.props.id, vId: obj.add[i] }
         );
       }
 
@@ -345,7 +345,7 @@ export class CardTeam extends Component {
           this.state.server,
           API_BASE_URI+'/team/members/remove',
           'POST',
-          { teamId: this.props.id, cId: obj.rm[i] }
+          { teamId: this.props.id, vId: obj.rm[i] }
         );
       }
 
