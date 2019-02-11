@@ -38,8 +38,8 @@ export default class App extends PureComponent {
     this.state = {
       refer: state.params.refer,
       funcs: state.params.funcs,
-      info: state.params.info,
-      form: state.params.refer.state.form,
+      form: state.params.form,
+      person: state.params.person,
     };
 
     this.doSave = this.doSave.bind(this);
@@ -77,26 +77,38 @@ export default class App extends PureComponent {
     const { form } = this.state;
 
     let newStruct = {};
-    let newOptions = { fields: {} };
+    let newOptions = {
+      i18n: {
+        optional: '',
+        required: ' *',
+      },
+      fields: {},
+    };
 
     let keys;
 
-    if (form.questions_order) keys = form.questions_order;
-    else keys = Object.keys(form.questions);
+    keys = form.attributes_order;
+
     for (let k in keys) {
       let value;
       let boxflag = false;
-      switch (form.questions[keys[k]].type) {
-        case 'TEXTBOX': value = t.String; boxflag = true; break;
-        case 'Number': value = t.Number; break;
-        case 'Boolean': value = t.Boolean; break;
-        case 'List': value = this.valueToEnums(form.questions[keys[k]].options); break;
-        case 'SAND': value = SAND; break;
+      switch (form.attributes[keys[k]].type) {
+        case 'textbox': value = t.String; boxflag = true; break;
+        case 'number': value = t.Number; break;
+        case 'boolean': value = t.Boolean; break;
+        case 'sand': value = SAND; break;
+        case 'string':
+          if (form.attributes[keys[k]].values)
+            value = this.valueToEnums(form.attributes[keys[k]].values);
+          else
+            value = t.String;
+          break;
         default: value = t.String;
       }
-      if (form.questions[keys[k]].optional) value = t.maybe(value);
+      if (!form.attributes[keys[k]].required) value = t.maybe(value);
+      if (!form.attributes[keys[k]].label) form.attributes[keys[k]].label = form.attributes[keys[k]].name;
       newStruct[keys[k]] = value;
-      newOptions.fields[keys[k]] = { label: form.questions[keys[k]].label + (form.questions[keys[k]].optional ? '' : ' *') };
+      newOptions.fields[keys[k]] = { label: form.attributes[keys[k]].label };
       if (boxflag === true) {
         newOptions.fields[keys[k]].multiline = true;
         newOptions.fields[keys[k]].stylesheet = {
@@ -123,18 +135,12 @@ export default class App extends PureComponent {
       <ScrollView style={{flex: 1, backgroundColor: 'white'}}>
 
         <View style={styles.container}>
-
-          <View style={{flex: 1, marginBottom: 10, alignItems: 'center'}}>
-            <Text style={{fontSize: 20}}>{form.name}</Text>
-            <Text>Form created by {form.author}</Text>
-          </View>
-
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <Form
               ref="form"
               type={CanvassForm}
               options={options}
-              value={this.state.info}
+              value={this.state.person}
             />
           </TouchableWithoutFeedback>
         </View>

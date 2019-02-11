@@ -34,7 +34,7 @@ export default class App extends PureComponent {
 
     return (
       <View style={{flexDirection: 'column'}}>
-        <View style={{width: 300, height: 350, backgroundColor: 'white', marginTop: 15, borderRadius: 15, padding: 10, alignSelf: 'flex-start'}}>
+        <View style={{width: 300, height: 450, backgroundColor: 'white', marginTop: 15, borderRadius: 15, padding: 10, alignSelf: 'flex-start'}}>
           <View>
             <Text>{(unit?'Unit '+unit.name:marker.address.street+', '+marker.address.city)}</Text>
 
@@ -49,7 +49,7 @@ export default class App extends PureComponent {
                       style={{flexDirection: 'row', alignItems: 'center'}}
                       onPress={() => {
                         refer.setState({ isKnockMenuVisible: false });
-                        navigate('Survey', {refer: refer, person: item});
+                        navigate('Survey', {refer: refer, funcs: funcs, form: form, person: item});
                       }}>
                       <Icon name="user" size={40} style={{margin: 5}} />
                       <View>
