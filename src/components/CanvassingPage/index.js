@@ -377,7 +377,7 @@ export default class App extends OVComponent {
           modalDidClose={() => this.setState({isKnockMenuVisible: false})}
           closeOnTouchOutside={true}
           disableOnBackPress={false}>
-          <KnockPage refer={this} marker={this.state.currentMarker} />
+          <KnockPage refer={this} funcs={this} marker={this.state.currentMarker} form={form} />
         </Modal>
 
       </View>

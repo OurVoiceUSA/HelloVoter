@@ -36,7 +36,7 @@ export default class App extends PureComponent {
   }
 
   render() {
-    const { refer, marker } = this.state;
+    const { refer, marker, form } = this.state;
 
     return (
       <ScrollView style={{flex: 1, backgroundColor: 'white'}} contentContainerStyle={{flexGrow:1}}>
@@ -81,7 +81,7 @@ export default class App extends PureComponent {
           modalDidClose={() => this.setState({isKnockMenuVisible: false})}
           closeOnTouchOutside={true}
           disableOnBackPress={false}>
-          <KnockPage refer={refer} marker={marker} unit={this.state.currentUnit} />
+          <KnockPage refer={this} funcs={refer} marker={marker} unit={this.state.currentUnit} form={form} />
         </Modal>
 
       </ScrollView>
