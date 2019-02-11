@@ -91,12 +91,14 @@ export default class App extends PureComponent {
 
     for (let k in keys) {
       let value;
+      let mode;
       let boxflag = false;
       switch (form.attributes[keys[k]].type) {
         case 'textbox': value = t.String; boxflag = true; break;
         case 'number': value = t.Number; break;
         case 'boolean': value = t.Boolean; break;
         case 'sand': value = SAND; break;
+        case 'date': value = t.Date; mode = 'date'; break;
         case 'string':
           if (form.attributes[keys[k]].values)
             value = this.valueToEnums(form.attributes[keys[k]].values);
@@ -109,6 +111,7 @@ export default class App extends PureComponent {
       if (!form.attributes[keys[k]].label) form.attributes[keys[k]].label = form.attributes[keys[k]].name;
       newStruct[keys[k]] = value;
       newOptions.fields[keys[k]] = { label: form.attributes[keys[k]].label };
+      if (mode) newOptions.fields[keys[k]].mode = mode;
       if (boxflag === true) {
         newOptions.fields[keys[k]].multiline = true;
         newOptions.fields[keys[k]].stylesheet = {
