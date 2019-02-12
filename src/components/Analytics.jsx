@@ -9,6 +9,7 @@ import {
   API_BASE_URI,
   _fetch,
   _loadTurfs,
+  _loadAttributes,
   _searchStringify,
   RootLoader,
 } from '../common.js';
@@ -34,7 +35,7 @@ export default class App extends Component {
     this.state = {
       turfOptions: [],
       selectedTurfOption: null,
-      party_breakdown: [],
+      data_breakdown: [],
       animation: true,
     };
   }
@@ -48,6 +49,8 @@ export default class App extends Component {
 
     let turfOptions = [];
     let turfs = await _loadTurfs(this);
+    let attributeOptions = [];
+    let attributes = await _loadAttributes(this);
 
     turfs.forEach(t => {
       turfOptions.push({
@@ -57,38 +60,59 @@ export default class App extends Component {
       });
     });
 
-    this.setState({turfOptions}, () => this._loadData());
+    attributes.forEach(a => {
+      attributeOptions.push({
+        value: _searchStringify(a),
+        id: a.id,
+        label: a.name,
+      });
+    });
+
+    this.setState({loading: false, attributeOptions, turfOptions});
   }
 
-  _loadData = async () => {
+  doQuery = async () => {
+    if (!this.state.selectedAttributeOption) return;
+
     this.setState({ loading: true });
 
-    let party_breakdown = [];
+    let data_breakdown = [];
 
     let uri = API_BASE_URI+'/analytics/list?turfId=';
     if (this.state.selectedTurfOption && this.state.selectedTurfOption.id) uri += this.state.selectedTurfOption.id;
+    if (this.state.selectedAttributeOption && this.state.selectedAttributeOption.id) uri += '&aId='+this.state.selectedAttributeOption.id;
     if (this.state.include_null) uri += '&include_null=true';
 
     let data = await _fetch(this.props.server, uri);
 
     if (data && data.data) {
-      data.data.map(d => party_breakdown.push({name: (d[0]?d[0]:'No Data'), value: d[1]}));
+      data.data.map(d => data_breakdown.push({name: (d[0]?d[0]:'No Data'), value: d[1]}));
     }
 
     // if data has more than 6 elements, combine everything after 6 into the 6th and mark it "other"
-    while (party_breakdown.length > 6) {
-      party_breakdown[5] = {name: "Other", value: party_breakdown[5].value+party_breakdown.pop().value};
+    while (data_breakdown.length > 6) {
+      data_breakdown[5] = {name: "Other", value: data_breakdown[5].value+data_breakdown.pop().value};
     }
 
-    this.setState({ party_breakdown, loading: false });
+    this.setState({ data_breakdown, loading: false });
   }
 
-  handleTurfChange = selectedTurfOption => this.setState({selectedTurfOption}, () => this._loadData());
+  handleTurfChange = selectedTurfOption => this.setState({selectedTurfOption}, () => this.doQuery());
+  handleAttributeChange = selectedAttributeOption => this.setState({selectedAttributeOption}, () => this.doQuery());
 
   render() {
     return (
-      <RootLoader flag={this.state.loading} func={() => this._loadData()}>
+      <RootLoader flag={this.state.loading} func={() => this.doQuery()}>
         <h3>Analytics</h3>
+        <Select
+          value={this.state.selectedAttributeOption}
+          onChange={this.handleAttributeChange}
+          options={this.state.attributeOptions}
+          isMulti={false}
+          isSearchable={true}
+          placeholder="Select an attribute to query data for"
+        />
+        <br />
         <Select
           value={this.state.selectedTurfOption}
           onChange={this.handleTurfChange}
@@ -98,13 +122,13 @@ export default class App extends Component {
           placeholder="Select a turf to include only records within that turf"
         />
         <Checkbox color="primary" checked={this.state.include_null} onChange={(e, c) => {
-          this.setState({include_null: c}, async () => await this._loadData());
+          this.setState({include_null: c}, async () => await this.doQuery());
         }} /> Include records with "No Data"
-        {this.state.party_breakdown.length?
+        {this.state.data_breakdown.length?
         <PieChart width={800} height={400}>
           <Legend />
           <Pie
-            data={this.state.party_breakdown}
+            data={this.state.data_breakdown}
             dataKey="value"
             startAngle={180}
             endAngle={-180}
@@ -115,12 +139,12 @@ export default class App extends Component {
             isAnimationActive={this.state.animation}
           >
             {
-              this.state.party_breakdown.map((entry, index) => (
+              this.state.data_breakdown.map((entry, index) => (
                 <Cell key={`slice-${index}`} fill={['red','blue','yellow','green','grey'][index]} />
               ))
             }
             <Label width={50} position="center">
-              Party Affiliation
+              {this.state.selectedAttributeOption.label}
             </Label>
           </Pie>
         </PieChart>
