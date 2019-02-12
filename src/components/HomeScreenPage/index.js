@@ -71,7 +71,7 @@ export default class App extends PureComponent {
                 height: 65, maxWidth: 350, justifyContent: 'center',
               }}
               onPress={() => {navigate('About')}}>
-              <Text style={{textAlign: 'center'}}>About Our Voice</Text>
+              <Text style={{textAlign: 'center'}}>About Our Voice USA</Text>
             </TouchableOpacity>
           </View>
 

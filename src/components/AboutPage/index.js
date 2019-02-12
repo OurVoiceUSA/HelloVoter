@@ -33,7 +33,7 @@ export default class App extends PureComponent {
         </Text>
 
         <Text style={{margin: 15, fontSize: 18, color: 'dimgray'}}>
-          Our Voice USA is a non-partisan organization registered as a 501(c)(3)
+          Our Voice USA, the maker of HelloVoter, is a non-partisan organization registered as a 501(c)(3)
           non-profit charity. We provide access to tools, resources, and collaboration that
           enables every day people to be politically engaged. Check us out on social media!
         </Text>
