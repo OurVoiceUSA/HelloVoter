@@ -87,6 +87,7 @@ export default class App extends OVComponent {
           label: 'Server Domain Name',
           help: 'Enter the domain name of the server you wish to connect to.',
           error: 'You must enter a domain name.',
+          autoCapitalize: 'none',
         },
         ack: {
           label: 'Terms of Use',
