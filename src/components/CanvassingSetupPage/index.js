@@ -434,7 +434,12 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
         if (this.state.connected !== true || user.dropbox.account_id !== json.author_id)
           swipeoutBtns.shift();
 
-      if (json.backend === 'server') swipeoutBtns.shift();
+      let createdby = 'Created by '+json.author;
+
+      if (json.backend === 'server') {
+        createdby = 'Hosted by '+json.server;
+        swipeoutBtns.shift();
+      }
 
       forms.push(
         <View key={i} style={{margin: 5, flexDirection: 'row'}}>
@@ -458,7 +463,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
                 <Icon style={{margin: 5, marginRight: 10}} name={icon} size={size} color={color} />
                 <View>
                   <Text style={{fontWeight: 'bold'}}>{json.name}</Text>
-                  <Text style={{fontSize: 12}}>Created by {json.author}</Text>
+                  <Text style={{fontSize: 12}}>{createdby}</Text>
                 </View>
               </View>
             </TouchableOpacity>
