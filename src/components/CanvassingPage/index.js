@@ -22,6 +22,7 @@ import OVComponent from '../OVComponent';
 
 import { NavigationActions } from 'react-navigation';
 import storage from 'react-native-storage-wrapper';
+import DeviceInfo from 'react-native-device-info';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps'
 import { API_BASE_URI, _doGeocode, _getApiToken } from '../../common';
@@ -195,6 +196,47 @@ export default class App extends OVComponent {
 
     return ret;
   }
+
+  sendStatus = async (status, address, unit) => {
+    const { form, myPosition } = this.state;
+
+    let input = {
+      deviceId: DeviceInfo.getUniqueID(),
+      addressId: address.id,
+      formId: form.id,
+      status: status,
+      start: this.getEpoch(),
+      end: this.getEpoch(),
+      longitude: myPosition.longitude,
+      latitude: myPosition.latitude,
+    };
+
+    if (unit) input.unit = unit.name;
+
+    try {
+      let res = await fetch('https://'+this.state.server+API_BASE_URI+'/people/visit/update', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer '+await _getApiToken(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(input),
+      });
+    } catch (e) {
+      // TODO: queue to retry later
+      console.warn(e);
+    }
+
+  }
+
+  notHome = async (address, unit) => {
+    this.sendStatus(0, address, unit);
+  }
+
+  notInterested = async (address, unit) => {
+    this.sendStatus(2, address, unit);
+  }
+
 
   getPinColor(marker) {
     if (marker.units && marker.units.length) return "cyan";

@@ -69,7 +69,7 @@ export default class App extends PureComponent {
                 backgroundColor="#d7d7d7"
                 color="#000000"
                 onPress={() => {
-                  // TODO: refer.dataAdd()
+                  funcs.notHome(marker.address, unit);
                   refer.setState({ isKnockMenuVisible: false })
                 }}
                 {...iconStyles}>
@@ -83,7 +83,7 @@ export default class App extends PureComponent {
                 backgroundColor="#d7d7d7"
                 color="#000000"
                 onPress={() => {
-                  // TODO: refer.dataAdd()
+                  funcs.notInterested(marker.address, unit);
                   refer.setState({ isKnockMenuVisible: false });
                 }}
                 {...iconStyles}>
