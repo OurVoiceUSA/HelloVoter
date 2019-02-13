@@ -140,12 +140,20 @@ export default class App extends OVComponent {
       return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
-  getLastVisit(marker) {
-    return "Haven't visited";
+  getLastVisit(place) {
+    if (!place.visits || place.visits.length === 0)
+      return "Haven't visited";
 
-    //str = this.ucFirst(last.status)+' '+timeAgo.format(new Date(last.updated));
+    let str;
 
-    return str;
+    switch (place.visits[0].status) {
+      case 0: str = "Not home"; break;
+      case 1: str = "Home"; break;
+      case 2: str = "Not interested"; break;
+      default: str = "Unknown"; break;
+    }
+
+    return str+" "+new TimeAgo('en-US').format(place.visits[0].end);
   }
 
   LoadDisclosure = async () => {
