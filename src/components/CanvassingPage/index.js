@@ -246,21 +246,20 @@ export default class App extends OVComponent {
   }
 
 
-  getPinColor(marker) {
-    if (marker.units && marker.units.length) return "cyan";
+  getPinColor(place) {
+    if (place.units && place.units.length) return "cyan";
 
-    // no interactions
-    return "#8b4513";
+    if (!place.visits || place.visits.length === 0)
+      return '#8b4513';
 
-/*
-    switch (nodes[0].status) {
-      case 'home': return "green";
-      case 'not home': return "yellow";
-      case 'not interested': return "red";
+    let str;
+
+    switch (place.visits[0].status) {
+      case 0: return 'yellow';
+      case 1: return 'green';
+      case 2: return 'red';
+      default: return '#8b4513';
     }
-*/
-
-    return "#8b4513";
   }
 
   _canvassGuidelinesUrlHandler() {
