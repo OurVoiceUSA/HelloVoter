@@ -145,6 +145,7 @@ export class App extends Component {
               }}
               units={a.units}
               people={a.people}
+              visits={a.visits}
               position={{lng: a.address.longitude, lat: a.address.latitude}} />
           ))}
           {polygons.map((p, idx) => (
@@ -164,6 +165,8 @@ export class App extends Component {
               Units: {JSON.stringify(this.state.selectedPlace.units)}
               <br />
               People: {JSON.stringify(this.state.selectedPlace.people)}
+              <br />
+              Visits: {JSON.stringify(this.state.selectedPlace.visits)}
             </div>
           </InfoWindow>
         </Map>
