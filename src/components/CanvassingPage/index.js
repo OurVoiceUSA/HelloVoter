@@ -25,7 +25,7 @@ import storage from 'react-native-storage-wrapper';
 import DeviceInfo from 'react-native-device-info';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps'
-import { API_BASE_URI, _doGeocode, _getApiToken } from '../../common';
+import { API_BASE_URI, _doGeocode, _getApiToken, getEpoch } from '../../common';
 import KnockPage from '../KnockPage';
 import Modal from 'react-native-simple-modal';
 import geolib from 'geolib';
@@ -123,10 +123,6 @@ export default class App extends OVComponent {
     );
   }
 
-  getEpoch() {
-    return Math.floor(new Date().getTime())
-  }
-
   doMarkerPress(marker) {
     const { navigate } = this.props.navigation;
 
@@ -205,6 +201,50 @@ export default class App extends OVComponent {
     return ret;
   }
 
+  sendVisit = async (address, unit, person, start, json) => {
+    const { form, myPosition } = this.state;
+    let attrs = [];
+
+    // convert object key/value to an array of id/value
+    let ids = Object.keys(json);
+    for (let i in ids) {
+      attrs.push({
+        id: ids[i],
+        value: (json[ids[i]]?json[ids[i]]:""),
+      });
+    }
+
+    let input = {
+      deviceId: DeviceInfo.getUniqueID(),
+      addressId: address.id,
+      formId: form.id,
+      status: 1,
+      start: start,
+      end: getEpoch(),
+      longitude: myPosition.longitude,
+      latitude: myPosition.latitude,
+      personId: person.id,
+      attrs: attrs,
+    };
+
+    if (unit) input.unit = unit.name;
+
+    try {
+      let res = await fetch('https://'+this.state.server+API_BASE_URI+'/people/visit/update', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer '+await _getApiToken(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(input),
+      });
+    } catch (e) {
+      // TODO: queue to retry later
+      console.warn(e);
+    }
+
+  }
+
   sendStatus = async (status, address, unit) => {
     const { form, myPosition } = this.state;
 
@@ -213,8 +253,8 @@ export default class App extends OVComponent {
       addressId: address.id,
       formId: form.id,
       status: status,
-      start: this.getEpoch(),
-      end: this.getEpoch(),
+      start: getEpoch(),
+      end: getEpoch(),
       longitude: myPosition.longitude,
       latitude: myPosition.latitude,
     };

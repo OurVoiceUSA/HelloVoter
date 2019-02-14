@@ -49,7 +49,7 @@ export default class App extends PureComponent {
                       style={{flexDirection: 'row', alignItems: 'center'}}
                       onPress={() => {
                         refer.setState({ isKnockMenuVisible: false });
-                        navigate('Survey', {refer: refer, funcs: funcs, form: form, person: item});
+                        navigate('Survey', {refer: refer, funcs: funcs, form: form, address: marker.address, unit: unit, person: item});
                       }}>
                       <Icon name="user" size={40} style={{margin: 5}} />
                       <View>

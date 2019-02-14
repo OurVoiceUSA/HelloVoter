@@ -12,6 +12,8 @@ import {
   ScrollView,
 } from 'react-native';
 
+import { getEpoch } from '../../common';
+
 import storage from 'react-native-storage-wrapper';
 import t from 'tcomb-form-native';
 import sha1 from 'sha1';
@@ -45,30 +47,23 @@ export default class App extends PureComponent {
       refer: state.params.refer,
       funcs: state.params.funcs,
       form: state.params.form,
+      address: state.params.address,
+      unit: state.params.unit,
       person: state.params.person,
       values: values,
+      start: getEpoch(),
     };
 
     this.doSave = this.doSave.bind(this);
   }
 
   doSave = async () => {
-    let { refer, funcs, form } = this.state;
+    const { funcs, address, unit, person } = this.state;
+
     let json = this.refs.form.getValue();
     if (json == null) return;
 
-    let epoch = funcs.getEpoch();
-
-    funcs._addNode({
-      type: "survey",
-      id: sha1(epoch+JSON.stringify(json)+refer.state.currentNode.id),
-      parent_id: refer.state.currentNode.id,
-      status: 'home',
-      survey: json,
-    });
-
-    funcs.updateMarkers();
-    refer.forceUpdate();
+    funcs.sendVisit(address, unit, person, this.state.start, json);
     this.props.navigation.goBack();
   }
 

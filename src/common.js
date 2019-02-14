@@ -11,6 +11,10 @@ export const API_BASE_URI = '/HelloVoterHQ/api/v1';
 const JWT = 'OV_JWT';
 const USERLOCAL = 'OV_USER';
 
+export function getEpoch() {
+  return Math.floor(new Date().getTime())
+}
+
 export const _fileReaderAsync = (blob) => {
   const fr = new FileReader();
   const to = typeof blob;
