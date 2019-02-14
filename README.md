@@ -47,7 +47,7 @@ Then setup neo4j with docker:
       -e NEO4J_dbms_logs_query_time__logging__enabled=true \
       -e NEO4J_dbms_jvm_additional="-Dcom.sun.management.jmxremote.authenticate=true -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.password.file=/logs/jmx.password -Dcom.sun.management.jmxremote.access.file=/logs/jmx.access -Dcom.sun.management.jmxremote.port=9999 -Djava.rmi.server.hostname=127.0.0.1" \
       --network host --add-host $(hostname):127.0.0.1 \
-      -e NEO4J_AUTH=neo4j/$NEO4J_PASS neo4j:3.5.1
+      -e NEO4J_AUTH=neo4j/$NEO4J_PASS neo4j:3.5.3
 
 Finally, setup to run the server and connect to the database:
 
