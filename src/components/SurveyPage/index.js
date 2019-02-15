@@ -99,7 +99,7 @@ export default class App extends PureComponent {
         case 'number': value = t.Number; break;
         case 'boolean': value = t.Boolean; break;
         case 'sand': value = SAND; break;
-        case 'date': value = t.Date; mode = 'date'; break;
+        //case 'date': value = t.Date; mode = 'date'; break;
         case 'string':
           if (form.attributes[keys[k]].values)
             value = this.valueToEnums(form.attributes[keys[k]].values);
