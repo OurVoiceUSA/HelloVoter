@@ -29,14 +29,15 @@ export default class App extends PureComponent {
     super(props);
     this.state = {
       refer: props.navigation.state.params.refer,
-      marker: props.navigation.state.params.marker,
-      form: props.navigation.state.params.refer.state.form,
+      form: props.navigation.state.params.form,
       isKnockMenuVisible: false,
     };
   }
 
   render() {
-    const { refer, marker, form } = this.state;
+    const { refer, form } = this.state;
+
+    const marker = refer.getCurrentMarker();
 
     return (
       <ScrollView style={{flex: 1, backgroundColor: 'white'}} contentContainerStyle={{flexGrow:1}}>
@@ -46,6 +47,7 @@ export default class App extends PureComponent {
           <FlatList
             scrollEnabled={false}
             data={marker.units}
+            extraData={this.state}
             keyExtractor={item => item.name}
             renderItem={({item}) => {
               let color = refer.getPinColor(item);

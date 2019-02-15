@@ -49,7 +49,7 @@ export default class App extends PureComponent {
                       style={{flexDirection: 'row', alignItems: 'center'}}
                       onPress={() => {
                         refer.setState({ isKnockMenuVisible: false });
-                        navigate('Survey', {refer: refer, funcs: funcs, form: form, address: marker.address, unit: unit, person: item});
+                        navigate('Survey', {refer: refer, funcs: funcs, form: form, marker: marker, place: place, unit: unit, person: item});
                       }}>
                       <Icon name="user" size={40} style={{margin: 5}} />
                       <View>
@@ -69,8 +69,8 @@ export default class App extends PureComponent {
                 backgroundColor="#d7d7d7"
                 color="#000000"
                 onPress={() => {
-                  funcs.notHome(marker.address, unit);
-                  refer.setState({ isKnockMenuVisible: false })
+                  funcs.notHome(marker.address.id, place, unit);
+                  refer.setState({ isKnockMenuVisible: false });
                 }}
                 {...iconStyles}>
                 Not Home
@@ -83,7 +83,7 @@ export default class App extends PureComponent {
                 backgroundColor="#d7d7d7"
                 color="#000000"
                 onPress={() => {
-                  funcs.notInterested(marker.address, unit);
+                  funcs.notInterested(marker.address.id, place, unit);
                   refer.setState({ isKnockMenuVisible: false });
                 }}
                 {...iconStyles}>

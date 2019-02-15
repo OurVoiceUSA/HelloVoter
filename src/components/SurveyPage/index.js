@@ -47,7 +47,8 @@ export default class App extends PureComponent {
       refer: state.params.refer,
       funcs: state.params.funcs,
       form: state.params.form,
-      address: state.params.address,
+      marker: state.params.marker,
+      place: state.params.place,
       unit: state.params.unit,
       person: state.params.person,
       values: values,
@@ -58,12 +59,13 @@ export default class App extends PureComponent {
   }
 
   doSave = async () => {
-    const { funcs, address, unit, person } = this.state;
+    const { funcs, refer, marker, place, unit, person } = this.state;
 
     let json = this.refs.form.getValue();
     if (json == null) return;
 
-    funcs.sendVisit(address, unit, person, this.state.start, json);
+    funcs.sendVisit(marker.address.id, place, unit, person, this.state.start, json);
+    setTimeout(() => refer.forceUpdate(), 500);
     this.props.navigation.goBack();
   }
 

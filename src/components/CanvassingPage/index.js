@@ -125,12 +125,17 @@ export default class App extends OVComponent {
 
   doMarkerPress(marker) {
     const { navigate } = this.props.navigation;
+    const { form } = this.state;
+
+    this.currentMarker = marker;
 
     if (marker.units.length)
-      navigate('ListMultiUnit', {refer: this, marker: marker});
+      navigate('ListMultiUnit', {refer: this, form: form});
     else
-      this.setState({currentMarker: marker, isKnockMenuVisible: true});
+      this.setState({isKnockMenuVisible: true});
   }
+
+  getCurrentMarker() { return this.currentMarker; }
 
   ucFirst(str) {
       return str.charAt(0).toUpperCase() + str.slice(1);
@@ -172,6 +177,13 @@ export default class App extends OVComponent {
     return date.toLocaleDateString('en-us')+" "+date.toLocaleTimeString('en-us');
   }
 
+  updateLocalMarker(place, input) {
+    // add interaction locally so app updates color
+    if (!place.visits) place.visits = [];
+    place.visits.push(input);
+    this.forceUpdate();
+  }
+
   _dataGet = async (flag) => {
     const { myPosition } = this.state;
     let ret = {error: false};
@@ -201,7 +213,7 @@ export default class App extends OVComponent {
     return ret;
   }
 
-  sendVisit = async (address, unit, person, start, json) => {
+  sendVisit(id, place, unit, person, start, json) {
     const { form, myPosition } = this.state;
     let attrs = [];
 
@@ -216,7 +228,7 @@ export default class App extends OVComponent {
 
     let input = {
       deviceId: DeviceInfo.getUniqueID(),
-      addressId: address.id,
+      addressId: id,
       formId: form.id,
       status: 1,
       start: start,
@@ -229,38 +241,35 @@ export default class App extends OVComponent {
 
     if (unit) input.unit = unit.name;
 
-    try {
-      let res = await fetch('https://'+this.state.server+API_BASE_URI+'/people/visit/update', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer '+await _getApiToken(),
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(input),
-      });
-    } catch (e) {
-      // TODO: queue to retry later
-      console.warn(e);
-    }
+    this.updateLocalMarker(place, input);
 
+    this.sendData(input);
   }
 
-  sendStatus = async (status, address, unit) => {
+  sendStatus(status, id, place, unit) {
     const { form, myPosition } = this.state;
+
+    let now = getEpoch();
 
     let input = {
       deviceId: DeviceInfo.getUniqueID(),
-      addressId: address.id,
+      addressId: id,
       formId: form.id,
       status: status,
-      start: getEpoch(),
-      end: getEpoch(),
+      start: now,
+      end: now,
       longitude: myPosition.longitude,
       latitude: myPosition.latitude,
     };
 
     if (unit) input.unit = unit.name;
 
+    this.updateLocalMarker(place, input);
+
+    this.sendData(input);
+  }
+
+  sendData = async (input) => {
     try {
       let res = await fetch('https://'+this.state.server+API_BASE_URI+'/people/visit/update', {
         method: 'POST',
@@ -274,15 +283,14 @@ export default class App extends OVComponent {
       // TODO: queue to retry later
       console.warn(e);
     }
-
   }
 
-  notHome = async (address, unit) => {
-    this.sendStatus(0, address, unit);
+  notHome = async (id, place, unit) => {
+    this.sendStatus(0, id, place, unit);
   }
 
-  notInterested = async (address, unit) => {
-    this.sendStatus(2, address, unit);
+  notInterested = async (id, place, unit) => {
+    this.sendStatus(2, id, place, unit);
   }
 
 
@@ -466,7 +474,7 @@ export default class App extends OVComponent {
           modalDidClose={() => this.setState({isKnockMenuVisible: false})}
           closeOnTouchOutside={true}
           disableOnBackPress={false}>
-          <KnockPage refer={this} funcs={this} marker={this.state.currentMarker} form={form} />
+          <KnockPage refer={this} funcs={this} marker={this.currentMarker} form={form} />
         </Modal>
 
       </View>
