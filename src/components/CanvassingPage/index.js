@@ -141,20 +141,31 @@ export default class App extends OVComponent {
       return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
-  getLastVisit(place) {
+  getLastVisitObj(place) {
     if (!place.visits || place.visits.length === 0)
-      return "Haven't visited";
+      return {status:-1};
 
+    let latest = {end:0};
+
+    for (let i in place.visits) {
+      if (place.visits[i].end > latest.end) latest = place.visits[i];
+    }
+
+    return latest;
+  }
+
+  getLastVisit(place) {
     let str;
+    let v = this.getLastVisitObj(place);
 
-    switch (place.visits[0].status) {
+    switch (v.status) {
       case 0: str = "Not home"; break;
       case 1: str = "Home"; break;
       case 2: str = "Not interested"; break;
-      default: str = "Unknown"; break;
+      default: str = "Haven't visited"; break;
     }
 
-    return str+" "+new TimeAgo('en-US').format(place.visits[0].end);
+    return str+(v.end?" "+new TimeAgo('en-US').format(v.end):'');
   }
 
   LoadDisclosure = async () => {
@@ -297,12 +308,10 @@ export default class App extends OVComponent {
   getPinColor(place) {
     if (place.units && place.units.length) return "cyan";
 
-    if (!place.visits || place.visits.length === 0)
-      return '#8b4513';
-
     let str;
+    let v = this.getLastVisitObj(place);
 
-    switch (place.visits[0].status) {
+    switch (v.status) {
       case 0: return 'yellow';
       case 1: return 'green';
       case 2: return 'red';
