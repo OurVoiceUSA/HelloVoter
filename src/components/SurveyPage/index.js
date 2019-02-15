@@ -101,10 +101,12 @@ export default class App extends PureComponent {
         case 'sand': value = SAND; break;
         //case 'date': value = t.Date; mode = 'date'; break;
         case 'string':
-          if (form.attributes[keys[k]].values)
-            value = this.valueToEnums(form.attributes[keys[k]].values);
-          else
+          if (form.attributes[keys[k]].values) {
+            let matching = this.state.person.attrs.filter(i => i.id === keys[k]);
+            value = this.valueToEnums(form.attributes[keys[k]].values.concat(matching.map(i => i.value)));
+          } else {
             value = t.String;
+          }
           break;
         default: value = t.String;
       }
