@@ -40,7 +40,8 @@ export default class App extends PureComponent {
     let values = {};
 
     for (let i in state.params.person.attrs) {
-      values[state.params.person.attrs[i].id] = state.params.person.attrs[i].value;
+      if (state.params.person.attrs[i].value)
+        values[state.params.person.attrs[i].id] = state.params.person.attrs[i].value;
     };
 
     this.state = {
