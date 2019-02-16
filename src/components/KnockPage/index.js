@@ -141,6 +141,10 @@ const PersonAttr = props => {
     let id = props.form.attributes[props.idx].id;
     let attr = (props.attrs.filter(a => a.id === id))[0];
     if (attr) {
+      if (props.form.attributes[props.idx].type === 'boolean') {
+        if (attr.value) attr.value = "Yes";
+        else attr.value = "No";
+      }
       return (
         <Text>
           {attr.name}: {attr.value}
