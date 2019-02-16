@@ -124,14 +124,12 @@ export default class App extends OVComponent {
     this.setState({serverLoading: false, server: json.server});
   }
 
-  singHello = async (server) => {
-    const { navigate } = this.props.navigation;
+  sayHello = async (server) => {
     const { myPosition } = this.state;
-    let ret;
 
+    let res = {};
     try {
       let jwt = await storage.get('OV_JWT');
-
       res = await fetch('https://'+server+API_BASE_URI+'/hello', {
         method: 'POST',
         headers: {
@@ -144,7 +142,18 @@ export default class App extends OVComponent {
           dinfo: DINFO,
         }),
       });
+    } catch (e) {
+      console.warn(e);
+    }
+    return res;
+  }
 
+  singHello = async (server) => {
+    const { navigate } = this.props.navigation;
+    let ret;
+
+    try {
+      let res = await this.sayHello(server);
       let auth_location = res.headers.get('x-sm-oauth-url');
 
       if (!auth_location || !auth_location.match(/^https:.*auth$/)) {
@@ -198,6 +207,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
           return;
         }
 
+        let jwt = await storage.get('OV_JWT');
         for (let i = 0; i < body.data.forms.length; i++) {
           res = await fetch('https://'+server+API_BASE_URI+'/form/get?formId='+body.data.forms[i].id, {
             headers: {
@@ -248,6 +258,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
       if (url) this.handleOpenURL({ url });
     });
 
+    this.requestLocationPermission();
     this._loadForms();
   }
 
@@ -452,12 +463,15 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
             right={swipeoutBtns}
             autoClose={true}>
             <TouchableOpacity
-              onPress={() => {
+              onPress={async () => {
                 if (json.backend === "dropbox" && !user.dropbox) {
                   this.setState({SelectModeScreen: true});
                 } else {
                   if (json.backend === "server") {
-                    navigate('Canvassing', {server: json.server, form: json, user: user});
+                    // TODO: set loading state as this can take a few seconds
+                    let ret = await this.sayHello(json.server);
+                    if (ret.status === 200) navigate('Canvassing', {server: json.server, form: json, user: user});
+                    else setTimeout(() => this.setState({SmLoginScreen: true}), 500);
                  } else {
                     navigate('LegacyCanvassing', {dbx: (json.backend === "dropbox" ? dbx : null), form: json, user: user});
                   }
@@ -726,7 +740,6 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
                     backgroundColor="#d7d7d7"
                     color="#000000"
                     onPress={async () => {
-                      await this.requestLocationPermission();
                       this.setState({SelectModeScreen: false}, () => setTimeout(() => this.setState({ConnectServerScreen: true}), 500))
                     }}
                     {...iconStyles}>
