@@ -33,7 +33,7 @@ import TimeAgo from 'javascript-time-ago'
 import en from 'javascript-time-ago/locale/en'
 import t from 'tcomb-form-native';
 import _ from 'lodash';
-import {deepCopy, geojson2polygons, ingeojson} from 'ourvoiceusa-sdk-js';
+import {deepCopy, geojson2polygons} from 'ourvoiceusa-sdk-js';
 
 TimeAgo.locale(en);
 
