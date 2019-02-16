@@ -90,38 +90,34 @@ export default class App extends PureComponent {
       fields: {},
     };
 
-    let keys;
-
-    keys = form.attributes_order;
-
-    for (let k in keys) {
+    form.attributes.forEach(a => {
       let value;
       let mode;
       let boxflag = false;
-      switch (form.attributes[keys[k]].type) {
+      switch (a.type) {
         case 'textbox': value = t.String; boxflag = true; break;
         case 'number': value = t.Number; break;
         case 'boolean': value = t.Boolean; break;
         case 'sand': value = SAND; break;
         //case 'date': value = t.Date; mode = 'date'; break;
         case 'string':
-          if (form.attributes[keys[k]].values) {
-            let matching = this.state.person.attrs.filter(i => i.id === keys[k]);
-            value = this.valueToEnums(form.attributes[keys[k]].values.concat(matching.map(i => i.value)));
+          if (a.values) {
+            let matching = this.state.person.attrs.filter(i => i.id === a.id);
+            value = this.valueToEnums(a.values.concat(matching.map(i => i.value)));
           } else {
             value = t.String;
           }
           break;
         default: value = t.String;
       }
-      if (!form.attributes[keys[k]].required) value = t.maybe(value);
-      if (!form.attributes[keys[k]].label) form.attributes[keys[k]].label = form.attributes[keys[k]].name;
-      newStruct[keys[k]] = value;
-      newOptions.fields[keys[k]] = { label: form.attributes[keys[k]].label };
-      if (mode) newOptions.fields[keys[k]].mode = mode;
+      if (!a.required) value = t.maybe(value);
+      if (!a.label) a.label = a.name;
+      newStruct[a.id] = value;
+      newOptions.fields[a.id] = { label: a.label };
+      if (mode) newOptions.fields[a.id].mode = mode;
       if (boxflag === true) {
-        newOptions.fields[keys[k]].multiline = true;
-        newOptions.fields[keys[k]].stylesheet = {
+        newOptions.fields[a.id].multiline = true;
+        newOptions.fields[a.id].stylesheet = {
           ...Form.stylesheet,
           textbox: {
             ...Form.stylesheet.textbox,
@@ -136,7 +132,7 @@ export default class App extends PureComponent {
           }
         };
       }
-    }
+    });
 
     CanvassForm = t.struct(newStruct);
     options = newOptions;

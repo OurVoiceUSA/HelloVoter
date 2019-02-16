@@ -137,17 +137,18 @@ export default class App extends PureComponent {
 }
 
 const PersonAttr = props => {
-  let id = props.form.attributes_order[props.idx];
-  let attr = (props.attrs.filter(a => a.id === id))[0];
-  if (attr) {
-    return (
-      <Text>
-        {attr.name}: {attr.value}
-      </Text>
-    );
-  } else {
-    return null;
+  if (props.form.attributes[props.idx]) {
+    let id = props.form.attributes[props.idx].id;
+    let attr = (props.attrs.filter(a => a.id === id))[0];
+    if (attr) {
+      return (
+        <Text>
+          {attr.name}: {attr.value}
+        </Text>
+      );
+    }
   }
+  return null;
 };
 
 const iconStyles = {

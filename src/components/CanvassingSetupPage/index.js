@@ -206,6 +206,9 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
             },
           });
 
+          // don't store a form error
+          if (res.status !== 200) continue;
+
           let form = await res.json();
           form.server = server;
           form.backend = 'server';
