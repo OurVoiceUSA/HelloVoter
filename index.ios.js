@@ -10,4 +10,4 @@ import {
 
 import App from './src/App';
 
-AppRegistry.registerComponent('OurVoice', () => App);
+AppRegistry.registerComponent('HelloVoter', () => App);
