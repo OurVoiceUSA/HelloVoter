@@ -12,6 +12,10 @@ This App is designed to be static and get all its configuration and data from th
 
 Install dependencies with `npm install` and start with `npm start`.
 
+## Deployment
+
+This repo is just the UI. The real magic happens with [OurVoiceUSA/HelloVoterAPI](https://github.com/OurVoiceUSA/HelloVoterAPI). Have a look at deploying that and use [this UI deployed by Our Voice USA](https://apps.ourvoiceusa.org/HelloVoterHQ/) and simply put your server address to connect. In the future we hope to roll these two repositories into one with a simple deployment strategy.
+
 ## Contributing
 
 Thank you for your interest in contributing to us! To avoid potential legal headaches please sign our CLA (Contributors License Agreement). We handle this via pull request hooks on GitHub provided by https://cla-assistant.io/
