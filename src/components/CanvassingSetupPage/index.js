@@ -142,6 +142,7 @@ export default class App extends OVComponent {
           dinfo: DINFO,
         }),
       });
+      if (res.status === 401) await storage.del('OV_JWT');
     } catch (e) {
       console.warn(e);
     }
