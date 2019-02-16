@@ -261,7 +261,7 @@ export default class App extends OVComponent {
     this.sendData('/people/visit/update', input);
   }
 
-  sendStatus(status, id, place, unit) {
+  sendStatus(status, id, place, unit, personId) {
     const { form, myPosition } = this.state;
 
     let now = getEpoch();
@@ -278,6 +278,7 @@ export default class App extends OVComponent {
     };
 
     if (unit) input.unit = unit.name;
+    if (personId) input.personId = personId;
 
     this.updateLocalMarker(place, input);
 
@@ -354,6 +355,10 @@ export default class App extends OVComponent {
 
   notInterested = async (id, place, unit) => {
     this.sendStatus(2, id, place, unit);
+  }
+
+  personMoved = async (id, place, unit, personId) => {
+    this.sendStatus(3, id, place, unit, personId);
   }
 
   triggerNetworkWarning() {

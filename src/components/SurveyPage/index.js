@@ -65,8 +65,9 @@ export default class App extends PureComponent {
     let json = this.refs.form.getValue();
     if (json == null) return;
 
+    refer.setState({updated: getEpoch()});
     funcs.sendVisit(marker.address.id, place, unit, person, this.state.start, json);
-    setTimeout(() => refer.forceUpdate(), 500);
+    person.visit = true;
     this.props.navigation.goBack();
   }
 
