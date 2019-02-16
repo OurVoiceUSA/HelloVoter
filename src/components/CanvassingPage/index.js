@@ -215,10 +215,10 @@ export default class App extends OVComponent {
         throw "Sync error";
       }
 
-      this.setState({lastFetchPosition: myPosition, markers: json, last_fetch: new Date().getTime()});
+      this.setState({lastFetchPosition: myPosition, markers: json, last_fetch: getEpoch()});
     } catch (e) {
       ret.error = true;
-      console.warn('error: '+e);
+      this.triggerNetworkWarning();
     }
 
     return ret;
@@ -291,8 +291,8 @@ export default class App extends OVComponent {
         body: JSON.stringify(input),
       });
     } catch (e) {
+      this.triggerNetworkWarning();
       // TODO: queue to retry later
-      console.warn(e);
     }
   }
 
@@ -304,6 +304,9 @@ export default class App extends OVComponent {
     this.sendStatus(2, id, place, unit);
   }
 
+  triggerNetworkWarning() {
+    // TODO: bar that appears at the top and a tap retries
+  }
 
   getPinColor(place) {
     if (place.units && place.units.length) return "cyan";
@@ -497,12 +500,6 @@ const iconStyles = {
   padding: 10,
 };
 
-const displayNone = {
-  height: 0,
-  maxHeight: 0,
-  opacity: 0,
-};
-
 const styles = StyleSheet.create({
   container: {
     ...StyleSheet.absoluteFillObject,
@@ -522,29 +519,6 @@ const styles = StyleSheet.create({
   },
   map: {
     ...StyleSheet.absoluteFillObject,
-  },
-  bubble: {
-    backgroundColor: 'rgba(255,255,255,0.7)',
-    paddingHorizontal: 18,
-    paddingVertical: 12,
-    borderRadius: 20,
-  },
-  latlng: {
-    width: 200,
-    alignItems: 'stretch',
-  },
-  button: {
-    width: 300,
-    paddingHorizontal: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginHorizontal: 5,
-    backgroundColor: '#d7d7d7',
-  },
-  buttonText: {
-    fontSize: 18,
-    color: 'white',
-    alignSelf: 'center'
   },
   addButton: {
     height: 36,
