@@ -33,7 +33,7 @@ import TimeAgo from 'javascript-time-ago'
 import en from 'javascript-time-ago/locale/en'
 import t from 'tcomb-form-native';
 import _ from 'lodash';
-import {geojson2polygons, ingeojson} from 'ourvoiceusa-sdk-js';
+import {deepCopy, geojson2polygons, ingeojson} from 'ourvoiceusa-sdk-js';
 
 TimeAgo.locale(en);
 
@@ -58,6 +58,7 @@ export default class App extends OVComponent {
       form: props.navigation.state.params.form,
       user: props.navigation.state.params.user,
       turfs: props.navigation.state.params.form.turfs,
+      retry_queue: [],
     };
 
     this.handleConnectivityChange = this.handleConnectivityChange.bind(this);
@@ -67,6 +68,7 @@ export default class App extends OVComponent {
     this.requestLocationPermission();
     this.setupConnectionListener();
     this.LoadDisclosure(); //Updates showDisclosure state if the user previously accepted
+    this.loadRetryQueue();
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -108,6 +110,8 @@ export default class App extends OVComponent {
       }
     } catch (e) {}
     this.setState({netInfo: state});
+
+    if (state === 'wifi' || state === 'cellular') this.doRetry();
   }
 
   syncingOk() {
@@ -254,7 +258,7 @@ export default class App extends OVComponent {
 
     this.updateLocalMarker(place, input);
 
-    this.sendData(input);
+    this.sendData('/people/visit/update', input);
   }
 
   sendStatus(status, id, place, unit) {
@@ -277,12 +281,12 @@ export default class App extends OVComponent {
 
     this.updateLocalMarker(place, input);
 
-    this.sendData(input);
+    this.sendData('/people/visit/update', input);
   }
 
-  sendData = async (input) => {
+  sendData = async (uri, input) => {
     try {
-      let res = await fetch('https://'+this.state.server+API_BASE_URI+'/people/visit/update', {
+      let res = await fetch('https://'+this.state.server+API_BASE_URI+uri, {
         method: 'POST',
         headers: {
           'Authorization': 'Bearer '+await _getApiToken(),
@@ -290,9 +294,57 @@ export default class App extends OVComponent {
         },
         body: JSON.stringify(input),
       });
+
+      if (res.status !== 200) {
+        throw "sendData error";
+      }
+
     } catch (e) {
       this.triggerNetworkWarning();
-      // TODO: queue to retry later
+      await this.queueRetry(uri, input);
+    }
+  }
+
+  queueRetry = async (uri, input) => {
+    let { retry_queue } = this.state;
+    retry_queue.push({uri: uri, input: input});
+    this.setState({retry_queue});
+    try {
+      await storage.set('OV_RETRY', JSON.stringify(retry_queue));
+    } catch(e) {
+      console.warn(e);
+    }
+  }
+
+  doRetry = async () => {
+    let queue = deepCopy(this.state.retry_queue);
+
+    if (this.state.retry_running) return;
+    this.setState({retry_running: true, retry_queue: []});
+
+    for (let i in queue) {
+      let input = queue[i].input;
+      let uri = queue[i].uri;
+      await this.sendData(uri, input);
+    }
+
+    try {
+      await storage.del('OV_RETRY');
+      await this._dataGet();
+    } catch (e) {
+      console.warn(e);
+    }
+
+    this.setState({retry_running: false});
+  }
+
+  loadRetryQueue = async () => {
+    try {
+      const value = await storage.get('OV_RETRY');
+      if (value !== null)
+        this.setState({retry_queue: JSON.parse(value)}, () => this.doRetry());
+    } catch(e) {
+      console.warn(e);
     }
   }
 
