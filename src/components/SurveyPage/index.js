@@ -67,7 +67,17 @@ export default class App extends PureComponent {
 
     refer.setState({updated: getEpoch()});
     funcs.sendVisit(marker.address.id, place, unit, person, this.state.start, json);
+
+    // update local
     person.visit = true;
+
+    let ids = Object.keys(json);
+    for (let i in ids) {
+      person.attrs.forEach(a => {
+        if (a.id === ids[i]) a.value = json[ids[i]];
+      });
+    }
+
     this.props.navigation.goBack();
   }
 
