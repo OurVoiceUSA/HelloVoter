@@ -12,7 +12,7 @@ import {
   ScrollView,
 } from 'react-native';
 
-import { getEpoch } from '../../common';
+import { getEpoch, getPropFromArrObj } from '../../common';
 
 import storage from 'react-native-storage-wrapper';
 import t from 'tcomb-form-native';
@@ -40,8 +40,17 @@ export default class App extends PureComponent {
     let values = {};
 
     for (let i in state.params.person.attrs) {
-      if (state.params.person.attrs[i].value)
-        values[state.params.person.attrs[i].id] = state.params.person.attrs[i].value;
+      if (state.params.person.attrs[i].value) {
+        let type = getPropFromArrObj(state.params.form.attributes, state.params.person.attrs[i].id, 'type');
+        if (type) {
+          if (type === 'boolean') {
+            if (state.params.person.attrs[i].value) values[state.params.person.attrs[i].id] = true;
+            else values[state.params.person.attrs[i].id] = false;
+          } else {
+            values[state.params.person.attrs[i].id] = state.params.person.attrs[i].value;
+          }
+        }
+      }
     };
 
     this.state = {
@@ -73,9 +82,15 @@ export default class App extends PureComponent {
 
     let ids = Object.keys(json);
     for (let i in ids) {
+      let found = false;
       person.attrs.forEach(a => {
-        if (a.id === ids[i]) a.value = json[ids[i]];
+        if (a.id === ids[i]) {
+          found = true;
+          a.value = json[ids[i]];
+        }
       });
+      // wasn't there? add it
+      if (!found) person.attrs.push({id: ids[i], value: json[ids[i]]});
     }
 
     this.props.navigation.goBack();

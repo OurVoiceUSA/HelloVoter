@@ -15,6 +15,12 @@ export function getEpoch() {
   return Math.floor(new Date().getTime())
 }
 
+export function getPropFromArrObj(arr, id, prop) {
+  for (let i in arr)
+    if (arr[i].id === id) return arr[i][prop];
+  return false;
+}
+
 export const _fileReaderAsync = (blob) => {
   const fr = new FileReader();
   const to = typeof blob;
