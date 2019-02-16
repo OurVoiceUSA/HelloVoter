@@ -139,6 +139,7 @@ export default class App extends PureComponent {
 const PersonAttr = props => {
   if (props.form.attributes[props.idx]) {
     let id = props.form.attributes[props.idx].id;
+    let name = props.form.attributes[props.idx].name;
     let attr = (props.attrs.filter(a => a.id === id))[0];
     if (attr) {
       let value = attr.value;
@@ -148,7 +149,7 @@ const PersonAttr = props => {
       }
       return (
         <Text>
-          {attr.name}: {value}
+          {name}: {value}
         </Text>
       );
     }
