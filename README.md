@@ -81,6 +81,7 @@ For this server, configure an `.env` file. The following is a complete list of v
     SM_OAUTH_URL=https://ws.ourvoiceusa.org/auth
     JWT_PUB_KEY=SM_OAUTH_URL/pubkey
     WABASE=https://apps.ourvoiceusa.org
+    AUTOENROLL_FORMID=
     DEBUG=
 
 The meaning of each config item is as follows:
@@ -98,6 +99,7 @@ The meaning of each config item is as follows:
 * `SM_OAUTH_URL`: URL of the oauth provider.
 * `JWT_PUB_KEY`: Path to the public key of the oauth provider.
 * `WABASE`: URL of the HelloVoterHQ react application.
+* `AUTOENROLL_FORMID`: The ID of the form new volunteers get auto-enrolled in with autoturf set so they can go right into the map with data, no approval needed. We use this for our demo server. You probably don't want to set this.
 * `DEBUG`: Whether or not cypher and other debugging info is sent to the console log.
 
 ## Contributing
