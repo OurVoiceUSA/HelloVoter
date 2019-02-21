@@ -43,11 +43,16 @@ Then setup neo4j with docker:
       -e NEO4J_dbms_memory_pagecache_size=$PAGE_SIZE \
       -e NEO4J_dbms_memory_heap_initial__size=$HEAP_SIZE \
       -e NEO4J_dbms_memory_heap_max__size=$HEAP_SIZE \
-      -e NEO4J_dbms_logs_query_enabled=true \
-      -e NEO4J_dbms_logs_query_time__logging__enabled=true \
+      -e NEO4J_dbms_directories_tx__log=/logs \
       -e NEO4J_dbms_jvm_additional="-Dcom.sun.management.jmxremote.authenticate=true -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.password.file=/logs/jmx.password -Dcom.sun.management.jmxremote.access.file=/logs/jmx.access -Dcom.sun.management.jmxremote.port=9999 -Djava.rmi.server.hostname=127.0.0.1" \
       --network host --add-host $(hostname):127.0.0.1 \
       -e NEO4J_AUTH=neo4j/$NEO4J_PASS neo4j:3.5.3
+
+Feel free to adjust the paths of the `bind` mounts to suite your environment. For lage databases, we recommend you put the logs on a different storage device than the data.
+
+You can connect to the database with a web browser by navigating to `YOUR_IP:7474`. Or if you prefer to do so via the command line, you can use the `cypher-shell` command from the running docker container:
+
+    docker exec -ti $(docker ps -qf name=neo4j) cypher-shell -u neo4j -p $NEO4J_PASS
 
 Finally, setup to run the server and connect to the database:
 
@@ -57,10 +62,6 @@ Finally, setup to run the server and connect to the database:
     
     npm install
     npm start
-
-To connect to the database with the cypher shell yourself, you can use the `cypher-shell` command from the running docker container:
-
-    docker exec -ti $(docker ps -qf name=neo4j) cypher-shell -u neo4j -p $NEO4J_PASS
 
 You should now be all set!
 
