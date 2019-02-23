@@ -60,11 +60,15 @@ export class App extends Component {
   handleFormsChange = async selectedFormsOption =>
     this.setState({selectedFormsOption, formId: selectedFormsOption.id}, () => this.loadMarkerData());
 
-  onMarkerClick = (props, marker, e) => {
+  onMarkerClick = async (props, marker, e) => {
+    const { formId } = this.state;
+    this.setState({showingInfoWindow: true});
+    let data = await _loadPeopleAddressData(this, props.address.id, formId);
+    let place = data[0];
+    place.title = props.title;
     this.setState({
-      selectedPlace: props,
+      selectedPlace: place,
       activeMarker: marker,
-      showingInfoWindow: true
     });
   }
 
@@ -144,9 +148,7 @@ export class App extends Component {
               icon={{
                 url: "http://maps.google.com/mapfiles/ms/icons/"+this.statusColor(a.address.status)+"-dot.png",
               }}
-              units={a.units}
-              people={a.people}
-              visits={a.visits}
+              address={a.address}
               position={{lng: a.address.longitude, lat: a.address.latitude}} />
           ))}
           {polygons.map((p, idx) => (
