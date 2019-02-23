@@ -591,7 +591,7 @@ export class CardForm extends Component {
           <div style={{ padding: '5px 10px' }}>
             <Icon
               icon={faClipboard}
-              style={{ width: 50, height: 50, color: 'gray' }}
+              style={{ width: 20, height: 20, color: 'gray' }}
             />{' '}
             {form.name}{' '}
             {this.props.edit ? (

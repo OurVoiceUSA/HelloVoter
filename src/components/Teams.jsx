@@ -546,7 +546,7 @@ export class CardTeam extends Component {
           <div style={{ flex: 1, overflow: 'auto', padding: '5px 10px' }}>
             <Icon
               icon={faUsers}
-              style={{ width: 50, height: 50, color: 'gray' }}
+              style={{ width: 20, height: 20, color: 'gray' }}
             />{' '}
             {team.name}{' '}
             {this.props.edit ? (
