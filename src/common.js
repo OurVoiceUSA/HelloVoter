@@ -289,7 +289,17 @@ export async function _loadAttributes(refer) {
   return forms;
 }
 
-export async function _loadAddressData(refer, lng, lat, formId) {
+export async function _loadAddressData(refer, lng, lat) {
+  let data = [];
+  try {
+    data = await _fetch(refer.props.server, API_BASE_URI+'/address/get/byposition?limit=1000&longitude='+lng+'&latitude='+lat);
+  } catch (e) {
+    notify_error(e, 'Unable to load address information.');
+  }
+  return data;
+}
+
+export async function _loadPeopleAddressData(refer, lng, lat, formId) {
   let data = [];
   try {
     data = await _fetch(refer.props.server, API_BASE_URI+'/people/get/byposition?longitude='+lng+'&latitude='+lat+(formId?'&formId='+formId:''));

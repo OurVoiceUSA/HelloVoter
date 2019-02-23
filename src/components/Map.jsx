@@ -10,7 +10,8 @@ import {
   _searchStringify,
   _loadForms,
   _loadTurfs,
-  _loadAddressData
+  _loadAddressData,
+  _loadPeopleAddressData,
 } from '../common.js';
 
 import { CardForm } from './Forms';
@@ -79,7 +80,7 @@ export class App extends Component {
       latitude = this.state.latitude;
     }
 
-    let addresses = await _loadAddressData(this, longitude, latitude, this.state.formId);
+    let addresses = await _loadAddressData(this, longitude, latitude);
     this.setState({addresses});
   }
 
