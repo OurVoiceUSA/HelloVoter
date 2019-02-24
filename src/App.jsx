@@ -50,20 +50,19 @@ class App extends Component {
     let mock = false;
 
     if (jwt) localStorage.setItem('jwt', jwt);
+    else jwt = localStorage.getItem('jwt');
 
     let hostname = localStorage.getItem('server');
     if (hostname === 'npm start') mock = true;
 
     this.setState({
       server: {
-        hostname: localStorage.getItem('server'),
-        jwt: jwt ? jwt : localStorage.getItem('jwt'),
-        mock: mock
+        hostname: hostname,
+        jwt: jwt,
+        mock: mock,
       }
-    });
+    }, () => this._loadKeys());
 
-    // don't load if no jwt
-    if (jwt) this._loadKeys();
   };
 
   _loadKeys = async () => {
