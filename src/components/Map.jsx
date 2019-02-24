@@ -97,12 +97,14 @@ export class App extends Component {
     }
   };
 
-  statusColor(status) {
-    switch (status) {
-    case 'multi': return 'blue';
-    case 'home': return 'green';
-    case 'nothome': return 'yellow';
-    case 'notinterested': return 'red';
+  statusColor(obj) {
+    if (!obj.visits || obj.visits.length === 0) return 'purple';
+    let visit = obj.visits[0];
+
+    switch (visit.status) {
+    case 0: return 'yellow';
+    case 1: return 'green';
+    case 2: return 'red';
     default: return 'purple';
     }
   }
@@ -135,7 +137,7 @@ export class App extends Component {
 
         <Map
           google={this.props.google}
-          zoom={14}
+          zoom={17}
           initialCenter={location}
           onReady={this.loadMarkerData}
           onDragend={this.loadMarkerData}
@@ -146,7 +148,7 @@ export class App extends Component {
               onClick={this.onMarkerClick}
               title={a.address.street+" "+a.address.city+" "+a.address.state+" "+a.address.zip}
               icon={{
-                url: "http://maps.google.com/mapfiles/ms/icons/"+this.statusColor(a.address.status)+"-dot.png",
+                url: "http://maps.google.com/mapfiles/ms/icons/"+this.statusColor(a)+"-dot.png",
               }}
               address={a.address}
               position={{lng: a.address.longitude, lat: a.address.latitude}} />
