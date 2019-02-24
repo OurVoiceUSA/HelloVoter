@@ -112,7 +112,7 @@ export class App extends Component {
 
   render() {
     let polygons = [];
-    const { addresses } = this.state;
+    const { addresses, selectedPlace } = this.state;
 
     let location = _browserLocation(this.props);
     if (!location.lng || !location.lat) return (<div>Loading map...</div>);
@@ -147,7 +147,7 @@ export class App extends Component {
             <Marker
               key={idx}
               onClick={this.onMarkerClick}
-              title={a.address.street+" "+a.address.city+" "+a.address.state+" "+a.address.zip}
+              title={a.address.street+", "+a.address.city+", "+a.address.state+", "+a.address.zip}
               icon={{
                 url: "http://maps.google.com/mapfiles/ms/icons/"+this.statusColor(a)+"-dot.png",
               }}
@@ -166,20 +166,49 @@ export class App extends Component {
           <InfoWindow
             marker={this.state.activeMarker}
             visible={this.state.showingInfoWindow}>
-            <div>
-              <h1>{this.state.selectedPlace.title}</h1>
-              Units: {JSON.stringify(this.state.selectedPlace.units)}
-              <br />
-              People: {JSON.stringify(this.state.selectedPlace.people)}
-              <br />
-              Visits: {JSON.stringify(this.state.selectedPlace.visits)}
-            </div>
+            <ModalMarker place={selectedPlace} />
           </InfoWindow>
         </Map>
       </RootLoader>
     );
   }
 }
+
+const ModalMarker = props => {
+  let people = props.place.people;
+  let units = props.place.units;
+
+  if (!people) people = [];
+  if (!units) units = [];
+
+  return (
+    <div>
+      <h1>{props.place.title}</h1>
+      {(units.length?'This is a multi unit address with '+units.length+' units.':'')}
+      {people.map((p) => <ModalPerson person={p} />)}
+    </div>
+  );
+};
+
+const ModalPerson = props => {
+  let attrs = props.person.attrs;
+  if (!attrs) attrs = [];
+  let name = '';
+  let party = '';
+
+  attrs.forEach(a => {
+    console.warn(a);
+    if (a.name === 'Name') name = a.value;
+    if (a.name === 'Party Affiliation') party = a.value;
+  });
+
+  return (
+    <div>
+      <b>Name: {name}</b><br />
+      <b>Party: {party}</b>
+    </div>
+  );
+};
 
 export default GoogleApiWrapper((props) => ({apiKey: props.apiKey}))(geolocated({
   positionOptions: {
