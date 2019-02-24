@@ -6,6 +6,7 @@ import {geojson2polygons} from 'ourvoiceusa-sdk-js';
 import {geolocated} from 'react-geolocated';
 
 import {
+  RootLoader,
   _browserLocation,
   _searchStringify,
   _loadForms,
@@ -122,7 +123,7 @@ export class App extends Component {
     });
 
     return (
-      <div>
+      <RootLoader flag={this.state.loading} func={() => this.loadMarkerData()}>
 
         <div style={{display: 'flex' }}>
           Show interaction status by Form:
@@ -175,7 +176,7 @@ export class App extends Component {
             </div>
           </InfoWindow>
         </Map>
-      </div>
+      </RootLoader>
     );
   }
 }
