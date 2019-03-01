@@ -8,7 +8,7 @@ There are laws that regulate voter data, and digital content in general, that va
 
 More information about where to get voter files and the applicable laws, visit http://voterlist.electproject.org/
 
-We do provide an import tool so you can import your own data that you acquire through your own means. It's currently in development, find the code here: https://github.com/OurVoiceUSA/HelloVoterHQ
+We do provide an import tool so you can import your own data that you acquire through your own means. It's a part of our HelloVoterHQ project, find it here: https://github.com/OurVoiceUSA/HelloVoterHQ
 
 ### Where can I get data?
 
@@ -18,7 +18,7 @@ You can also just start knocking on doors! Not having any data to start with doe
 
 ### Why do you integrate with Dropbox?
 
-As Our Voice USA is a non-profit, we aren't able to host data for you for three reasons:
+As Our Voice USA is a non-profit charity, we aren't able to host data for you for three reasons:
 
 1) non-profits and political parties/candidates don't mix well, legally
 2) hosting services can get expensive
@@ -30,10 +30,11 @@ Dropbox is a cloud-storage solution which meets our criteria for ease of use and
 
 No. Your data goes directly from your device to your Dropbox account. You have full control over your data and with whom you choose to share it.
 
-### Will you integrate with cloud storage other than Dropbox?
+### Can I use cloud storage other than Dropbox?
 
-Our Voice USA has a server-side application in development to be used with the app that you can host anywhere.
+Yes! HelloVoterHQ is a server-side application that you can host anywhere.
 
 ### How many people can be on a canvassing team?
 
-Our Canvassing App has been tested with small teams of up to 10 members, and the app performs well. It may be difficult to manage larger groups with the current set of functionality. This will be addressed in a future release of the app.
+With HelloVoterHQ you can have thousands of volunteers canvassing for you across the country.
+
