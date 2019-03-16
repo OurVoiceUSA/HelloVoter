@@ -7,7 +7,6 @@ ENV NODE_ENV=production
 ENV BABEL_CACHE_PATH=/tmp/.babel_cache
 ENV NO_UPDATE_NOTIFIER=1
 
-RUN git clone https://github.com/OurVoiceUSA/districts.git
 RUN apt-get update && apt-get install -y openjdk-8-jdk
 
 COPY .babelrc .
