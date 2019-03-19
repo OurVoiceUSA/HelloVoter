@@ -20,6 +20,7 @@ COPY lib lib
 COPY *.js ./
 
 EXPOSE 8080
+EXPOSE 8443
 USER node
 
 CMD [ "node", "node_modules/@babel/node/lib/_babel-node", "server.js" ]
