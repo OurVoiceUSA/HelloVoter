@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
+import DeviceInfo from 'react-native-device-info';
 import Modal from 'react-native-simple-modal';
 import KnockPage from '../KnockPage';
 
@@ -31,7 +32,39 @@ export default class App extends PureComponent {
       refer: props.navigation.state.params.refer,
       form: props.navigation.state.params.form,
       isKnockMenuVisible: false,
+      newUnitModalVisible: (props.navigation.state.params.addUnit?true:false),
     };
+  }
+
+  addUnit = async () => {
+    let { refer, form } = this.state;
+    let { myPosition } = refer.state;
+
+    let json = this.refs.mainForm.getValue();
+    if (json == null) return;
+
+    // search for dupes
+    let dupe = false;
+    refer.currentMarker.units.forEach(u => {
+      if (u.name.toLowerCase() === json.unit.toLowerCase()) dupe = true;
+    });
+
+    if (!dupe) {
+      let input = {
+        deviceId: DeviceInfo.getUniqueID(),
+        formId: form.id,
+        timestamp: refer.getEpoch(),
+        longitude: myPosition.longitude,
+        latitude: myPosition.latitude,
+        unit: json.unit,
+        addressId: refer.currentMarker.address.id,
+      };
+
+      refer.sendData('/address/add/unit', input);
+      refer.currentMarker.units.push({name: json.unit, people: []});
+    }
+
+    this.setState({newUnitModalVisible: false});
   }
 
   render() {
@@ -43,6 +76,19 @@ export default class App extends PureComponent {
       <ScrollView style={{flex: 1, backgroundColor: 'white'}} contentContainerStyle={{flexGrow:1}}>
         <View>
           <Text style={{fontSize: 20, padding: 10}}>{marker.address.street}, {marker.address.city}</Text>
+
+          {refer.leader &&
+          <Icon.Button
+            name="plus-circle"
+            backgroundColor="#d7d7d7"
+            color="#000000"
+            onPress={() => {
+              this.setState({ newUnitModalVisible: true });
+            }}
+            {...iconStyles}>  
+            Add new unit/apt number
+          </Icon.Button>
+          }
 
           <FlatList
             scrollEnabled={false}
@@ -84,6 +130,36 @@ export default class App extends PureComponent {
           closeOnTouchOutside={true}
           disableOnBackPress={false}>
           <KnockPage refer={this} funcs={refer} marker={marker} unit={this.state.currentUnit} form={form} />
+        </Modal>
+
+        <Modal 
+          open={this.state.newUnitModalVisible}
+          modalStyle={{width: 335, height: 250, backgroundColor: "transparent",
+            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
+          style={{alignItems: 'center'}}
+          offset={0}
+          overlayBackground={'rgba(0, 0, 0, 0.75)'}
+          animationDuration={200}
+          animationTension={40} 
+          modalDidOpen={() => undefined}
+          modalDidClose={() => this.setState({newUnitModalVisible: false})}
+          closeOnTouchOutside={true}
+          disableOnBackPress={false}>
+          <View style={styles.container}>
+            <View>
+              <View style={{flex: 1, flexDirection: 'row', margin: 20, alignItems: 'center'}}>
+                <Text>Recording a new unit for this address:</Text>
+              </View>
+
+              <Form
+                ref="mainForm"
+               type={mainForm}
+              />
+              <TouchableHighlight style={styles.button} onPress={this.addUnit} underlayColor='#99d9f4'>
+                <Text style={styles.buttonText}>Add</Text>
+              </TouchableHighlight>
+            </View>
+          </View>
         </Modal>
 
       </ScrollView>

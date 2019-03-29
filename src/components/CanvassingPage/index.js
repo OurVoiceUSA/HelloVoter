@@ -408,7 +408,8 @@ export default class App extends OVComponent {
 
     this.updateLocalMarker(place, input);
 
-    this.sendData('/people/visit/update', input);
+    
+    this.sendData('/people/visit/'+(person.new?'add':'update'), input);
   }
 
   sendStatus(status, id, place, unit, personId) {
@@ -540,8 +541,6 @@ export default class App extends OVComponent {
       loading, region,
     } = this.state;
 
-    let leader = false;
-
     if (showDisclosure === "true") {
       return (
         <ScrollView style={{flex: 1, backgroundColor: 'white'}}>
@@ -671,7 +670,7 @@ export default class App extends OVComponent {
 
         <View style={styles.buttonContainer}>
 
-          {leader &&
+          {this.leader &&
           <TouchableOpacity style={styles.iconContainer}
             onPress={() => {this.showConfirmAddress();}}>
             <Icon

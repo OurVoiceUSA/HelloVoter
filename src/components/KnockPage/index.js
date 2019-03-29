@@ -12,6 +12,7 @@ import {
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Swipeout from 'react-native-swipeout';
+import uuidv4 from 'uuid/v4';
 
 import { getEpoch } from '../../common';
 
@@ -41,6 +42,19 @@ export default class App extends PureComponent {
         <View style={{width: 300, height: 450, backgroundColor: 'white', marginTop: 15, borderRadius: 15, padding: 10, alignSelf: 'flex-start'}}>
           <View>
             <Text>{(unit?'Unit '+unit.name:marker.address.street+', '+marker.address.city)}</Text>
+
+            {funcs.leader &&
+            <Icon.Button
+              name="plus-circle"
+              backgroundColor="#d7d7d7"
+              color="#000000"
+              onPress={() => {
+                navigate('Survey', {refer: this, funcs: funcs, form: form, marker: marker, place: place, unit: unit, person: {id: uuidv4(), new: true, attrs:[]}});
+              }}
+              {...iconStyles}>
+              Add Person
+            </Icon.Button>
+            }
 
             {place.people.length?
             <FlatList
@@ -101,7 +115,21 @@ export default class App extends PureComponent {
               }}
             />
             :
-            <View><Text>There is nobody here!</Text></View>
+            <View style={{margin: 5, flexDirection: 'row'}}>
+              {(!unit && funcs.leader) &&
+              <Icon.Button
+                name="plus-circle"
+                backgroundColor="#d7d7d7"
+                color="#000000"
+                onPress={() => {
+                  refer.setState({ isKnockMenuVisible: false });
+                  navigate('ListMultiUnit', {refer: refer, form: form, addUnit: true});
+                }}
+                {...iconStyles}>
+                Add Unit
+              </Icon.Button>
+              }
+            </View>
             }
 
             <View style={{margin: 5, flexDirection: 'row'}}>
