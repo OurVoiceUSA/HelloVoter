@@ -42,6 +42,7 @@ export default class App extends PureComponent {
           <View>
             <Text>{(unit?'Unit '+unit.name:marker.address.street+', '+marker.address.city)}</Text>
 
+            {place.people.length?
             <FlatList
               scrollEnabled={true}
               data={place.people}
@@ -99,6 +100,9 @@ export default class App extends PureComponent {
                 );
               }}
             />
+            :
+            <View><Text>There is nobody here!</Text></View>
+            }
 
             <View style={{margin: 5, flexDirection: 'row'}}>
               <Icon.Button

@@ -14,6 +14,7 @@
 		"javascript-time-ago": "^1.0.34",
 		"jwt-decode": "^2.2.0",
 		"lodash": "^4.17.11",
+		"md5": "^2.2.1",
 		"ourvoiceusa-sdk-js": "github:OurVoiceUSA/ourvoiceusa-sdk-js",
 		"pako": "^1.0.6",
 		"react": "^16.6.3",

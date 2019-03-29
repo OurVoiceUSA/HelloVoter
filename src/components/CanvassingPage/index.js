@@ -29,6 +29,7 @@ import { API_BASE_URI, _doGeocode, _getApiToken, getEpoch } from '../../common';
 import KnockPage from '../KnockPage';
 import Modal from 'react-native-simple-modal';
 import geolib from 'geolib';
+import md5 from 'md5';
 import TimeAgo from 'javascript-time-ago'
 import en from 'javascript-time-ago/locale/en'
 import t from 'tcomb-form-native';
@@ -36,6 +37,30 @@ import _ from 'lodash';
 import {deepCopy, geojson2polygons} from 'ourvoiceusa-sdk-js';
 
 TimeAgo.locale(en);
+
+var Form = t.form.Form;
+
+var formStreet = t.struct({
+  'street': t.String,
+}); 
+var formCity = t.struct({
+  'city': t.String,
+}); 
+var formState = t.struct({
+  'state': t.String,
+  'zip': t.String,
+}); 
+  
+const formStyleRow = _.cloneDeep(t.form.Form.stylesheet);
+formStyleRow.fieldset = {
+  flexDirection: 'row'
+};  
+formStyleRow.formGroup.normal.flex = 1;
+formStyleRow.formGroup.error.flex = 1;
+
+const formOptRow = {
+  stylesheet: formStyleRow,
+};
 
 export default class App extends OVComponent {
 
@@ -52,7 +77,10 @@ export default class App extends OVComponent {
       lastFetchPosition: {latitude: null, longitude: null},
       region: {latitudeDelta: 0.004, longitudeDelta: 0.004},
       markers: [],
+      fAddress: {},
+      pAddress: {},
       DisclosureKey : 'OV_DISCLOUSER',
+      isModalVisible: false,
       isKnockMenuVisible: false,
       showDisclosure: "true",
       form: props.navigation.state.params.form,
@@ -61,6 +89,7 @@ export default class App extends OVComponent {
       retry_queue: [],
     };
 
+    this.onChange = this.onChange.bind(this);
     this.handleConnectivityChange = this.handleConnectivityChange.bind(this);
   }
 
@@ -125,6 +154,127 @@ export default class App extends OVComponent {
       'connectionChange',
       this.handleConnectivityChange
     );
+  }
+
+  showConfirmAddress() {
+    const { myPosition } = this.state;
+
+    if (this.state.netInfo === 'none') {
+      this.setState({ isModalVisible: true });
+      return;
+    }
+
+    if (myPosition.latitude !== null && myPosition.longitude !== null) {
+      if (this.state.geofence && !ingeojson(this.state.geofence, myPosition.longitude, myPosition.latitude)) {
+        Alert.alert('Outside District', 'You are outside the district boundary for this canvassing form. You need to be within the boundaries of '+this.state.geofencename+'.', [{text: 'OK'}], { cancelable: false });
+        return;
+      }
+    }
+
+    this.setState({
+      loading: true,
+      isModalVisible: true,
+    });
+  
+    setTimeout(async () => {
+      try {
+        if (this.state.locationAccess === false) throw "location access denied";
+  
+        let res = await _doGeocode(myPosition.longitude, myPosition.latitude);
+  
+        if (!res.error) {
+          let arr = res.address.split(", ");
+          let country = arr[arr.length-1]; // unused
+          let state_zip = arr[arr.length-2];
+          let fAddress = {
+            state: (state_zip?state_zip.split(" ")[0]:null),
+            zip: (state_zip?state_zip.split(" ")[1]:null),
+            city: arr[arr.length-3],
+            street: arr[arr.length-4],
+          };
+
+          this.setState({fAddress});
+        }
+      } catch (error) {}
+      this.setState({loading: false})
+    }, 550);
+  }
+
+  onChange(fAddress) {
+    this.setState({fAddress});
+  }
+
+  getEpoch() {
+    return Math.floor(new Date().getTime())
+  }
+
+  doConfirmAddress = async () => {
+    const { myPosition, form, markers } = this.state;
+    
+    let jsonStreet = this.refs.formStreet.getValue();
+    let jsonCity = this.refs.formCity.getValue();
+    let jsonState = this.refs.formState.getValue();
+    
+    if (jsonStreet === null || jsonCity === null || jsonState === null) return;
+
+    try {
+      await this.map.animateToCoordinate(myPosition, 500)
+    } catch (error) {}
+    
+    let epoch = this.getEpoch();
+    let fAddress = {
+      street: jsonStreet.street.trim(),
+      city: jsonCity.city.trim(),
+      state: jsonState.state.trim(),
+      zip: jsonState.zip.trim(),
+    };
+
+    // search for dupes
+    let marker;
+    markers.forEach(m => {
+      // change nulls to empty string
+      ["street", "city", "state", "zip"].forEach(i => {if (!m.address[i]) m.address[i] = "";});
+
+      if (m.address.street.toLowerCase() === fAddress.street.toLowerCase() &&
+          m.address.city.toLowerCase() === fAddress.city.toLowerCase() &&
+          m.address.state.toLowerCase() === fAddress.state.toLowerCase() &&
+          m.address.zip.substring(0, 5) === fAddress.zip.substring(0, 5)) marker = m;
+    });
+
+    if (!marker) {
+      marker = {
+        people: [],
+        units: [],
+        address: {
+          id: md5(fAddress.street.toLowerCase()+fAddress.city.toLowerCase()+fAddress.state.toLowerCase()+fAddress.zip.substring(0, 5)),
+          longitude: myPosition.longitude,
+          latitude: myPosition.latitude,
+          street: fAddress.street,
+          city: fAddress.city,
+          state: fAddress.state,
+          zip: fAddress.zip,
+        },
+      };
+
+      let input = {
+        deviceId: DeviceInfo.getUniqueID(),
+        formId: form.id,
+        timestamp: getEpoch(),
+        longitude: myPosition.longitude,
+        latitude: myPosition.latitude,
+        street: marker.address.street,
+        city: marker.address.city,
+        state: marker.address.state,
+        zip: marker.address.zip,
+      };
+
+      this.sendData('/address/add/location', input);
+
+      markers.push(marker);
+    }
+
+    this.setState({ markers, fAddress, pAddress: fAddress, isModalVisible: false });
+    this.doMarkerPress(marker); 
   }
 
   doMarkerPress(marker) {
@@ -390,6 +540,8 @@ export default class App extends OVComponent {
       loading, region,
     } = this.state;
 
+    let leader = false;
+
     if (showDisclosure === "true") {
       return (
         <ScrollView style={{flex: 1, backgroundColor: 'white'}}>
@@ -518,6 +670,19 @@ export default class App extends OVComponent {
         }
 
         <View style={styles.buttonContainer}>
+
+          {leader &&
+          <TouchableOpacity style={styles.iconContainer}
+            onPress={() => {this.showConfirmAddress();}}>
+            <Icon
+              name="map-marker"
+              testID="map-marker"
+              size={50}
+              color="#8b4513"
+              {...iconStyles} />
+          </TouchableOpacity>
+          }
+
           {nomap_content.length == 0 &&
           <TouchableOpacity style={styles.iconContainer}
             onPress={() => this.map.animateToCoordinate(myPosition, 1000)}>
@@ -529,6 +694,78 @@ export default class App extends OVComponent {
           </TouchableOpacity>
           }
         </View>
+
+        <Modal
+          open={this.state.isModalVisible}
+          modalStyle={{width: 350, height: 400, backgroundColor: "transparent",
+            position: 'absolute', top: (Platform.OS === 'android'?0:100), left: 0, right: 0, bottom: 0}}
+          style={{alignItems: 'center'}}
+          offset={0}
+          overlayBackground={'rgba(0, 0, 0, 0.75)'}
+          animationDuration={200}
+          animationTension={40}
+          modalDidOpen={() => undefined}
+          modalDidClose={() => this.setState({isModalVisible: false})}
+          closeOnTouchOutside={true}
+          disableOnBackPress={false}>
+          <View style={{flexDirection: 'column'}}>
+            <View style={{width: 325, backgroundColor: 'white', marginTop: 5, borderRadius: 15, padding: 10, alignSelf: 'flex-start'}}>
+              {loading &&
+              <View>
+                <Text style={{color: 'blue', fontWeight: 'bold', fontSize: 15}}>Loading Address</Text>
+                <ActivityIndicator size="large" />
+              </View>
+              ||
+              <View>
+                <View style={{flexDirection: 'row'}}>
+                  <Text style={{color: 'blue', fontWeight: 'bold', fontSize: 15}}>Confirm the Address</Text>
+                  <View style={{flexDirection: 'row'}}>
+                    <TouchableOpacity
+                      style={{
+                        backgroundColor: '#d7d7d7', padding: 10, borderRadius: 20, marginLeft: 5,
+                        ...((this.state.pAddress.street && this.state.pAddress.street !== this.state.fAddress.street) ? {} : displayNone)
+                      }}
+                      onPress={() => {this.setState({fAddress: this.state.pAddress})}}>
+                      <Text style={{textAlign: 'center'}}>Use Previous</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={{
+                        backgroundColor: '#d7d7d7', padding: 10, borderRadius: 20, marginLeft: 5,
+                        ...(this.state.netInfo === 'none' ? displayNone : {})
+                      }}
+                      onPress={() => {this.showConfirmAddress();}}>
+                      <Text style={{textAlign: 'center'}}>Retry</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+                <Form
+                 ref="formStreet"
+                 type={formStreet}
+                 onChange={this.onChange}
+                 value={this.state.fAddress}
+                />
+                <Form
+                 ref="formCity"
+                 type={formCity}
+                 onChange={this.onChange}
+                 options={formOptRow}
+                 value={this.state.fAddress}
+                />
+                <Form
+                 ref="formState"
+                 type={formState}
+                 onChange={this.onChange}
+                 options={formOptRow}
+                 value={this.state.fAddress}
+                />
+                <TouchableHighlight style={styles.addButton} onPress={this.doConfirmAddress} underlayColor='#99d9f4'>
+                  <Text style={styles.buttonText}>Add</Text>
+                </TouchableHighlight>
+              </View>
+              }
+            </View>
+          </View>
+        </Modal>
 
         <Modal
           open={this.state.isKnockMenuVisible}
@@ -557,6 +794,12 @@ const iconStyles = {
   padding: 10,
 };
 
+const displayNone = {
+  height: 0,
+  maxHeight: 0,
+  opacity: 0,
+};
+
 const styles = StyleSheet.create({
   container: {
     ...StyleSheet.absoluteFillObject,
@@ -576,6 +819,19 @@ const styles = StyleSheet.create({
   },
   map: {
     ...StyleSheet.absoluteFillObject,
+  },
+  button: {
+    width: 300,
+    paddingHorizontal: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 5,
+    backgroundColor: '#d7d7d7',
+  },
+  buttonText: {
+    fontSize: 18,
+    color: 'white',
+    alignSelf: 'center'
   },
   addButton: {
     height: 36,
