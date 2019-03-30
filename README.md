@@ -83,6 +83,7 @@ For this server, configure an `.env` file. The following is a complete list of v
     JWT_PUB_KEY=SM_OAUTH_URL/pubkey
     WABASE=https://apps.ourvoiceusa.org
     AUTOENROLL_FORMID=
+    VOLUNTEER_ADD_NEW=
     PURGE_IMPORT_RECORDS=
     DEBUG=
 
@@ -102,6 +103,7 @@ The meaning of each config item is as follows:
 * `JWT_PUB_KEY`: Path to the public key of the oauth provider.
 * `WABASE`: URL of the HelloVoterHQ react application.
 * `AUTOENROLL_FORMID`: The ID of the form new volunteers get auto-enrolled in with autoturf set so they can go right into the map with data, no approval needed. We use this for our demo server. You probably don't want to set this.
+* `VOLUNTEER_ADD_NEW`: Whether or not volunteers can add new addresses & people that don't exist in the database.
 * `PURGE_IMPORT_RECORDS`: By default, import records are kept in the database, so you can trace where things came from. For larger operations (>20 million), we recommend setting this to `1` as otherwise the speed of data imports will be significantly impacted.
 * `DEBUG`: Whether or not cypher and other debugging info is sent to the console log.
 
