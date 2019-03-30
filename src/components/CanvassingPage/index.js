@@ -408,6 +408,7 @@ export default class App extends OVComponent {
 
     this.updateLocalMarker(place, input);
 
+    if (person.new) place.people.push(person);
     
     this.sendData('/people/visit/'+(person.new?'add':'update'), input);
   }
