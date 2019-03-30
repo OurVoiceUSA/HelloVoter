@@ -34,7 +34,7 @@ import TimeAgo from 'javascript-time-ago'
 import en from 'javascript-time-ago/locale/en'
 import t from 'tcomb-form-native';
 import _ from 'lodash';
-import {deepCopy, geojson2polygons} from 'ourvoiceusa-sdk-js';
+import {deepCopy, geojson2polygons, ingeojson} from 'ourvoiceusa-sdk-js';
 
 TimeAgo.locale(en);
 
@@ -167,9 +167,15 @@ export default class App extends OVComponent {
     }
 
     if (myPosition.latitude !== null && myPosition.longitude !== null) {
-      if (this.state.geofence && !ingeojson(this.state.geofence, myPosition.longitude, myPosition.latitude)) {
-        Alert.alert('Outside District', 'You are outside the district boundary for this canvassing form. You need to be within the boundaries of '+this.state.geofencename+'.', [{text: 'OK'}], { cancelable: false });
-        return;
+      if (this.state.turfs && this.state.turfs.length) {
+        let flag = false;
+        this.state.turfs.forEach(t => {
+          if (ingeojson(t, myPosition.longitude, myPosition.latitude)) flag = true;
+        });
+        if (!flag) {
+          Alert.alert('Outside Boundary', 'You are outside the turf boundary for this canvassing form.', [{text: 'OK'}], { cancelable: false });
+          return;
+        }
       }
     }
 
