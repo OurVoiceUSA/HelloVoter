@@ -89,6 +89,8 @@ export default class App extends OVComponent {
           error: 'You must enter a domain name.',
           autoCapitalize: 'none',
           autoCorrect: false,
+          autoFocus: true,
+          keyboardType: 'email-address',
         },
         ack: {
           label: 'Terms of Use',
