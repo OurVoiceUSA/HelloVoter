@@ -44,16 +44,18 @@ export default class App extends PureComponent {
             <Text>{(unit?'Unit '+unit.name:marker.address.street+', '+marker.address.city)}</Text>
 
             {funcs.leader &&
-            <Icon.Button
-              name="plus-circle"
-              backgroundColor="#d7d7d7"
-              color="#000000"
-              onPress={() => {
-                navigate('Survey', {refer: this, funcs: funcs, form: form, marker: marker, place: place, unit: unit, person: {id: uuidv4(), new: true, attrs:[]}});
-              }}
-              {...iconStyles}>
-              Add Person
-            </Icon.Button>
+            <View style={{margin: 5, flexDirection: 'row'}}>
+              <Icon.Button
+                name="user-plus"
+                backgroundColor="#d7d7d7"
+                color="#000000"
+                onPress={() => {
+                  navigate('Survey', {refer: this, funcs: funcs, form: form, marker: marker, place: place, unit: unit, person: {id: uuidv4(), new: true, attrs:[]}});
+                }}
+                {...iconStyles}>
+                Add Person
+              </Icon.Button>
+            </View>
             }
 
             {place.people.length?
@@ -126,7 +128,7 @@ export default class App extends PureComponent {
                   navigate('ListMultiUnit', {refer: refer, form: form, addUnit: true});
                 }}
                 {...iconStyles}>
-                Add Unit
+                Add Unit/Apt
               </Icon.Button>
               }
             </View>
