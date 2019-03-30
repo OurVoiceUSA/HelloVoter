@@ -3,6 +3,7 @@ package org.ourvoiceinitiative.ourvoice;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.arttitude360.reactnative.rngoogleplaces.RNGooglePlacesPackage;
 import com.devfd.RNGeocoder.RNGeocoderPackage;
 import com.airbnb.android.react.maps.MapsPackage;
 import com.timhagn.rngloc.RNGLocation;
