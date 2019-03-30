@@ -26,7 +26,7 @@ import DeviceInfo from 'react-native-device-info';
 import storage from 'react-native-storage-wrapper';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import sha1 from 'sha1';
-import { Marker, Callout, Polygon, PROVIDER_GOOGLE } from 'react-native-maps'
+import { Marker, Callout, Polyline, PROVIDER_GOOGLE } from 'react-native-maps'
 import MapView from 'react-native-maps-super-cluster'
 import encoding from 'encoding';
 import { transliterate as tr } from 'transliteration/src/main/browser';
@@ -1187,7 +1187,7 @@ export default class App extends OVComponent {
           minZoom={0}
           maxZoom={maxZoom}
           {...this.props}>
-          {geofence.map((polygon, idx) => <Polygon key={idx} coordinates={polygon} strokeWidth={2} fillColor="rgba(0,0,0,0)" />)}
+          {geofence.map((polygon, idx) => <Polyline key={idx} coordinates={polygon} strokeWidth={2} />)}
         </MapView>
         }
 

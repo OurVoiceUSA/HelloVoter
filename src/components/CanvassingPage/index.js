@@ -649,7 +649,7 @@ export default class App extends OVComponent {
           followsUserLocation={false}
           keyboardShouldPersistTaps={true}
           {...this.props}>
-          {geofence.map((polygon, idx) => <MapView.Polygon key={idx} coordinates={polygon} strokeWidth={2} fillColor="rgba(0,0,0,0)" />)}
+          {geofence.map((polygon, idx) => <MapView.Polyline key={idx} coordinates={polygon} strokeWidth={2} />)}
           {this.state.markers.map((marker) => {
             return (
               <MapView.Marker
