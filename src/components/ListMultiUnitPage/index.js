@@ -153,7 +153,8 @@ export default class App extends PureComponent {
 
               <Form
                 ref="mainForm"
-               type={mainForm}
+                options={{fields: {unit: {autoFocus: true}}}}
+                type={mainForm}
               />
               <TouchableHighlight style={styles.button} onPress={this.addUnit} underlayColor='#99d9f4'>
                 <Text style={styles.buttonText}>Add</Text>
