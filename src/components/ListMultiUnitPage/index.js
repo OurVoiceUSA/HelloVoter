@@ -77,7 +77,7 @@ export default class App extends PureComponent {
         <View>
           <Text style={{fontSize: 20, padding: 10}}>{marker.address.street}, {marker.address.city}</Text>
 
-          {refer.leader &&
+          {refer.add_new &&
           <Icon.Button
             name="plus-circle"
             backgroundColor="#d7d7d7"

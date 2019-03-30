@@ -43,7 +43,7 @@ export default class App extends PureComponent {
           <View>
             <Text>{(unit?'Unit '+unit.name:marker.address.street+', '+marker.address.city)}</Text>
 
-            {funcs.leader &&
+            {funcs.add_new &&
             <View style={{margin: 5, flexDirection: 'row'}}>
               <Icon.Button
                 name="user-plus"
@@ -118,7 +118,7 @@ export default class App extends PureComponent {
             />
             :
             <View style={{margin: 5, flexDirection: 'row'}}>
-              {(!unit && funcs.leader) &&
+              {(!unit && funcs.add_new) &&
               <Icon.Button
                 name="plus-circle"
                 backgroundColor="#d7d7d7"

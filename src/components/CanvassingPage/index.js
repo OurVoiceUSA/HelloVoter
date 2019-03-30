@@ -89,6 +89,8 @@ export default class App extends OVComponent {
       retry_queue: [],
     };
 
+    if (this.state.form.add_new) this.add_new = true;
+
     this.onChange = this.onChange.bind(this);
     this.handleConnectivityChange = this.handleConnectivityChange.bind(this);
   }
@@ -671,7 +673,7 @@ export default class App extends OVComponent {
 
         <View style={styles.buttonContainer}>
 
-          {this.leader &&
+          {this.add_new &&
           <TouchableOpacity style={styles.iconContainer}
             onPress={() => {this.showConfirmAddress();}}>
             <Icon
