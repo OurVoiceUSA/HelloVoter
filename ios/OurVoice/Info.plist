@@ -60,6 +60,8 @@
 	<string>You may choose to take a photo as part of the canvassing tool form.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>We use your location information to find your district, and for the canvassing tool.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>We use your location information to find your district, and for the canvassing tool.</string>
 	<key>NSMotionUsageDescription</key>
 	<string>We use your device motion data for augmented reality in the canvassing tool.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
