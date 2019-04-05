@@ -210,6 +210,19 @@ export async function _loadTurfs(refer, teamId, flag) {
   return turf;
 }
 
+export async function _loadHomeTurfs(refer, lng, lat) {
+  let turf = [];
+
+  try {
+    let data = await _fetch(refer.props.server, API_BASE_URI+'/turf/list/byposition?longitude='+lng+'&latitude='+lat);
+    turf = data.data ? data.data : [];
+  } catch (e) {
+    notify_error(e, 'Unable to load turf data.');
+  }
+
+  return turf;
+}
+
 export async function _loadTeam(refer, id) {
   let team = {};
 

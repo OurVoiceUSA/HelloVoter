@@ -26,6 +26,7 @@ import {
   _loadTeams,
   _loadForms,
   _loadTurfs,
+  _loadHomeTurfs,
   RootLoader,
   Icon,
   PlacesAutocomplete,
@@ -449,7 +450,8 @@ export class CardVolunteer extends Component {
     let volunteer = {},
       forms = [],
       turf = [],
-      teams = [];
+      teams = [],
+      hometurf = [];
 
     this.setState({ loading: true });
 
@@ -464,6 +466,9 @@ export class CardVolunteer extends Component {
       notify_error(e, 'Unable to load canavasser info.');
       return this.setState({ loading: false });
     }
+
+    if (volunteer.location)
+      hometurf = await _loadHomeTurfs(this.props.refer, volunteer.location.x, volunteer.location.y);
 
     let teamOptions = [];
     let leaderOptions = [];
@@ -575,7 +580,8 @@ export class CardVolunteer extends Component {
       selectedTeamsOption,
       selectedLeaderOption,
       selectedFormsOption,
-      selectedTurfOption
+      selectedTurfOption,
+      hometurf,
     });
   };
 
@@ -673,7 +679,10 @@ export const CardVolunteerFull = props => (
     Address:{' '}
     <VolunteerAddress refer={props.refer} volunteer={props.volunteer} />
     <br />
-    # of doors knocked: 0
+    Turf this volunteer's home address is in:
+    {props.refer.state.hometurf.map(t => <div>{t.name}</div>)}
+    <br />
+    # of doors knocked: N/A
     <br />
     <br />
     <div>
