@@ -31,28 +31,6 @@ import OVComponent from '../OVComponent';
 
 var Form = t.form.Form;
 
-var sampleForm = {
-  "id": "sampleForm",
-  "created": (new Date().getTime()),
-  "name": "Sample Canvassing Form",
-  "author": "Our Voice USA",
-  "author_id": "sampleForm",
-  "version": 1,
-  "questions":{
-    "FullName":{"type":"String","label":"Full Name","optional":true},
-    "Email":{"type":"String","label":"Email Address","optional":true},
-    "Puppy breed preferences":{"type":"SAND","label":"I prefer my puppies to be fuzzy and cute.","optional":true},
-    "Puppy preferences":{"type":"Boolean","label":"Turn this switch ON if you prefer puppies stay outside.","optional":true},
-    "Bad Puppy preferences":{"type":"SAND","label":"When puppies misbehave, I often shrug it off because hey, they're cute puppies.","optional":true},
-    "Puppy breeds":{"type":"TEXTBOX","label":"Please list as many breeds of puppies you would like to have for your very own.","optional":true},
-    "Puppy breed specify":{"type":"String","label":"Of the breeds you've listed, which style of puppy is your favorite? (There can be only one)","optional":true},
-    "Number of puppies":{"type":"Number","label":"How many puppies can you hold in your arms without dropping any?","optional":true},
-    "Puppy puddles":{"type":"Boolean","label":"Turn this switch ON if you dont mind mopping up puppy puddles.","optional":true},
-    "Puppy trees":{"type":"String","label":"If your favorite breed of puppy could be any type of tree, what type of tree would your favorite fuzzy little puddle-making puppy choose?","optional":true},
-  },
-  "questions_order":["FullName","Email","Puppy breed preferences","Puppy preferences","Bad Puppy preferences","Puppy breeds","Puppy breed specify","Number of puppies","Puppy puddles","Puppy trees"],
-}
-
 export default class App extends OVComponent {
 
   constructor(props) {
@@ -117,14 +95,18 @@ export default class App extends OVComponent {
       return;
     }
 
+    this.connectToServer(json.server);
+  }
+
+  connectToServer = async(server) => {
     this.setState({serverLoading: true});
 
-    let ret = await this.singHello(json.server);
+    let ret = await this.singHello(server);
 
     if (ret.flag !== true) Alert.alert((ret.error?'Error':'Connection Successful'), ret.msg, [{text: 'OK'}], { cancelable: false });
     if (ret.error !== true) server = null;
 
-    this.setState({serverLoading: false, server: json.server});
+    this.setState({serverLoading: false, server: server});
   }
 
   sayHello = async (server) => {
@@ -689,15 +671,15 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
                     name="forward"
                     backgroundColor="#d7d7d7"
                     color="#000000"
-                    onPress={() => navigate('LegacyCanvassing', {dbx: null, form: sampleForm})}
+                    onPress={() => this.connectToServer('gotv.ourvoiceusa.org')}
                     {...iconStyles}>
-                    Demo with a Sample Form
+                    Get Out The Vote!
                   </Icon.Button>
                 </View>
 
                 <View style={{margin: 5, marginTop: 0}}>
                   <Text style={{fontSize: 10, textAlign: 'justify'}}>
-                    Jump right into the map with a pre-made form to get a feel for how this canvassing tool works.
+                    Join us in an effort to knock doors and encourge our neighbors to get out and vote.
                   </Text>
                 </View>
 
