@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
+import DropboxSharePage from '../DropboxSharePage';
 import DeviceInfo from 'react-native-device-info';
 import Modal from 'react-native-simple-modal';
 import t from 'tcomb-form-native';
@@ -66,6 +67,7 @@ export default class App extends PureComponent {
     this.state = {
       refer: props.navigation.state.params.refer,
       exportRunning: false,
+      DropboxShareScreen: false,
     };
 
     this.onChange = this.onChange.bind(this);
@@ -90,6 +92,13 @@ export default class App extends PureComponent {
     }
 
     setTimeout(() => this.forceUpdate(), 500);
+  }
+
+  exportDone(success) {
+    if (success)
+      Alert.alert('Success', 'Data export successful! Check your dropbox account for the spreadsheet.', [{text: 'OK'}], { cancelable: false });
+    else
+      Alert.alert('Error', 'Unable to export data to the server.', [{text: 'OK'}], { cancelable: false });
   }
 
   render() {
@@ -122,6 +131,53 @@ export default class App extends PureComponent {
           <Text>{DeviceInfo.getUniqueID()}</Text>
         </View>
 
+        {refer.state.dbx && refer.state.user.dropbox.account_id == refer.state.form.author_id &&
+        <View>
+
+          <View style={{
+              width: Dimensions.get('window').width,
+              height: 1,
+              backgroundColor: 'lightgray',
+              margin: 10,
+            }}
+          />
+
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <TouchableOpacity
+              style={{backgroundColor: '#d7d7d7', flex: 1, flexDirection: 'row', alignItems: 'center', padding: 10, borderRadius: 20, marginBottom: 10}}
+              onPress={() => this.setState({DropboxShareScreen: true})}>
+              <Icon name="share-square" size={50} color="#808080" />
+              <Text style={{fontSize: 20, marginLeft: 10}}>Share form</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            {this.state.exportRunning &&
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <ActivityIndicator size="large" />
+              <Text style={{fontSize: 20, marginLeft: 10}}>Exporting data...</Text>
+            </View>
+            ||
+            <TouchableOpacity
+              style={{backgroundColor: '#d7d7d7', flex: 1, flexDirection: 'row', alignItems: 'center', padding: 10, borderRadius: 20, marginBottom: 10}}
+              onPress={() => {
+              if (refer.state.netInfo === 'none') {
+                Alert.alert('Export failed.', 'You are not connected to the internet.', [{text: 'OK'}], { cancelable: false });
+              } else if (!refer.syncingOk()) {
+                Alert.alert('Export failed.', 'You are not connected to wifi. To sync over your cellular connection, enable \'Sync over cellular\' in settings.', [{text: 'OK'}], { cancelable: false });
+              } else if (refer.state.syncRunning) {
+                Alert.alert('Export failed.', 'Data sync is currently running. Wait until it\'s finished and try again.', [{text: 'OK'}], { cancelable: false });
+              } else {
+                refer.doExport(this);
+              }
+            }}>
+              <Icon name="save" size={50} color={(refer.syncingOk() ? "#b20000" : "#d3d3d3")} />
+              <Text style={{fontSize: 20, marginLeft: 10}}>Export data to spreadsheet</Text>
+            </TouchableOpacity>
+            }
+          </View>
+        </View>
+        }
+
         <View style={{
             width: Dimensions.get('window').width,
             height: 1,
@@ -147,6 +203,22 @@ export default class App extends PureComponent {
             margin: 10,
           }}
         />
+
+        <Modal
+          open={this.state.DropboxShareScreen}
+          modalStyle={{width: 335, height: 250, backgroundColor: "transparent",
+            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
+          style={{alignItems: 'center'}}
+          offset={0}
+          overlayBackground={'rgba(0, 0, 0, 0.75)'}
+          animationDuration={200}
+          animationTension={40}
+          modalDidOpen={() => undefined}
+          modalDidClose={() => this.setState({DropboxShareScreen: false})}
+          closeOnTouchOutside={true}
+          disableOnBackPress={false}>
+          <DropboxSharePage refer={this} funcs={refer} />
+        </Modal>
 
       </ScrollView>
     );

@@ -1241,7 +1241,7 @@ export default class App extends OVComponent {
           }
 
           <TouchableOpacity style={styles.iconContainer}
-            onPress={() => {navigate("CanvassingSettingsPage", {refer: this})}}>
+            onPress={() => {navigate("LegacyCanvassingSettingsPage", {refer: this})}}>
             <Icon
               name="cog"
               size={50}

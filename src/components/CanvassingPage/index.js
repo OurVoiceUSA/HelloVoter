@@ -80,6 +80,8 @@ export default class App extends OVComponent {
       fAddress: {},
       pAddress: {},
       DisclosureKey : 'OV_DISCLOUSER',
+      settingsStorageKey: 'OV_CANVASS_SETTINGS',
+      canvassSettings: {},
       isModalVisible: false,
       isKnockMenuVisible: false,
       showDisclosure: "true",
@@ -143,6 +145,33 @@ export default class App extends OVComponent {
     this.setState({netInfo: state});
 
     if (state === 'wifi' || state === 'cellular') this.doRetry();
+  }
+
+  _getCanvassSettings = async () => {
+    let canvassSettings = {};
+    try {
+      const value = await storage.get(this.state.settingsStorageKey);
+      if (value !== null) {
+        canvassSettings = JSON.parse(value);
+        this.setState({ canvassSettings });
+      }
+    } catch (e) {
+      console.warn(e);
+      return;
+    }
+
+  }
+
+  _setCanvassSettings = async (canvassSettings) => {
+    const { form, dbx } = this.state;
+
+    try {
+      let str = JSON.stringify(canvassSettings);
+      await storage.set(this.state.settingsStorageKey, str);
+      this.setState({canvassSettings});
+    } catch (e) {}
+
+    // TODO: toggle re-fetch if filters have changed
   }
 
   syncingOk() {
@@ -545,6 +574,7 @@ export default class App extends OVComponent {
   }
 
   render() {
+    const { navigate } = this.props.navigation;
     const {
       showDisclosure, myPosition, myNodes, locationAccess, serviceError, form, user,
       loading, region,
@@ -701,6 +731,16 @@ export default class App extends OVComponent {
               {...iconStyles} />
           </TouchableOpacity>
           }
+
+          <TouchableOpacity style={styles.iconContainer}
+            onPress={() => {navigate("CanvassingSettingsPage", {refer: this})}}>
+            <Icon
+              name="cog"
+              size={50}
+              color="#808080"
+              {...iconStyles} />
+          </TouchableOpacity>
+
         </View>
 
         <Modal
