@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react';
 import {
+  Alert,
   Dimensions,
   TouchableOpacity,
   TouchableHighlight,
@@ -65,7 +66,31 @@ export default class App extends PureComponent {
       start: getEpoch(),
     };
 
+    this.onChange = this.onChange.bind(this);
     this.doSave = this.doSave.bind(this);
+
+    this.edits = false;
+    this.goBack = this.props.navigation.goBack;
+    this.props.navigation.goBack = () => {
+      if (this.edits) {
+        Alert.alert(
+          'Unsaved Form',
+          'You have unsaved edits. Do you want to save your changes?',
+          [
+            {text: 'Discard Changes', onPress: () => { this.goBack();
+            }},
+            {text: 'Keep Editing'},
+          ], { cancelable: false }
+        );
+      } else {
+        this.goBack();
+      }
+    };
+
+  }
+
+  onChange(value) {
+    this.edits = true;
   }
 
   doSave = async () => {
@@ -93,7 +118,7 @@ export default class App extends PureComponent {
       if (!found) person.attrs.push({id: ids[i], value: json[ids[i]]});
     }
 
-    this.props.navigation.goBack();
+    this.goBack();
   }
 
   valueToEnums(options) {
@@ -172,6 +197,7 @@ export default class App extends PureComponent {
               type={CanvassForm}
               options={options}
               value={this.state.values}
+              onChange={this.onChange}
             />
           </TouchableWithoutFeedback>
         </View>
