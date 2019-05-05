@@ -98,6 +98,7 @@ export default class App extends OVComponent {
   }
 
   componentDidMount() {
+    this._getCanvassSettings();
     this.requestLocationPermission();
     this.setupConnectionListener();
     this.LoadDisclosure(); //Updates showDisclosure state if the user previously accepted
@@ -163,7 +164,7 @@ export default class App extends OVComponent {
   }
 
   _setCanvassSettings = async (canvassSettings) => {
-    const { form, dbx } = this.state;
+    const { form } = this.state;
 
     try {
       let str = JSON.stringify(canvassSettings);
