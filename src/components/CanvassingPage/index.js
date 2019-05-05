@@ -170,9 +170,9 @@ export default class App extends OVComponent {
       let str = JSON.stringify(canvassSettings);
       await storage.set(this.state.settingsStorageKey, str);
       this.setState({canvassSettings});
+      this._dataGet();
     } catch (e) {}
 
-    // TODO: toggle re-fetch if filters have changed
   }
 
   syncingOk() {
@@ -397,7 +397,7 @@ export default class App extends OVComponent {
     let ret = {error: false};
 
     try {
-      let res = await fetch('https://'+this.state.server+API_BASE_URI+'/people/get/byposition?formId='+this.state.form.id+'&longitude='+myPosition.longitude+'&latitude='+myPosition.latitude+'&limit=100', {
+      let res = await fetch('https://'+this.state.server+API_BASE_URI+'/people/get/byposition?formId='+this.state.form.id+'&longitude='+myPosition.longitude+'&latitude='+myPosition.latitude+'&limit=100'+(this.state.canvassSettings.filter_pins?'&filter_key='+this.state.canvassSettings.filter_key+'&filter_val='+this.state.canvassSettings.filter_val:''), {
         method: 'GET',
         headers: {
           'Authorization': 'Bearer '+await _getApiToken(),
