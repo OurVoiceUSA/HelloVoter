@@ -20,41 +20,11 @@ import t from 'tcomb-form-native';
 
 var Form = t.form.Form;
 
-const CZOOM = t.enums({
-  'medium': 'Medium',
-  'low': 'Low',
-}, 'CZOOM');
-
 var options = {
   fields: {
-    draggable_pins: {
-      label: 'Pins can be moved',
-      help: 'Your device\'s GPS may drop pins with low accuracy. Enabling this allows you to drag-and-drop pins.',
-    },
-    pin_clustering_zoom: {
-      label: 'Pin Clustering Zoom',
-      help: 'The zoom level of the map in which the pins start to cluster together. Lowering this may cause the map to be slow.',
-      nullOption: {value: '', text: 'High'},
-    },
-    show_only_my_turf: {
-      label: 'Show only my turf',
-      help: 'If you don\'t want to see the progress of others with this form, enable this option.',
-    },
-    sync_on_cellular: {
-      label: 'Sync over cellular',
-      help: 'Allow syncing of data over your cellular connection. Data rates may apply.',
-    },
-    auto_sync: {
-      label: 'Automatially sync data',
-      help: 'Data will sync automatically as you canvass, if you\'ve allowed syncing over cellular, or are connected to wifi.',
-    },
-    share_progress: {
-      label: 'Share progress',
-      help: 'If enabled, syncing your device will allow all your canvassers to see each other\'s progress on thier devices after they sync too.',
-    },
-    only_export_home: {
-      label: 'Only export taken surveys',
-      help: 'When you export your data, this makes it so \'not home\' and \'not interested\' don\'t show up in the spreadsheet.',
+    filter_pins: {
+      label: 'Filter Results by attribute value',
+      help: 'To help you further target your canvassing, enabling this will make the map only show addresses with people who match your below selected criteria.',
     },
   },
 };
@@ -65,62 +35,78 @@ export default class App extends PureComponent {
 
     this.state = {
       refer: props.navigation.state.params.refer,
-      exportRunning: false,
+      form: props.navigation.state.params.form,
+      canvassSettings: props.navigation.state.params.refer.state.canvassSettings,
     };
 
     this.onChange = this.onChange.bind(this);
+
+    // make goBack() update the settings in the parent
+    this.goBack = this.props.navigation.goBack;
+    this.props.navigation.goBack = () => {
+      this.state.refer._setCanvassSettings(this.state.canvassSettings);
+      setTimeout(() => this.forceUpdate(), 500);
+      this.goBack();
+    };
   }
 
   onChange(canvassSettings) {
-    const { refer } = this.state;
+    this.setState({canvassSettings});
+  }
 
-    if (refer.state.canvassSettings.share_progress !== true && canvassSettings.share_progress === true) {
-      Alert.alert(
-        'Data Sharing',
-        '"Share progress" enables anyone who you shared your canvassing form with to see everyone\'s progress. Local laws in your area may govern with whom you may share name and address information. It is your responsibility to make sure you are in compliance with the law. Are you sure you wish to enable this option?',
-        [
-          {text: 'Yes', onPress: () => {
-            refer._setCanvassSettings(canvassSettings);
-            setTimeout(() => this.forceUpdate(), 500);
-          }},
-          {text: 'No', onPress: () => this.forceUpdate()}
-        ], { cancelable: false });
-    } else {
-      refer._setCanvassSettings(canvassSettings);
-    }
+  valueToEnums(options) {
+    let obj = {};
+    for (let i in options)
+      obj[options[i]] = options[i];
+    return t.enums(obj);
+  }
 
-    setTimeout(() => this.forceUpdate(), 500);
+  attrOptsById(id) {
+    let values = ["TRUE","FALSE"];
+    let attr = {};
+    this.state.form.attributes.forEach(a => {
+      if (a.id === id) attr = a;
+    });
+    if (attr.type === 'string') values = attr.values;
+    return values;
   }
 
   render() {
-    const { refer } = this.state;
+    const { refer, form, selectedFilterID } = this.state;
 
     let formOpt = {
-      'draggable_pins': t.Boolean,
-      'pin_clustering_zoom': CZOOM,
+      'filter_pins': t.Boolean,
     };
 
-    if (refer.state.dbx) {
-      formOpt.show_only_my_turf = t.Boolean;
-      formOpt.sync_on_cellular =  t.Boolean;
-      formOpt.auto_sync = t.Boolean;
-    };
+    let attrs = [];
 
-    // additional settings for the form owner
-    if (refer.state.dbx && refer.state.user.dropbox.account_id === refer.state.form.author_id) {
-      formOpt['share_progress'] = t.Boolean;
-      formOpt['only_export_home'] = t.Boolean;
+    // selectable filter options are booleans, and (TODO:) arrays
+    form.attributes.forEach(a => {
+      let value;
+      if (!a.label) a.label = a.name;
+      switch (a.type) {
+        case 'boolean': attrs.push(a); break;
+// TODO: switching between boolean and string throws a fatal error, need to figure out why
+//        case 'string': if (a.values) attrs.push(a); break;
+        default: break;
+      }
+      if (this.state.canvassSettings.filter_key === a.label) this.setState({selectedFilterID: a.id}); 
+    });
+
+    if (this.state.canvassSettings.filter_pins) {
+      if (attrs.length) {
+        formOpt.filter_key = this.valueToEnums(attrs.map(a => a.label));
+
+        if (selectedFilterID) {
+          formOpt.filter_val = this.valueToEnums(this.attrOptsById(selectedFilterID));
+        }
+      }
     }
 
     let mainForm = t.struct(formOpt);
 
     return (
       <ScrollView style={{flex: 1, padding: 15, backgroundColor: 'white'}}>
-
-        <View style={{flex: 1, alignItems: 'flex-end'}}>
-          <Text>Your device ID is:</Text>
-          <Text>{DeviceInfo.getUniqueID()}</Text>
-        </View>
 
         <View style={{
             width: Dimensions.get('window').width,
@@ -136,7 +122,7 @@ export default class App extends PureComponent {
            type={mainForm}
            options={options}
            onChange={this.onChange}
-           value={refer.state.canvassSettings}
+           value={this.state.canvassSettings}
           />
         </TouchableWithoutFeedback>
 

@@ -190,6 +190,11 @@ export default class App extends OVComponent {
   showConfirmAddress() {
     const { myPosition } = this.state;
 
+    if (this.state.canvassSettings.filter_pins) {
+      Alert.alert('Active Filter', 'You cannot add a new address while a filter is active.', [{text: 'OK'}], { cancelable: false });
+      return;
+    }
+
     if (this.state.netInfo === 'none') {
       this.setState({ isModalVisible: true });
       return;
@@ -733,7 +738,7 @@ export default class App extends OVComponent {
           }
 
           <TouchableOpacity style={styles.iconContainer}
-            onPress={() => {navigate("CanvassingSettingsPage", {refer: this})}}>
+            onPress={() => {navigate("CanvassingSettingsPage", {refer: this, form: form})}}>
             <Icon
               name="cog"
               size={50}
