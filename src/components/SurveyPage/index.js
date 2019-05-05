@@ -15,6 +15,7 @@ import {
 
 import { getEpoch, getPropFromArrObj } from '../../common';
 
+import {BackHandler} from 'react-native';
 import storage from 'react-native-storage-wrapper';
 import t from 'tcomb-form-native';
 import sha1 from 'sha1';
@@ -87,6 +88,14 @@ export default class App extends PureComponent {
       }
     };
 
+  }
+
+  componentDidMount() {
+    BackHandler.addEventListener('hardwareBackPress', this.props.navigation.goBack);
+  }
+
+  componentWillUnmount() {
+    BackHandler.removeEventListener('hardwareBackPress', this.props.navigation.goBack);
   }
 
   onChange(value) {

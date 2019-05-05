@@ -13,6 +13,7 @@ import {
   ScrollView,
 } from 'react-native';
 
+import {BackHandler} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import DeviceInfo from 'react-native-device-info';
 import Modal from 'react-native-simple-modal';
@@ -48,6 +49,14 @@ export default class App extends PureComponent {
       setTimeout(() => this.forceUpdate(), 500);
       this.goBack();
     };
+  }
+
+  componentDidMount() {
+    BackHandler.addEventListener('hardwareBackPress', this.props.navigation.goBack);
+  }
+
+  componentWillUnmount() {
+    BackHandler.removeEventListener('hardwareBackPress', this.props.navigation.goBack);
   }
 
   onChange(canvassSettings) {
