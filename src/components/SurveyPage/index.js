@@ -165,6 +165,10 @@ export default class App extends PureComponent {
       newStruct[a.id] = value;
       newOptions.fields[a.id] = { label: a.label };
       if (mode) newOptions.fields[a.id].mode = mode;
+      if (a.readonly) {
+        newOptions.fields[a.id].disabled = true;
+        newOptions.fields[a.id].editable = false;
+      }
       if (boxflag === true) {
         newOptions.fields[a.id].multiline = true;
         newOptions.fields[a.id].stylesheet = {
