@@ -26,7 +26,7 @@
 		"react-native-google-places": "^3.0.0-beta.11",
 		"react-native-maps": "^0.20.1",
 		"react-native-maps-super-cluster": "^1.5.0",
-		"react-native-modal-selector": "0.0.27",
+		"react-native-modal-selector": "^1.0.3",
 		"react-native-permissions": "^1.1.1",
 		"react-native-safari-view": "^2.1.0",
 		"react-native-simple-modal": "^9.0.1",
