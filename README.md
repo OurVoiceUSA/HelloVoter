@@ -4,7 +4,7 @@ Our Voice USA is a 501(c)(3) non-profit, non-partisian organization for civic ed
 
 ## Features
 
-This is in development, and will be the API backend to the HelloVoter canvass functions for large operations. The current production mobile app uses Dropbox for data sharing and storage.
+This is the API backend to the HelloVoter canvass functions for large operations. Select the "Connect to Server" canvassing mode and enter the address you deploy this API to.
 
 ## Setup
 
