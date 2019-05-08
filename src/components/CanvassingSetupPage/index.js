@@ -354,11 +354,6 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
       }
     }
 
-    if (!user.dropbox && forms_local === null) {
-      // gendate a sample form for them
-      let id = sha1(new Date().getTime());
-    }
-
     for (let i in forms_local) {
       let json = forms_local[i];
       if (json === null) continue;
@@ -377,6 +372,29 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
       if (json.backend === "server") {
         icon = "cloud-upload";
         size = 25;
+
+        // atempt to re-pull the form to see if it's changed
+        try {
+          let jwt = await storage.get('OV_JWT');
+          let res = await fetch('https://'+json.server+API_BASE_URI+'/form/get?formId='+json.id, {
+            headers: {
+              'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
+              'Content-Type': 'application/json',
+            },
+          });
+
+          // don't store a form error
+          if (res.status === 200) {
+            let server = json.server;
+            json = await res.json();
+            json.server = server;
+            json.backend = 'server';
+          }
+
+          // TODO: if status === 403 remove it
+        } catch (e) {
+          console.warn(""+e);
+        }
       }
 
       let swipeoutBtns = [
