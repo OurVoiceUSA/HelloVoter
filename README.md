@@ -63,6 +63,14 @@ Finally, setup to run the server and connect to the database:
     npm install
     npm start
 
+Now you can navigate to the web UI which is published here: https://apps.ourvoiceusa.org/HelloVoterHQ/
+
+Enter the domain name or public IP address of your server and and click one of the sign-in options.
+
+After you sign in, switch to the neo4j console and make yourself an administrator by running the following query:
+
+    match (v:Volunteer) where v.email = 'YOUR_EMAIL' set v.admin = true;
+
 You should now be all set!
 
 ## Configuration
