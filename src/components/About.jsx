@@ -44,7 +44,7 @@ export default class App extends Component {
         </div>
         <div>
           {this.state.cb_version ? (
-            'volunteer-broker version ' + this.state.cb_version
+            'HelloVoterAPI version ' + this.state.cb_version
           ) : (
             <CircularProgress height={15} />
           )}
