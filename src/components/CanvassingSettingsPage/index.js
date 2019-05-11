@@ -60,6 +60,8 @@ export default class App extends PureComponent {
   }
 
   onChange(canvassSettings) {
+    // if the key changes, remove the filter_val to prevent tcomb from crashing
+    if (canvassSettings.filter_key !== this.state.canvassSettings.filter_key) delete canvassSettings.filter_val;
     this.setState({canvassSettings});
   }
 
@@ -71,15 +73,17 @@ export default class App extends PureComponent {
   }
 
   attrToValues(attr) {
-    let ret = {"TRUE": "TRUE", "FALSE": "FALSE"};
+    let ret = {};
     if (attr.values) {
       attr.values.forEach((a) => ret[a] = a);
+    } else {
+      ret = {"TRUE": "TRUE", "FALSE": "FALSE"};
     }
     return t.enums(ret);
   }
 
   render() {
-    const { refer, form, formOpt, selectedAttribute } = this.state;
+    const { refer, form, selectedAttribute } = this.state;
 
     let formOpt = {
       'filter_pins': t.Boolean,
