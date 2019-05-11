@@ -411,7 +411,7 @@ export default class App extends OVComponent {
     this.setState({fetching: true});
 
     try {
-      let res = await fetch('https://'+this.state.server+API_BASE_URI+'/people/get/byposition?formId='+this.state.form.id+'&longitude='+pos.longitude+'&latitude='+pos.latitude+'&limit=100'+(this.state.canvassSettings.filter_pins?'&filter_key='+this.state.canvassSettings.filter_key+'&filter_val='+this.state.canvassSettings.filter_val:''), {
+      let res = await fetch('https://'+this.state.server+API_BASE_URI+'/people/get/byposition?formId='+this.state.form.id+'&longitude='+pos.longitude+'&latitude='+pos.latitude+'&limit=100'+(this.state.canvassSettings.filter_pins&&this.state.canvassSettings.filter_key?'&filter_key='+this.state.canvassSettings.filter_key+'&filter_val='+this.state.canvassSettings.filter_val:''), {
         method: 'GET',
         headers: {
           'Authorization': 'Bearer '+await _getApiToken(),
