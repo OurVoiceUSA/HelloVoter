@@ -389,9 +389,14 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
             json = await res.json();
             json.server = server;
             json.backend = 'server';
+            forms_local[i] = json;
           }
 
-          // TODO: if status === 403 remove it
+          // user cannot see this form
+          if (res.status === 403) {
+            json = {deleted:true};
+            forms_local[i] = json;
+          }
         } catch (e) {
           console.warn(""+e);
         }
@@ -460,7 +465,8 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
         swipeoutBtns.shift();
       }
 
-      forms.push(
+      if (!json.deleted) {
+        forms.push(
         <View key={i} style={{margin: 5, flexDirection: 'row'}}>
           <Swipeout
             style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20, maxWidth: 350}}
@@ -491,11 +497,18 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
             </TouchableOpacity>
           </Swipeout>
         </View>
-      );
+        );
+      }
     }
 
     // cache forms locally
     try {
+      forms_local = forms_local.filter((f) => {
+        // don't store non-objects
+        if (f === null || typeof f !== "object") return false;
+        // don't store deleted forms
+        return !f.deleted;
+      });
       await storage.set('OV_CANVASS_FORMS', JSON.stringify(forms_local));
     } catch (error) {
     }
