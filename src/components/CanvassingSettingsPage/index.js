@@ -66,22 +66,20 @@ export default class App extends PureComponent {
   valueToEnums(options) {
     let obj = {};
     for (let i in options)
-      obj[options[i]] = options[i];
+      obj[options[i].id] = options[i].label;
     return t.enums(obj);
   }
 
-  attrOptsById(id) {
-    let values = ["TRUE","FALSE"];
-    let attr = {};
-    this.state.form.attributes.forEach(a => {
-      if (a.id === id) attr = a;
-    });
-    if (attr.type === 'string') values = attr.values;
-    return values;
+  attrToValues(attr) {
+    let ret = {"TRUE": "TRUE", "FALSE": "FALSE"};
+    if (attr.values) {
+      attr.values.forEach((a) => ret[a] = a);
+    }
+    return t.enums(ret);
   }
 
   render() {
-    const { refer, form, selectedFilterID } = this.state;
+    const { refer, form, formOpt, selectedAttribute } = this.state;
 
     let formOpt = {
       'filter_pins': t.Boolean,
@@ -89,25 +87,24 @@ export default class App extends PureComponent {
 
     let attrs = [];
 
-    // selectable filter options are booleans, and (TODO:) arrays
+    // selectable filter options are booleans and arrays
     form.attributes.forEach(a => {
       let value;
       if (!a.label) a.label = a.name;
       switch (a.type) {
         case 'boolean': attrs.push(a); break;
-// TODO: switching between boolean and string throws a fatal error, need to figure out why
-//        case 'string': if (a.values) attrs.push(a); break;
+        case 'string': if (a.values) attrs.push(a); break;
         default: break;
       }
-      if (this.state.canvassSettings.filter_key === a.label) this.setState({selectedFilterID: a.id}); 
+      if (this.state.canvassSettings.filter_key === a.id) this.setState({selectedAttribute: a});
     });
 
     if (this.state.canvassSettings.filter_pins) {
       if (attrs.length) {
-        formOpt.filter_key = this.valueToEnums(attrs.map(a => a.label));
+        formOpt.filter_key = this.valueToEnums(attrs);
 
-        if (selectedFilterID) {
-          formOpt.filter_val = this.valueToEnums(this.attrOptsById(selectedFilterID));
+        if (selectedAttribute) {
+          formOpt.filter_val = this.attrToValues(selectedAttribute);
         }
       }
     }
