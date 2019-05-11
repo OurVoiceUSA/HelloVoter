@@ -98,7 +98,18 @@ export default class App extends OVComponent {
     this.connectToServer(json.server);
   }
 
+  checkLocationAccess() {
+    if (!this.state.locationAccess) {
+      Alert.alert('Location Access', 'To connect to a canvassing server, you must enable location access. Check your device settings.', [{text: 'OK'}], { cancelable: false });
+      return false;
+    }
+    return true;
+  }
+
   connectToServer = async(server) => {
+
+    if (!this.checkLocationAccess()) return;
+
     this.setState({serverLoading: true});
 
     let ret = await this.singHello(server);
@@ -757,7 +768,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
                     backgroundColor="#d7d7d7"
                     color="#000000"
                     onPress={async () => {
-                      this.setState({SelectModeScreen: false}, () => setTimeout(() => this.setState({ConnectServerScreen: true}), 500))
+                      if (this.checkLocationAccess()) this.setState({SelectModeScreen: false}, () => setTimeout(() => this.setState({ConnectServerScreen: true}), 500))
                     }}
                     {...iconStyles}>
                     Connect to Server
@@ -790,7 +801,6 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
             <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
               <View style={{backgroundColor: 'white', padding: 20, borderRadius: 40, borderWidth: 10, borderColor: '#d7d7d7'}}>
 
-                {this.state.locationAccess?
                 <View>
                 <Form
                   ref="mainForm"
@@ -815,12 +825,6 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
                 </TouchableOpacity>
                 }
                 </View>
-                :
-                <View style={styles.content}>
-                  <Text>Unable to determine your location.</Text>
-                  <Text>To connect to a canvassing server, you must enable location access. Check your device settings.</Text>
-                </View>
-                }
               </View>
             </View>
           </View>
