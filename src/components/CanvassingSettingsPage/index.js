@@ -40,6 +40,11 @@ export default class App extends PureComponent {
       canvassSettings: props.navigation.state.params.refer.state.canvassSettings,
     };
 
+    // ensure the filter_key exists
+    if (this.state.form.attributes.map((a) => a.id).indexOf(this.state.canvassSettings.filter_key) === -1) {
+      this.state.canvassSettings = {};
+    }
+
     this.onChange = this.onChange.bind(this);
 
     // make goBack() update the settings in the parent
