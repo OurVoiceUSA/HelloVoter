@@ -224,7 +224,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
 
         // if there's more than one form in body.data.forms, don't navigate
         if (forms_server.length === 1) {
-          navigate('Canvassing', {server: server, form: forms_server[0], user: this.state.user});
+          navigate('Canvassing', {server: server, form: forms_server[0], user: this.state.user, refer: this});
         }
         await this._loadForms();
         return {error: false, flag: true};
@@ -480,7 +480,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
                   if (json.backend === "server") {
                     // TODO: set loading state as this can take a few seconds
                     let ret = await this.sayHello(json.server);
-                    if (ret.status === 200) navigate('Canvassing', {server: json.server, form: json, user: user});
+                    if (ret.status === 200) navigate('Canvassing', {server: json.server, form: json, user: user, refer: this});
                     else setTimeout(() => this.setState({SmLoginScreen: true}), 500);
                  } else {
                     navigate('LegacyCanvassing', {dbx: (json.backend === "dropbox" ? dbx : null), form: json, user: user});

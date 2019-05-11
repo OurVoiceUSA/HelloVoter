@@ -68,6 +68,7 @@ export default class App extends OVComponent {
     super(props);
 
     this.state = {
+      refer: props.navigation.state.params.refer,
       server: props.navigation.state.params.server,
       last_fetch: 0,
       loading: false,
@@ -95,6 +96,13 @@ export default class App extends OVComponent {
 
     this.onChange = this.onChange.bind(this);
     this.handleConnectivityChange = this.handleConnectivityChange.bind(this);
+
+    // reload forms on go back
+    this.goBack = this.props.navigation.goBack;
+    this.props.navigation.goBack = () => {
+      this.state.refer._loadForms();
+      this.goBack();
+    };
   }
 
   componentDidMount() {
