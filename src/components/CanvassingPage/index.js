@@ -28,7 +28,6 @@ import MapView, { PROVIDER_GOOGLE } from 'react-native-maps'
 import { API_BASE_URI, _doGeocode, _getApiToken, getEpoch } from '../../common';
 import KnockPage from '../KnockPage';
 import Modal from 'react-native-simple-modal';
-import geolib from 'geolib';
 import md5 from 'md5';
 import TimeAgo from 'javascript-time-ago'
 import en from 'javascript-time-ago/locale/en'
@@ -96,6 +95,7 @@ export default class App extends OVComponent {
     if (this.state.form.add_new) this.add_new = true;
 
     this.onChange = this.onChange.bind(this);
+    this.onRegionChange = this.onRegionChange.bind(this);
     this.handleConnectivityChange = this.handleConnectivityChange.bind(this);
 
     // reload forms on go back
@@ -117,12 +117,11 @@ export default class App extends OVComponent {
   componentDidUpdate(prevProps, prevState) {
     const { lastFetchPosition, myPosition } = this.state;
 
-    if (
-        (!lastFetchPosition.longitude && myPosition.longitude)
-        ||
-        (lastFetchPosition.longitude && myPosition.longitude &&
-        geolib.getDistanceSimple(lastFetchPosition, myPosition) > 50)
-    ) this._dataGet();
+    if (!lastFetchPosition.longitude && myPosition.longitude) this._dataGet();
+  }
+
+  onRegionChange(region) {
+    this._dataGet(region);
   }
 
   setupConnectionListener = async () => {
@@ -401,16 +400,18 @@ export default class App extends OVComponent {
     this.forceUpdate();
   }
 
-  _dataGet = async (flag) => {
+  _dataGet = async (pos) => {
     const { myPosition, fetching } = this.state;
     let ret = {error: false};
+
+    if (!pos) pos = myPosition;
 
     if (fetching) return;
 
     this.setState({fetching: true});
 
     try {
-      let res = await fetch('https://'+this.state.server+API_BASE_URI+'/people/get/byposition?formId='+this.state.form.id+'&longitude='+myPosition.longitude+'&latitude='+myPosition.latitude+'&limit=100'+(this.state.canvassSettings.filter_pins?'&filter_key='+this.state.canvassSettings.filter_key+'&filter_val='+this.state.canvassSettings.filter_val:''), {
+      let res = await fetch('https://'+this.state.server+API_BASE_URI+'/people/get/byposition?formId='+this.state.form.id+'&longitude='+pos.longitude+'&latitude='+pos.latitude+'&limit=100'+(this.state.canvassSettings.filter_pins?'&filter_key='+this.state.canvassSettings.filter_key+'&filter_val='+this.state.canvassSettings.filter_val:''), {
         method: 'GET',
         headers: {
           'Authorization': 'Bearer '+await _getApiToken(),
@@ -425,7 +426,7 @@ export default class App extends OVComponent {
         throw "Sync error";
       }
 
-      this.setState({lastFetchPosition: myPosition, markers: json, last_fetch: getEpoch()});
+      this.setState({lastFetchPosition: pos, markers: json, last_fetch: getEpoch()});
     } catch (e) {
       ret.error = true;
       this.triggerNetworkWarning();
@@ -707,6 +708,7 @@ export default class App extends OVComponent {
           showsUserLocation={true}
           followsUserLocation={false}
           keyboardShouldPersistTaps={true}
+          onRegionChangeComplete={this.onRegionChange}
           {...this.props}>
           {geofence.map((polygon, idx) => <MapView.Polyline key={idx} coordinates={polygon} strokeWidth={2} />)}
           {this.state.markers.map((marker) => {

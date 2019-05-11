@@ -10,7 +10,6 @@
 		"base-64": "^0.1.0",
 		"dropbox": "^4.0.17",
 		"encoding": "^0.1.12",
-		"geolib": "^2.0.24",
 		"javascript-time-ago": "^1.0.35",
 		"jwt-decode": "^2.2.0",
 		"lodash": "^4.17.11",
