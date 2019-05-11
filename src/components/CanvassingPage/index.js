@@ -72,6 +72,7 @@ export default class App extends OVComponent {
       server: props.navigation.state.params.server,
       last_fetch: 0,
       loading: false,
+      fetching: false,
       netInfo: 'none',
       serviceError: null,
       myPosition: {latitude: null, longitude: null},
@@ -401,8 +402,12 @@ export default class App extends OVComponent {
   }
 
   _dataGet = async (flag) => {
-    const { myPosition } = this.state;
+    const { myPosition, fetching } = this.state;
     let ret = {error: false};
+
+    if (fetching) return;
+
+    this.setState({fetching: true});
 
     try {
       let res = await fetch('https://'+this.state.server+API_BASE_URI+'/people/get/byposition?formId='+this.state.form.id+'&longitude='+myPosition.longitude+'&latitude='+myPosition.latitude+'&limit=100'+(this.state.canvassSettings.filter_pins?'&filter_key='+this.state.canvassSettings.filter_key+'&filter_val='+this.state.canvassSettings.filter_val:''), {
@@ -425,6 +430,8 @@ export default class App extends OVComponent {
       ret.error = true;
       this.triggerNetworkWarning();
     }
+
+    this.setState({fetching: false});
 
     return ret;
   }
