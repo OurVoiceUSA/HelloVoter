@@ -51,7 +51,6 @@ export default class App extends PureComponent {
     this.goBack = this.props.navigation.goBack;
     this.props.navigation.goBack = () => {
       this.state.refer._setCanvassSettings(this.state.canvassSettings);
-      setTimeout(() => this.forceUpdate(), 500);
       this.goBack();
     };
   }

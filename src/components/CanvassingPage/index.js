@@ -167,13 +167,12 @@ export default class App extends OVComponent {
   }
 
   _setCanvassSettings = async (canvassSettings) => {
-    const { form } = this.state;
+    const { form, lastFetchPosition } = this.state;
 
     try {
       let str = JSON.stringify(canvassSettings);
       await storage.set(this.state.settingsStorageKey, str);
-      this.setState({canvassSettings});
-      this._dataGet();
+      this.setState({canvassSettings}, () => this._dataGet(lastFetchPosition, true));
     } catch (e) {}
 
   }
@@ -395,7 +394,7 @@ export default class App extends OVComponent {
     this.forceUpdate();
   }
 
-  _dataGet = async (pos) => {
+  _dataGet = async (pos, flag) => {
     const { myPosition, lastFetchPosition, fetching } = this.state;
     let ret = {error: false};
 
@@ -403,7 +402,7 @@ export default class App extends OVComponent {
 
     if (!pos.longitude || !pos.latitude) return;
     if (fetching) return;
-    if (lastFetchPosition.longitude && geolib.getDistanceSimple(lastFetchPosition, pos) < 1000) return;
+    if (!flag && lastFetchPosition.longitude && geolib.getDistanceSimple(lastFetchPosition, pos) < 1000) return;
 
     this.setState({fetching: true});
 
