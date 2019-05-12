@@ -29,6 +29,7 @@ import { API_BASE_URI, _doGeocode, _getApiToken, getEpoch } from '../../common';
 import KnockPage from '../KnockPage';
 import Modal from 'react-native-simple-modal';
 import md5 from 'md5';
+import geolib from 'geolib';
 import TimeAgo from 'javascript-time-ago'
 import en from 'javascript-time-ago/locale/en'
 import t from 'tcomb-form-native';
@@ -112,12 +113,6 @@ export default class App extends OVComponent {
     this.setupConnectionListener();
     this.LoadDisclosure(); //Updates showDisclosure state if the user previously accepted
     this.loadRetryQueue();
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    const { lastFetchPosition, myPosition } = this.state;
-
-    if (!lastFetchPosition.longitude && myPosition.longitude) this._dataGet();
   }
 
   onRegionChange(region) {
@@ -401,12 +396,14 @@ export default class App extends OVComponent {
   }
 
   _dataGet = async (pos) => {
-    const { myPosition, fetching } = this.state;
+    const { myPosition, lastFetchPosition, fetching } = this.state;
     let ret = {error: false};
 
     if (!pos) pos = myPosition;
 
+    if (!pos.longitude || !pos.latitude) return;
     if (fetching) return;
+    if (lastFetchPosition.longitude && geolib.getDistanceSimple(lastFetchPosition, pos) < 1000) return;
 
     this.setState({fetching: true});
 
