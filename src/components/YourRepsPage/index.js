@@ -237,6 +237,13 @@ export default class App extends OVComponent {
 
       <ScrollView style={{flex: 1, backgroundColor: 'white'}} contentContainerStyle={{flexGrow:1}}>
 
+        <View style={{
+            width: Dimensions.get('window').width,
+            height: 1,
+            backgroundColor: 'lightgray'
+          }}
+        />
+
         {myPosition.icon &&
         <View style={{margin: 10}}>
           <TouchableOpacity
