@@ -73,6 +73,14 @@ export class App extends Component {
     });
   }
 
+  onTurfClick = async (props) => {
+    console.log(props);
+    this.setState({
+      infoLocation: props.paths[0],
+      activeTurf: props.name,
+    });
+  }
+
   loadMarkerData = async (mapProps, map) => {
     let longitude, latitude;
 
@@ -119,7 +127,7 @@ export class App extends Component {
 
     this.state.turfs.forEach((c) => {
       if (c.geometry)
-        geojson2polygons(JSON.parse(c.geometry)).forEach((p) => polygons.push(p));
+        geojson2polygons(JSON.parse(c.geometry)).forEach((p) => polygons.push({name: c.name, polygon: p}));
     });
 
     return (
@@ -157,7 +165,9 @@ export class App extends Component {
           {polygons.map((p, idx) => (
             <Polygon
               key={idx}
-              paths={p}
+              paths={p.polygon}
+              name={p.name}
+              onClick={this.onTurfClick}
               strokeColor="#0000FF"
               strokeWeight={5}
               fillColor="#000000"
@@ -167,6 +177,9 @@ export class App extends Component {
             marker={this.state.activeMarker}
             visible={this.state.showingInfoWindow}>
             <ModalMarker place={selectedPlace} />
+          </InfoWindow>
+          <InfoWindow position={this.state.infoLocation} visible={(this.state.activeTurf?true:false)}>
+            <h1>Turf: {this.state.activeTurf}</h1>
           </InfoWindow>
         </Map>
       </RootLoader>
@@ -197,7 +210,6 @@ const ModalPerson = props => {
   let party = '';
 
   attrs.forEach(a => {
-    console.warn(a);
     if (a.name === 'Name') name = a.value;
     if (a.name === 'Party Affiliation') party = a.value;
   });
