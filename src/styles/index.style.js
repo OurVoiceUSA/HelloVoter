@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 export const colors = {
     black: '#1a1917',
     gray: '#888888',
-    background1: 'blue',
+    background1: '#ffffff',
 };
 
 export default StyleSheet.create({
@@ -33,7 +33,7 @@ export default StyleSheet.create({
     title: {
         paddingHorizontal: 30,
         backgroundColor: 'transparent',
-        color: 'rgba(255, 255, 255, 0.9)',
+        color: 'rgba(55, 55, 55, 0.9)',
         fontSize: 20,
         fontWeight: 'bold',
         textAlign: 'center'
@@ -45,7 +45,7 @@ export default StyleSheet.create({
         marginTop: 5,
         paddingHorizontal: 30,
         backgroundColor: 'transparent',
-        color: 'rgba(255, 255, 255, 0.75)',
+        color: 'rgba(55, 55, 55, 0.75)',
         fontSize: 13,
         fontStyle: 'italic',
         textAlign: 'center'
