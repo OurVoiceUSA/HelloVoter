@@ -20,6 +20,7 @@ import {
 
 import OVComponent from '../OVComponent';
 
+import { BottomNavigation } from 'react-native-material-ui';
 import { NavigationActions } from 'react-navigation';
 import storage from 'react-native-storage-wrapper';
 import DeviceInfo from 'react-native-device-info';
@@ -70,6 +71,7 @@ export default class App extends OVComponent {
     this.state = {
       refer: props.navigation.state.params.refer,
       server: props.navigation.state.params.server,
+      active: '',
       last_fetch: 0,
       loading: false,
       fetching: false,
@@ -678,7 +680,9 @@ export default class App extends OVComponent {
     }
 
     return (
-      <View style={styles.container}>
+      <View style={{flex: 1}}>
+
+        <View style={{flex: 1}}></View>
 
         {nomap_content.length &&
           <View>
@@ -725,42 +729,6 @@ export default class App extends OVComponent {
           )})}
         </MapView>
         }
-
-        <View style={styles.buttonContainer}>
-
-          {this.add_new &&
-          <TouchableOpacity style={styles.iconContainer}
-            onPress={() => {this.showConfirmAddress();}}>
-            <Icon
-              name="map-marker"
-              testID="map-marker"
-              size={50}
-              color="#8b4513"
-              {...iconStyles} />
-          </TouchableOpacity>
-          }
-
-          {nomap_content.length == 0 &&
-          <TouchableOpacity style={styles.iconContainer}
-            onPress={() => this.map.animateToCoordinate(myPosition, 1000)}>
-            <Icon
-              name="location-arrow"
-              size={50}
-              color="#0084b4"
-              {...iconStyles} />
-          </TouchableOpacity>
-          }
-
-          <TouchableOpacity style={styles.iconContainer}
-            onPress={() => {navigate("CanvassingSettingsPage", {refer: this, form: form})}}>
-            <Icon
-              name="cog"
-              size={50}
-              color="#808080"
-              {...iconStyles} />
-          </TouchableOpacity>
-
-        </View>
 
         <Modal
           open={this.state.isModalVisible}
@@ -850,6 +818,27 @@ export default class App extends OVComponent {
           <KnockPage refer={this} funcs={this} marker={this.currentMarker} form={form} />
         </Modal>
 
+        <BottomNavigation active={this.state.active} hidden={false} >
+          <BottomNavigation.Action
+            key="map"
+            icon="people"
+            label="New Address"
+            onPress={() => this.showConfirmAddress()}
+          />
+          <BottomNavigation.Action
+            key="center"
+            icon="bookmark"
+            label="Center Map"
+            onPress={() => this.map.animateToCoordinate(myPosition, 1000)}
+          />
+          <BottomNavigation.Action
+            key="settings"
+            icon="settings"
+            label="Settings"
+            onPress={() => {navigate("CanvassingSettingsPage", {refer: this, form: form})}}
+          />
+        </BottomNavigation>
+
       </View>
     );
   }
@@ -868,12 +857,6 @@ const displayNone = {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    backgroundColor: '#FFF',
-  },
   content: {
     flex: 1,
     justifyContent: 'center',
