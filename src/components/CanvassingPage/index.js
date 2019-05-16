@@ -71,7 +71,7 @@ export default class App extends OVComponent {
     this.state = {
       refer: props.navigation.state.params.refer,
       server: props.navigation.state.params.server,
-      active: '',
+      active: 'map',
       last_fetch: 0,
       loading: false,
       fetching: false,
@@ -597,7 +597,7 @@ export default class App extends OVComponent {
     const { navigate } = this.props.navigation;
     const {
       showDisclosure, myPosition, myNodes, locationAccess, serviceError, form, user,
-      loading, region,
+      loading, region, active,
     } = this.state;
 
     if (showDisclosure === "true") {
@@ -682,7 +682,11 @@ export default class App extends OVComponent {
     return (
       <View style={{flex: 1}}>
 
-        <View style={{flex: 1}}></View>
+        <View style={{flex: 1}}>
+        {active==='list'&&
+        <Text>This is the list view</Text>
+        }
+        </View>
 
         {nomap_content.length &&
           <View>
@@ -704,7 +708,7 @@ export default class App extends OVComponent {
             });
           }}
           provider={PROVIDER_GOOGLE}
-          style={styles.map}
+          style={(active==='map'?styles.map:null)}
           showsUserLocation={true}
           followsUserLocation={false}
           keyboardShouldPersistTaps={true}
@@ -728,6 +732,36 @@ export default class App extends OVComponent {
               </MapView.Marker>
           )})}
         </MapView>
+        }
+
+        {active==='map'&&
+        <View style={{flex: 1, alignItems: 'center', justifyContent: 'flex-end'}}>
+        <View style={styles.buttonContainer}>
+
+          {this.add_new &&
+          <TouchableOpacity style={styles.iconContainer}
+            onPress={() => {this.showConfirmAddress();}}>
+            <Icon
+              name="map-marker"
+              testID="map-marker"
+              size={50}
+              color="#8b4513"
+              {...iconStyles} />
+          </TouchableOpacity>
+          }
+
+          {nomap_content.length == 0 &&
+          <TouchableOpacity style={styles.iconContainer}
+            onPress={() => this.map.animateToCoordinate(myPosition, 1000)}>
+            <Icon
+              name="location-arrow"
+              size={50}
+              color="#0084b4"
+              {...iconStyles} />
+          </TouchableOpacity>
+          }
+        </View>
+        </View>
         }
 
         <Modal
@@ -821,15 +855,15 @@ export default class App extends OVComponent {
         <BottomNavigation active={this.state.active} hidden={false} >
           <BottomNavigation.Action
             key="map"
-            icon="people"
-            label="New Address"
-            onPress={() => this.showConfirmAddress()}
+            icon="map"
+            label="Map View"
+            onPress={() => this.setState({active: 'map'})}
           />
           <BottomNavigation.Action
-            key="center"
+            key="list"
             icon="bookmark"
-            label="Center Map"
-            onPress={() => this.map.animateToCoordinate(myPosition, 1000)}
+            label="List View"
+            onPress={() => this.setState({active: 'list'})}
           />
           <BottomNavigation.Action
             key="settings"
