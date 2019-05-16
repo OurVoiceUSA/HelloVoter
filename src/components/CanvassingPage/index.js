@@ -735,7 +735,7 @@ export default class App extends OVComponent {
         }
 
         {active==='map'&&
-        <View style={{flex: 1, alignItems: 'center', justifyContent: 'flex-end'}}>
+        <View style={{alignItems: 'center', justifyContent: 'flex-end'}}>
         <View style={styles.buttonContainer}>
 
           {this.add_new &&
@@ -929,7 +929,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flexDirection: 'row',
-    marginVertical: 20,
+    marginVertical: 5,
     backgroundColor: 'transparent',
   },
 });
