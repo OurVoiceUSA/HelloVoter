@@ -720,7 +720,7 @@ export default class App extends OVComponent {
         <ScrollView style={{flex: 1, backgroundColor: '#FFF'}}>
         {active==='list'&&
           <Accordion
-            activeSections={this.state.activeCity}
+            activeSections={(Object.keys(this.state.listview).length===1?[0]:this.state.activeCity)}
             sections={Object.keys(this.state.listview)}
             renderSectionTitle={() => (<Text></Text>)}
             renderHeader={(city) => (<Text style={{margin: 10}}>{city}</Text>)}
