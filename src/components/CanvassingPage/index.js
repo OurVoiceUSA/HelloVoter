@@ -132,31 +132,6 @@ export default class App extends OVComponent {
     this.loadRetryQueue();
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    const { active, markers } = this.state;
-
-    // organize markers by city / street / person
-    if (prevState.active !== active && active === 'list') {
-      let listview = {};
-      let cities = [];
-      let streets = [];
-
-      // gather unique cities & streets
-      markers.forEach((marker) => {
-        let street = marker.address.street.replace(/\d+ /, '');
-
-        if (!listview[marker.address.city]) listview[marker.address.city] = {};
-        if (!listview[marker.address.city][street]) listview[marker.address.city][street] = [];
-
-        listview[marker.address.city][street].push(marker);
-      });
-
-      Object.keys(listview).forEach((city) => Object.keys(listview[city]).forEach((street) => listview[city][street].sort(bystreet)));
-
-      this.setState({listview});
-    }
-  }
-
   onRegionChange(region) {
     this._dataGet(region);
   }
@@ -459,7 +434,23 @@ export default class App extends OVComponent {
         throw "Sync error";
       }
 
-      this.setState({lastFetchPosition: pos, markers: json, last_fetch: getEpoch()});
+      let listview = {};
+      let cities = [];
+      let streets = [];
+
+      // gather unique cities & streets
+      json.forEach((marker) => {
+        let street = marker.address.street.replace(/\d+ /, '');
+
+        if (!listview[marker.address.city]) listview[marker.address.city] = {};
+        if (!listview[marker.address.city][street]) listview[marker.address.city][street] = [];
+
+        listview[marker.address.city][street].push(marker);
+      });
+
+      Object.keys(listview).forEach((city) => Object.keys(listview[city]).forEach((street) => listview[city][street].sort(bystreet)));
+
+      this.setState({lastFetchPosition: pos, markers: json, listview, last_fetch: getEpoch()});
     } catch (e) {
       ret.error = true;
       this.triggerNetworkWarning();
