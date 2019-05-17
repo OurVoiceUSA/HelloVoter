@@ -20,6 +20,7 @@ import {
 
 import OVComponent from '../OVComponent';
 
+import Accordion from 'react-native-collapsible/Accordion';
 import { BottomNavigation } from 'react-native-material-ui';
 import { NavigationActions } from 'react-navigation';
 import storage from 'react-native-storage-wrapper';
@@ -72,6 +73,8 @@ export default class App extends OVComponent {
       refer: props.navigation.state.params.refer,
       server: props.navigation.state.params.server,
       active: 'map',
+      listview: {},
+      activeSections: [],
       last_fetch: 0,
       loading: false,
       fetching: false,
@@ -115,6 +118,29 @@ export default class App extends OVComponent {
     this.setupConnectionListener();
     this.LoadDisclosure(); //Updates showDisclosure state if the user previously accepted
     this.loadRetryQueue();
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    const { active, markers } = this.state;
+
+    // organize markers by city / street / person
+    if (prevState.active !== active && active === 'list') {
+      let listview = {};
+      let cities = [];
+      let streets = [];
+
+      // gather unique cities & streets
+      markers.forEach((marker) => {
+        let street = marker.address.street.replace(/\d+ /, '');
+
+        if (!listview[marker.address.city]) listview[marker.address.city] = {};
+        if (!listview[marker.address.city][street]) listview[marker.address.city][street] = [];
+
+        listview[marker.address.city][street].push(marker);
+      });
+
+      this.setState({listview});
+    }
   }
 
   onRegionChange(region) {
@@ -177,11 +203,6 @@ export default class App extends OVComponent {
       this.setState({canvassSettings}, () => this._dataGet(lastFetchPosition, true));
     } catch (e) {}
 
-  }
-
-  syncingOk() {
-    if (this.state.netInfo === 'none') return false;
-    return true;
   }
 
   componentWillUnmount() {
@@ -682,11 +703,21 @@ export default class App extends OVComponent {
     return (
       <View style={{flex: 1}}>
 
-        <View style={{flex: 1}}>
+        <ScrollView style={{flex: 1, backgroundColor: '#FFF'}}>
         {active==='list'&&
-        <Text>This is the list view</Text>
+          <Accordion
+            activeSections={this.state.activeSections}
+            sections={Object.keys(this.state.listview)}
+            renderSectionTitle={() => (<Text></Text>)}
+            renderHeader={(city) => (<Text>{city}</Text>)}
+            renderContent={(city) => {
+              if (!this.state.listview[city]) return (<Text>NAHA</Text>);
+              return Object.keys(this.state.listview[city]).map((street) => (<Text>{street}</Text>));
+            }}
+            onChange={(activeSections) => this.setState({activeSections})}
+          />
         }
-        </View>
+        </ScrollView>
 
         {nomap_content.length &&
           <View>
