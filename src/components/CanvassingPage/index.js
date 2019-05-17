@@ -64,6 +64,17 @@ const formOptRow = {
   stylesheet: formStyleRow,
 };
 
+function bystreet(a,b) {
+  let na = parseInt(a.address.street.replace(/(\d+) .*/, '$1'));
+  let nb = parseInt(b.address.street.replace(/(\d+) .*/, '$1'));
+
+  if ( na < nb )
+    return -1;
+  if ( na > nb )
+    return 1;
+  return 0;
+}
+
 export default class App extends OVComponent {
 
   constructor(props) {
@@ -139,6 +150,8 @@ export default class App extends OVComponent {
 
         listview[marker.address.city][street].push(marker);
       });
+
+      Object.keys(listview).forEach((city) => Object.keys(listview[city]).forEach((street) => listview[city][street].sort(bystreet)));
 
       this.setState({listview});
     }
