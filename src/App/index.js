@@ -10,20 +10,16 @@ YellowBox.ignoreWarnings([
 ]);
 
 import HomeScreenPage from '../components/HomeScreenPage';
-import YourRepsPage from '../components/YourRepsPage';
 import PolProfilePage from '../components/PolProfilePage';
 import SettingsPage from '../components/SettingsPage';
-import CanvassingSetupPage from '../components/CanvassingSetupPage';
-import CanvassingSettingsPage from '../components/CanvassingSettingsPage';
 import CanvassingPage from '../components/CanvassingPage';
+import ListMultiUnitPage from '../components/ListMultiUnitPage';
+import SurveyPage from '../components/SurveyPage';
+import CreateSurveyPage from '../components/CreateSurveyPage';
 import LegacyCanvassingPage from '../components/LegacyCanvassingPage';
 import LegacyCanvassingSettingsPage from '../components/LegacyCanvassingSettingsPage';
 import LegacyListMultiUnitPage from '../components/LegacyListMultiUnitPage';
-import ListMultiUnitPage from '../components/ListMultiUnitPage';
-import SurveyPage from '../components/SurveyPage';
 import LegacySurveyPage from '../components/LegacySurveyPage';
-import CreateSurveyPage from '../components/CreateSurveyPage';
-import AboutPage from '../components/AboutPage';
 
 import { StackNavigator } from 'react-navigation';
 
@@ -44,22 +40,29 @@ export default App = StackNavigator({
       title: 'Settings',
     }),
   },
-  CanvassingSetup: {
-    screen: CanvassingSetupPage,
-    navigationOptions: ({navigation}) => ({
-      title: 'Canvassing Setup',
-     }),
-  },
-  CanvassingSettingsPage: {
-    screen: CanvassingSettingsPage,
-    navigationOptions: ({navigation}) => ({
-      title: 'Canvassing Settings',
-     }),
-  },
   Canvassing: {
     screen: CanvassingPage,
     navigationOptions: ({navigation}) => ({
       title: 'Canvassing',
+    }),
+  },
+  ListMultiUnit: {
+    screen: ListMultiUnitPage,
+    navigationOptions: ({navigation}) => ({
+      title: 'Units',
+    }),
+  },
+  Survey: {
+    screen: SurveyPage,
+    navigationOptions: ({navigation}) => ({
+      title: 'Canvassing Form',
+    }),
+  },
+  PolProfile: {
+    screen: PolProfilePage,
+    navigationOptions: ({navigation}) => ({
+      title: 'Politician Profile',
+      headerRight: <SettingsButton nav={navigation} />,
     }),
   },
   LegacyCanvassingSettingsPage: {
@@ -80,18 +83,6 @@ export default App = StackNavigator({
       title: 'Units',
     }),
   },
-  ListMultiUnit: {
-    screen: ListMultiUnitPage,
-    navigationOptions: ({navigation}) => ({
-      title: 'Units',
-    }),
-  },
-  Survey: {
-    screen: SurveyPage,
-    navigationOptions: ({navigation}) => ({
-      title: 'Canvassing Form',
-    }),
-  },
   LegacySurvey: {
     screen: LegacySurveyPage,
     navigationOptions: ({navigation}) => ({
@@ -104,25 +95,4 @@ export default App = StackNavigator({
       title: `${navigation.state.params.title}`,
     }),
    },
-  YourReps: {
-    screen: YourRepsPage,
-    navigationOptions: ({navigation}) => ({
-      title: 'Your Representatives',
-      headerRight: <SettingsButton nav={navigation} />,
-    }),
-  },
-  PolProfile: {
-    screen: PolProfilePage,
-    navigationOptions: ({navigation}) => ({
-      title: 'Politician Profile',
-      headerRight: <SettingsButton nav={navigation} />,
-    }),
-  },
-  About: {
-    screen: AboutPage,
-    navigationOptions: ({navigation}) => ({
-      title: 'About Our Voice',
-      headerRight: <SettingsButton nav={navigation} />,
-    }),
-  },
 });
