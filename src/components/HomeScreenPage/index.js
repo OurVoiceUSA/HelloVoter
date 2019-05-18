@@ -144,8 +144,6 @@ export default class App extends PureComponent {
               scrollEventThrottle={200}
               directionalLockEnabled={true}>
             <View style={styles.exampleContainer}>
-              <Text style={styles.title}>{`Hello, Voter!`}</Text>
-              <Text style={styles.subtitle}>Use this app to Phone Your Reps, Canvass at Zero Cost, and Get Out The Vote</Text>
               <Carousel
                 ref={c => this._sliderRef = c}
                 data={mainMenu}
@@ -178,6 +176,11 @@ export default class App extends PureComponent {
                 tappableDots={!!this._sliderRef}
               />
             </View>
+            <Text style={{marginTop: 0, margin: 15, color: 'dimgray'}}>
+              Our Voice USA, the maker of HelloVoter, is a non-partisan organization registered as a 501(c)(3)
+              non-profit charity. We provide access to tools, resources, and collaboration that
+              enables every day people to be politically engaged. Check us out on social media!
+            </Text>
             <View style={{flexDirection: 'row', justifyContent: 'center', marginBottom: 15}}>
               <Icon name="facebook-official" size={40} color="#3b5998" style={{marginRight: 25}} onPress={this.openFacebook} />
               <Icon name="twitter" size={40} color="#0084b4" style={{marginRight: 25}} onPress={this.openTwitter} />

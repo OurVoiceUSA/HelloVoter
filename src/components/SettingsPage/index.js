@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 
 import { StackActions, NavigationActions } from 'react-navigation'
+import DeviceInfo from 'react-native-device-info';
 import Permissions from 'react-native-permissions';
 import RNGooglePlaces from 'react-native-google-places';
 import ModalPicker from 'react-native-modal-selector';
@@ -159,6 +160,7 @@ export default class App extends PureComponent {
   }
 
   openVote = () => this.openURL('https://www.eac.gov/voters/register-and-vote-in-your-state/');
+  openGitHub = (repo) => this.openURL('https://github.com/OurVoiceUSA/'+(repo?repo:''));
 
   openURL = (url) => {
     return Linking.openURL(url).catch(() => null);
@@ -465,6 +467,34 @@ export default class App extends PureComponent {
             notifications to your device when there is an upcoming caucus
             or election that may be relevant to you.
           </Text>
+        </View>
+
+        <View style={{
+            width: Dimensions.get('window').width,
+            height: 1,
+            backgroundColor: 'lightgray'
+          }}
+        />
+
+        <View style={{flexDirection: 'row', margin: 20}}>
+          <View style={{flex: 1}}>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <Icon style={{marginRight: 10}} name="coffee" size={22} color="black" />
+              <Text style={{fontSize: 20}}>Installed Version:</Text>
+            </View>
+          </View>
+          <View style={{flexDirection: 'row', alignItems: 'center', marginRight: 20}}>
+            <Text style={{marginRight: 7, fontWeight: 'bold'}}>{DeviceInfo.getVersion()}</Text>
+            <Icon name="github" size={30} onPress={() => {this.openGitHub('HelloVoter')}} />
+          </View>
+        </View>
+
+        <View style={{flexDirection: 'row', margin: 20, marginTop: 0}}>
+          <Text>
+            This mobile app is open source! Your code contribution is welcome.
+            Our goal is to update occasionally with new features that help every day
+            people get involved with the political process.
+         </Text>
         </View>
 
         <View style={{
