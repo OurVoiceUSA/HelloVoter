@@ -29,6 +29,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps'
 import { API_BASE_URI, _doGeocode, _getApiToken, getEpoch } from '../../common';
 import KnockPage from '../KnockPage';
+import CanvassingSettingsPage from '../CanvassingSettingsPage';
 import Modal from 'react-native-simple-modal';
 import md5 from 'md5';
 import geolib from 'geolib';
@@ -116,11 +117,20 @@ export default class App extends OVComponent {
     this.onRegionChange = this.onRegionChange.bind(this);
     this.handleConnectivityChange = this.handleConnectivityChange.bind(this);
 
-    // reload forms on go back
+    // confirm exit, and reload forms when they do
     this.goBack = this.props.navigation.goBack;
     this.props.navigation.goBack = () => {
-      this.state.refer._loadForms();
-      this.goBack();
+      Alert.alert(
+        'Exit Canvassing',
+        'Are you sure you wish to exit the canvassing?',
+        [
+          {text: 'Yes', onPress: () => {
+            this.state.refer._loadForms();
+            this.goBack();
+          }},
+          {text: 'No'},
+        ], { cancelable: false }
+      );
     };
   }
 
@@ -192,6 +202,14 @@ export default class App extends OVComponent {
       this.setState({canvassSettings}, () => this._dataGet(lastFetchPosition, true));
     } catch (e) {}
 
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    const { active, canvassSettings } = this.state;
+
+    if (prevState.active === 'settings' && prevState.active !== active) {
+      this._setCanvassSettings(canvassSettings);
+    }
   }
 
   componentWillUnmount() {
@@ -719,6 +737,9 @@ export default class App extends OVComponent {
             onChange={(activeCity) => this.setState({activeCity})}
           />
         }
+        {active==='settings'&&
+          <CanvassingSettingsPage refer={this} form={form} />
+        }
         </ScrollView>
 
         {nomap_content.length &&
@@ -902,7 +923,7 @@ export default class App extends OVComponent {
             key="settings"
             icon="settings"
             label="Settings"
-            onPress={() => {navigate("CanvassingSettingsPage", {refer: this, form: form})}}
+            onPress={() => this.setState({active: 'settings'})}
           />
         </BottomNavigation>
 

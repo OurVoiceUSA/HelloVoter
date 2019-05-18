@@ -13,7 +13,6 @@ import {
   ScrollView,
 } from 'react-native';
 
-import {BackHandler} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import DeviceInfo from 'react-native-device-info';
 import Modal from 'react-native-simple-modal';
@@ -35,38 +34,24 @@ export default class App extends PureComponent {
     super(props);
 
     this.state = {
-      refer: props.navigation.state.params.refer,
-      form: props.navigation.state.params.form,
-      canvassSettings: props.navigation.state.params.refer.state.canvassSettings,
+      refer: props.refer,
+      form: props.form,
     };
 
     // ensure the filter_key exists
-    if (this.state.form.attributes.map((a) => a.id).indexOf(this.state.canvassSettings.filter_key) === -1) {
-      this.state.canvassSettings = {};
+    if (this.state.form.attributes.map((a) => a.id).indexOf(this.state.refer.state.canvassSettings.filter_key) === -1) {
+      this.state.refer.state.canvassSettings = {};
     }
 
     this.onChange = this.onChange.bind(this);
-
-    // make goBack() update the settings in the parent
-    this.goBack = this.props.navigation.goBack;
-    this.props.navigation.goBack = () => {
-      this.state.refer._setCanvassSettings(this.state.canvassSettings);
-      this.goBack();
-    };
-  }
-
-  componentDidMount() {
-    BackHandler.addEventListener('hardwareBackPress', this.props.navigation.goBack);
-  }
-
-  componentWillUnmount() {
-    BackHandler.removeEventListener('hardwareBackPress', this.props.navigation.goBack);
   }
 
   onChange(canvassSettings) {
+    const { refer } = this.state;
     // if the key changes, remove the filter_val to prevent tcomb from crashing
-    if (canvassSettings.filter_key !== this.state.canvassSettings.filter_key) delete canvassSettings.filter_val;
-    this.setState({canvassSettings});
+    if (canvassSettings.filter_key !== refer.state.canvassSettings.filter_key) delete canvassSettings.filter_val;
+    refer.setState({canvassSettings});
+    this.forceUpdate();
   }
 
   valueToEnums(options) {
@@ -87,7 +72,7 @@ export default class App extends PureComponent {
   }
 
   render() {
-    const { refer, form, selectedAttribute } = this.state;
+    const { form, refer, selectedAttribute } = this.state;
 
     let formOpt = {
       'filter_pins': t.Boolean,
@@ -104,10 +89,10 @@ export default class App extends PureComponent {
         case 'string': if (a.values) attrs.push(a); break;
         default: break;
       }
-      if (this.state.canvassSettings.filter_key === a.id) this.setState({selectedAttribute: a});
+      if (refer.state.canvassSettings.filter_key === a.id) this.setState({selectedAttribute: a});
     });
 
-    if (this.state.canvassSettings.filter_pins) {
+    if (refer.state.canvassSettings.filter_pins) {
       if (attrs.length) {
         formOpt.filter_key = this.valueToEnums(attrs);
 
@@ -120,7 +105,7 @@ export default class App extends PureComponent {
     let mainForm = t.struct(formOpt);
 
     return (
-      <ScrollView style={{flex: 1, padding: 15, backgroundColor: 'white'}}>
+      <View style={{flex: 1, padding: 15, backgroundColor: 'white'}}>
 
         <View style={{
             width: Dimensions.get('window').width,
@@ -136,7 +121,7 @@ export default class App extends PureComponent {
            type={mainForm}
            options={options}
            onChange={this.onChange}
-           value={this.state.canvassSettings}
+           value={refer.state.canvassSettings}
           />
         </TouchableWithoutFeedback>
 
@@ -148,7 +133,7 @@ export default class App extends PureComponent {
           }}
         />
 
-      </ScrollView>
+      </View>
     );
   }
 }
