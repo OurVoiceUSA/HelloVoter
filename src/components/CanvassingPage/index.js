@@ -727,12 +727,13 @@ export default class App extends OVComponent {
         <ScrollView style={{flex: 1, backgroundColor: '#FFF'}}>
         {active==='list'&&
           <Accordion
-            activeSections={this.state.activeCity}
+            activeSections={(Object.keys(this.state.listview).length===1?[0]:this.state.activeCity)}
             sections={Object.keys(this.state.listview)}
             renderSectionTitle={() => (<Text></Text>)}
             renderHeader={(city, idx) => (
               <View>
                 <View style={{flex: 1, flexDirection: 'row'}}>
+                  {Object.keys(this.state.listview).length>1&&
                   <Icon
                     style={{margin: 20, marginRight: 10}}
                     size={20}
@@ -740,6 +741,7 @@ export default class App extends OVComponent {
                     backgroundColor="#d7d7d7"
                     color="black"
                   />
+                  }
                   <Text style={{margin: 20, marginLeft: 10}}>{city}</Text>
                 </View>
                 <Divider />
