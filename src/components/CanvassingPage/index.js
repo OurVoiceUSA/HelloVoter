@@ -965,13 +965,13 @@ const ListStreet = props => (
         <View>
           <View style={{flex: 1, flexDirection: 'row'}}>
             <Icon
-              style={{margin: 20, marginRight: 10}}
+              style={{margin: 20, marginRight: 10, marginTop: 0}}
               size={20}
               name={(parseInt(props.refer.state.activeStreet)===idx?"minus-circle":"plus-circle")}
               backgroundColor="#d7d7d7"
               color="black"
             />
-            <Text style={{margin: 20, marginLeft: 10}}>{street} ({props.obj[street].length})</Text>
+            <Text style={{margin: 20, marginLeft: 10, marginTop: 0}}>{street} ({props.obj[street].length})</Text>
           </View>
           <Divider />
         </View>
@@ -981,7 +981,7 @@ const ListStreet = props => (
         let icon = (color === "red" ? "ban" : "home");
 
         return (
-          <View key={idx} style={{padding: 10}}>
+          <View key={idx} style={{padding: 10, paddingTop: 0}}>
             <TouchableOpacity
               style={{flexDirection: 'row', alignItems: 'center'}}
               onPress={() => props.refer.doMarkerPress(marker)}>
