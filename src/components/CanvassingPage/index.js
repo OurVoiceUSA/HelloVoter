@@ -737,6 +737,9 @@ export default class App extends OVComponent {
             onChange={(activeCity) => this.setState({activeCity})}
           />
         }
+        {active==='history'&&
+          <Text>History goes here...</Text>
+        }
         {active==='settings'&&
           <CanvassingSettingsPage refer={this} form={form} />
         }
@@ -918,6 +921,12 @@ export default class App extends OVComponent {
             icon="bookmark"
             label="List View"
             onPress={() => this.setState({active: 'list'})}
+          />
+          <BottomNavigation.Action
+            key="history"
+            icon="today"
+            label="History"
+            onPress={() => this.setState({active: 'history'})}
           />
           <BottomNavigation.Action
             key="settings"
