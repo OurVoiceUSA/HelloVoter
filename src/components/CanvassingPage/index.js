@@ -206,8 +206,12 @@ export default class App extends OVComponent {
   componentDidUpdate(prevProps, prevState) {
     const { active, canvassSettings } = this.state;
 
-    if (prevState.active === 'settings' && prevState.active !== active) {
-      this._setCanvassSettings(canvassSettings);
+    if (prevState.active !== active) {
+      // close any open modals
+      this.setState({isModalVisible: false, isKnockMenuVisible: false});
+
+      // reload filters, etc
+      if (prevState.active === 'settings') this._setCanvassSettings(canvassSettings);
     }
   }
 
