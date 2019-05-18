@@ -971,7 +971,7 @@ const ListStreet = props => (
               backgroundColor="#d7d7d7"
               color="black"
             />
-            <Text style={{margin: 20, marginLeft: 10, marginTop: 0}}>{street} ({props.obj[street].length})</Text>
+            <Text style={{alignSelf: 'center', margin: 20, marginLeft: 10, marginTop: 0}}>{street} ({props.obj[street].length})</Text>
           </View>
           <Divider />
         </View>
