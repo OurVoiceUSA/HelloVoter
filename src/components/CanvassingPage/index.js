@@ -950,7 +950,21 @@ const ListStreet = props => (
       sections={Object.keys(props.obj)}
       renderSectionTitle={() => (<Text></Text>)}
       renderHeader={(street) => (<Text style={{margin: 20}}>{street} ({props.obj[street].length})</Text>)}
-      renderContent={(street) => props.obj[street].map((marker, idx) => (<View key={idx}><Text>{marker.address.street}</Text></View>))}
+      renderContent={(street) => props.obj[street].map((marker, idx) => {
+        let color = props.refer.getPinColor(marker);
+        let icon = (color === "red" ? "ban" : "home");
+
+        return (
+          <View key={idx} style={{padding: 10}}>
+            <TouchableOpacity
+              style={{flexDirection: 'row', alignItems: 'center'}}
+              onPress={() => props.refer.doMarkerPress(marker)}>
+              <Icon name={icon} size={40} color={color} style={{margin: 5}} />
+              <Text>{marker.address.street} - {props.refer.getLastVisit(marker)}</Text>
+            </TouchableOpacity>
+          </View>
+        );
+      })}
       onChange={(activeStreet) => props.refer.setState({activeStreet})}
     />
   </View>
