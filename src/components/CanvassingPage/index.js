@@ -3,7 +3,6 @@ import React, { PureComponent } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  Dimensions,
   StyleSheet,
   NetInfo,
   Text,
@@ -27,7 +26,7 @@ import storage from 'react-native-storage-wrapper';
 import DeviceInfo from 'react-native-device-info';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps'
-import { API_BASE_URI, _doGeocode, _getApiToken, getEpoch } from '../../common';
+import { Divider, API_BASE_URI, _doGeocode, _getApiToken, getEpoch } from '../../common';
 import KnockPage from '../KnockPage';
 import CanvassingSettingsPage from '../CanvassingSettingsPage';
 import Modal from 'react-native-simple-modal';
@@ -732,15 +731,18 @@ export default class App extends OVComponent {
             sections={Object.keys(this.state.listview)}
             renderSectionTitle={() => (<Text></Text>)}
             renderHeader={(city, idx) => (
-              <View style={{flex: 1, flexDirection: 'row'}}>
-                <Icon
-                  style={{margin: 20, marginRight: 10}}
-                  size={20}
-                  name={(parseInt(this.state.activeCity)===idx?"minus-circle":"plus-circle")}
-                  backgroundColor="#d7d7d7"
-                  color="black"
-                />
-                <Text style={{margin: 20, marginLeft: 10}}>{city}</Text>
+              <View>
+                <View style={{flex: 1, flexDirection: 'row'}}>
+                  <Icon
+                    style={{margin: 20, marginRight: 10}}
+                    size={20}
+                    name={(parseInt(this.state.activeCity)===idx?"minus-circle":"plus-circle")}
+                    backgroundColor="#d7d7d7"
+                    color="black"
+                  />
+                  <Text style={{margin: 20, marginLeft: 10}}>{city}</Text>
+                </View>
+                <Divider />
               </View>
             )}
             renderContent={(city) => (<ListStreet obj={this.state.listview[city]} refer={this} />)}
@@ -960,16 +962,19 @@ const ListStreet = props => (
       sections={Object.keys(props.obj)}
       renderSectionTitle={() => (<Text></Text>)}
       renderHeader={(street, idx) => (
-      <View style={{flex: 1, flexDirection: 'row'}}>
-        <Icon
-          style={{margin: 20, marginRight: 10}}
-          size={20}
-          name={(parseInt(props.refer.state.activeStreet)===idx?"minus-circle":"plus-circle")}
-          backgroundColor="#d7d7d7"
-          color="black"
-        />
-        <Text style={{margin: 20, marginLeft: 10}}>{street} ({props.obj[street].length})</Text>
-      </View>
+        <View>
+          <View style={{flex: 1, flexDirection: 'row'}}>
+            <Icon
+              style={{margin: 20, marginRight: 10}}
+              size={20}
+              name={(parseInt(props.refer.state.activeStreet)===idx?"minus-circle":"plus-circle")}
+              backgroundColor="#d7d7d7"
+              color="black"
+            />
+            <Text style={{margin: 20, marginLeft: 10}}>{street} ({props.obj[street].length})</Text>
+          </View>
+          <Divider />
+        </View>
       )}
       renderContent={(street) => props.obj[street].map((marker, idx) => {
         let color = props.refer.getPinColor(marker);
@@ -983,6 +988,7 @@ const ListStreet = props => (
               <Icon name={icon} size={40} color={color} style={{margin: 5}} />
               <Text>{marker.address.street} - {props.refer.getLastVisit(marker)}</Text>
             </TouchableOpacity>
+            <Divider />
           </View>
         );
       })}

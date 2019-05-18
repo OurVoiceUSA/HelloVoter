@@ -1,4 +1,11 @@
 
+import React, { PureComponent } from 'react';
+
+import {
+  Dimensions,
+  View,
+} from 'react-native';
+
 import storage from 'react-native-storage-wrapper';
 import jwt_decode from 'jwt-decode';
 import DeviceInfo from 'react-native-device-info';
@@ -320,3 +327,12 @@ export async function _rmJWT() {
     console.warn(error);
   }
 }
+
+export const Divider = props => (
+  <View style={{
+      width: Dimensions.get('window').width,
+      height: 1,
+      backgroundColor: 'lightgray'
+    }}
+  />
+);

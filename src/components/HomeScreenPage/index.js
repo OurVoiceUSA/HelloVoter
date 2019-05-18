@@ -8,7 +8,6 @@ import CanvassingSetup from '../CanvassingSetupPage/index.js';
 
 import {
   Alert,
-  Dimensions,
   Image,
   TouchableOpacity,
   View,

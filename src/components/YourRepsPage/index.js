@@ -9,7 +9,6 @@ import {
   View,
   FlatList,
   Linking,
-  Dimensions,
   TouchableOpacity,
 } from 'react-native';
 
@@ -20,7 +19,7 @@ import RNGooglePlaces from 'react-native-google-places';
 import Modal from 'react-native-simple-modal';
 import DisplayRep from './display-rep';
 import { wsbase } from '../../config'
-import { _apiCall, _loginPing, _doGeocode, _saveUser, _specificAddress } from '../../common';
+import { Divider, _apiCall, _loginPing, _doGeocode, _saveUser, _specificAddress } from '../../common';
 
 export default class App extends OVComponent {
 
@@ -237,12 +236,7 @@ export default class App extends OVComponent {
 
       <ScrollView style={{flex: 1, backgroundColor: 'white'}} contentContainerStyle={{flexGrow:1}}>
 
-        <View style={{
-            width: Dimensions.get('window').width,
-            height: 1,
-            backgroundColor: 'lightgray'
-          }}
-        />
+        <Divider />
 
         {myPosition.icon &&
         <View style={{margin: 10}}>

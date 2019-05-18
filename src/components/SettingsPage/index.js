@@ -4,7 +4,6 @@ import React, { PureComponent } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  Dimensions,
   Text,
   Linking,
   View,
@@ -26,7 +25,7 @@ import storage from 'react-native-storage-wrapper';
 import SmLoginPage from '../SmLoginPage';
 import { Dropbox } from 'dropbox';
 import { google_api_key } from '../../config';
-import { _getJWT, _loginPing, _rmJWT, _saveUser, _rmUser, _apiCall, _specificAddress } from '../../common';
+import { Divider, _getJWT, _loginPing, _rmJWT, _saveUser, _rmUser, _apiCall, _specificAddress } from '../../common';
 
 const party_data = [
   { key: 0, label: 'Party Affiliation', section: true },
@@ -246,12 +245,7 @@ export default class App extends PureComponent {
         </View>
         }
 
-        <View style={{
-            width: Dimensions.get('window').width,
-            height: 1,
-            backgroundColor: 'lightgray'
-          }}
-        />
+        <Divider />
 
         <View style={{flexDirection: 'row', margin: 20, marginBottom: 10}}>
           <View style={{flex: 1}}>
@@ -333,12 +327,7 @@ export default class App extends PureComponent {
           </Text>
         </View>
 
-        <View style={{
-            width: Dimensions.get('window').width,
-            height: 1,
-            backgroundColor: 'lightgray'
-          }}
-        />
+        <Divider />
 
         <View style={{flexDirection: 'row', margin: 20, marginBottom: 0}}>
           <View style={{flex: 1}}>
@@ -399,12 +388,7 @@ export default class App extends PureComponent {
           </TouchableOpacity>
         </View>
 
-        <View style={{
-            width: Dimensions.get('window').width,
-            height: 1,
-            backgroundColor: 'lightgray'
-          }}
-        />
+        <Divider />
 
         <View style={{flexDirection: 'row', margin: 20, marginBottom: 10}}>
           <View style={{flex: 1}}>
@@ -433,12 +417,7 @@ export default class App extends PureComponent {
           </Text>
         </View>
 
-        <View style={{
-            width: Dimensions.get('window').width,
-            height: 1,
-            backgroundColor: 'lightgray'
-          }}
-        />
+        <Divider />
 
         <View style={{flexDirection: 'row', margin: 20}}>
           <View style={{flex: 1}}>
@@ -469,12 +448,7 @@ export default class App extends PureComponent {
           </Text>
         </View>
 
-        <View style={{
-            width: Dimensions.get('window').width,
-            height: 1,
-            backgroundColor: 'lightgray'
-          }}
-        />
+        <Divider />
 
         <View style={{flexDirection: 'row', margin: 20}}>
           <View style={{flex: 1}}>
@@ -497,12 +471,7 @@ export default class App extends PureComponent {
          </Text>
         </View>
 
-        <View style={{
-            width: Dimensions.get('window').width,
-            height: 1,
-            backgroundColor: 'lightgray'
-          }}
-        />
+        <Divider />
 
         <View style={{flexDirection: 'row', margin: 20}}>
           <View style={{flex: 1}}>

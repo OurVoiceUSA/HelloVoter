@@ -4,7 +4,6 @@ import React, { PureComponent } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  Dimensions,
   Linking,
   Text,
   View,
@@ -24,7 +23,7 @@ import SafariView from 'react-native-safari-view';
 import jwt_decode from 'jwt-decode';
 import SmLoginPage from '../SmLoginPage';
 import { Dropbox } from 'dropbox';
-import { API_BASE_URI, DINFO, _loginPing, _saveUser, _getApiToken, _fileReaderAsync } from '../../common';
+import { Divider, API_BASE_URI, DINFO, _loginPing, _saveUser, _getApiToken, _fileReaderAsync } from '../../common';
 import { wsbase } from '../../config';
 
 import OVComponent from '../OVComponent';
@@ -580,12 +579,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
     return (
       <ScrollView style={{flex: 1, backgroundColor: 'white'}} contentContainerStyle={{flexGrow:1}}>
 
-        <View style={{
-            width: Dimensions.get('window').width,
-            height: 1,
-            backgroundColor: 'lightgray'
-          }}
-        />
+        <Divider />
 
         <View style={{flexDirection: 'row', margin: 20, marginTop: 0}}>
             {loading &&
@@ -602,7 +596,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
         </View>
 
         <View>
-          <View style={{width: Dimensions.get('window').width, height: 1, backgroundColor: 'lightgray'}} />
+          <Divider />
 
           <View style={{margin: 12, alignItems: 'center'}}>
             <Icon.Button
@@ -617,12 +611,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
           {user.dropbox &&
           <View style={{margin: 12, marginTop: 0, alignItems: 'center'}}>
 
-            <View style={{
-                width: Dimensions.get('window').width,
-                height: 1,
-                backgroundColor: 'lightgray'
-              }}
-            />
+            <Divider />
 
             <View style={{margin: 20, alignItems: 'center'}}>
               <Text>You are logged into Dropbox as:</Text>
@@ -662,12 +651,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
 
         </View>
 
-        <View style={{
-            width: Dimensions.get('window').width,
-            height: 1,
-            backgroundColor: 'lightgray'
-          }}
-        />
+        <Divider />
 
         <View style={{margin: 12}}>
           <Text>
@@ -676,12 +660,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
           </Text>
         </View>
 
-        <View style={{
-            width: Dimensions.get('window').width,
-            height: 1,
-            backgroundColor: 'lightgray'
-          }}
-        />
+        <Divider />
 
         <View style={{margin: 12}}>
           <Text>

@@ -10,7 +10,6 @@ import {
   Text,
   View,
   TouchableOpacity,
-  Dimensions,
   findNodeHandle,
 } from 'react-native';
 

@@ -6,7 +6,6 @@ import {
   Text,
   View,
   FlatList,
-  Dimensions,
   TouchableHighlight,
   TouchableOpacity,
 } from 'react-native';
