@@ -770,6 +770,8 @@ export default class App extends OVComponent {
           followsUserLocation={false}
           keyboardShouldPersistTaps={true}
           onRegionChangeComplete={this.onRegionChange}
+          showsIndoors={false}
+          showsTraffic={false}
           {...this.props}>
           {geofence.map((polygon, idx) => <MapView.Polyline key={idx} coordinates={polygon} strokeWidth={2} />)}
           {this.state.markers.map((marker) => {
