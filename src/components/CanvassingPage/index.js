@@ -950,7 +950,7 @@ const ListStreet = props => (
       sections={Object.keys(props.obj)}
       renderSectionTitle={() => (<Text></Text>)}
       renderHeader={(street) => (<Text style={{margin: 20}}>{street} ({props.obj[street].length})</Text>)}
-      renderContent={(street) => props.obj[street].map((marker) => (<Text>{marker.address.street}</Text>))}
+      renderContent={(street) => props.obj[street].map((marker, idx) => (<View key={idx}><Text>{marker.address.street}</Text></View>))}
       onChange={(activeStreet) => props.refer.setState({activeStreet})}
     />
   </View>
