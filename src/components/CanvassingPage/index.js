@@ -949,7 +949,18 @@ const ListStreet = props => (
       activeSections={props.refer.state.activeStreet}
       sections={Object.keys(props.obj)}
       renderSectionTitle={() => (<Text></Text>)}
-      renderHeader={(street) => (<Text style={{margin: 20}}>{street} ({props.obj[street].length})</Text>)}
+      renderHeader={(street, idx) => (
+      <View style={{flex: 1, flexDirection: 'row'}}>
+        <Icon
+          style={{margin: 20, marginRight: 10}}
+          size={20}
+          name={(parseInt(props.refer.state.activeStreet)===idx?"minus-circle":"plus-circle")}
+          backgroundColor="#d7d7d7"
+          color="black"
+        />
+        <Text style={{margin: 20, marginLeft: 10}}>{street} ({props.obj[street].length})</Text>
+      </View>
+      )}
       renderContent={(street) => props.obj[street].map((marker, idx) => {
         let color = props.refer.getPinColor(marker);
         let icon = (color === "red" ? "ban" : "home");
