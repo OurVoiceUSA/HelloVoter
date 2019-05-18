@@ -86,7 +86,7 @@ export default class App extends OVComponent {
       server: props.navigation.state.params.server,
       active: 'map',
       listview: {},
-      activeCity: [],
+      activeCity: [0],
       activeStreet: [],
       last_fetch: 0,
       loading: false,
@@ -725,14 +725,24 @@ export default class App extends OVComponent {
 
     return (
       <View style={{flex: 1}}>
-
         <ScrollView style={{flex: 1, backgroundColor: '#FFF'}}>
         {active==='list'&&
           <Accordion
-            activeSections={(Object.keys(this.state.listview).length===1?[0]:this.state.activeCity)}
+            activeSections={this.state.activeCity}
             sections={Object.keys(this.state.listview)}
             renderSectionTitle={() => (<Text></Text>)}
-            renderHeader={(city) => (<Text style={{margin: 10}}>{city}</Text>)}
+            renderHeader={(city, idx) => (
+              <View style={{flex: 1, flexDirection: 'row'}}>
+                <Icon
+                  style={{margin: 20, marginRight: 10}}
+                  size={20}
+                  name={(parseInt(this.state.activeCity)===idx?"minus-circle":"plus-circle")}
+                  backgroundColor="#d7d7d7"
+                  color="black"
+                />
+                <Text style={{margin: 20, marginLeft: 10}}>{city}</Text>
+              </View>
+            )}
             renderContent={(city) => (<ListStreet obj={this.state.listview[city]} refer={this} />)}
             onChange={(activeCity) => this.setState({activeCity})}
           />
