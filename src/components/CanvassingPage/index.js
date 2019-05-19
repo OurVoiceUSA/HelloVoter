@@ -222,7 +222,7 @@ export default class App extends OVComponent {
     );
   }
 
-  showConfirmAddress() {
+  showConfirmAddress = () => {
     const { myPosition } = this.state;
 
     if (this.state.canvassSettings.filter_pins) {
@@ -354,7 +354,7 @@ export default class App extends OVComponent {
     this.doMarkerPress(marker); 
   }
 
-  doMarkerPress(marker) {
+  doMarkerPress = (marker) => {
     const { navigate } = this.props.navigation;
     const { form } = this.state;
 
@@ -638,6 +638,44 @@ export default class App extends OVComponent {
     return Linking.openURL(url).catch(() => null);
   }
 
+  emptyText = () => (<Text></Text>)
+
+  acstreet = (street) => this.state.listview[street].map((marker, idx) => {
+    let color = this.getPinColor(marker);
+    let icon = (color === "red" ? "ban" : "home");
+
+    return (
+      <View key={idx} style={{padding: 10, paddingTop: 0}}>
+        <TouchableOpacity
+          style={{flexDirection: 'row', alignItems: 'center'}}
+          onPress={() => this.doMarkerPress(marker)}>
+          <Icon name={icon} size={40} color={color} style={{margin: 5}} />
+          <Text>{street} - {this.getLastVisit(marker)}</Text>
+          </TouchableOpacity>
+          <Divider />
+        </View>
+      );
+    }
+  )
+
+  acrh = (street, idx) => (
+    <View>
+      <View style={{flex: 1, flexDirection: 'row'}}>
+        <Icon
+          style={{margin: 20, marginRight: 10, marginTop: 0}}
+          size={20}
+          name={(parseInt(this.state.activeStreet)===idx?"minus-circle":"plus-circle")}
+          backgroundColor="#d7d7d7"
+          color="black"
+        />
+        <Text style={{alignSelf: 'center', margin: 20, marginLeft: 10, marginTop: 0}}>{street} ({this.state.listview[street].length})</Text>
+      </View>
+      <Divider />
+    </View>
+  )
+
+  acoc = (activeStreet) => this.setState({activeStreet})
+
   render() {
     const { navigate } = this.props.navigation;
     const {
@@ -731,39 +769,10 @@ export default class App extends OVComponent {
             <Accordion
               activeSections={this.state.activeStreet}
               sections={Object.keys(this.state.listview)}
-              renderSectionTitle={() => (<Text></Text>)}
-              renderHeader={(street, idx) => (
-              <View>
-                <View style={{flex: 1, flexDirection: 'row'}}>
-                  <Icon
-                    style={{margin: 20, marginRight: 10, marginTop: 0}}
-                    size={20}
-                    name={(parseInt(this.state.activeStreet)===idx?"minus-circle":"plus-circle")}
-                    backgroundColor="#d7d7d7"
-                    color="black"
-                  />
-                  <Text style={{alignSelf: 'center', margin: 20, marginLeft: 10, marginTop: 0}}>{street} ({this.state.listview[street].length})</Text>
-                </View>
-                <Divider />
-              </View>
-            )}
-            renderContent={(street) => this.state.listview[street].map((marker, idx) => {
-              let color = this.getPinColor(marker);
-              let icon = (color === "red" ? "ban" : "home");
-
-              return (
-                <View key={idx} style={{padding: 10, paddingTop: 0}}>
-                  <TouchableOpacity
-                    style={{flexDirection: 'row', alignItems: 'center'}}
-                    onPress={() => this.doMarkerPress(marker)}>
-                    <Icon name={icon} size={40} color={color} style={{margin: 5}} />
-                    <Text>{marker.address.street} - {this.getLastVisit(marker)}</Text>
-                    </TouchableOpacity>
-                    <Divider />
-                  </View>
-                );
-              })}
-              onChange={(activeStreet) => this.setState({activeStreet})}
+              renderSectionTitle={this.emptyText}
+              renderHeader={this.acrh}
+              renderContent={this.acstreet}
+              onChange={this.acoc}
             />
           </View>
         {active==='history'&&
@@ -782,17 +791,12 @@ export default class App extends OVComponent {
         <MapView
           ref={component => this.map = component}
           initialRegion={{latitude: myPosition.latitude, longitude: myPosition.longitude, latitudeDelta: region.latitudeDelta, longitudeDelta: region.longitudeDelta}}
-          onMapReady={() => {
-            let latitudeDelta = region.latitudeDelta;
-            let longitudeDelta = region.longitudeDelta;
-
-            this.map.animateToRegion({
-              latitude: myPosition.latitude,
-              longitude: myPosition.longitude,
-              latitudeDelta: latitudeDelta,
-              longitudeDelta: longitudeDelta,
-            });
-          }}
+          onMapReady={() => this.map.animateToRegion({
+            latitude: myPosition.latitude,
+            longitude: myPosition.longitude,
+            latitudeDelta: region.latitudeDelta,
+            longitudeDelta: region.longitudeDelta,
+          })}
           provider={PROVIDER_GOOGLE}
           style={(active==='map'?styles.map:null)}
           showsUserLocation={true}
@@ -803,8 +807,7 @@ export default class App extends OVComponent {
           showsTraffic={false}
           {...this.props}>
           {geofence.map((polygon, idx) => <MapView.Polyline key={idx} coordinates={polygon} strokeWidth={2} />)}
-          {this.state.markers.map((marker) => {
-            return (
+          {this.state.markers.map((marker) => (
               <MapView.Marker
                 key={marker.address.id}
                 coordinate={{longitude: marker.address.longitude, latitude: marker.address.latitude}}
@@ -818,7 +821,7 @@ export default class App extends OVComponent {
                   </View>
                 </MapView.Callout>
               </MapView.Marker>
-          )})}
+          ))}
         </MapView>
         }
 
@@ -828,7 +831,7 @@ export default class App extends OVComponent {
 
           {this.add_new &&
           <TouchableOpacity style={styles.iconContainer}
-            onPress={() => {this.showConfirmAddress();}}>
+            onPress={this.showConfirmAddress}>
             <Icon
               name="map-marker"
               testID="map-marker"
@@ -890,7 +893,7 @@ export default class App extends OVComponent {
                         backgroundColor: '#d7d7d7', padding: 10, borderRadius: 20, marginLeft: 5,
                         ...(this.state.netInfo === 'none' ? displayNone : {})
                       }}
-                      onPress={() => {this.showConfirmAddress();}}>
+                      onPress={this.showConfirmAddress}>
                       <Text style={{textAlign: 'center'}}>Retry</Text>
                     </TouchableOpacity>
                   </View>
