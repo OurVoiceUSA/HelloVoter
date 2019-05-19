@@ -427,7 +427,7 @@ export default class App extends OVComponent {
   }
 
   _dataGet = async (pos, flag) => {
-    const { myPosition, lastFetchPosition, fetching } = this.state;
+    const { canvassSettings, myPosition, lastFetchPosition, fetching } = this.state;
     let ret = {error: false};
 
     if (!pos) pos = myPosition;
@@ -439,7 +439,7 @@ export default class App extends OVComponent {
     this.setState({fetching: true});
 
     try {
-      let res = await fetch('https://'+this.state.server+API_BASE_URI+'/people/get/byposition?formId='+this.state.form.id+'&longitude='+pos.longitude+'&latitude='+pos.latitude+(this.state.canvassSettings.filter_pins&&this.state.canvassSettings.filter_key?'&filter_key='+this.state.canvassSettings.filter_key+'&filter_val='+this.state.canvassSettings.filter_val:''), {
+      let res = await fetch('https://'+this.state.server+API_BASE_URI+'/people/get/byposition?formId='+this.state.form.id+'&longitude='+pos.longitude+'&latitude='+pos.latitude+'&limit='+(canvassSettings.limit?canvassSettings.limit:100)+(canvassSettings.filter_pins&&canvassSettings.filter_key?'&filter_key='+canvassSettings.filter_key+'&filter_val='+canvassSettings.filter_val:''), {
         method: 'GET',
         headers: {
           'Authorization': 'Bearer '+await _getApiToken(),

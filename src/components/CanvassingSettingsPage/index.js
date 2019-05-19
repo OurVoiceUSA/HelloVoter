@@ -22,6 +22,10 @@ var Form = t.form.Form;
 
 var options = {
   fields: {
+    limit: {
+      label: 'Limit Addresses',
+      help: 'Numbers of addresses that load at a given time. The more that load at once, the slower the app will get.',
+    },
     filter_pins: {
       label: 'Filter Results by attribute value',
       help: 'To help you further target your canvassing, enabling this will make the map only show addresses with people who match your below selected criteria.',
@@ -42,6 +46,9 @@ export default class App extends PureComponent {
     if (this.state.form.attributes.map((a) => a.id).indexOf(this.state.refer.state.canvassSettings.filter_key) === -1) {
       this.state.refer.state.canvassSettings = {};
     }
+
+    let limit = this.state.refer.state.canvassSettings.limit;
+    if (isNaN(parseInt(limit)) || limit === 0) this.state.refer.state.canvassSettings.limit = 100;
 
     this.onChange = this.onChange.bind(this);
   }
@@ -75,6 +82,7 @@ export default class App extends PureComponent {
     const { form, refer, selectedAttribute } = this.state;
 
     let formOpt = {
+      'limit': t.enums({100: '100', 250: '250', 500: '500'}),
       'filter_pins': t.Boolean,
     };
 
