@@ -43,8 +43,9 @@ export default class App extends PureComponent {
     };
 
     // ensure the filter_key exists
-    if (this.state.form.attributes.map((a) => a.id).indexOf(this.state.refer.state.canvassSettings.filter_key) === -1) {
-      this.state.refer.state.canvassSettings = {};
+    if (this.state.refer.state.canvassSettings.filter_key && this.state.form.attributes.map((a) => a.id).indexOf(this.state.refer.state.canvassSettings.filter_key) === -1) {
+      delete this.state.refer.state.canvassSettings.filter_key;
+      delete this.state.refer.state.canvassSettings.filter_val;
     }
 
     this.onChange = this.onChange.bind(this);
@@ -79,7 +80,7 @@ export default class App extends PureComponent {
     const { form, refer, selectedAttribute } = this.state;
 
     let formOpt = {
-      'limit': t.enums({100: '100', 250: '250', 500: '500'}),
+      'limit': t.enums({'100': '100', '250': '250', '500': '500'}),
       'filter_pins': t.Boolean,
     };
 
