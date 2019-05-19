@@ -728,32 +728,32 @@ export default class App extends OVComponent {
     return (
       <View style={{flex: 1}}>
         <ScrollView style={{flex: 1, backgroundColor: '#FFF'}}>
-        {active==='list'&&
-          <Accordion
-            activeSections={(Object.keys(this.state.listview).length===1?[0]:this.state.activeCity)}
-            sections={Object.keys(this.state.listview)}
-            renderSectionTitle={() => (<Text></Text>)}
-            renderHeader={(city, idx) => (
-              <View>
-                <View style={{flex: 1, flexDirection: 'row'}}>
-                  {Object.keys(this.state.listview).length>1&&
-                  <Icon
-                    style={{margin: 20, marginRight: 10}}
-                    size={20}
-                    name={(parseInt(this.state.activeCity)===idx?"minus-circle":"plus-circle")}
-                    backgroundColor="#d7d7d7"
-                    color="black"
-                  />
-                  }
-                  <Text style={{margin: 20, marginLeft: 10}}>{city}</Text>
+          <View style={{...(active==='list'? {} : displayNone)}}>
+            <Accordion
+              activeSections={(Object.keys(this.state.listview).length===1?[0]:this.state.activeCity)}
+              sections={Object.keys(this.state.listview)}
+              renderSectionTitle={() => (<Text></Text>)}
+              renderHeader={(city, idx) => (
+                <View>
+                  <View style={{flex: 1, flexDirection: 'row'}}>
+                    {Object.keys(this.state.listview).length>1&&
+                    <Icon
+                      style={{margin: 20, marginRight: 10}}
+                      size={20}
+                      name={(parseInt(this.state.activeCity)===idx?"minus-circle":"plus-circle")}
+                      backgroundColor="#d7d7d7"
+                      color="black"
+                    />
+                    }
+                    <Text style={{margin: 20, marginLeft: 10}}>{city}</Text>
+                  </View>
+                  <Divider />
                 </View>
-                <Divider />
-              </View>
-            )}
-            renderContent={(city) => (<ListStreet obj={this.state.listview[city]} refer={this} />)}
-            onChange={(activeCity) => this.setState({activeCity})}
-          />
-        }
+              )}
+              renderContent={(city) => (<ListStreet obj={this.state.listview[city]} refer={this} />)}
+              onChange={(activeCity) => this.setState({activeCity})}
+            />
+          </View>
         {active==='history'&&
           <Text>History goes here...</Text>
         }
