@@ -765,16 +765,16 @@ export default class App extends OVComponent {
     return (
       <View style={{flex: 1}}>
         <ScrollView style={{flex: 1, backgroundColor: '#FFF'}}>
-          <View style={{...(active==='list'? {} : displayNone)}}>
-            <Accordion
-              activeSections={this.state.activeStreet}
-              sections={Object.keys(this.state.listview)}
-              renderSectionTitle={this.emptyText}
-              renderHeader={this.acrh}
-              renderContent={this.acstreet}
-              onChange={this.acoc}
-            />
-          </View>
+        {active==='list'&&
+          <Accordion
+            activeSections={this.state.activeStreet}
+            sections={Object.keys(this.state.listview)}
+            renderSectionTitle={this.emptyText}
+            renderHeader={this.acrh}
+            renderContent={this.acstreet}
+            onChange={this.acoc}
+          />
+        }
         {active==='history'&&
           <Text>History goes here...</Text>
         }
