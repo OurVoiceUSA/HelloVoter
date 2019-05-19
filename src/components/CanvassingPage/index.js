@@ -89,6 +89,7 @@ export default class App extends OVComponent {
       activeStreet: [],
       last_fetch: 0,
       loading: false,
+      fetching: false,
       netInfo: 'none',
       serviceError: null,
       myPosition: {latitude: null, longitude: null},
@@ -436,6 +437,8 @@ export default class App extends OVComponent {
 
     if (!pos.longitude || !pos.latitude) return;
 
+    this.setState({fetching: true});
+
     try {
       let res = await fetch('https://'+this.state.server+API_BASE_URI+'/people/get/byposition?formId='+this.state.form.id+'&longitude='+pos.longitude+'&latitude='+pos.latitude+'&limit='+(canvassSettings.limit?canvassSettings.limit:100)+(canvassSettings.filter_pins&&canvassSettings.filter_key?'&filter_key='+canvassSettings.filter_key+'&filter_val='+canvassSettings.filter_val:''), {
         method: 'GET',
@@ -476,6 +479,8 @@ export default class App extends OVComponent {
       ret.error = true;
       this.triggerNetworkWarning();
     }
+
+    this.setState({fetching: false});
 
     return ret;
   }
@@ -680,7 +685,7 @@ export default class App extends OVComponent {
     const { navigate } = this.props.navigation;
     const {
       showDisclosure, myPosition, myNodes, locationAccess, serviceError, form, user,
-      loading, region, active,
+      loading, region, active, fetching
     } = this.state;
 
     if (showDisclosure === "true") {
@@ -829,6 +834,12 @@ export default class App extends OVComponent {
               </MapView.Marker>
           ))}
         </MapView>
+        }
+
+        {fetching&&
+        <View style={{position: 'absolute', right: 0, ...styles.iconContainer}}>
+          <ActivityIndicator size="large" />
+        </View>
         }
 
         {active==='map'&&
