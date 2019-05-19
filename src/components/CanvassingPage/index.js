@@ -84,6 +84,7 @@ export default class App extends OVComponent {
       server: props.navigation.state.params.server,
       active: 'map',
       listview: {},
+      listview_order: [],
       activeCity: [0],
       activeStreet: [],
       last_fetch: 0,
@@ -452,6 +453,7 @@ export default class App extends OVComponent {
       }
 
       let listview = {};
+      let listview_order = [];
       let cities = [];
       let streets = [];
 
@@ -459,14 +461,17 @@ export default class App extends OVComponent {
       json.forEach((marker) => {
         let street = marker.address.street.replace(/\d+ /, '');
 
-        if (!listview[street]) listview[street] = [];
+        if (!listview[street]) {
+          listview[street] = [];
+          listview_order.push(street);
+        }
 
         listview[street].push(marker);
       });
 
       Object.keys(listview).forEach((street) => listview[street].sort(bystreet));
 
-      this.setState({lastFetchPosition: pos, markers: json, listview, last_fetch: getEpoch()});
+      this.setState({lastFetchPosition: pos, markers: json, listview, listview_order, last_fetch: getEpoch()});
     } catch (e) {
       ret.error = true;
       this.triggerNetworkWarning();
@@ -763,7 +768,7 @@ export default class App extends OVComponent {
         {active==='list'&&
           <Accordion
             activeSections={this.state.activeStreet}
-            sections={Object.keys(this.state.listview)}
+            sections={this.state.listview_order}
             renderSectionTitle={this.emptyText}
             renderHeader={this.acrh}
             renderContent={this.acstreet}
