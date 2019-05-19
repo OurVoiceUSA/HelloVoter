@@ -140,14 +140,10 @@ export default class App extends PureComponent {
     const { mainMenu, sliderActiveSlide } = this.state;
 
     return (
-      <SafeAreaView style={styles.safeArea}>
+      <View style={styles.safeArea}>
+        <StatusBar />
         {this.state.active === 'home' &&
           <View style={styles.container}>
-            <StatusBar
-              translucent={true}
-              backgroundColor={'rgba(0, 0, 0, 0)'}
-              barStyle={'light-content'}
-              />
            <ScrollView
               style={styles.scrollview}
               scrollEventThrottle={200}
@@ -228,7 +224,7 @@ export default class App extends PureComponent {
           />
         </BottomNavigation>
 
-      </SafeAreaView>
+      </View>
     );
   }
 }
