@@ -650,7 +650,7 @@ export default class App extends OVComponent {
           style={{flexDirection: 'row', alignItems: 'center'}}
           onPress={() => this.doMarkerPress(marker)}>
           <Icon name={icon} size={40} color={color} style={{margin: 5}} />
-          <Text>{street} - {this.getLastVisit(marker)}</Text>
+          <Text>{marker.address.street} - {this.getLastVisit(marker)}</Text>
           </TouchableOpacity>
           <Divider />
         </View>
