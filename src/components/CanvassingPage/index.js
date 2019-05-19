@@ -30,7 +30,7 @@ import KnockPage from '../KnockPage';
 import CanvassingSettingsPage from '../CanvassingSettingsPage';
 import Modal from 'react-native-simple-modal';
 import md5 from 'md5';
-import geolib from 'geolib';
+import { debounce } from 'throttle-debounce';
 import TimeAgo from 'javascript-time-ago'
 import en from 'javascript-time-ago/locale/en'
 import t from 'tcomb-form-native';
@@ -88,7 +88,6 @@ export default class App extends OVComponent {
       activeStreet: [],
       last_fetch: 0,
       loading: false,
-      fetching: false,
       netInfo: 'none',
       serviceError: null,
       myPosition: {latitude: null, longitude: null},
@@ -114,6 +113,8 @@ export default class App extends OVComponent {
     this.onChange = this.onChange.bind(this);
     this.onRegionChange = this.onRegionChange.bind(this);
     this.handleConnectivityChange = this.handleConnectivityChange.bind(this);
+
+    this._dataGet = debounce(500, this._dataFetch)
 
     // confirm exit, and reload forms when they do
     this.goBack = this.props.navigation.goBack;
@@ -426,17 +427,13 @@ export default class App extends OVComponent {
     this.forceUpdate();
   }
 
-  _dataGet = async (pos, flag) => {
-    const { canvassSettings, myPosition, lastFetchPosition, fetching } = this.state;
+  _dataFetch = async (pos, flag) => {
+    const { canvassSettings, myPosition, lastFetchPosition } = this.state;
     let ret = {error: false};
 
     if (!pos) pos = myPosition;
 
     if (!pos.longitude || !pos.latitude) return;
-    if (fetching) return;
-    if (!flag && lastFetchPosition.longitude && geolib.getDistanceSimple(lastFetchPosition, pos) < 1000) return;
-
-    this.setState({fetching: true});
 
     try {
       let res = await fetch('https://'+this.state.server+API_BASE_URI+'/people/get/byposition?formId='+this.state.form.id+'&longitude='+pos.longitude+'&latitude='+pos.latitude+'&limit='+(canvassSettings.limit?canvassSettings.limit:100)+(canvassSettings.filter_pins&&canvassSettings.filter_key?'&filter_key='+canvassSettings.filter_key+'&filter_val='+canvassSettings.filter_val:''), {
@@ -474,8 +471,6 @@ export default class App extends OVComponent {
       ret.error = true;
       this.triggerNetworkWarning();
     }
-
-    this.setState({fetching: false});
 
     return ret;
   }
