@@ -462,13 +462,12 @@ export default class App extends OVComponent {
       json.forEach((marker) => {
         let street = marker.address.street.replace(/\d+ /, '');
 
-        if (!listview[marker.address.city]) listview[marker.address.city] = {};
-        if (!listview[marker.address.city][street]) listview[marker.address.city][street] = [];
+        if (!listview[street]) listview[street] = [];
 
-        listview[marker.address.city][street].push(marker);
+        listview[street].push(marker);
       });
 
-      Object.keys(listview).forEach((city) => Object.keys(listview[city]).forEach((street) => listview[city][street].sort(bystreet)));
+      Object.keys(listview).forEach((street) => listview[street].sort(bystreet));
 
       this.setState({lastFetchPosition: pos, markers: json, listview, last_fetch: getEpoch()});
     } catch (e) {
@@ -730,28 +729,41 @@ export default class App extends OVComponent {
         <ScrollView style={{flex: 1, backgroundColor: '#FFF'}}>
           <View style={{...(active==='list'? {} : displayNone)}}>
             <Accordion
-              activeSections={(Object.keys(this.state.listview).length===1?[0]:this.state.activeCity)}
+              activeSections={this.state.activeStreet}
               sections={Object.keys(this.state.listview)}
               renderSectionTitle={() => (<Text></Text>)}
-              renderHeader={(city, idx) => (
-                <View>
-                  <View style={{flex: 1, flexDirection: 'row'}}>
-                    {Object.keys(this.state.listview).length>1&&
-                    <Icon
-                      style={{margin: 20, marginRight: 10}}
-                      size={20}
-                      name={(parseInt(this.state.activeCity)===idx?"minus-circle":"plus-circle")}
-                      backgroundColor="#d7d7d7"
-                      color="black"
-                    />
-                    }
-                    <Text style={{margin: 20, marginLeft: 10}}>{city}</Text>
-                  </View>
-                  <Divider />
+              renderHeader={(street, idx) => (
+              <View>
+                <View style={{flex: 1, flexDirection: 'row'}}>
+                  <Icon
+                    style={{margin: 20, marginRight: 10, marginTop: 0}}
+                    size={20}
+                    name={(parseInt(this.state.activeStreet)===idx?"minus-circle":"plus-circle")}
+                    backgroundColor="#d7d7d7"
+                    color="black"
+                  />
+                  <Text style={{alignSelf: 'center', margin: 20, marginLeft: 10, marginTop: 0}}>{street} ({this.state.listview[street].length})</Text>
                 </View>
-              )}
-              renderContent={(city) => (<ListStreet obj={this.state.listview[city]} refer={this} />)}
-              onChange={(activeCity) => this.setState({activeCity})}
+                <Divider />
+              </View>
+            )}
+            renderContent={(street) => this.state.listview[street].map((marker, idx) => {
+              let color = this.getPinColor(marker);
+              let icon = (color === "red" ? "ban" : "home");
+
+              return (
+                <View key={idx} style={{padding: 10, paddingTop: 0}}>
+                  <TouchableOpacity
+                    style={{flexDirection: 'row', alignItems: 'center'}}
+                    onPress={() => this.doMarkerPress(marker)}>
+                    <Icon name={icon} size={40} color={color} style={{margin: 5}} />
+                    <Text>{marker.address.street} - {this.getLastVisit(marker)}</Text>
+                    </TouchableOpacity>
+                    <Divider />
+                  </View>
+                );
+              })}
+              onChange={(activeStreet) => this.setState({activeStreet})}
             />
           </View>
         {active==='history'&&
@@ -959,48 +971,6 @@ export default class App extends OVComponent {
     );
   }
 }
-
-const ListStreet = props => (
-  <View>
-    <Accordion
-      activeSections={props.refer.state.activeStreet}
-      sections={Object.keys(props.obj)}
-      renderSectionTitle={() => (<Text></Text>)}
-      renderHeader={(street, idx) => (
-        <View>
-          <View style={{flex: 1, flexDirection: 'row'}}>
-            <Icon
-              style={{margin: 20, marginRight: 10, marginTop: 0}}
-              size={20}
-              name={(parseInt(props.refer.state.activeStreet)===idx?"minus-circle":"plus-circle")}
-              backgroundColor="#d7d7d7"
-              color="black"
-            />
-            <Text style={{alignSelf: 'center', margin: 20, marginLeft: 10, marginTop: 0}}>{street} ({props.obj[street].length})</Text>
-          </View>
-          <Divider />
-        </View>
-      )}
-      renderContent={(street) => props.obj[street].map((marker, idx) => {
-        let color = props.refer.getPinColor(marker);
-        let icon = (color === "red" ? "ban" : "home");
-
-        return (
-          <View key={idx} style={{padding: 10, paddingTop: 0}}>
-            <TouchableOpacity
-              style={{flexDirection: 'row', alignItems: 'center'}}
-              onPress={() => props.refer.doMarkerPress(marker)}>
-              <Icon name={icon} size={40} color={color} style={{margin: 5}} />
-              <Text>{marker.address.street} - {props.refer.getLastVisit(marker)}</Text>
-            </TouchableOpacity>
-            <Divider />
-          </View>
-        );
-      })}
-      onChange={(activeStreet) => props.refer.setState({activeStreet})}
-    />
-  </View>
-);
 
 const iconStyles = {
   justifyContent: 'center',
