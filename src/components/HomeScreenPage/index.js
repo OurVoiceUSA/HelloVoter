@@ -30,8 +30,6 @@ import { sliderWidth, itemWidth } from '../../styles/SliderEntry.style';
 import SliderEntry from '../SliderEntry';
 import styles, { colors } from '../../styles/index.style';
 
-const SLIDER_FIRST_ITEM = 0;
-
 export default class App extends PureComponent {
 
   constructor(props) {
@@ -85,7 +83,7 @@ export default class App extends PureComponent {
         onPress: () => this.openGitHub(),
       },
     ],
-      sliderActiveSlide: SLIDER_FIRST_ITEM,
+      sliderActiveSlide: 1,
     };
   }
 
@@ -156,7 +154,7 @@ export default class App extends PureComponent {
                 sliderWidth={sliderWidth}
                 itemWidth={itemWidth}
                 hasParallaxImages={true}
-                firstItem={SLIDER_FIRST_ITEM}
+                firstItem={this.state.sliderActiveSlide}
                 inactiveSlideScale={0.94}
                 inactiveSlideOpacity={0.7}
                 containerCustomStyle={styles.slider}
