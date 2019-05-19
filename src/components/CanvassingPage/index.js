@@ -228,10 +228,17 @@ export default class App extends OVComponent {
     );
   }
 
+  addOk = () => {
+    if (this.state.canvassSettings.filter_pins) return false;
+    if (this.state.canvassSettings.filter_visited) return false;
+    return true;
+
+  }
+
   showConfirmAddress = () => {
     const { myPosition } = this.state;
 
-    if (this.state.canvassSettings.filter_pins) {
+    if (!this.addOk()) {
       Alert.alert('Active Filter', 'You cannot add a new address while a filter is active.', [{text: 'OK'}], { cancelable: false });
       return;
     }
@@ -443,7 +450,13 @@ export default class App extends OVComponent {
     this.setState({fetching: true});
 
     try {
-      let res = await fetch('https://'+this.state.server+API_BASE_URI+'/people/get/byposition?formId='+this.state.form.id+'&longitude='+pos.longitude+'&latitude='+pos.latitude+'&limit='+(canvassSettings.limit?canvassSettings.limit:100)+(canvassSettings.filter_pins&&canvassSettings.filter_key?'&filter_key='+canvassSettings.filter_key+'&filter_val='+canvassSettings.filter_val:''), {
+      let res = await fetch(
+        'https://'+this.state.server+API_BASE_URI+'/people/get/byposition?formId='+this.state.form.id+
+        '&longitude='+pos.longitude+'&latitude='+pos.latitude+
+        '&limit='+(canvassSettings.limit?canvassSettings.limit:100)+
+        (canvassSettings.filter_visited?'&filter_visited=home':'')+
+        (canvassSettings.filter_pins&&canvassSettings.filter_key?'&filter_key='+canvassSettings.filter_key+'&filter_val='+canvassSettings.filter_val:''),
+      {
         method: 'GET',
         headers: {
           'Authorization': 'Bearer '+await _getApiToken(),

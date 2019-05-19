@@ -26,6 +26,10 @@ var options = {
       label: 'Limit Addresses',
       help: 'Numbers of addresses that load at a given time. The more that load at once, the slower the app will get.',
     },
+    filter_visited: {
+      label: 'Hide already contacted',
+      help: 'Don\'t show people who have already been visisted by someone for this form.',
+    },
     filter_pins: {
       label: 'Filter Results by attribute value',
       help: 'To help you further target your canvassing, enabling this will make the map only show addresses with people who match your selected criteria below.',
@@ -81,6 +85,7 @@ export default class App extends PureComponent {
 
     let formOpt = {
       'limit': t.enums({'100': '100', '250': '250', '500': '500'}),
+      'filter_visited': t.Boolean,
       'filter_pins': t.Boolean,
     };
 

@@ -83,7 +83,7 @@ export default class App extends PureComponent {
             backgroundColor="#d7d7d7"
             color="#000000"
             onPress={() => {
-              if (refer.state.canvassSettings.filter_pins) {
+              if (!refer.addOk()) {
                 Alert.alert('Active Filter', 'You cannot add a new address while a filter is active.', [{text: 'OK'}], { cancelable: false });
                 return;
               }
