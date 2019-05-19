@@ -1,7 +1,7 @@
 
 import React, { PureComponent } from 'react';
 
-import { Button, BottomNavigation } from 'react-native-material-ui'
+import { BottomNavigation } from 'react-native-material-ui'
 
 import YourReps from '../YourRepsPage/index.js';
 import CanvassingSetup from '../CanvassingSetupPage/index.js';
