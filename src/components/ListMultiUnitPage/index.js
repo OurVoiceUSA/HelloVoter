@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
+import { orderBy } from 'natural-orderby';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import DeviceInfo from 'react-native-device-info';
 import Modal from 'react-native-simple-modal';
@@ -95,7 +96,7 @@ export default class App extends PureComponent {
 
           <FlatList
             scrollEnabled={false}
-            data={marker.units}
+            data={orderBy(marker.units, u => u.name)}
             extraData={this.state}
             keyExtractor={item => item.name}
             renderItem={({item}) => {
