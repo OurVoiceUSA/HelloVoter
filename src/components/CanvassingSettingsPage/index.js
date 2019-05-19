@@ -28,7 +28,7 @@ var options = {
     },
     filter_pins: {
       label: 'Filter Results by attribute value',
-      help: 'To help you further target your canvassing, enabling this will make the map only show addresses with people who match your below selected criteria.',
+      help: 'To help you further target your canvassing, enabling this will make the map only show addresses with people who match your selected criteria below.',
     },
   },
 };
