@@ -766,14 +766,20 @@ export default class App extends OVComponent {
       <View style={{flex: 1}}>
         <ScrollView style={{flex: 1, backgroundColor: '#FFF'}}>
         {active==='list'&&
-          <Accordion
-            activeSections={this.state.activeStreet}
-            sections={this.state.listview_order}
-            renderSectionTitle={this.emptyText}
-            renderHeader={this.acrh}
-            renderContent={this.acstreet}
-            onChange={this.acoc}
-          />
+          <View>
+          {this.state.listview_order.length&&
+            <Accordion
+              activeSections={this.state.activeStreet}
+              sections={this.state.listview_order}
+              renderSectionTitle={this.emptyText}
+              renderHeader={this.acrh}
+              renderContent={this.acstreet}
+              onChange={this.acoc}
+            />
+          ||
+            <Text>No address data for this area. Try widening your view on the map or adjusting your filter settings.</Text>
+          }
+          </View>
         }
         {active==='history'&&
           <Text>History goes here...</Text>
