@@ -30,14 +30,62 @@ import { sliderWidth, itemWidth } from '../../styles/SliderEntry.style';
 import SliderEntry from '../SliderEntry';
 import styles, { colors } from '../../styles/index.style';
 
+const SLIDER_FIRST_ITEM = 0;
+
 export default class App extends PureComponent {
 
   constructor(props) {
     super(props);
     this.state = {
       active: 'home',
-      mainMenu: [],
-      sliderActiveSlide: 0,
+      mainMenu: [
+      {
+        title: 'Contact Your Reps',
+        subtitle: 'Know who represents you! (or doesn\'t) Give \'em a piece of your mind.',
+        illustration: require('../../../img/phone-your-rep.png'),
+        onPress: () => this.setState({active: 'reps'}),
+      },
+      {
+        title: 'Canvass for any cause',
+        subtitle: 'Our zero cost tool enables you to hit the pavement with the latest tech.',
+        illustration: require('../../../img/canvassing.png'),
+        onPress: () => this.setState({active: 'canvassing'}),
+      },
+      {
+        title: 'Coming soon; Phone Banking',
+        subtitle: 'Be kind to your feet and connect to voters from the comfort of your home.',
+        illustration: require('../../../img/phone-banking.png'),
+        onPress: () => this.openDonate(),
+      },
+      {
+        title: 'Donate',
+        subtitle: 'We operate on donations. Keep this app free by making a contribution today.',
+        illustration: require('../../../img/donate.png'),
+        onPress: () => this.openDonate(),
+      },
+      {
+        title: 'Rate this App!',
+        subtitle: 'Feedback helps us make this app better. Share your experience with the world.',
+        illustration: require('../../../img/rate.png'),
+        onPress: () => {
+          let options = {
+            AppleAppID: "1275301651",
+            GooglePackageName: "org.ourvoiceinitiative.ourvoice",
+            preferredAndroidMarket: AndroidMarket.Google,
+            preferInApp: false,
+            openAppStoreIfInAppFails: true,
+          }
+          Rate.rate(options, (success) => {});
+        },
+      },
+      {
+        title: 'Open Source Software',
+        subtitle: 'You can help us out directly! Contribute art, how-to\'s, or write code. The power is yours.',
+        illustration: require('../../../img/open-source.png'),
+        onPress: () => this.openGitHub(),
+      },
+    ],
+      sliderActiveSlide: SLIDER_FIRST_ITEM,
     };
   }
 
@@ -54,44 +102,6 @@ export default class App extends PureComponent {
 
   componentDidMount() {
     this.requestPushPermission();
-
-    // TODO: default to local file but attempt to pull latest from web resource
-    this.setState({mainMenu: [
-      {
-        title: 'Coming soon; Phone Banking',
-        subtitle: 'Be kind to your feet and connect to voters from the comfort of your home.',
-        illustration: 'https://oldfirstucc.org/wp-content/uploads/2018/09/vote.jpg',
-        onPress: () => this.openDonate(),
-      },
-      {
-        title: 'Donate',
-        subtitle: 'We operate on donations. Keep this app free by making a contribution today.',
-        illustration: 'https://i.imgur.com/MABUbpDl.jpg',
-        onPress: () => this.openDonate(),
-      },
-      {
-        title: 'Rate this App!',
-        subtitle: 'Feedback helps us make this app better. Share your experience with the world.',
-        illustration: 'https://i.imgur.com/MABUbpDl.jpg',
-        onPress: () => {
-          let options = {
-            AppleAppID: "1275301651",
-            GooglePackageName: "org.ourvoiceinitiative.ourvoice",
-            preferredAndroidMarket: AndroidMarket.Google,
-            preferInApp: false,
-            openAppStoreIfInAppFails: true,
-          }
-          Rate.rate(options, (success) => {});
-        },
-      },
-      {
-        title: 'Open Source Software',
-        subtitle: 'You can help us out directly! Contribute art, how-to\'s, or write code. The power is yours.',
-        illustration: 'https://i.imgur.com/UPrs1EWl.jpg',
-        onPress: () => this.openGitHub(),
-      },
-    ]
-  });
 
   }
 
@@ -150,7 +160,7 @@ export default class App extends PureComponent {
                 sliderWidth={sliderWidth}
                 itemWidth={itemWidth}
                 hasParallaxImages={true}
-                firstItem={0}
+                firstItem={SLIDER_FIRST_ITEM}
                 inactiveSlideScale={0.94}
                 inactiveSlideOpacity={0.7}
                 containerCustomStyle={styles.slider}
