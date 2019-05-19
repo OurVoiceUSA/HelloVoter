@@ -185,19 +185,22 @@ export default class App extends OVComponent {
       const value = await storage.get(this.state.settingsStorageKey);
       if (value !== null) {
         canvassSettings = JSON.parse(value);
-        this.setState({ canvassSettings });
       }
     } catch (e) {
       console.warn(e);
       return;
     }
 
+    if (!canvassSettings.limit) canvassSettings.limit = '100';
+
+    this.setState({ canvassSettings });
   }
 
   _setCanvassSettings = async (canvassSettings) => {
     const { form, lastFetchPosition } = this.state;
 
     try {
+      if (!canvassSettings.limit) canvassSettings.limit = '100';
       let str = JSON.stringify(canvassSettings);
       await storage.set(this.state.settingsStorageKey, str);
       this.setState({canvassSettings}, () => this._dataGet(lastFetchPosition, true));

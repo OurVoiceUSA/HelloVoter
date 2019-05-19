@@ -47,9 +47,6 @@ export default class App extends PureComponent {
       this.state.refer.state.canvassSettings = {};
     }
 
-    let limit = this.state.refer.state.canvassSettings.limit;
-    if (isNaN(parseInt(limit)) || limit === 0) this.state.refer.state.canvassSettings.limit = 100;
-
     this.onChange = this.onChange.bind(this);
   }
 
