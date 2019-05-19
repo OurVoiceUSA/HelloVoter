@@ -646,8 +646,6 @@ export default class App extends OVComponent {
     return Linking.openURL(url).catch(() => null);
   }
 
-  emptyText = () => (<Text></Text>)
-
   acstreet = (street) => this.state.listview[street].map((marker, idx) => {
     let color = this.getPinColor(marker);
     let icon = (color === "red" ? "ban" : "home");
@@ -670,13 +668,13 @@ export default class App extends OVComponent {
     <View>
       <View style={{flex: 1, flexDirection: 'row'}}>
         <Icon
-          style={{margin: 20, marginRight: 10, marginTop: 0}}
+          style={{margin: 20, marginRight: 10}}
           size={20}
           name={(parseInt(this.state.activeStreet)===idx?"minus-circle":"plus-circle")}
           backgroundColor="#d7d7d7"
           color="black"
         />
-        <Text style={{alignSelf: 'center', margin: 20, marginLeft: 10, marginTop: 0}}>{street} ({this.state.listview[street].length})</Text>
+        <Text style={{alignSelf: 'center', margin: 20, marginLeft: 10}}>{street} ({this.state.listview[street].length})</Text>
       </View>
       <Divider />
     </View>
@@ -779,7 +777,7 @@ export default class App extends OVComponent {
             <Accordion
               activeSections={this.state.activeStreet}
               sections={this.state.listview_order}
-              renderSectionTitle={this.emptyText}
+              renderSectionTitle={() => null}
               renderHeader={this.acrh}
               renderContent={this.acstreet}
               onChange={this.acoc}
