@@ -580,7 +580,7 @@ export default class App extends OVComponent {
 
     try {
       await storage.del('OV_RETRY');
-      await this._dataGet();
+      this._dataGet();
     } catch (e) {
       console.warn(e);
     }
