@@ -662,6 +662,8 @@ export default class App extends OVComponent {
   acstreet = (street) => this.state.listview[street].map((marker, idx) => {
     let color = this.getPinColor(marker);
     let icon = (color === "red" ? "ban" : "home");
+    let num_people = marker.people.length;
+    marker.units.forEach((u) => num_people+=u.people.length);
 
     return (
       <View key={idx} style={{padding: 10, paddingTop: 0}}>
@@ -669,7 +671,7 @@ export default class App extends OVComponent {
           style={{flexDirection: 'row', alignItems: 'center'}}
           onPress={() => this.doMarkerPress(marker)}>
           <Icon name={icon} size={40} color={color} style={{margin: 5}} />
-          <Text>{marker.address.street} - {this.getLastVisit(marker)}</Text>
+          <Text>{marker.address.street} - {this.getLastVisit(marker)} ({num_people})</Text>
           </TouchableOpacity>
           <Divider />
         </View>
