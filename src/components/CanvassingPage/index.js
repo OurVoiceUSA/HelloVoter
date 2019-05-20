@@ -983,13 +983,13 @@ export default class App extends OVComponent {
           />
           <BottomNavigation.Action
             key="list"
-            icon="bookmark"
+            icon="menu"
             label="List View"
             onPress={() => this.setState({active: 'list'})}
           />
           <BottomNavigation.Action
             key="history"
-            icon="today"
+            icon="history"
             label="History"
             onPress={() => this.setState({active: 'history'})}
           />
