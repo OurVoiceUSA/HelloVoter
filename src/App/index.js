@@ -9,6 +9,8 @@ YellowBox.ignoreWarnings([
   'Require cycle:',
 ]);
 
+import Icon from 'react-native-vector-icons/FontAwesome';
+
 import HomeScreenPage from '../components/HomeScreenPage';
 import PolProfilePage from '../components/PolProfilePage';
 import SettingsPage from '../components/SettingsPage';
@@ -44,12 +46,14 @@ export default App = StackNavigator({
     screen: CanvassingPage,
     navigationOptions: ({navigation}) => ({
       title: 'Canvassing',
+      headerLeft: <Icon name="times-circle" size={30} style={{marginLeft: 10, margin: 5}} onPress={() => navigation.goBack()} />
     }),
   },
   ListMultiUnit: {
     screen: ListMultiUnitPage,
     navigationOptions: ({navigation}) => ({
       title: 'Units',
+      headerLeft: null,
     }),
   },
   Survey: {

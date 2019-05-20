@@ -10,6 +10,8 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
+import { BottomNavigation } from 'react-native-material-ui';
+
 import { orderBy } from 'natural-orderby';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import DeviceInfo from 'react-native-device-info';
@@ -73,8 +75,8 @@ export default class App extends PureComponent {
     const marker = refer.getCurrentMarker();
 
     return (
-      <ScrollView style={{flex: 1, backgroundColor: 'white'}} contentContainerStyle={{flexGrow:1}}>
-        <View>
+      <View style={{flex: 1}}>
+        <ScrollView style={{flex: 1, backgroundColor: 'white'}} contentContainerStyle={{flexGrow:1}}>
           <Text style={{fontSize: 20, padding: 10}}>{marker.address.street}, {marker.address.city}</Text>
 
           {refer.add_new &&
@@ -118,7 +120,7 @@ export default class App extends PureComponent {
             }}
           />
 
-        </View>
+        </ScrollView>
 
         <Modal
           open={this.state.isKnockMenuVisible}
@@ -167,7 +169,16 @@ export default class App extends PureComponent {
           </View>
         </Modal>
 
-      </ScrollView>
+        <BottomNavigation active={'done'} hidden={false} >
+          <BottomNavigation.Action
+            key="done"
+            icon="done"
+            label="Go Back"
+            onPress={() => this.props.navigation.goBack()}
+          />
+        </BottomNavigation>
+
+      </View>
      );
    }
 }
