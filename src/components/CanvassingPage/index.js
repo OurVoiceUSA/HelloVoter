@@ -4,6 +4,8 @@ import {
   ActivityIndicator,
   Alert,
   StyleSheet,
+  FlatList,
+  Image,
   NetInfo,
   Text,
   TextInput,
@@ -90,6 +92,9 @@ export default class App extends OVComponent {
       last_fetch: 0,
       loading: false,
       fetching: false,
+      fetchingHistory: false,
+      checkHistory: true,
+      history: [],
       netInfo: 'none',
       serviceError: null,
       myPosition: {latitude: null, longitude: null},
@@ -209,7 +214,7 @@ export default class App extends OVComponent {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const { active, canvassSettings } = this.state;
+    const { active, canvassSettings, checkHistory } = this.state;
 
     if (prevState.active !== active) {
       // close any open modals
@@ -217,6 +222,9 @@ export default class App extends OVComponent {
 
       // reload filters, etc
       if (prevState.active === 'settings') this._setCanvassSettings(canvassSettings);
+
+      // poll history if needed
+      if (active === 'history' && checkHistory) this._pollHistory();
     }
   }
 
@@ -226,6 +234,36 @@ export default class App extends OVComponent {
       'connectionChange',
       this.handleConnectivityChange
     );
+  }
+
+  _pollHistory = async () => {
+
+    this.setState({fetchingHistory: true});
+
+    try {
+      let res = await fetch(
+        'https://'+this.state.server+API_BASE_URI+'/volunteer/visit/history?formId='+this.state.form.id,
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': 'Bearer '+await _getApiToken(),
+          'Content-Type': 'application/json',
+        },
+      });
+
+      let json = await res.json();
+
+      if (res.status !== 200 || json.error === true) {
+        if (json.msg) ret.msg = json.msg;
+        throw "Sync error";
+      }
+
+      this.setState({history: json, checkHistory: false});
+    } catch (e) {
+      this.triggerNetworkWarning();
+    }
+
+    this.setState({fetchingHistory: false});
   }
 
   addOk = () => {
@@ -427,11 +465,6 @@ export default class App extends OVComponent {
     } catch (error) {}
   }
 
-  timeFormat(epoch) {
-    let date = new Date(epoch);
-    return date.toLocaleDateString('en-us')+" "+date.toLocaleTimeString('en-us');
-  }
-
   updateLocalMarker(place, input) {
     // add interaction locally so app updates color
     if (!place.visits) place.visits = [];
@@ -574,6 +607,8 @@ export default class App extends OVComponent {
       if (res.status !== 200) {
         throw "sendData error";
       }
+
+      this.setState({checkHistory: true});
 
     } catch (e) {
       this.triggerNetworkWarning();
@@ -803,7 +838,7 @@ export default class App extends OVComponent {
           </View>
         }
         {active==='history'&&
-          <Text>History goes here...</Text>
+          <History refer={this} loading={this.state.fetchingHistory} data={this.state.history} />
         }
         {active==='settings'&&
           <CanvassingSettingsPage refer={this} form={form} />
@@ -1007,6 +1042,58 @@ export default class App extends OVComponent {
     );
   }
 }
+
+function statusToText(code) {
+  switch (code) {
+    case 0: return 'Not Home';
+    case 1: return 'Home';
+    case 2: return 'Not Interested';
+    case 3: return 'Moved';
+    default: return 'unknown';
+  }
+}
+
+function timeFormat(epoch) {
+  let date = new Date(epoch);
+  return date.toLocaleDateString('en-us')+" "+date.toLocaleTimeString('en-us');
+}
+
+const History = (props) => (
+  <ScrollView>
+    {props.loading&&
+    <ActivityIndicator size="large" />
+    }
+    {!props.loading&&
+    <View style={{padding: 10}}>
+      <Text>{(props.data.length?'Loaded '+props.data.length+' historical actions:':'No history to view')}</Text>
+    </View>
+    }
+    <FlatList
+      scrollEnabled={false}
+      data={props.data}
+      keyExtractor={item => ""+item.datetime}
+      renderItem={({item}) => (
+        <View key={item.datetime}>
+          <Divider />
+          <View style={{marginTop: 10, marginBottom: 10}}>
+            <View style={{flexDirection: 'row'}}>
+              <View style={{width: 100, alignItems: 'center'}}>
+                <Image source={{ uri: item.volunteer.avatar }} style={{height: 50, width: 50, padding: 10, borderRadius: 20}} />
+                <Text>{item.volunteer.name}</Text>
+              </View>
+              <View>
+                <Text>Date: {timeFormat(item.datetime)}</Text>
+                <Text>Address: {item.address.street}</Text>
+                <Text>Status: {statusToText(item.status)}</Text>
+                <Text>Contact: {(item.person?item.person.name:'N/A')}</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      )}
+    />
+  </ScrollView>
+);
 
 const iconStyles = {
   justifyContent: 'center',
