@@ -24,7 +24,7 @@
 		"react-native-device-info": "^1.6.1",
 		"react-native-geocoder": "^0.5.0",
 		"react-native-google-location": "^0.2.0",
-		"react-native-google-places": "^3.0.0-beta.11",
+		"react-native-google-places": "^3.0.5",
 		"react-native-maps": "^0.20.1",
 		"react-native-maps-super-cluster": "^1.5.0",
 		"react-native-material-ui": "^1.30.1",
@@ -33,7 +33,7 @@
 		"react-native-rate": "^1.1.6",
 		"react-native-safari-view": "^2.1.0",
 		"react-native-simple-modal": "^9.0.1",
-		"react-native-snap-carousel": "^3.7.5",
+		"react-native-snap-carousel": "^3.8.0",
 		"react-native-sortable-listview": "^0.2.8",
 		"react-native-storage-wrapper": "0.1.0",
 		"react-native-swipeout": "^2.3.6",
@@ -47,8 +47,8 @@
 	},
 	"devDependencies": {
 		"@babel/cli": "^7.4.4",
-		"@babel/core": "^7.4.4",
-		"@babel/node": "^7.2.2",
+		"@babel/core": "^7.4.5",
+		"@babel/node": "^7.4.5",
 		"react-native-cli": "^2.0.1",
 		"react-test-renderer": "^16.6.3"
 	}
