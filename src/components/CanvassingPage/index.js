@@ -838,7 +838,10 @@ export default class App extends OVComponent {
           </View>
         }
         {active==='history'&&
-          <History refer={this} loading={this.state.fetchingHistory} data={this.state.history} />
+          <History refer={this} loading={this.state.fetchingHistory} data={this.state.history} onPress={(pos) => {
+            this.setState({active: 'map'});
+            this.map.animateToRegion(pos);
+          }} />
         }
         {active==='settings'&&
           <CanvassingSettingsPage refer={this} form={form} />
@@ -1075,7 +1078,11 @@ const History = (props) => (
       renderItem={({item}) => (
         <View key={item.datetime}>
           <Divider />
-          <View style={{marginTop: 10, marginBottom: 10}}>
+          <TouchableOpacity style={{marginTop: 10, marginBottom: 10}}
+            onPress={() => props.onPress({
+              longitude: item.address.position.x,
+              latitude: item.address.position.y,
+            })}>
             <View style={{flexDirection: 'row'}}>
               <View style={{width: 100, alignItems: 'center'}}>
                 <Image source={{ uri: item.volunteer.avatar }} style={{height: 50, width: 50, padding: 10, borderRadius: 20}} />
@@ -1088,7 +1095,7 @@ const History = (props) => (
                 <Text>Contact: {(item.person?item.person.name:'N/A')}</Text>
               </View>
             </View>
-          </View>
+          </TouchableOpacity>
         </View>
       )}
     />
