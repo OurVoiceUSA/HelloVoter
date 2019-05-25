@@ -1,5 +1,10 @@
 import React from 'react';
 
+import {
+  Text,
+  TouchableOpacity,
+} from 'react-native';
+
 import { YellowBox } from 'react-native';
 YellowBox.ignoreWarnings([
   'Warning: isMounted(...) is deprecated',
@@ -32,7 +37,6 @@ export default App = StackNavigator({
     screen: HomeScreenPage,
     navigationOptions: ({navigation}) => ({
       title: 'HelloVoter',
-      headerBackTitle: 'Back',
       headerRight: <SettingsButton nav={navigation} />,
     }),
   },
@@ -40,13 +44,14 @@ export default App = StackNavigator({
     screen: SettingsPage,
     navigationOptions: ({navigation}) => ({
       title: 'Settings',
+      headerLeft: null,
     }),
   },
   Canvassing: {
     screen: CanvassingPage,
     navigationOptions: ({navigation}) => ({
       title: 'Canvassing',
-      headerLeft: <Icon name="times-circle" size={30} style={{marginLeft: 10, margin: 5}} onPress={() => navigation.goBack()} />
+      headerLeft: <GoBack nav={navigation} />
     }),
   },
   ListMultiUnit: {
@@ -60,6 +65,7 @@ export default App = StackNavigator({
     screen: SurveyPage,
     navigationOptions: ({navigation}) => ({
       title: 'Canvassing Form',
+      headerLeft: null,
     }),
   },
   PolProfile: {
@@ -67,36 +73,49 @@ export default App = StackNavigator({
     navigationOptions: ({navigation}) => ({
       title: 'Politician Profile',
       headerRight: <SettingsButton nav={navigation} />,
+      headerLeft: null,
     }),
   },
   LegacyCanvassingSettingsPage: {
     screen: LegacyCanvassingSettingsPage,
     navigationOptions: ({navigation}) => ({
       title: 'Canvassing Settings',
+      headerLeft: null,
      }),
   },
   LegacyCanvassing: {
     screen: LegacyCanvassingPage,
     navigationOptions: ({navigation}) => ({
       title: 'Canvassing',
+      headerLeft: <GoBack nav={navigation} />
     }),
   },
   LegacyListMultiUnit: {
     screen: LegacyListMultiUnitPage,
     navigationOptions: ({navigation}) => ({
       title: 'Units',
+      headerLeft: null,
     }),
   },
   LegacySurvey: {
     screen: LegacySurveyPage,
     navigationOptions: ({navigation}) => ({
       title: 'Canvassing Form',
+      headerLeft: null,
     }),
   },
   CreateSurvey: {
     screen: CreateSurveyPage,
     navigationOptions: ({navigation}) => ({
       title: `${navigation.state.params.title}`,
+      headerLeft: null,
     }),
    },
 });
+
+const GoBack = (props) => (
+  <TouchableOpacity style={{flexDirection: 'row', alignItems: 'center'}} onPress={() => props.nav.goBack()}>
+    <Icon name="times-circle" size={30} style={{marginLeft: 10, margin: 5}} />
+    <Text>Exit</Text>
+  </TouchableOpacity>
+);

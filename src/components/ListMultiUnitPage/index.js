@@ -172,7 +172,7 @@ export default class App extends PureComponent {
         <BottomNavigation active={'done'} hidden={false} >
           <BottomNavigation.Action
             key="done"
-            icon="done"
+            icon="undo"
             label="Go Back"
             onPress={() => this.props.navigation.goBack()}
           />

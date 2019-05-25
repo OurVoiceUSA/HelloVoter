@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react';
 import {
+  Alert,
   Dimensions,
   TouchableOpacity,
   TouchableHighlight,
@@ -13,6 +14,7 @@ import {
 } from 'react-native';
 
 import storage from 'react-native-storage-wrapper';
+import { BottomNavigation } from 'react-native-material-ui';
 import t from 'tcomb-form-native';
 import sha1 from 'sha1';
 
@@ -43,6 +45,29 @@ export default class App extends PureComponent {
     };
 
     this.doSave = this.doSave.bind(this);
+    this.onChange = this.onChange.bind(this);
+
+    this.edits = false;
+    this.goBack = this.props.navigation.goBack;
+    this.props.navigation.goBack = () => {
+      if (this.edits) {
+        Alert.alert(
+          'Unsaved Form',
+          'You have unsaved edits. Do you want to save your changes?',
+          [
+            {text: 'Discard Changes', onPress: () => { this.goBack();
+            }},
+            {text: 'Keep Editing'},
+          ], { cancelable: false }
+        );
+      } else {
+        this.goBack();
+      }
+    };
+  }
+
+  onChange(value) {
+    this.edits = true;
   }
 
   doSave = async () => {
@@ -62,7 +87,7 @@ export default class App extends PureComponent {
 
     funcs.updateMarkers();
     refer.forceUpdate();
-    this.props.navigation.goBack();
+    this.goBack();
   }
 
   valueToEnums(options) {
@@ -120,6 +145,7 @@ export default class App extends PureComponent {
     options = newOptions;
 
     return (
+    <View style={{flex: 1}}>
       <ScrollView style={{flex: 1, backgroundColor: 'white'}}>
 
         <View style={styles.container}>
@@ -135,17 +161,28 @@ export default class App extends PureComponent {
               type={CanvassForm}
               options={options}
               value={this.state.info}
+              onChange={this.onChange}
             />
           </TouchableWithoutFeedback>
         </View>
 
-        <TouchableHighlight style={styles.button} onPress={this.doSave} underlayColor='#99d9f4'>
-          <Text style={styles.buttonText}>Save</Text>
-        </TouchableHighlight>
-
-        <View style={{width: Dimensions.get('window').width, height: 1, marginBottom: 250}} />
-
       </ScrollView>
+
+      <BottomNavigation active={'done'} hidden={false} >
+        <BottomNavigation.Action
+          key="undo"
+          icon="undo"
+          label="Go Back"
+          onPress={() => this.props.navigation.goBack()}
+        />
+        <BottomNavigation.Action
+          key="done"
+          icon="done"
+          label="Save Changes"
+          onPress={this.doSave}
+        />
+      </BottomNavigation>
+    </View>
     );
   }
 }

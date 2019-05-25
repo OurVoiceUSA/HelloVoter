@@ -14,13 +14,13 @@ import {
   TouchableHighlight,
   TouchableOpacity,
   TouchableWithoutFeedback,
-  Platform,
   Keyboard,
 } from 'react-native';
 
 import OVComponent from '../OVComponent';
 
 import { NavigationActions } from 'react-navigation';
+import { BottomNavigation } from 'react-native-material-ui';
 import { Dropbox } from 'dropbox';
 import DeviceInfo from 'react-native-device-info';
 import storage from 'react-native-storage-wrapper';
@@ -111,6 +111,19 @@ export default class App extends OVComponent {
 
     this.onChange = this.onChange.bind(this);
     this.handleConnectivityChange = this.handleConnectivityChange.bind(this);
+
+    // confirm exit, and reload forms when they do
+    this.goBack = this.props.navigation.goBack;
+    this.props.navigation.goBack = () => {
+      Alert.alert(
+        'Exit Canvassing',
+        'Are you sure you wish to exit the canvassing?',
+        [
+          {text: 'Yes', onPress: () => this.goBack()},
+          {text: 'No'},
+        ], { cancelable: false }
+      );
+    };
   }
 
   componentDidMount() {
@@ -1143,7 +1156,9 @@ export default class App extends OVComponent {
     }
 
     return (
-      <View style={styles.container}>
+      <View style={{flex: 1}}>
+
+        <View style={{flex: 1}}></View>
 
         {nomap_content.length &&
           <View>
@@ -1191,6 +1206,7 @@ export default class App extends OVComponent {
         </MapView>
         }
 
+        <View style={{alignItems: 'center', justifyContent: 'flex-end'}}>
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.iconContainer}
             onPress={() => {this.showConfirmAddress();}}>
@@ -1212,49 +1228,13 @@ export default class App extends OVComponent {
               {...iconStyles} />
           </TouchableOpacity>
           }
-
-          {this._syncable() &&
-          <View>
-            {this.state.syncRunning &&
-            <View style={styles.iconContainer}>
-              <ActivityIndicator size="large" />
-            </View>
-            ||
-            <TouchableOpacity style={styles.iconContainer}
-              onPress={() => {
-                if (this.state.netInfo === 'none') {
-                  Alert.alert('Sync failed.', 'You are not connected to the internet.', [{text: 'OK'}], { cancelable: false });
-                } else if (!this.syncingOk()) {
-                  Alert.alert('Sync failed.', 'You are not connected to wifi. To sync over your cellular connection, enable \'Sync over cellular\' in settings.', [{text: 'OK'}], { cancelable: false });
-                } else {
-                  this._syncNodes(true);
-                }
-              }}>
-              <Icon
-                name="refresh"
-                size={50}
-                color={(this.syncingOk() ? "#00a86b" : "#d3d3d3")}
-                {...iconStyles} />
-            </TouchableOpacity>
-            }
-          </View>
-          }
-
-          <TouchableOpacity style={styles.iconContainer}
-            onPress={() => {navigate("LegacyCanvassingSettingsPage", {refer: this})}}>
-            <Icon
-              name="cog"
-              size={50}
-              color="#808080"
-              {...iconStyles} />
-          </TouchableOpacity>
-
+        </View>
         </View>
 
         <Modal
           open={this.state.isModalVisible}
           modalStyle={{width: 350, height: 400, backgroundColor: "transparent",
-            position: 'absolute', top: (Platform.OS === 'android'?0:100), left: 0, right: 0, bottom: 0}}
+            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
           style={{alignItems: 'center'}}
           offset={0}
           overlayBackground={'rgba(0, 0, 0, 0.75)'}
@@ -1326,7 +1306,7 @@ export default class App extends OVComponent {
         <Modal
           open={this.state.isKnockMenuVisible}
           modalStyle={{width: 335, height: 350, backgroundColor: "transparent",
-            position: 'absolute', top: (Platform.OS === 'android'?0:100), left: 0, right: 0, bottom: 0}}
+            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
           style={{alignItems: 'center'}}
           offset={0}
           overlayBackground={'rgba(0, 0, 0, 0.75)'}
@@ -1338,6 +1318,36 @@ export default class App extends OVComponent {
           disableOnBackPress={false}>
           <LegacyKnockPage refer={this} funcs={this} />
         </Modal>
+
+        <BottomNavigation active={(this.state.syncRunning?'sync':'none')} hidden={false} >
+          {this._syncable()&&
+          <BottomNavigation.Action
+            key="sync"
+            icon={(this.state.syncRunning?'more-vert':'refresh')}
+            label={(this.state.syncRunning?'Syncing...':'Sync Data')}
+            onPress={() => {
+              if (this.state.netInfo === 'none') {
+                Alert.alert('Sync failed.', 'You are not connected to the internet.', [{text: 'OK'}], { cancelable: false });
+              } else if (!this.syncingOk()) {                                                                                                                            Alert.alert('Sync failed.', 'You are not connected to wifi. To sync over your cellular connection, enable \'Sync over cellular\' in settings.', [{text: 'OK'}], { cancelable: false });
+              } else {
+                this._syncNodes(true);
+              }
+            }}
+          />
+          ||
+          <BottomNavigation.Action
+            key="none"
+            icon="map"
+            label="Map View"
+          />
+          }
+          <BottomNavigation.Action
+            key="settings"
+            icon="settings"
+            label="Settings"
+            onPress={() => navigate("LegacyCanvassingSettingsPage", {refer: this})}
+          />
+        </BottomNavigation>
 
       </View>
     );
@@ -1411,7 +1421,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flexDirection: 'row',
-    marginVertical: 20,
+    marginVertical: 5,
     backgroundColor: 'transparent',
   },
 });

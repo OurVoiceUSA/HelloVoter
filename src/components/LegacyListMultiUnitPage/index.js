@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 
 import sha1 from 'sha1';
+import { BottomNavigation } from 'react-native-material-ui';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Modal from 'react-native-simple-modal';
 import LegacyKnockPage from '../LegacyKnockPage';
@@ -65,6 +66,7 @@ export default class App extends PureComponent {
     let childNodes = refer.getChildNodesByIdTypes(this.state.node.id, ["unit"]).sort(refer.dynamicSort("unit"));
 
     return (
+    <View style={{flex: 1}}>
       <ScrollView style={{flex: 1, backgroundColor: 'white'}} contentContainerStyle={{flexGrow:1}}>
         <View>
           <Text style={{fontSize: 20, padding: 10}}>{this.state.node.address.join(", ")}</Text>
@@ -170,6 +172,16 @@ export default class App extends PureComponent {
         </Modal>
 
       </ScrollView>
+
+      <BottomNavigation active={'done'} hidden={false} >
+        <BottomNavigation.Action
+          key="done"
+          icon="undo"
+          label="Go Back"
+          onPress={() => this.props.navigation.goBack()}
+        />
+      </BottomNavigation>
+     </View>
      );
    }
 }

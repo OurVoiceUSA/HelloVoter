@@ -14,7 +14,8 @@ import {
   TouchableWithoutFeedback,
 } from 'react-native';
 
-import { StackActions, NavigationActions } from 'react-navigation'
+import { StackActions, NavigationActions } from 'react-navigation';
+import { BottomNavigation } from 'react-native-material-ui';
 import DeviceInfo from 'react-native-device-info';
 import Permissions from 'react-native-permissions';
 import RNGooglePlaces from 'react-native-google-places';
@@ -179,6 +180,7 @@ export default class App extends PureComponent {
       );
 
     return (
+    <View style={{flex: 1}}>
       <ScrollView style={{flex: 1, backgroundColor: 'white'}} contentContainerStyle={{flexGrow:1}}>
 
         <View style={{flexDirection: 'row', margin: 20, marginBottom: 10}}>
@@ -535,6 +537,17 @@ export default class App extends PureComponent {
         </Modal>
 
       </ScrollView>
+
+      <BottomNavigation active={'done'} hidden={false} >
+        <BottomNavigation.Action
+          key="done"
+          icon="undo"
+          label="Go Back"
+          onPress={() => this.props.navigation.goBack()}
+        />
+      </BottomNavigation>
+
+    </View>
     );
   }
 

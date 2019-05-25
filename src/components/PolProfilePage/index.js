@@ -12,6 +12,7 @@ import {
   Image,
 } from 'react-native';
 
+import { BottomNavigation } from 'react-native-material-ui';
 import Modal from 'react-native-simple-modal';
 import SmLoginPage from '../SmLoginPage';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -195,6 +196,7 @@ export default class App extends PureComponent {
     }
 
     return (
+    <View style={{flex: 1}}>
       <ScrollView style={{flex: 1, backgroundColor: 'white'}} contentContainerStyle={{flexGrow:1}}>
 
         <View style={{flexDirection: 'row', alignItems: 'flex-start', margin: 10, marginBottom: 0}}>
@@ -325,6 +327,16 @@ export default class App extends PureComponent {
 
       </ScrollView>
 
+      <BottomNavigation active={'done'} hidden={false} >
+        <BottomNavigation.Action
+          key="done"
+          icon="undo"
+          label="Go Back"
+          onPress={() => this.props.navigation.goBack()}
+        />
+      </BottomNavigation>
+
+    </View>
     );
   }
 

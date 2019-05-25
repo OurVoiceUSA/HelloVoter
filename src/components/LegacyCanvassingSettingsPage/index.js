@@ -13,6 +13,7 @@ import {
   ScrollView,
 } from 'react-native';
 
+import { BottomNavigation } from 'react-native-material-ui';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import DropboxSharePage from '../DropboxSharePage';
 import DeviceInfo from 'react-native-device-info';
@@ -124,6 +125,7 @@ export default class App extends PureComponent {
     let mainForm = t.struct(formOpt);
 
     return (
+    <View style={{flex: 1}}>
       <ScrollView style={{flex: 1, padding: 15, backgroundColor: 'white'}}>
 
         <View style={{flex: 1, alignItems: 'flex-end'}}>
@@ -221,6 +223,16 @@ export default class App extends PureComponent {
         </Modal>
 
       </ScrollView>
+
+      <BottomNavigation active={'done'} hidden={false} >
+        <BottomNavigation.Action
+          key="done"
+          icon="undo"
+          label="Go Back"
+          onPress={() => this.props.navigation.goBack()}
+        />
+      </BottomNavigation>
+    </View>
     );
   }
 }

@@ -16,6 +16,7 @@ import {
 import { getEpoch, getPropFromArrObj } from '../../common';
 
 import {BackHandler} from 'react-native';
+import { BottomNavigation } from 'react-native-material-ui';
 import storage from 'react-native-storage-wrapper';
 import t from 'tcomb-form-native';
 import sha1 from 'sha1';
@@ -201,6 +202,7 @@ export default class App extends PureComponent {
     options = newOptions;
 
     return (
+    <View style={{flex: 1}}>
       <ScrollView style={{flex: 1, backgroundColor: 'white'}}>
 
         <View style={styles.container}>
@@ -215,13 +217,24 @@ export default class App extends PureComponent {
           </TouchableWithoutFeedback>
         </View>
 
-        <TouchableHighlight style={styles.button} onPress={this.doSave} underlayColor='#99d9f4'>
-          <Text style={styles.buttonText}>Save</Text>
-        </TouchableHighlight>
-
-        <View style={{width: Dimensions.get('window').width, height: 1, marginBottom: 250}} />
-
       </ScrollView>
+
+      <BottomNavigation active={'done'} hidden={false} >
+        <BottomNavigation.Action
+          key="undo"
+          icon="undo"
+          label="Go Back"
+          onPress={() => this.props.navigation.goBack()}
+        />
+        <BottomNavigation.Action
+          key="done"
+          icon="done"
+          label="Save Changes"
+          onPress={this.doSave}
+        />
+      </BottomNavigation>
+
+    </View>
     );
   }
 }

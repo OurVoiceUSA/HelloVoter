@@ -19,6 +19,7 @@ import {
 
 import OVComponent from '../OVComponent';
 
+import { BottomNavigation } from 'react-native-material-ui';
 import t from 'tcomb-form-native';
 import Modal from 'react-native-simple-modal';
 import storage from 'react-native-storage-wrapper';
@@ -549,10 +550,6 @@ export default class App extends OVComponent {
           }}
         />
 
-        <TouchableHighlight style={styles.button} onPress={this.doSave} underlayColor='#99d9f4'>
-          <Text style={styles.buttonText}>Save Form</Text>
-        </TouchableHighlight>
-
         <Modal
           open={(customForm !== null)}
           modalStyle={{width: 350, height: 450, backgroundColor: "transparent",
@@ -632,6 +629,15 @@ export default class App extends OVComponent {
             }
           </View>
         </Modal>
+
+        <BottomNavigation active={'done'} hidden={false} >
+          <BottomNavigation.Action
+            key="done"
+            icon="done"
+            label="Save"
+            onPress={this.doSave}
+          />
+        </BottomNavigation>
 
       </View>
     );
