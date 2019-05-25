@@ -12,6 +12,7 @@ YellowBox.ignoreWarnings([
   'The StackNavigator function',
   'Class RCTCxxModule was not exported',
   'Require cycle:',
+  'Task orphaned for request <NSMutableURLRequest: ',
 ]);
 
 import Icon from 'react-native-vector-icons/FontAwesome';
