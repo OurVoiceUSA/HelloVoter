@@ -833,7 +833,7 @@ export default class App extends OVComponent {
               onChange={this.acoc}
             />
           ||
-            <Text>No address data for this area. Try widening your view on the map or adjusting your filter settings.</Text>
+            <Text style={{margin: 10}}>No address data for this area. Try widening your view on the map or adjusting your filter settings.</Text>
           }
           </View>
         }
