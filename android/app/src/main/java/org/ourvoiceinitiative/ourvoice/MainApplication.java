@@ -3,6 +3,7 @@ package org.ourvoiceinitiative.ourvoice;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.oblador.vectoricons.VectorIconsPackage;
 import com.devfd.RNGeocoder.RNGeocoderPackage;
 import com.airbnb.android.react.maps.MapsPackage;
 import com.timhagn.rngloc.RNGLocation;
@@ -30,6 +31,7 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new VectorIconsPackage(),
             new RNGeocoderPackage(),
             new MapsPackage(),
             new RNGLocation(),

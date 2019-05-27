@@ -37,7 +37,7 @@
 		"react-native-sortable-listview": "^0.2.8",
 		"react-native-storage-wrapper": "0.1.0",
 		"react-native-swipeout": "^2.3.6",
-		"react-native-vector-icons": "^4.4.3",
+		"react-native-vector-icons": "^6.4.2",
 		"react-navigation": "^2.18.2",
 		"sha1": "^1.1.1",
 		"tcomb-form-native": "^0.6.20",
