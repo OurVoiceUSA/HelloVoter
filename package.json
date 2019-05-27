@@ -50,6 +50,6 @@
 		"@babel/core": "^7.4.5",
 		"@babel/node": "^7.4.5",
 		"react-native-cli": "^2.0.1",
-		"react-test-renderer": "^16.6.3"
+		"react-test-renderer": "^16.8.6"
 	}
 }
