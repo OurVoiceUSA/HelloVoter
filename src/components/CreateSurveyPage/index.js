@@ -22,7 +22,7 @@ import OVComponent from '../OVComponent';
 import { BottomNavigation } from 'react-native-material-ui';
 import t from 'tcomb-form-native';
 import Modal from 'react-native-simple-modal';
-import storage from 'react-native-storage-wrapper';
+import storage from '../storage';
 import SortableListView from 'react-native-sortable-listview'
 import Permissions from 'react-native-permissions';
 import RNGLocation from 'react-native-google-location';

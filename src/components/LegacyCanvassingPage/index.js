@@ -5,7 +5,6 @@ import {
   Alert,
   Dimensions,
   StyleSheet,
-  NetInfo,
   Text,
   TextInput,
   View,
@@ -23,7 +22,8 @@ import { NavigationActions } from 'react-navigation';
 import { BottomNavigation } from 'react-native-material-ui';
 import { Dropbox } from 'dropbox';
 import DeviceInfo from 'react-native-device-info';
-import storage from 'react-native-storage-wrapper';
+import storage from '../storage';
+import NetInfo from '@react-native-community/netinfo';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import sha1 from 'sha1';
 import { Marker, Callout, Polyline, PROVIDER_GOOGLE } from 'react-native-maps'

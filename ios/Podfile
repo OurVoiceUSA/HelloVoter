@@ -8,6 +8,7 @@ target 'OurVoice' do
   # Pods for OurVoice
   pod 'GooglePlaces'
   pod 'GoogleMaps'
+  pod 'Google-Maps-iOS-Utils'
   pod 'GooglePlacePicker'
 
   pod 'React', :path => '../node_modules/react-native', :subspecs => [
@@ -35,12 +36,24 @@ target 'OurVoice' do
   
   pod 'RNGestureHandler', :path => '../node_modules/react-native-gesture-handler'
 
-  post_install do |installer_representation|
-      installer_representation.pods_project.targets.each do |target|
-          if target.name == "React"
-              target.remove_from_project
-          end
+  pod 'react-native-maps', path: '../node_modules/react-native-maps'
+  pod 'react-native-google-maps', path: '../node_modules/react-native-maps'
+
+  pod 'RNCAsyncStorage', :path => '../node_modules/@react-native-community/async-storage'
+
+  pod 'react-native-netinfo', :path => '../node_modules/@react-native-community/netinfo'
+
+  post_install do |installer|
+    installer.pods_project.targets.each do |target|
+      if target.name == 'react-native-google-maps'
+        target.build_configurations.each do |config|
+          config.build_settings['CLANG_ENABLE_MODULES'] = 'No'
+        end
       end
+      if target.name == "React"
+        target.remove_from_project
+      end
+    end
   end
 
 end

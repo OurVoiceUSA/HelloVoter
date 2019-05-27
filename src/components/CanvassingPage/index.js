@@ -6,7 +6,6 @@ import {
   StyleSheet,
   FlatList,
   Image,
-  NetInfo,
   Text,
   TextInput,
   View,
@@ -23,7 +22,8 @@ import OVComponent from '../OVComponent';
 import Accordion from 'react-native-collapsible/Accordion';
 import { BottomNavigation } from 'react-native-material-ui';
 import { NavigationActions } from 'react-navigation';
-import storage from 'react-native-storage-wrapper';
+import storage from '../storage';
+import NetInfo from '@react-native-community/netinfo';
 import DeviceInfo from 'react-native-device-info';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps'

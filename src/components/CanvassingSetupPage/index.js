@@ -16,7 +16,7 @@ import {
 import t from 'tcomb-form-native';
 import sha1 from 'sha1';
 import Modal from 'react-native-simple-modal';
-import storage from 'react-native-storage-wrapper';
+import storage from '../storage';
 import Swipeout from 'react-native-swipeout';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import SafariView from 'react-native-safari-view';
