@@ -83,7 +83,7 @@ export default class App extends PureComponent {
         onPress: () => this.openGitHub(),
       },
     ],
-      sliderActiveSlide: 1,
+      sliderActiveSlide: 0,
     };
   }
 
