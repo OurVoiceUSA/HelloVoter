@@ -38,10 +38,6 @@ Install https://nodejs.org/en/download/ if you havne't already, and run:
     npm install
     npm install -g react-native-cli
 
-The install may overwrite some dependancy overrides or other configuration - revert those by doing a force checkout:
-
-`git checkout -f`
-
 **NOTE**: Due to a bug in how iOS handles `fetch` different from Android, Dropbox integration needs a tweak. See issue https://github.com/dropbox/dropbox-sdk-js/issues/224 -- and the hackish fix is:
 
 `perl -pi -e "s/t\.blob\(\)/typeof t.blob==='function'?t.blob():t.text()/" node_modules/dropbox/dist/Dropbox-sdk.min.js`

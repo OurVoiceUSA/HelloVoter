@@ -3,6 +3,7 @@
 	"version": "1.8.3",
 	"private": true,
 	"scripts": {
+                "postinstall": "patch-package",
 		"start": "node node_modules/react-native/local-cli/cli.js start",
 		"test": "jest"
 	},
@@ -51,6 +52,7 @@
 		"@babel/cli": "^7.4.4",
 		"@babel/core": "^7.4.5",
 		"@babel/node": "^7.4.5",
+		"patch-package": "^6.1.2",
 		"react-native-cli": "^2.0.1",
 		"react-test-renderer": "^16.8.6"
 	}
