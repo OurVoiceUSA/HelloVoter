@@ -41,7 +41,7 @@ import t from 'tcomb-form-native';
 import _ from 'lodash';
 import {geojson2polygons, ingeojson} from 'ourvoiceusa-sdk-js';
 
-TimeAgo.locale(en);
+TimeAgo.addLocale(en);
 
 var Form = t.form.Form;
 
