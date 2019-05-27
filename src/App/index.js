@@ -3,9 +3,9 @@ import React from 'react';
 import {
   Text,
   TouchableOpacity,
+  YellowBox,
 } from 'react-native';
 
-import { YellowBox } from 'react-native';
 YellowBox.ignoreWarnings([
   'Warning: isMounted(...) is deprecated',
   'Module RCTImageLoader',
@@ -29,11 +29,11 @@ import LegacyCanvassingSettingsPage from '../components/LegacyCanvassingSettings
 import LegacyListMultiUnitPage from '../components/LegacyListMultiUnitPage';
 import LegacySurveyPage from '../components/LegacySurveyPage';
 
-import { StackNavigator } from 'react-navigation';
+import { createStackNavigator, createAppContainer } from 'react-navigation';
 
 import SettingsButton from './settings-button';
 
-export default App = StackNavigator({
+const AppNavigator = createStackNavigator({
   HomeScreen: {
     screen: HomeScreenPage,
     navigationOptions: ({navigation}) => ({
@@ -120,3 +120,5 @@ const GoBack = (props) => (
     <Text>Exit</Text>
   </TouchableOpacity>
 );
+
+export default createAppContainer(AppNavigator);
