@@ -46,7 +46,7 @@ The install may overwrite some dependancy overrides or other configuration - rev
 
 `perl -pi -e "s/t\.blob\(\)/typeof t.blob==='function'?t.blob():t.text()/" node_modules/dropbox/dist/Dropbox-sdk.min.js`
 
-**NOTE**: Due to a bug in the version of react-native used, follow the steps in this comment: https://github.com/facebook/react-native/issues/23282#issuecomment-476439080
+**NOTE**: On iOS if the build fails to install to the simulator, try fixing it with `ln -s ../Build ios/build/OurVoice/Build`
 
 If you're developing the **Android** app - install https://developer.android.com/studio/releases/ if you haven't already, import the `OVMobile/android` project, and follow the prompts to download all the build and runtime dependancies. You'll also have to run this command:
 
