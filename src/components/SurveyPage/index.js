@@ -17,7 +17,7 @@ import { getEpoch, getPropFromArrObj } from '../../common';
 
 import {BackHandler} from 'react-native';
 import { BottomNavigation } from 'react-native-material-ui';
-import storage from '../storage';
+import storage from 'react-native-storage-wrapper';
 import t from 'tcomb-form-native';
 import sha1 from 'sha1';
 

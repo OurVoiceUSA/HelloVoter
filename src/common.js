@@ -6,7 +6,7 @@ import {
   View,
 } from 'react-native';
 
-import storage from './components/storage';
+import storage from 'react-native-storage-wrapper';
 import jwt_decode from 'jwt-decode';
 import DeviceInfo from 'react-native-device-info';
 import RNGooglePlaces from 'react-native-google-places';

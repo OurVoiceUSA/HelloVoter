@@ -13,7 +13,7 @@ import {
   ScrollView,
 } from 'react-native';
 
-import storage from '../storage';
+import storage from 'react-native-storage-wrapper';
 import { BottomNavigation } from 'react-native-material-ui';
 import t from 'tcomb-form-native';
 import sha1 from 'sha1';

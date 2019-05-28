@@ -22,7 +22,7 @@ import RNGooglePlaces from 'react-native-google-places';
 import ModalPicker from 'react-native-modal-selector';
 import Modal from 'react-native-simple-modal';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import storage from '../storage';
+import storage from 'react-native-storage-wrapper';
 import SmLoginPage from '../SmLoginPage';
 import { Dropbox } from 'dropbox';
 import { google_api_key } from '../../config';
