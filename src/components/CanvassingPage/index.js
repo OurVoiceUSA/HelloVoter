@@ -840,7 +840,7 @@ export default class App extends OVComponent {
         {active==='history'&&
           <History refer={this} loading={this.state.fetchingHistory} data={this.state.history} onPress={(pos) => {
             this.setState({active: 'map'});
-            this.map.animateToRegion(pos);
+            this.map.animateToCoordinate(pos, 1000);
           }} />
         }
         {active==='settings'&&
