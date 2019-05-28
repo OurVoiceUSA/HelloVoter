@@ -38,10 +38,6 @@ Install https://nodejs.org/en/download/ if you havne't already, and run:
     npm install
     npm install -g react-native-cli
 
-**NOTE**: Due to a bug in how iOS handles `fetch` different from Android, Dropbox integration needs a tweak. See issue https://github.com/dropbox/dropbox-sdk-js/issues/224 -- and the hackish fix is:
-
-`perl -pi -e "s/t\.blob\(\)/typeof t.blob==='function'?t.blob():t.text()/" node_modules/dropbox/dist/Dropbox-sdk.min.js`
-
 **NOTE**: On iOS if the build fails to install to the simulator, try fixing it with `ln -s ../Build ios/build/OurVoice/Build`
 
 If you're developing the **Android** app - install https://developer.android.com/studio/releases/ if you haven't already, import the `OVMobile/android` project, and follow the prompts to download all the build and runtime dependancies. You'll also have to run this command:
