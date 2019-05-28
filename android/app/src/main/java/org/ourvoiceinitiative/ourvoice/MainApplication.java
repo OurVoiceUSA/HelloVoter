@@ -13,7 +13,6 @@ import com.timhagn.rngloc.RNGLocation;
 import com.lugg.ReactNativeConfig.ReactNativeConfigPackage;
 import com.arttitude360.reactnative.rngoogleplaces.RNGooglePlacesPackage;
 import com.learnium.RNDeviceInfo.RNDeviceInfo;
-import com.oblador.vectoricons.VectorIconsPackage;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
@@ -37,7 +36,6 @@ public class MainApplication extends Application implements ReactApplication {
             new NetInfoPackage(),
             new AsyncStoragePackage(),
             new RNGestureHandlerPackage(),
-            new VectorIconsPackage(),
             new RNGeocoderPackage(),
             new MapsPackage(),
             new RNGLocation(),
