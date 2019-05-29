@@ -23,7 +23,7 @@ import { BottomNavigation } from 'react-native-material-ui';
 import t from 'tcomb-form-native';
 import Modal from 'react-native-simple-modal';
 import storage from 'react-native-storage-wrapper';
-import SortableListView from 'react-native-sortable-listview'
+import SortableList from 'react-native-sortable-list';
 import Permissions from 'react-native-permissions';
 import RNGLocation from 'react-native-google-location';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -138,12 +138,6 @@ export default class App extends OVComponent {
     this.doAddCustom = this.doAddCustom.bind(this);
     this.doSave = this.doSave.bind(this);
     this.doShowCustom = this.doShowCustom.bind(this);
-  }
-
-  componentDidMount() {
-    setTimeout(() => {
-      this.map.scrollTo({x: 1, y: 1, animated: true}); // fix wierd bug where doesn't initially load on iOS
-    }, 100);
   }
 
   componentWillUnmount() {
@@ -490,41 +484,21 @@ export default class App extends OVComponent {
           </View>
         </View>
 
-        <SortableListView
-          ref={component => this.map = component}
+        <SortableList
           style={{ flex: 1, margin: 5, marginTop: 0 }}
           data={fields}
           order={order}
-          onRowMoved={e => {
-            let { order } = this.state;
-            order.splice(e.to, 0, order.splice(e.from, 1)[0]);
-            this.setState(order);
-          }}
+          onReleaseRow={(key, order) => this.setState({order})}
           renderRow={row => {
             return (
-              <TouchableHighlight
-                underlayColor={'#eee'}
-                style={{
-                  padding: 5,
-                  backgroundColor: '#F8F8F8',
-                  borderBottomWidth: 1,
-                  borderColor: '#eee',
-                }}
-                {...this.props.sortHandlers}
-                >
                 <View>
                   <View style={{flexDirection: 'row'}}>
-                    <View style={{width: (Dimensions.get('window').width*.62)-5}}>
                       <Text style={{margin: 5}}>
-                        {row.label+(row.required?' *':'')}
+                        {row.data.label+(row.data.required?' *':'')}
                       </Text>
-                    </View>
-                    <View style={{width: (Dimensions.get('window').width*.32)-5}}>
                       <Text style={{margin: 5}}>
-                        : {this.inputTypeToReadable(row.type)}
+                        : {this.inputTypeToReadable(row.data.type)}
                       </Text>
-                    </View>
-                    <View style={{width: Dimensions.get('window').width*.05, justifyContent: 'center'}}>
                       <Icon
                         name="times-circle"
                         backgroundColor="#d7d7d7"
@@ -533,19 +507,17 @@ export default class App extends OVComponent {
                         onPress={() => {
                           Alert.alert(
                             'Delete Item',
-                            'Are you sure you wish to delete the item "'+row.label+'"?',
+                            'Are you sure you wish to delete the item "'+row.data.label+'"?',
                             [
-                              {text: 'OK', onPress: () => this.rmField(row)},
+                              {text: 'OK', onPress: () => this.rmField(row.data)},
                               {text: 'Cancel'}
                             ],
                             { cancelable: false }
                           );
                         }}>
                       </Icon>
-                    </View>
                   </View>
-                </View>
-              </TouchableHighlight>
+                 </View>
             );
           }}
         />
