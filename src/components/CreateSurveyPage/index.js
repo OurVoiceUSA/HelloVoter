@@ -632,6 +632,12 @@ export default class App extends OVComponent {
 
         <BottomNavigation active={'done'} hidden={false} >
           <BottomNavigation.Action
+            key="undo"
+            icon="undo"
+            label="Go Back"
+            onPress={() => this.props.navigation.goBack()}
+          />
+          <BottomNavigation.Action
             key="done"
             icon="done"
             label="Save"
