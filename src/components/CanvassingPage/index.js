@@ -1074,9 +1074,9 @@ const History = (props) => (
     <FlatList
       scrollEnabled={false}
       data={props.data}
-      keyExtractor={item => ""+item.datetime}
+      keyExtractor={item => ""+item.id}
       renderItem={({item}) => (
-        <View key={item.datetime}>
+        <View key={item.id}>
           <Divider />
           <TouchableOpacity style={{marginTop: 10, marginBottom: 10}}
             onPress={() => props.onPress({
