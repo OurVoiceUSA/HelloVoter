@@ -34,11 +34,11 @@ PODS:
     - GoogleMaps/Base (= 3.1.0)
   - React (0.59.8):
     - React/Core (= 0.59.8)
-  - react-native-google-maps (0.24.0):
+  - react-native-google-maps (0.24.2):
     - Google-Maps-iOS-Utils (= 2.1.0)
     - GoogleMaps (= 3.1.0)
     - React
-  - react-native-maps (0.24.0):
+  - react-native-maps (0.24.2):
     - React
   - react-native-netinfo (3.2.0):
     - React
@@ -170,8 +170,8 @@ SPEC CHECKSUMS:
   GooglePlacePicker: 1c60c2a26e9d1e73bcb0c6f89609db8d777d13c1
   GooglePlaces: e874db179f2675c4f3eeda0b686b540273a578b0
   React: 76e6aa2b87d05eb6cccb6926d72685c9a07df152
-  react-native-google-maps: 3e89f89243a11dfb25bb33a2fc39f13b9c0db538
-  react-native-maps: d87d8ed456d4132112fb1d2ee9baf3470c0f211d
+  react-native-google-maps: 4a64efb264666e5d396ccbfc7673ef38dd21eceb
+  react-native-maps: 0316ed017dbb64b33b227751fa810e2454fcfa39
   react-native-netinfo: 34cf53b69bd112eaf944e931092a899c024adf8d
   RNCAsyncStorage: 285698b8a4f219573174d99e863a78b93f389272
   RNGestureHandler: aea90f0ad8e35fec23438db6fc3ad79be58bb734
