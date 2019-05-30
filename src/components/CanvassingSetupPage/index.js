@@ -125,6 +125,19 @@ export default class App extends OVComponent {
     let res = {};
     try {
       let jwt = await storage.get('OV_JWT');
+
+      try {
+        // if the jwt doesn't have an id, discard it
+        let obj = jwt_decode(jwt);
+        if (!obj.id) throw "not a full user object";
+      } catch (e) {
+        await storage.del('OV_JWT');
+        // mock a fetch object
+        res.status = 401;
+        res.headers = {get: () => wsbase+'/auth'};
+        return res;
+      }
+
       res = await fetch('https://'+server+API_BASE_URI+'/hello', {
         method: 'POST',
         headers: {
