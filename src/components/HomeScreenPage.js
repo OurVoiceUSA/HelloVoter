@@ -1,34 +1,29 @@
 
 import React, { PureComponent } from 'react';
 
-import { BottomNavigation } from 'react-native-material-ui'
+import { BottomNavigation } from 'react-native-material-ui';
 
-import YourReps from '../YourRepsPage/index.js';
-import CanvassingSetup from '../CanvassingSetupPage/index.js';
+import YourReps from './YourRepsPage';
+import CanvassingSetup from './CanvassingSetupPage';
 
 import {
-  Alert,
-  Image,
-  TouchableOpacity,
   View,
   Text,
   Linking,
   PermissionsAndroid,
-  Platform,
   ScrollView,
   StatusBar,
-  SafeAreaView,
 } from 'react-native';
 
 import Permissions from 'react-native-permissions';
-import { _loginPing } from '../../common';
-
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Rate, { AndroidMarket } from 'react-native-rate'
 import Carousel, { Pagination } from 'react-native-snap-carousel';
-import { sliderWidth, itemWidth } from '../../styles/SliderEntry.style';
-import SliderEntry from '../SliderEntry';
-import styles, { colors } from '../../styles/index.style';
+
+import { sliderWidth, itemWidth } from '../styles/SliderEntry.style';
+import styles, { colors } from '../styles/index.style';
+import SliderEntry from './SliderEntry';
+import { _loginPing } from '../common';
 
 export default class App extends PureComponent {
 
@@ -40,31 +35,31 @@ export default class App extends PureComponent {
       {
         title: 'Contact Your Reps',
         subtitle: 'Know who represents you! (or doesn\'t) Give \'em a piece of your mind.',
-        illustration: require('../../../img/phone-your-rep.png'),
+        illustration: require('../../img/phone-your-rep.png'),
         onPress: () => this.setState({active: 'reps'}),
       },
       {
         title: 'Canvass for any cause',
         subtitle: 'Our zero cost tool enables you to hit the pavement with the latest tech.',
-        illustration: require('../../../img/canvassing.png'),
+        illustration: require('../../img/canvassing.png'),
         onPress: () => this.setState({active: 'canvassing'}),
       },
       {
         title: 'Coming soon; Phone Banking',
         subtitle: 'Be kind to your feet and connect to voters from the comfort of your home.',
-        illustration: require('../../../img/phone-banking.png'),
+        illustration: require('../../img/phone-banking.png'),
         onPress: () => this.openDonate(),
       },
       {
         title: 'Donate',
         subtitle: 'We operate on donations. Keep this app free by making a contribution today.',
-        illustration: require('../../../img/donate.png'),
+        illustration: require('../../img/donate.png'),
         onPress: () => this.openDonate(),
       },
       {
         title: 'Rate this App!',
         subtitle: 'Feedback helps us make this app better. Share your experience with the world.',
-        illustration: require('../../../img/rate.png'),
+        illustration: require('../../img/rate.png'),
         onPress: () => {
           let options = {
             AppleAppID: "1275301651",
@@ -79,7 +74,7 @@ export default class App extends PureComponent {
       {
         title: 'Open Source Software',
         subtitle: 'You can help us out directly! Contribute art, how-to\'s, or write code. The power is yours.',
-        illustration: require('../../../img/open-source.png'),
+        illustration: require('../../img/open-source.png'),
         onPress: () => this.openGitHub(),
       },
     ],
