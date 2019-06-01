@@ -9,7 +9,7 @@
 	},
 	"dependencies": {
 		"@react-native-community/async-storage": "^1.4.2",
-		"@react-native-community/netinfo": "^3.2.0",
+		"@react-native-community/netinfo": "^3.2.1",
 		"base-64": "^0.1.0",
 		"dropbox": "^4.0.17",
 		"encoding": "^0.1.12",
