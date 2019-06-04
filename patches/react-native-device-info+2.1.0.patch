@@ -1,8 +1,8 @@
 diff --git a/node_modules/react-native-device-info/android/src/main/java/com/learnium/RNDeviceInfo/RNDeviceModule.java b/node_modules/react-native-device-info/android/src/main/java/com/learnium/RNDeviceInfo/RNDeviceModule.java
-index ab82f50..5b7a69c 100644
+index 120ac5f..280a260 100644
 --- a/node_modules/react-native-device-info/android/src/main/java/com/learnium/RNDeviceInfo/RNDeviceModule.java
 +++ b/node_modules/react-native-device-info/android/src/main/java/com/learnium/RNDeviceInfo/RNDeviceModule.java
-@@ -376,10 +376,7 @@ public class RNDeviceModule extends ReactContextBaseJavaModule {
+@@ -391,10 +391,7 @@ public class RNDeviceModule extends ReactContextBaseJavaModule {
    public void isLocationEnabled(Promise p) {
        boolean locationEnabled = false;
  
