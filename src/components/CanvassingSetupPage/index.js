@@ -23,8 +23,13 @@ import SafariView from 'react-native-safari-view';
 import jwt_decode from 'jwt-decode';
 import SmLoginPage from '../SmLoginPage';
 import { Dropbox } from 'dropbox';
+import { ingeojson } from 'ourvoiceusa-sdk-js';
 import { Divider, API_BASE_URI, DINFO, _loginPing, _saveUser, _getApiToken, _fileReaderAsync } from '../../common';
 import { wsbase } from '../../config';
+
+import RBush from 'rbush';
+import rtree from '../../../rtree.json';
+import { geographies } from '../../geographies';
 
 import OVComponent from '../OVComponent';
 
@@ -105,6 +110,27 @@ export default class App extends OVComponent {
     return true;
   }
 
+  connectToGOTV = async() => {
+    const { myPosition } = this.state;
+
+    let state;
+
+    new RBush(9).fromJSON(rtree).search({
+      minX: myPosition.longitude,
+      minY: myPosition.latitude,
+      maxX: myPosition.longitude,
+      maxY: myPosition.latitude,
+    }).forEach(bb => {
+      let geo = geographies[bb.state];
+      if (geo.geography) geo = geo.geography;
+      if (ingeojson(geo, myPosition.longitude, myPosition.latitude))
+        state = bb.state;
+    });
+
+    if (state) this.connectToServer('gotv-'+state+'.ourvoiceusa.org');
+    else Alert.alert('Out of bounds', 'You are not located within the United States of America. Unable to continue.', [{text: 'OK'}], { cancelable: false });
+  }
+
   connectToServer = async(server) => {
 
     if (!this.checkLocationAccess()) return;
@@ -152,7 +178,7 @@ export default class App extends OVComponent {
       });
       if (res.status === 400 || res.status === 401) await storage.del('OV_JWT');
     } catch (e) {
-      console.warn(e);
+      console.warn(""+e);
     }
     return res;
   }
@@ -705,7 +731,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
                     name="forward"
                     backgroundColor="#d7d7d7"
                     color="#000000"
-                    onPress={() => this.connectToServer('gotv.ourvoiceusa.org')}
+                    onPress={() => this.connectToGOTV()}
                     {...iconStyles}>
                     Get Out The Vote!
                   </Icon.Button>

@@ -5,6 +5,9 @@
 # react-native stuff
 .env*
 
+# postinstall build stuff
+rtree.json
+
 # OSX
 #
 .DS_Store
