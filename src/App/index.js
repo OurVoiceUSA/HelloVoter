@@ -38,7 +38,7 @@ const AppNavigator = createStackNavigator({
     screen: HomeScreenPage,
     navigationOptions: ({navigation}) => ({
       title: 'HelloVoter',
-      headerRight: <SettingsButton nav={navigation} />,
+      headerRight: (<SettingsButton nav={navigation} />),
     }),
   },
   Settings: {
@@ -52,7 +52,7 @@ const AppNavigator = createStackNavigator({
     screen: CanvassingPage,
     navigationOptions: ({navigation}) => ({
       title: 'Canvassing',
-      headerLeft: <GoBack nav={navigation} />
+      headerLeft: (<GoBack nav={navigation} />),
     }),
   },
   ListMultiUnit: {
@@ -73,7 +73,7 @@ const AppNavigator = createStackNavigator({
     screen: PolProfilePage,
     navigationOptions: ({navigation}) => ({
       title: 'Politician Profile',
-      headerRight: <SettingsButton nav={navigation} />,
+      headerRight: (<SettingsButton nav={navigation} />),
       headerLeft: null,
     }),
   },
@@ -88,7 +88,7 @@ const AppNavigator = createStackNavigator({
     screen: LegacyCanvassingPage,
     navigationOptions: ({navigation}) => ({
       title: 'Canvassing',
-      headerLeft: <GoBack nav={navigation} />
+      headerLeft: (<GoBack nav={navigation} />),
     }),
   },
   LegacyListMultiUnit: {
