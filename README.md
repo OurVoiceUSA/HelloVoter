@@ -72,7 +72,7 @@ Then build/execute the tests:
     detox build -c android.emu.debug
     detox test -c android.emu.debug
 
-Test Automation for Android may have issues due to a newer version of react native, see https://github.com/wix/detox/issues/608
+NOTE: Test Automation for Android generally seems to have issues due to it not following the latest version react native very well.
 
 ## Contributing
 
