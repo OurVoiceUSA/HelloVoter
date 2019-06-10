@@ -4,16 +4,22 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "JUNIT_REPORT_PATH=test-result/result.xml JUNIT_REPORT_STACK=1 mocha --timeout 25000 --colors --reporter mocha-jenkins-reporter || true",
+    "test": "JUNIT_REPORT_PATH=test-result/result.xml JUNIT_REPORT_STACK=1 mocha --require @babel/register --timeout 25000 --colors --reporter mocha-jenkins-reporter || true",
     "start": "node node_modules/nodemon/bin/nodemon.js --signal SIGKILL --exec babel-node server.js"
   },
   "author": "Our Voice USA",
   "license": "AGPL-3.0",
   "devDependencies": {
+    "@babel/cli": "^7.4.4",
+    "@babel/core": "^7.4.5",
+    "@babel/node": "^7.4.5",
+    "@babel/plugin-transform-runtime": "^7.4.4",
+    "@babel/preset-env": "^7.4.5",
+    "@babel/register": "^7.4.4",
     "chai": "^4.2.0",
     "mocha": "^5.2.0",
     "mocha-jenkins-reporter": "^0.4.1",
-    "nodemon": "^1.18.9",
+    "nodemon": "^1.19.1",
     "random-points-on-polygon": "0.0.4",
     "random-words": "^1.1.0",
     "supertest": "^3.3.0"
@@ -24,10 +30,7 @@
     ]
   },
   "dependencies": {
-    "@babel/cli": "^7.2.3",
-    "@babel/core": "^7.2.2",
-    "@babel/node": "^7.2.2",
-    "@babel/preset-env": "^7.2.3",
+    "@babel/runtime": "^7.4.5",
     "body-parser": "^1.18.3",
     "circle-to-polygon": "^1.0.2",
     "cors": "^2.8.5",

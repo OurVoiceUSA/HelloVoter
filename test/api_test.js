@@ -2,12 +2,14 @@
 var neo4j = require('neo4j-driver').v1;
 var BoltAdapter = require('node-neo4j-bolt-adapter');
 
+import { ov_config } from '../lib/ov_config';
+
 var expect = require('chai').expect;
 var supertest = require('supertest');
 var jwt = require('jsonwebtoken');
 var fetch = require('node-fetch');
 var api = supertest((process.env.WSBASE?process.env.WSBASE:'http://localhost:8080'));
-var sm_oauth = supertest(process.env.SM_OAUTH_URL);
+var sm_oauth = supertest(ov_config.sm_oauth_url);
 var fs = require('fs');
 
 var keep = (process.env.KEEP_TEST_DATA ? true : false);
@@ -39,8 +41,8 @@ describe('API smoke', function () {
   before(async () => {
     let r;
 
-    authToken = neo4j.auth.basic(process.env.NEO4J_USER, process.env.NEO4J_PASS);
-    db = new BoltAdapter(neo4j.driver('bolt://'+process.env.NEO4J_HOST, authToken));
+    authToken = neo4j.auth.basic(ov_config.neo4j_user, ov_config.neo4j_pass);
+    db = new BoltAdapter(neo4j.driver('bolt://'+ov_config.neo4j_host, authToken));
 
     // clean up test data before we begin
     await db.cypherQueryAsync('match (a:Canvasser) where a.id =~ "test:.*" detach delete a');
