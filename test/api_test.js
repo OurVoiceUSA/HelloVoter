@@ -1,16 +1,15 @@
 
-var neo4j = require('neo4j-driver').v1;
-var BoltAdapter = require('node-neo4j-bolt-adapter');
+import supertest from 'supertest';
+import jwt from 'jsonwebtoken';
+import fetch from 'node-fetch';
+import { expect } from 'chai';
+import fs from 'fs';
 
+import { cqa, cqc, neo4j_version } from '../lib/neo4j.js';
 import { ov_config } from '../lib/ov_config';
 
-var expect = require('chai').expect;
-var supertest = require('supertest');
-var jwt = require('jsonwebtoken');
-var fetch = require('node-fetch');
-var api = supertest((process.env.WSBASE?process.env.WSBASE:'http://localhost:8080'));
 var sm_oauth = supertest(ov_config.sm_oauth_url);
-var fs = require('fs');
+var api = supertest((process.env.WSBASE?process.env.WSBASE:'http://localhost:8080'));
 
 var keep = (process.env.KEEP_TEST_DATA ? true : false);
 
@@ -21,9 +20,6 @@ var CASLDL62 = JSON.parse(fs.readFileSync('./geojson/CA-sldl-62.geojson'));
 var c = {};
 
 var tpx = "Test ";
-
-var authToken;
-var db;
 
 var teamName1 = tpx+'Team '+Math.ceil(Math.random()*10000000);
 var turfName1 = tpx+'Turf '+Math.ceil(Math.random()*10000000);
@@ -41,12 +37,17 @@ describe('API smoke', function () {
   before(async () => {
     let r;
 
-    authToken = neo4j.auth.basic(ov_config.neo4j_user, ov_config.neo4j_pass);
-    db = new BoltAdapter(neo4j.driver('bolt://'+ov_config.neo4j_host, authToken));
+    let arr = (await neo4j_version()).split('.');
+    let ver = Number.parseFloat(arr[0]+'.'+arr[1]);
+
+    if (ver < 3.5) {
+      console.warn("Neo4j version 3.5 or higher is required.");
+      process.exit(1);
+    }
 
     // clean up test data before we begin
-    await db.cypherQueryAsync('match (a:Canvasser) where a.id =~ "test:.*" detach delete a');
-    await db.cypherQueryAsync('match (a) where a.name =~ "'+tpx+'.*" detach delete a');
+    await cqa('match (a:Canvasser) where a.id =~ "test:.*" detach delete a');
+    await cqa('match (a) where a.name =~ "'+tpx+'.*" detach delete a');
 
     r = await sm_oauth.get('/pubkey');
     expect(r.statusCode).to.equal(200);
@@ -94,12 +95,12 @@ describe('API smoke', function () {
 
     if (!keep) {
       // clean up test users
-      await db.cypherQueryAsync('match (a:Canvasser) where a.id =~ "test:.*" detach delete a');
+      await cqa('match (a:Canvasser) where a.id =~ "test:.*" detach delete a');
       // any left over test data??
-      ref = await db.cypherQueryAsync('match (a) where a.name =~ "'+tpx+'.*" return count(a)');
+      ref = await cqa('match (a) where a.name =~ "'+tpx+'.*" return count(a)');
     }
 
-    db.close();
+    cqc();
 
     if (!keep) {
       // check query after close, so we don't hang the test on failure
@@ -176,7 +177,7 @@ describe('API smoke', function () {
     expect(r.body.data.ready).to.equal(false);
 
     // make admin an admin
-    await db.cypherQueryAsync('match (a:Canvasser {id:{id}}) set a.admin=true', c.admin);
+    await cqa('match (a:Canvasser {id:{id}}) set a.admin=true', c.admin);
 
     r = await api.post('/canvass/v1/hello')
       .set('Authorization', 'Bearer '+c.admin.jwt)
@@ -1068,4 +1069,3 @@ describe('API smoke', function () {
   });
 
 });
-
