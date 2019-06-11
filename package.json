@@ -17,12 +17,12 @@
     "@babel/preset-env": "^7.4.5",
     "@babel/register": "^7.4.4",
     "chai": "^4.2.0",
-    "mocha": "^5.2.0",
+    "mocha": "^6.1.4",
     "mocha-jenkins-reporter": "^0.4.1",
     "nodemon": "^1.19.1",
     "random-points-on-polygon": "0.0.4",
     "random-words": "^1.1.0",
-    "supertest": "^3.3.0"
+    "supertest": "^4.0.2"
   },
   "nodemonConfig": {
     "ignore": [
@@ -31,26 +31,26 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.4.5",
-    "body-parser": "^1.18.3",
+    "body-parser": "^1.19.0",
     "circle-to-polygon": "^1.0.2",
     "cors": "^2.8.5",
     "docker-secrets-nodejs": "^1.0.5",
-    "dotenv": "^6.2.0",
-    "express": "^4.16.4",
+    "dotenv": "^8.0.0",
+    "express": "^4.17.1",
     "express-async-await": "^1.1.0",
     "express-jwt": "^5.3.1",
     "express-logging": "^1.1.1",
     "form-data": "^2.3.3",
-    "jsonwebtoken": "^8.4.0",
+    "jsonwebtoken": "^8.5.1",
     "jwt-decode": "^2.2.0",
     "logops": "^2.1.0",
-    "neo4j-driver": "^1.7.2",
-    "node-fetch": "^2.3.0",
+    "neo4j-driver": "^1.7.5",
+    "node-fetch": "^2.6.0",
     "node-neo4j-bolt-adapter": "github:OurVoiceUSA/node-neo4j-bolt-adapter",
     "ourvoiceusa-sdk-js": "github:OurVoiceUSA/ourvoiceusa-sdk-js",
-    "papaparse": "^4.6.3",
+    "papaparse": "^5.0.0",
     "uuid": "^3.3.2",
-    "wkx": "^0.4.6"
+    "wkx": "^0.4.7"
   },
   "optionalDependencies": {
     "jmx": "^0.7.0"
