@@ -1,7 +1,6 @@
 
 import supertest from 'supertest';
 import jwt from 'jsonwebtoken';
-import fetch from 'node-fetch';
 import { expect } from 'chai';
 import fs from 'fs';
 
@@ -9,7 +8,7 @@ import { cqa, cqc, neo4j_version } from '../lib/neo4j.js';
 import { ov_config } from '../lib/ov_config';
 
 var sm_oauth = supertest(ov_config.sm_oauth_url);
-var api = supertest((process.env.WSBASE?process.env.WSBASE:'http://localhost:8080'));
+var api = supertest('http://localhost:8080');
 
 var keep = (process.env.KEEP_TEST_DATA ? true : false);
 
