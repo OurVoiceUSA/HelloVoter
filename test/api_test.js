@@ -107,7 +107,7 @@ describe('API smoke', function () {
     }
 
     // confirm that we're all set
-    const r = await api.get('/canvass/v1/uncle')
+    const r = await api.get('/HelloVoterHQ/api/v1/uncle')
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.name).to.equal("Bob");
@@ -120,7 +120,7 @@ describe('API smoke', function () {
   });
 
   it('hello 400 no jwt', async () => {
-    const r = await api.post('/canvass/v1/hello')
+    const r = await api.post('/HelloVoterHQ/api/v1/hello')
     expect(r.statusCode).to.equal(400);
     expect(r.body.error).to.equal(true);
     expect(r.body.msg).to.equal("Missing required header.");
@@ -139,7 +139,7 @@ describe('API smoke', function () {
 
     let jwt_bad = r.body.jwt; // this lacks an ID
 
-    r = await api.post('/canvass/v1/hello')
+    r = await api.post('/HelloVoterHQ/api/v1/hello')
       .set('Authorization', 'Bearer '+jwt_bad)
     expect(r.statusCode).to.equal(400);
     expect(r.body.error).to.equal(true);
@@ -155,7 +155,7 @@ describe('API smoke', function () {
       exp: Math.floor(new Date().getTime() / 1000)+60,
     }), Math.random().toString());
 
-    const r = await api.post('/canvass/v1/hello')
+    const r = await api.post('/HelloVoterHQ/api/v1/hello')
       .set('Authorization', 'Bearer '+jwt_inval)
     expect(r.statusCode).to.equal(401);
     expect(r.body.error).to.equal(true);
@@ -165,7 +165,7 @@ describe('API smoke', function () {
   it('hello 200 admin awaiting assignment', async () => {
     let r;
 
-    r = await api.post('/canvass/v1/hello')
+    r = await api.post('/HelloVoterHQ/api/v1/hello')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         longitude: -118.3281370,
@@ -178,7 +178,7 @@ describe('API smoke', function () {
     // make admin an admin
     await cqa('match (a:Canvasser {id:{id}}) set a.admin=true', c.admin);
 
-    r = await api.post('/canvass/v1/hello')
+    r = await api.post('/HelloVoterHQ/api/v1/hello')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         longitude: -118.3281370,
@@ -192,12 +192,12 @@ describe('API smoke', function () {
   it('hello 400 invalid params', async () => {
     let r;
 
-    r = await api.post('/canvass/v1/hello')
+    r = await api.post('/HelloVoterHQ/api/v1/hello')
       .set('Authorization', 'Bearer '+c.bob.jwt)
     expect(r.statusCode).to.equal(400);
     expect(r.body.msg).to.equal("Parameters longitude and latitude must be set and numeric.");
 
-    r = await api.post('/canvass/v1/hello')
+    r = await api.post('/HelloVoterHQ/api/v1/hello')
       .set('Authorization', 'Bearer '+c.bob.jwt)
       .send({
         longitude: "abc",
@@ -211,7 +211,7 @@ describe('API smoke', function () {
   it('hello 200 canvassers awaiting assignment', async () => {
     let r;
 
-    r = await api.post('/canvass/v1/hello')
+    r = await api.post('/HelloVoterHQ/api/v1/hello')
       .set('Authorization', 'Bearer '+c.bob.jwt)
       .send({
         longitude: -118.3281370,
@@ -222,7 +222,7 @@ describe('API smoke', function () {
     expect(r.body.data.ready).to.equal(false);
     expect(r.body.data).to.not.have.property("admin");
 
-    r = await api.post('/canvass/v1/hello')
+    r = await api.post('/HelloVoterHQ/api/v1/hello')
       .set('Authorization', 'Bearer '+c.sally.jwt)
       .send({
         longitude: -118.3281370,
@@ -233,7 +233,7 @@ describe('API smoke', function () {
     expect(r.body.data.ready).to.equal(false);
     expect(r.body.data).to.not.have.property("admin");
 
-    r = await api.post('/canvass/v1/hello')
+    r = await api.post('/HelloVoterHQ/api/v1/hello')
       .set('Authorization', 'Bearer '+c.rich.jwt)
       .send({
         longitude: -118.3281370,
@@ -244,7 +244,7 @@ describe('API smoke', function () {
     expect(r.body.data.ready).to.equal(false);
     expect(r.body.data).to.not.have.property("admin");
 
-    r = await api.post('/canvass/v1/hello')
+    r = await api.post('/HelloVoterHQ/api/v1/hello')
       .set('Authorization', 'Bearer '+c.jane.jwt)
       .send({
         longitude: -118.3281370,
@@ -255,7 +255,7 @@ describe('API smoke', function () {
     expect(r.body.data.ready).to.equal(false);
     expect(r.body.data).to.not.have.property("admin");
 
-    r = await api.post('/canvass/v1/hello')
+    r = await api.post('/HelloVoterHQ/api/v1/hello')
       .set('Authorization', 'Bearer '+c.mike.jwt)
       .send({
         longitude: -118.3281370,
@@ -266,7 +266,7 @@ describe('API smoke', function () {
     expect(r.body.data.ready).to.equal(false);
     expect(r.body.data).to.not.have.property("admin");
 
-    r = await api.post('/canvass/v1/hello')
+    r = await api.post('/HelloVoterHQ/api/v1/hello')
       .set('Authorization', 'Bearer '+c.han.jwt)
       .send({
         longitude: -118.3281370,
@@ -281,7 +281,7 @@ describe('API smoke', function () {
   // TODO: check admin full list vs. non-admin only see your own team
 
   it('canvasser/list 200 array', async () => {
-    const r = await api.get('/canvass/v1/canvasser/list')
+    const r = await api.get('/HelloVoterHQ/api/v1/canvasser/list')
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.data).to.be.an('array');
@@ -291,7 +291,7 @@ describe('API smoke', function () {
     let r;
 
     for (let p in c) {
-      r = await api.post('/canvass/v1/canvasser/update')
+      r = await api.post('/HelloVoterHQ/api/v1/canvasser/update')
         .set('Authorization', 'Bearer '+c.admin.jwt)
         .send({
           id: c[p].id,
@@ -301,7 +301,7 @@ describe('API smoke', function () {
       expect(r.statusCode).to.equal(200);
     }
 
-    r = await api.post('/canvass/v1/canvasser/update')
+    r = await api.post('/HelloVoterHQ/api/v1/canvasser/update')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         id: c.bob.id,
@@ -310,7 +310,7 @@ describe('API smoke', function () {
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.get('/canvass/v1/canvasser/get?id='+c.bob.id)
+    r = await api.get('/HelloVoterHQ/api/v1/canvasser/get?id='+c.bob.id)
       .set('Authorization', 'Bearer '+c.admin.jwt)
     expect(r.statusCode).to.equal(200);
     expect(r.body.data.length).to.equal(1);
@@ -318,7 +318,7 @@ describe('API smoke', function () {
     expect(r.body.data[0].display_name).to.equal("Robert");
     expect(r.body.data[0].display_avatar).to.equal("http://example.com/avatar.jpg");
 
-    r = await api.post('/canvass/v1/canvasser/update')
+    r = await api.post('/HelloVoterHQ/api/v1/canvasser/update')
       .set('Authorization', 'Bearer '+c.bob.jwt)
       .send({
         id: c.bob.id,
@@ -327,7 +327,7 @@ describe('API smoke', function () {
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.get('/canvass/v1/canvasser/get?id='+c.bob.id)
+    r = await api.get('/HelloVoterHQ/api/v1/canvasser/get?id='+c.bob.id)
       .set('Authorization', 'Bearer '+c.bob.jwt)
     expect(r.statusCode).to.equal(200);
     expect(r.body.data.length).to.equal(1);
@@ -335,7 +335,7 @@ describe('API smoke', function () {
     expect(r.body.data[0].display_name).to.equal("Bobby");
     expect(r.body.data[0].display_avatar).to.equal("http://example.com/avatar.jpg");
 
-    r = await api.post('/canvass/v1/canvasser/update')
+    r = await api.post('/HelloVoterHQ/api/v1/canvasser/update')
       .set('Authorization', 'Bearer '+c.sally.jwt)
       .send({
         id: c.bob.id,
@@ -349,14 +349,14 @@ describe('API smoke', function () {
   it('canvasser/lock 200 bob', async () => {
     let r;
 
-    r = await api.post('/canvass/v1/canvasser/lock')
+    r = await api.post('/HelloVoterHQ/api/v1/canvasser/lock')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         id: c.bob.id,
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.post('/canvass/v1/hello')
+    r = await api.post('/HelloVoterHQ/api/v1/hello')
       .set('Authorization', 'Bearer '+c.bob.jwt)
     expect(r.statusCode).to.equal(403);
     expect(r.body.msg).to.equal("Your account is locked.");
@@ -365,14 +365,14 @@ describe('API smoke', function () {
   it('canvasser/unlock 200 bob', async () => {
     let r;
 
-    r = await api.post('/canvass/v1/canvasser/unlock')
+    r = await api.post('/HelloVoterHQ/api/v1/canvasser/unlock')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         id: c.bob.id,
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.post('/canvass/v1/hello')
+    r = await api.post('/HelloVoterHQ/api/v1/hello')
       .set('Authorization', 'Bearer '+c.bob.jwt)
       .send({
         longitude: -118.3281370,
@@ -384,14 +384,14 @@ describe('API smoke', function () {
   // TODO: check admin full list vs. non-admin only see your own teams
 
   it('team/list 200 array', async () => {
-    const r = await api.get('/canvass/v1/team/list')
+    const r = await api.get('/HelloVoterHQ/api/v1/team/list')
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.data).to.be.an('array');
   });
 
   it('team/create 400 invalid characters', async () => {
-    const r = await api.post('/canvass/v1/team/create')
+    const r = await api.post('/HelloVoterHQ/api/v1/team/create')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: "*",
@@ -405,14 +405,14 @@ describe('API smoke', function () {
   it('team/create & team/members/add team 1', async () => {
     let r;
 
-    r = await api.post('/canvass/v1/team/create')
+    r = await api.post('/HelloVoterHQ/api/v1/team/create')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: teamName1,
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.post('/canvass/v1/team/create')
+    r = await api.post('/HelloVoterHQ/api/v1/team/create')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: teamName1,
@@ -420,12 +420,12 @@ describe('API smoke', function () {
     expect(r.statusCode).to.equal(500);
     expect(r.body.error).to.equal(true);
 
-    r = await api.get('/canvass/v1/team/members/list?teamName='+teamName1)
+    r = await api.get('/HelloVoterHQ/api/v1/team/members/list?teamName='+teamName1)
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.data.length).to.equal(0);
 
-    r = await api.post('/canvass/v1/team/members/add')
+    r = await api.post('/HelloVoterHQ/api/v1/team/members/add')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         teamName: teamName1,
@@ -433,7 +433,7 @@ describe('API smoke', function () {
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.post('/canvass/v1/team/members/add')
+    r = await api.post('/HelloVoterHQ/api/v1/team/members/add')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         teamName: teamName1,
@@ -441,7 +441,7 @@ describe('API smoke', function () {
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.get('/canvass/v1/team/members/list?teamName='+teamName1)
+    r = await api.get('/HelloVoterHQ/api/v1/team/members/list?teamName='+teamName1)
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.data.length).to.equal(2);
@@ -451,19 +451,19 @@ describe('API smoke', function () {
   it('team/create & team/members/add team 2', async () => {
     let r;
 
-    r = await api.post('/canvass/v1/team/create')
+    r = await api.post('/HelloVoterHQ/api/v1/team/create')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: teamName2,
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.get('/canvass/v1/team/members/list?teamName='+teamName2)
+    r = await api.get('/HelloVoterHQ/api/v1/team/members/list?teamName='+teamName2)
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.data.length).to.equal(0);
 
-    r = await api.post('/canvass/v1/team/members/add')
+    r = await api.post('/HelloVoterHQ/api/v1/team/members/add')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         teamName: teamName2,
@@ -471,7 +471,7 @@ describe('API smoke', function () {
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.post('/canvass/v1/team/members/add')
+    r = await api.post('/HelloVoterHQ/api/v1/team/members/add')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         teamName: teamName2,
@@ -479,12 +479,12 @@ describe('API smoke', function () {
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.get('/canvass/v1/team/members/list?teamName='+teamName1)
+    r = await api.get('/HelloVoterHQ/api/v1/team/members/list?teamName='+teamName1)
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.data.length).to.equal(2);
 
-    r = await api.get('/canvass/v1/team/members/list?teamName='+teamName2)
+    r = await api.get('/HelloVoterHQ/api/v1/team/members/list?teamName='+teamName2)
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.data.length).to.equal(2);
@@ -494,7 +494,7 @@ describe('API smoke', function () {
   it('canvasser/get same team', async () => {
     let r;
 
-    r = await api.get('/canvass/v1/canvasser/get?id='+c.bob.id)
+    r = await api.get('/HelloVoterHQ/api/v1/canvasser/get?id='+c.bob.id)
       .set('Authorization', 'Bearer '+c.admin.jwt)
     expect(r.statusCode).to.equal(200);
     expect(r.body.data.length).to.equal(1);
@@ -502,7 +502,7 @@ describe('API smoke', function () {
     expect(r.body.data[0].display_name).to.equal("Bobby");
     expect(r.body.data[0].display_avatar).to.equal("http://example.com/avatar.jpg");
 
-    r = await api.get('/canvass/v1/canvasser/get?id='+c.bob.id)
+    r = await api.get('/HelloVoterHQ/api/v1/canvasser/get?id='+c.bob.id)
       .set('Authorization', 'Bearer '+c.sally.jwt)
     expect(r.statusCode).to.equal(200);
     expect(r.body.data.length).to.equal(1);
@@ -510,18 +510,18 @@ describe('API smoke', function () {
     expect(r.body.data[0].display_name).to.equal("Bobby");
     expect(r.body.data[0].display_avatar).to.equal("http://example.com/avatar.jpg");
 
-    r = await api.get('/canvass/v1/canvasser/get?id='+c.bob.id)
+    r = await api.get('/HelloVoterHQ/api/v1/canvasser/get?id='+c.bob.id)
       .set('Authorization', 'Bearer '+c.rich.jwt)
     expect(r.statusCode).to.equal(403);
     expect(r.body).to.not.have.property("data");
 
-    r = await api.get('/canvass/v1/canvasser/get?id='+c.jane.id)
+    r = await api.get('/HelloVoterHQ/api/v1/canvasser/get?id='+c.jane.id)
       .set('Authorization', 'Bearer '+c.rich.jwt)
     expect(r.statusCode).to.equal(200);
     expect(r.body.data.length).to.equal(1);
     expect(r.body.data[0].id).to.equal(c.jane.id);
 
-    r = await api.get('/canvass/v1/canvasser/get?id='+c.jane.id)
+    r = await api.get('/HelloVoterHQ/api/v1/canvasser/get?id='+c.jane.id)
       .set('Authorization', 'Bearer '+c.mike.jwt)
     expect(r.statusCode).to.equal(403);
     expect(r.body).to.not.have.property("data");
@@ -531,14 +531,14 @@ describe('API smoke', function () {
   it('turf/create', async () => {
     let r;
 
-    r = await api.post('/canvass/v1/turf/create')
+    r = await api.post('/HelloVoterHQ/api/v1/turf/create')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: turfName1,
       });
     expect(r.statusCode).to.equal(400);
 
-    r = await api.post('/canvass/v1/turf/create')
+    r = await api.post('/HelloVoterHQ/api/v1/turf/create')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: turfName1,
@@ -546,7 +546,7 @@ describe('API smoke', function () {
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.post('/canvass/v1/turf/create')
+    r = await api.post('/HelloVoterHQ/api/v1/turf/create')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: turfName2,
@@ -554,7 +554,7 @@ describe('API smoke', function () {
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.post('/canvass/v1/turf/create')
+    r = await api.post('/HelloVoterHQ/api/v1/turf/create')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: turfName3,
@@ -567,12 +567,12 @@ describe('API smoke', function () {
   it('turf/assigned/canvasser', async () => {
     let r;
 
-    r = await api.get('/canvass/v1/turf/assigned/canvasser/list?turfName='+turfName1)
+    r = await api.get('/HelloVoterHQ/api/v1/turf/assigned/canvasser/list?turfName='+turfName1)
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.data.length).to.equal(0);
 
-    r = await api.post('/canvass/v1/turf/assigned/canvasser/add')
+    r = await api.post('/HelloVoterHQ/api/v1/turf/assigned/canvasser/add')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         cId: c.han.id,
@@ -580,7 +580,7 @@ describe('API smoke', function () {
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.post('/canvass/v1/turf/assigned/canvasser/add')
+    r = await api.post('/HelloVoterHQ/api/v1/turf/assigned/canvasser/add')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         cId: c.han.id,
@@ -588,7 +588,7 @@ describe('API smoke', function () {
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.post('/canvass/v1/turf/assigned/canvasser/add')
+    r = await api.post('/HelloVoterHQ/api/v1/turf/assigned/canvasser/add')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         cId: c.han.id,
@@ -597,7 +597,7 @@ describe('API smoke', function () {
     expect(r.statusCode).to.equal(400);
     expect(r.body.msg).to.equal("Canvasser location is not inside that turf.")
 
-    r = await api.post('/canvass/v1/turf/assigned/canvasser/add')
+    r = await api.post('/HelloVoterHQ/api/v1/turf/assigned/canvasser/add')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         cId: c.han.id,
@@ -606,7 +606,7 @@ describe('API smoke', function () {
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.get('/canvass/v1/turf/assigned/canvasser/list?turfName='+turfName1)
+    r = await api.get('/HelloVoterHQ/api/v1/turf/assigned/canvasser/list?turfName='+turfName1)
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.data.length).to.equal(1);
@@ -616,7 +616,7 @@ describe('API smoke', function () {
   it('turf/assigned/team', async () => {
     let r;
 
-    r = await api.post('/canvass/v1/turf/assigned/team/add')
+    r = await api.post('/HelloVoterHQ/api/v1/turf/assigned/team/add')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         teamName: teamName1,
@@ -624,7 +624,7 @@ describe('API smoke', function () {
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.post('/canvass/v1/turf/assigned/team/add')
+    r = await api.post('/HelloVoterHQ/api/v1/turf/assigned/team/add')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         teamName: teamName2,
@@ -638,7 +638,7 @@ describe('API smoke', function () {
   it('form/create & form/assigned add', async () => {
     let r;
 
-    r = await api.post('/canvass/v1/form/create')
+    r = await api.post('/HelloVoterHQ/api/v1/form/create')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: formName1,
@@ -646,7 +646,7 @@ describe('API smoke', function () {
     expect(r.statusCode).to.equal(200);
     formId1 = r.body.data[0].id;
 
-    r = await api.post('/canvass/v1/form/assigned/team/add')
+    r = await api.post('/HelloVoterHQ/api/v1/form/assigned/team/add')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         fId: formId1,
@@ -654,7 +654,7 @@ describe('API smoke', function () {
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.post('/canvass/v1/form/assigned/team/add')
+    r = await api.post('/HelloVoterHQ/api/v1/form/assigned/team/add')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         fId: formId1,
@@ -662,7 +662,7 @@ describe('API smoke', function () {
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.post('/canvass/v1/form/assigned/canvasser/add')
+    r = await api.post('/HelloVoterHQ/api/v1/form/assigned/canvasser/add')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         fId: formId1,
@@ -675,12 +675,12 @@ describe('API smoke', function () {
   it('sync', async () => {
     let r;
 
-    r = await api.post('/canvass/v1/sync')
+    r = await api.post('/HelloVoterHQ/api/v1/sync')
       .set('Authorization', 'Bearer '+c.mike.jwt)
     expect(r.statusCode).to.equal(403);
     expect(r.body.msg).to.equal("Canvasser is not assigned.");
 
-    r = await api.post('/canvass/v1/sync')
+    r = await api.post('/HelloVoterHQ/api/v1/sync')
       .set('Authorization', 'Bearer '+c.bob.jwt)
       .send({
         formId: 'asdfadsf',
@@ -689,7 +689,7 @@ describe('API smoke', function () {
     expect(r.statusCode).to.equal(403);
     expect(r.body.msg).to.equal("Canvasser is not assigned to this form.");
 
-    r = await api.post('/canvass/v1/sync')
+    r = await api.post('/HelloVoterHQ/api/v1/sync')
       .set('Authorization', 'Bearer '+c.bob.jwt)
       .send({
         formId: formId1,
@@ -697,7 +697,7 @@ describe('API smoke', function () {
     expect(r.statusCode).to.equal(400);
     expect(r.body.msg).to.equal("nodes must be an object.");
 
-    r = await api.post('/canvass/v1/sync')
+    r = await api.post('/HelloVoterHQ/api/v1/sync')
       .set('Authorization', 'Bearer '+c.bob.jwt)
       .send({
         formId: formId1,
@@ -711,47 +711,47 @@ describe('API smoke', function () {
   it('non-admin permission denied', async () => {
     let r;
 
-    r = await api.get('/canvass/v1/canvasser/get?id='+c.sally.id)
+    r = await api.get('/HelloVoterHQ/api/v1/canvasser/get?id='+c.sally.id)
       .set('Authorization', 'Bearer '+c.mike.jwt)
     expect(r.statusCode).to.equal(403);
 
-    r = await api.post('/canvass/v1/canvasser/update?id='+c.sally.id)
+    r = await api.post('/HelloVoterHQ/api/v1/canvasser/update?id='+c.sally.id)
       .set('Authorization', 'Bearer '+c.mike.jwt)
     expect(r.statusCode).to.equal(403);
 
-    r = await api.get('/canvass/v1/canvasser/unassigned')
+    r = await api.get('/HelloVoterHQ/api/v1/canvasser/unassigned')
       .set('Authorization', 'Bearer '+c.mike.jwt)
     expect(r.statusCode).to.equal(403);
 
-    r = await api.post('/canvass/v1/canvasser/lock')
-      .set('Authorization', 'Bearer '+c.mike.jwt)
-      .send({
-        id: c.sally.id,
-      });
-    expect(r.statusCode).to.equal(403);
-
-    r = await api.post('/canvass/v1/canvasser/unlock')
+    r = await api.post('/HelloVoterHQ/api/v1/canvasser/lock')
       .set('Authorization', 'Bearer '+c.mike.jwt)
       .send({
         id: c.sally.id,
       });
     expect(r.statusCode).to.equal(403);
 
-    r = await api.post('/canvass/v1/team/create')
+    r = await api.post('/HelloVoterHQ/api/v1/canvasser/unlock')
+      .set('Authorization', 'Bearer '+c.mike.jwt)
+      .send({
+        id: c.sally.id,
+      });
+    expect(r.statusCode).to.equal(403);
+
+    r = await api.post('/HelloVoterHQ/api/v1/team/create')
       .set('Authorization', 'Bearer '+c.mike.jwt)
       .send({
         name: teamName1,
       });
     expect(r.statusCode).to.equal(403);
 
-    r = await api.post('/canvass/v1/team/delete')
+    r = await api.post('/HelloVoterHQ/api/v1/team/delete')
       .set('Authorization', 'Bearer '+c.mike.jwt)
       .send({
         name: teamName1,
       });
     expect(r.statusCode).to.equal(403);
 
-    r = await api.post('/canvass/v1/team/members/add')
+    r = await api.post('/HelloVoterHQ/api/v1/team/members/add')
       .set('Authorization', 'Bearer '+c.mike.jwt)
       .send({
         cId: c.mike.id,
@@ -759,7 +759,7 @@ describe('API smoke', function () {
       });
     expect(r.statusCode).to.equal(403);
 
-    r = await api.post('/canvass/v1/team/members/remove')
+    r = await api.post('/HelloVoterHQ/api/v1/team/members/remove')
       .set('Authorization', 'Bearer '+c.mike.jwt)
       .send({
         cId: c.sally.id,
@@ -767,7 +767,7 @@ describe('API smoke', function () {
       });
     expect(r.statusCode).to.equal(403);
 
-    r = await api.post('/canvass/v1/turf/create')
+    r = await api.post('/HelloVoterHQ/api/v1/turf/create')
       .set('Authorization', 'Bearer '+c.mike.jwt)
       .send({
         name: turfName1,
@@ -775,18 +775,18 @@ describe('API smoke', function () {
       });
     expect(r.statusCode).to.equal(403);
 
-    r = await api.post('/canvass/v1/turf/delete')
+    r = await api.post('/HelloVoterHQ/api/v1/turf/delete')
       .set('Authorization', 'Bearer '+c.mike.jwt)
       .send({
         name: turfName1,
       });
     expect(r.statusCode).to.equal(403);
 
-    r = await api.get('/canvass/v1/turf/assigned/team/list?turfName='+turfName1)
+    r = await api.get('/HelloVoterHQ/api/v1/turf/assigned/team/list?turfName='+turfName1)
       .set('Authorization', 'Bearer '+c.mike.jwt)
     expect(r.statusCode).to.equal(403);
 
-    r = await api.post('/canvass/v1/turf/assigned/team/add')
+    r = await api.post('/HelloVoterHQ/api/v1/turf/assigned/team/add')
       .set('Authorization', 'Bearer '+c.mike.jwt)
       .send({
         turfName: turfName1,
@@ -794,7 +794,7 @@ describe('API smoke', function () {
       });
     expect(r.statusCode).to.equal(403);
 
-    r = await api.post('/canvass/v1/turf/assigned/team/remove')
+    r = await api.post('/HelloVoterHQ/api/v1/turf/assigned/team/remove')
       .set('Authorization', 'Bearer '+c.mike.jwt)
       .send({
         teamName: teamName1,
@@ -802,19 +802,11 @@ describe('API smoke', function () {
       });
     expect(r.statusCode).to.equal(403);
 
-    r = await api.get('/canvass/v1/turf/assigned/canvasser/list?turfName='+turfName1)
+    r = await api.get('/HelloVoterHQ/api/v1/turf/assigned/canvasser/list?turfName='+turfName1)
       .set('Authorization', 'Bearer '+c.mike.jwt)
     expect(r.statusCode).to.equal(403);
 
-    r = await api.post('/canvass/v1/turf/assigned/canvasser/add')
-      .set('Authorization', 'Bearer '+c.mike.jwt)
-      .send({
-        cId: c.mike.id,
-        turfName: turfName1,
-      });
-    expect(r.statusCode).to.equal(403);
-
-    r = await api.post('/canvass/v1/turf/assigned/canvasser/remove')
+    r = await api.post('/HelloVoterHQ/api/v1/turf/assigned/canvasser/add')
       .set('Authorization', 'Bearer '+c.mike.jwt)
       .send({
         cId: c.mike.id,
@@ -822,37 +814,37 @@ describe('API smoke', function () {
       });
     expect(r.statusCode).to.equal(403);
 
-    r = await api.get('/canvass/v1/form/get?id='+formId1)
+    r = await api.post('/HelloVoterHQ/api/v1/turf/assigned/canvasser/remove')
+      .set('Authorization', 'Bearer '+c.mike.jwt)
+      .send({
+        cId: c.mike.id,
+        turfName: turfName1,
+      });
+    expect(r.statusCode).to.equal(403);
+
+    r = await api.get('/HelloVoterHQ/api/v1/form/get?id='+formId1)
       .set('Authorization', 'Bearer '+c.mike.jwt)
     expect(r.statusCode).to.equal(403);
 
-    r = await api.post('/canvass/v1/form/create')
+    r = await api.post('/HelloVoterHQ/api/v1/form/create')
       .set('Authorization', 'Bearer '+c.mike.jwt)
       .send({
         name: formName1,
       });
     expect(r.statusCode).to.equal(403);
 
-    r = await api.post('/canvass/v1/form/delete')
+    r = await api.post('/HelloVoterHQ/api/v1/form/delete')
       .set('Authorization', 'Bearer '+c.mike.jwt)
       .send({
         id: formId1,
       });
     expect(r.statusCode).to.equal(403);
 
-    r = await api.get('/canvass/v1/form/assigned/team/list?id='+formId1)
+    r = await api.get('/HelloVoterHQ/api/v1/form/assigned/team/list?id='+formId1)
       .set('Authorization', 'Bearer '+c.mike.jwt)
     expect(r.statusCode).to.equal(403);
 
-    r = await api.post('/canvass/v1/form/assigned/team/add')
-      .set('Authorization', 'Bearer '+c.mike.jwt)
-      .send({
-        fId: formId1,
-        teamName: teamName1,
-      });
-    expect(r.statusCode).to.equal(403);
-
-    r = await api.post('/canvass/v1/form/assigned/team/remove')
+    r = await api.post('/HelloVoterHQ/api/v1/form/assigned/team/add')
       .set('Authorization', 'Bearer '+c.mike.jwt)
       .send({
         fId: formId1,
@@ -860,11 +852,19 @@ describe('API smoke', function () {
       });
     expect(r.statusCode).to.equal(403);
 
-    r = await api.get('/canvass/v1/form/assigned/canvasser/list?id='+formId1)
+    r = await api.post('/HelloVoterHQ/api/v1/form/assigned/team/remove')
+      .set('Authorization', 'Bearer '+c.mike.jwt)
+      .send({
+        fId: formId1,
+        teamName: teamName1,
+      });
+    expect(r.statusCode).to.equal(403);
+
+    r = await api.get('/HelloVoterHQ/api/v1/form/assigned/canvasser/list?id='+formId1)
       .set('Authorization', 'Bearer '+c.mike.jwt)
     expect(r.statusCode).to.equal(403);
 
-    r = await api.post('/canvass/v1/form/assigned/canvasser/add')
+    r = await api.post('/HelloVoterHQ/api/v1/form/assigned/canvasser/add')
       .set('Authorization', 'Bearer '+c.mike.jwt)
       .send({
         fId: formId1,
@@ -872,7 +872,7 @@ describe('API smoke', function () {
       });
     expect(r.statusCode).to.equal(403);
 
-    r = await api.post('/canvass/v1/form/assigned/canvasser/remove')
+    r = await api.post('/HelloVoterHQ/api/v1/form/assigned/canvasser/remove')
       .set('Authorization', 'Bearer '+c.mike.jwt)
       .send({
         fId: formId1,
@@ -880,15 +880,15 @@ describe('API smoke', function () {
       });
     expect(r.statusCode).to.equal(403);
 
-    r = await api.get('/canvass/v1/question/get?key=reality')
+    r = await api.get('/HelloVoterHQ/api/v1/question/get?key=reality')
       .set('Authorization', 'Bearer '+c.mike.jwt)
     expect(r.statusCode).to.equal(403);
 
-    r = await api.get('/canvass/v1/question/list')
+    r = await api.get('/HelloVoterHQ/api/v1/question/list')
       .set('Authorization', 'Bearer '+c.mike.jwt)
     expect(r.statusCode).to.equal(403);
 
-    r = await api.post('/canvass/v1/question/create')
+    r = await api.post('/HelloVoterHQ/api/v1/question/create')
       .set('Authorization', 'Bearer '+c.mike.jwt)
       .send({
         key: 'reality',
@@ -897,18 +897,18 @@ describe('API smoke', function () {
       });
     expect(r.statusCode).to.equal(403);
 
-    r = await api.post('/canvass/v1/question/delete')
+    r = await api.post('/HelloVoterHQ/api/v1/question/delete')
       .set('Authorization', 'Bearer '+c.mike.jwt)
       .send({
         key: 'reality',
       });
     expect(r.statusCode).to.equal(403);
 
-    r = await api.get('/canvass/v1/question/assigned/list?key=reality')
+    r = await api.get('/HelloVoterHQ/api/v1/question/assigned/list?key=reality')
       .set('Authorization', 'Bearer '+c.mike.jwt)
     expect(r.statusCode).to.equal(403);
 
-    r = await api.post('/canvass/v1/question/assigned/add')
+    r = await api.post('/HelloVoterHQ/api/v1/question/assigned/add')
       .set('Authorization', 'Bearer '+c.mike.jwt)
       .send({
         fId: formId1,
@@ -916,7 +916,7 @@ describe('API smoke', function () {
       });
     expect(r.statusCode).to.equal(403);
 
-    r = await api.post('/canvass/v1/question/assigned/remove')
+    r = await api.post('/HelloVoterHQ/api/v1/question/assigned/remove')
       .set('Authorization', 'Bearer '+c.mike.jwt)
       .send({
         fId: formId1,
@@ -929,27 +929,27 @@ describe('API smoke', function () {
   it('non-admin unassigned zero visibility', async () => {
     let r;
 
-    r = await api.get('/canvass/v1/canvasser/list')
+    r = await api.get('/HelloVoterHQ/api/v1/canvasser/list')
       .set('Authorization', 'Bearer '+c.mike.jwt)
     expect(r.statusCode).to.equal(200);
     expect(r.body.data.length).to.equal(0);
 
-    r = await api.get('/canvass/v1/team/list')
+    r = await api.get('/HelloVoterHQ/api/v1/team/list')
       .set('Authorization', 'Bearer '+c.mike.jwt)
     expect(r.statusCode).to.equal(200);
     expect(r.body.data.length).to.equal(0);
 
-    r = await api.get('/canvass/v1/team/members/list?teamName='+teamName1)
+    r = await api.get('/HelloVoterHQ/api/v1/team/members/list?teamName='+teamName1)
       .set('Authorization', 'Bearer '+c.mike.jwt)
     expect(r.statusCode).to.equal(200);
     expect(r.body.data.length).to.equal(0);
 
-    r = await api.get('/canvass/v1/turf/list')
+    r = await api.get('/HelloVoterHQ/api/v1/turf/list')
       .set('Authorization', 'Bearer '+c.mike.jwt)
     expect(r.statusCode).to.equal(200);
     expect(r.body.data.length).to.equal(0);
 
-    r = await api.get('/canvass/v1/form/list?id='+formId1)
+    r = await api.get('/HelloVoterHQ/api/v1/form/list?id='+formId1)
       .set('Authorization', 'Bearer '+c.mike.jwt)
     expect(r.statusCode).to.equal(200);
     expect(r.body.data.length).to.equal(0);
@@ -959,7 +959,7 @@ describe('API smoke', function () {
   (keep?it.skip:it)('turf/assigned/canvasser/remove', async () => {
     let r;
 
-    r = await api.post('/canvass/v1/turf/assigned/canvasser/remove')
+    r = await api.post('/HelloVoterHQ/api/v1/turf/assigned/canvasser/remove')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         cId: c.han.id,
@@ -967,7 +967,7 @@ describe('API smoke', function () {
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.get('/canvass/v1/turf/assigned/canvasser/list?turfName='+turfName1)
+    r = await api.get('/HelloVoterHQ/api/v1/turf/assigned/canvasser/list?turfName='+turfName1)
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.data.length).to.equal(0);
@@ -977,7 +977,7 @@ describe('API smoke', function () {
   (keep?it.skip:it)('team/members/remove & team/delete', async () => {
     let r;
 
-    r = await api.post('/canvass/v1/team/members/remove')
+    r = await api.post('/HelloVoterHQ/api/v1/team/members/remove')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         teamName: teamName1,
@@ -985,7 +985,7 @@ describe('API smoke', function () {
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.post('/canvass/v1/team/members/remove')
+    r = await api.post('/HelloVoterHQ/api/v1/team/members/remove')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         teamName: teamName1,
@@ -993,19 +993,19 @@ describe('API smoke', function () {
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.get('/canvass/v1/team/members/list?teamName='+teamName1)
+    r = await api.get('/HelloVoterHQ/api/v1/team/members/list?teamName='+teamName1)
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.data.length).to.equal(0);
 
-    r = await api.post('/canvass/v1/team/delete')
+    r = await api.post('/HelloVoterHQ/api/v1/team/delete')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: teamName1,
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.post('/canvass/v1/team/delete')
+    r = await api.post('/HelloVoterHQ/api/v1/team/delete')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: teamName2,
@@ -1017,26 +1017,26 @@ describe('API smoke', function () {
   (keep?it.skip:it)('turf/delete', async () => {
     let r;
 
-    r = await api.get('/canvass/v1/turf/assigned/team/list?turfName='+turfName1)
+    r = await api.get('/HelloVoterHQ/api/v1/turf/assigned/team/list?turfName='+turfName1)
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.data.length).to.equal(0);
 
-    r = await api.post('/canvass/v1/turf/delete')
+    r = await api.post('/HelloVoterHQ/api/v1/turf/delete')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: turfName1,
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.post('/canvass/v1/turf/delete')
+    r = await api.post('/HelloVoterHQ/api/v1/turf/delete')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: turfName2,
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.post('/canvass/v1/turf/delete')
+    r = await api.post('/HelloVoterHQ/api/v1/turf/delete')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: turfName3,
@@ -1048,19 +1048,19 @@ describe('API smoke', function () {
   (keep?it.skip:it)('form/delete', async () => {
     let r;
 
-    r = await api.get('/canvass/v1/form/list')
+    r = await api.get('/HelloVoterHQ/api/v1/form/list')
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     let count = r.body.data.length;
 
-    r = await api.post('/canvass/v1/form/delete')
+    r = await api.post('/HelloVoterHQ/api/v1/form/delete')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         id: formId1,
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.get('/canvass/v1/form/list')
+    r = await api.get('/HelloVoterHQ/api/v1/form/list')
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.data.length).to.equal(count-1);
