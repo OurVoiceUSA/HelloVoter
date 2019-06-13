@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "postinstall": "patch-package",
     "test": "JUNIT_REPORT_PATH=test-result/result.xml JUNIT_REPORT_STACK=1 mocha --require @babel/register --timeout 25000 --colors --reporter mocha-jenkins-reporter || true",
     "start": "node node_modules/nodemon/bin/nodemon.js --signal SIGKILL --exec babel-node server.js"
   },
@@ -20,6 +21,7 @@
     "mocha": "^6.1.4",
     "mocha-jenkins-reporter": "^0.4.1",
     "nodemon": "^1.19.1",
+    "patch-package": "^6.1.2",
     "random-points-on-polygon": "0.0.4",
     "random-words": "^1.1.0",
     "supertest": "^4.0.2"
