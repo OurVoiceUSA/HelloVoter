@@ -4,12 +4,19 @@ import jwt from 'jsonwebtoken';
 import { expect } from 'chai';
 import fs from 'fs';
 
-import { cqa, cqc, neo4j_version } from '../lib/neo4j.js';
-import { ov_config } from '../lib/ov_config';
 import { doExpressInit } from '../lib/express';
+import { ov_config } from '../lib/ov_config';
+import neo4j from '../lib/neo4j';
+import queue from '../lib/queue';
+
+const db = new neo4j(ov_config);
+db.connect();
+
+const qq = new queue(db);
 
 var sm_oauth = supertest(ov_config.sm_oauth_url);
-var api = supertest(doExpressInit());
+var app = doExpressInit(db, qq);
+var api = supertest(app);
 
 var keep = (process.env.KEEP_TEST_DATA ? true : false);
 
@@ -42,7 +49,7 @@ describe('API smoke', function () {
   before(async () => {
     let r;
 
-    let arr = (await neo4j_version()).split('.');
+    let arr = (await db.version()).split('.');
     let ver = Number.parseFloat(arr[0]+'.'+arr[1]);
 
     if (ver < 3.5) {
@@ -51,8 +58,8 @@ describe('API smoke', function () {
     }
 
     // clean up test data before we begin
-    await cqa('match (a:Volunteer) where a.id =~ "test:.*" detach delete a');
-    await cqa('match (a) where a.name =~ "'+tpx+'.*" detach delete a');
+    await db.query('match (a:Volunteer) where a.id =~ "test:.*" detach delete a');
+    await db.query('match (a) where a.name =~ "'+tpx+'.*" detach delete a');
 
     r = await sm_oauth.get('/pubkey');
     expect(r.statusCode).to.equal(200);
@@ -100,12 +107,12 @@ describe('API smoke', function () {
 
     if (!keep) {
       // clean up test users
-      await cqa('match (a:Volunteer) where a.id =~ "test:.*" detach delete a');
+      await db.query('match (a:Volunteer) where a.id =~ "test:.*" detach delete a');
       // any left over test data??
-      ref = await cqa('match (a) where a.name =~ "'+tpx+'.*" return count(a)');
+      ref = await db.query('match (a) where a.name =~ "'+tpx+'.*" return count(a)');
     }
 
-    cqc();
+    db.close();
 
     if (!keep) {
       // check query after close, so we don't hang the test on failure
@@ -182,7 +189,7 @@ describe('API smoke', function () {
     expect(r.body.data.ready).to.equal(false);
 
     // make admin an admin
-    await cqa('match (a:Volunteer {id:{id}}) set a.admin=true', c.admin);
+    await db.query('match (a:Volunteer {id:{id}}) set a.admin=true', c.admin);
 
     r = await api.post('/HelloVoterHQ/api/v1/hello')
       .set('Authorization', 'Bearer '+c.admin.jwt)
