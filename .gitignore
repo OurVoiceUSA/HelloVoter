@@ -45,6 +45,7 @@ node_modules/
 test-result/
 npm-debug.log
 yarn-error.log
+.nyc_output/
 
 # BUCK
 buck-out/
