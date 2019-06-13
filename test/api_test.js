@@ -117,10 +117,7 @@ describe('API smoke', function () {
       ref = await db.query('match (a) where a.name =~ "'+tpx+'.*" return count(a)');
     }
 
-    db.close();
-
     if (!keep) {
-      // check query after close, so we don't hang the test on failure
       expect(ref.data[0]).to.equal(0);
     }
 
@@ -129,6 +126,8 @@ describe('API smoke', function () {
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.name).to.equal("Bob");
+
+    db.close();
   });
 
   it('poke 200 timestamp', async () => {
