@@ -15,8 +15,13 @@ db.connect();
 const qq = new queue(db);
 
 var sm_oauth = supertest(ov_config.sm_oauth_url);
-var app = doExpressInit(db, qq);
-var api = supertest(app);
+var api;
+
+if (process.env.TEST_TARGET) {
+  api = supertest(process.env.TEST_TARGET);
+} else {
+  api = supertest(doExpressInit(false, db, qq));
+}
 
 var keep = (process.env.KEEP_TEST_DATA ? true : false);
 
