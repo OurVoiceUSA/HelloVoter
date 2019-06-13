@@ -6,9 +6,10 @@ import fs from 'fs';
 
 import { cqa, cqc, neo4j_version } from '../lib/neo4j.js';
 import { ov_config } from '../lib/ov_config';
+import { doExpressInit } from '../lib/express';
 
 var sm_oauth = supertest(ov_config.sm_oauth_url);
-var api = supertest('http://localhost:8080');
+var api = supertest(doExpressInit());
 
 var keep = (process.env.KEEP_TEST_DATA ? true : false);
 
