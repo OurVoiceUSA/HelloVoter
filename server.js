@@ -6,7 +6,6 @@ import neo4j from './lib/neo4j';
 import queue from './lib/queue';
 
 const db = new neo4j(ov_config);
-db.connect();
 
 const qq = new queue(db);
 

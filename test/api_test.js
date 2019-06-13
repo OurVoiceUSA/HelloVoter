@@ -10,7 +10,6 @@ import neo4j from '../lib/neo4j';
 import queue from '../lib/queue';
 
 const db = new neo4j(ov_config);
-db.connect();
 
 var sm_oauth = supertest(ov_config.sm_oauth_url);
 var api;
