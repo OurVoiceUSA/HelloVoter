@@ -53,7 +53,6 @@
     "node-neo4j-bolt-adapter": "github:OurVoiceUSA/node-neo4j-bolt-adapter",
     "ourvoiceusa-sdk-js": "github:OurVoiceUSA/ourvoiceusa-sdk-js",
     "papaparse": "^5.0.0",
-    "uuid": "^3.3.2",
     "wkx": "^0.4.7"
   },
   "optionalDependencies": {
