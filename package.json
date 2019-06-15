@@ -11,11 +11,6 @@
   "author": "Our Voice USA",
   "license": "AGPL-3.0",
   "devDependencies": {
-    "@babel/cli": "^7.4.4",
-    "@babel/core": "^7.4.5",
-    "@babel/node": "^7.4.5",
-    "@babel/plugin-transform-runtime": "^7.4.4",
-    "@babel/preset-env": "^7.4.5",
     "@babel/register": "^7.4.4",
     "chai": "^4.2.0",
     "mocha": "^6.1.4",
@@ -33,6 +28,11 @@
     ]
   },
   "dependencies": {
+    "@babel/cli": "^7.4.4",
+    "@babel/core": "^7.4.5",
+    "@babel/node": "^7.4.5",
+    "@babel/plugin-transform-runtime": "^7.4.4",
+    "@babel/preset-env": "^7.4.5",
     "@babel/runtime": "^7.4.5",
     "body-parser": "^1.19.0",
     "circle-to-polygon": "^1.0.2",
