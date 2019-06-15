@@ -29,10 +29,10 @@ Then setup neo4j with docker:
     sudo mv jmx.access jmx.password /opt/neo4j/logs/
     (
       cd /opt/neo4j/plugins
-      sudo curl -LO https://github.com/neo4j-contrib/spatial/releases/download/0.26.1-neo4j-3.4.9/neo4j-spatial-0.26.1-neo4j-3.4.9-server-plugin.jar
-      sudo curl -LO https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases/download/3.5.0.1/apoc-3.5.0.1-all.jar
+      sudo curl -LO https://github.com/neo4j-contrib/spatial/releases/download/0.26.2-neo4j-3.5.2/neo4j-spatial-0.26.2-neo4j-3.5.2-server-plugin.jar
+      sudo curl -LO https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases/download/3.5.0.4/apoc-3.5.0.4-all.jar
     )
-    sudo chown -R 100:101 /opt/neo4j
+    sudo chown -R 101:101 /opt/neo4j
 
     docker run -d --name neo4j \
       --mount type=bind,src=/opt/neo4j/data,dst=/data \
@@ -46,7 +46,7 @@ Then setup neo4j with docker:
       -e NEO4J_dbms_directories_tx__log=/logs \
       -e NEO4J_dbms_jvm_additional="-Dcom.sun.management.jmxremote.authenticate=true -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.password.file=/logs/jmx.password -Dcom.sun.management.jmxremote.access.file=/logs/jmx.access -Dcom.sun.management.jmxremote.port=9999 -Djava.rmi.server.hostname=127.0.0.1" \
       --network host --add-host $(hostname):127.0.0.1 \
-      -e NEO4J_AUTH=neo4j/$NEO4J_PASS neo4j:3.5.3
+      -e NEO4J_AUTH=neo4j/$NEO4J_PASS neo4j:3.5
 
 Feel free to adjust the paths of the `bind` mounts to suite your environment. For lage databases, we recommend you put the logs on a different storage device than the data.
 
