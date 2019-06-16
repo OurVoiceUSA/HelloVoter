@@ -3,7 +3,7 @@ import https from 'https';
 import fs from 'fs';
 
 import { doStartupTasks } from './lib/startup';
-import { doExpressInit } from './lib/express';
+import { doExpressInit } from './app/createExpressApp';
 import { ov_config } from './lib/ov_config';
 import neo4j from './lib/neo4j';
 import queue from './lib/queue';
