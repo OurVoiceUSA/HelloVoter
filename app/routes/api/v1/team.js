@@ -7,20 +7,6 @@ import {
 const Router = require('express').Router
 
 module.exports = Router({mergeParams: true})
-.get('/team/list', (req, res) => {
-  if (req.user.admin)
-    return cqdo(req, res, 'match (a:Team) return a');
-  else
-    return cqdo(req, res, 'match (a:Volunteer {id:{id}})-[:MEMBERS]-(b:Team) return b', req.user);
-})
-.get('/team/get', (req, res) => {
-  if (req.user.admin)
-    return cqdo(req, res, 'match (a:Team {id:{teamId}}) return a', req.query);
-  else {
-    req.query.id = req.user.id;
-    return cqdo(req, res, 'match (:Volunteer {id:{id}})-[:MEMBERS]-(a:Team {id:{teamId}}) return a', req.query);
-  }
-})
 .post('/team/create', async (req, res) => {
   if (!req.user.admin) return _403(res, "Permission denied.");
   if (!valid(req.body.name)) return _400(res, "Invalid value to parameter 'name'.");
@@ -37,9 +23,19 @@ module.exports = Router({mergeParams: true})
 
   return res.json({teamId: ref.data[0]});
 })
-.post('/team/delete', (req, res) => {
-  if (!valid(req.body.teamId)) return _400(res, "Invalid value to parameter 'teamId'.");
-  return cqdo(req, res, 'match (a:Team {id:{teamId}}) detach delete a', req.body, true);
+.get('/team/list', (req, res) => {
+  if (req.user.admin)
+    return cqdo(req, res, 'match (a:Team) return a');
+  else
+    return cqdo(req, res, 'match (a:Volunteer {id:{id}})-[:MEMBERS]-(b:Team) return b', req.user);
+})
+.get('/team/get', (req, res) => {
+  if (req.user.admin)
+    return cqdo(req, res, 'match (a:Team {id:{teamId}}) return a', req.query);
+  else {
+    req.query.id = req.user.id;
+    return cqdo(req, res, 'match (:Volunteer {id:{id}})-[:MEMBERS]-(a:Team {id:{teamId}}) return a', req.query);
+  }
 })
 .get('/team/members/list', async (req, res) => {
   if (!valid(req.query.teamId)) return _400(res, "Invalid value to parameter 'teamId'.");
@@ -116,6 +112,10 @@ module.exports = Router({mergeParams: true})
 .post('/team/form/remove', (req, res) => {
   if (!valid(req.body.teamId) || valid(!req.body.formId)) return _400(res, "Invalid value to parameter 'teamId' or 'formId'.");
   return cqdo(req, res, 'match (a:Form {id:{formId}})-[r:ASSIGNED]-(b:Team {id:{teamId}}) delete r', req.body, true);
+})
+.post('/team/delete', (req, res) => {
+  if (!valid(req.body.teamId)) return _400(res, "Invalid value to parameter 'teamId'.");
+  return cqdo(req, res, 'match (a:Team {id:{teamId}}) detach delete a', req.body, true);
 });
 
 async function volunteerIsLeader(req, id, teamId) {

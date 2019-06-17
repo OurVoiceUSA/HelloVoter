@@ -4,11 +4,12 @@ import { expect } from 'chai';
 
 import { ov_config } from '../lib/ov_config';
 import neo4j from '../lib/neo4j';
-import { appInit, base_uri, writeUsers, sm_oauth, tpx } from './lib/utils';
+import { appInit, base_uri, genName, writeObj, sm_oauth, tpx } from './lib/utils';
 
 var api;
 var db;
 var c = {};
+var teams = {};
 var public_key;
 
 describe('User Creation', function () {
@@ -24,7 +25,8 @@ describe('User Creation', function () {
   });
 
   after(async () => {
-    writeUsers(c);
+    writeObj('volunteers', c);
+    writeObj('teams', teams);
     db.close();
   });
 
@@ -46,7 +48,7 @@ describe('User Creation', function () {
     public_key = r.body.toString();
   });
 
-  it('get users from /tokentest endpoint', async () => {
+  it('get volunteers from /tokentest endpoint', async () => {
     let r;
 
     r = await sm_oauth.get('/tokentest');
@@ -181,6 +183,32 @@ describe('User Creation', function () {
     expect(r.body.msg).to.equal("Awaiting assignment");
     expect(r.body.data.ready).to.equal(false);
     expect(r.body.data).to.not.have.property("admin");
+  });
+
+  it('generate test objects', async () => {
+    let r;
+
+    teams.A = { name: genName("Team") };
+    teams.B = { name: genName("Team") };
+
+    r = await api.post(base_uri+'/team/create')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        name: teams.A.name,
+      });
+    expect(r.statusCode).to.equal(200);
+    expect(typeof r.body.teamId).to.equal("string");
+    teams.A.id = r.body.teamId;
+
+    r = await api.post(base_uri+'/team/create')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        name: teams.B.name,
+      });
+    expect(r.statusCode).to.equal(200);
+    expect(typeof r.body.teamId).to.equal("string");
+    teams.B.id = r.body.teamId;
+
   });
 
 });

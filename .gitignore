@@ -1,7 +1,8 @@
 districts/
 
 # test data
-test/users.json
+test/volunteers.json
+test/teams.json
 
 # misc files
 *.orig

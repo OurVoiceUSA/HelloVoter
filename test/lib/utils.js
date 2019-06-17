@@ -11,8 +11,10 @@ export var tpx = "Test ";
 
 export var sm_oauth = supertest(ov_config.sm_oauth_url);
 
-export var writeUsers = (users) => fs.writeFileSync('./test/users.json', JSON.stringify(users));
-export var getUsers = () => JSON.parse(fs.readFileSync('./test/users.json'));
+export var writeObj = (name, obj) => fs.writeFileSync('./test/'+name+'.json', JSON.stringify(obj));
+export var getObjs = (name) => JSON.parse(fs.readFileSync('./test/'+name+'.json'));
+
+export var genName = (name) => tpx+name+' '+Math.ceil(Math.random()*10000000);
 
 export var keep = (process.env.KEEP_TEST_DATA ? true : false);
 

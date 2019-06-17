@@ -4,7 +4,7 @@ import { expect } from 'chai';
 
 import { ov_config } from '../lib/ov_config';
 import neo4j from '../lib/neo4j';
-import { appInit, base_uri, getUsers, keep, tpx } from './lib/utils';
+import { appInit, base_uri, getObjs, keep, tpx } from './lib/utils';
 
 var api;
 var db;
@@ -15,11 +15,11 @@ describe('Cleanup', function () {
   before(() => {
     db = new neo4j(ov_config);
     api = appInit(db);
-    c = getUsers();
+    c = getObjs('volunteers');
   });
 
   after(async () => {
-    // clean up test users
+    // clean up test volunteers
     if (!keep)
       await db.query('match (a:Volunteer) where a.id =~ "test:.*" detach delete a');
 
