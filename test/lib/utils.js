@@ -6,6 +6,7 @@ import { doExpressInit } from '../../app/createExpressApp';
 import { ov_config } from '../../lib/ov_config';
 import queue from '../../lib/queue';
 
+export var base_uri = '/HelloVoterHQ/api/v1/';
 export var tpx = "Test ";
 
 export var sm_oauth = supertest(ov_config.sm_oauth_url);
