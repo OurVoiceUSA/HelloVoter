@@ -14,10 +14,6 @@ var version = require('../../../../package.json').version;
 const Router = require('express').Router
 
 module.exports = Router({mergeParams: true})
-.get('/', (req, res) => {
-  let host = req.header('host');
-  res.redirect(ov_config.wabase+'/HelloVoterHQ/'+(host?'?server='+host:''));
-})
 .post('/hello', async (req, res) => {
   // they say that time's supposed to heal ya but i ain't done much healin'
 

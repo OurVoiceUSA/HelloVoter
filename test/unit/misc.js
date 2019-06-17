@@ -22,11 +22,20 @@ describe('MISC endpoints', function () {
     db.close();
   });
 
+  // these aren't in _misc.js but have to test them somewhere
+
   it('poke 200 timestamp', async () => {
-    const r = await api.get('/poke');
+    let r = await api.get('/poke');
     expect(r.statusCode).to.equal(200);
     expect(r.body.data[0]).to.satisfy(Number.isInteger);
   });
+
+  it('root uri redirects', async () => {
+    let r = await api.get('/');
+    expect(r.statusCode).to.equal(302);
+  });
+
+  // hello
 
   it('hello 400 no jwt', async () => {
     const r = await api.post('/HelloVoterHQ/api/v1/hello')

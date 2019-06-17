@@ -92,6 +92,12 @@ export function doExpressInit(log, db, qq) {
     return cqdo(req, res, 'return timestamp()', false)
   });
 
+  // root redirect to HQ
+  app.get('/', (req, res) => {
+    let host = req.header('host');
+    res.redirect(ov_config.wabase+'/HelloVoterHQ/'+(host?'?server='+host:''));
+  })
+
   // routes from glob
   app.use('/HelloVoterHQ/api/v1', router);
 
