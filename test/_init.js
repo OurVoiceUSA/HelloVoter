@@ -4,7 +4,7 @@ import { expect } from 'chai';
 
 import { ov_config } from '../lib/ov_config';
 import neo4j from '../lib/neo4j';
-import { appInit, writeUsers, sm_oauth, tpx } from './lib/utils';
+import { appInit, base_uri, writeUsers, sm_oauth, tpx } from './lib/utils';
 
 var api;
 var db;
@@ -89,7 +89,7 @@ describe('User Creation', function () {
   it('hello 200 admin awaiting assignment', async () => {
     let r;
 
-    r = await api.post('/HelloVoterHQ/api/v1/hello')
+    r = await api.post(base_uri+'/hello')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         longitude: -118.3281370,
@@ -102,7 +102,7 @@ describe('User Creation', function () {
     // make admin an admin
     await db.query('match (a:Volunteer {id:{id}}) set a.admin=true', c.admin);
 
-    r = await api.post('/HelloVoterHQ/api/v1/hello')
+    r = await api.post(base_uri+'/hello')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         longitude: -118.3281370,
@@ -116,7 +116,7 @@ describe('User Creation', function () {
   it('hello 200 volunteers awaiting assignment', async () => {
     let r;
 
-    r = await api.post('/HelloVoterHQ/api/v1/hello')
+    r = await api.post(base_uri+'/hello')
       .set('Authorization', 'Bearer '+c.bob.jwt)
       .send({
         longitude: -118.3281370,
@@ -127,7 +127,7 @@ describe('User Creation', function () {
     expect(r.body.data.ready).to.equal(false);
     expect(r.body.data).to.not.have.property("admin");
 
-    r = await api.post('/HelloVoterHQ/api/v1/hello')
+    r = await api.post(base_uri+'/hello')
       .set('Authorization', 'Bearer '+c.sally.jwt)
       .send({
         longitude: -118.3281370,
@@ -138,7 +138,7 @@ describe('User Creation', function () {
     expect(r.body.data.ready).to.equal(false);
     expect(r.body.data).to.not.have.property("admin");
 
-    r = await api.post('/HelloVoterHQ/api/v1/hello')
+    r = await api.post(base_uri+'/hello')
       .set('Authorization', 'Bearer '+c.rich.jwt)
       .send({
         longitude: -118.3281370,
@@ -149,7 +149,7 @@ describe('User Creation', function () {
     expect(r.body.data.ready).to.equal(false);
     expect(r.body.data).to.not.have.property("admin");
 
-    r = await api.post('/HelloVoterHQ/api/v1/hello')
+    r = await api.post(base_uri+'/hello')
       .set('Authorization', 'Bearer '+c.jane.jwt)
       .send({
         longitude: -118.3281370,
@@ -160,7 +160,7 @@ describe('User Creation', function () {
     expect(r.body.data.ready).to.equal(false);
     expect(r.body.data).to.not.have.property("admin");
 
-    r = await api.post('/HelloVoterHQ/api/v1/hello')
+    r = await api.post(base_uri+'/hello')
       .set('Authorization', 'Bearer '+c.mike.jwt)
       .send({
         longitude: -118.3281370,
@@ -171,7 +171,7 @@ describe('User Creation', function () {
     expect(r.body.data.ready).to.equal(false);
     expect(r.body.data).to.not.have.property("admin");
 
-    r = await api.post('/HelloVoterHQ/api/v1/hello')
+    r = await api.post(base_uri+'/hello')
       .set('Authorization', 'Bearer '+c.han.jwt)
       .send({
         longitude: -118.3281370,

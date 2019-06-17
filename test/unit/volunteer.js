@@ -4,7 +4,7 @@ import { expect } from 'chai';
 
 import { ov_config } from '../../lib/ov_config';
 import neo4j from '../../lib/neo4j';
-import { appInit, getUsers, sm_oauth } from '../lib/utils';
+import { appInit, base_uri, getUsers, sm_oauth } from '../lib/utils';
 
 var api;
 var db;
@@ -25,7 +25,7 @@ describe('Volunteer Endpoints', function () {
   // list
 
   it('list volunteers via admin', async () => {
-    const r = await api.get('/HelloVoterHQ/api/v1/volunteer/list')
+    const r = await api.get(base_uri+'/volunteer/list')
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body).to.be.an('array');
@@ -33,7 +33,7 @@ describe('Volunteer Endpoints', function () {
   });
 
   it('list volunteers via non-admin', async () => {
-    const r = await api.get('/HelloVoterHQ/api/v1/volunteer/list')
+    const r = await api.get(base_uri+'/volunteer/list')
       .set('Authorization', 'Bearer '+c.bob.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body).to.be.an('array');
@@ -43,7 +43,7 @@ describe('Volunteer Endpoints', function () {
   // get
 
   it('get volunteer via admin', async () => {
-    const r = await api.get('/HelloVoterHQ/api/v1/volunteer/get?id='+c.bob.id)
+    const r = await api.get(base_uri+'/volunteer/get?id='+c.bob.id)
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body).to.be.an('object');
@@ -51,7 +51,7 @@ describe('Volunteer Endpoints', function () {
   });
 
   it('get volunteer via non-admin', async () => {
-    const r = await api.get('/HelloVoterHQ/api/v1/volunteer/get?id='+c.bob.id)
+    const r = await api.get(base_uri+'/volunteer/get?id='+c.bob.id)
       .set('Authorization', 'Bearer '+c.bob.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body).to.be.an('object');
@@ -59,7 +59,7 @@ describe('Volunteer Endpoints', function () {
   });
 
   it('get volunteer permission denied', async () => {
-    const r = await api.get('/HelloVoterHQ/api/v1/volunteer/get?id='+c.admin.id)
+    const r = await api.get(base_uri+'/volunteer/get?id='+c.admin.id)
       .set('Authorization', 'Bearer '+c.bob.jwt);
     expect(r.statusCode).to.equal(403);
   });
@@ -72,7 +72,7 @@ describe('Volunteer Endpoints', function () {
     let lat = 39.250758;
     let locationstr = "Nowhere, KS";
 
-    r = await api.post('/HelloVoterHQ/api/v1/volunteer/update')
+    r = await api.post(base_uri+'/volunteer/update')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         id: c.bob.id,
@@ -82,7 +82,7 @@ describe('Volunteer Endpoints', function () {
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.get('/HelloVoterHQ/api/v1/volunteer/get?id='+c.bob.id)
+    r = await api.get(base_uri+'/volunteer/get?id='+c.bob.id)
       .set('Authorization', 'Bearer '+c.bob.jwt)
     expect(r.statusCode).to.equal(200);
     expect(r.body.locationstr).to.equal(locationstr);
@@ -96,7 +96,7 @@ describe('Volunteer Endpoints', function () {
     let lat = 38.4813632;
     let locationstr = "Nowhere, MO";
 
-    r = await api.post('/HelloVoterHQ/api/v1/volunteer/update')
+    r = await api.post(base_uri+'/volunteer/update')
       .set('Authorization', 'Bearer '+c.bob.jwt)
       .send({
         id: c.bob.id,
@@ -106,7 +106,7 @@ describe('Volunteer Endpoints', function () {
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.get('/HelloVoterHQ/api/v1/volunteer/get?id='+c.bob.id)
+    r = await api.get(base_uri+'/volunteer/get?id='+c.bob.id)
       .set('Authorization', 'Bearer '+c.bob.jwt)
     expect(r.statusCode).to.equal(200);
     expect(r.body.locationstr).to.equal(locationstr);
@@ -115,7 +115,7 @@ describe('Volunteer Endpoints', function () {
   });
 
   it('update volunteer invalid parameter', async () => {
-    let r = await api.post('/HelloVoterHQ/api/v1/volunteer/update')
+    let r = await api.post(base_uri+'/volunteer/update')
       .set('Authorization', 'Bearer '+c.bob.jwt)
       .send({
         address: "Invalid, TX",
@@ -128,14 +128,14 @@ describe('Volunteer Endpoints', function () {
   it('lock volunteer', async () => {
     let r;
 
-    r = await api.post('/HelloVoterHQ/api/v1/volunteer/lock')
+    r = await api.post(base_uri+'/volunteer/lock')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         id: c.bob.id,
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.post('/HelloVoterHQ/api/v1/hello')
+    r = await api.post(base_uri+'/hello')
       .set('Authorization', 'Bearer '+c.bob.jwt)
     expect(r.statusCode).to.equal(403);
     expect(r.body.msg).to.equal("Your account is locked.");
@@ -144,31 +144,31 @@ describe('Volunteer Endpoints', function () {
   it('lock volunteer permission denied', async () => {
     let r;
 
-    r = await api.post('/HelloVoterHQ/api/v1/volunteer/lock')
+    r = await api.post(base_uri+'/volunteer/lock')
       .set('Authorization', 'Bearer '+c.bob.jwt)
       .send({
         id: c.admin.id,
       });
     expect(r.statusCode).to.equal(403);
 
-    r = await api.post('/HelloVoterHQ/api/v1/hello')
+    r = await api.post(base_uri+'/hello')
       .set('Authorization', 'Bearer '+c.admin.jwt)
     expect(r.statusCode).to.equal(200);
 
-    r = await api.post('/HelloVoterHQ/api/v1/volunteer/lock')
+    r = await api.post(base_uri+'/volunteer/lock')
       .set('Authorization', 'Bearer '+c.bob.jwt)
       .send({
         id: c.sally.id,
       });
     expect(r.statusCode).to.equal(403);
 
-    r = await api.post('/HelloVoterHQ/api/v1/hello')
+    r = await api.post(base_uri+'/hello')
       .set('Authorization', 'Bearer '+c.sally.jwt)
     expect(r.statusCode).to.equal(200);
   });
 
   it('lock volunteer admin permission denied', async () => {
-    let r = await api.post('/HelloVoterHQ/api/v1/volunteer/lock')
+    let r = await api.post(base_uri+'/volunteer/lock')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         id: c.admin.id,
@@ -181,14 +181,14 @@ describe('Volunteer Endpoints', function () {
   it('unlock volunteer', async () => {
     let r;
 
-    r = await api.post('/HelloVoterHQ/api/v1/volunteer/unlock')
+    r = await api.post(base_uri+'/volunteer/unlock')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         id: c.bob.id,
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.post('/HelloVoterHQ/api/v1/hello')
+    r = await api.post(base_uri+'/hello')
       .set('Authorization', 'Bearer '+c.bob.jwt)
       .send({
         longitude: -118.3281370,
@@ -200,14 +200,14 @@ describe('Volunteer Endpoints', function () {
   it('unlock volunteer permission denied', async () => {
     let r;
 
-    r = await api.post('/HelloVoterHQ/api/v1/volunteer/unlock')
+    r = await api.post(base_uri+'/volunteer/unlock')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         id: c.bob.id,
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.post('/HelloVoterHQ/api/v1/hello')
+    r = await api.post(base_uri+'/hello')
       .set('Authorization', 'Bearer '+c.bob.jwt)
       .send({
         longitude: -118.3281370,
@@ -219,27 +219,27 @@ describe('Volunteer Endpoints', function () {
   // visit/history
 
   it('view history for self', async () => {
-    let r = await api.get('/HelloVoterHQ/api/v1/volunteer/visit/history?formId=test')
+    let r = await api.get(base_uri+'/volunteer/visit/history?formId=test')
       .set('Authorization', 'Bearer '+c.bob.jwt)
     expect(r.statusCode).to.equal(200);
     expect(r.body).to.be.an('array');
   });
 
   it('view history via admin', async () => {
-    let r = await api.get('/HelloVoterHQ/api/v1/volunteer/visit/history?id='+c.bob.id+'&formId=test')
+    let r = await api.get(base_uri+'/volunteer/visit/history?id='+c.bob.id+'&formId=test')
       .set('Authorization', 'Bearer '+c.admin.jwt)
     expect(r.statusCode).to.equal(200);
     expect(r.body).to.be.an('array');
   });
 
   it('view history permission denied', async () => {
-    let r = await api.get('/HelloVoterHQ/api/v1/volunteer/visit/history?id='+c.sally.id+'&formId=test')
+    let r = await api.get(base_uri+'/volunteer/visit/history?id='+c.sally.id+'&formId=test')
       .set('Authorization', 'Bearer '+c.bob.jwt)
     expect(r.statusCode).to.equal(403);
   });
 
   it('view history no formId', async () => {
-    let r = await api.get('/HelloVoterHQ/api/v1/volunteer/visit/history')
+    let r = await api.get(base_uri+'/volunteer/visit/history')
       .set('Authorization', 'Bearer '+c.bob.jwt)
     expect(r.statusCode).to.equal(400);
   });

@@ -4,7 +4,7 @@ import { expect } from 'chai';
 
 import { ov_config } from '../../lib/ov_config';
 import neo4j from '../../lib/neo4j';
-import { appInit, getUsers, sm_oauth } from '../lib/utils';
+import { appInit, base_uri, getUsers, sm_oauth } from '../lib/utils';
 
 var api;
 var db;
@@ -23,7 +23,7 @@ describe('MISC endpoints', function () {
   });
 
   it('team/create invalid characters', async () => {
-    const r = await api.post('/HelloVoterHQ/api/v1/team/create')
+    const r = await api.post(base_uri+'/team/create')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: "*",
@@ -33,7 +33,7 @@ describe('MISC endpoints', function () {
   });
 
   it('team/delete invalid parameter', async () => {
-    const r = await api.post('/HelloVoterHQ/api/v1/team/delete')
+    const r = await api.post(base_uri+'/team/delete')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: "The Muse",

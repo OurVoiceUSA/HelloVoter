@@ -4,7 +4,7 @@ import { expect } from 'chai';
 
 import { ov_config } from '../lib/ov_config';
 import neo4j from '../lib/neo4j';
-import { appInit, getUsers, keep, tpx } from './lib/utils';
+import { appInit, base_uri, getUsers, keep, tpx } from './lib/utils';
 
 var api;
 var db;
@@ -33,7 +33,7 @@ describe('Cleanup', function () {
   });
 
   it('bob\'s your uncle', async () => {
-    const r = await api.get('/HelloVoterHQ/api/v1/uncle')
+    const r = await api.get(base_uri+'/uncle')
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.name).to.equal("Bob");

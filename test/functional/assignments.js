@@ -5,7 +5,7 @@ import fs from 'fs';
 
 import { ov_config } from '../../lib/ov_config';
 import neo4j from '../../lib/neo4j';
-import { appInit, getUsers, keep, tpx } from '../lib/utils';
+import { appInit, base_uri, getUsers, keep, tpx } from '../lib/utils';
 
 var api;
 var db;
@@ -46,7 +46,7 @@ describe('Assignments & Permissions', function () {
   // TODO: check admin full list vs. non-admin only see your own teams
 
   it('team/list 200 array', async () => {
-    const r = await api.get('/HelloVoterHQ/api/v1/team/list')
+    const r = await api.get(base_uri+'/team/list')
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.data).to.be.an('array');
@@ -57,7 +57,7 @@ describe('Assignments & Permissions', function () {
   it('team/create & team/members/add team 1', async () => {
     let r;
 
-    r = await api.post('/HelloVoterHQ/api/v1/team/create')
+    r = await api.post(base_uri+'/team/create')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: teamName1,
@@ -65,19 +65,19 @@ describe('Assignments & Permissions', function () {
     expect(r.statusCode).to.equal(200);
     teamName1id = r.body.teamId;
 
-    r = await api.post('/HelloVoterHQ/api/v1/team/create')
+    r = await api.post(base_uri+'/team/create')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: teamName1,
       });
     expect(r.statusCode).to.equal(500);
 
-    r = await api.get('/HelloVoterHQ/api/v1/team/members/list?teamId='+teamName1id)
+    r = await api.get(base_uri+'/team/members/list?teamId='+teamName1id)
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.length).to.equal(0);
 
-    r = await api.post('/HelloVoterHQ/api/v1/team/members/add')
+    r = await api.post(base_uri+'/team/members/add')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         teamId: teamName1id,
@@ -85,7 +85,7 @@ describe('Assignments & Permissions', function () {
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.post('/HelloVoterHQ/api/v1/team/members/add')
+    r = await api.post(base_uri+'/team/members/add')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         teamId: teamName1id,
@@ -93,7 +93,7 @@ describe('Assignments & Permissions', function () {
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.get('/HelloVoterHQ/api/v1/team/members/list?teamId='+teamName1id)
+    r = await api.get(base_uri+'/team/members/list?teamId='+teamName1id)
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.length).to.equal(2);
@@ -103,7 +103,7 @@ describe('Assignments & Permissions', function () {
   it('team/create & team/members/add team 2', async () => {
     let r;
 
-    r = await api.post('/HelloVoterHQ/api/v1/team/create')
+    r = await api.post(base_uri+'/team/create')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: teamName2,
@@ -111,12 +111,12 @@ describe('Assignments & Permissions', function () {
     expect(r.statusCode).to.equal(200);
     teamName2id = r.body.teamId;
 
-    r = await api.get('/HelloVoterHQ/api/v1/team/members/list?teamId='+teamName2id)
+    r = await api.get(base_uri+'/team/members/list?teamId='+teamName2id)
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.length).to.equal(0);
 
-    r = await api.post('/HelloVoterHQ/api/v1/team/members/add')
+    r = await api.post(base_uri+'/team/members/add')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         teamId: teamName2id,
@@ -124,7 +124,7 @@ describe('Assignments & Permissions', function () {
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.post('/HelloVoterHQ/api/v1/team/members/add')
+    r = await api.post(base_uri+'/team/members/add')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         teamId: teamName2id,
@@ -132,12 +132,12 @@ describe('Assignments & Permissions', function () {
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.get('/HelloVoterHQ/api/v1/team/members/list?teamId='+teamName1id)
+    r = await api.get(base_uri+'/team/members/list?teamId='+teamName1id)
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.length).to.equal(2);
 
-    r = await api.get('/HelloVoterHQ/api/v1/team/members/list?teamId='+teamName2id)
+    r = await api.get(base_uri+'/team/members/list?teamId='+teamName2id)
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.length).to.equal(2);
@@ -147,26 +147,26 @@ describe('Assignments & Permissions', function () {
   it('volunteer/get same team', async () => {
     let r;
 
-    r = await api.get('/HelloVoterHQ/api/v1/volunteer/get?id='+c.bob.id)
+    r = await api.get(base_uri+'/volunteer/get?id='+c.bob.id)
       .set('Authorization', 'Bearer '+c.admin.jwt)
     expect(r.statusCode).to.equal(200);
     expect(r.body.id).to.equal(c.bob.id);
 
-    r = await api.get('/HelloVoterHQ/api/v1/volunteer/get?id='+c.bob.id)
+    r = await api.get(base_uri+'/volunteer/get?id='+c.bob.id)
       .set('Authorization', 'Bearer '+c.sally.jwt)
     expect(r.statusCode).to.equal(200);
     expect(r.body.id).to.equal(c.bob.id);
 
-    r = await api.get('/HelloVoterHQ/api/v1/volunteer/get?id='+c.bob.id)
+    r = await api.get(base_uri+'/volunteer/get?id='+c.bob.id)
       .set('Authorization', 'Bearer '+c.rich.jwt)
     expect(r.statusCode).to.equal(403);
 
-    r = await api.get('/HelloVoterHQ/api/v1/volunteer/get?id='+c.jane.id)
+    r = await api.get(base_uri+'/volunteer/get?id='+c.jane.id)
       .set('Authorization', 'Bearer '+c.rich.jwt)
     expect(r.statusCode).to.equal(200);
     expect(r.body.id).to.equal(c.jane.id);
 
-    r = await api.get('/HelloVoterHQ/api/v1/volunteer/get?id='+c.jane.id)
+    r = await api.get(base_uri+'/volunteer/get?id='+c.jane.id)
       .set('Authorization', 'Bearer '+c.mike.jwt)
     expect(r.statusCode).to.equal(403);
 
@@ -175,14 +175,14 @@ describe('Assignments & Permissions', function () {
   it('turf/create', async () => {
     let r;
 
-    r = await api.post('/HelloVoterHQ/api/v1/turf/create')
+    r = await api.post(base_uri+'/turf/create')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: turfName1,
       });
     expect(r.statusCode).to.equal(400);
 
-    r = await api.post('/HelloVoterHQ/api/v1/turf/create')
+    r = await api.post(base_uri+'/turf/create')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: turfName1,
@@ -191,7 +191,7 @@ describe('Assignments & Permissions', function () {
     expect(r.statusCode).to.equal(200);
     turfName1id = r.body.turfId;
 
-    r = await api.post('/HelloVoterHQ/api/v1/turf/create')
+    r = await api.post(base_uri+'/turf/create')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: turfName2,
@@ -200,7 +200,7 @@ describe('Assignments & Permissions', function () {
     expect(r.statusCode).to.equal(200);
     turfName2id = r.body.turfId;
 
-    r = await api.post('/HelloVoterHQ/api/v1/turf/create')
+    r = await api.post(base_uri+'/turf/create')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: turfName3,
@@ -214,12 +214,12 @@ describe('Assignments & Permissions', function () {
   it('turf/assigned/volunteer', async () => {
     let r;
 
-    r = await api.get('/HelloVoterHQ/api/v1/turf/assigned/volunteer/list?turfId='+turfName1id)
+    r = await api.get(base_uri+'/turf/assigned/volunteer/list?turfId='+turfName1id)
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.length).to.equal(0);
 
-    r = await api.post('/HelloVoterHQ/api/v1/turf/assigned/volunteer/add')
+    r = await api.post(base_uri+'/turf/assigned/volunteer/add')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         vId: c.han.id,
@@ -227,7 +227,7 @@ describe('Assignments & Permissions', function () {
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.post('/HelloVoterHQ/api/v1/turf/assigned/volunteer/add')
+    r = await api.post(base_uri+'/turf/assigned/volunteer/add')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         vId: c.han.id,
@@ -235,7 +235,7 @@ describe('Assignments & Permissions', function () {
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.get('/HelloVoterHQ/api/v1/turf/assigned/volunteer/list?turfId='+turfName1id)
+    r = await api.get(base_uri+'/turf/assigned/volunteer/list?turfId='+turfName1id)
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.length).to.equal(1);
@@ -245,7 +245,7 @@ describe('Assignments & Permissions', function () {
   it('turf/assigned/team', async () => {
     let r;
 
-    r = await api.post('/HelloVoterHQ/api/v1/turf/assigned/team/add')
+    r = await api.post(base_uri+'/turf/assigned/team/add')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         teamId: teamName1id,
@@ -253,7 +253,7 @@ describe('Assignments & Permissions', function () {
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.post('/HelloVoterHQ/api/v1/turf/assigned/team/add')
+    r = await api.post(base_uri+'/turf/assigned/team/add')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         teamId: teamName2id,
@@ -266,7 +266,7 @@ describe('Assignments & Permissions', function () {
   it('form/create & form/assigned add', async () => {
     let r;
 
-    r = await api.post('/HelloVoterHQ/api/v1/form/create')
+    r = await api.post(base_uri+'/form/create')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: formName1,
@@ -275,7 +275,7 @@ describe('Assignments & Permissions', function () {
     expect(r.statusCode).to.equal(200);
     formId1 = r.body.formId;
 
-    r = await api.post('/HelloVoterHQ/api/v1/form/assigned/team/add')
+    r = await api.post(base_uri+'/form/assigned/team/add')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         formId: formId1,
@@ -283,7 +283,7 @@ describe('Assignments & Permissions', function () {
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.post('/HelloVoterHQ/api/v1/form/assigned/team/add')
+    r = await api.post(base_uri+'/form/assigned/team/add')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         formId: formId1,
@@ -291,7 +291,7 @@ describe('Assignments & Permissions', function () {
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.post('/HelloVoterHQ/api/v1/form/assigned/volunteer/add')
+    r = await api.post(base_uri+'/form/assigned/volunteer/add')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         formId: formId1,
@@ -304,46 +304,46 @@ describe('Assignments & Permissions', function () {
   it('non-admin permission denied', async () => {
     let r;
 
-    r = await api.get('/HelloVoterHQ/api/v1/volunteer/get?id='+c.sally.id)
+    r = await api.get(base_uri+'/volunteer/get?id='+c.sally.id)
       .set('Authorization', 'Bearer '+c.mike.jwt)
     expect(r.statusCode).to.equal(403);
 
-    r = await api.post('/HelloVoterHQ/api/v1/volunteer/update')
-      .set('Authorization', 'Bearer '+c.mike.jwt)
-      .send({
-        id: c.sally.id,
-      });
-    expect(r.statusCode).to.equal(403);
-
-    r = await api.post('/HelloVoterHQ/api/v1/volunteer/lock')
+    r = await api.post(base_uri+'/volunteer/update')
       .set('Authorization', 'Bearer '+c.mike.jwt)
       .send({
         id: c.sally.id,
       });
     expect(r.statusCode).to.equal(403);
 
-    r = await api.post('/HelloVoterHQ/api/v1/volunteer/unlock')
+    r = await api.post(base_uri+'/volunteer/lock')
       .set('Authorization', 'Bearer '+c.mike.jwt)
       .send({
         id: c.sally.id,
       });
     expect(r.statusCode).to.equal(403);
 
-    r = await api.post('/HelloVoterHQ/api/v1/team/create')
+    r = await api.post(base_uri+'/volunteer/unlock')
+      .set('Authorization', 'Bearer '+c.mike.jwt)
+      .send({
+        id: c.sally.id,
+      });
+    expect(r.statusCode).to.equal(403);
+
+    r = await api.post(base_uri+'/team/create')
       .set('Authorization', 'Bearer '+c.mike.jwt)
       .send({
         name: teamName1,
       });
     expect(r.statusCode).to.equal(403);
 
-    r = await api.post('/HelloVoterHQ/api/v1/team/delete')
+    r = await api.post(base_uri+'/team/delete')
       .set('Authorization', 'Bearer '+c.mike.jwt)
       .send({
         teamId: teamName1id,
       });
     expect(r.statusCode).to.equal(403);
 
-    r = await api.post('/HelloVoterHQ/api/v1/team/members/add')
+    r = await api.post(base_uri+'/team/members/add')
       .set('Authorization', 'Bearer '+c.mike.jwt)
       .send({
         vId: c.mike.id,
@@ -351,7 +351,7 @@ describe('Assignments & Permissions', function () {
       });
     expect(r.statusCode).to.equal(403);
 
-    r = await api.post('/HelloVoterHQ/api/v1/team/members/remove')
+    r = await api.post(base_uri+'/team/members/remove')
       .set('Authorization', 'Bearer '+c.mike.jwt)
       .send({
         vId: c.sally.id,
@@ -359,7 +359,7 @@ describe('Assignments & Permissions', function () {
       });
     expect(r.statusCode).to.equal(403);
 
-    r = await api.post('/HelloVoterHQ/api/v1/turf/create')
+    r = await api.post(base_uri+'/turf/create')
       .set('Authorization', 'Bearer '+c.mike.jwt)
       .send({
         name: turfName1,
@@ -367,18 +367,18 @@ describe('Assignments & Permissions', function () {
       });
     expect(r.statusCode).to.equal(403);
 
-    r = await api.post('/HelloVoterHQ/api/v1/turf/delete')
+    r = await api.post(base_uri+'/turf/delete')
       .set('Authorization', 'Bearer '+c.mike.jwt)
       .send({
         turfId: turfName1id,
       });
     expect(r.statusCode).to.equal(403);
 
-    r = await api.get('/HelloVoterHQ/api/v1/turf/assigned/team/list?turfId='+turfName1id)
+    r = await api.get(base_uri+'/turf/assigned/team/list?turfId='+turfName1id)
       .set('Authorization', 'Bearer '+c.mike.jwt)
     expect(r.statusCode).to.equal(403);
 
-    r = await api.post('/HelloVoterHQ/api/v1/turf/assigned/team/add')
+    r = await api.post(base_uri+'/turf/assigned/team/add')
       .set('Authorization', 'Bearer '+c.mike.jwt)
       .send({
         turfId: turfName1id,
@@ -386,7 +386,7 @@ describe('Assignments & Permissions', function () {
       });
     expect(r.statusCode).to.equal(403);
 
-    r = await api.post('/HelloVoterHQ/api/v1/turf/assigned/team/remove')
+    r = await api.post(base_uri+'/turf/assigned/team/remove')
       .set('Authorization', 'Bearer '+c.mike.jwt)
       .send({
         teamId: teamName1id,
@@ -395,12 +395,12 @@ describe('Assignments & Permissions', function () {
     expect(r.statusCode).to.equal(403);
 
 /*
-    r = await api.get('/HelloVoterHQ/api/v1/turf/assigned/volunteer/list?turfId='+turfName1id)
+    r = await api.get(base_uri+'/turf/assigned/volunteer/list?turfId='+turfName1id)
       .set('Authorization', 'Bearer '+c.mike.jwt)
     expect(r.statusCode).to.equal(403);
 */
 
-    r = await api.post('/HelloVoterHQ/api/v1/turf/assigned/volunteer/add')
+    r = await api.post(base_uri+'/turf/assigned/volunteer/add')
       .set('Authorization', 'Bearer '+c.mike.jwt)
       .send({
         vId: c.mike.id,
@@ -408,7 +408,7 @@ describe('Assignments & Permissions', function () {
       });
     expect(r.statusCode).to.equal(403);
 
-    r = await api.post('/HelloVoterHQ/api/v1/turf/assigned/volunteer/remove')
+    r = await api.post(base_uri+'/turf/assigned/volunteer/remove')
       .set('Authorization', 'Bearer '+c.mike.jwt)
       .send({
         vId: c.mike.id,
@@ -416,11 +416,11 @@ describe('Assignments & Permissions', function () {
       });
     expect(r.statusCode).to.equal(403);
 
-    r = await api.get('/HelloVoterHQ/api/v1/form/get?id='+formId1)
+    r = await api.get(base_uri+'/form/get?id='+formId1)
       .set('Authorization', 'Bearer '+c.mike.jwt)
     expect(r.statusCode).to.equal(403);
 
-    r = await api.post('/HelloVoterHQ/api/v1/form/create')
+    r = await api.post(base_uri+'/form/create')
       .set('Authorization', 'Bearer '+c.mike.jwt)
       .send({
         name: formName1,
@@ -428,18 +428,18 @@ describe('Assignments & Permissions', function () {
       });
     expect(r.statusCode).to.equal(403);
 
-    r = await api.post('/HelloVoterHQ/api/v1/form/delete')
+    r = await api.post(base_uri+'/form/delete')
       .set('Authorization', 'Bearer '+c.mike.jwt)
       .send({
         formId: formId1,
       });
     expect(r.statusCode).to.equal(403);
 
-    r = await api.get('/HelloVoterHQ/api/v1/form/assigned/team/list?formId='+formId1)
+    r = await api.get(base_uri+'/form/assigned/team/list?formId='+formId1)
       .set('Authorization', 'Bearer '+c.mike.jwt)
     expect(r.statusCode).to.equal(403);
 
-    r = await api.post('/HelloVoterHQ/api/v1/form/assigned/team/add')
+    r = await api.post(base_uri+'/form/assigned/team/add')
       .set('Authorization', 'Bearer '+c.mike.jwt)
       .send({
         formId: formId1,
@@ -447,7 +447,7 @@ describe('Assignments & Permissions', function () {
       });
     expect(r.statusCode).to.equal(403);
 
-    r = await api.post('/HelloVoterHQ/api/v1/form/assigned/team/remove')
+    r = await api.post(base_uri+'/form/assigned/team/remove')
       .set('Authorization', 'Bearer '+c.mike.jwt)
       .send({
         formId: formId1,
@@ -456,12 +456,12 @@ describe('Assignments & Permissions', function () {
     expect(r.statusCode).to.equal(403);
 
 /*
-    r = await api.get('/HelloVoterHQ/api/v1/form/assigned/volunteer/list?formId='+formId1)
+    r = await api.get(base_uri+'/form/assigned/volunteer/list?formId='+formId1)
       .set('Authorization', 'Bearer '+c.mike.jwt)
     expect(r.statusCode).to.equal(403);
 */
 
-    r = await api.post('/HelloVoterHQ/api/v1/form/assigned/volunteer/add')
+    r = await api.post(base_uri+'/form/assigned/volunteer/add')
       .set('Authorization', 'Bearer '+c.mike.jwt)
       .send({
         formId: formId1,
@@ -469,7 +469,7 @@ describe('Assignments & Permissions', function () {
       });
     expect(r.statusCode).to.equal(403);
 
-    r = await api.post('/HelloVoterHQ/api/v1/form/assigned/volunteer/remove')
+    r = await api.post(base_uri+'/form/assigned/volunteer/remove')
       .set('Authorization', 'Bearer '+c.mike.jwt)
       .send({
         formId: formId1,
@@ -482,27 +482,27 @@ describe('Assignments & Permissions', function () {
   it('non-admin unassigned zero visibility', async () => {
     let r;
 
-    r = await api.get('/HelloVoterHQ/api/v1/volunteer/list')
+    r = await api.get(base_uri+'/volunteer/list')
       .set('Authorization', 'Bearer '+c.mike.jwt)
     expect(r.statusCode).to.equal(200);
     expect(r.body.length).to.equal(1);
 
-    r = await api.get('/HelloVoterHQ/api/v1/team/list')
+    r = await api.get(base_uri+'/team/list')
       .set('Authorization', 'Bearer '+c.mike.jwt)
     expect(r.statusCode).to.equal(200);
     expect(r.body.data.length).to.equal(0);
 
-    r = await api.get('/HelloVoterHQ/api/v1/team/members/list?teamId='+teamName1id)
+    r = await api.get(base_uri+'/team/members/list?teamId='+teamName1id)
       .set('Authorization', 'Bearer '+c.mike.jwt)
     expect(r.statusCode).to.equal(200);
     expect(r.body.length).to.equal(0);
 
-    r = await api.get('/HelloVoterHQ/api/v1/turf/list')
+    r = await api.get(base_uri+'/turf/list')
       .set('Authorization', 'Bearer '+c.mike.jwt)
     expect(r.statusCode).to.equal(200);
     expect(r.body.data.length).to.equal(0);
 
-    r = await api.get('/HelloVoterHQ/api/v1/form/list?formId='+formId1)
+    r = await api.get(base_uri+'/form/list?formId='+formId1)
       .set('Authorization', 'Bearer '+c.mike.jwt)
     expect(r.statusCode).to.equal(200);
     expect(r.body.data.length).to.equal(0);
@@ -512,7 +512,7 @@ describe('Assignments & Permissions', function () {
   (keep?it.skip:it)('turf/assigned/volunteer/remove', async () => {
     let r;
 
-    r = await api.post('/HelloVoterHQ/api/v1/turf/assigned/volunteer/remove')
+    r = await api.post(base_uri+'/turf/assigned/volunteer/remove')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         vId: c.han.id,
@@ -520,7 +520,7 @@ describe('Assignments & Permissions', function () {
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.get('/HelloVoterHQ/api/v1/turf/assigned/volunteer/list?turfId='+turfName1id)
+    r = await api.get(base_uri+'/turf/assigned/volunteer/list?turfId='+turfName1id)
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.length).to.equal(0);
@@ -530,7 +530,7 @@ describe('Assignments & Permissions', function () {
   (keep?it.skip:it)('team/members/remove & team/delete', async () => {
     let r;
 
-    r = await api.post('/HelloVoterHQ/api/v1/team/members/remove')
+    r = await api.post(base_uri+'/team/members/remove')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         teamId: teamName1id,
@@ -538,7 +538,7 @@ describe('Assignments & Permissions', function () {
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.post('/HelloVoterHQ/api/v1/team/members/remove')
+    r = await api.post(base_uri+'/team/members/remove')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         teamId: teamName1id,
@@ -546,19 +546,19 @@ describe('Assignments & Permissions', function () {
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.get('/HelloVoterHQ/api/v1/team/members/list?teamId='+teamName1id)
+    r = await api.get(base_uri+'/team/members/list?teamId='+teamName1id)
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.length).to.equal(0);
 
-    r = await api.post('/HelloVoterHQ/api/v1/team/delete')
+    r = await api.post(base_uri+'/team/delete')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         teamId: teamName1id,
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.post('/HelloVoterHQ/api/v1/team/delete')
+    r = await api.post(base_uri+'/team/delete')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         teamId: teamName2id,
@@ -570,26 +570,26 @@ describe('Assignments & Permissions', function () {
   (keep?it.skip:it)('turf/delete', async () => {
     let r;
 
-    r = await api.get('/HelloVoterHQ/api/v1/turf/assigned/team/list?turfId='+turfName1id)
+    r = await api.get(base_uri+'/turf/assigned/team/list?turfId='+turfName1id)
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.data.length).to.equal(0);
 
-    r = await api.post('/HelloVoterHQ/api/v1/turf/delete')
+    r = await api.post(base_uri+'/turf/delete')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         turfId: turfName1id,
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.post('/HelloVoterHQ/api/v1/turf/delete')
+    r = await api.post(base_uri+'/turf/delete')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         turfId: turfName2id,
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.post('/HelloVoterHQ/api/v1/turf/delete')
+    r = await api.post(base_uri+'/turf/delete')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         turfId: turfName3id,
@@ -601,19 +601,19 @@ describe('Assignments & Permissions', function () {
   (keep?it.skip:it)('form/delete', async () => {
     let r;
 
-    r = await api.get('/HelloVoterHQ/api/v1/form/list')
+    r = await api.get(base_uri+'/form/list')
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     let count = r.body.data.length;
 
-    r = await api.post('/HelloVoterHQ/api/v1/form/delete')
+    r = await api.post(base_uri+'/form/delete')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         formId: formId1,
       });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.get('/HelloVoterHQ/api/v1/form/list')
+    r = await api.get(base_uri+'/form/list')
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.data.length).to.equal(count-1);

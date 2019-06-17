@@ -4,7 +4,7 @@ import { expect } from 'chai';
 
 import { ov_config } from '../../lib/ov_config';
 import neo4j from '../../lib/neo4j';
-import { appInit, getUsers, sm_oauth } from '../lib/utils';
+import { appInit, base_uri, getUsers, sm_oauth } from '../lib/utils';
 
 var api;
 var db;
@@ -38,7 +38,7 @@ describe('MISC endpoints', function () {
   // hello
 
   it('hello 400 no jwt', async () => {
-    const r = await api.post('/HelloVoterHQ/api/v1/hello')
+    const r = await api.post(base_uri+'/hello')
     expect(r.statusCode).to.equal(400);
     expect(r.body.error).to.equal(true);
     expect(r.body.msg).to.equal("Missing required header.");
@@ -57,7 +57,7 @@ describe('MISC endpoints', function () {
 
     let jwt_bad = r.body.jwt; // this lacks an ID
 
-    r = await api.post('/HelloVoterHQ/api/v1/hello')
+    r = await api.post(base_uri+'/hello')
       .set('Authorization', 'Bearer '+jwt_bad)
     expect(r.statusCode).to.equal(400);
     expect(r.body.error).to.equal(true);
@@ -73,7 +73,7 @@ describe('MISC endpoints', function () {
       exp: Math.floor(new Date().getTime() / 1000)+60,
     }), Math.random().toString());
 
-    const r = await api.post('/HelloVoterHQ/api/v1/hello')
+    const r = await api.post(base_uri+'/hello')
       .set('Authorization', 'Bearer '+jwt_inval)
     expect(r.statusCode).to.equal(401);
     expect(r.body.error).to.equal(true);
@@ -83,7 +83,7 @@ describe('MISC endpoints', function () {
   it('hello 400 invalid params', async () => {
     let r;
 
-    r = await api.post('/HelloVoterHQ/api/v1/hello')
+    r = await api.post(base_uri+'/hello')
       .set('Authorization', 'Bearer '+c.bob.jwt)
       .send({
         dinfo: {ApplicationName: "MOCHA", Brand: "NODE", BuildNumber: "INFINITY", BundleId: "MOCHA", Carrier: "NODE", DeviceCountr: "SHELL", DeviceId: "TESTDEVICE123", DeviceLocale: "en-us", DeviceName: "MOCHA", FontScale: "10", FreeDiskStorage: "50", Manufacturer: "NODE", Model: "MOCHA", ReadableVersion: "1.2.3", SystemName: "NODE", SystemVersion: "1.2.3", Timezone: "EST", TotalDiskCapacity: "50", TotalMemory: "50", UniqueID: "TESTDEVICE123", UserAgent: "NODE/MOCHA", Version: "1.2.3", Emulator: true, Tablet: false, hasNotch: false, Landscape: false},
