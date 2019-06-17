@@ -1,5 +1,8 @@
 districts/
 
+# test data
+test/users.json
+
 # misc files
 *.orig
 

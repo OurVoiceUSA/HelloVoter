@@ -29,17 +29,6 @@ module.exports = Router({mergeParams: true})
   // if this is coming from the mobile app
   if (typeof req.body.dinfo === 'object') {
     try {
-
-      if (ov_config.debug) {
-        // if there are no admins, make this one an admin
-        let ref = await req.db.query('match (a:Volunteer {admin:true}) return count(a)');
-        if (ref.data[0] === 0) {
-          await req.db.query('match (a:Volunteer {id:{id}}) set a.admin=true', req.user);
-          req.user.admin = true;
-          ass.admin = true;
-        }
-      }
-
       // create query save their device info
       let dinfo_str = ['ApplicationName', 'Brand', 'BuildNumber', 'BundleId', 'Carrier', 'DeviceCountr', 'DeviceId', 'DeviceLocale', 'DeviceName', 'FontScale', 'FreeDiskStorage', 'Manufacturer', 'Model', 'ReadableVersion', 'SystemName', 'SystemVersion', 'Timezone', 'TotalDiskCapacity', 'TotalMemory', 'UniqueID', 'UserAgent', 'Version', 'Emulator', 'Tablet', 'hasNotch', 'Landscape'].map(d => d+':{'+d+'}').join(',');
 
