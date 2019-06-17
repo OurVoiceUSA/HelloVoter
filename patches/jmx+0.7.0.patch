@@ -1,0 +1,11 @@
+--- a/node_modules/jmx/package.json
++++ b/node_modules/jmx/package.json
+@@ -37,7 +37,7 @@
+   "bundleDependencies": false,
+   "dependencies": {
+     "async": "~1.5.0",
+-    "java": "~0.9.0"
++    "java": "^0.11.0"
+   },
+   "deprecated": false,
+   "description": "Bridge library to communicate with Java applications through JMX.",
