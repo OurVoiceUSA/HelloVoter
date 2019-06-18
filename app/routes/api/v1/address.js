@@ -1,8 +1,10 @@
 
 import {
   volunteerAssignments,
-  valid, _400, _403, _500
+  _400, _403,
 } from '../../../lib/utils';
+
+import { ov_config } from '../../../lib/ov_config';
 
 import { Router } from 'express';
 

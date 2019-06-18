@@ -11,7 +11,7 @@ import { public_key, jwt_iss } from './lib/pubkey';
 import { ov_config } from './lib/ov_config';
 
 import {
-  cqdo, _400, _401, _403, _422, _500
+  cqdo, _400, _401, _403, _500
 } from './lib/utils';
 
 const router = require('./routes/createRouter.js')();

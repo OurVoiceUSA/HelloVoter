@@ -1,6 +1,6 @@
 
 import {
-  _volunteersFromCypher, volunteerAssignments, sameTeam, onMyTurf, volunteerIsLeader,
+  _volunteersFromCypher, onMyTurf, volunteerIsLeader,
   cqdo, valid, _400, _403, _500
 } from '../../../lib/utils';
 

@@ -1,10 +1,10 @@
 
 import fetch from 'node-fetch';
-import { ingeojson, deepCopy } from 'ourvoiceusa-sdk-js';
+import { deepCopy } from 'ourvoiceusa-sdk-js';
 
 import {
   volunteerAssignments,
-  valid, _400, _401, _403, _422, _500
+  _400, _401, _500
 } from '../../../lib/utils';
 
 import { ov_config } from '../../../lib/ov_config';
@@ -89,7 +89,6 @@ module.exports = Router({mergeParams: true})
   } catch (e) {
     return _500(res, e);
   }
-  return res.json({});
 })
 .get('/google_maps_key', async (req, res) => {
   let ass = await volunteerAssignments(req);

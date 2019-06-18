@@ -1,6 +1,6 @@
 
 import {
-  _volunteersFromCypher, volunteerAssignments, sameTeam, onMyTurf, volunteerCanSee,
+  _volunteersFromCypher, onMyTurf, volunteerCanSee,
   cqdo, valid, _400, _403, _500
 } from '../../../lib/utils';
 
@@ -11,8 +11,6 @@ module.exports = Router({mergeParams: true})
   let volunteers = [];
 
   try {
-    let ref;
-
     if (req.user.admin)
       volunteers = await _volunteersFromCypher(req, 'match (a:Volunteer) return a');
     else

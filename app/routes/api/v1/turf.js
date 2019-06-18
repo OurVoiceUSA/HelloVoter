@@ -1,7 +1,7 @@
 
 import wkx from 'wkx';
 import {
-  _volunteersFromCypher, volunteerAssignments,
+  _volunteersFromCypher,
   cqdo, valid, _400, _403, _500
 } from '../../../lib/utils';
 
@@ -98,13 +98,11 @@ module.exports = Router({mergeParams: true})
 
   if (!req.body.override) {
     try {
-      let ret;
+      await req.db.query('match (a:Volunteer {id:{vId}}) return a', req.body);
+      //let c = ret.data[0];
 
-      ret = await req.db.query('match (a:Volunteer {id:{vId}}) return a', req.body);
-      let c = ret.data[0];
-
-      ret = await req.db.query('match (a:Turf {id:{turfId}}) return a', req.body);
-      let t = ret.data[0];
+      await req.db.query('match (a:Turf {id:{turfId}}) return a', req.body);
+      //let t = ret.data[0];
 
       // TODO: config option for whether or not we care...
       //if (!ingeojson(JSON.parse(t.geometry), c.longitude, c.latitude)) return _400(res, "Volunteer location is not inside that turf.");

@@ -13,9 +13,11 @@ const qq = new queue(db);
 
 db.query('return timestamp()')
   .catch((e) => {
-    console.error("Unable to connect to database.");
-    process.exit(1)}
-  ).then(async () => {
+    console.error("Unable to connect to database");
+    console.error(e);
+    process.exit(1)
+  })
+  .then(async () => {
     await doStartupTasks(db, qq);
 
     const app = doExpressInit(true, db, qq);
