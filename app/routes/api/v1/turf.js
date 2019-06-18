@@ -16,7 +16,7 @@ module.exports = Router({mergeParams: true})
   try {
     req.body.wkt = wkx.Geometry.parseGeoJSON(req.body.geometry).toEwkt().split(';')[1];
   } catch (e) {
-    return _500(res, e);
+    return _400(res, "Unable to parse geometry.");
   }
 
   // store geojson too as string
