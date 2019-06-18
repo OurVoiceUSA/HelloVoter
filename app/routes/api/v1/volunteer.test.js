@@ -3,7 +3,7 @@ import { expect } from 'chai';
 
 import { ov_config } from '../../../../lib/ov_config';
 import neo4j from '../../../../lib/neo4j';
-import { appInit, base_uri, getObjs, sm_oauth } from '../../../../test/lib/utils';
+import { appInit, base_uri, getObjs } from '../../../../test/lib/utils';
 
 var api;
 var db;
