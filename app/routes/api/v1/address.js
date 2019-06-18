@@ -2,7 +2,7 @@
 import {
   volunteerAssignments,
   valid, _400, _403, _500
-} from '../../../../app/lib/utils';
+} from '../../../lib/utils';
 
 const Router = require('express').Router
 

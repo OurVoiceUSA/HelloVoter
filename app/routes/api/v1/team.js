@@ -2,7 +2,7 @@
 import {
   _volunteersFromCypher, volunteerAssignments, sameTeam, onMyTurf, volunteerIsLeader,
   cqdo, valid, _400, _403, _500
-} from '../../../../app/lib/utils';
+} from '../../../lib/utils';
 
 const Router = require('express').Router
 

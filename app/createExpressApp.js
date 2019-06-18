@@ -7,12 +7,12 @@ import helmet from 'helmet';
 import jwt from 'jsonwebtoken';
 import bodyParser from 'body-parser';
 
-import { public_key, jwt_iss } from '../app/lib/pubkey';
-import { ov_config } from '../app/lib/ov_config';
+import { public_key, jwt_iss } from './lib/pubkey';
+import { ov_config } from './lib/ov_config';
 
 import {
   cqdo, _400, _401, _403, _422, _500
-} from '../app/lib/utils';
+} from './lib/utils';
 
 const router = require('./routes/createRouter.js')();
 
