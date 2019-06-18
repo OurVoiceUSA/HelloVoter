@@ -154,7 +154,7 @@ describe('Team', function () {
 
   // members/list
 
-  it('members/list as admin', async () => {
+  it('list team members as admin', async () => {
     let r;
 
     r = await api.get(base_uri+'/team/members/list?teamId='+teams.A.id)
@@ -168,7 +168,7 @@ describe('Team', function () {
     expect(r.body.length).to.equal(2);
   });
 
-  it('members/list as non-admin', async () => {
+  it('list team members as non-admin', async () => {
     let r;
 
     r = await api.get(base_uri+'/team/members/list?teamId='+teams.A.id)
@@ -258,6 +258,88 @@ describe('Team', function () {
 
   // members/remove
 
+  it('remove team members as non-admin', async () => {
+    let r = await api.post(base_uri+'/team/members/remove')
+      .set('Authorization', 'Bearer '+c.sally.jwt)
+      .send({
+        teamId: teams.A.id,
+        vId: c.bob.id,
+      });
+    expect(r.statusCode).to.equal(403);
+  });
+
+  it('remove team members as team leader', async () => {
+    let r;
+
+    r = await api.post(base_uri+'/team/members/remove')
+      .set('Authorization', 'Bearer '+c.bob.jwt)
+      .send({
+        teamId: teams.A.id,
+        vId: c.sally.id,
+      });
+    expect(r.statusCode).to.equal(200);
+
+    r = await api.get(base_uri+'/team/members/list?teamId='+teams.A.id)
+      .set('Authorization', 'Bearer '+c.admin.jwt);
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.length).to.equal(1);
+  });
+
+  it('remove team members as other team leader', async () => {
+    let r;
+
+    r = await api.post(base_uri+'/team/members/remove')
+      .set('Authorization', 'Bearer '+c.bob.jwt)
+      .send({
+        teamId: teams.B.id,
+        vId: c.rich.id,
+      });
+    expect(r.statusCode).to.equal(403);
+
+    r = await api.get(base_uri+'/team/members/list?teamId='+teams.B.id)
+      .set('Authorization', 'Bearer '+c.admin.jwt);
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.length).to.equal(2);
+  });
+
+  it('remove team members as admin', async () => {
+    let r;
+
+    r = await api.post(base_uri+'/team/members/remove')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        teamId: teams.A.id,
+        vId: c.bob.id,
+      });
+    expect(r.statusCode).to.equal(200);
+
+    r = await api.get(base_uri+'/team/members/list?teamId='+teams.A.id)
+      .set('Authorization', 'Bearer '+c.admin.jwt);
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.length).to.equal(0);
+
+    r = await api.post(base_uri+'/team/members/remove')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        teamId: teams.B.id,
+        vId: c.rich.id,
+      });
+    expect(r.statusCode).to.equal(200);
+
+    r = await api.post(base_uri+'/team/members/remove')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        teamId: teams.B.id,
+        vId: c.jane.id,
+      });
+    expect(r.statusCode).to.equal(200);
+
+    r = await api.get(base_uri+'/team/members/list?teamId='+teams.B.id)
+      .set('Authorization', 'Bearer '+c.admin.jwt);
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.length).to.equal(0);
+  });
+
   // delete
 
   it('delete invalid parameter', async () => {
@@ -268,34 +350,6 @@ describe('Team', function () {
       });
     expect(r.statusCode).to.equal(400);
     expect(r.body).to.have.property("error");
-  });
-
-  it('delete teamA and teamB', async () => {
-    let r;
-
-    r = await api.post(base_uri+'/team/delete')
-      .set('Authorization', 'Bearer '+c.admin.jwt)
-      .send({
-        teamId: teams.A.id,
-      });
-    expect(r.statusCode).to.equal(200);
-
-    r = await api.get(base_uri+'/team/get?teamId='+teams.A.id)
-      .set('Authorization', 'Bearer '+c.admin.jwt);
-    expect(r.statusCode).to.equal(200);
-    expect(r.body.data.length).to.equal(0);
-
-    r = await api.post(base_uri+'/team/delete')
-      .set('Authorization', 'Bearer '+c.admin.jwt)
-      .send({
-        teamId: teams.B.id,
-      });
-    expect(r.statusCode).to.equal(200);
-
-    r = await api.get(base_uri+'/team/get?teamId='+teams.B.id)
-      .set('Authorization', 'Bearer '+c.admin.jwt);
-    expect(r.statusCode).to.equal(200);
-    expect(r.body.data.length).to.equal(0);
   });
 
 });

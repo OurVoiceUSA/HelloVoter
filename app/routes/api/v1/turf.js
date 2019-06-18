@@ -63,18 +63,6 @@ module.exports = Router({mergeParams: true})
   // TODO: if (req.user.admin) -- append a match (v:Volunteer) that's assigned to that node somehow
   return cqdo(req, res, 'call spatial.intersects("turf", {longitude: {longitude}, latitude: {latitude}}) yield node return node', req.query);
 })
-.post('/turf/delete', async (req, res) => {
-  if (!req.user.admin) return _403(res, "Permission denied.");
-  if (!valid(req.body.turfId)) return _400(res, "Invalid value to parameter 'turfId'.");
-
-  try {
-    await req.db.query('match (a:Turf {id:{turfId}}) detach delete a', req.body);
-  } catch(e) {
-    return _500(res, e);
-  }
-
-  return res.json({});
-})
 .get('/turf/assigned/team/list', (req, res) => {
   if (!valid(req.query.turfId)) return _400(res, "Invalid value to parameter 'turfId'.");
   return cqdo(req, res, 'match (a:Turf {id:{turfId}})-[:ASSIGNED]-(b:Team) return b', req.query, true);
@@ -134,3 +122,15 @@ module.exports = Router({mergeParams: true})
 
   return cqdo(req, res, 'match (a:Turf {id:{turfId}})-[r:ASSIGNED]-(b:Volunteer {id:{vId}}) delete r', req.body, true);
 })
+.post('/turf/delete', async (req, res) => {
+  if (!req.user.admin) return _403(res, "Permission denied.");
+  if (!valid(req.body.turfId)) return _400(res, "Invalid value to parameter 'turfId'.");
+
+  try {
+    await req.db.query('match (a:Turf {id:{turfId}}) detach delete a', req.body);
+  } catch(e) {
+    return _500(res, e);
+  }
+
+  return res.json({});
+});
