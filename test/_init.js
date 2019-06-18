@@ -1,10 +1,12 @@
 
+import { Docker, Options } from 'docker-cli-js';
 import jwt from 'jsonwebtoken';
 import { expect } from 'chai';
 import fs from 'fs';
 
 import { ov_config } from '../app/lib/ov_config';
 import neo4j from '../app/lib/neo4j';
+import { min_neo4j_version } from '../app/lib/utils';
 import { appInit, base_uri, genName, writeObj, sm_oauth, tpx } from './lib/utils';
 
 var api;
@@ -41,8 +43,8 @@ describe('User Creation', function () {
     let arr = (await db.version()).split('.');
     let ver = Number.parseFloat(arr[0]+'.'+arr[1]);
 
-    if (ver < 3.5) {
-      console.warn("Neo4j version 3.5 or higher is required.");
+    if (ver < min_neo4j_version) {
+      console.warn("Neo4j version "+min_neo4j_version+" or higher is required.");
       process.exit(1);
     }
   });

@@ -2,6 +2,7 @@
 import { asyncForEach, sleep } from 'ourvoiceusa-sdk-js';
 
 import { ov_config } from './ov_config';
+import { min_neo4j_version } from './utils';
 import queue from './queue';
 
 var _require = require; // so we can lazy load a module later on
@@ -115,12 +116,11 @@ async function doDbInit() {
     process.exit(1);
   }
 
-  // indexing changed in 3.5 and we do not support the old ones
   let arr = (await db.version()).split('.');
   let ver = Number.parseFloat(arr[0]+'.'+arr[1]);
 
-  if (ver < 3.5) {
-    console.warn("Neo4j version 3.5 or higher is required.");
+  if (ver < min_neo4j_version) {
+    console.warn("Neo4j version "+min_neo4j_version+" or higher is required.");
     process.exit(1);
   }
 
