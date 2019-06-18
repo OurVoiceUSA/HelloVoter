@@ -1,5 +1,4 @@
 
-import jwt from 'jsonwebtoken';
 import { expect } from 'chai';
 
 import { ov_config } from '../../../../lib/ov_config';
