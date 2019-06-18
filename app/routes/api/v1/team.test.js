@@ -24,7 +24,7 @@ describe('Team', function () {
     db.close();
   });
 
-  // create already tested from _init
+  // create
 
   it('create invalid characters', async () => {
     let r = await api.post(base_uri+'/team/create')
@@ -84,27 +84,179 @@ describe('Team', function () {
     expect(r.body.data.length).to.equal(0);
   });
 
-  // members/list
-
   // members/add
 
-  // members/remove
+  it('add volunteers to teams invalid parameters', async () => {
+    let r;
+
+    r = await api.post(base_uri+'/team/members/add')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        teamId: teams.A.id,
+      });
+    expect(r.statusCode).to.equal(400);
+    expect(r.body).to.have.property("error");
+
+    r = await api.post(base_uri+'/team/members/add')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        vId: c.bob.id,
+      });
+    expect(r.statusCode).to.equal(400);
+    expect(r.body).to.have.property("error");
+  });
+
+  it('add volunteers to teams as non-admin', async () => {
+    let r = await api.post(base_uri+'/team/members/add')
+      .set('Authorization', 'Bearer '+c.bob.jwt)
+      .send({
+        teamId: teams.A.id,
+        vId: c.bob.id,
+      });
+    expect(r.statusCode).to.equal(403);
+  });
+
+  it('add volunteers to teams as admin', async () => {
+    let r;
+
+    r = await api.post(base_uri+'/team/members/add')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        teamId: teams.A.id,
+        vId: c.bob.id,
+      });
+    expect(r.statusCode).to.equal(200);
+
+    r = await api.post(base_uri+'/team/members/add')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        teamId: teams.A.id,
+        vId: c.sally.id,
+      });
+    expect(r.statusCode).to.equal(200);
+
+    r = await api.post(base_uri+'/team/members/add')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        teamId: teams.B.id,
+        vId: c.rich.id,
+      });
+    expect(r.statusCode).to.equal(200);
+
+    r = await api.post(base_uri+'/team/members/add')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        teamId: teams.B.id,
+        vId: c.jane.id,
+      });
+    expect(r.statusCode).to.equal(200);
+  });
+
+  // members/list
+
+  it('members/list as admin', async () => {
+    let r;
+
+    r = await api.get(base_uri+'/team/members/list?teamId='+teams.A.id)
+      .set('Authorization', 'Bearer '+c.admin.jwt);
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.length).to.equal(2);
+
+    r = await api.get(base_uri+'/team/members/list?teamId='+teams.B.id)
+      .set('Authorization', 'Bearer '+c.admin.jwt);
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.length).to.equal(2);
+  });
+
+  it('members/list as non-admin', async () => {
+    let r;
+
+    r = await api.get(base_uri+'/team/members/list?teamId='+teams.A.id)
+      .set('Authorization', 'Bearer '+c.bob.jwt);
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.length).to.equal(2);
+
+    r = await api.get(base_uri+'/team/members/list?teamId='+teams.B.id)
+      .set('Authorization', 'Bearer '+c.bob.jwt);
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.length).to.equal(0);
+  });
 
   // members/promote
 
-  // members/demote
+  it('members/promote as admin', async () => {
+    let r;
 
-  // turf/list
+    r = await api.post(base_uri+'/team/members/promote')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        teamId: teams.A.id,
+        vId: c.bob.id,
+      });
+    expect(r.statusCode).to.equal(200);
+
+    r = await api.post(base_uri+'/team/members/promote')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        teamId: teams.B.id,
+        vId: c.rich.id,
+      });
+    expect(r.statusCode).to.equal(200);
+  });
+
+  it('members/promote as non-admin', async () => {
+    let r;
+
+    r = await api.post(base_uri+'/team/members/promote')
+      .set('Authorization', 'Bearer '+c.sally.jwt)
+      .send({
+        teamId: teams.A.id,
+        vId: c.sally.id,
+      });
+    expect(r.statusCode).to.equal(403);
+
+    r = await api.post(base_uri+'/team/members/promote')
+      .set('Authorization', 'Bearer '+c.jane.jwt)
+      .send({
+        teamId: teams.B.id,
+        vId: c.jane.id,
+      });
+    expect(r.statusCode).to.equal(403);
+  });
+
+  it('members/promote invalid parameters', async () => {
+    let r;
+
+    r = await api.post(base_uri+'/team/members/promote')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        vId: c.bob.id,
+      });
+    expect(r.statusCode).to.equal(400);
+
+    r = await api.post(base_uri+'/team/members/promote')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        teamId: teams.B.id,
+      });
+    expect(r.statusCode).to.equal(400);
+  });
 
   // turf/add
 
-  // turf/remove
-
-  // form/list
+  // turf/list
 
   // form/add
 
+  // form/list
+
+  // members/demote
+
+  // turf/remove
+
   // form/remove
+
+  // members/remove
 
   // delete
 
