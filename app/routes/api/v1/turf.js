@@ -5,7 +5,7 @@ import {
   cqdo, valid, _400, _403, _500
 } from '../../../lib/utils';
 
-const Router = require('express').Router
+import { Router } from 'express';
 
 module.exports = Router({mergeParams: true})
 .post('/turf/create', async (req, res) => {

@@ -8,10 +8,9 @@ import {
 } from '../../../lib/utils';
 
 import { ov_config } from '../../../lib/ov_config';
+import { version } from '../../../../package.json';
 
-var version = require('../../../../package.json').version;
-
-const Router = require('express').Router
+import { Router } from 'express';
 
 module.exports = Router({mergeParams: true})
 .post('/hello', async (req, res) => {

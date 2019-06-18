@@ -4,7 +4,7 @@ import {
   valid, _400, _403, _500
 } from '../../../lib/utils';
 
-const Router = require('express').Router
+import { Router } from 'express';
 
 module.exports = Router({mergeParams: true})
 .get('/people/get/byposition', async (req, res) => {
