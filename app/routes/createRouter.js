@@ -1,6 +1,6 @@
 
-const glob = require('glob')
-const Router = require('express').Router
+import glob from 'glob';
+import { Router } from 'express';
 
 module.exports = () => glob
   .sync('**/*.js', { cwd: `${__dirname}/` })

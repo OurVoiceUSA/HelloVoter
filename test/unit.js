@@ -1,5 +1,5 @@
 
-const glob = require('glob');
+import glob from 'glob';
 
 console.warn = function() {};
 
