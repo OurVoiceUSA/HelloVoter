@@ -3,8 +3,8 @@ import supertest from 'supertest';
 import fs from 'fs';
 
 import { doExpressInit } from '../../app/createExpressApp';
-import { ov_config } from '../../lib/ov_config';
-import queue from '../../lib/queue';
+import { ov_config } from '../../app/lib/ov_config';
+import queue from '../../app/lib/queue';
 
 export var base_uri = '/HelloVoterHQ/api/v1/';
 export var tpx = "Test ";

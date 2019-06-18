@@ -2,11 +2,11 @@
 import https from 'https';
 import fs from 'fs';
 
-import { doStartupTasks } from './lib/startup';
+import { doStartupTasks } from './app/lib/startup';
 import { doExpressInit } from './app/createExpressApp';
-import { ov_config } from './lib/ov_config';
-import neo4j from './lib/neo4j';
-import queue from './lib/queue';
+import { ov_config } from './app/lib/ov_config';
+import neo4j from './app/lib/neo4j';
+import queue from './app/lib/queue';
 
 const db = new neo4j(ov_config);
 const qq = new queue(db);

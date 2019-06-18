@@ -2,8 +2,8 @@
 import jwt from 'jsonwebtoken';
 import { expect } from 'chai';
 
-import { ov_config } from '../lib/ov_config';
-import neo4j from '../lib/neo4j';
+import { ov_config } from '../app/lib/ov_config';
+import neo4j from '../app/lib/neo4j';
 import { appInit, base_uri, getObjs, keep, tpx } from './lib/utils';
 
 var api;

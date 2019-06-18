@@ -5,9 +5,9 @@ import { ingeojson, deepCopy } from 'ourvoiceusa-sdk-js';
 import {
   volunteerAssignments,
   valid, _400, _401, _403, _422, _500
-} from '../../../../lib/http';
+} from '../../../../app/lib/utils';
 
-import { ov_config } from '../../../../lib/ov_config';
+import { ov_config } from '../../../../app/lib/ov_config';
 
 var version = require('../../../../package.json').version;
 

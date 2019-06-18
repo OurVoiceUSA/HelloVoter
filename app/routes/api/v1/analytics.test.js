@@ -1,8 +1,8 @@
 
 import { expect } from 'chai';
 
-import { ov_config } from '../../../../lib/ov_config';
-import neo4j from '../../../../lib/neo4j';
+import { ov_config } from '../../../../app/lib/ov_config';
+import neo4j from '../../../../app/lib/neo4j';
 import { appInit, base_uri, getObjs } from '../../../../test/lib/utils';
 
 var api;
