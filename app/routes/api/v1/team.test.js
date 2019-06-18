@@ -8,8 +8,7 @@ import { appInit, base_uri, getObjs, sm_oauth } from '../../../../test/lib/utils
 
 var api;
 var db;
-var c;
-var teams;
+var c, teams, turfs, forms;
 
 describe('Team', function () {
 
@@ -18,6 +17,8 @@ describe('Team', function () {
     api = appInit(db);
     c = getObjs('volunteers');
     teams = getObjs('teams');
+    turfs = getObjs('turfs');
+    forms = getObjs('forms');
   });
 
   after(async () => {
@@ -244,19 +245,471 @@ describe('Team', function () {
 
   // turf/add
 
+  it('add turf invalid parameters', async () => {
+    let r;
+
+    r = await api.post(base_uri+'/team/turf/add')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        teamId: teams.A.id,
+      });
+    expect(r.statusCode).to.equal(400);
+
+    r = await api.post(base_uri+'/team/turf/add')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        turfId: turfs.A.id,
+      });
+    expect(r.statusCode).to.equal(400);
+  });
+
+  it('add turf as non-admin', async () => {
+    let r;
+
+    r = await api.post(base_uri+'/team/turf/add')
+      .set('Authorization', 'Bearer '+c.bob.jwt)
+      .send({
+        turfId: turfs.A.id,
+        teamId: teams.A.id,
+      });
+    expect(r.statusCode).to.equal(403);
+
+    r = await api.post(base_uri+'/team/turf/add')
+      .set('Authorization', 'Bearer '+c.sally.jwt)
+      .send({
+        turfId: turfs.A.id,
+        teamId: teams.A.id,
+      });
+    expect(r.statusCode).to.equal(403);
+  });
+
+  it('add turf as admin', async () => {
+    let r;
+
+    r = await api.post(base_uri+'/team/turf/add')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        turfId: turfs.A.id,
+        teamId: teams.A.id,
+      });
+    expect(r.statusCode).to.equal(200);
+
+    r = await api.post(base_uri+'/team/turf/add')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        turfId: turfs.B.id,
+        teamId: teams.B.id,
+      });
+    expect(r.statusCode).to.equal(200);
+  });
+
   // turf/list
+
+  it('list turf invalid parameters', async () => {
+    let r;
+
+    r = await api.get(base_uri+'/team/turf/list')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+    expect(r.statusCode).to.equal(400);
+
+    r = await api.get(base_uri+'/team/turf/list?turfId='+turfs.A.id)
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+    expect(r.statusCode).to.equal(400);
+  });
+
+  it('list turf as non-admin', async () => {
+    let r;
+
+    r = await api.get(base_uri+'/team/turf/list?teamId='+teams.A.id)
+      .set('Authorization', 'Bearer '+c.bob.jwt)
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.data.length).to.equal(1);
+    expect(r.body.data[0].id).to.equal(turfs.A.id);
+
+    r = await api.get(base_uri+'/team/turf/list?teamId='+teams.B.id)
+      .set('Authorization', 'Bearer '+c.rich.jwt)
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.data.length).to.equal(1);
+    expect(r.body.data[0].id).to.equal(turfs.B.id);
+  });
+
+  it('list turf from other team', async () => {
+    let r;
+
+    r = await api.get(base_uri+'/team/turf/list?teamId='+teams.B.id)
+      .set('Authorization', 'Bearer '+c.bob.jwt)
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.data.length).to.equal(0);
+
+    r = await api.get(base_uri+'/team/turf/list?teamId='+teams.A.id)
+      .set('Authorization', 'Bearer '+c.rich.jwt)
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.data.length).to.equal(0);
+  });
+
+  it('list turf as admin', async () => {
+    let r;
+
+    r = await api.get(base_uri+'/team/turf/list?teamId='+teams.A.id)
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.data.length).to.equal(1);
+    expect(r.body.data[0].id).to.equal(turfs.A.id);
+
+    r = await api.get(base_uri+'/team/turf/list?teamId='+teams.B.id)
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.data.length).to.equal(1);
+    expect(r.body.data[0].id).to.equal(turfs.B.id);
+  });
 
   // form/add
 
+  it('add form invalid parameters', async () => {
+    let r;
+
+    r = await api.post(base_uri+'/team/form/add')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        teamId: teams.A.id,
+      });
+    expect(r.statusCode).to.equal(400);
+
+    r = await api.post(base_uri+'/team/form/add')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        formId: forms.A.id,
+      });
+    expect(r.statusCode).to.equal(400);
+  });
+
+  it('add form as non-admin', async () => {
+    let r;
+
+    r = await api.post(base_uri+'/team/form/add')
+      .set('Authorization', 'Bearer '+c.bob.jwt)
+      .send({
+        formId: forms.A.id,
+        teamId: teams.A.id,
+      });
+    expect(r.statusCode).to.equal(403);
+
+    r = await api.post(base_uri+'/team/form/add')
+      .set('Authorization', 'Bearer '+c.sally.jwt)
+      .send({
+        formId: forms.A.id,
+        teamId: teams.A.id,
+      });
+    expect(r.statusCode).to.equal(403);
+  });
+
+  it('add form as admin', async () => {
+    let r;
+
+    r = await api.post(base_uri+'/team/form/add')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        formId: forms.A.id,
+        teamId: teams.A.id,
+      });
+    expect(r.statusCode).to.equal(200);
+
+    r = await api.post(base_uri+'/team/form/add')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        formId: forms.B.id,
+        teamId: teams.B.id,
+      });
+    expect(r.statusCode).to.equal(200);
+  });
+
   // form/list
+
+  it('list form invalid parameters', async () => {
+    let r;
+
+    r = await api.get(base_uri+'/team/form/list')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+    expect(r.statusCode).to.equal(400);
+
+    r = await api.get(base_uri+'/team/form/list?formId='+forms.A.id)
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+    expect(r.statusCode).to.equal(400);
+  });
+
+  it('list form as non-admin', async () => {
+    let r;
+
+    r = await api.get(base_uri+'/team/form/list?teamId='+teams.A.id)
+      .set('Authorization', 'Bearer '+c.bob.jwt)
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.data.length).to.equal(1);
+    expect(r.body.data[0].id).to.equal(forms.A.id);
+
+    r = await api.get(base_uri+'/team/form/list?teamId='+teams.B.id)
+      .set('Authorization', 'Bearer '+c.rich.jwt)
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.data.length).to.equal(1);
+    expect(r.body.data[0].id).to.equal(forms.B.id);
+  });
+
+  it('list form from other team', async () => {
+    let r;
+
+    r = await api.get(base_uri+'/team/form/list?teamId='+teams.B.id)
+      .set('Authorization', 'Bearer '+c.bob.jwt)
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.data.length).to.equal(0);
+
+    r = await api.get(base_uri+'/team/form/list?teamId='+teams.A.id)
+      .set('Authorization', 'Bearer '+c.rich.jwt)
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.data.length).to.equal(0);
+  });
+
+  it('list form as admin', async () => {
+    let r;
+
+    r = await api.get(base_uri+'/team/form/list?teamId='+teams.A.id)
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.data.length).to.equal(1);
+    expect(r.body.data[0].id).to.equal(forms.A.id);
+
+    r = await api.get(base_uri+'/team/form/list?teamId='+teams.B.id)
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.data.length).to.equal(1);
+    expect(r.body.data[0].id).to.equal(forms.B.id);
+  });
 
   // members/demote
 
+  it('demote invalid parameters', async () => {
+    let r;
+
+    r = await api.post(base_uri+'/team/members/demote')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        vId: c.bob.id,
+      });
+    expect(r.statusCode).to.equal(400);
+
+    r = await api.post(base_uri+'/team/members/demote')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        teamId: teams.B.id,
+      });
+    expect(r.statusCode).to.equal(400);
+  });
+
+  it('demote as non-leader', async () => {
+    let r;
+
+    r = await api.post(base_uri+'/team/members/demote')
+      .set('Authorization', 'Bearer '+c.sally.jwt)
+      .send({
+        teamId: teams.A.id,
+        vId: c.bob.id,
+      });
+    expect(r.statusCode).to.equal(403);
+
+    r = await api.post(base_uri+'/team/members/demote')
+      .set('Authorization', 'Bearer '+c.jane.jwt)
+      .send({
+        teamId: teams.A.id,
+        vId: c.bob.id,
+      });
+    expect(r.statusCode).to.equal(403);
+  });
+
+  it('demote as admin', async () => {
+    let r;
+
+    r = await api.post(base_uri+'/team/members/demote')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        teamId: teams.A.id,
+        vId: c.bob.id,
+      });
+    expect(r.statusCode).to.equal(200);
+
+    r = await api.post(base_uri+'/team/members/remove')
+      .set('Authorization', 'Bearer '+c.bob.jwt)
+      .send({
+        teamId: teams.A.id,
+        vId: c.sally.id,
+      });
+    expect(r.statusCode).to.equal(403);
+
+    r = await api.post(base_uri+'/team/members/promote')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        teamId: teams.A.id,
+        vId: c.bob.id,
+      });
+    expect(r.statusCode).to.equal(200);
+  });
+
   // turf/remove
+
+  it('remove turf invalid parameters', async () => {
+    let r;
+
+    r = await api.post(base_uri+'/team/turf/remove')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        teamId: teams.A.id,
+      });
+    expect(r.statusCode).to.equal(400);
+
+    r = await api.post(base_uri+'/team/turf/remove')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        turfId: turfs.A.id,
+      });
+    expect(r.statusCode).to.equal(400);
+  });
+
+  it('remove turf as non-admin', async () => {
+    let r = await api.post(base_uri+'/team/turf/remove')
+      .set('Authorization', 'Bearer '+c.sally.jwt)
+      .send({
+        teamId: teams.A.id,
+        turfId: turfs.A.id,
+      });
+    expect(r.statusCode).to.equal(403);
+  });
+
+  it('remove turf as team leader', async () => {
+    let r = await api.post(base_uri+'/team/turf/remove')
+      .set('Authorization', 'Bearer '+c.bob.jwt)
+      .send({
+        teamId: teams.A.id,
+        turfId: turfs.A.id,
+      });
+    expect(r.statusCode).to.equal(403);
+  });
+
+  it('remove turf as admin', async () => {
+    let r;
+
+    r = await api.post(base_uri+'/team/turf/remove')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        teamId: teams.A.id,
+        turfId: turfs.A.id,
+      });
+    expect(r.statusCode).to.equal(200);
+
+    r = await api.post(base_uri+'/team/turf/remove')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        teamId: teams.B.id,
+        turfId: turfs.B.id,
+      });
+    expect(r.statusCode).to.equal(200);
+
+    r = await api.get(base_uri+'/team/turf/list?teamId='+teams.A.id)
+      .set('Authorization', 'Bearer '+c.admin.jwt);
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.data.length).to.equal(0);
+
+    r = await api.get(base_uri+'/team/turf/list?teamId='+teams.B.id)
+      .set('Authorization', 'Bearer '+c.admin.jwt);
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.data.length).to.equal(0);
+  });
 
   // form/remove
 
+  it('remove form invalid parameters', async () => {
+    let r;
+
+    r = await api.post(base_uri+'/team/form/remove')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        teamId: teams.A.id,
+      });
+    expect(r.statusCode).to.equal(400);
+
+    r = await api.post(base_uri+'/team/form/remove')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        formId: forms.A.id,
+      });
+    expect(r.statusCode).to.equal(400);
+  });
+
+  it('remove form as non-admin', async () => {
+    let r = await api.post(base_uri+'/team/form/remove')
+      .set('Authorization', 'Bearer '+c.sally.jwt)
+      .send({
+        teamId: teams.A.id,
+        formId: forms.A.id,
+      });
+    expect(r.statusCode).to.equal(403);
+  });
+
+  it('remove form as team leader', async () => {
+    let r = await api.post(base_uri+'/team/form/remove')
+      .set('Authorization', 'Bearer '+c.bob.jwt)
+      .send({
+        teamId: teams.A.id,
+        formId: forms.A.id,
+      });
+    expect(r.statusCode).to.equal(403);
+  });
+
+  it('remove form as admin', async () => {
+    let r;
+
+    r = await api.post(base_uri+'/team/form/remove')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        teamId: teams.A.id,
+        formId: forms.A.id,
+      });
+    expect(r.statusCode).to.equal(200);
+
+    r = await api.post(base_uri+'/team/form/remove')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        teamId: teams.B.id,
+        formId: forms.B.id,
+      });
+    expect(r.statusCode).to.equal(200);
+
+    r = await api.get(base_uri+'/team/form/list?teamId='+teams.A.id)
+      .set('Authorization', 'Bearer '+c.admin.jwt);
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.data.length).to.equal(0);
+
+    r = await api.get(base_uri+'/team/form/list?teamId='+teams.B.id)
+      .set('Authorization', 'Bearer '+c.admin.jwt);
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.data.length).to.equal(0);
+  });
+
   // members/remove
+
+  it('remove team members invalid parameters', async () => {
+    let r;
+
+    r = await api.post(base_uri+'/team/members/remove')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        vId: c.bob.id,
+      });
+    expect(r.statusCode).to.equal(400);
+
+    r = await api.post(base_uri+'/team/members/remove')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        teamId: teams.A.id,
+      });
+    expect(r.statusCode).to.equal(400);
+  });
 
   it('remove team members as non-admin', async () => {
     let r = await api.post(base_uri+'/team/members/remove')

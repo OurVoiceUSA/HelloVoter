@@ -1,6 +1,6 @@
 
 import {
-  _volunteersFromCypher, volunteerAssignments, sameTeam, onMyTurf,
+  _volunteersFromCypher, volunteerAssignments, sameTeam, onMyTurf, volunteerIsLeader,
   cqdo, valid, _400, _403, _500
 } from '../../../../lib/http';
 
@@ -89,12 +89,12 @@ module.exports = Router({mergeParams: true})
   }
 })
 .post('/team/turf/add', (req, res) => {
-  if (!valid(req.body.teamId) || !valid(req.body.turformId)) return _400(res, "Invalid value to parameter 'teamId' or 'turformId'.");
-  return cqdo(req, res, 'match (a:Turf {id:{turformId}}), (b:Team {id:{teamId}}) merge (b)-[:ASSIGNED]->(a)', req.body, true);
+  if (!valid(req.body.teamId) || !valid(req.body.turfId)) return _400(res, "Invalid value to parameter 'teamId' or 'turfId'.");
+  return cqdo(req, res, 'match (a:Turf {id:{turfId}}), (b:Team {id:{teamId}}) merge (b)-[:ASSIGNED]->(a)', req.body, true);
 })
 .post('/team/turf/remove', (req, res) => {
-  if (!valid(req.body.teamId) || valid(!req.body.turformId)) return _400(res, "Invalid value to parameter 'teamId' or 'turformId'.");
-  return cqdo(req, res, 'match (a:Turf {id:{turformId}})-[r:ASSIGNED]-(b:Team {id:{teamId}}) delete r', req.body, true);
+  if (!valid(req.body.teamId) || valid(!req.body.turfId)) return _400(res, "Invalid value to parameter 'teamId' or 'turfId'.");
+  return cqdo(req, res, 'match (a:Turf {id:{turfId}})-[r:ASSIGNED]-(b:Team {id:{teamId}}) delete r', req.body, true);
 })
 .get('/team/form/list', (req, res) => {
   if (!valid(req.query.teamId)) return _400(res, "Invalid value to parameter 'teamId'.");
@@ -117,13 +117,3 @@ module.exports = Router({mergeParams: true})
   if (!valid(req.body.teamId)) return _400(res, "Invalid value to parameter 'teamId'.");
   return cqdo(req, res, 'match (a:Team {id:{teamId}}) detach delete a', req.body, true);
 });
-
-async function volunteerIsLeader(req, id, teamId) {
-  try {
-    let ref = await req.db.query('match (:Volunteer {id:{id}})-[:MEMBERS {leader:true}]-(a:Team {id:{teamId}}) return a', {id: id, teamId: teamId})
-    if (ref.data.length > 0) return true;
-  } catch (e) {
-    console.warn(e);
-  }
-  return false;
-}
