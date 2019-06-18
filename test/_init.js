@@ -1,6 +1,7 @@
 
 import jwt from 'jsonwebtoken';
 import { expect } from 'chai';
+import fs from 'fs';
 
 import { ov_config } from '../lib/ov_config';
 import neo4j from '../lib/neo4j';
@@ -10,6 +11,8 @@ var api;
 var db;
 var c = {};
 var teams = {};
+var turfs = {};
+var forms = {};
 var public_key;
 
 describe('User Creation', function () {
@@ -27,6 +30,8 @@ describe('User Creation', function () {
   after(async () => {
     writeObj('volunteers', c);
     writeObj('teams', teams);
+    writeObj('turfs', turfs);
+    writeObj('forms', forms);
     db.close();
   });
 
@@ -85,7 +90,6 @@ describe('User Creation', function () {
     expect(r.statusCode).to.equal(200);
     c.han = jwt.verify(r.body.jwt, public_key);
     c.han.jwt = r.body.jwt;
-
   });
 
   it('hello 200 admin awaiting assignment', async () => {
@@ -112,7 +116,6 @@ describe('User Creation', function () {
       });
     expect(r.statusCode).to.equal(200);
     expect(r.body.data.admin).to.equal(true);
-
   });
 
   it('hello 200 volunteers awaiting assignment', async () => {
@@ -185,11 +188,10 @@ describe('User Creation', function () {
     expect(r.body.data).to.not.have.property("admin");
   });
 
-  it('generate test objects', async () => {
+  it('generate test objects - teams', async () => {
     let r;
 
     teams.A = { name: genName("Team") };
-    teams.B = { name: genName("Team") };
 
     r = await api.post(base_uri+'/team/create')
       .set('Authorization', 'Bearer '+c.admin.jwt)
@@ -200,6 +202,8 @@ describe('User Creation', function () {
     expect(typeof r.body.teamId).to.equal("string");
     teams.A.id = r.body.teamId;
 
+    teams.B = { name: genName("Team") };
+
     r = await api.post(base_uri+'/team/create')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
@@ -208,7 +212,58 @@ describe('User Creation', function () {
     expect(r.statusCode).to.equal(200);
     expect(typeof r.body.teamId).to.equal("string");
     teams.B.id = r.body.teamId;
+  });
 
+  it('generate test objects - turfs', async () => {
+    let r;
+
+    turfs.A = { name: genName("Turf") };
+
+    r = await api.post(base_uri+'/turf/create')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        name: turfs.A.name,
+        geometry: JSON.parse(fs.readFileSync('./geojson/CA.geojson')),
+      });
+    expect(r.statusCode).to.equal(200);
+    turfs.A.id = r.body.turfId;
+
+    turfs.B = { name: genName("Turf") };
+
+    r = await api.post(base_uri+'/turf/create')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        name: turfs.B.name,
+        geometry: JSON.parse(fs.readFileSync('./geojson/CA-sldl-62.geojson')).geometry,
+      });
+    expect(r.statusCode).to.equal(200);
+    turfs.B.id = r.body.turfId;
+  });
+
+  it('generate test objects - forms', async () => {
+    let r;
+
+    forms.A = { name: genName("Form") };
+
+    r = await api.post(base_uri+'/form/create')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        name: forms.A.name,
+        attributes: ["013a31db-fe24-4fad-ab6a-dd9d831e72f9"],
+      });
+    expect(r.statusCode).to.equal(200);
+    forms.A.id = r.body.formId;
+
+    forms.B = { name: genName("Form") };
+
+    r = await api.post(base_uri+'/form/create')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        name: forms.B.name,
+        attributes: ["013a31db-fe24-4fad-ab6a-dd9d831e72f9"],
+      });
+    expect(r.statusCode).to.equal(200);
+    forms.B.id = r.body.formId;
   });
 
 });
