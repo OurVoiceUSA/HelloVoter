@@ -4,7 +4,7 @@ import { expect } from 'chai';
 
 import { ov_config } from '../../../../lib/ov_config';
 import neo4j from '../../../../lib/neo4j';
-import { appInit, base_uri, getObjs, sm_oauth } from '../../../../test/lib/utils';
+import { appInit, base_uri, getObjs } from '../../../../test/lib/utils';
 
 var api;
 var db;
@@ -92,19 +92,162 @@ describe('Turf', function () {
 
   // get
 
+  it('get invalid parameter', async () => {
+    let r = await api.get(base_uri+'/turf/get')
+      .set('Authorization', 'Bearer '+c.admin.jwt);
+    expect(r.statusCode).to.equal(400);
+  });
+
+  it('get as non-admin', async () => {
+    let r = await api.get(base_uri+'/turf/get?turfId='+turfs.A.id)
+      .set('Authorization', 'Bearer '+c.bob.jwt);
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.data.length).to.equal(0);
+  });
+
+  it('get as admin', async () => {
+    let r = await api.get(base_uri+'/turf/get?turfId='+turfs.A.id)
+      .set('Authorization', 'Bearer '+c.admin.jwt);
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.data.length).to.equal(1);
+    expect(r.body.data[0].id).to.equal(turfs.A.id);
+  });
+
   // list
+
+  it('list as non-admin', async () => {
+    let r = await api.get(base_uri+'/turf/list')
+      .set('Authorization', 'Bearer '+c.bob.jwt);
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.data.length).to.equal(0);
+  });
+
+  it('list as admin with no geometry', async () => {
+    let r = await api.get(base_uri+'/turf/list')
+      .set('Authorization', 'Bearer '+c.admin.jwt);
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.data.length).to.equal(2);
+    expect(r.body.data[0]).to.not.have.property("geometry");
+  });
+
+  it('list as admin with geometry', async () => {
+    let r = await api.get(base_uri+'/turf/list?geometry=true')
+      .set('Authorization', 'Bearer '+c.admin.jwt);
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.data.length).to.equal(2);
+    expect(r.body.data[0]).to.have.property("geometry");
+  });
 
   // list/byposition
 
-  // assigned/team/list
+  it('list byposition no coordinates', async () => {
+    let r = await api.get(base_uri+'/turf/list/byposition')
+      .set('Authorization', 'Bearer '+c.admin.jwt);
+    expect(r.statusCode).to.equal(400);
+  });
+
+  it('list byposition missing coordinate', async () => {
+    let r;
+
+    r = await api.get(base_uri+'/turf/list/byposition?longitude=-118.3281370')
+      .set('Authorization', 'Bearer '+c.admin.jwt);
+    expect(r.statusCode).to.equal(400);
+
+    r = await api.get(base_uri+'/turf/list/byposition?latitude=33.9208231')
+      .set('Authorization', 'Bearer '+c.admin.jwt);
+    expect(r.statusCode).to.equal(400);
+  });
+
+  it('list byposition coordinates not a number', async () => {
+    let r = await api.get(base_uri+'/turf/list/byposition?longitude=ABC&latitude=DEF')
+      .set('Authorization', 'Bearer '+c.admin.jwt);
+    expect(r.statusCode).to.equal(400);
+  });
+
+  it('list byposition single turf', async () => {
+    let r;
+
+    r = await api.get(base_uri+'/turf/list/byposition?longitude=-116.566483&latitude=35.6430223')
+      .set('Authorization', 'Bearer '+c.admin.jwt);
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.data.length).to.equal(1);
+  });
+
+  it('list byposition turf overlap', async () => {
+    let r;
+
+    r = await api.get(base_uri+'/turf/list/byposition?longitude=-118.3281370&latitude=33.9208231')
+      .set('Authorization', 'Bearer '+c.admin.jwt);
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.data.length).to.equal(2);
+  });
+
+  it.skip('list byposition non-admin', async () => {
+    let r;
+
+    r = await api.get(base_uri+'/turf/list/byposition?longitude=-116.566483&latitude=35.6430223')
+      .set('Authorization', 'Bearer '+c.bob.jwt);
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.data.length).to.equal(0);
+  });
 
   // assigned/team/add
 
+  it('assign a team invalid parameter', async () => {
+    let r;
+
+    r = await api.post(base_uri+'/turf/assigned/team/add')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        turfId: turfs.A.id,
+      });
+    expect(r.statusCode).to.equal(400);
+
+    r = await api.post(base_uri+'/turf/assigned/team/add')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        teamId: teams.A.id,
+      });
+    expect(r.statusCode).to.equal(400);
+  });
+
+  it('assign a team as non-admin', async () => {
+    let r = await api.post(base_uri+'/turf/assigned/team/add')
+      .set('Authorization', 'Bearer '+c.bob.jwt)
+      .send({
+        teamId: teams.A.id,
+        turfId: turfs.A.id,
+      });
+    expect(r.statusCode).to.equal(403);
+  });
+
+  it('assign a team as admin', async () => {
+    let r;
+
+    r = await api.post(base_uri+'/turf/assigned/team/add')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        teamId: teams.A.id,
+        turfId: turfs.A.id,
+      });
+    expect(r.statusCode).to.equal(200);
+
+    r = await api.post(base_uri+'/turf/assigned/team/add')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        teamId: teams.B.id,
+        turfId: turfs.B.id,
+      });
+    expect(r.statusCode).to.equal(200);
+  });
+
+  // assigned/team/list
+
   // assigned/team/remove
 
-  // assigned/volunteer/list
-
   // assigned/volunteer/add
+
+  // assigned/volunteer/list
 
   // assigned/volunteer/remove
 

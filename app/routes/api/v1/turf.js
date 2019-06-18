@@ -48,6 +48,7 @@ module.exports = Router({mergeParams: true})
     return cqdo(req, res, 'match (v:Volunteer {id:{id}}) optional match (v)-[:ASSIGNED]-(t:Turf) with v, t as dturf optional match (v)-[:MEMBERS]-(:Team)-[:ASSIGNED]-(t:Turf) with v, dturf + collect(t) as turf unwind turf as t call spatial.intersects("turf", t.wkt) yield node return node{.id, .name, .created'+(geom?', .geometry':'')+'}', req.user);
 })
 .get('/turf/get', (req, res) => {
+  if (!valid(req.query.turfId)) return _400(res, "Invalid value to parameter 'turfId'.");
   if (req.user.admin)
     return cqdo(req, res, 'match (a:Turf {id:{turfId}}) return a', req.query);
   else {
