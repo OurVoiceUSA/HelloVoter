@@ -10,7 +10,7 @@ var db;
 var c, turfs;
 var aId = "4a320f76-ef7b-4d73-ae2a-8f4ccf5de344";
 
-describe('Queue', function () {
+describe('Analytics', function () {
 
   before(() => {
     db = new neo4j(ov_config);
