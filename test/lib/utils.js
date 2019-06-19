@@ -1,5 +1,6 @@
 
 import supertest from 'supertest';
+import jwt from 'jsonwebtoken';
 import fs from 'fs';
 
 import { doExpressInit } from '../../app/createExpressApp';
@@ -8,8 +9,6 @@ import queue from '../../app/lib/queue';
 
 export var base_uri = '/HelloVoterHQ/api/v1/';
 export var tpx = "Test ";
-
-export var sm_oauth = supertest(ov_config.sm_oauth_url);
 
 export var writeObj = (name, obj) => fs.writeFileSync('./test/'+name+'.json', JSON.stringify(obj));
 export var getObjs = (name) => JSON.parse(fs.readFileSync('./test/'+name+'.json'));
@@ -26,4 +25,16 @@ export function appInit(db) {
     api = supertest(doExpressInit(false, db, new queue(db)));
   }
   return api;
+}
+
+export function testToken(key) {
+  let id = Math.ceil(Math.random()*10000000);
+  return jwt.sign(JSON.stringify({
+    id: 'test:' + id,
+    name: "Test User "+id,
+    iss: ov_config.jwt_iss,
+    iat: Math.floor(new Date().getTime() / 1000),
+    exp: Math.floor(new Date().getTime() / 1000)+604800,
+    disclaimer: "THIS IS A TEST TOKEN",
+  }), key, {algorithm: 'RS256'});
 }

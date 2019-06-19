@@ -5,10 +5,10 @@ import fetch from 'node-fetch';
 import { ov_config } from './ov_config.js';
 
 export var public_key;
-export var jwt_iss = 'ourvoiceusa.org';
+export var jwt_iss = ov_config.jwt_iss;
 
 if (ov_config.jwt_pub_key) {
-  public_key = fs.readFileSync(ov_config.jwt_pub_key);
+  public_key = fs.readFileSync(ov_config.jwt_pub_key, "utf8");
 } else {
   console.log("JWT_PUB_KEY not defined, attempting to fetch from "+ov_config.sm_oauth_url+'/pubkey');
   fetch(ov_config.sm_oauth_url+'/pubkey')

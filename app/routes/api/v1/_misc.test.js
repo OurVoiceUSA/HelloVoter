@@ -1,10 +1,11 @@
 
+import fetch from 'node-fetch';
 import jwt from 'jsonwebtoken';
 import { expect } from 'chai';
 
 import { ov_config } from '../../../lib/ov_config';
 import neo4j from '../../../lib/neo4j';
-import { appInit, base_uri, getObjs, sm_oauth } from '../../../../test/lib/utils';
+import { appInit, base_uri, getObjs } from '../../../../test/lib/utils';
 
 var api;
 var db;
@@ -42,26 +43,6 @@ describe('MISC endpoints', function () {
     expect(r.statusCode).to.equal(400);
     expect(r.body.error).to.equal(true);
     expect(r.body.msg).to.equal("Missing required header.");
-  });
-
-  it('hello 400 bad jwt', async () => {
-    let r;
-
-    r = await sm_oauth.post('/jwt')
-      .set('Content-Type', 'application/json')
-      .set('User-Agent', 'OurVoiceUSA/test')
-      .send({
-        apiKey: "12345678765432",
-      });
-    expect(r.statusCode).to.equal(200);
-
-    let jwt_bad = r.body.jwt; // this lacks an ID
-
-    r = await api.post(base_uri+'/hello')
-      .set('Authorization', 'Bearer '+jwt_bad)
-    expect(r.statusCode).to.equal(400);
-    expect(r.body.error).to.equal(true);
-    expect(r.body.msg).to.equal("Your token is missing a required parameter.");
   });
 
   it('hello 401 wrong jwt algorithm', async () => {

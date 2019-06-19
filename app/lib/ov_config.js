@@ -20,6 +20,7 @@ export const ov_config = {
   disable_jmx: getConfig("disable_jmx", false, false),
   job_concurrency: parseInt(getConfig("job_concurrency", false, 1)),
   jwt_pub_key: getConfig("jwt_pub_key", false, null),
+  jwt_iss: getConfig("jwt_iss", false, "ourvoiceusa.org"),
   google_maps_key: getConfig("google_maps_key", false, null),
   sm_oauth_url: getConfig("sm_oauth_url", false, 'https://ws.ourvoiceusa.org/auth'),
   autoenroll_formid: getConfig("autoenroll_formid", false, null),

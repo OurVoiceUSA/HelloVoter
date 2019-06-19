@@ -2,6 +2,8 @@ districts/
 
 # test data
 test/*.json
+test/rsa.pub
+test/rsa.key
 
 # misc files
 *.orig

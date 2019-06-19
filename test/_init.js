@@ -6,7 +6,7 @@ import fs from 'fs';
 import { ov_config } from '../app/lib/ov_config';
 import neo4j from '../app/lib/neo4j';
 import { min_neo4j_version } from '../app/lib/utils';
-import { appInit, base_uri, genName, writeObj, sm_oauth, tpx } from './lib/utils';
+import { appInit, base_uri, genName, testToken, writeObj, tpx } from './lib/utils';
 import { doDbInit } from '../app/lib/startup';
 
 var api;
@@ -15,7 +15,7 @@ var c = {};
 var teams = {};
 var turfs = {};
 var forms = {};
-var public_key;
+var public_key, private_key;
 
 describe('User Creation', function () {
 
@@ -55,49 +55,43 @@ describe('User Creation', function () {
     await doDbInit(db);
   });
 
-  it('get public key', async () => {
-    let r = await sm_oauth.get('/pubkey');
-    expect(r.statusCode).to.equal(200);
-    public_key = r.body.toString();
+  it('rsa keys match', async () => {
+    public_key = fs.readFileSync('./test/rsa.pub', "utf8");
+    private_key = fs.readFileSync('./test/rsa.key', "utf8");
+
+    jwt.verify(testToken(private_key), public_key);
   });
 
-  it('get volunteers from /tokentest endpoint', async () => {
-    let r;
+  it('generate volunteers', async () => {
+    let t;
 
-    r = await sm_oauth.get('/tokentest');
-    expect(r.statusCode).to.equal(200);
-    c.admin = jwt.verify(r.body.jwt, public_key);
-    c.admin.jwt = r.body.jwt;
+    t = testToken(private_key);
+    c.admin = jwt.verify(t, public_key);
+    c.admin.jwt = t;
 
-    r = await sm_oauth.get('/tokentest');
-    expect(r.statusCode).to.equal(200);
-    c.bob = jwt.verify(r.body.jwt, public_key);
-    c.bob.jwt = r.body.jwt;
+    t = testToken(private_key);
+    c.bob = jwt.verify(t, public_key);
+    c.bob.jwt = t;
 
-    r = await sm_oauth.get('/tokentest');
-    expect(r.statusCode).to.equal(200);
-    c.sally = jwt.verify(r.body.jwt, public_key);
-    c.sally.jwt = r.body.jwt;
+    t = testToken(private_key);
+    c.sally = jwt.verify(t, public_key);
+    c.sally.jwt = t;
 
-    r = await sm_oauth.get('/tokentest');
-    expect(r.statusCode).to.equal(200);
-    c.rich = jwt.verify(r.body.jwt, public_key);
-    c.rich.jwt = r.body.jwt;
+    t = testToken(private_key);
+    c.rich = jwt.verify(t, public_key);
+    c.rich.jwt = t;
 
-    r = await sm_oauth.get('/tokentest');
-    expect(r.statusCode).to.equal(200);
-    c.jane = jwt.verify(r.body.jwt, public_key);
-    c.jane.jwt = r.body.jwt;
+    t = testToken(private_key);
+    c.jane = jwt.verify(t, public_key);
+    c.jane.jwt = t;
 
-    r = await sm_oauth.get('/tokentest');
-    expect(r.statusCode).to.equal(200);
-    c.mike = jwt.verify(r.body.jwt, public_key);
-    c.mike.jwt = r.body.jwt;
+    t = testToken(private_key);
+    c.mike = jwt.verify(t, public_key);
+    c.mike.jwt = t;
 
-    r = await sm_oauth.get('/tokentest');
-    expect(r.statusCode).to.equal(200);
-    c.han = jwt.verify(r.body.jwt, public_key);
-    c.han.jwt = r.body.jwt;
+    t = testToken(private_key);
+    c.han = jwt.verify(t, public_key);
+    c.han.jwt = t;
   });
 
   it('hello 200 admin awaiting assignment', async () => {
