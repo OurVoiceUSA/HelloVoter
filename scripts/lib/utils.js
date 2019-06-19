@@ -1,10 +1,10 @@
 
 import { Docker, Options } from 'docker-cli-js';
 
-export async function runDatabase(flag) {
+export async function runDatabase(sandbox) {
   let docker = new Docker(new Options());
   let ni = 'neo4j-hv';
-  let nc = ni+(flag?'-sandbox':'');
+  let nc = ni+(sandbox?'-sandbox':'');
 
   let d;
 
@@ -26,9 +26,9 @@ export async function runDatabase(flag) {
         await docker.command("rm -f "+nc);
       } catch (e) {}
 
-      await docker.command("run -d -p "+(flag?"5":"")+"7687:7687 -p "+(flag?"5":"")+"7474:7474 -e NEO4J_AUTH=neo4j/"+nc+" -e NEO4J_dbms_security_procedures_unrestricted=apoc.\\\\\\\\\* --name "+nc+" "+ni);
+      await docker.command("run -d -p "+(sandbox?"5":"")+"7687:7687 -p "+(sandbox?"5":"")+"7474:7474 -e NEO4J_AUTH=neo4j/"+nc+" -e NEO4J_dbms_security_procedures_unrestricted=apoc.\\\\\\\\\* --name "+nc+" "+ni);
     } else {
-      console.log("Using already running neo4j "+(flag?"sandbox":"test")+" container.");
+      console.log("Using already running neo4j "+(sandbox?"sandbox":"test")+" container.");
     }
   } catch (e) {
     console.error(e);
