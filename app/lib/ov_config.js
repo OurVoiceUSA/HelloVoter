@@ -4,6 +4,12 @@ import { getConfig } from 'ourvoiceusa-sdk-js';
 
 dotenv.config();
 
+// override some settings while running in "npm test"
+if (process.env.NPM_TEST) {
+  process.env['JWT_PUB_KEY'] = "./test/rsa.pub";
+  process.env['NEO4J_PORT'] = 57687;
+}
+
 export const ov_config = {
   server_port: getConfig("server_port", false, 8080),
   server_ssl_port: getConfig("server_ssl_port", false, 8443),
@@ -13,7 +19,7 @@ export const ov_config = {
   neo4j_host: getConfig("neo4j_host", false, 'localhost'),
   neo4j_port: getConfig("neo4j_port", false, 7687),
   neo4j_user: getConfig("neo4j_user", false, 'neo4j'),
-  neo4j_pass: getConfig("neo4j_pass", false, 'neo4j'),
+  neo4j_pass: getConfig("neo4j_pass", false, 'hellovoter'),
   neo4j_jmx_port: getConfig("neo4j_jmx_port", false, 9999),
   neo4j_jmx_user: getConfig("noej4_jmx_user", false, "monitor"),
   neo4j_jmx_pass: getConfig("noej4_jmx_pass", false, "Neo4j"),
@@ -29,4 +35,3 @@ export const ov_config = {
   wabase: getConfig("wabase", false, 'https://apps.ourvoiceusa.org'),
   DEBUG: getConfig("debug", false, false),
 };
-
