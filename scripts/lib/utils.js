@@ -21,14 +21,14 @@ export async function runDatabase(sandbox) {
     d = await docker.command('ps');
 
     if (d.containerList.filter(i => i.names === nc).length === 0) {
-      console.log("Launching a "+ni+" test container.");
+      console.log("Launching a "+nc+" container.");
       try {
         await docker.command("rm -f "+nc);
       } catch (e) {}
 
       await docker.command("run -d -p "+(sandbox?"5":"")+"7687:7687 -p "+(sandbox?"5":"")+"7474:7474 -e NEO4J_AUTH=neo4j/"+nc+" -e NEO4J_dbms_security_procedures_unrestricted=apoc.\\\\\\\\\* --name "+nc+" "+ni);
     } else {
-      console.log("Using already running neo4j "+(sandbox?"sandbox":"test")+" container.");
+      console.log("Using already running "+nc+" container.");
     }
   } catch (e) {
     console.error(e);
