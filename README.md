@@ -1,21 +1,48 @@
 ## Introduction
 
-Our Voice USA is a 501(c)(3) non-profit, non-partisian organization for civic education. We are writing tools to engage everyday citizens with the political process by providing easy access to civic information that's relevant to the individual.
+Our Voice USA is a 501(c)(3) non-profit, non-partisan organization for civic education. We are writing tools to engage everyday citizens with the political process by providing easy access to civic information that's relevant to the individual.
 
-## Features
+This is the API back-end to the HelloVoter Mobile App's canvass functions for large operations. Select the "Connect to Server" canvassing mode and enter the address you deploy this API to.
 
-This is the API backend to the HelloVoter canvass functions for large operations. Select the "Connect to Server" canvassing mode and enter the address you deploy this API to.
+## Development Setup
 
-## Setup
+Docker is required to get the database running, so make sure you have that installed on your system.
 
-You need a Neo4j database with the `spatial` and `apoc` plugins installed. You can get this setup with docker easily with the below:
+To get set up locally, simply run the following commands:
+
+    git clone https://github.com/OurVoiceUSA/HelloVoterAPI.git
+    cd HelloVoterAPI
+    npm install
+
+Note the omitted `npm start`. While that exists and you can run it to start the API locally, we do test-driven development so in order to test our code changes, we run the test suite. See below.
+
+If you really want to start the server locally so you can manually test things, you can get going with a non-sandbox database like this:
+
+    npm run database
+    npm start
+
+Please be sure to write any tests that correspond to your code changes before you submit a pull request.
+
+## Test Automation
+
+Our goal is 100% code coverage and full regression of automated tests. As the tests are very heavily data dependent, a sandbox database is spun up before execution.
+
+    npm test
+
+The very first time you run this will take longer than normal to build and spin up the sandbox database. It remains running after the tests finish, so subsequent test executions will go much faster.
+
+The sandbox database runs on a different port than the default Neo4j port. If you need to connect to it, use `57474` for the Neo4j Web UI port and `57687` for the bolt port after you load the UI.
+
+## Production Setup
+
+The defaults from the "npm run database" aren't suitable for a production environment. You will with to configure the Neo4j database yourself. Below is an example to get started from.
 
 First, export some variables to use, and be sure to change the password prior to running!
 
     export HEAP_SIZE=4G
     export PAGE_SIZE=12G
     export NEO4J_PASS=yournewpassword
-    
+
     # ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ #
     # change that password. Do it!    #
     # ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ #
@@ -27,12 +54,9 @@ Then setup neo4j with docker:
     echo "monitor Neo4j" > jmx.password
     chmod 400 jmx.access jmx.password
     sudo mv jmx.access jmx.password /opt/neo4j/logs/
-    (
-      cd /opt/neo4j/plugins
-      sudo curl -LO https://github.com/neo4j-contrib/spatial/releases/download/0.26.2-neo4j-3.5.2/neo4j-spatial-0.26.2-neo4j-3.5.2-server-plugin.jar
-      sudo curl -LO https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases/download/3.5.0.4/apoc-3.5.0.4-all.jar
-    )
     sudo chown -R 101:101 /opt/neo4j
+
+    docker build -t neo4j-hv neo4j
 
     docker run -d --name neo4j \
       --mount type=bind,src=/opt/neo4j/data,dst=/data \
@@ -46,7 +70,7 @@ Then setup neo4j with docker:
       -e NEO4J_dbms_directories_tx__log=/logs \
       -e NEO4J_dbms_jvm_additional="-Dcom.sun.management.jmxremote.authenticate=true -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.password.file=/logs/jmx.password -Dcom.sun.management.jmxremote.access.file=/logs/jmx.access -Dcom.sun.management.jmxremote.port=9999 -Djava.rmi.server.hostname=127.0.0.1" \
       --network host --add-host $(hostname):127.0.0.1 \
-      -e NEO4J_AUTH=neo4j/$NEO4J_PASS neo4j:3.5
+      -e NEO4J_AUTH=neo4j/$NEO4J_PASS neo4j-hv
 
 Feel free to adjust the paths of the `bind` mounts to suite your environment. For lage databases, we recommend you put the logs on a different storage device than the data.
 
@@ -59,7 +83,7 @@ Finally, setup to run the server and connect to the database:
     git clone https://github.com/OurVoiceUSA/HelloVoterAPI.git
     cd HelloVoterAPI
     echo "NEO4J_PASS=$NEO4J_PASS" > .env
-    
+
     npm install
     npm start
 
@@ -128,7 +152,7 @@ Please also read our [code of conduct](CODE_OF_CONDUCT.md).
 ## License
 
 	Software License Agreement (AGPLv3+)
-	
+
 	Copyright (c) 2018, Our Voice USA. All rights reserved.
 
         This program is free software; you can redistribute it and/or
@@ -144,4 +168,3 @@ Please also read our [code of conduct](CODE_OF_CONDUCT.md).
         You should have received a copy of the GNU Affero General Public License
         along with this program; if not, write to the Free Software
         Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-
