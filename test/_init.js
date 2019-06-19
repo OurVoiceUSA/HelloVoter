@@ -21,7 +21,6 @@ describe('Database Init', function () {
 
   before(async () => {
     db = new neo4j(ov_config);
-    await db.query("match (a) detach delete a");
     api = appInit(db);
   });
 
@@ -43,6 +42,12 @@ describe('Database Init', function () {
       console.warn("Neo4j version "+min_neo4j_version+" or higher is required.");
       process.exit(1);
     }
+  });
+
+  it('database has no nodes', async () => {
+    await db.query("match (a) detach delete a");
+    let ref = await db.query("match (a) return count(a)");
+    expect(ref.data[0]).to.equal(0);
   });
 
   it('database startup tasks', async () => {
