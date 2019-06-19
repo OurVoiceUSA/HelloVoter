@@ -6,7 +6,7 @@ import fs from 'fs';
 import { ov_config } from '../app/lib/ov_config';
 import neo4j from '../app/lib/neo4j';
 import { min_neo4j_version } from '../app/lib/utils';
-import { appInit, base_uri, genName, testToken, writeObj, tpx } from './lib/utils';
+import { appInit, base_uri, genName, testToken, writeObj } from './lib/utils';
 import { doDbInit } from '../app/lib/startup';
 
 var api;
