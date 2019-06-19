@@ -79,6 +79,7 @@ For this server, configure an `.env` file. The following is a complete list of v
 
     SERVER_PORT=8080
     NEO4J_HOST=localhost
+    NEO4J_PORT=7687
     NEO4J_USER=neo4j
     NEO4J_PASS=neo4j
     NEO4J_JMX_PORT=9999
@@ -100,6 +101,7 @@ The meaning of each config item is as follows:
 
 * `SERVER_PORT`: Port for node to listen on for http requests.
 * `NEO4J_HOST`: Hostname of your neo4j server.
+* `NEO4J_PORT`: Port number of your neo4j server.
 * `NEO4J_USER`: Username to use to connect to neo4j.
 * `NEO4J_PASS`: Password to use to connect to neo4j.
 * `NEO4J_JMX_PORT`: The port on your `NEO4J_HOST` that exposes JMX. This port isn't exposed by default by Neo4j. See "Neo4j Configuration" below for how to set this up on the database side.
