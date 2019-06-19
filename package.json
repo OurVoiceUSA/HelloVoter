@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "postinstall": "patch-package",
-    "test": "reset && JUNIT_REPORT_PATH=test-result/result.xml JUNIT_REPORT_STACK=1 nyc mocha --recursive --require @babel/register --timeout 25000 --colors --reporter mocha-jenkins-reporter || true",
+    "testdatabase": "node node_modules/@babel/node/lib/_babel-node scripts/runTestDatabase.js",
+    "test": "reset && npm run testdatabase && NEO4J_PORT=57687 NEO4J_PASS=neo4j-hv-testdb JUNIT_REPORT_PATH=test-result/result.xml JUNIT_REPORT_STACK=1 nyc mocha --recursive --require @babel/register --timeout 25000 --colors --reporter mocha-jenkins-reporter || true",
     "start": "node node_modules/nodemon/bin/nodemon.js --signal SIGKILL --exec babel-node server.js"
   },
   "author": "Our Voice USA",
@@ -13,6 +14,7 @@
   "devDependencies": {
     "@babel/register": "^7.4.4",
     "chai": "^4.2.0",
+    "docker-cli-js": "^2.5.2",
     "mocha": "^6.1.4",
     "mocha-jenkins-reporter": "^0.4.1",
     "nodemon": "^1.19.1",

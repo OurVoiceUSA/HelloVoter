@@ -7,8 +7,6 @@ import queue from './queue';
 
 var _require = require; // so we can lazy load a module later on
 
-var db;
-var qq;
 var jmx;
 var jmxclient = {};
 var jvmconfig = {};
@@ -16,18 +14,15 @@ var jvmconfig = {};
 export var concurrency = ov_config.job_concurrency;
 
 // tasks to do on startup
-export async function doStartupTasks(dbc, qqc) {
-  db = dbc;
-  qq = qqc;
-
+export async function doStartupTasks(db, qq) {
   // required to do in sequence
-  if (!ov_config.disable_jmx) await doJmxInit();
-  await doDbInit();
+  if (!ov_config.disable_jmx) await doJmxInit(db, qq);
+  await doDbInit(db);
   // can happen in parallel
-  postDbInit();
+  postDbInit(qq);
 }
 
-async function doJmxInit() {
+async function doJmxInit(db, qq) {
   let start = new Date().getTime();
   console.log("doJmxInit() started @ "+start);
 
@@ -102,7 +97,7 @@ async function doJmxInit() {
   console.log("doJmxInit() finished @ "+finish+" after "+(finish-start)+" milliseconds");
 }
 
-async function doDbInit() {
+export async function doDbInit(db) {
   let start = new Date().getTime();
   console.log("doDbInit() started @ "+start);
 
@@ -218,7 +213,7 @@ async function doDbInit() {
   console.log("doDbInit() finished @ "+finish+" after "+(finish-start)+" milliseconds");
 }
 
-async function postDbInit() {
+async function postDbInit(qq) {
   let start = new Date().getTime();
   console.log("postDbInit() started @ "+start);
 

@@ -1,5 +1,4 @@
 
-import { Docker, Options } from 'docker-cli-js';
 import jwt from 'jsonwebtoken';
 import { expect } from 'chai';
 import fs from 'fs';
@@ -8,6 +7,7 @@ import { ov_config } from '../app/lib/ov_config';
 import neo4j from '../app/lib/neo4j';
 import { min_neo4j_version } from '../app/lib/utils';
 import { appInit, base_uri, genName, writeObj, sm_oauth, tpx } from './lib/utils';
+import { doDbInit } from '../app/lib/startup';
 
 var api;
 var db;
@@ -47,6 +47,12 @@ describe('User Creation', function () {
       console.warn("Neo4j version "+min_neo4j_version+" or higher is required.");
       process.exit(1);
     }
+  });
+
+  it('database init', async () => {
+    // blow away database and re-init
+    await db.query("match (a) detach delete a");
+    await doDbInit(db);
   });
 
   it('get public key', async () => {
