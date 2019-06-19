@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "postinstall": "patch-package",
+    "database": "node node_modules/@babel/node/lib/_babel-node scripts/runDatabase.js",
     "testdatabase": "node node_modules/@babel/node/lib/_babel-node scripts/runTestDatabase.js",
-    "test": "reset && npm run testdatabase && NEO4J_PORT=57687 NEO4J_PASS=neo4j-hv-testdb JUNIT_REPORT_PATH=test-result/result.xml JUNIT_REPORT_STACK=1 nyc mocha --recursive --require @babel/register --timeout 25000 --colors --reporter mocha-jenkins-reporter || true",
+    "test": "reset && npm run testdatabase && NEO4J_PORT=57687 NEO4J_PASS=neo4j-hv-sandbox JUNIT_REPORT_PATH=test-result/result.xml JUNIT_REPORT_STACK=1 nyc mocha --recursive --require @babel/register --timeout 25000 --colors --reporter mocha-jenkins-reporter || true",
     "start": "node node_modules/nodemon/bin/nodemon.js --signal SIGKILL --exec babel-node server.js"
   },
   "author": "Our Voice USA",

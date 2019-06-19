@@ -1,4 +1,4 @@
 
 import { runDatabase } from './lib/utils';
 
-runDatabase(true);
+runDatabase(false);
