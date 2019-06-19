@@ -28,7 +28,7 @@ export async function runDatabase(flag) {
 
       await docker.command("run -d -p "+(flag?"5":"")+"7687:7687 -p "+(flag?"5":"")+"7474:7474 -e NEO4J_AUTH=neo4j/"+nc+" -e NEO4J_dbms_security_procedures_unrestricted=apoc.\\\\\\\\\* --name "+nc+" "+ni);
     } else {
-      console.log("Using already running neo4j test container.");
+      console.log("Using already running neo4j "+(flag?"sandbox":"test")+" container.");
     }
   } catch (e) {
     console.error(e);
