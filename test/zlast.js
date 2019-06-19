@@ -22,18 +22,7 @@ describe('Cleanup', function () {
   });
 
   after(async () => {
-    let fail = false;
-
-    // clean up test volunteers
-    if (!keep) {
-      await db.query('match (a:Volunteer) where a.id =~ "test:.*" detach delete a');
-      let ref = await db.query('match (a) where a.name =~ "'+tpx+'.*" return count(a)');
-      if (ref.data[0] !== 0) fail = true;
-    }
-
     db.close();
-
-    expect(fail).to.equal(false);
   });
 
   (keep?it.skip:it)('delete teams', async () => {
@@ -98,6 +87,15 @@ describe('Cleanup', function () {
         formId: forms.B.id,
       });
     expect(r.statusCode).to.equal(200);
+  });
+
+  (keep?it.skip:it)('delete volunteers', async () => {
+    await db.query('match (v:Volunteer) detach delete v');
+  });
+
+  (keep?it.skip:it)('chemistry test - confirming all test objects argon', async () => {
+    let ref = await db.query('match (a) where a.name =~ "'+tpx+'.*" return count(a)');
+    expect(ref.data[0]).to.equal(0);
   });
 
   it('bob\'s your uncle', async () => {

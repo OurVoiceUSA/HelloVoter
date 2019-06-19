@@ -17,15 +17,11 @@ var turfs = {};
 var forms = {};
 var public_key, private_key;
 
-describe('User Creation', function () {
+describe('Database Init', function () {
 
   before(async () => {
     db = new neo4j(ov_config);
-
-    // clean up test data before we begin
-    await db.query('match (a:Volunteer) where a.id =~ "test:.*" detach delete a');
-    await db.query('match (a) where a.name =~ "'+tpx+'.*" detach delete a');
-
+    await db.query("match (a) detach delete a");
     api = appInit(db);
   });
 
@@ -49,9 +45,7 @@ describe('User Creation', function () {
     }
   });
 
-  it('database init', async () => {
-    // blow away database and re-init
-    await db.query("match (a) detach delete a");
+  it('database startup tasks', async () => {
     await doDbInit(db);
   });
 
@@ -62,40 +56,12 @@ describe('User Creation', function () {
     jwt.verify(testToken(private_key), public_key);
   });
 
-  it('generate volunteers', async () => {
-    let t;
-
-    t = testToken(private_key);
-    c.admin = jwt.verify(t, public_key);
-    c.admin.jwt = t;
-
-    t = testToken(private_key);
-    c.bob = jwt.verify(t, public_key);
-    c.bob.jwt = t;
-
-    t = testToken(private_key);
-    c.sally = jwt.verify(t, public_key);
-    c.sally.jwt = t;
-
-    t = testToken(private_key);
-    c.rich = jwt.verify(t, public_key);
-    c.rich.jwt = t;
-
-    t = testToken(private_key);
-    c.jane = jwt.verify(t, public_key);
-    c.jane.jwt = t;
-
-    t = testToken(private_key);
-    c.mike = jwt.verify(t, public_key);
-    c.mike.jwt = t;
-
-    t = testToken(private_key);
-    c.han = jwt.verify(t, public_key);
-    c.han.jwt = t;
-  });
-
   it('hello 200 admin awaiting assignment', async () => {
     let r;
+
+    let t = testToken(private_key);
+    c.admin = jwt.verify(t, public_key);
+    c.admin.jwt = t;
 
     r = await api.post(base_uri+'/hello')
       .set('Authorization', 'Bearer '+c.admin.jwt)
@@ -121,7 +87,31 @@ describe('User Creation', function () {
   });
 
   it('hello 200 volunteers awaiting assignment', async () => {
-    let r;
+    let r, t;
+
+    t = testToken(private_key);
+    c.bob = jwt.verify(t, public_key);
+    c.bob.jwt = t;
+
+    t = testToken(private_key);
+    c.sally = jwt.verify(t, public_key);
+    c.sally.jwt = t;
+
+    t = testToken(private_key);
+    c.rich = jwt.verify(t, public_key);
+    c.rich.jwt = t;
+
+    t = testToken(private_key);
+    c.jane = jwt.verify(t, public_key);
+    c.jane.jwt = t;
+
+    t = testToken(private_key);
+    c.mike = jwt.verify(t, public_key);
+    c.mike.jwt = t;
+
+    t = testToken(private_key);
+    c.han = jwt.verify(t, public_key);
+    c.han.jwt = t;
 
     r = await api.post(base_uri+'/hello')
       .set('Authorization', 'Bearer '+c.bob.jwt)
