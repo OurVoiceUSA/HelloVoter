@@ -4,12 +4,6 @@ import { getConfig } from 'ourvoiceusa-sdk-js';
 
 dotenv.config();
 
-// override some settings while running in "npm test"
-if (process.env.NPM_TEST) {
-  process.env['JWT_PUB_KEY'] = "./test/rsa.pub";
-  process.env['NEO4J_PORT'] = 57687;
-}
-
 export const ov_config = {
   server_port: getConfig("server_port", false, 8080),
   server_ssl_port: getConfig("server_ssl_port", false, 8443),
