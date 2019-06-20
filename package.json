@@ -1,58 +1,18 @@
 {
   "name": "HelloVoterHQ",
-  "version": "0.1.0",
-  "private": true,
-  "homepage": "/HelloVoterHQ",
-  "dependencies": {
-    "@fortawesome/fontawesome-svg-core": "^1.2.18",
-    "@fortawesome/free-brands-svg-icons": "^5.8.2",
-    "@fortawesome/free-solid-svg-icons": "^5.8.2",
-    "@fortawesome/react-fontawesome": "^0.1.4",
-    "@material-ui/core": "^3.9.3",
-    "@material-ui/icons": "^3.0.2",
-    "circle-to-polygon": "^1.0.2",
-    "enzyme": "^3.9.0",
-    "enzyme-adapter-react-16": "^1.12.1",
-    "filesize": "^4.1.2",
-    "google-maps-react": "^2.0.2",
-    "javascript-time-ago": "^2.0.1",
-    "jsonwebtoken": "^8.5.1",
-    "lodash": "^4.17.11",
-    "ourvoiceusa-sdk-js": "github:OurVoiceUSA/ourvoiceusa-sdk-js",
-    "pretty-ms": "^5.0.0",
-    "query-string": "^6.5.0",
-    "react": "^16.8.6",
-    "react-csv-reader": "^1.2.2",
-    "react-dom": "^16.8.6",
-    "react-geolocated": "^2.4.1",
-    "react-image": "^2.1.1",
-    "react-modal": "^3.8.1",
-    "react-notifications": "^1.4.3",
-    "react-number-format": "^4.0.7",
-    "react-paginate": "^6.3.0",
-    "react-places-autocomplete": "^7.2.1",
-    "react-router-dom": "^5.0.0",
-    "react-scripts": "^3.0.1",
-    "react-select": "^2.4.3",
-    "react-sortable-hoc": "^1.9.1",
-    "react-test-renderer": "^16.8.6",
-    "react-tooltip": "^3.10.0",
-    "recharts": "^1.5.0",
-    "simple-format-number": "^0.1.2",
-    "tcomb-form": "^0.9.21",
-    "typeface-roboto": "0.0.54",
-    "uuid": "^3.3.2"
-  },
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "all-tests": "react-scripts test --verbose"
+    "postinstall": "cd client && npm install && cd ../server && npm install",
+    "client": "cd client && npm start",
+    "server": "cd server && npm start",
+    "start": "concurrently -k \"npm run client\" \"npm run server\""
   },
-  "browserslist": [
-    ">0.2%",
-    "not dead",
-    "not ie <= 11",
-    "not op_mini all"
-  ]
+  "keywords": [],
+  "author": "Our Voice USA",
+  "license": "AGPL-3.0",
+  "devDependencies": {
+    "concurrently": "^4.1.0"
+  }
 }
