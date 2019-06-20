@@ -7,6 +7,14 @@ server/node_modules
 # production
 client/build
 
+# test data
+server/test/*.json
+server/test/rsa.pub
+server/test/rsa.key
+
+# misc files
+*.orig
+
 # misc
 .DS_Store
 .env.local
