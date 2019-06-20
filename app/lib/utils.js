@@ -145,6 +145,10 @@ export function _500(res, obj) {
   return sendError(res, 500, "Internal server error.");
 }
 
+export function _503(res, msg) {
+  return sendError(res, 503, msg);
+}
+
 export function valid(str) {
   if (!str) return false;
   if (typeof str !== "string") return true;

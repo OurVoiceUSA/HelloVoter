@@ -6,15 +6,19 @@ import logger from 'logops';
 import helmet from 'helmet';
 import jwt from 'jsonwebtoken';
 import bodyParser from 'body-parser';
+import fs from 'fs';
+import fetch from 'node-fetch';
 
-import { public_key, jwt_iss } from './lib/pubkey';
 import { ov_config } from './lib/ov_config';
 
 import {
-  cqdo, _400, _401, _403, _500
+  cqdo, _400, _401, _403, _500, _503
 } from './lib/utils';
 
 const router = require('./routes/createRouter.js')();
+
+var public_key;
+var jwt_iss = ov_config.jwt_iss;
 
 export function doExpressInit(log, db, qq) {
 
@@ -28,6 +32,26 @@ export function doExpressInit(log, db, qq) {
   app.use(bodyParser.json({limit: '5mb'}));
   app.use(cors({exposedHeaders: ['x-sm-oauth-url']}));
   app.use(helmet());
+
+  if (ov_config.jwt_pub_key) {
+    public_key = fs.readFileSync(ov_config.jwt_pub_key, "utf8");
+  } else {
+    console.log("JWT_PUB_KEY not defined, attempting to fetch from "+ov_config.sm_oauth_url+'/pubkey');
+    fetch(ov_config.sm_oauth_url+'/pubkey')
+    .then(res => {
+      jwt_iss = res.headers.get('x-jwt-iss');
+      if (res.status !== 200) throw "http code "+res.status;
+      return res.text()
+    })
+    .then(body => {
+      public_key = body;
+    })
+    .catch((e) => {
+      console.log("Unable to read SM_OAUTH_URL "+ov_config.sm_oauth_url);
+      console.log(e);
+      process.exit(1);
+    });
+  }
 
   // require ip_header if config for it is set
   if (!ov_config.DEBUG && ov_config.ip_header) {
@@ -50,6 +74,10 @@ export function doExpressInit(log, db, qq) {
     req.qq = qq;
 
     res.set('x-sm-oauth-url', ov_config.sm_oauth_url);
+
+    if (!public_key) {
+      return _503(res, "Server is starting up.");
+    }
 
     // uri whitelist
     switch (req.url) {
