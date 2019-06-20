@@ -2,6 +2,7 @@
   "name": "HelloVoterReact",
   "version": "0.1.0",
   "private": true,
+  "proxy": "http://localhost:8080/",
   "homepage": "/HelloVoterHQ",
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.18",
