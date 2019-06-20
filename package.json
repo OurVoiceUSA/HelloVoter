@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "database": "cd server && npm run database",
     "postinstall": "cd client && npm install && cd ../server && npm install",
     "client": "cd client && npm start",
     "server": "cd server && npm start",
