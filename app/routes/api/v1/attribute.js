@@ -21,7 +21,11 @@ module.exports = Router({mergeParams: true})
     default: return _400(res, "Invalid value to parameter 'type'.");
   }
 
-  return cqdo(req, res, 'match (a:Volunteer {id:{author_id}}) create (b:Attribute {id:randomUUID(), created: timestamp(), name:{name}, type:{type}})-[:AUTHOR]->(a)', req.body, true);
+  return cqdo(req, res, 'match (v:Volunteer {id:{author_id}}) create (a:Attribute {id:randomUUID(), created: timestamp(), name:{name}, type:{type}})-[:AUTHOR]->(v) return a.id', req.body, true);
+})
+.get('/attribute/get', (req, res) => {
+  if (!valid(req.query.aId)) return _400(res, "Invalid value to parameter 'aId'.");
+  return cqdo(req, res, 'match (a:Attribute {id:{aId}}) return a', req.query, true);
 })
 .get('/attribute/list', (req, res) => {
   if (req.user.admin === true)
