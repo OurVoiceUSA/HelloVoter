@@ -326,6 +326,9 @@ export function _handleSelectChange(oldopt, newopt) {
   let add = [];
   let rm = [];
 
+  if (!oldopt) oldopt = [];
+  if (!newopt) newopt = [];
+
   let prior = oldopt.map(e => {
     return e.id;
   });

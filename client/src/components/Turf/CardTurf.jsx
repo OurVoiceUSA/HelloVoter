@@ -39,6 +39,7 @@ export class CardTurf extends Component {
   }
 
   handleTeamsChange = async selectedTeamsOption => {
+    if (!selectedTeamsOption) selectedTeamsOption = [];
     this.props.refer.setState({ saving: true });
     try {
       let obj = _handleSelectChange(
@@ -73,6 +74,7 @@ export class CardTurf extends Component {
   };
 
   handleMembersChange = async selectedMembersOption => {
+    if (!selectedMembersOption) selectedMembersOption = [];
     this.props.refer.setState({ saving: true });
     try {
       let obj = _handleSelectChange(

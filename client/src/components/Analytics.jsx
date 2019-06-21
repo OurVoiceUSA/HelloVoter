@@ -97,8 +97,15 @@ export default class App extends Component {
     this.setState({ data_breakdown, loading: false });
   }
 
-  handleTurfChange = selectedTurfOption => this.setState({selectedTurfOption}, () => this.doQuery());
-  handleAttributeChange = selectedAttributeOption => this.setState({selectedAttributeOption}, () => this.doQuery());
+  handleTurfChange = selectedTurfOption => {
+    if (!selectedTurfOption) selectedTurfOption = [];
+    this.setState({selectedTurfOption}, () => this.doQuery());
+  }
+
+  handleAttributeChange = selectedAttributeOption => {
+    if (!selectedAttributeOption) selectedAttributeOption = [];
+    this.setState({selectedAttributeOption}, () => this.doQuery());
+  }
 
   render() {
     return (

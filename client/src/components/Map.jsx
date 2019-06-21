@@ -58,8 +58,10 @@ export class App extends Component {
     this.setState({turfs, forms, formOptions});
   }
 
-  handleFormsChange = async selectedFormsOption =>
+  handleFormsChange = async selectedFormsOption => {
+    if (!selectedFormsOption) selectedFormsOption = [];
     this.setState({selectedFormsOption, formId: selectedFormsOption.id}, () => this.loadMarkerData());
+  }
 
   onMarkerClick = async (props, marker, e) => {
     const { formId } = this.state;

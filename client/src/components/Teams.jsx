@@ -324,6 +324,7 @@ export class CardTeam extends Component {
   }
 
   handleMembersChange = async selectedMembersOption => {
+    if (!selectedMembersOption) selectedMembersOption = [];
     this.props.refer.setState({ saving: true });
     try {
       let obj = _handleSelectChange(
@@ -360,6 +361,7 @@ export class CardTeam extends Component {
   };
 
   handleFormsChange = async selectedFormsOption => {
+    if (!selectedFormsOption) selectedFormsOption = [];
     this.props.refer.setState({ saving: true });
     try {
       let obj = _handleSelectChange(
@@ -396,6 +398,7 @@ export class CardTeam extends Component {
   };
 
   handleTurfChange = async selectedTurfOption => {
+    if (!selectedTurfOption) selectedTurfOption = [];
     this.props.refer.setState({ saving: true });
     try {
       let obj = _handleSelectChange(

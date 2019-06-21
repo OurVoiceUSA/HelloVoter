@@ -441,6 +441,7 @@ export class CardForm extends Component {
   }
 
   handleTeamsChange = async selectedTeamsOption => {
+    if (!selectedTeamsOption) selectedTeamsOption = [];
     this.props.refer.setState({ saving: true });
     try {
       let obj = _handleSelectChange(
@@ -475,6 +476,7 @@ export class CardForm extends Component {
   };
 
   handleMembersChange = async selectedMembersOption => {
+    if (!selectedMembersOption) selectedMembersOption = [];
     this.props.refer.setState({ saving: true });
     try {
       let obj = _handleSelectChange(

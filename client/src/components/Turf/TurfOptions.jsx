@@ -12,6 +12,7 @@ import {
 
 export class TurfOptions extends Component {
   handleStateChange = selectedStateOption => {
+    if (!selectedStateOption) selectedStateOption = [];
     this.setState({
       typeOptions: [
         { value: 'state', label: 'State' },
