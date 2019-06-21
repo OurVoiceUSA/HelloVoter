@@ -2,8 +2,6 @@ import React, { Component } from 'react';
 
 import Select from 'react-select';
 
-import { mocked_users } from '../mocks.js';
-
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -55,7 +53,7 @@ class LogIn extends Component {
     super(props);
 
     this.state = {
-      mock: (process.env.NODE_ENV === 'development'), // default to true if development
+      dev: (process.env.NODE_ENV === 'development'), // default to true if development
       classes: props.classes,
     };
 
@@ -77,11 +75,46 @@ class LogIn extends Component {
           <form className={classes.form} onSubmit={(e) => { e.preventDefault(); this.props.refer.doSave(e, this.state.target); }} >
             {(process.env.NODE_ENV === 'development')?
               <FormControlLabel
-                control={<Checkbox id="mock" name="mock" value="mock" color="primary" checked={this.state.mock} onChange={(e, c) => this.setState({mock: c})} />}
+                control={<Checkbox id="dev" name="dev" value="dev" color="primary" checked={this.state.dev} onChange={(e, c) => this.setState({dev: c})} />}
                 label="DEVELOPMENT MODE"
               />
               :''}
-            <ServerLiveOrMocked classes={classes} mock={this.state.mock} refer={this} qserver={this.props.refer.state.qserver} />
+              <div>
+                {this.state.dev?
+                ''
+                :
+                <div>
+                  <FormControl margin="normal" required fullWidth>
+                    <InputLabel htmlFor="domain">Server Address</InputLabel>
+                    <Input id="server" name="server" autoComplete="server" autoFocus defaultValue={this.state.qserver} />
+                  </FormControl>
+                  <FormControlLabel
+                    control={<Checkbox value="ack" color="primary" required />}
+                    label="By checking this box you acknowledge that the server to which you are connecting is not affiliated with Our Voice USA and the data you send and receive is governed by that server's terms of use."
+                  />
+                </div>
+                }
+                <Button
+                  type="submit"
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  className={classes.submit}
+                  onClick={() => this.setState({target: 'google'})}
+                >
+                  Google Sign In
+                </Button>
+                <Button
+                  type="submit"
+                  fullWidth
+                  variant="contained"
+                  color="secondary"
+                  onClick={() => this.setState({target: 'facebook'})}
+                  className={classes.submit}
+                >
+                  Facebook Sign In
+                </Button>
+              </div>
           </form>
         </Paper>
         <br />
@@ -90,49 +123,5 @@ class LogIn extends Component {
     );
   }
 }
-
-const ServerLiveOrMocked = (props) => {
-
-  if (props.mock) return (
-    <Select
-      options={mocked_users}
-      placeholder="Choose a user to mock"
-      onChange={(obj) => props.refer.props.refer.doSave(null, null, obj.value)}
-    />
-  );
-
-  return (
-    <div>
-      <FormControl margin="normal" required fullWidth>
-        <InputLabel htmlFor="domain">Server Address</InputLabel>
-        <Input id="server" name="server" autoComplete="server" autoFocus defaultValue={props.qserver} />
-      </FormControl>
-      <FormControlLabel
-        control={<Checkbox value="ack" color="primary" required />}
-        label="By checking this box you acknowledge that the server to which you are connecting is not affiliated with Our Voice USA and the data you send and receive is governed by that server's terms of use."
-      />
-      <Button
-        type="submit"
-        fullWidth
-        variant="contained"
-        color="primary"
-        className={props.classes.submit}
-        onClick={() => props.refer.setState({target: 'google'})}
-      >
-        Google Sign In
-      </Button>
-      <Button
-        type="submit"
-        fullWidth
-        variant="contained"
-        color="secondary"
-        onClick={() => props.refer.setState({target: 'facebook'})}
-        className={props.classes.submit}
-      >
-        Facebook Sign In
-      </Button>
-    </div>
-  );
-};
 
 export default withStyles(styles)(LogIn);

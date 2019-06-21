@@ -11,8 +11,6 @@ import prettyMs from 'pretty-ms';
 import Modal from '@material-ui/core/Modal';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
-import { mockFetch } from './mocks.js';
-
 export const API_BASE_URI = '/HelloVoterHQ/api/v1';
 
 export function jobRuntime(start, end) {
@@ -39,7 +37,9 @@ export function notify_error(e, msg) {
 
 export async function _fetch(server, uri, method, body) {
   if (!server) return;
-  if (server && server.mock) return mockFetch(server.jwt, uri, method, body);
+
+  let https = true;
+  if (server.hostname.match(/^localhost/)) https = false;
 
   if (!method) method = 'GET';
 
@@ -48,7 +48,7 @@ export async function _fetch(server, uri, method, body) {
     return;
   }
 
-  let res = await fetch('https://' + server.hostname + uri, {
+  let res = await fetch('http'+(https?'s':'')+'://' + server.hostname + uri, {
     method: method,
     headers: {
       Authorization: 'Bearer ' + server.jwt,

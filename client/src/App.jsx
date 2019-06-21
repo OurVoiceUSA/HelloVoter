@@ -118,23 +118,15 @@ class App extends Component {
     this.setState({ menuLogout: false, server: {} });
   };
 
-  doSave = async (event, target, user) => {
-    // mocked user
-    if (user) {
-      let token = jwt.sign(user, 'shhhhh');
-      localStorage.setItem('server', 'npm start');
-      localStorage.setItem('jwt', token);
-      this.setState({
-        server: {
-          hostname: 'npm start',
-          jwt: token,
-          mock: true
-        }
-      });
+  doSave = async (event, target) => {
+    let server;
+
+    if (event.target.server) {
+      server = event.target.server.value;
     } else {
-      // live poll
-      await this.singHello(event.target.server.value, target);
+      server = 'localhost:8080';
     }
+    await this.singHello(server, target);
   };
 
   singHello = async (server, target) => {
@@ -142,8 +134,11 @@ class App extends Component {
 
     localStorage.setItem('server', server);
 
+    let https = true;
+    if (server.match(/^localhost/)) https = false;
+
     try {
-      res = await fetch('https://' + server + API_BASE_URI+'/hello', {
+      res = await fetch('http'+(https?'s':'')+'://' + server + API_BASE_URI+'/hello', {
         method: 'POST',
         headers: {
           Authorization:
