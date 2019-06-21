@@ -166,7 +166,7 @@ class App extends Component {
         let sm = '';
         if (target === 'google') sm = 'gm';
         if (target === 'facebook') sm = 'fm';
-        window.location.href = sm_oauth_url + '/'+sm+'/?app=HelloVoterHQ';
+        window.location.href = sm_oauth_url + '/'+sm+'/?app=HelloVoterHQ'+(https?'':'&local=true');
         return { error: false, flag: true };
       case 403:
         return {
