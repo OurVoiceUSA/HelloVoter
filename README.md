@@ -4,6 +4,36 @@ Our Voice USA is a 501(c)(3) non-profit, non-partisan organization for civic edu
 
 This is the back-end to the HelloVoter Mobile App's canvass functions for large operations. Select the "Connect to Server" canvassing mode and enter the address you deploy this API to.
 
+## Development Setup
+
+Docker is required to get the database running, so make sure you have that installed on your system.
+
+To get set up locally, simply run the following commands:
+
+    git clone https://github.com/OurVoiceUSA/HelloVoterHQ.git
+    cd HelloVoterHQ
+    npm install
+    npm run database
+    npm start
+
+## Test Automation
+
+Our goal is 100% code coverage and full regression of automated tests. As the tests are very heavily data dependent, a sandbox database is spun up before execution.
+
+    npm test
+
+The very first time you run this will take longer than normal to build and spin up the sandbox database. It remains running after the tests finish, so subsequent test executions will go much faster.
+
+The sandbox database runs on a different port than the default Neo4j port. If you need to connect to it, use `57474` for the Neo4j Web UI port and `57687` for the bolt port after you load the UI.
+
+Please be sure to write any tests that correspond to your code changes before you submit a pull request.
+
+## Production Setup
+
+This app is designed such that you only need to deploy the server, as Our Voice USA hosts a production copy of the react app here: https://apps.ourvoiceusa.org/HelloVoterHQ/
+
+See [server/README.md](server/README.md) for details on how to configure and deploy the server.
+
 ## Contributing
 
 Thank you for your interest in contributing to us! To avoid potential legal headaches please sign our CLA (Contributors License Agreement). We handle this via pull request hooks on GitHub provided by https://cla-assistant.io/

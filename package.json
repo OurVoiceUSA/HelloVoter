@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "database": "cd server && npm run database",
+    "test": "cd server && npm test",
     "ncu": "ncu && cd client && ncu && cd ../server && ncu",
     "postinstall": "cd client && npm install && cd ../server && npm install",
     "client": "cd client && npm start",
