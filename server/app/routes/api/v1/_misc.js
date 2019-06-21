@@ -63,6 +63,7 @@ module.exports = Router({mergeParams: true})
   try {
     let nv = await req.db.version();
     if (req.user.admin === true) return res.json({
+      admins: (await req.db.query('match (v:Volunteer {admin:true}) return count(v)')).data[0],
       volunteers: (await req.db.query('match (a:Volunteer) return count(a)')).data[0],
       teams: (await req.db.query('match (a:Team) return count(a)')).data[0],
       turfs: (await req.db.query('match (a:Turf) return count(a)')).data[0],
@@ -76,6 +77,7 @@ module.exports = Router({mergeParams: true})
     else {
       let ass = await volunteerAssignments(req);
       return res.json({
+        admins: (await req.db.query('match (v:Volunteer {admin:true}) return count(v)')).data[0],
         volunteers: (await req.db.query('match (a:Volunteer {id:{id}})-[:MEMBERS {leader:true}]-(:Team)-[]-(t:Turf) where t.wkt is not null call spatial.intersects("volunteer", t.wkt) yield node return node UNION match (a:Volunteer {id:{id}}) return a as node UNION match (a:Volunteer {id:{id}})-[:MEMBERS]-(:Team)-[:MEMBERS]-(c:Volunteer) return distinct(c) as node', req.user)).data.length,
         teams: ass.teams.length,
         turfs: ass.turfs.length,

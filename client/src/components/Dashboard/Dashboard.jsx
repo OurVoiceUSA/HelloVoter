@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import NumberFormat from 'react-number-format';
 import filesize from 'filesize';
 
+import Modal from '@material-ui/core/Modal';
+
 import {
   faUser,
   faUsers,
@@ -31,6 +33,7 @@ export default class App extends Component {
 
     this.state = {
       loading: true,
+      noAdmins: false,
       data: {},
       cards: [],
       dash,
@@ -57,6 +60,9 @@ export default class App extends Component {
 
     try {
       data = await _fetch(this.props.server, API_BASE_URI+'/dashboard');
+
+      if (data.admins === 0) this.setState({noAdmins: true});
+
       cards = {
         vol: {
           name: 'Volunteers',
@@ -119,6 +125,31 @@ export default class App extends Component {
           cards={this.state.cards}
           dash={this.state.dash}
         />
+
+        <Modal
+          aria-labelledby="simple-modal-title"
+          aria-describedby="simple-modal-description"
+          open={this.state.noAdmins}
+          onClose={() => this.setState({ noAdmins: false })}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              top: 100,
+              left: 200,
+              right: 200,
+              backgroundColor: 'white',
+              padding: 40
+            }}
+          >
+            Welcome! Looks like you're new here. By default, users have zero permissions
+            when they sign in. To make yourself an admin and gain full access to the UI,
+            run the follow command from the shell:
+            <br />
+            <br />
+            <pre>npm run makeadmin -- {this.props.refer.getUserProp("id")}</pre>
+          </div>
+        </Modal>
       </RootLoader>
     );
   }

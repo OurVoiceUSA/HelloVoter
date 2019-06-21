@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "postinstall": "patch-package",
+    "makeadmin": "node node_modules/@babel/node/lib/_babel-node scripts/makeadmin.js",
     "database": "node node_modules/@babel/node/lib/_babel-node scripts/runDatabase.js",
     "sandboxdatabase": "node node_modules/@babel/node/lib/_babel-node scripts/runSandboxDatabase.js",
     "genkeys": "node node_modules/@babel/node/lib/_babel-node scripts/genkeys.js",

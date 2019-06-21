@@ -226,6 +226,7 @@ class App extends Component {
           <Sidebar
             classes={classes}
             open={this.state.open}
+            getUserProp={this.getUserProp}
             handleClickLogout={this.handleClickLogout}
             handleDrawerClose={this.handleDrawerClose}
           />

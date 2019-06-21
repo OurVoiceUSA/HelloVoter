@@ -25,7 +25,7 @@ import NoMatch from './NoMatch';
 */
 export const Routes = ({ server, refer, google_maps_key }) => (
   <Switch>
-    <Route exact={true} path="/" render={() => <Dashboard server={server} />} />
+    <Route exact={true} path="/" render={() => <Dashboard server={server} refer={refer} />} />
     <Route path="/volunteers/" render={() => <Volunteers server={server} />} />
     <Route path="/teams/" render={() => <Teams server={server} />} />
     <Route path="/turf/" render={() => <Turf server={server} />} />
