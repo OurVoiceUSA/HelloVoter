@@ -46,7 +46,7 @@ You can connect to the database with a web browser by navigating to `YOUR_IP:747
 
 Finally, setup to run the server and connect to the database:
 
-    git clone https://github.com/OurVoiceUSA/HelloVoterAPI.git
+    git clone https://github.com/OurVoiceUSA/HelloVoterHQ.git
     cd HelloVoterHQ/server
     echo "NEO4J_PASS=$NEO4J_PASS" > .env
 
