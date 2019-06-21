@@ -28,7 +28,7 @@
   },
   "nodemonConfig": {
     "ignore": [
-      "districts"
+      "test"
     ]
   },
   "dependencies": {
