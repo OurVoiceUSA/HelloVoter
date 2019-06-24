@@ -30,9 +30,9 @@ Please be sure to write any tests that correspond to your code changes before yo
 
 ## Production Setup
 
-This app is designed such that you only need to deploy the server, as Our Voice USA hosts a production copy of the react app here: https://apps.ourvoiceusa.org/HelloVoterHQ/
+This app is designed such that you do not need to deploy the client, as Our Voice USA hosts a production copy of the react app here: https://apps.ourvoiceusa.org/HelloVoterHQ/
 
-See [server/README.md](server/README.md) for details on how to configure and deploy the server.
+See [database/README.md](database/README.md) for details on how to setup a database and [server/README.md](server/README.md) for details on how to configure and deploy the server.
 
 ## Contributing
 
