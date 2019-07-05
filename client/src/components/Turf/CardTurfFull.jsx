@@ -4,6 +4,9 @@ import Select from 'react-select';
 export const CardTurfFull = props => (
   <div>
     <div>
+      <pre>
+      {JSON.stringify(props.refer.state.turf.stats, null, 2)}
+      </pre>
       <br />
       Teams assigned to this turf:
       <Select
