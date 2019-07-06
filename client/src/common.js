@@ -132,6 +132,8 @@ export function _searchStringify(obj) {
   // deep copy and remove volitile variables
   let o = JSON.parse(JSON.stringify(obj));
   delete o.last_seen;
+  delete o.created;
+  delete o.id;
   return JSON.stringify(o).toLowerCase();
 }
 
