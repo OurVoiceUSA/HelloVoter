@@ -59,19 +59,21 @@ module.exports = Router({mergeParams: true})
 
   turf.data = ref.data;
 
-  // turf stats
-  turf.data[0].stats = {
-    'Most active volunteer': (await req.db.query('match (t:Turf {id:{turfId}}) match (v:Volunteer)<-[:USED_BY]-(:Device)-[:VISIT_DEVICE]-(vi:Visit)-[:VISIT_AT]->()-[*0..1]-(:Address)-[:WITHIN]->(t) with distinct(v.name) as name, count(distinct(vi)) as count order by count desc return name limit 1', req.query)).data[0],
-    'Number of volunteers assigned': (await req.db.query('match (v:Volunteer)<-[:ASSIGNED]-(t:Turf {id:{turfId}}) return count(distinct(v))', req.query)).data[0],
-    'Number of active volunteers': (await req.db.query('match (t:Turf {id:{turfId}}) match (v:Volunteer)<-[:USED_BY]-(:Device)-[:VISIT_DEVICE]-(:Visit)-[:VISIT_AT]->()-[*0..1]-(:Address)-[:WITHIN]->(t) return count(distinct(v))', req.query)).data[0],
-    'First assigned': 'N/A',
-    'Last Touch': (await req.db.query('match (t:Turf {id:{turfId}}) match (vi:Visit)-[:VISIT_AT]->()-[*0..1]-(:Address)-[:WITHIN]->(t) return vi.end order by vi.end desc limit 1', req.query)).data[0],
-    'Total Addresses': (await req.db.query('match (a:Address)-[:WITHIN]->(t:Turf {id:{turfId}}) return count(distinct(a))', req.query)).data[0],
-    'Total People': (await req.db.query('match (p:Person)-[:RESIDENCE {current:true}]->()-[*0..1]-(a:Address)-[:WITHIN]->(t:Turf {id:{turfId}}) return count(distinct(p))', req.query)).data[0],
-    'Total People Visited': (await req.db.query('match (vi:Visit)-[:VISIT_PERSON]->(p:Person)-[:RESIDENCE {current:true}]->()-[*0..1]-(a:Address)-[:WITHIN]->(t:Turf {id:{turfId}}) return count(distinct(p))', req.query)).data[0],
-    'People Visited in past month': (await req.db.query('match (vi:Visit)-[:VISIT_PERSON]->(p:Person)-[:RESIDENCE {current:true}]->()-[*0..1]-(a:Address)-[:WITHIN]->(t:Turf {id:{turfId}}) where vi.end > timestamp()-(1000*60*60*24*30) return count(distinct(p))', req.query)).data[0],
-  };
-
+  if (turf.data.length) {
+    // turf stats
+    turf.data[0].stats = {
+      'Most active volunteer': (await req.db.query('match (t:Turf {id:{turfId}}) match (v:Volunteer)<-[:USED_BY]-(:Device)-[:VISIT_DEVICE]-(vi:Visit)-[:VISIT_AT]->()-[*0..1]-(:Address)-[:WITHIN]->(t) with distinct(v.name) as name, count(distinct(vi)) as count order by count desc return name limit 1', req.query)).data[0],
+      'Number of volunteers assigned': (await req.db.query('match (v:Volunteer)<-[:ASSIGNED]-(t:Turf {id:{turfId}}) return count(distinct(v))', req.query)).data[0],
+      'Number of active volunteers': (await req.db.query('match (t:Turf {id:{turfId}}) match (v:Volunteer)<-[:USED_BY]-(:Device)-[:VISIT_DEVICE]-(:Visit)-[:VISIT_AT]->()-[*0..1]-(:Address)-[:WITHIN]->(t) return count(distinct(v))', req.query)).data[0],
+      'First assigned': 'N/A',
+      'Last Touch': (await req.db.query('match (t:Turf {id:{turfId}}) match (vi:Visit)-[:VISIT_AT]->()-[*0..1]-(:Address)-[:WITHIN]->(t) return vi.end order by vi.end desc limit 1', req.query)).data[0],
+      'Total Addresses': (await req.db.query('match (a:Address)-[:WITHIN]->(t:Turf {id:{turfId}}) return count(distinct(a))', req.query)).data[0],
+      'Total People': (await req.db.query('match (p:Person)-[:RESIDENCE {current:true}]->()-[*0..1]-(a:Address)-[:WITHIN]->(t:Turf {id:{turfId}}) return count(distinct(p))', req.query)).data[0],
+      'Total People Visited': (await req.db.query('match (vi:Visit)-[:VISIT_PERSON]->(p:Person)-[:RESIDENCE {current:true}]->()-[*0..1]-(a:Address)-[:WITHIN]->(t:Turf {id:{turfId}}) return count(distinct(p))', req.query)).data[0],
+      'People Visited in past month': (await req.db.query('match (vi:Visit)-[:VISIT_PERSON]->(p:Person)-[:RESIDENCE {current:true}]->()-[*0..1]-(a:Address)-[:WITHIN]->(t:Turf {id:{turfId}}) where vi.end > timestamp()-(1000*60*60*24*30) return count(distinct(p))', req.query)).data[0],
+    };
+  }
+  
   return res.json(turf);
 })
 .get('/turf/list/byposition', (req, res) => {
