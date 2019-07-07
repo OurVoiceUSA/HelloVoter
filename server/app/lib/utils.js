@@ -72,7 +72,7 @@ export async function volunteerCanSee(req, ida, idb) {
   return false;
 }
 
-export async function volunteerAssignments(req) {
+export async function volunteerAssignments(req, vol) {
   let obj = {
     ready: false,
     teams: [],
@@ -80,10 +80,10 @@ export async function volunteerAssignments(req) {
     forms: [],
   };
 
-  if (req.user.admin) obj.admin = req.user.admin;
+  if (vol.admin) obj.admin = vol.admin;
 
   try {
-    let ref = await req.db.query('match (a:Volunteer {id:{id}}) optional match (a)-[r:MEMBERS]-(b:Team) with a, collect(b{.*,leader:r.leader}) as teams optional match (a)-[:ASSIGNED]-(b:Form) with a, teams, collect(b{.*,direct:true}) as dforms optional match (a)-[:MEMBERS]-(:Team)-[:ASSIGNED]-(b:Form) with a, teams, dforms + collect(b{.*}) as forms optional match (a)-[:ASSIGNED]-(b:Turf) with a, teams, forms, collect(b{.id,.name,direct:true}) as dturf optional match (a)-[:MEMBERS]-(:Team)-[:ASSIGNED]-(b:Turf) with a, teams, forms, dturf + collect(b{.id,.name}) as turf return teams, forms, turf', req.user);
+    let ref = await req.db.query('match (a:Volunteer {id:{id}}) optional match (a)-[r:MEMBERS]-(b:Team) with a, collect(b{.*,leader:r.leader}) as teams optional match (a)-[:ASSIGNED]-(b:Form) with a, teams, collect(b{.*,direct:true}) as dforms optional match (a)-[:MEMBERS]-(:Team)-[:ASSIGNED]-(b:Form) with a, teams, dforms + collect(b{.*}) as forms optional match (a)-[:ASSIGNED]-(b:Turf) with a, teams, forms, collect(b{.id,.name,direct:true}) as dturf optional match (a)-[:MEMBERS]-(:Team)-[:ASSIGNED]-(b:Turf) with a, teams, forms, dturf + collect(b{.id,.name}) as turf return teams, forms, turf', vol);
 
     obj.teams = ref.data[0][0];
     obj.forms = ref.data[0][1];
@@ -92,10 +92,10 @@ export async function volunteerAssignments(req) {
     if (ov_config.autoenroll_formid) {
       let b = await req.db.query('match (b:Form {id:{formId}}) return b{.*,direct:true}', {formId: ov_config.autoenroll_formid});
       obj.forms.push(b.data[0]);
-      req.user.autoturf = true;
+      vol.autoturf = true;
     }
 
-    if (req.user.autoturf && req.user.location) {
+    if (vol.autoturf && vol.location) {
       obj.turfs.push({id: 'auto', name: 'auto', direct: true});
     }
 

@@ -17,7 +17,7 @@ module.exports = Router({mergeParams: true})
   // they say that time's supposed to heal ya but i ain't done much healin'
 
   let msg = "Awaiting assignment";
-  let ass = await volunteerAssignments(req);
+  let ass = await volunteerAssignments(req, req.user);
   if (ass.ready)
     msg = "You are assigned turf and ready to volunteer!";
 
@@ -75,7 +75,7 @@ module.exports = Router({mergeParams: true})
       neo4j_version: nv,
     });
     else {
-      let ass = await volunteerAssignments(req);
+      let ass = await volunteerAssignments(req, req.user);
       return res.json({
         admins: (await req.db.query('match (v:Volunteer {admin:true}) return count(v)')).data[0],
         volunteers: (await req.db.query('match (a:Volunteer {id:{id}})-[:MEMBERS {leader:true}]-(:Team)-[]-(t:Turf) where t.wkt is not null call spatial.intersects("volunteer", t.wkt) yield node return node UNION match (a:Volunteer {id:{id}}) return a as node UNION match (a:Volunteer {id:{id}})-[:MEMBERS]-(:Team)-[:MEMBERS]-(c:Volunteer) return distinct(c) as node', req.user)).data.length,
@@ -93,7 +93,7 @@ module.exports = Router({mergeParams: true})
   }
 })
 .get('/google_maps_key', async (req, res) => {
-  let ass = await volunteerAssignments(req);
+  let ass = await volunteerAssignments(req, req.user);
   if (ass.ready || req.user.admin) return res.json({google_maps_key: ov_config.google_maps_key });
   else return _401(res, "No soup for you");
 });

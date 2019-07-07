@@ -69,7 +69,7 @@ async function addressAdd(req, res) {
 
   if (isNaN(req.body.timestamp)) return _400(res, "Invalid value to parameter 'timestamp'.");
 
-  let ass = await volunteerAssignments(req);
+  let ass = await volunteerAssignments(req, req.user);
   if (!ass.ready) return _403(res, "Volunteer is not assigned.");
 
   // make sure formId is in ass.forms

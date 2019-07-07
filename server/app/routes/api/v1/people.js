@@ -54,7 +54,7 @@ module.exports = Router({mergeParams: true})
   // attrs is required if status is home
   if (req.body.status === 1 && typeof req.body.attrs !== 'object') return _400(res, "Invalid value to parameter 'attrs'.");
 
-  let ass = await volunteerAssignments(req);
+  let ass = await volunteerAssignments(req, req.user);
   if (!ass.ready) return _403(res, "Volunteer is not assigned.");
 
   // make sure formId is in ass.forms
@@ -176,7 +176,7 @@ async function visitsAndPeople(req, res) {
   if (!req.query.dist) req.query.dist = 10000;
 
   // poll assignments to get autoturf
-  await volunteerAssignments(req);
+  await volunteerAssignments(req, req.user);
 
   req.query.autoturf_dist = 1000;
 

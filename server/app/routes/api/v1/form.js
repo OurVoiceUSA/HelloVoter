@@ -13,7 +13,7 @@ import { Router } from 'express';
 
 module.exports = Router({mergeParams: true})
 .get('/form/get', async (req, res) => {
-  let ass = await volunteerAssignments(req);
+  let ass = await volunteerAssignments(req, req.user);
   if (!req.user.admin && !idInArrObj(ass.forms, req.query.formId)) return _403(res, "Volunteer is not assigned to this form.");
 
   let form = {};
