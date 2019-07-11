@@ -15,7 +15,7 @@
 		"encoding": "^0.1.12",
 		"javascript-time-ago": "^2.0.1",
 		"jwt-decode": "^2.2.0",
-		"lodash": "^4.17.11",
+		"lodash": "^4.17.14",
 		"md5": "^2.2.1",
 		"natural-orderby": "^2.0.3",
 		"ourvoiceusa-sdk-js": "github:OurVoiceUSA/ourvoiceusa-sdk-js",
