@@ -9,10 +9,6 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.BLUETOOTH"/>
 
-    <uses-sdk
-        android:minSdkVersion="16"
-        android:targetSdkVersion="22" />
-
     <application
       android:name=".MainApplication"
       android:allowBackup="true"

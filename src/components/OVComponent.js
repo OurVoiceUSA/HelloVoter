@@ -10,6 +10,7 @@ import {
 import Permissions from 'react-native-permissions';
 import RNGLocation from 'react-native-google-location';
 import RNGooglePlaces from 'react-native-google-places';
+navigator.geolocation = require('@react-native-community/geolocation');
 
 export default class OVComponent extends PureComponent {
 
@@ -73,14 +74,20 @@ export default class OVComponent extends PureComponent {
 
   getLocation() {
     const { myPosition } = this.state;
-    navigator.geolocation.getCurrentPosition((position) => {
-      let pos = JSON.parse(JSON.stringify(myPosition));
-      pos.latitude = position.coords.latitude;
-      pos.longitude = position.coords.longitude;
-      this.setState({ myPosition: pos });
-    },
-    (error) => { },
-    { enableHighAccuracy: true, timeout: 2000, maximumAge: 1000 });
+    try {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          let pos = JSON.parse(JSON.stringify(myPosition));
+          pos.latitude = position.coords.latitude;
+          pos.longitude = position.coords.longitude;
+          this.setState({ myPosition: pos });
+        },
+        (error) => { },
+        { enableHighAccuracy: true, timeout: 2000, maximumAge: 1000 }
+      );
+    } catch (e) {
+      console.warn("getLocation(): "+e);
+    }
   }
 
   cleanupLocation() {

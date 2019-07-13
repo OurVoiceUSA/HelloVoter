@@ -1,0 +1,24 @@
+diff --git a/node_modules/react-native-maps/lib/android/src/main/java/com/airbnb/android/react/maps/AirMapView.java b/node_modules/react-native-maps/lib/android/src/main/java/com/airbnb/android/react/maps/AirMapView.java
+index 397d4a6..64822e1 100644
+--- a/node_modules/react-native-maps/lib/android/src/main/java/com/airbnb/android/react/maps/AirMapView.java
++++ b/node_modules/react-native-maps/lib/android/src/main/java/com/airbnb/android/react/maps/AirMapView.java
+@@ -9,8 +9,8 @@ import android.graphics.Point;
+ import android.graphics.PorterDuff;
+ import android.graphics.Rect;
+ import android.os.Build;
+-import android.support.v4.view.GestureDetectorCompat;
+-import android.support.v4.view.MotionEventCompat;
++import androidx.core.view.GestureDetectorCompat;
++import androidx.core.view.MotionEventCompat;
+ import android.view.GestureDetector;
+ import android.view.MotionEvent;
+ import android.view.View;
+@@ -68,7 +68,7 @@ import java.util.List;
+ import java.util.Map;
+ import java.util.concurrent.ExecutionException;
+ 
+-import static android.support.v4.content.PermissionChecker.checkSelfPermission;
++import static androidx.core.content.PermissionChecker.checkSelfPermission;
+ 
+ public class AirMapView extends MapView implements GoogleMap.InfoWindowAdapter,
+     GoogleMap.OnMarkerDragListener, OnMapReadyCallback, GoogleMap.OnPoiClickListener, GoogleMap.OnIndoorStateChangeListener {

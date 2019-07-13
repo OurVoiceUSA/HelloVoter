@@ -9,6 +9,7 @@
 	},
 	"dependencies": {
 		"@react-native-community/async-storage": "^1.5.1",
+		"@react-native-community/geolocation": "^1.4.2",
 		"@react-native-community/netinfo": "^4.1.0",
 		"base-64": "^0.1.0",
 		"dropbox": "^4.0.28",
@@ -22,7 +23,7 @@
 		"pako": "^1.0.10",
 		"rbush": "^3.0.0",
 		"react": "^16.8.6",
-		"react-native": "^0.59.10",
+		"react-native": "^0.60.3",
 		"react-native-collapsible": "^1.4.0",
 		"react-native-config": "^0.11.7",
 		"react-native-device-info": "^2.2.2",

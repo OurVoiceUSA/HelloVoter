@@ -4,12 +4,12 @@ import android.app.Application;
 
 import com.facebook.react.ReactApplication;
 import com.swmansion.gesturehandler.react.RNGestureHandlerPackage;
+import com.reactnativecommunity.geolocation.GeolocationPackage;
 import com.oblador.vectoricons.VectorIconsPackage;
 import com.devfd.RNGeocoder.RNGeocoderPackage;
 import com.airbnb.android.react.maps.MapsPackage;
 import com.timhagn.rngloc.RNGLocation;
 import com.lugg.ReactNativeConfig.ReactNativeConfigPackage;
-import com.arttitude360.reactnative.rngoogleplaces.RNGooglePlacesPackage;
 import com.learnium.RNDeviceInfo.RNDeviceInfo;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
@@ -32,11 +32,11 @@ public class MainApplication extends Application implements ReactApplication {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
             new RNGestureHandlerPackage(),
+            new GeolocationPackage(),
             new RNGeocoderPackage(),
             new MapsPackage(),
             new RNGLocation(),
             new ReactNativeConfigPackage(),
-            new RNGooglePlacesPackage(),
             new RNDeviceInfo(),
             new VectorIconsPackage()
       );

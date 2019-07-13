@@ -11,30 +11,30 @@ target 'OurVoice' do
   pod 'Google-Maps-iOS-Utils'
   pod 'GooglePlacePicker'
 
-  pod 'React', :path => '../node_modules/react-native', :subspecs => [
-    'Core',
-    'CxxBridge',
-    'DevSupport',
-    # the following ones are the ones taken from "Libraries" in Xcode:
-    'RCTAnimation',
-    'RCTActionSheet',
-    'RCTBlob',
-    'RCTGeolocation',
-    'RCTImage',
-    'RCTLinkingIOS',
-    'RCTNetwork',
-    'RCTSettings',
-    'RCTText',
-    'RCTVibration',
-    'RCTWebSocket'
-  ]
-  
+  pod 'React-jsi', :path => '../node_modules/react-native/ReactCommon/jsi'
+  pod 'React-jsiexecutor', :path => '../node_modules/react-native/ReactCommon/jsiexecutor'
+  pod 'React-jsinspector', :path => '../node_modules/react-native/ReactCommon/jsinspector'
+  pod 'React-cxxreact', :path => '../node_modules/react-native/ReactCommon/cxxreact'
+  pod 'React-RCTAnimation', :path => '../node_modules/react-native/Libraries/NativeAnimation'
+  pod 'React-RCTActionSheet', :path => '../node_modules/react-native/Libraries/ActionSheetIOS'
+  pod 'React-RCTWebSocket', :path => '../node_modules/react-native/Libraries/WebSocket'
+  pod 'React-fishhook', :path => '../node_modules/react-native/Libraries/fishhook'
+  pod 'React-RCTNetwork', :path => '../node_modules/react-native/Libraries/Network'
+  pod 'React-RCTImage', :path => '../node_modules/react-native/Libraries/Image'
+  pod 'React-RCTLinking', :path => '../node_modules/react-native/Libraries/LinkingIOS'
+  pod 'React-RCTSettings', :path => '../node_modules/react-native/Libraries/Settings'
+  pod 'React-RCTVibration', :path => '../node_modules/react-native/Libraries/Vibration'
+  pod 'React-RCTText', :path => '../node_modules/react-native/Libraries/Text'
+  pod 'React-RCTBlob', :path => '../node_modules/react-native/Libraries/Blob'
+  pod 'React-DevSupport', :path => '../node_modules/react-native/React'
+  pod 'React-Core', :path => '../node_modules/react-native/React'
+  pod 'React', :path => '../node_modules/react-native'
+
   pod 'yoga', :path => '../node_modules/react-native/ReactCommon/yoga'
   pod 'DoubleConversion', :podspec => '../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec'
   pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
   pod 'glog', :podspec => '../node_modules/react-native/third-party-podspecs/glog.podspec'
   
-  pod 'RNGestureHandler', :path => '../node_modules/react-native-gesture-handler'
 
   pod 'react-native-maps', path: '../node_modules/react-native-maps'
   pod 'react-native-google-maps', path: '../node_modules/react-native-maps'
@@ -42,6 +42,10 @@ target 'OurVoice' do
   pod 'RNCAsyncStorage', :path => '../node_modules/@react-native-community/async-storage'
 
   pod 'react-native-netinfo', :path => '../node_modules/@react-native-community/netinfo'
+
+  pod 'react-native-geolocation', :path => '../node_modules/@react-native-community/geolocation'
+
+  pod 'RNGestureHandler', :path => '../node_modules/react-native-gesture-handler'
 
   post_install do |installer|
     installer.pods_project.targets.each do |target|
