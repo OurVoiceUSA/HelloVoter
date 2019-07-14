@@ -1,7 +1,7 @@
 
 ## Production Setup
 
-The defaults from the "npm run database" aren't suitable for a production environment. You will with to configure the Neo4j database yourself. Below is an example to get started from.
+The defaults from the "npm run database" aren't suitable for a production environment. You will have to configure the Neo4j database yourself. Below is an example to get started from.
 
 First, export some variables to use, and be sure to change the password prior to running!
 
