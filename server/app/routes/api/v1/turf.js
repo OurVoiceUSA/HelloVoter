@@ -43,9 +43,9 @@ module.exports = Router({mergeParams: true})
   if (req.query.geometry) geom = true;
 
   if (req.user.admin)
-    return cqdo(req, res, 'match (a:Turf) return a{.id, .name, .created'+(geom?', .geometry':'')+'}');
+    return cqdo(req, res, 'match (a:Turf) return a{.id, .name, .created'+(geom?', .geometry':'')+'} order by a.name');
   else
-    return cqdo(req, res, 'match (v:Volunteer {id:{id}}) optional match (v)-[:ASSIGNED]-(t:Turf) with v, t as dturf optional match (v)-[:MEMBERS]-(:Team)-[:ASSIGNED]-(t:Turf) with v, dturf + collect(t) as turf unwind turf as t call spatial.intersects("turf", t.wkt) yield node return node{.id, .name, .created'+(geom?', .geometry':'')+'}', req.user);
+    return cqdo(req, res, 'match (v:Volunteer {id:{id}}) optional match (v)-[:ASSIGNED]-(t:Turf) with v, t as dturf optional match (v)-[:MEMBERS]-(:Team)-[:ASSIGNED]-(t:Turf) with v, dturf + collect(t) as turf unwind turf as t call spatial.intersects("turf", t.wkt) yield node return node{.id, .name, .created'+(geom?', .geometry':'')+'} order by node.name', req.user);
 })
 .get('/turf/get', async (req, res) => {
   if (!valid(req.query.turfId)) return _400(res, "Invalid value to parameter 'turfId'.");
@@ -73,16 +73,20 @@ module.exports = Router({mergeParams: true})
       'People Visited in past month': (await req.db.query('match (vi:Visit)-[:VISIT_PERSON]->(p:Person)-[:RESIDENCE {current:true}]->()-[*0..1]-(a:Address)-[:WITHIN]->(t:Turf {id:{turfId}}) where vi.end > timestamp()-(1000*60*60*24*30) return count(distinct(p))', req.query)).data[0],
     };
   }
-  
+
   return res.json(turf);
 })
 .get('/turf/list/byposition', (req, res) => {
   req.query.longitude = parseFloat(req.query.longitude);
   req.query.latitude = parseFloat(req.query.latitude);
+  req.query.dist = parseFloat(req.query.dist);
   if (isNaN(req.query.longitude) || isNaN(req.query.latitude)) return _400(res, "Invalid value to parameters 'longitude' and 'latitude'.");
 
   // TODO: if (req.user.admin) -- append a match (v:Volunteer) that's assigned to that node somehow
-  return cqdo(req, res, 'call spatial.intersects("turf", {longitude: {longitude}, latitude: {latitude}}) yield node return node', req.query);
+  if (req.query.dist)
+    return cqdo(req, res, 'call spatial.withinDistance("turf", {longitude: {longitude}, latitude: {latitude}}, {dist}) yield node return node{.id, .name, .created}', req.query);
+  else
+    return cqdo(req, res, 'call spatial.intersects("turf", {longitude: {longitude}, latitude: {latitude}}) yield node return node{.id, .name, .created}', req.query);
 })
 .get('/turf/assigned/team/list', (req, res) => {
   if (!valid(req.query.turfId)) return _400(res, "Invalid value to parameter 'turfId'.");

@@ -26,7 +26,7 @@ import {
   _loadTeams,
   _loadForms,
   _loadTurfs,
-  _loadHomeTurfs,
+  _loadNearbyTurfs,
   RootLoader,
   Icon,
   PlacesAutocomplete,
@@ -49,6 +49,8 @@ import {
 import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en';
 TimeAgo.locale(en);
+
+const NEARBY_DIST = 50;
 
 export default class Volunteers extends Component {
   constructor(props) {
@@ -455,7 +457,8 @@ export class CardVolunteer extends Component {
       forms = [],
       turf = [],
       teams = [],
-      hometurf = [];
+      hometurf = [],
+      nearbyturf = [];
 
     this.setState({ loading: true });
 
@@ -471,8 +474,10 @@ export class CardVolunteer extends Component {
       return this.setState({ loading: false });
     }
 
-    if (volunteer.location)
-      hometurf = await _loadHomeTurfs(this.props.refer, volunteer.location.x, volunteer.location.y);
+    if (volunteer.location) {
+      hometurf = await _loadNearbyTurfs(this.props.refer, volunteer.location.x, volunteer.location.y, 0);
+      nearbyturf = await _loadNearbyTurfs(this.props.refer, volunteer.location.x, volunteer.location.y, NEARBY_DIST);
+    }
 
     let teamOptions = [];
     let leaderOptions = [];
@@ -586,6 +591,7 @@ export class CardVolunteer extends Component {
       selectedFormsOption,
       selectedTurfOption,
       hometurf,
+      nearbyturf,
     });
   };
 
@@ -683,8 +689,23 @@ export const CardVolunteerFull = props => (
     Address:{' '}
     <VolunteerAddress refer={props.refer} volunteer={props.volunteer} />
     <br />
-    Turf this volunteer's home address is in:
-    {props.refer.state.hometurf.map(t => <div>{t.name}</div>)}
+    {props.refer.state.hometurf.length?
+      <div>
+        Turf this volunteer's home address is in:
+        {props.refer.state.hometurf.map(t => <div>{t.name}</div>)}
+      </div>
+      :
+      <div>This volunteer's home address isn't in any turf.</div>
+    }
+    <br />
+    {props.refer.state.nearbyturf.length?
+      <div>
+        Turf this volunteer's home address is near by:
+        {props.refer.state.nearbyturf.slice(0,5).map(t => <div>{t.name}</div>)}
+      </div>
+      :
+      <div>No turfs are within {NEARBY_DIST}km of this volunteer.</div>
+    }
     <br />
     # of doors knocked: N/A
     <br />
