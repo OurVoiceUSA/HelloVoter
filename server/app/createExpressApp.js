@@ -100,7 +100,15 @@ export function doExpressInit(log, db, qq) {
       if (!u.email) u.email = "";
       if (!u.avatar) u.avatar = "";
 
-      let a = await req.db.query('merge (a:Volunteer {id:{id}}) on match set a += {last_seen: timestamp(), name:{name}, email:{email}, avatar:{avatar}} on create set a += {created: timestamp(), last_seen: timestamp(), name:{name}, email:{email}, avatar:{avatar}} return a', u);
+      let a;
+
+      try {
+        a = await req.db.query('merge (a:Volunteer {id:{id}}) on match set a += {last_seen: timestamp(), name:{name}, email:{email}, avatar:{avatar}} on create set a += {created: timestamp(), last_seen: timestamp(), name:{name}, email:{email}, avatar:{avatar}} return a', u);
+      } catch (e) {
+        console.warn(e);
+        return _500(res, e);
+      }
+
       if (a.data.length === 1) {
         req.user = a.data[0];
       } else return _500(res, {});
