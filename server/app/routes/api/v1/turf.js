@@ -7,6 +7,18 @@ import {
 
 import { Router } from 'express';
 
+async function stats_by_attr(req, attrs) {
+  req.query.attrs = attrs;
+  let c = '';
+  if (attrs) c = attrs.map((attr, idx) => 'match (p)<-[:ATTRIBUTE_OF]-(pa'+idx+':PersonAttribute)-[:ATTRIBUTE_TYPE]->(:Attribute {id:"'+attr.id+'"}) where pa'+idx+'.value '+attr.op+' "'+attr.val+'"').join(' ');
+  return {
+    'Total Addresses': (await req.db.query('match (p:Person)-[:RESIDENCE {current:true}]->()-[*0..1]-(a:Address)-[:WITHIN]->(t:Turf {id:{turfId}}) '+c+' return count(distinct(a))', req.query)).data[0],
+    'Total People': (await req.db.query('match (p:Person)-[:RESIDENCE {current:true}]->()-[*0..1]-(a:Address)-[:WITHIN]->(t:Turf {id:{turfId}}) '+c+' return count(distinct(p))', req.query)).data[0],
+    'Total People Visited': (await req.db.query('match (vi:Visit)-[:VISIT_PERSON]->(p:Person)-[:RESIDENCE {current:true}]->()-[*0..1]-(a:Address)-[:WITHIN]->(t:Turf {id:{turfId}}) '+c+' return count(distinct(p))', req.query)).data[0],
+    'People Visited in past month': (await req.db.query('match (vi:Visit)-[:VISIT_PERSON]->(p:Person)-[:RESIDENCE {current:true}]->()-[*0..1]-(a:Address)-[:WITHIN]->(t:Turf {id:{turfId}}) where vi.end > timestamp()-(1000*60*60*24*30) '+c+' return count(distinct(p))', req.query)).data[0],
+  };
+}
+
 module.exports = Router({mergeParams: true})
 .post('/turf/create', async (req, res) => {
   if (!req.user.admin) return _403(res, "Permission denied.");
@@ -66,11 +78,12 @@ module.exports = Router({mergeParams: true})
       'Number of volunteers assigned': (await req.db.query('match (v:Volunteer)<-[:ASSIGNED]-(t:Turf {id:{turfId}}) return count(distinct(v))', req.query)).data[0],
       'Number of active volunteers': (await req.db.query('match (t:Turf {id:{turfId}}) match (v:Volunteer)<-[:USED_BY]-(:Device)-[:VISIT_DEVICE]-(:Visit)-[:VISIT_AT]->()-[*0..1]-(:Address)-[:WITHIN]->(t) return count(distinct(v))', req.query)).data[0],
       'First assigned': 'N/A',
-      'Last Touch': (await req.db.query('match (t:Turf {id:{turfId}}) match (vi:Visit)-[:VISIT_AT]->()-[*0..1]-(:Address)-[:WITHIN]->(t) return vi.end order by vi.end desc limit 1', req.query)).data[0],
-      'Total Addresses': (await req.db.query('match (a:Address)-[:WITHIN]->(t:Turf {id:{turfId}}) return count(distinct(a))', req.query)).data[0],
-      'Total People': (await req.db.query('match (p:Person)-[:RESIDENCE {current:true}]->()-[*0..1]-(a:Address)-[:WITHIN]->(t:Turf {id:{turfId}}) return count(distinct(p))', req.query)).data[0],
-      'Total People Visited': (await req.db.query('match (vi:Visit)-[:VISIT_PERSON]->(p:Person)-[:RESIDENCE {current:true}]->()-[*0..1]-(a:Address)-[:WITHIN]->(t:Turf {id:{turfId}}) return count(distinct(p))', req.query)).data[0],
-      'People Visited in past month': (await req.db.query('match (vi:Visit)-[:VISIT_PERSON]->(p:Person)-[:RESIDENCE {current:true}]->()-[*0..1]-(a:Address)-[:WITHIN]->(t:Turf {id:{turfId}}) where vi.end > timestamp()-(1000*60*60*24*30) return count(distinct(p))', req.query)).data[0],
+      'Last Touch': (await req.db.query('match (vi:Visit)-[:VISIT_AT]->()-[*0..1]-(:Address)-[:WITHIN]->(t:Turf {id:{turfId}}) return vi.end order by vi.end desc limit 1', req.query)).data[0],
+      'Stats by Attribute': {
+        'total': await stats_by_attr(req),
+        // TODO: include list of custom attribute chains by user preference
+        // 'custom attribute value and male and born after 1980': await stats_by_attr(req, [{id: '9a912e86-3977-426a-8da0-b7fd90c8834a', op: '=', val: "Municipal"},{id: 'a0e622d2-db0a-410e-a315-52c65f678ffa', op: '=', val: "Male"},{id: '9a903e4f-66ea-4625-bacf-43abb53c6cfc', op: '>=', val: '1980'}]),
+      }
     };
   }
 
