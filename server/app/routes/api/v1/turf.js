@@ -1,5 +1,6 @@
 
 import wkx from 'wkx';
+import { asyncForEach, sleep } from 'ourvoiceusa-sdk-js';
 import {
   _volunteersFromCypher,
   cqdo, valid, _400, _403, _500
@@ -7,11 +8,14 @@ import {
 
 import { Router } from 'express';
 
-async function stats_by_attr(req, attrs) {
-  req.query.attrs = attrs;
+async function stats_by_attr(req, aq) {
   let c = '';
-  if (attrs) c = attrs.map((attr, idx) => 'match (p)<-[:ATTRIBUTE_OF]-(pa'+idx+':PersonAttribute)-[:ATTRIBUTE_TYPE]->(:Attribute {id:"'+attr.id+'"}) where pa'+idx+'.value '+attr.op+' "'+attr.val+'"').join(' ');
-  let ref = await req.db.query(`
+  let ref;
+  if (aq) {
+    ref = await req.db.query('match (aq:AttributeQuery {id:{id}})-[r:CONSTRAIN]->(at:Attribute) return at.id, r.op, r.value', {id: aq});
+    c = ref.data.map((attr, idx) => 'match (p)<-[:ATTRIBUTE_OF]-(pa'+idx+':PersonAttribute)-[:ATTRIBUTE_TYPE]->(:Attribute {id:"'+attr[0]+'"}) where pa'+idx+'.value '+attr[1]+' "'+attr[2]+'"').join(' ');
+  }
+  ref = await req.db.query(`
 match (p:Person)-[:RESIDENCE {current:true}]->()-[*0..1]-(a:Address)-[:WITHIN]->(t:Turf {id:{turfId}})
 `+c+`
 optional match (p)<-[:VISIT_PERSON]-(vi:Visit)
@@ -102,10 +106,11 @@ return last_touch, active_name, total_active, total_assigned`,
       'First assigned': 'N/A',
       'Stats by Attribute': {
         'total': await stats_by_attr(req),
-        // TODO: include list of custom attribute chains by user preference
-        // 'custom attribute value and male and born after 1980': await stats_by_attr(req, [{id: '9a912e86-3977-426a-8da0-b7fd90c8834a', op: '=', val: "Municipal"},{id: 'a0e622d2-db0a-410e-a315-52c65f678ffa', op: '=', val: "Male"},{id: '9a903e4f-66ea-4625-bacf-43abb53c6cfc', op: '>=', val: '1980'}]),
       }
     };
+    await asyncForEach((await req.db.query('match (aq:AttributeQuery) return aq.id, aq.name')).data, async (aq) => {
+      turf.data[0].stats['Stats by Attribute'][aq[1]] = await stats_by_attr(req, aq[0]);
+    });
   }
 
   return res.json(turf);
