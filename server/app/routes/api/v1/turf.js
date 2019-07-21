@@ -84,11 +84,11 @@ match (t:Turf {id:{turfId}})
 optional match (v:Volunteer)<-[:ASSIGNED]-(t)
   with t, count(v) as total_assigned
 optional match (v:Volunteer)<-[:VISIT_VOLUNTEER]-(vi:Visit)-[:VISIT_AT]->()-[*0..1]-(:Address)-[:WITHIN]->(t)
-  with count(distinct(v)) as total_active, total_assigned
+  with t, count(distinct(v)) as total_active, total_assigned
 optional match (v:Volunteer)<-[:VISIT_VOLUNTEER]-(vi:Visit)-[:VISIT_AT]->()-[*0..1]-(:Address)-[:WITHIN]->(t)
-  with distinct(v.name) as active_name, count(distinct(vi)) as count, total_active, total_assigned order by count desc limit 1
+  with distinct(v.name) as active_name, t, count(distinct(vi)) as count, total_active, total_assigned order by count desc limit 1
 optional match (vi:Visit)-[:VISIT_AT]->()-[*0..1]-(:Address)-[:WITHIN]->(t)
-  with vi.end as last_touch, active_name, total_active, total_assigned order by vi.end desc limit 1
+  with t, vi.end as last_touch, active_name, total_active, total_assigned order by vi.end desc limit 1
 return last_touch, active_name, total_active, total_assigned`,
     req.query);
     // turf stats
