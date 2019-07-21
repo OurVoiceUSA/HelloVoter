@@ -73,3 +73,13 @@ index 137fef2..d21ec5f 100644
  
      @Override
      public String getName() {
+--- a/node_modules/react-native-google-location/android/app/build.gradle
++++ b/node_modules/react-native-google-location/android/app/build.gradle
+@@ -31,6 +31,6 @@
+ 
+ dependencies {
+   compile 'com.facebook.react:react-native:0.12.+'
+-  compile 'com.google.android.gms:play-services-location:8.3.0'
++  compile 'com.google.android.gms:play-services-location:16.0.0'
+ }
+ 

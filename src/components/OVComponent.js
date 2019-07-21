@@ -10,7 +10,9 @@ import {
 import Permissions from 'react-native-permissions';
 import RNGLocation from 'react-native-google-location';
 import RNGooglePlaces from 'react-native-google-places';
-navigator.geolocation = require('@react-native-community/geolocation');
+if (Platform.OS === 'ios') {
+  navigator.geolocation = require('@react-native-community/geolocation');
+}
 
 export default class OVComponent extends PureComponent {
 
