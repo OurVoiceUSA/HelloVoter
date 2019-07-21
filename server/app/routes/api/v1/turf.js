@@ -11,11 +11,18 @@ async function stats_by_attr(req, attrs) {
   req.query.attrs = attrs;
   let c = '';
   if (attrs) c = attrs.map((attr, idx) => 'match (p)<-[:ATTRIBUTE_OF]-(pa'+idx+':PersonAttribute)-[:ATTRIBUTE_TYPE]->(:Attribute {id:"'+attr.id+'"}) where pa'+idx+'.value '+attr.op+' "'+attr.val+'"').join(' ');
+  let ref = await req.db.query(`
+    match (p:Person)-[:RESIDENCE {current:true}]->()-[*0..1]-(a:Address)-[:WITHIN]->(t:Turf {id:{turfId}})
+    `+c+`
+    optional match (p)<-[:VISIT_PERSON]-(vi:Visit) with a, p, CASE WHEN (count(vi) > 0) THEN {visits: count(vi)} ELSE NULL END as visits
+    optional match (p)<-[:VISIT_PERSON]-(rvi:Visit) where rvi.end > timestamp()-(1000*60*60*24*30) with a, p, visits, CASE WHEN (count(rvi) > 0) THEN {visits: count(rvi)} ELSE NULL END as recent_visits
+    return count(distinct(a)), count(p), count(visits), count(recent_visits)`
+  , req.query);
   return {
-    'Total Addresses': (await req.db.query('match (p:Person)-[:RESIDENCE {current:true}]->()-[*0..1]-(a:Address)-[:WITHIN]->(t:Turf {id:{turfId}}) '+c+' return count(distinct(a))', req.query)).data[0],
-    'Total People': (await req.db.query('match (p:Person)-[:RESIDENCE {current:true}]->()-[*0..1]-(a:Address)-[:WITHIN]->(t:Turf {id:{turfId}}) '+c+' return count(distinct(p))', req.query)).data[0],
-    'Total People Visited': (await req.db.query('match (vi:Visit)-[:VISIT_PERSON]->(p:Person)-[:RESIDENCE {current:true}]->()-[*0..1]-(a:Address)-[:WITHIN]->(t:Turf {id:{turfId}}) '+c+' return count(distinct(p))', req.query)).data[0],
-    'People Visited in past month': (await req.db.query('match (vi:Visit)-[:VISIT_PERSON]->(p:Person)-[:RESIDENCE {current:true}]->()-[*0..1]-(a:Address)-[:WITHIN]->(t:Turf {id:{turfId}}) where vi.end > timestamp()-(1000*60*60*24*30) '+c+' return count(distinct(p))', req.query)).data[0],
+    'Total Addresses': ref.data[0][0],
+    'Total People': ref.data[0][1],
+    'Total People Visited': ref.data[0][2],
+    'People Visited in past month': ref.data[0][3],
   };
 }
 
