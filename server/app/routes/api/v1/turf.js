@@ -79,13 +79,25 @@ module.exports = Router({mergeParams: true})
   turf.data = ref.data;
 
   if (turf.data.length) {
+    let ref = await req.db.query(`
+match (t:Turf {id:{turfId}})
+optional match (v:Volunteer)<-[:ASSIGNED]-(t)
+  with t, count(v) as total_assigned
+optional match (v:Volunteer)<-[:VISIT_VOLUNTEER]-(vi:Visit)-[:VISIT_AT]->()-[*0..1]-(:Address)-[:WITHIN]->(t)
+  with count(distinct(v)) as total_active, total_assigned
+optional match (v:Volunteer)<-[:VISIT_VOLUNTEER]-(vi:Visit)-[:VISIT_AT]->()-[*0..1]-(:Address)-[:WITHIN]->(t)
+  with distinct(v.name) as active_name, count(distinct(vi)) as count, total_active, total_assigned order by count desc limit 1
+optional match (vi:Visit)-[:VISIT_AT]->()-[*0..1]-(:Address)-[:WITHIN]->(t)
+  with vi.end as last_touch, active_name, total_active, total_assigned order by vi.end desc limit 1
+return last_touch, active_name, total_active, total_assigned`,
+    req.query);
     // turf stats
     turf.data[0].stats = {
-      'Most active volunteer': (await req.db.query('match (t:Turf {id:{turfId}}) match (v:Volunteer)<-[:USED_BY]-(:Device)-[:VISIT_DEVICE]-(vi:Visit)-[:VISIT_AT]->()-[*0..1]-(:Address)-[:WITHIN]->(t) with distinct(v.name) as name, count(distinct(vi)) as count order by count desc return name limit 1', req.query)).data[0],
-      'Number of volunteers assigned': (await req.db.query('match (v:Volunteer)<-[:ASSIGNED]-(t:Turf {id:{turfId}}) return count(distinct(v))', req.query)).data[0],
-      'Number of active volunteers': (await req.db.query('match (t:Turf {id:{turfId}}) match (v:Volunteer)<-[:USED_BY]-(:Device)-[:VISIT_DEVICE]-(:Visit)-[:VISIT_AT]->()-[*0..1]-(:Address)-[:WITHIN]->(t) return count(distinct(v))', req.query)).data[0],
+      'Last Touch': ref.data[0][0],
+      'Most active volunteer': ref.data[0][1],
+      'Number of active volunteers': ref.data[0][2],
+      'Number of volunteers assigned': ref.data[0][3],
       'First assigned': 'N/A',
-      'Last Touch': (await req.db.query('match (vi:Visit)-[:VISIT_AT]->()-[*0..1]-(:Address)-[:WITHIN]->(t:Turf {id:{turfId}}) return vi.end order by vi.end desc limit 1', req.query)).data[0],
       'Stats by Attribute': {
         'total': await stats_by_attr(req),
         // TODO: include list of custom attribute chains by user preference
