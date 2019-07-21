@@ -29,7 +29,7 @@ export default class App extends Component {
   constructor(props) {
     super(props);
 
-    const dash = (localStorage.getItem('dash') || 'vol,team,turf,form,ques,addr,dbsz').split(',');
+    const dash = (localStorage.getItem('dash') || 'vol,team,turf,form,attributes,addr,dbsz').split(',');
 
     this.state = {
       loading: true,
@@ -84,9 +84,9 @@ export default class App extends Component {
           stat: data.forms,
           icon: faClipboard,
         },
-        ques: {
-          name: 'Questions',
-          stat: data.questions,
+        attributes: {
+          name: 'Attributes',
+          stat: data.attributes,
           icon: faChartPie,
         },
         addr: {

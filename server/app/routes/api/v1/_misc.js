@@ -67,7 +67,7 @@ module.exports = Router({mergeParams: true})
       volunteers: (await req.db.query('match (a:Volunteer) return count(a)')).data[0],
       teams: (await req.db.query('match (a:Team) return count(a)')).data[0],
       turfs: (await req.db.query('match (a:Turf) return count(a)')).data[0],
-      attributes: (await req.db.query('match (a:Attribute) return count(a)')).data[0],
+      attributes: (await req.db.query('match (at:Attribute) return count(at)')).data[0],
       forms: (await req.db.query('match (a:Form) return count(a)')).data[0],
       addresses: (await req.db.query('match (a:Address) return count(a)')).data[0],
       dbsize: await req.db.size(),

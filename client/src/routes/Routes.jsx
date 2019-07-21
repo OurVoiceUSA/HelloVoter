@@ -6,6 +6,7 @@ import {
   Teams,
   Turf,
   Forms,
+  Attributes,
   Map,
   ImportData,
   Queue,
@@ -30,6 +31,7 @@ export const Routes = ({ server, refer, google_maps_key }) => (
     <Route path="/teams/" render={() => <Teams server={server} />} />
     <Route path="/turf/" render={() => <Turf server={server} />} />
     <Route path="/forms/" render={() => <Forms server={server} />} />
+    <Route path="/attributes/" render={() => <Attributes server={server} />} />
     <Route
       path="/map/"
       render={() => <Map server={server} apiKey={google_maps_key} />}

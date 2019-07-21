@@ -2,6 +2,7 @@ import About from './About';
 import Analytics from './Analytics';
 import Dashboard from './Dashboard';
 import Forms from './Forms';
+import Attributes from './Attributes';
 import { ImportData } from './ImportData/index';
 import Queue from './Queue';
 import Jwt from './Jwt';
@@ -19,6 +20,7 @@ export {
   Analytics,
   Dashboard,
   Forms,
+  Attributes,
   ImportData,
   Queue,
   Jwt,

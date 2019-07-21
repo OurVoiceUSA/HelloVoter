@@ -10,6 +10,7 @@ import PersonIcon from '@material-ui/icons/Person';
 import PeopleIcon from '@material-ui/icons/People';
 import MapIcon from '@material-ui/icons/Map';
 import AssignmentIcon from '@material-ui/icons/Assignment';
+import PaperclipIcon from '@material-ui/icons/AttachFile';
 import NavigationIcon from '@material-ui/icons/Navigation';
 import PresentToAllIcon from '@material-ui/icons/PresentToAll';
 import WorkIcon from '@material-ui/icons/Work';
@@ -60,6 +61,14 @@ const MenuItems = ({ handleClickLogout }) => (
             <AssignmentIcon />
           </ListItemIcon>
           <ListItemText primary="Forms" />
+        </ListItem>
+      </Link>
+      <Link to={'/attributes/'}>
+        <ListItem button>
+          <ListItemIcon>
+            <PaperclipIcon />
+          </ListItemIcon>
+          <ListItemText primary="Attributes" />
         </ListItem>
       </Link>
       <Link to={'/map/'}>
@@ -127,8 +136,7 @@ const MenuItems = ({ handleClickLogout }) => (
       <a
         target="_blank"
         rel="noopener noreferrer"
-        href="https://github.com/OurVoiceUSA/HelloVoterHQ/tree/mast
-  er/docs/"
+        href="https://github.com/OurVoiceUSA/HelloVoterHQ/tree/master/docs/"
       >
         <ListItem button>
           <ListItemIcon>
