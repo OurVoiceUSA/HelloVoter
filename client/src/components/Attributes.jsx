@@ -33,6 +33,7 @@ export default class App extends Component {
         value: _searchStringify(a),
         id: a.id,
         label: a.name,
+        data: a,
       });
     });
 
@@ -41,7 +42,7 @@ export default class App extends Component {
 
   handleAttributeChange = selectedAttributeOption => {
     if (!selectedAttributeOption) selectedAttributeOption = [];
-    this.setState({selectedAttributeOption}, () => this._init());
+    this.setState({selectedAttributeOption});
   }
 
   render() {
@@ -56,6 +57,11 @@ export default class App extends Component {
           isSearchable={true}
           placeholder="Select an attribute to edit"
         />
+      {this.state.selectedAttributeOption?
+      <div>{JSON.stringify(this.state.selectedAttributeOption.data)}</div>
+      :
+      <div></div>
+      }
       </RootLoader>
     );
   }

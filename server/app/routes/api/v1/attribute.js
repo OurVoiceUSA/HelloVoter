@@ -29,15 +29,15 @@ module.exports = Router({mergeParams: true})
 })
 .get('/attribute/list', (req, res) => {
   if (req.user.admin === true)
-    return cqdo(req, res, 'match (a:Attribute) return a order by a.order', {}, true);
+    return cqdo(req, res, 'match (at:Attribute) return at order by at.order', {}, true);
   else
     return cqdo(req, res, `
   match (v:Volunteer {id:{id}})
   optional match (v)-[:ASSIGNED]-(f:Form) with v, collect(f) as dforms
   optional match (v)-[:MEMBERS]-(:Team)-[:ASSIGNED]-(f:Form) with v, dforms + collect(f) as forms
   unwind forms as f
-  match (a:Attribute)-[:COMPILED_ON]->(f)
-  return a order by a.order
+  match (at:Attribute)-[:COMPILED_ON]->(f)
+  return at order by at.order
     `, req.user);
 })
 .get('/attribute/form/list', (req, res) => {

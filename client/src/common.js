@@ -292,18 +292,17 @@ export async function _loadForms(refer, teamId) {
 }
 
 export async function _loadAttributes(refer) {
-  let forms = [];
+  let attributes = [];
 
   try {
     let data = await _fetch(refer.props.server, API_BASE_URI+'/attribute/list');
-    forms = data.data ? data.data : [];
+    attributes = data.data ? data.data : [];
   } catch (e) {
     notify_error(e, 'Unable to load attribute data.');
   }
 
-  return forms;
+  return attributes;
 }
-
 export async function _loadAddressData(refer, lng, lat, formId) {
   let data = [];
   try {
