@@ -30,7 +30,6 @@ export function notify_success(msg) {
 }
 
 export function notify_error(e, msg) {
-  if (e && e.mock) msg = e.message;
   NotificationManager.error(msg, 'Error', 6000);
   console.warn(e);
 }
