@@ -7,9 +7,12 @@ import t from 'tcomb-form';
 
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Button from '@material-ui/core/Button';
+import Checkbox from '@material-ui/core/Checkbox';
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogActions from '@material-ui/core/DialogActions';
+
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 import {
   faTimesCircle,
@@ -54,6 +57,54 @@ var addItem = {
   type: FTYPE
 };
 
+
+// a little function to help us with reordering the result
+const reorder = (list, startIndex, endIndex) => {
+    const result = Array.from(list);
+    const [removed] = result.splice(startIndex, 1);
+    result.splice(endIndex, 0, removed);
+
+    return result;
+};
+
+/**
+ * Moves an item from one list to another list.
+ */
+const move = (source, destination, droppableSource, droppableDestination) => {
+    const sourceClone = Array.from(source);
+    const destClone = Array.from(destination);
+    const [removed] = sourceClone.splice(droppableSource.index, 1);
+
+    destClone.splice(droppableDestination.index, 0, removed);
+
+    const result = {};
+    result[droppableSource.droppableId] = sourceClone;
+    result[droppableDestination.droppableId] = destClone;
+
+    return result;
+};
+
+const grid = 8;
+
+const getItemStyle = (isDragging, draggableStyle) => ({
+    // some basic styles to make the items look a bit nicer
+    userSelect: 'none',
+    padding: grid * 2,
+    margin: `0 0 ${grid}px 0`,
+
+    // change background colour if dragging
+    background: isDragging ? 'lightgreen' : 'grey',
+
+    // styles we need to apply on draggables
+    ...draggableStyle
+});
+
+const getListStyle = isDraggingOver => ({
+    background: isDraggingOver ? 'lightblue' : 'lightgrey',
+    padding: grid,
+    width: 250
+});
+
 export default class Forms extends Component {
   constructor(props) {
     super(props);
@@ -72,6 +123,7 @@ export default class Forms extends Component {
       loading: true,
       forms: [],
       attributes: [],
+      attributes_selected: [],
       fields: fields,
       order: order,
       customForm: null,
@@ -79,6 +131,11 @@ export default class Forms extends Component {
       perPage: perPage,
       pageNum: 1,
       menuDelete: false
+    };
+
+    this.id2List = {
+        droppable: 'attributes',
+        droppable2: 'attributes_selected',
     };
 
     this.formServerItems = t.struct({
@@ -100,6 +157,45 @@ export default class Forms extends Component {
     this.onTypeSearch = this.onTypeSearch.bind(this);
     this.handlePageNumChange = this.handlePageNumChange.bind(this);
   }
+
+  getList = id => this.state[this.id2List[id]];
+
+  onDragEnd = result => {
+      const { source, destination } = result;
+
+      // dropped outside the list
+      if (!destination) {
+          return;
+      }
+
+      if (source.droppableId === destination.droppableId) {
+          const attributes = reorder(
+              this.getList(source.droppableId),
+              source.index,
+              destination.index
+          );
+
+          let state = { attributes };
+
+          if (source.droppableId === 'droppable2') {
+              state = { attributes_selected: attributes };
+          }
+
+          this.setState(state);
+      } else {
+          const result = move(
+              this.getList(source.droppableId),
+              this.getList(destination.droppableId),
+              source,
+              destination
+          );
+
+          this.setState({
+              attributes: result.droppable,
+              attributes_selected: result.droppable2
+          });
+      }
+  };
 
   handleClickDelete = () => {
     this.setState({ menuDelete: true });
@@ -171,7 +267,7 @@ export default class Forms extends Component {
   _loadData = async () => {
     this.setState({ loading: true });
     let forms = [];
-    let attributes = [];
+    let attributes = [], attributes_selected = [];
     let fields = {};
 
     try {
@@ -186,7 +282,7 @@ export default class Forms extends Component {
     } catch (e) {
       notify_error(e, 'Unable to load forms.');
     }
-    this.setState({ forms, attributes, fields, loading: false });
+    this.setState({ forms, attributes, attributes_selected, fields, loading: false });
   };
 
   _deleteForm = async id => {
@@ -293,16 +389,72 @@ export default class Forms extends Component {
                   value={this.state.addFormForm}
                 />
 
-                {Object.keys(this.state.fields).map(f => {
-                  let field = this.state.fields[f];
-                  return (
-                    <li key={f} style={{ marginLeft: 25 }}>
-                      {field.label + (field.required ? ' *' : '')} :{' '}
-                      {this.inputTypeToReadable(field.type)}{' '}
-                      <Icon icon={faTimesCircle} color="red" />
-                    </li>
-                  );
-                })}
+                <div style={{display: 'flex', flexDirection: 'row'}}>
+                  <DragDropContext onDragEnd={this.onDragEnd}>
+                      <Droppable droppableId="droppable">
+                          {(provided, snapshot) => (
+                              <div
+                                  ref={provided.innerRef}
+                                  style={getListStyle(snapshot.isDraggingOver)}>
+                                  {this.state.attributes.map((item, index) => (
+                                      <Draggable
+                                          key={item.id}
+                                          draggableId={item.id}
+                                          index={index}>
+                                          {(provided, snapshot) => (
+                                              <div
+                                                  ref={provided.innerRef}
+                                                  {...provided.draggableProps}
+                                                  {...provided.dragHandleProps}
+                                                  style={getItemStyle(
+                                                      snapshot.isDragging,
+                                                      provided.draggableProps.style
+                                                  )}>
+                                                  {item.label + (item.required ? ' *' : '')} :{' '}
+                                                  {this.inputTypeToReadable(item.type)}{' '}
+                                              </div>
+                                          )}
+                                      </Draggable>
+                                  ))}
+                                  {provided.placeholder}
+                              </div>
+                          )}
+                      </Droppable>
+                      &nbsp;
+                      Drag to assign
+                      &nbsp;
+                      <Droppable droppableId="droppable2">
+                          {(provided, snapshot) => (
+                              <div
+                                  ref={provided.innerRef}
+                                  style={getListStyle(snapshot.isDraggingOver)}>
+                                  {this.state.attributes_selected.map((item, index) => (
+                                      <Draggable
+                                          key={item.id}
+                                          draggableId={item.id}
+                                          index={index}>
+                                          {(provided, snapshot) => (
+                                              <div
+                                                  ref={provided.innerRef}
+                                                  {...provided.draggableProps}
+                                                  {...provided.dragHandleProps}
+                                                  style={getItemStyle(
+                                                      snapshot.isDragging,
+                                                      provided.draggableProps.style
+                                                  )}>
+                                                  {item.label + (item.required ? ' *' : '')} :{' '}
+                                                  {this.inputTypeToReadable(item.type)}{' '}
+                                                  <Checkbox value="ack" color="primary" /> Readonly
+                                              </div>
+                                          )}
+                                      </Draggable>
+                                  ))}
+                                  {provided.placeholder}
+                              </div>
+                          )}
+                      </Droppable>
+                  </DragDropContext>
+                </div>
 
                 <button
                   style={{ margin: 25 }}

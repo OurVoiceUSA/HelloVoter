@@ -300,6 +300,10 @@ export async function _loadAttributes(refer) {
     notify_error(e, 'Unable to load attribute data.');
   }
 
+  attributes.forEach(a => {
+    if (!a.label) a.label = a.name;
+  });
+
   return attributes;
 }
 export async function _loadAddressData(refer, lng, lat, formId) {
