@@ -117,7 +117,7 @@ PODS:
   - React-RCTWebSocket (0.60.4):
     - React-Core (= 0.60.4)
     - React-fishhook (= 0.60.4)
-  - RNCAsyncStorage (1.5.1):
+  - RNCAsyncStorage (1.6.1):
     - React
   - RNGestureHandler (1.3.0):
     - React
@@ -254,7 +254,7 @@ SPEC CHECKSUMS:
   React-RCTText: e0f224898b13af9aa036ea7cb3d438daa68c1044
   React-RCTVibration: 0bea40cd51bd089bd591a8f74c86e91fdf2666c5
   React-RCTWebSocket: 163873f4cdd5f1058a9483443404fc3801581cb6
-  RNCAsyncStorage: 2808c378f6a70f22f66eeb6c11a8d69f326dd795
+  RNCAsyncStorage: 621bad7a889b5bf1583a52547f2dcd3a4d1ff15e
   RNGestureHandler: 5329a942fce3d41c68b84c2c2276ce06a696d8b0
   yoga: c2c050f6ae6e222534760cc82f559b89214b67e2
 
