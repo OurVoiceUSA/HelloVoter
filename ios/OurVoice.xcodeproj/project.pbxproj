@@ -19,7 +19,6 @@
 		1D8B23D2213E414AB1D0DE2D /* FontAwesome5_Solid.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7019FDBBCCD643818B293C69 /* FontAwesome5_Solid.ttf */; };
 		2F83BAA4C1D643AEB2E8DE2D /* libRNRate.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 69F7364A23974AA59264A127 /* libRNRate.a */; };
 		45019A96AD55434B81639A9D /* libSafariViewManager.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F6BA522A20694F19A864E2F0 /* libSafariViewManager.a */; };
-		57D3698422DAA0F000B9AB4E /* libRNGestureHandler.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 57D3697B22DAA09E00B9AB4E /* libRNGestureHandler.a */; };
 		5FAECC9BAB414169A38450F7 /* Octicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 54D94ECDDE93486F873FCA33 /* Octicons.ttf */; };
 		71629C073CD141AFA4656DED /* MaterialIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A02F4B8605B84BB390C28371 /* MaterialIcons.ttf */; };
 		7997AEEADC8447568CA790DC /* Zocial.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 4FDE70F5ED554D4F8192C6AA /* Zocial.ttf */; };
@@ -503,7 +502,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				57D3698422DAA0F000B9AB4E /* libRNGestureHandler.a in Frameworks */,
 				9B05DC4B20030F0C007E8B8C /* libReactNativePermissions.a in Frameworks */,
 				45019A96AD55434B81639A9D /* libSafariViewManager.a in Frameworks */,
 				BC868042C1C04F938F3E8265 /* libRNDeviceInfo.a in Frameworks */,
