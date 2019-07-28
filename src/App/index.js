@@ -7,6 +7,7 @@ import {
 } from 'react-native';
 
 YellowBox.ignoreWarnings([
+  'animateCamera',
   'Warning: isMounted(...) is deprecated',
   'componentWillReceiveProps is deprecated',
   'componentWillMount is deprecated',
