@@ -8,6 +8,8 @@ import {
 
 YellowBox.ignoreWarnings([
   'Warning: isMounted(...) is deprecated',
+  'componentWillReceiveProps is deprecated',
+  'componentWillMount is deprecated',
   'Module RCTImageLoader',
   'The StackNavigator function',
   'Class RCTCxxModule was not exported',
