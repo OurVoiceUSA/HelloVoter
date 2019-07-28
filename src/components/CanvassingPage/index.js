@@ -487,14 +487,17 @@ export default class App extends OVComponent {
     try {
       let https = true;
       if (this.state.server.match(/:8080/)) https = false;
-      let res = await fetch(
-        'http'+(https?'s':'')+'://'+this.state.server+API_BASE_URI+'/people/get/byposition?formId='+this.state.form.id+
-        '&longitude='+pos.longitude+'&latitude='+pos.latitude+
-        '&limit='+(canvassSettings.limit?canvassSettings.limit:100)+
-        (canvassSettings.filter_visited?'&filter_visited=home':'')+
-        (canvassSettings.filter_pins&&canvassSettings.filter_key?'&filter_key='+canvassSettings.filter_key+'&filter_val='+canvassSettings.filter_val:''),
-      {
-        method: 'GET',
+      let res = await fetch('http'+(https?'s':'')+'://'+this.state.server+API_BASE_URI+'/people/get/byposition', {
+        method: 'POST',
+        body: JSON.stringify({
+          formId: this.state.form.id,
+          longitude: pos.longitude,
+          latitude: pos.latitude,
+          limit: (canvassSettings.limit?canvassSettings.limit:100),
+          filter_visited: (canvassSettings.filter_visited?'home':undefined),
+          filter_key: (canvassSettings.filter_pins&&canvassSettings.filter_key?canvassSettings.filter_key:undefined),
+          filter_val: (canvassSettings.filter_val:undefined),
+        }),
         headers: {
           'Authorization': 'Bearer '+await _getApiToken(),
           'Content-Type': 'application/json',
