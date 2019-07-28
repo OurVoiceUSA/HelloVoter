@@ -195,9 +195,7 @@ async function visitsAndPeople(req, res) {
       with a, u
     optional match (person:Person)-[:RESIDENCE {current:true}]->(u) `;
 
-      if (req.query.filter_key) q += `
-        where ((u)<-[:RESIDENCE {current:true}]-(:Person)<-[:ATTRIBUTE_OF {current:true}]-(:PersonAttribute {value:{filter_val}})-[:ATTRIBUTE_TYPE]->(:Attribute {id:{filter_key}})
-        or (person)<-[:ATTRIBUTE_OF {current:true}]-(:PersonAttribute {value:{filter_val}})-[:ATTRIBUTE_TYPE]->(:Attribute {id:{filter_key}})) `;
+      if (req.query.filter_key) q += `where (u)<-[:RESIDENCE {current:true}]-(:Person)<-[:ATTRIBUTE_OF {current:true}]-(:PersonAttribute {value:{filter_val}})-[:ATTRIBUTE_TYPE]->(:Attribute {id:{filter_key}}) `;
 
       if (req.query.filter_visited) q += (req.query.filter_key?`and`:`where`)+` not (person)<-[:VISIT_PERSON]-(:Visit)-[:VISIT_FORM]->(:Form {id:{formId}}) `;
 
@@ -214,9 +212,7 @@ async function visitsAndPeople(req, res) {
     with a, collect(unit) as units
   optional match (person:Person)-[:RESIDENCE {current:true}]->(a) `;
 
-      if (req.query.filter_key) q += `
-        where ((a)<-[:RESIDENCE {current:true}]-(:Person)<-[:ATTRIBUTE_OF {current:true}]-(:PersonAttribute {value:{filter_val}})-[:ATTRIBUTE_TYPE]->(:Attribute {id:{filter_key}})
-        or (person)<-[:ATTRIBUTE_OF {current:true}]-(:PersonAttribute {value:{filter_val}})-[:ATTRIBUTE_TYPE]->(:Attribute {id:{filter_key}})) `;
+      if (req.query.filter_key) q += `where (a)<-[:RESIDENCE {current:true}]-(:Person)<-[:ATTRIBUTE_OF {current:true}]-(:PersonAttribute {value:{filter_val}})-[:ATTRIBUTE_TYPE]->(:Attribute {id:{filter_key}}) `;
 
       if (req.query.filter_visited) q += (req.query.filter_key?`and`:`where`)+` not (person)<-[:VISIT_PERSON]-(:Visit)-[:VISIT_FORM]->(:Form {id:{formId}}) `;
 
