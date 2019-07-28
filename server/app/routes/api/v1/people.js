@@ -157,8 +157,12 @@ async function visitsAndPeople(req, res) {
 
   // no value? no key
   if (!req.query.filter_val) req.query.filter_key = null;
+
+  // convert old single filter to multi-filter with single value
+  if (req.query.filter_key) req.query.filters = [{id: req.query.filter_key, val: req.query.filter_val}];
+
   // even if empty_addrs, a filter removes this
-  if (req.query.filter_key) empty_addrs = false;
+  if (req.query.filters) empty_addrs = false;
   // type convert value if needed
   switch (req.query.filter_val) {
     case "TRUE": req.query.filter_val = true; break;
@@ -206,9 +210,14 @@ async function visitsAndPeople(req, res) {
       with a, u
     optional match (person:Person)-[:RESIDENCE {current:true}]->(u) `;
 
-      if (req.query.filter_key) q += `where (u)<-[:RESIDENCE {current:true}]-(:Person)<-[:ATTRIBUTE_OF {current:true}]-(:PersonAttribute {value:{filter_val}})-[:ATTRIBUTE_TYPE]->(:Attribute {id:{filter_key}}) `;
+      if (req.query.filters)
+        q += `where `+req.query.filters.map((f, idx) => {
+          req.query['faid'+idx] = f.id;
+          req.query['faval'+idx] = f.val;
+          return `(u)<-[:RESIDENCE {current:true}]-(:Person)<-[:ATTRIBUTE_OF {current:true}]-(:PersonAttribute {value:{faval`+idx+`}})-[:ATTRIBUTE_TYPE]->(:Attribute {id:{faid`+idx+`}}) `;
+        }).join('and ');
 
-      if (req.query.filter_visited) q += (req.query.filter_key?`and`:`where`)+` not (person)<-[:VISIT_PERSON]-(:Visit)-[:VISIT_FORM]->(:Form {id:{formId}}) `;
+      if (req.query.filter_visited) q += (req.query.filters?`and`:`where`)+` not (person)<-[:VISIT_PERSON]-(:Visit)-[:VISIT_FORM]->(:Form {id:{formId}}) `;
 
       q += `optional match (attr:Attribute)<-[:ATTRIBUTE_TYPE]-(pattr:PersonAttribute)-[:ATTRIBUTE_OF {current:true}]->(person)
     with a, u, person, collect({id:attr.id, name:attr.name, value:pattr.value}) as attrs
@@ -223,9 +232,14 @@ async function visitsAndPeople(req, res) {
     with a, collect(unit) as units
   optional match (person:Person)-[:RESIDENCE {current:true}]->(a) `;
 
-      if (req.query.filter_key) q += `where (a)<-[:RESIDENCE {current:true}]-(:Person)<-[:ATTRIBUTE_OF {current:true}]-(:PersonAttribute {value:{filter_val}})-[:ATTRIBUTE_TYPE]->(:Attribute {id:{filter_key}}) `;
+      if (req.query.filters)
+        q += `where `+req.query.filters.map((f, idx) => {
+          req.query['faid'+idx] = f.id;
+          req.query['faval'+idx] = f.val;
+          return `(a)<-[:RESIDENCE {current:true}]-(:Person)<-[:ATTRIBUTE_OF {current:true}]-(:PersonAttribute {value:{faval`+idx+`}})-[:ATTRIBUTE_TYPE]->(:Attribute {id:{faid`+idx+`}}) `;
+        }).join('and ');
 
-      if (req.query.filter_visited) q += (req.query.filter_key?`and`:`where`)+` not (person)<-[:VISIT_PERSON]-(:Visit)-[:VISIT_FORM]->(:Form {id:{formId}}) `;
+      if (req.query.filter_visited) q += (req.query.filters?`and`:`where`)+` not (person)<-[:VISIT_PERSON]-(:Visit)-[:VISIT_FORM]->(:Form {id:{formId}}) `;
 
       q += `
   optional match (attr:Attribute)<-[:ATTRIBUTE_TYPE]-(pattr:PersonAttribute)-[:ATTRIBUTE_OF {current:true}]->(person)
