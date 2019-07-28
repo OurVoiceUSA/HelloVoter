@@ -13,7 +13,11 @@ async function stats_by_attr(req, aq) {
   let ref;
   if (aq) {
     ref = await req.db.query('match (aq:AttributeQuery {id:{id}})-[r:CONSTRAIN]->(at:Attribute) return at.id, r.not, r.op, r.value', {id: aq});
-    c = ref.data.map((attr, idx) => 'match (p)<-[:ATTRIBUTE_OF]-(pa'+idx+':PersonAttribute)-[:ATTRIBUTE_TYPE]->(:Attribute {id:"'+attr[0]+'"}) where '+(attr[1]?'NOT':'')+' pa'+idx+'.value '+attr[2]+' "'+attr[3]+'"').join(' ');
+    c = ref.data.map((attr, idx) => {
+      req.query['aid'+idx] = attr[0];
+      req.query['aval'+idx] = attr[3];
+      return 'match (p)<-[:ATTRIBUTE_OF]-(pa'+idx+':PersonAttribute)-[:ATTRIBUTE_TYPE]->(:Attribute {id:{aid'+idx+'}}) where '+(attr[1]?'NOT':'')+' pa'+idx+'.value '+attr[2]+' {aval'+idx+'}';
+    }).join(' ');
   }
   ref = await req.db.query(`
 match (p:Person)-[:RESIDENCE {current:true}]->()-[*0..1]-(a:Address)-[:WITHIN]->(t:Turf {id:{turfId}})
