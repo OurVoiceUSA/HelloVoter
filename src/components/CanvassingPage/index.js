@@ -426,13 +426,13 @@ export default class App extends OVComponent {
   }
 
   getLastVisitObj(place) {
-    if (!place.visits || place.visits.length === 0)
-      return {status:-1};
+    let latest = {status:-1,end:0};
 
-    let latest = {end:0};
+    if (!place.visits || place.visits.length === 0)
+      return latest;
 
     for (let i in place.visits) {
-      if (place.visits[i].end > latest.end) latest = place.visits[i];
+      if (place.visits[i].status !== 3 && place.visits[i].end > latest.end) latest = place.visits[i];
     }
 
     return latest;
