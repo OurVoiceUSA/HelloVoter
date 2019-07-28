@@ -8,6 +8,7 @@ import {
 
 YellowBox.ignoreWarnings([
   'animateCamera',
+  'RNCNetInfo - You are', // my fire, my one desire! (not)
   'Warning: isMounted(...) is deprecated',
   'componentWillReceiveProps is deprecated',
   'componentWillMount is deprecated',
