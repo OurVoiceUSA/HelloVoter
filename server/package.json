@@ -19,7 +19,7 @@
     "chai": "^4.2.0",
     "docker-cli-js": "^2.5.2",
     "keypair": "^1.0.1",
-    "mocha": "^6.1.4",
+    "mocha": "^6.2.0",
     "mocha-jenkins-reporter": "^0.4.1",
     "nodemon": "^1.19.1",
     "nyc": "^14.1.1",
@@ -46,7 +46,7 @@
     "express-jwt": "^5.3.1",
     "express-logging": "^1.1.1",
     "form-data": "^2.5.0",
-    "helmet": "^3.19.0",
+    "helmet": "^3.20.0",
     "jsonwebtoken": "^8.5.1",
     "jwt-decode": "^2.2.0",
     "logops": "^2.1.0",
@@ -54,8 +54,8 @@
     "node-fetch": "^2.6.0",
     "node-neo4j-bolt-adapter": "github:OurVoiceUSA/node-neo4j-bolt-adapter",
     "ourvoiceusa-sdk-js": "github:OurVoiceUSA/ourvoiceusa-sdk-js",
-    "papaparse": "^5.0.0",
-    "wkx": "^0.4.7"
+    "papaparse": "^5.0.1",
+    "wkx": "^0.4.8"
   },
   "optionalDependencies": {
     "jmx": "^0.7.0"
