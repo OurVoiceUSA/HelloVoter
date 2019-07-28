@@ -142,7 +142,7 @@ async function visitsAndPeople(req, res) {
   req.query.visit_status = [0,1,2,3];
 
   // TODO: set to false if the canvassing mode is avoid places we've been
-  let empty_addrs = true;
+  let empty_addrs = (req.query.filter_visited?false:true);
 
   // no value? no key
   if (!req.query.filter_val) req.query.filter_key = null;
