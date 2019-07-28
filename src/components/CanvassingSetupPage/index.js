@@ -447,6 +447,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
         // atempt to re-pull the form to see if it's changed
         try {
           let jwt = await storage.get('OV_JWT');
+          let https = true;
           if (json.server.match(/:8080/)) https = false;
           let res = await fetch('http'+(https?'s':'')+'://'+json.server+API_BASE_URI+'/form/get?formId='+json.id, {
             headers: {
