@@ -102,15 +102,30 @@ export default class App extends OVComponent {
   }
 
   checkLocationAccess() {
+    const { myPosition } = this.state;
     if (!this.state.locationAccess) {
-      Alert.alert('Location Access', 'To connect to a canvassing server, you must enable location access. Check your device settings.', [{text: 'OK'}], { cancelable: false });
+      Alert.alert('Location Access', 'Your device settings deny this app access to your location, please enable location access for this app in your device settings to continue.', [{text: 'OK'}], { cancelable: false });
+      return false;
+    }
+    if (!myPosition.longitude || !myPosition.latitude) {
+      Alert.alert('Location Services', 'Location Services is unavailable, please turn on Location Seervices in your device settings and restart this app to continue.');
       return false;
     }
     return true;
   }
 
+  navigate_canvassing(args) {
+    const { navigate } = this.props.navigation;
+
+    if (!this.checkLocationAccess()) return;
+
+    navigate('Canvassing', args);
+  }
+
   connectToGOTV = async() => {
     const { myPosition } = this.state;
+
+    if (!this.checkLocationAccess()) return;
 
     let state;
 
@@ -146,6 +161,8 @@ export default class App extends OVComponent {
 
   sayHello = async (server) => {
     const { myPosition } = this.state;
+
+    if (!this.checkLocationAccess()) return;
 
     let res = {};
     try {
@@ -278,7 +295,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
 
         // if there's more than one form in body.data.forms, don't navigate
         if (forms_server.length === 1) {
-          navigate('Canvassing', {server: server, form: forms_server[0], user: this.state.user, refer: this});
+          this.navigate_canvassing({server: server, form: forms_server[0], user: this.state.user, refer: this});
         }
         await this._loadForms();
         return {error: false, flag: true};
@@ -535,7 +552,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
                   if (json.backend === "server") {
                     // TODO: set loading state as this can take a few seconds
                     let ret = await this.sayHello(json.server);
-                    if (ret.status === 200) navigate('Canvassing', {server: json.server, form: json, user: user, refer: this});
+                    if (ret.status === 200) this.navigate_canvassing({server: json.server, form: json, user: user, refer: this});
                     else setTimeout(() => this.setState({SmLoginScreen: true}), 500);
                  } else {
                     navigate('LegacyCanvassing', {dbx: (json.backend === "dropbox" ? dbx : null), form: json, user: user});
