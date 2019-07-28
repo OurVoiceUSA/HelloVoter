@@ -176,8 +176,9 @@ async function visitsAndPeople(req, res) {
     with v, collect(t.id) as tt
   optional match (t:Turf)-[:ASSIGNED]->(v)
     with tt + collect(t.id) as turfIds
-  match (t:Turf) where t.id in turfIds
-    with t `;
+  call spatial.withinDistance("turf", {longitude: {longitude}, latitude: {latitude}}, {dist}) yield node
+    where node.id in turfIds
+    with node as t limit 4 `;
 
       // either target an address, or use the address index
       if (req.query.aId) q += `match (a:Address {id:{aId}}) `;
