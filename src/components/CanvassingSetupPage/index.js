@@ -49,7 +49,6 @@ export default class App extends OVComponent {
       SelectModeScreen: false,
       ConnectServerScreen: false,
       SmLoginScreen: false,
-      //server: (__DEV__?{server: wsbase.replace('https://','')}:null),
       server: null,
       serverLoading: false,
       myPosition: {latitude: null, longitude: null},
@@ -164,7 +163,10 @@ export default class App extends OVComponent {
         return res;
       }
 
-      res = await fetch('https://'+server+API_BASE_URI+'/hello', {
+      let https = true;
+      if (server.match(/:8080/)) https = false;
+
+      res = await fetch('http'+(https?'s':'')+'://'+server+API_BASE_URI+'/hello', {
         method: 'POST',
         headers: {
           'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
@@ -244,7 +246,10 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
 
         let jwt = await storage.get('OV_JWT');
         for (let i = 0; i < body.data.forms.length; i++) {
-          res = await fetch('https://'+server+API_BASE_URI+'/form/get?formId='+body.data.forms[i].id, {
+          let https = true;
+          if (server.match(/:8080/)) https = false;
+
+          res = await fetch('http'+(https?'s':'')+'://'+server+API_BASE_URI+'/form/get?formId='+body.data.forms[i].id, {
             headers: {
               'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
               'Content-Type': 'application/json',
@@ -425,7 +430,8 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
         // atempt to re-pull the form to see if it's changed
         try {
           let jwt = await storage.get('OV_JWT');
-          let res = await fetch('https://'+json.server+API_BASE_URI+'/form/get?formId='+json.id, {
+          if (server.match(/:8080/)) https = false;
+          let res = await fetch('http'+(https?'s':'')+'://'+json.server+API_BASE_URI+'/form/get?formId='+json.id, {
             headers: {
               'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
               'Content-Type': 'application/json',
@@ -798,6 +804,27 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
                     Join a large canvassing operation. Uses their server for data storage.
                   </Text>
                 </View>
+
+                {__DEV__?
+                <View>
+                  <View style={{margin: 5}}>
+                    <Icon.Button
+                      name="code"
+                      backgroundColor="#d7d7d7"
+                      color="#000000"
+                      onPress={() => this.connectToServer((Platform.OS === 'ios'?'localhost':'10.0.2.2')+':8080')}
+                      {...iconStyles}>
+                      Local Dev
+                    </Icon.Button>
+                  </View>
+
+                  <View style={{margin: 5, marginTop: 0}}>
+                    <Text style={{fontSize: 10, textAlign: 'justify'}}>
+                      Connect to your local development instance of HelloVoterHQ
+                    </Text>
+                  </View>
+                </View>
+                :''}
 
               </View>
 

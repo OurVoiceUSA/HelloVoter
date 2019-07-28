@@ -241,8 +241,10 @@ export default class App extends OVComponent {
     this.setState({fetchingHistory: true});
 
     try {
+      let https = true;
+      if (this.state.server.match(/:8080/)) https = false;
       let res = await fetch(
-        'https://'+this.state.server+API_BASE_URI+'/volunteer/visit/history?formId='+this.state.form.id,
+        'http'+(https?'s':'')+'://'+this.state.server+API_BASE_URI+'/volunteer/visit/history?formId='+this.state.form.id,
       {
         method: 'GET',
         headers: {
@@ -483,8 +485,10 @@ export default class App extends OVComponent {
     this.setState({fetching: true});
 
     try {
+      let https = true;
+      if (this.state.server.match(/:8080/)) https = false;
       let res = await fetch(
-        'https://'+this.state.server+API_BASE_URI+'/people/get/byposition?formId='+this.state.form.id+
+        'http'+(https?'s':'')+'://'+this.state.server+API_BASE_URI+'/people/get/byposition?formId='+this.state.form.id+
         '&longitude='+pos.longitude+'&latitude='+pos.latitude+
         '&limit='+(canvassSettings.limit?canvassSettings.limit:100)+
         (canvassSettings.filter_visited?'&filter_visited=home':'')+
@@ -595,7 +599,9 @@ export default class App extends OVComponent {
 
   sendData = async (uri, input) => {
     try {
-      let res = await fetch('https://'+this.state.server+API_BASE_URI+uri, {
+      let https = true;
+      if (this.state.server.match(/:8080/)) https = false;
+      let res = await fetch('http'+(https?'s':'')+'://'+this.state.server+API_BASE_URI+uri, {
         method: 'POST',
         headers: {
           'Authorization': 'Bearer '+await _getApiToken(),
