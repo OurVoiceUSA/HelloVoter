@@ -17,6 +17,17 @@ module.exports = Router({mergeParams: true})
 
   return visitsAndPeople(req, res);
 })
+.post('/people/get/byposition', async (req, res) => {
+  // hack the post to be like a get
+  req.query = req.body;
+
+  req.query.longitude = parseFloat(req.query.longitude);
+  req.query.latitude = parseFloat(req.query.latitude);
+
+  if (isNaN(req.query.longitude) || isNaN(req.query.latitude)) return _400(res, "Invalid value to parameters 'longitude' or 'latitude'.");
+
+  return visitsAndPeople(req, res);
+})
 .get('/people/get/byaddress', async (req, res) => {
   if (!req.query.aId) return _400(res, "Invalid value to parameter 'aId'.");
 
