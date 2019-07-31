@@ -45,19 +45,19 @@ var Form = t.form.Form;
 
 var formStreet = t.struct({
   'street': t.String,
-}); 
+});
 var formCity = t.struct({
   'city': t.String,
-}); 
+});
 var formState = t.struct({
   'state': t.String,
   'zip': t.String,
-}); 
-  
+});
+
 const formStyleRow = _.cloneDeep(t.form.Form.stylesheet);
 formStyleRow.fieldset = {
   flexDirection: 'row'
-};  
+};
 formStyleRow.formGroup.normal.flex = 1;
 formStyleRow.formGroup.error.flex = 1;
 
@@ -305,13 +305,13 @@ export default class App extends OVComponent {
       loading: true,
       isModalVisible: true,
     });
-  
+
     setTimeout(async () => {
       try {
         if (this.state.locationAccess === false) throw "location access denied";
-  
+
         let res = await _doGeocode(myPosition.longitude, myPosition.latitude);
-  
+
         if (!res.error) {
           let arr = res.address.split(", ");
           let country = arr[arr.length-1]; // unused
@@ -340,17 +340,17 @@ export default class App extends OVComponent {
 
   doConfirmAddress = async () => {
     const { myPosition, form, markers } = this.state;
-    
+
     let jsonStreet = this.refs.formStreet.getValue();
     let jsonCity = this.refs.formCity.getValue();
     let jsonState = this.refs.formState.getValue();
-    
+
     if (jsonStreet === null || jsonCity === null || jsonState === null) return;
 
     try {
       await this.map.animateToCoordinate(myPosition, 500)
     } catch (error) {}
-    
+
     let epoch = this.getEpoch();
     let fAddress = {
       street: jsonStreet.street.trim(),
@@ -404,7 +404,7 @@ export default class App extends OVComponent {
     }
 
     this.setState({ markers, fAddress, pAddress: fAddress, isModalVisible: false });
-    this.doMarkerPress(marker); 
+    this.doMarkerPress(marker);
   }
 
   doMarkerPress = (marker) => {
@@ -495,7 +495,7 @@ export default class App extends OVComponent {
           latitude: pos.latitude,
           limit: (canvassSettings.limit?canvassSettings.limit:100),
           filter_visited: (canvassSettings.filter_visited?'home':undefined),
-          filters: (canvassSettings.filter_pins&&canvassSettings.filter_key&&canvassSettings.filter_val?[{id:canvassSettings.filter_key,val:canvassSettings.filter_val}]:undefined),
+          filters: (canvassSettings.filter_pins&&canvassSettings.filters?canvassSettings.filters:undefined),
         }),
         headers: {
           'Authorization': 'Bearer '+await _getApiToken(),
@@ -571,7 +571,7 @@ export default class App extends OVComponent {
     this.updateLocalMarker(place, input);
 
     if (person.new) place.people.push(person);
-    
+
     this.sendData('/people/visit/'+(person.new?'add':'update'), input);
   }
 

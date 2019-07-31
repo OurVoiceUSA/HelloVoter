@@ -1,41 +1,21 @@
 import React, { PureComponent } from 'react';
+
 import {
-  ActivityIndicator,
-  Alert,
-  Dimensions,
-  TouchableHighlight,
-  TouchableWithoutFeedback,
-  TouchableOpacity,
-  Keyboard,
   Text,
   View,
   StyleSheet,
   ScrollView,
 } from 'react-native';
 
-import Icon from 'react-native-vector-icons/FontAwesome';
-import DeviceInfo from 'react-native-device-info';
-import Modal from 'react-native-simple-modal';
-import t from 'tcomb-form-native';
-
-var Form = t.form.Form;
-
-var options = {
-  fields: {
-    limit: {
-      label: 'Limit Addresses',
-      help: 'Numbers of addresses that load at a given time. The more that load at once, the slower the app will get.',
-    },
-    filter_visited: {
-      label: 'Hide already contacted',
-      help: 'Don\'t show people who have already been visisted by someone for this form.',
-    },
-    filter_pins: {
-      label: 'Filter Results by attribute value',
-      help: 'To help you further target your canvassing, enabling this will make the map only show addresses with people who match your selected criteria below.',
-    },
-  },
-};
+import {
+  SettingsDividerShort,
+  SettingsDividerLong,
+  SettingsCategoryHeader,
+  SettingsButton,
+  SettingsSwitch,
+  SettingsPicker,
+  SettingsTextLabel,
+} from "react-native-settings-components";
 
 export default class App extends PureComponent {
   constructor(props) {
@@ -46,133 +26,199 @@ export default class App extends PureComponent {
       form: props.form,
     };
 
-    // ensure the filter_key exists
-    if (this.state.refer.state.canvassSettings.filter_key && this.state.form.attributes.map((a) => a.id).indexOf(this.state.refer.state.canvassSettings.filter_key) === -1) {
-      delete this.state.refer.state.canvassSettings.filter_key;
-      delete this.state.refer.state.canvassSettings.filter_val;
-    }
-
-    this.onChange = this.onChange.bind(this);
   }
 
-  onChange(canvassSettings) {
+  changeSetting(name, value) {
     const { refer } = this.state;
-    // if the key changes, remove the filter_val to prevent tcomb from crashing
-    if (canvassSettings.filter_key !== refer.state.canvassSettings.filter_key) delete canvassSettings.filter_val;
+    let { canvassSettings } = refer.state;
+
+    canvassSettings[name] = value;
+
     refer.setState({canvassSettings});
     this.forceUpdate();
   }
 
-  valueToEnums(options) {
-    let obj = {};
-    for (let i in options)
-      obj[options[i].id] = options[i].label;
-    return t.enums(obj);
-  }
-
-  attrToValues(attr) {
-    let ret = {};
-    if (attr.values) {
-      attr.values.forEach((a) => ret[a] = a);
-    } else {
-      ret = {"TRUE": "TRUE", "FALSE": "FALSE"};
-    }
-    return t.enums(ret);
-  }
-
   render() {
-    const { form, refer, selectedAttribute } = this.state;
+    const { refer } = this.state;
 
-    let formOpt = {
-      'limit': t.enums({'100': '100', '250': '250', '500': '500'}),
-      'filter_visited': t.Boolean,
-      'filter_pins': t.Boolean,
-    };
+    let canAddFilter = false;
 
-    let attrs = [];
-
-    // selectable filter options are booleans and arrays
-    form.attributes.forEach(a => {
-      let value;
-      if (!a.label) a.label = a.name;
-      switch (a.type) {
-        case 'boolean': attrs.push(a); break;
-        case 'string': if (a.values) attrs.push(a); break;
-        default: break;
-      }
-      if (refer.state.canvassSettings.filter_key === a.id) this.setState({selectedAttribute: a});
-    });
-
-    if (refer.state.canvassSettings.filter_pins) {
-      if (attrs.length) {
-        formOpt.filter_key = this.valueToEnums(attrs);
-
-        if (selectedAttribute) {
-          formOpt.filter_val = this.attrToValues(selectedAttribute);
-        }
-      }
+    // if any of the filters don't have a value, don't show the add button
+    if (refer.state.canvassSettings.filters) {
+      canAddFilter = true;
+      refer.state.canvassSettings.filters.forEach(f => {
+        if (!f.value) canAddFilter = false;
+      });
     }
-
-    let mainForm = t.struct(formOpt);
 
     return (
-      <View style={{flex: 1, padding: 15, backgroundColor: 'white'}}>
+    <ScrollView style={{flex: 1, backgroundColor: colors.white}}>
 
-        <View style={{
-            width: Dimensions.get('window').width,
-            height: 1,
-            backgroundColor: 'lightgray',
-            margin: 10,
-          }}
-        />
+      <SettingsCategoryHeader
+        title={"Settings"}
+        textStyle={Platform.OS === "android" ? { color: colors.monza } : null}
+      />
 
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <Form
-           ref="mainForm"
-           type={mainForm}
-           options={options}
-           onChange={this.onChange}
-           value={refer.state.canvassSettings}
+      <SettingsDividerLong />
+
+      <SettingsPicker
+        title="Limit Addresses"
+        options={[
+          { label: "100", value: "100" },
+          { label: "250", value: "250" },
+          { label: "500", value: "500" },
+        ]}
+        onValueChange={limit => this.changeSetting('limit', limit)}
+        value={refer.state.canvassSettings.limit}
+        styleModalButtonsText={{ color: colors.monza }}
+      />
+
+      <SettingsTextLabel title={"Numbers of addresses that load at a given time. The more that load at once, the slower the app will get."} />
+
+      <SettingsDividerShort />
+
+      <SettingsSwitch
+        title={"Hide already contacted"}
+        onValueChange={filter_visited => this.changeSetting('filter_visited', filter_visited)}
+        value={refer.state.canvassSettings.filter_visited}
+        trackColor={{
+          true: colors.switchEnabled,
+          false: colors.switchDisabled,
+        }}
+      />
+
+      <SettingsTextLabel title={"Don't show people who have already been visisted by someone for this form."} />
+
+      <SettingsDividerShort />
+
+      <SettingsSwitch
+        title={"Filter Results by attribute value"}
+        onValueChange={filter_pins => this.changeSetting('filter_pins', filter_pins)}
+        value={refer.state.canvassSettings.filter_pins}
+        trackColor={{
+          true: colors.switchEnabled,
+          false: colors.switchDisabled,
+        }}
+      />
+
+      <SettingsTextLabel title={"To help you further target your canvassing, enabling this will make the map only show addresses with people who match your selected criteria below."} />
+
+      {refer.state.canvassSettings.filter_pins&&
+      <View>
+        <SettingsDividerShort />
+
+        <FilterSwitches
+          refer={this}
+          filters={refer.state.canvassSettings.filters}
+          attributes={this.state.form.attributes}
           />
-        </TouchableWithoutFeedback>
 
-        <View style={{
-            width: Dimensions.get('window').width,
-            height: 1,
-            backgroundColor: 'lightgray',
-            margin: 10,
-          }}
-        />
-
+        {canAddFilter&&
+        <SettingsButton title={"Add another filter"} onPress={() => {
+          this.changeSetting('filters', refer.state.canvassSettings.filters.concat([{id: '', name: '', value: ''}]));
+        }} />
+        }
       </View>
+      }
+
+    </ScrollView>
     );
   }
 }
 
-var styles = StyleSheet.create({
-  container: {
-    justifyContent: 'center',
-    padding: 20,
-    backgroundColor: '#ffffff',
-  },
-  title: {
-    fontSize: 30,
-    alignSelf: 'center',
-    marginBottom: 30
-  },
-  buttonText: {
-    fontSize: 18,
-    color: 'white',
-    alignSelf: 'center'
-  },
-  button: {
-    height: 36,
-    backgroundColor: '#48BBEC',
-    borderColor: '#48BBEC',
-    borderWidth: 1,
-    borderRadius: 8,
-    marginBottom: 10,
-    alignSelf: 'stretch',
-    justifyContent: 'center'
+function options_from_type(f) {
+  if (!f.id) return [];
+
+  switch (f.type) {
+    case "boolean": return [
+      { label: "TRUE", value: "TRUE" },
+      { label: "FALSE", value: "FALSE" },
+    ];
+    case "string": return f.values.map(v => {
+      return { label: v, value: v };
+    });
+    default: return [];
   }
-});
+}
+
+const FilterSwitches = props => {
+  let { attributes, filters, refer } = props;
+
+  // no filters? create a blank one
+  if (!filters) filters = [{id: '', name: '', value: ''}];
+
+  let key_options = attributes.filter(a => {
+
+    // only certain types of attributes can be filterd on
+    switch (a.type) {
+      case 'boolean': break;
+      case 'string': if (a.values) break; return false;
+      default: return false;
+    }
+
+    // now filter by whether or not it's already found in other filters
+    let found = false;
+    filters.forEach((f, idx)=> {
+      if (f.id === a.id && refer.state.selectedFilter !== idx) found = true;
+    });
+
+    return !found;
+  }).map(a => {
+    return { id: a.id, label: a.name, value: a.name };
+  });
+
+  return filters.map((filter, idx) => {
+
+    let value_options = options_from_type(filter);
+
+    return (
+    <View key={idx}>
+
+      <SettingsCategoryHeader
+        title={"Filter #"+(idx+1)}
+        textStyle={Platform.OS === "android" ? { color: colors.monza } : null}
+      />
+
+      <SettingsPicker
+        title={"Key"}
+        dialogDescription={"Select which attribute to filter on."}
+        options={key_options}
+        onPress={value => {
+          refer.setState({selectedFilter: idx})
+        }}
+        onValueChange={value => {
+          attributes.forEach(a => {
+            if (a.name === value) filters[idx] = a;
+          });
+          refer.changeSetting('filters', filters);
+        }}
+        value={filter.name}
+        styleModalButtonsText={{ color: colors.monza }}
+      />
+
+      <SettingsPicker
+        title={"Value"}
+        dialogDescription={"Select the value to match."}
+        options={value_options}
+        disabled={(value_options.length?false:true)}
+        onValueChange={value => {
+          filters[idx].value = value;
+          refer.changeSetting('filters', filters);
+        }}
+        value={filter.value}
+        styleModalButtonsText={{ color: colors.monza }}
+      />
+
+      <SettingsDividerShort />
+
+    </View>
+  )});
+}
+
+const colors = {
+  white: "#FFFFFF",
+  monza: "#C70039",
+  switchEnabled: "#C70039",
+  switchDisabled: "#efeff3",
+  blueGem: "#27139A",
+};

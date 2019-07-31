@@ -1,0 +1,42 @@
+--- a/node_modules/react-native-input-prompt/src/Prompt.js
++++ b/node_modules/react-native-input-prompt/src/Prompt.js
+@@ -79,6 +79,7 @@ export default class Prompt extends Component {
+ 						</Text>
+ 						<TextInput
+ 							placeholder={this.props.placeholder}
++                                                        defaultValue={this.props.value}
+ 							style={styles.textInput}
+ 							onChangeText={this._onChangeText.bind(this)}
+ 							onSubmitEditing={this._onSubmit.bind(this)}
+--- a/node_modules/react-native-input-prompt/src/styles.js
++++ b/node_modules/react-native-input-prompt/src/styles.js
+@@ -3,25 +3,22 @@ import { StyleSheet, Platform, Dimensions } from "react-native";
+ export default StyleSheet.create({
+ 	screenOverlay: {
+ 		height: Dimensions.get("window").height,
+-		backgroundColor: "black",
+-		opacity: 0.8
++		backgroundColor: "rgba(0, 0, 0, 0.8)",
+ 	},
+ 	dialogPrompt: {
+ 		...Platform.select({
+ 			ios: {
+-				opacity: 0.9,
+-				backgroundColor: "rgb(222,222,222)",
+-				borderRadius: 15
++				borderRadius: 15,
+ 			},
+ 			android: {
+ 				borderRadius: 5,
+-				backgroundColor: "white"
+ 			}
+ 		}),
++                opacity: 1,
++		backgroundColor: "white",
+ 		marginHorizontal: 20,
+ 		marginTop: 150,
+ 		padding: 10,
+-
+ 		flexDirection: "column",
+ 		justifyContent: "space-between",
+ 		alignItems: "center"
