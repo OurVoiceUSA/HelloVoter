@@ -131,8 +131,8 @@ function options_from_type(f) {
 
   switch (f.type) {
     case "boolean": return [
-      { label: "TRUE", value: "TRUE" },
-      { label: "FALSE", value: "FALSE" },
+      { label: "true", value: true },
+      { label: "false", value: false },
     ];
     case "string": return f.values.map(v => {
       return { label: v, value: v };
@@ -201,7 +201,11 @@ const FilterSwitches = props => {
         dialogDescription={"Select the value to match."}
         options={value_options}
         disabled={(value_options.length?false:true)}
+        multi={(filter.type==="boolean"?false:true)}
         onValueChange={value => {
+          // first one is null wtf?
+          if (value[0] === null) value.splice(0, 1);
+
           filters[idx].value = value;
           refer.changeSetting('filters', filters);
         }}
