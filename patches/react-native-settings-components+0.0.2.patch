@@ -137,13 +137,21 @@ index a504173..89c9f93 100644
      );
    }
 diff --git a/node_modules/react-native-settings-components/src/picker/picker.jsx b/node_modules/react-native-settings-components/src/picker/picker.js
-similarity index 97%
+similarity index 95%
 rename from node_modules/react-native-settings-components/src/picker/picker.jsx
 rename to node_modules/react-native-settings-components/src/picker/picker.js
-index b2fdd7d..626c697 100644
+index b2fdd7d..7532ed1 100644
 --- a/node_modules/react-native-settings-components/src/picker/picker.jsx
 +++ b/node_modules/react-native-settings-components/src/picker/picker.js
-@@ -61,6 +61,7 @@ class SettingsPicker extends Component {
+@@ -54,6 +54,7 @@ class SettingsPicker extends Component {
+     titleProps: PropTypes.object,
+     titleStyle: PropTypes.object,
+     title: PropTypes.string.isRequired,
++    title: PropTypes.string,
+     valueProps: PropTypes.object,
+     valueStyle: PropTypes.object,
+     value: PropTypes.any,
+@@ -61,6 +62,7 @@ class SettingsPicker extends Component {
      valuePlaceholder: PropTypes.string,
      options: PropTypes.array.isRequired,
      dialogDescription: PropTypes.string,
@@ -151,7 +159,7 @@ index b2fdd7d..626c697 100644
      onValueChange: PropTypes.func.isRequired,
      disabled: PropTypes.bool,
      modalStyle: PropTypes.shape({
-@@ -99,6 +100,7 @@ class SettingsPicker extends Component {
+@@ -99,6 +101,7 @@ class SettingsPicker extends Component {
      modalStyle: {},
      singleRadio: true,
      multi: false,
@@ -159,7 +167,7 @@ index b2fdd7d..626c697 100644
      renderCloseBtn: () => (
        <Text style={style.headerCloseBtnText}>
          {'CLOSE'}
-@@ -172,7 +174,7 @@ class SettingsPicker extends Component {
+@@ -172,16 +175,16 @@ class SettingsPicker extends Component {
        }
      } else if (value) {
        return value.toString();
@@ -168,16 +176,18 @@ index b2fdd7d..626c697 100644
      return valuePlaceholder;
    };
  
-@@ -181,7 +183,7 @@ class SettingsPicker extends Component {
+   render() {
+     const {
        disabled, dialogDescription,
-       containerProps, containerStyle, title, titleProps, titleStyle,
+-      containerProps, containerStyle, title, titleProps, titleStyle,
++      containerProps, containerStyle, title, titleProps, titleStyle, innerTitle,
        valueProps, valueStyle, disabledOverlayStyle, modalStyle,
 -      options,
 +      options, onPress,
        multi, renderCloseBtn, renderListItem,
      } = this.props;
      const { pickerOpen, pickerValue } = this.state;
-@@ -193,6 +195,7 @@ class SettingsPicker extends Component {
+@@ -193,13 +196,14 @@ class SettingsPicker extends Component {
              this.setState({
                pickerOpen: true,
              });
@@ -185,6 +195,14 @@ index b2fdd7d..626c697 100644
            }}
            >
              <PickerModal
+               closeModal={this.closeModal}
+               pickerOpen={pickerOpen}
+               pickerValue={pickerValue}
+-              title={title}
++              title={(innerTitle?innerTitle:title)}
+               options={options}
+               dialogDescription={dialogDescription}
+               modalStyle={modalStyle}
 diff --git a/node_modules/react-native-settings-components/src/picker/picker.modal.item.jsx b/node_modules/react-native-settings-components/src/picker/picker.modal.item.js
 similarity index 100%
 rename from node_modules/react-native-settings-components/src/picker/picker.modal.item.jsx

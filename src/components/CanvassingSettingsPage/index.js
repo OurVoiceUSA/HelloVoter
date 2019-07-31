@@ -198,7 +198,8 @@ const FilterSwitches = props => {
 
       <SettingsPicker
         title={"Value"}
-        dialogDescription={"Select the value to match."}
+        innerTitle={filter.name}
+        dialogDescription={(filter.type==="boolean"?"Select true or false.":"Select any values to match on.")}
         options={value_options}
         disabled={(value_options.length?false:true)}
         multi={(filter.type==="boolean"?false:true)}
