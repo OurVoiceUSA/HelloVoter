@@ -159,15 +159,25 @@ async function visitsAndPeople(req, res) {
   if (!req.query.filter_val) req.query.filter_key = null;
 
   // convert old single filter to multi-filter with single value
-  if (req.query.filter_key) req.query.filters = [{id: req.query.filter_key, val: req.query.filter_val}];
+  if (req.query.filter_key) req.query.filters = [{id: req.query.filter_key, value: req.query.filter_val}];
 
-  // even if empty_addrs, a filter removes this
-  if (req.query.filters) empty_addrs = false;
-  // type convert value if needed
-  switch (req.query.filter_val) {
-    case "TRUE": req.query.filter_val = true; break;
-    case "FALSE": req.query.filter_val = false; break;
-    default: break;
+  // filter out empty filter values
+  if (req.query.filters) {
+    req.query.filters = req.query.filters.filter(f => f.value);
+  }
+
+  if (req.query.filters) {
+    // even if empty_addrs, a filter removes this
+    empty_addrs = false;
+
+    // type convert value if needed
+    req.query.filters.forEach(f => {
+      switch (f.value) {
+        case "TRUE": f.value = true; break;
+        case "FALSE": f.value = false; break;
+        default: break;
+      }
+    });
   }
 
 /*
@@ -213,7 +223,7 @@ async function visitsAndPeople(req, res) {
       if (req.query.filters)
         q += `where `+req.query.filters.map((f, idx) => {
           req.query['faid'+idx] = f.id;
-          req.query['faval'+idx] = f.val;
+          req.query['faval'+idx] = f.value;
           return `(u)<-[:RESIDENCE {current:true}]-(:Person)<-[:ATTRIBUTE_OF {current:true}]-(:PersonAttribute {value:{faval`+idx+`}})-[:ATTRIBUTE_TYPE]->(:Attribute {id:{faid`+idx+`}}) `;
         }).join('and ');
 
@@ -235,7 +245,7 @@ async function visitsAndPeople(req, res) {
       if (req.query.filters)
         q += `where `+req.query.filters.map((f, idx) => {
           req.query['faid'+idx] = f.id;
-          req.query['faval'+idx] = f.val;
+          req.query['faval'+idx] = f.value;
           return `(a)<-[:RESIDENCE {current:true}]-(:Person)<-[:ATTRIBUTE_OF {current:true}]-(:PersonAttribute {value:{faval`+idx+`}})-[:ATTRIBUTE_TYPE]->(:Attribute {id:{faid`+idx+`}}) `;
         }).join('and ');
 
