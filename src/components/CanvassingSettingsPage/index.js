@@ -44,7 +44,7 @@ export default class App extends PureComponent {
     let canAddFilter = false;
 
     // if any of the filters don't have a value, don't show the add button
-    if (refer.state.canvassSettings.filters) {
+    if (refer.state.canvassSettings.filters && refer.state.canvassSettings.filters.length) {
       canAddFilter = true;
       refer.state.canvassSettings.filters.forEach(f => {
         if (!f.value) canAddFilter = false;
@@ -145,7 +145,7 @@ const FilterSwitches = props => {
   let { attributes, filters, refer } = props;
 
   // no filters? create a blank one
-  if (!filters) filters = [{id: '', name: '', value: ''}];
+  if (!filters || (filters && !filters.length)) filters = [{id: '', name: '', value: ''}];
 
   let key_options = attributes.filter(a => {
 
@@ -208,6 +208,13 @@ const FilterSwitches = props => {
         value={filter.value}
         styleModalButtonsText={{ color: colors.monza }}
       />
+
+      {idx!==0&&
+      <SettingsButton title={"Remove this filter"} onPress={() => {
+        filters.splice(idx, 1);
+        refer.changeSetting('filters', filters);
+      }} />
+      }
 
       <SettingsDividerShort />
 
