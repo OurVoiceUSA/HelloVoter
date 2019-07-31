@@ -161,23 +161,24 @@ async function visitsAndPeople(req, res) {
   // convert old single filter to multi-filter with single value
   if (req.query.filter_key) req.query.filters = [{id: req.query.filter_key, value: req.query.filter_val}];
 
+  // initialize empty filters if not defined so we can check length below
+  if (!req.query.filters) req.query.filters = [];
+
   // filter out empty filter values
-  if (req.query.filters) {
-    req.query.filters = req.query.filters.filter(f => f.value);
+  if (req.query.filters.length) {
+    req.query.filters = req.query.filters.filter(f => {
+      if (typeof f.value === "object" && f.value.length && f.value.indexOf(null) === -1) return true;
+      if (typeof f.value === "boolean") {
+        f.value = [f.value];
+        return true;
+      }
+      return false;
+    });
   }
 
-  if (req.query.filters) {
+  if (req.query.filters.length) {
     // even if empty_addrs, a filter removes this
     empty_addrs = false;
-
-    // type convert value if needed
-    req.query.filters.forEach(f => {
-      switch (f.value) {
-        case "TRUE": f.value = true; break;
-        case "FALSE": f.value = false; break;
-        default: break;
-      }
-    });
   }
 
 /*
@@ -220,14 +221,16 @@ async function visitsAndPeople(req, res) {
       with a, u
     optional match (person:Person)-[:RESIDENCE {current:true}]->(u) `;
 
-      if (req.query.filters)
+      if (req.query.filters.length)
         q += `where `+req.query.filters.map((f, idx) => {
           req.query['faid'+idx] = f.id;
-          req.query['faval'+idx] = f.value;
-          return `(u)<-[:RESIDENCE {current:true}]-(:Person)<-[:ATTRIBUTE_OF {current:true}]-(:PersonAttribute {value:{faval`+idx+`}})-[:ATTRIBUTE_TYPE]->(:Attribute {id:{faid`+idx+`}}) `;
+          return '('+f.value.map((v, vdx) => {
+            req.query['faval'+idx+''+vdx] = v;
+            return `(u)<-[:RESIDENCE {current:true}]-(:Person)<-[:ATTRIBUTE_OF {current:true}]-(:PersonAttribute {value:{faval`+idx+''+vdx+`}})-[:ATTRIBUTE_TYPE]->(:Attribute {id:{faid`+idx+`}}) `;
+          }).join('or ')+') ';
         }).join('and ');
 
-      if (req.query.filter_visited) q += (req.query.filters?`and`:`where`)+` not (person)<-[:VISIT_PERSON]-(:Visit)-[:VISIT_FORM]->(:Form {id:{formId}}) `;
+      if (req.query.filter_visited) q += (req.query.filters.length?`and`:`where`)+` not (person)<-[:VISIT_PERSON]-(:Visit)-[:VISIT_FORM]->(:Form {id:{formId}}) `;
 
       q += `optional match (attr:Attribute)<-[:ATTRIBUTE_TYPE]-(pattr:PersonAttribute)-[:ATTRIBUTE_OF {current:true}]->(person)
     with a, u, person, collect({id:attr.id, name:attr.name, value:pattr.value}) as attrs
@@ -242,14 +245,16 @@ async function visitsAndPeople(req, res) {
     with a, collect(unit) as units
   optional match (person:Person)-[:RESIDENCE {current:true}]->(a) `;
 
-      if (req.query.filters)
+      if (req.query.filters.length)
         q += `where `+req.query.filters.map((f, idx) => {
           req.query['faid'+idx] = f.id;
-          req.query['faval'+idx] = f.value;
-          return `(a)<-[:RESIDENCE {current:true}]-(:Person)<-[:ATTRIBUTE_OF {current:true}]-(:PersonAttribute {value:{faval`+idx+`}})-[:ATTRIBUTE_TYPE]->(:Attribute {id:{faid`+idx+`}}) `;
+          return '('+f.value.map((v, vdx) => {
+            req.query['faval'+idx+''+vdx] = v;
+            return `(a)<-[:RESIDENCE {current:true}]-(:Person)<-[:ATTRIBUTE_OF {current:true}]-(:PersonAttribute {value:{faval`+idx+''+vdx+`}})-[:ATTRIBUTE_TYPE]->(:Attribute {id:{faid`+idx+`}}) `;
+          }).join('or ')+') ';
         }).join('and ');
 
-      if (req.query.filter_visited) q += (req.query.filters?`and`:`where`)+` not (person)<-[:VISIT_PERSON]-(:Visit)-[:VISIT_FORM]->(:Form {id:{formId}}) `;
+      if (req.query.filter_visited) q += (req.query.filters.length?`and`:`where`)+` not (person)<-[:VISIT_PERSON]-(:Visit)-[:VISIT_FORM]->(:Form {id:{formId}}) `;
 
       q += `
   optional match (attr:Attribute)<-[:ATTRIBUTE_TYPE]-(pattr:PersonAttribute)-[:ATTRIBUTE_OF {current:true}]->(person)
