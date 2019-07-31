@@ -136,15 +136,11 @@ index a504173..89c9f93 100644
        </View>
      );
    }
-diff --git a/node_modules/react-native-settings-components/src/picker/.picker.js.swp b/node_modules/react-native-settings-components/src/picker/.picker.js.swp
-new file mode 100644
-index 0000000..824bf7f
-Binary files /dev/null and b/node_modules/react-native-settings-components/src/picker/.picker.js.swp differ
 diff --git a/node_modules/react-native-settings-components/src/picker/picker.jsx b/node_modules/react-native-settings-components/src/picker/picker.js
-similarity index 98%
+similarity index 97%
 rename from node_modules/react-native-settings-components/src/picker/picker.jsx
 rename to node_modules/react-native-settings-components/src/picker/picker.js
-index b2fdd7d..401ac2b 100644
+index b2fdd7d..626c697 100644
 --- a/node_modules/react-native-settings-components/src/picker/picker.jsx
 +++ b/node_modules/react-native-settings-components/src/picker/picker.js
 @@ -61,6 +61,7 @@ class SettingsPicker extends Component {
@@ -163,6 +159,15 @@ index b2fdd7d..401ac2b 100644
      renderCloseBtn: () => (
        <Text style={style.headerCloseBtnText}>
          {'CLOSE'}
+@@ -172,7 +174,7 @@ class SettingsPicker extends Component {
+       }
+     } else if (value) {
+       return value.toString();
+-    }
++    } else if (typeof value === 'boolean') return value.toString();
+     return valuePlaceholder;
+   };
+ 
 @@ -181,7 +183,7 @@ class SettingsPicker extends Component {
        disabled, dialogDescription,
        containerProps, containerStyle, title, titleProps, titleStyle,
