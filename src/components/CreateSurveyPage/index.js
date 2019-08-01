@@ -488,6 +488,7 @@ export default class App extends OVComponent {
           style={{ flex: 1, margin: 5, marginTop: 0 }}
           data={fields}
           order={order}
+          sortingEnabled={false}
           onReleaseRow={(key, order) => this.setState({order})}
           renderRow={row => {
             return (
