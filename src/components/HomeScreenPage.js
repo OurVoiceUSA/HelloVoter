@@ -45,8 +45,8 @@ export default class App extends PureComponent {
         onPress: () => this.setState({active: 'canvassing'}),
       },
       {
-        title: 'Coming soon; Phone Banking',
-        subtitle: 'Be kind to your feet and connect to voters from the comfort of your home.',
+        title: 'Coming soon; Desktop Tools',
+        subtitle: 'Canvassing at scale; import data, create turf, better volunteer management.',
         illustration: require('../../img/phone-banking.png'),
         onPress: () => this.openDonate(),
       },
@@ -221,4 +221,3 @@ export default class App extends PureComponent {
     );
   }
 }
-
