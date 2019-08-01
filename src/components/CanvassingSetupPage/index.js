@@ -159,28 +159,6 @@ export default class App extends OVComponent {
     this.setState({serverLoading: false, server: server});
   }
 
-  formGet = async (server, jwt, formId) => {
-    let https = true;
-    if (server.match(/:8080/)) https = false;
-
-    let res = await fetch('http'+(https?'s':'')+'://'+server+API_BASE_URI+'/form/get?formId='+formId, {
-      headers: {
-        'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
-        'Content-Type': 'application/json',
-      },
-    });
-
-    // don't store a form error
-    if (res.status === 403) return {error:true,error_403:true}
-    if (res.status !== 200) return {error:true};
-
-    let form = await res.json();
-    form.server = server;
-    form.backend = 'server';
-
-    return form;
-  }
-
   sayHello = async (server) => {
     const { myPosition } = this.state;
 
@@ -285,10 +263,22 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
 
         let jwt = await storage.get('OV_JWT');
         for (let i = 0; i < body.data.forms.length; i++) {
-          let form = await this.formGet(server, jwt, body.data.forms[i].id);
+          let https = true;
+          if (server.match(/:8080/)) https = false;
+
+          res = await fetch('http'+(https?'s':'')+'://'+server+API_BASE_URI+'/form/get?formId='+body.data.forms[i].id, {
+            headers: {
+              'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
+              'Content-Type': 'application/json',
+            },
+          });
 
           // don't store a form error
-          if (form.error) continue;
+          if (res.status !== 200) continue;
+
+          let form = await res.json();
+          form.server = server;
+          form.backend = 'server';
 
           forms_server.push(form);
 
@@ -457,15 +447,26 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
         // atempt to re-pull the form to see if it's changed
         try {
           let jwt = await storage.get('OV_JWT');
-          let json = await this.formGet(json.server, jwt, json.id);
+          let https = true;
+          if (json.server.match(/:8080/)) https = false;
+          let res = await fetch('http'+(https?'s':'')+'://'+json.server+API_BASE_URI+'/form/get?formId='+json.id, {
+            headers: {
+              'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
+              'Content-Type': 'application/json',
+            },
+          });
 
           // don't store a form error
-          if (!json.error) {
+          if (res.status === 200) {
+            let server = json.server;
+            json = await res.json();
+            json.server = server;
+            json.backend = 'server';
             forms_local[i] = json;
           }
 
           // user cannot see this form
-          if (json.error_403) {
+          if (res.status === 403) {
             json = {deleted:true};
             forms_local[i] = json;
           }
