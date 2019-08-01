@@ -89,6 +89,10 @@ PODS:
     - Google-Maps-iOS-Utils (= 2.1.0)
     - GoogleMaps (= 3.1.0)
     - React
+  - react-native-google-places (3.1.1):
+    - GoogleMaps (~> 3.1.0)
+    - GooglePlaces (~> 3.1.0)
+    - React
   - react-native-maps (0.25.0):
     - React
   - react-native-netinfo (4.1.3):
@@ -141,6 +145,7 @@ DEPENDENCIES:
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector`)
   - "react-native-geolocation (from `../node_modules/@react-native-community/geolocation`)"
   - react-native-google-maps (from `../node_modules/react-native-maps`)
+  - react-native-google-places (from `../node_modules/react-native-google-places`)
   - react-native-maps (from `../node_modules/react-native-maps`)
   - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
   - React-RCTActionSheet (from `../node_modules/react-native/Libraries/ActionSheetIOS`)
@@ -192,6 +197,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-community/geolocation"
   react-native-google-maps:
     :path: "../node_modules/react-native-maps"
+  react-native-google-places:
+    :path: "../node_modules/react-native-google-places"
   react-native-maps:
     :path: "../node_modules/react-native-maps"
   react-native-netinfo:
@@ -242,6 +249,7 @@ SPEC CHECKSUMS:
   React-jsinspector: 73f24a02fa684ed6a2b828ba116874a2191ded88
   react-native-geolocation: 79c743ad7a2e86617811ef23f49308824e92520c
   react-native-google-maps: 88d750ad441b19c24885f20d43a55ecac25939b5
+  react-native-google-places: a667a22f22eaefec7aee140d842b43a898fa5b86
   react-native-maps: 190c02ca533fddac5bb49cf17bdece3644612107
   react-native-netinfo: c8798d4becf1df39247d1625abc623ee65832c75
   React-RCTActionSheet: 9f71d7ae3e8fb10e08d162cbf14c621349dbfab3
@@ -258,6 +266,6 @@ SPEC CHECKSUMS:
   RNGestureHandler: 5329a942fce3d41c68b84c2c2276ce06a696d8b0
   yoga: c2c050f6ae6e222534760cc82f559b89214b67e2
 
-PODFILE CHECKSUM: d15a53950c95dd15d7f3e851f7ca9d3d40aaa0ed
+PODFILE CHECKSUM: 4fe71f08dc5a2b553e381f4a23b6ca3a2e6fec80
 
 COCOAPODS: 1.7.5
