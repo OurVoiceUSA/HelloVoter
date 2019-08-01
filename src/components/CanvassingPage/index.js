@@ -185,6 +185,8 @@ export default class App extends OVComponent {
   }
 
   _getCanvassSettings = async () => {
+    const { form } = this.state;
+
     let canvassSettings = {};
     try {
       const value = await storage.get(this.state.settingsStorageKey);
@@ -196,7 +198,12 @@ export default class App extends OVComponent {
       return;
     }
 
+    // set some defaults
     if (!canvassSettings.limit) canvassSettings.limit = '100';
+    if (form.default_filters && !canvassSettings.filters) {
+      canvassSettings.filter_pins = true;
+      canvassSettings.filters = deepCopy(form.default_filters);
+    }
 
     this.setState({ canvassSettings });
   }
