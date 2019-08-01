@@ -35,9 +35,7 @@ module.exports = Router({mergeParams: true})
     }
     // add the user's turfs to this form
     let c = await req.db.query('match (t:Turf) where t.id in {turfIds} return t.geometry', {turfIds: idFromArrObj(ass.turfs)});
-    form.turfs = c.data.map(t => JSON.parse(t));
-    if (req.user.autoturf && req.user.location)
-      form.turfs.push(circleToPolygon([req.user.location.x,req.user.location.y],1000));
+    form.turfs = c.data.map(t => JSON.parse(t));    
   } catch (e) {
     return _500(res, e);
   }
