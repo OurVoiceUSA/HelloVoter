@@ -17,7 +17,7 @@
   "devDependencies": {
     "@babel/register": "^7.5.5",
     "chai": "^4.2.0",
-    "docker-cli-js": "^2.5.2",
+    "docker-cli-js": "^2.5.3",
     "keypair": "^1.0.1",
     "mocha": "^6.2.0",
     "mocha-jenkins-reporter": "^0.4.1",
