@@ -842,7 +842,10 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
                     </Text>
                   </View>
                 </View>
-                :''}
+                :
+                <View>
+                </View>
+                }
 
               </View>
 
