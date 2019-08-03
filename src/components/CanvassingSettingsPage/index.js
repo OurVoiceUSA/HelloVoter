@@ -54,10 +54,7 @@ export default class App extends PureComponent {
     return (
     <ScrollView style={{flex: 1, backgroundColor: colors.white}}>
 
-      <SettingsCategoryHeader
-        title={"Settings"}
-        textStyle={Platform.OS === "android" ? { color: colors.monza } : null}
-      />
+      <SettingsCategoryHeader title={"Settings"} />
 
       <SettingsDividerLong />
 
@@ -176,7 +173,7 @@ const FilterSwitches = props => {
 
       <SettingsCategoryHeader
         title={"Filter #"+(idx+1)}
-        textStyle={Platform.OS === "android" ? { color: colors.monza } : null}
+        textStyle={{ color: colors.monza }}
       />
 
       <SettingsPicker
