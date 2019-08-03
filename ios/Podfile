@@ -48,6 +48,8 @@ target 'OurVoice' do
 
   pod 'RNGestureHandler', :path => '../node_modules/react-native-gesture-handler'
 
+  pod 'react-native-camera', :path => '../node_modules/react-native-camera'
+
   post_install do |installer|
     installer.pods_project.targets.each do |target|
       if target.name == 'react-native-google-maps'
