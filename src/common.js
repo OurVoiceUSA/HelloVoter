@@ -249,7 +249,7 @@ export async function _getJWT(remote) {
         _rmJWT();
         jwt = null;
       } else {
-        dinfo_resp = JSON.parse(res._bodyInit);
+        dinfo_resp = await res.json();
       }
     } catch (error) {
       console.warn(error);
