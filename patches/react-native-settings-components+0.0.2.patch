@@ -141,10 +141,10 @@ index a504173..a3acaf3 100644
      );
    }
 diff --git a/node_modules/react-native-settings-components/src/picker/picker.jsx b/node_modules/react-native-settings-components/src/picker/picker.js
-similarity index 95%
+similarity index 91%
 rename from node_modules/react-native-settings-components/src/picker/picker.jsx
 rename to node_modules/react-native-settings-components/src/picker/picker.js
-index b2fdd7d..7532ed1 100644
+index b2fdd7d..5bf5e8f 100644
 --- a/node_modules/react-native-settings-components/src/picker/picker.jsx
 +++ b/node_modules/react-native-settings-components/src/picker/picker.js
 @@ -54,6 +54,7 @@ class SettingsPicker extends Component {
@@ -155,28 +155,36 @@ index b2fdd7d..7532ed1 100644
      valueProps: PropTypes.object,
      valueStyle: PropTypes.object,
      value: PropTypes.any,
-@@ -61,6 +62,7 @@ class SettingsPicker extends Component {
+@@ -61,6 +62,8 @@ class SettingsPicker extends Component {
      valuePlaceholder: PropTypes.string,
      options: PropTypes.array.isRequired,
      dialogDescription: PropTypes.string,
 +    onPress: PropTypes.func,
++    onPressOverride: PropTypes.bool,
      onValueChange: PropTypes.func.isRequired,
      disabled: PropTypes.bool,
      modalStyle: PropTypes.shape({
-@@ -99,6 +101,7 @@ class SettingsPicker extends Component {
+@@ -99,6 +102,8 @@ class SettingsPicker extends Component {
      modalStyle: {},
      singleRadio: true,
      multi: false,
 +    onPress: () => {},
++    onPressOverride: false,
      renderCloseBtn: () => (
        <Text style={style.headerCloseBtnText}>
          {'CLOSE'}
-@@ -172,16 +175,16 @@ class SettingsPicker extends Component {
+@@ -168,20 +173,19 @@ class SettingsPicker extends Component {
+     }
+     if (multi) {
+       if (isArray(value) && value.length) {
+-        return trim(join(value, ', '));
++        return join(value.sort(), '\n');
        }
-     } else if (value) {
-       return value.toString();
+-    } else if (value) {
+-      return value.toString();
 -    }
 +    } else if (typeof value === 'boolean') return value.toString();
++    else if (value) return value.toString().split(', ').join('\n');
      return valuePlaceholder;
    };
  
@@ -187,14 +195,18 @@ index b2fdd7d..7532ed1 100644
 +      containerProps, containerStyle, title, titleProps, titleStyle, innerTitle,
        valueProps, valueStyle, disabledOverlayStyle, modalStyle,
 -      options,
-+      options, onPress,
++      options, onPress, onPressOverride,
        multi, renderCloseBtn, renderListItem,
      } = this.props;
      const { pickerOpen, pickerValue } = this.state;
-@@ -193,13 +196,14 @@ class SettingsPicker extends Component {
-             this.setState({
-               pickerOpen: true,
-             });
+@@ -190,16 +194,15 @@ class SettingsPicker extends Component {
+       <View style={{ width: '100%' }}>
+         {(!disabled) ? (
+           <TouchableOpacity onPress={() => {
+-            this.setState({
+-              pickerOpen: true,
+-            });
++            if (!onPressOverride) this.setState({pickerOpen: true});
 +            onPress();
            }}
            >
