@@ -15,10 +15,10 @@ similarity index 100%
 rename from node_modules/react-native-settings-components/src/divider/divider-short.jsx
 rename to node_modules/react-native-settings-components/src/divider/divider-short.js
 diff --git a/node_modules/react-native-settings-components/src/edit-text/edit-text.jsx b/node_modules/react-native-settings-components/src/edit-text/edit-text.js
-similarity index 87%
+similarity index 83%
 rename from node_modules/react-native-settings-components/src/edit-text/edit-text.jsx
 rename to node_modules/react-native-settings-components/src/edit-text/edit-text.js
-index a504173..89c9f93 100644
+index a504173..a3acaf3 100644
 --- a/node_modules/react-native-settings-components/src/edit-text/edit-text.jsx
 +++ b/node_modules/react-native-settings-components/src/edit-text/edit-text.js
 @@ -8,7 +8,7 @@ import {
@@ -38,7 +38,7 @@ index a504173..89c9f93 100644
    static propTypes = {
      containerProps: PropTypes.object,
      containerStyle: PropTypes.object,
-@@ -138,37 +139,25 @@ class SettingsEditText extends Component {
+@@ -138,60 +139,31 @@ class SettingsEditText extends Component {
      touchableProps: {},
    };
  
@@ -80,19 +80,23 @@ index a504173..89c9f93 100644
        iosDialogInputType, value,
      } = this.props;
 -    if (Platform.OS === 'ios') {
-+this.setState({visible: true});
-+/*
-       AlertIOS.prompt(
-         title,
-         dialogDescription,
-@@ -182,16 +171,14 @@ class SettingsEditText extends Component {
-         iosDialogInputType,
-         (value) || '',
-       );
+-      AlertIOS.prompt(
+-        title,
+-        dialogDescription,
+-        [
+-          { text: negativeButtonTitle, onPress: () => {}, style: 'cancel' },
+-          {
+-            text: positiveButtonTitle,
+-            onPress: this.onValueChange,
+-          },
+-        ],
+-        iosDialogInputType,
+-        (value) || '',
+-      );
 -    } else {
 -      this.renderAndroidDialog();
 -    }
-+*/
++    this.setState({visible: true});
    };
  
    render() {
@@ -105,7 +109,7 @@ index a504173..89c9f93 100644
      } = this.props;
  
      return (!disabled) ? (
-@@ -215,6 +202,22 @@ class SettingsEditText extends Component {
+@@ -215,6 +187,22 @@ class SettingsEditText extends Component {
              {(value) || valuePlaceholder}
            </Text>
          </View>
@@ -128,7 +132,7 @@ index a504173..89c9f93 100644
        </TouchableOpacity>
      ) : (
        <View {...containerProps} style={[style.defaultContainerStyle, containerStyle]}>
-@@ -233,6 +236,7 @@ class SettingsEditText extends Component {
+@@ -233,6 +221,7 @@ class SettingsEditText extends Component {
            {(isFunction(valueFormat) ? valueFormat(value) : value) || valuePlaceholder}
          </Text>
          <View style={[style.defaultDisabledOverlayStyle, disabledOverlayStyle]} />
