@@ -19,24 +19,44 @@ import { BottomNavigation } from 'react-native-material-ui';
 import DeviceInfo from 'react-native-device-info';
 import Permissions from 'react-native-permissions';
 import RNGooglePlaces from 'react-native-google-places';
-import ModalPicker from 'react-native-modal-selector';
 import Modal from 'react-native-simple-modal';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import storage from 'react-native-storage-wrapper';
 import SmLoginPage from '../SmLoginPage';
 import { Dropbox } from 'dropbox';
 import { google_api_key } from '../../config';
-import { Divider, _getJWT, _loginPing, _rmJWT, _saveUser, _rmUser, _apiCall, _specificAddress } from '../../common';
+import { _getJWT, _loginPing, _rmJWT, _saveUser, _rmUser, _apiCall, _specificAddress } from '../../common';
+
+import {
+  SettingsDividerShort,
+  SettingsDividerLong,
+  SettingsCategoryHeader,
+  SettingsButton,
+  SettingsSwitch,
+  SettingsPicker,
+  SettingsTextLabel,
+} from 'react-native-settings-components';
 
 const party_data = [
-  { key: 0, label: 'Party Affiliation', section: true },
-  { key: 'D', label: 'Democrat' },
-  { key: 'R', label: 'Republican' },
-  { key: 'I', label: 'Independent' },
-  { key: 'G', label: 'Green' },
-  { key: 'L', label: 'Libertarian' },
-  { key: 'O', label: 'Other' },
+  { key: 'I', label: 'No Party Preference', value: 'No Party Preference' },
+  { key: 'D', label: 'Democrat', value: 'Democrat' },
+  { key: 'R', label: 'Republican', value: 'Republican' },
+  { key: 'G', label: 'Green', value: 'Green' },
+  { key: 'L', label: 'Libertarian', value: 'Libertarian' },
+  { key: 'O', label: 'Other', value: 'Other' },
 ];
+
+function _partyName(party) {
+  let p = party_data.filter(d => party === d.key);
+  if (p[0] && p[0].key) return p[0].value;
+  return '';
+}
+
+function _partyKey(name) {
+  let p = party_data.filter(d => name === d.value);
+  if (p[0] && p[0].value) return p[0].key;
+  return '';
+}
 
 export default class App extends PureComponent {
 
@@ -110,13 +130,6 @@ export default class App extends PureComponent {
     this.setState({profileUpdate: false});
   }
 
-  _partyName(party) {
-    for (let i = 0; i < party_data.length; i++) {
-      if (party_data[i].key == party) return party_data[i].label;
-    }
-    return '';
-  }
-
   componentDidMount() {
     this.checkPermissionLocation();
     this.checkPermissionNotification();
@@ -159,7 +172,6 @@ export default class App extends PureComponent {
     Alert.alert('Logged Out', 'Your login session has expired. Please login again to update your profile.', [{text: 'OK'}], { cancelable: false });
   }
 
-  openVote = () => this.openURL('https://www.eac.gov/voters/register-and-vote-in-your-state/');
   openGitHub = (repo) => this.openURL('https://github.com/OurVoiceUSA/'+(repo?repo:''));
 
   openURL = (url) => {
@@ -182,6 +194,10 @@ export default class App extends PureComponent {
     return (
     <View style={{flex: 1}}>
       <ScrollView style={{flex: 1, backgroundColor: 'white'}} contentContainerStyle={{flexGrow:1}}>
+
+      <SettingsCategoryHeader title={"Personal Settings"} />
+
+      <SettingsDividerLong />
 
         <View style={{flexDirection: 'row', margin: 20, marginBottom: 10}}>
           <View style={{flex: 1}}>
@@ -239,158 +255,75 @@ export default class App extends PureComponent {
           </View>
         </View>
         ||
-        <View style={{flexDirection: 'row', margin: 20, marginTop: 0, marginBottom: 10}}>
-          <Text>
-            For the best user experience, login with a social media account.
-            However, it is not required for most app functions.
-          </Text>
-        </View>
+        <SettingsTextLabel title={"For the best user experience, login with a social media account. However, it is not required for most app functions."} />
         }
 
-        <Divider />
+        <SettingsDividerShort />
 
-        <View style={{flexDirection: 'row', margin: 20, marginBottom: 10}}>
-          <View style={{flex: 1}}>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <Icon style={{marginRight: 10}} name="home" size={22} color="black" />
-              <Text style={{fontSize: 20}}>Home Address:</Text>
-            </View>
-          </View>
-          {myPosition.address && !_specificAddress(myPosition.address) &&
-          <View style={{flexDirection: 'row', alignItems: 'center', marginRight: 20}}>
-            <Text style={{marginRight: 7, fontWeight: 'bold'}}>Ambiguous</Text>
-            <Icon name="exclamation-triangle" size={30} color="orange" />
-          </View>
-          || myPosition.address &&
-          <View style={{flexDirection: 'row', alignItems: 'center', marginRight: 20}}>
-            <Text style={{marginRight: 7, fontWeight: 'bold'}}>Set</Text>
-            <Icon name="check-circle" size={30} color="green" />
-          </View>
-          ||
-          <View style={{flexDirection: 'row', alignItems: 'center', marginRight: 20}}>
-            <Text style={{marginRight: 7, fontWeight: 'bold'}}>Not Set</Text>
-            <Icon name="times-circle" size={30} color="red" />
-          </View>
-          }
-        </View>
-
-        <View style={{flex: 1, alignItems: 'center', marginBottom: 10}}>
-          {user.lastsmlogin && !user.loggedin &&
-          <TouchableOpacity
-            style={{backgroundColor: '#d7d7d7', flex: 1, flexDirection: 'row', alignItems: 'center', padding: 12}}
-            onPress={this.sessionExpired}>
-            <Text>{(myPosition.address?myPosition.address:'Tap to set address')}</Text>
-          </TouchableOpacity>
-          ||
-          <TouchableOpacity
-            style={{backgroundColor: '#d7d7d7', flex: 1, flexDirection: 'row', alignItems: 'center', padding: 12}}
-            onPress={() => {
-              RNGooglePlaces.openAutocompleteModal()
-              .then((place) => {
-                if (!_specificAddress(place.address)) {
-                  setTimeout(() => {
-                    Alert.alert(
-                      'Ambiguous Address',
-                      'Unfortunately we can\'t guarantee accurate district results without a whole address.',
-                      [
-                        {text: 'Continue Anyway', onPress: () => {
-                          this.setState({
-                            profileUpdate: true,
-                            myPositionOld: myPosition,
-                            myPosition: place,
-                          });
-                        }},
-                        {text: 'Cancel'}
-                      ], { cancelable: false }
-                    );
-                  }, 500);
-                } else {
-                  this.setState({
-                    profileUpdate: true,
-                    myPositionOld: myPosition,
-                    myPosition: place,
-                  });
-                }
-              })
-              .catch(error => console.log(error.message));
-            }}>
-            <Text style={{textAlign: 'center'}}>
-              {(myPosition.address?myPosition.address:'Tap to set address')}
-            </Text>
-          </TouchableOpacity>
-          }
-        </View>
-
-        <View style={{flexDirection: 'row', margin: 20, marginTop: 0}}>
-          <Text>
-            We use your home address to give you information most relevant to you.
-            You may simply enter a city or a state, but we cannot guarantee
-            accurate district results without a whole address.
-          </Text>
-        </View>
-
-        <Divider />
-
-        <View style={{flexDirection: 'row', margin: 20, marginBottom: 0}}>
-          <View style={{flex: 1}}>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <Icon style={{marginRight: 10}} name="group" size={18} color="black" />
-              <Text style={{fontSize: 20}}>Party Affiliation:</Text>
-            </View>
-          </View>
-          {party &&
-          <View style={{flexDirection: 'row', alignItems: 'center', marginRight: 20}}>
-            <Text style={{marginRight: 7, fontWeight: 'bold'}}>Set</Text>
-            <Icon name="check-circle" size={30} color="green" />
-          </View>
-          ||
-          <View style={{flexDirection: 'row', alignItems: 'center', marginRight: 20}}>
-            <Text style={{marginRight: 7, fontWeight: 'bold'}}>Not Set</Text>
-            <Icon name="times-circle" size={30} color="red" />
-          </View>
-          }
-        </View>
-
-        <View style={{flex: 1, alignItems: 'center'}}>
-          <View style={{margin: 5}}>
-            {user.lastsmlogin && !user.loggedin &&
-            <TouchableOpacity
-              style={{backgroundColor: '#d7d7d7', flex: 1, flexDirection: 'row', alignItems: 'center', padding: 12}}
-              onPress={this.sessionExpired}>
-              <Text>{(party?this._partyName(party):'Tap to set party')}</Text>
-            </TouchableOpacity>
-            ||
-            <ModalPicker
-              style={{backgroundColor: '#d7d7d7', flexDirection: 'row', alignItems: 'center'}}
-              data={party_data}
-              initValue={(party?this._partyName(party):'Tap to set party')}
-              onChange={(option) => {
+        <SettingsPicker
+          title={"Home Address"}
+          options={[{label: '', value: ''}]}
+          value={myPosition.address}
+          valuePlaceholder={"Not Set"}
+          onValueChange={() => {}}
+          onPressOverride={true}
+          onPress={() => {
+            RNGooglePlaces.openAutocompleteModal()
+            .then((place) => {
+              if (!_specificAddress(place.address)) {
+                setTimeout(() => {
+                  Alert.alert(
+                    'Ambiguous Address',
+                    'Unfortunately we can\'t guarantee accurate district results without a whole address.',
+                    [
+                      {text: 'Continue Anyway', onPress: () => {
+                        this.setState({
+                          profileUpdate: true,
+                          myPositionOld: myPosition,
+                          myPosition: place,
+                        });
+                      }},
+                      {text: 'Cancel'}
+                    ], { cancelable: false }
+                  );
+                }, 500);
+              } else {
                 this.setState({
                   profileUpdate: true,
-                  partyOld: party,
-                  party: option.key
+                  myPositionOld: myPosition,
+                  myPosition: place,
                 });
-              }} />
-            }
-          </View>
-        </View>
+              }
+            })
+            .catch(error => console.log(error.message));
+          }}
+        />
 
-        <View style={{flexDirection: 'row', margin: 20, marginTop: 0}}>
-          <Text>
-             We use your party affiliation to better categorize information for you.
-             If not set, we assume you are an Independent.
-          </Text>
-        </View>
+        <SettingsTextLabel title={"We use your home address to give you information most relevant to you. You may simply enter a city or a state, but we cannot guarantee accurate district results without a whole address."} />
 
-        <View style={{marginLeft: 50, marginRight: 50, flexDirection: 'row', justifyContent: 'center', marginBottom: 15}}>
-          <TouchableOpacity
-            style={{backgroundColor: '#d7d7d7', flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', padding: 10, borderRadius: 20}}
-            onPress={() => {this.openVote()}}>
-            <Text>Register to Vote</Text>
-          </TouchableOpacity>
-        </View>
+        <SettingsDividerShort />
 
-        <Divider />
+        <SettingsPicker
+          title={"Party Affiliation"}
+          dialogDescription={"Select the political party you belong to."}
+          options={party_data}
+          onValueChange={value => this.setState({
+            profileUpdate: true,
+            partyOld: party,
+            party: _partyKey(value),
+          })}
+          value={_partyName(party)}
+          valuePlaceholder={"Not Set"}
+          styleModalButtonsText={{ color: colors.monza }}
+        />
+
+        <SettingsTextLabel title={"We use your party affiliation to better categorize information for you. If not set, we assume you are an Independent."} />
+
+        <SettingsDividerLong />
+
+        <SettingsCategoryHeader title={"App Permissions"} />
+
+        <SettingsDividerLong />
 
         <View style={{flexDirection: 'row', margin: 20, marginBottom: 10}}>
           <View style={{flex: 1}}>
@@ -412,14 +345,9 @@ export default class App extends PureComponent {
           </TouchableOpacity>
           }
         </View>
-        <View style={{flexDirection: 'row', margin: 20, marginTop: 0}}>
-          <Text>
-            We use your device location when you select the "current location"
-            option when searching representatives, or when using the canvassing tool.
-          </Text>
-        </View>
+        <SettingsTextLabel title={"We use your device location when you select the \"current location\" option when searching representatives, or when using the canvassing tool."} />
 
-        <Divider />
+        <SettingsDividerShort />
 
         <View style={{flexDirection: 'row', margin: 20}}>
           <View style={{flex: 1}}>
@@ -442,15 +370,13 @@ export default class App extends PureComponent {
           }
         </View>
 
-        <View style={{flexDirection: 'row', margin: 20, marginTop: 0}}>
-          <Text>
-            Based on your home address and party settings, we may push
-            notifications to your device when there is an upcoming caucus
-            or election that may be relevant to you.
-          </Text>
-        </View>
+        <SettingsTextLabel title={"Based on your home address and party settings, we may push notifications to your device when there is an upcoming caucus or election that may be relevant to you."} />
 
-        <Divider />
+        <SettingsDividerLong />
+
+        <SettingsCategoryHeader title={"App Info"} />
+
+        <SettingsDividerLong />
 
         <View style={{flexDirection: 'row', margin: 20}}>
           <View style={{flex: 1}}>
@@ -465,15 +391,9 @@ export default class App extends PureComponent {
           </View>
         </View>
 
-        <View style={{flexDirection: 'row', margin: 20, marginTop: 0}}>
-          <Text>
-            This mobile app is open source! Your code contribution is welcome.
-            Our goal is to update occasionally with new features that help every day
-            people get involved with the political process.
-         </Text>
-        </View>
+        <SettingsTextLabel title={"This mobile app is open source! Your code contribution is welcome. Our goal is to update occasionally with new features that help every day people get involved with the political process."} />
 
-        <Divider />
+        <SettingsDividerShort />
 
         <View style={{flexDirection: 'row', margin: 20}}>
           <View style={{flex: 1}}>
@@ -487,20 +407,8 @@ export default class App extends PureComponent {
             <Icon name="check-circle" size={30} color="green" />
           </View>
         </View>
-        <View style={{flexDirection: 'row', margin: 20, marginTop: 0}}>
-          {!user.lastsmlogin &&
-          <Text>
-            We save your canvassing and profile data to your device. Clear data will remove
-            all data for this app from your device.
-          </Text>
-          ||
-          <Text>
-            We save your profile to your device, even when you are not logged in.
-            Logging out will remove all profile data for this app from your device.
-            Logging in again will restore your profile.
-          </Text>
-          }
-        </View>
+
+        <SettingsTextLabel title={"We save your canvassing and profile data to your device. Clear data will remove all data for this app from your device."} />
 
         <View style={{flex: 1, alignItems: 'center'}}>
           <View style={{margin: 20, marginTop: 0}}>
@@ -552,3 +460,11 @@ export default class App extends PureComponent {
   }
 
 }
+
+const colors = {
+  white: "#FFFFFF",
+  monza: "#C70039",
+  switchEnabled: "#C70039",
+  switchDisabled: "#efeff3",
+  blueGem: "#27139A",
+};
