@@ -27,6 +27,7 @@ import NetInfo from '@react-native-community/netinfo';
 import DeviceInfo from 'react-native-device-info';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps'
+import RNGooglePlaces from 'react-native-google-places';
 import { Divider, API_BASE_URI, _doGeocode, _getApiToken, getEpoch } from '../../common';
 import KnockPage from '../KnockPage';
 import CanvassingSettingsPage from '../CanvassingSettingsPage';
@@ -37,6 +38,7 @@ import TimeAgo from 'javascript-time-ago'
 import en from 'javascript-time-ago/locale/en'
 import t from 'tcomb-form-native';
 import _ from 'lodash';
+
 import {deepCopy, geojson2polygons, ingeojson} from 'ourvoiceusa-sdk-js';
 
 TimeAgo.addLocale(en);
@@ -937,6 +939,22 @@ export default class App extends OVComponent {
               {...iconStyles} />
           </TouchableOpacity>
           }
+
+          {nomap_content.length == 0 &&
+          <TouchableOpacity style={styles.iconContainer}
+            onPress={() => {
+              RNGooglePlaces.openAutocompleteModal()
+              .then((place) => this.map.animateToCoordinate(place.location, 1000))
+              .catch(error => console.warn(error.message));
+            }}>
+            <Icon
+              name="search"
+              size={40}
+              color="#000000"
+              {...iconStyles} />
+          </TouchableOpacity>
+          }
+
         </View>
         </View>
         }
