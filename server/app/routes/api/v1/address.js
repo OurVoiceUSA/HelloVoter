@@ -92,6 +92,7 @@ async function addressAdd(req, res) {
   merge (vi)-[:VISIT_VOLUNTEER]->(v)
   merge (vi)-[:VISIT_AT]->(`+(req.body.unit?'u':'a')+`)
   merge (vi)-[:VISIT_FORM]->(f)
+  set `+(req.body.unit?'u':'a')+` :Residence
   return a.id`, req.body);
 
   if (req.body.addressId && req.body.unit) {

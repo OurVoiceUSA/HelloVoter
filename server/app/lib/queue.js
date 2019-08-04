@@ -157,6 +157,7 @@ export default class queue {
         "merge (c:Address {id:apoc.util.md5([toLower(b.street), toLower(b.city), toLower(b.state), substring(b.zip,0,5)])})
           on create set c += {created: timestamp(), updated: timestamp(), position: point({longitude: toFloat(b.lng), latitude: toFloat(b.lat)}), street:b.street, city:b.city, state:b.state, zip:b.zip}
         merge (c)-[:SOURCE]->(b)
+        set c :Residence
         with b,c
         merge (d:Person {id:b.pid})
         merge (d)-[:SOURCE]->(b)
@@ -172,6 +173,8 @@ export default class queue {
         merge (e:Unit {name:b.unit})-[:AT]->(c)
         merge (c)-[:SOURCE]->(b)
         merge (e)-[:SOURCE]->(b)
+        set c :Residence
+        set e :Residence
         with b,e
         merge (d:Person {id:b.pid})
         merge (d)-[:SOURCE]->(b)

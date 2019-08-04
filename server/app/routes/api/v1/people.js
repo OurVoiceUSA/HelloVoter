@@ -210,53 +210,45 @@ async function visitsAndPeople(req, res) {
     q += `with distinct(a) as a
   optional match (u:Unit)-[:AT]->(a)
     with a, u
-  optional match (person:Person)-[:RESIDENCE {current:true}]->(u) `;
+  match (r:Residence) where ID(r) in [ID(a), ID(u)] `;
+
+    q += `optional match (p:Person)-[:RESIDENCE {current:true}]->(r) `;
 
     if (req.query.filters.length)
       q += `where `+req.query.filters.map((f, idx) => {
         req.query['faid'+idx] = f.id;
         return '('+f.value.map((v, vdx) => {
           req.query['faval'+idx+''+vdx] = v;
-          return `(u)<-[:RESIDENCE {current:true}]-(:Person)<-[:ATTRIBUTE_OF {current:true}]-(:PersonAttribute {value:{faval`+idx+''+vdx+`}})-[:ATTRIBUTE_TYPE]->(:Attribute {id:{faid`+idx+`}}) `;
+          return `(r)<-[:RESIDENCE {current:true}]-(:Person)<-[:ATTRIBUTE_OF {current:true}]-(:PersonAttribute {value:{faval`+idx+''+vdx+`}})-[:ATTRIBUTE_TYPE]->(:Attribute {id:{faid`+idx+`}}) `;
         }).join('or ')+') ';
       }).join('and ');
 
-    if (req.query.filter_visited) q += (req.query.filters.length?`and`:`where`)+` not (person)<-[:VISIT_PERSON]-(:Visit)-[:VISIT_FORM]->(:Form {id:{formId}}) `;
+    if (req.query.filter_visited) q += (req.query.filters.length?`and`:`where`)+` not (p)<-[:VISIT_PERSON]-(:Visit)-[:VISIT_FORM]->(:Form {id:{formId}}) `;
 
-    q += `optional match (attr:Attribute)<-[:ATTRIBUTE_TYPE]-(pattr:PersonAttribute)-[:ATTRIBUTE_OF {current:true}]->(person)
-  with a, u, person, collect({id:attr.id, name:attr.name, value:pattr.value}) as attrs
-  with a, u, collect(person{.*, attrs:attrs}) as people `;
+    q += `optional match (p)<-[:ATTRIBUTE_OF {current:true}]-(pa:PersonAttribute)-[:ATTRIBUTE_TYPE]->(at:Attribute)
+  with a.id as aid, r, p, collect({id:at.id, name:at.name, value:pa.value}) as attrs
+  with aid, r, collect(p{.*, attrs: attrs}) as people `;
 
-    if (!empty_addrs) q += `where size(people) > 0 or u is null `;
-
-    q += `
-  optional match (u)<-[:VISIT_AT]-(v:Visit)-[:VISIT_FORM]->(:Form {id:{formId}})
-    where v.status in {visit_status} with a, u, people, collect(v) as visits, collect(v.status) as status where not 2 in status or status is null
-    with a, u{.*, people: people`+(req.query.formId?`, visits: visits`:``)+`} as unit
-    with a, collect(unit) as units
-  optional match (person:Person)-[:RESIDENCE {current:true}]->(a) `;
-
-    if (req.query.filters.length)
-      q += `where `+req.query.filters.map((f, idx) => {
-        req.query['faid'+idx] = f.id;
-        return '('+f.value.map((v, vdx) => {
-          req.query['faval'+idx+''+vdx] = v;
-          return `(a)<-[:RESIDENCE {current:true}]-(:Person)<-[:ATTRIBUTE_OF {current:true}]-(:PersonAttribute {value:{faval`+idx+''+vdx+`}})-[:ATTRIBUTE_TYPE]->(:Attribute {id:{faid`+idx+`}}) `;
-        }).join('or ')+') ';
-      }).join('and ');
-
-    if (req.query.filter_visited) q += (req.query.filters.length?`and`:`where`)+` not (person)<-[:VISIT_PERSON]-(:Visit)-[:VISIT_FORM]->(:Form {id:{formId}}) `;
+    if (!empty_addrs) q += `where size(people) > 0 or (r)<-[:AT]-(:Unit)`;
 
     q += `
-  optional match (attr:Attribute)<-[:ATTRIBUTE_TYPE]-(pattr:PersonAttribute)-[:ATTRIBUTE_OF {current:true}]->(person)
-    with a, units, person, collect({id:attr.id, name:attr.name, value:pattr.value}) as attrs
-    with a, units, a.position as ap, collect(person{.*, attrs: attrs}) as people
-  optional match (a)<-[:VISIT_AT]-(v:Visit)-[:VISIT_FORM]->(:Form {id:{formId}})
-    where v.status in {visit_status} with a, units, ap, people, collect(v) as visits, collect(v.status) as status `;
+  optional match (r)<-[:VISIT_AT]-(v:Visit)-[:VISIT_FORM]->(:Form {id:{formId}})
+    where v.status in {visit_status}
+    with aid, r, people, collect(v) as visits, collect(v.status) as status where not 2 in status or status is null
+    with aid, r{.*, visits: visits, people: people} as r
+    with aid, CASE WHEN (r.street is null) THEN null ELSE r END as r, collect(CASE WHEN (r.street is null) THEN r ELSE null END) as units
+    with aid, collect({address: r, units: units}) as addrs
+    with addrs[0].address as a, addrs[1].units as units
+    `;
 
-    if (!empty_addrs) q += `where (size(people) > 0 or size(units) > 0) and (not 2 in status or status is null) `;
+    if (!empty_addrs) q += `where size(a.people) > 0 or size(units) > 0 `;
 
-    q += `return collect({address: a{longitude:ap.x,latitude:ap.y,.id,.street,.city,.state,.zip,.updated}, units: units, people: people, visits: visits}) as data`;
+    q += `return collect({
+      address: a{longitude:a.position.x,latitude:a.position.y,.id,.street,.city,.state,.zip,.updated},
+      units: CASE WHEN (units is null) THEN [] ELSE units END,
+      people: a.people,
+      visits: a.visits
+    }) as data`;
 
     ref = await req.db.query(q, req.query);
 
