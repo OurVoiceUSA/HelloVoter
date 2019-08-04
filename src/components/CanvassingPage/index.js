@@ -540,6 +540,7 @@ export default class App extends OVComponent {
 
       this.setState({lastFetchPosition: pos, markers: json, listview, listview_order, last_fetch: getEpoch()});
     } catch (e) {
+      console.warn("Error: "+e);
       ret.error = true;
       this.triggerNetworkWarning();
     }
