@@ -181,23 +181,14 @@ async function visitsAndPeople(req, res) {
     empty_addrs = false;
   }
 
-/*
-    // TODO: system settings and team/individual permissions for dist/limit, etc by volunteer
-    req.query.limit = 25; // TODO: server setting for this?
-    req.query.dist = 1000; // TODO: this too?
-    req.query.visit_status = [0,2]; // pick up 'not interested' here so we can filter the address/unit entirely
-*/
-  if (!req.query.limit) req.query.limit = 1000;
+  // caps & defaults on limit and dist
   if (!req.query.dist) req.query.dist = 10000;
+  if (req.query.dist > 50000) req.query.dist = 50000;
+  if (!req.query.limit || req.query.limit > 1000) req.query.limit = 1000;
 
   try {
-    // in rural areas this query can return zero -- retry with an order of magnatude incrasea ... twice if we have to
-    let retry = 0;
 
-    while (retry <= 2) {
-      if (retry && req.query.dist <= 100000) req.query.dist *= 10;
-
-      let q = `match (v:Volunteer {id:{id}})
+    let q = `match (v:Volunteer {id:{id}})
   optional match (t:Turf)-[:ASSIGNED]->(:Team)-[:MEMBERS]->(v)
     with v, collect(t.id) as tt
   optional match (t:Turf)-[:ASSIGNED]->(v)
@@ -206,74 +197,70 @@ async function visitsAndPeople(req, res) {
     where node.id in turfIds
     with node as t limit 4 `;
 
-      // either target an address, or use the address index
-      if (req.query.aId) q += `match (a:Address {id:{aId}}) `;
-      else q += `match (a:Address) using index a:Address(position) `;
+    // either target an address, or use the address index
+    if (req.query.aId) q += `match (a:Address {id:{aId}}) `;
+    else q += `match (a:Address) using index a:Address(position) `;
 
-      q += `where (a)-[:WITHIN]->(t) `;
+    q += `where (a)-[:WITHIN]->(t) `;
 
-      if (!req.query.aId) q += `and distance(a.position, point({longitude: {longitude}, latitude: {latitude}})) < {dist}
-    with a, distance(a.position, point({longitude: {longitude}, latitude: {latitude}})) as dist
-    order by dist limit {limit} `;
+    if (!req.query.aId) q += `and distance(a.position, point({longitude: {longitude}, latitude: {latitude}})) < {dist}
+  with a, distance(a.position, point({longitude: {longitude}, latitude: {latitude}})) as dist
+  order by dist limit {limit} `;
 
-      q += `with distinct(a) as a
-    optional match (u:Unit)-[:AT]->(a)
-      with a, u
-    optional match (person:Person)-[:RESIDENCE {current:true}]->(u) `;
+    q += `with distinct(a) as a
+  optional match (u:Unit)-[:AT]->(a)
+    with a, u
+  optional match (person:Person)-[:RESIDENCE {current:true}]->(u) `;
 
-      if (req.query.filters.length)
-        q += `where `+req.query.filters.map((f, idx) => {
-          req.query['faid'+idx] = f.id;
-          return '('+f.value.map((v, vdx) => {
-            req.query['faval'+idx+''+vdx] = v;
-            return `(u)<-[:RESIDENCE {current:true}]-(:Person)<-[:ATTRIBUTE_OF {current:true}]-(:PersonAttribute {value:{faval`+idx+''+vdx+`}})-[:ATTRIBUTE_TYPE]->(:Attribute {id:{faid`+idx+`}}) `;
-          }).join('or ')+') ';
-        }).join('and ');
+    if (req.query.filters.length)
+      q += `where `+req.query.filters.map((f, idx) => {
+        req.query['faid'+idx] = f.id;
+        return '('+f.value.map((v, vdx) => {
+          req.query['faval'+idx+''+vdx] = v;
+          return `(u)<-[:RESIDENCE {current:true}]-(:Person)<-[:ATTRIBUTE_OF {current:true}]-(:PersonAttribute {value:{faval`+idx+''+vdx+`}})-[:ATTRIBUTE_TYPE]->(:Attribute {id:{faid`+idx+`}}) `;
+        }).join('or ')+') ';
+      }).join('and ');
 
-      if (req.query.filter_visited) q += (req.query.filters.length?`and`:`where`)+` not (person)<-[:VISIT_PERSON]-(:Visit)-[:VISIT_FORM]->(:Form {id:{formId}}) `;
+    if (req.query.filter_visited) q += (req.query.filters.length?`and`:`where`)+` not (person)<-[:VISIT_PERSON]-(:Visit)-[:VISIT_FORM]->(:Form {id:{formId}}) `;
 
-      q += `optional match (attr:Attribute)<-[:ATTRIBUTE_TYPE]-(pattr:PersonAttribute)-[:ATTRIBUTE_OF {current:true}]->(person)
-    with a, u, person, collect({id:attr.id, name:attr.name, value:pattr.value}) as attrs
-    with a, u, collect(person{.*, attrs:attrs}) as people `;
+    q += `optional match (attr:Attribute)<-[:ATTRIBUTE_TYPE]-(pattr:PersonAttribute)-[:ATTRIBUTE_OF {current:true}]->(person)
+  with a, u, person, collect({id:attr.id, name:attr.name, value:pattr.value}) as attrs
+  with a, u, collect(person{.*, attrs:attrs}) as people `;
 
-      if (!empty_addrs) q += `where size(people) > 0 or u is null `;
+    if (!empty_addrs) q += `where size(people) > 0 or u is null `;
 
-      q += `
+    q += `
   optional match (u)<-[:VISIT_AT]-(v:Visit)-[:VISIT_FORM]->(:Form {id:{formId}})
     where v.status in {visit_status} with a, u, people, collect(v) as visits, collect(v.status) as status where not 2 in status or status is null
     with a, u{.*, people: people`+(req.query.formId?`, visits: visits`:``)+`} as unit
     with a, collect(unit) as units
   optional match (person:Person)-[:RESIDENCE {current:true}]->(a) `;
 
-      if (req.query.filters.length)
-        q += `where `+req.query.filters.map((f, idx) => {
-          req.query['faid'+idx] = f.id;
-          return '('+f.value.map((v, vdx) => {
-            req.query['faval'+idx+''+vdx] = v;
-            return `(a)<-[:RESIDENCE {current:true}]-(:Person)<-[:ATTRIBUTE_OF {current:true}]-(:PersonAttribute {value:{faval`+idx+''+vdx+`}})-[:ATTRIBUTE_TYPE]->(:Attribute {id:{faid`+idx+`}}) `;
-          }).join('or ')+') ';
-        }).join('and ');
+    if (req.query.filters.length)
+      q += `where `+req.query.filters.map((f, idx) => {
+        req.query['faid'+idx] = f.id;
+        return '('+f.value.map((v, vdx) => {
+          req.query['faval'+idx+''+vdx] = v;
+          return `(a)<-[:RESIDENCE {current:true}]-(:Person)<-[:ATTRIBUTE_OF {current:true}]-(:PersonAttribute {value:{faval`+idx+''+vdx+`}})-[:ATTRIBUTE_TYPE]->(:Attribute {id:{faid`+idx+`}}) `;
+        }).join('or ')+') ';
+      }).join('and ');
 
-      if (req.query.filter_visited) q += (req.query.filters.length?`and`:`where`)+` not (person)<-[:VISIT_PERSON]-(:Visit)-[:VISIT_FORM]->(:Form {id:{formId}}) `;
+    if (req.query.filter_visited) q += (req.query.filters.length?`and`:`where`)+` not (person)<-[:VISIT_PERSON]-(:Visit)-[:VISIT_FORM]->(:Form {id:{formId}}) `;
 
-      q += `
+    q += `
   optional match (attr:Attribute)<-[:ATTRIBUTE_TYPE]-(pattr:PersonAttribute)-[:ATTRIBUTE_OF {current:true}]->(person)
     with a, units, person, collect({id:attr.id, name:attr.name, value:pattr.value}) as attrs
     with a, units, a.position as ap, collect(person{.*, attrs: attrs}) as people
   optional match (a)<-[:VISIT_AT]-(v:Visit)-[:VISIT_FORM]->(:Form {id:{formId}})
     where v.status in {visit_status} with a, units, ap, people, collect(v) as visits, collect(v.status) as status `;
 
-      if (!empty_addrs) q += `where (size(people) > 0 or size(units) > 0) and (not 2 in status or status is null) `;
+    if (!empty_addrs) q += `where (size(people) > 0 or size(units) > 0) and (not 2 in status or status is null) `;
 
-      q += `return collect({address: a{longitude:ap.x,latitude:ap.y,.id,.street,.city,.state,.zip,.updated}, units: units, people: people, visits: visits}) as data`;
+    q += `return collect({address: a{longitude:ap.x,latitude:ap.y,.id,.street,.city,.state,.zip,.updated}, units: units, people: people, visits: visits}) as data`;
 
-      ref = await req.db.query(q, req.query);
+    ref = await req.db.query(q, req.query);
 
-      if (ref.data[0].length) return res.json(ref.data[0]);
-
-      // retry if not over limit
-      retry++;
-    }
+    if (ref.data[0].length) return res.json(ref.data[0]);
 
   } catch (e) {
     return _500(res, e);
