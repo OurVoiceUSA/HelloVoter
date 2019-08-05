@@ -209,8 +209,8 @@ async function visitsAndPeople(req, res) {
 
     q += `with distinct(a) as a
   optional match (u:Unit)-[:AT]->(a)
-    with a, u
-  match (r:Residence) where ID(r) in [ID(a), ID(u)] `;
+    with a.id as aid, collect(distinct(a))+collect(u) as rs
+    unwind rs as r `;
 
     q += `optional match (p:Person)-[:RESIDENCE {current:true}]->(r) `;
 
@@ -226,7 +226,7 @@ async function visitsAndPeople(req, res) {
     if (req.query.filter_visited) q += (req.query.filters.length?`and`:`where`)+` not (p)<-[:VISIT_PERSON]-(:Visit)-[:VISIT_FORM]->(:Form {id:{formId}}) `;
 
     q += `optional match (p)<-[:ATTRIBUTE_OF {current:true}]-(pa:PersonAttribute)-[:ATTRIBUTE_TYPE]->(at:Attribute)
-  with a.id as aid, r, p, collect({id:at.id, name:at.name, value:pa.value}) as attrs
+  with aid, r, p, collect({id:at.id, name:at.name, value:pa.value}) as attrs
   with aid, r, collect(p{.*, attrs: attrs}) as people `;
 
     if (!empty_addrs) q += `where size(people) > 0 or (r)<-[:AT]-(:Unit)`;
