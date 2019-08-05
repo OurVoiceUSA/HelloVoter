@@ -25,6 +25,7 @@ import SmLoginPage from '../SmLoginPage';
 import { Dropbox } from 'dropbox';
 import { ingeojson } from 'ourvoiceusa-sdk-js';
 import { Divider, API_BASE_URI, DINFO, _loginPing, _saveUser, _getApiToken, _fileReaderAsync } from '../../common';
+import DeviceInfo from 'react-native-device-info';
 import { wsbase } from '../../config';
 
 import RBush from 'rbush';
@@ -823,7 +824,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
                   </Text>
                 </View>
 
-                {__DEV__?
+                {__DEV__&&DeviceInfo.isEmulator()?
                 <View>
                   <View style={{margin: 5}}>
                     <Icon.Button
