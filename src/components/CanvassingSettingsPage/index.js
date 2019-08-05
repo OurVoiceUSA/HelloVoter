@@ -51,6 +51,12 @@ export default class App extends PureComponent {
       });
     }
 
+    let size_matters = [
+      { size: 100, label: "small", value: "small" },
+      { size: 250, label: "medium", value: "medium" },
+      { size: 500, label: "large", value: "large" },
+    ];
+
     return (
     <ScrollView style={{flex: 1, backgroundColor: colors.white}}>
 
@@ -60,17 +66,13 @@ export default class App extends PureComponent {
 
       <SettingsPicker
         title="Limit Addresses"
-        options={[
-          { label: "100", value: "100" },
-          { label: "250", value: "250" },
-          { label: "500", value: "500" },
-        ]}
-        onValueChange={limit => this.changeSetting('limit', limit)}
-        value={refer.state.canvassSettings.limit}
+        options={size_matters}
+        onValueChange={limit => this.changeSetting('limit', size_matters.filter(m => m.label === limit)[0].size)}
+        value={size_matters.filter(m => m.size === refer.state.canvassSettings.limit)[0].label}
         styleModalButtonsText={{ color: colors.monza }}
       />
 
-      <SettingsTextLabel title={"Numbers of addresses that load at a given time. The more that load at once, the slower the app will get."} />
+      <SettingsTextLabel title={"The volume of address pins that load at a given time. The more that load at once, the slower the app will get."} />
 
       <SettingsDividerShort />
 
