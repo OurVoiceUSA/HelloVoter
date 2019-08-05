@@ -5,7 +5,6 @@ import Forms from './Forms';
 import Attributes from './Attributes';
 import { ImportData } from './ImportData/index';
 import Queue from './Queue';
-import Jwt from './Jwt';
 import Login from './Login';
 import LogoutDialog from './LogoutDialog';
 import Map from './Map';
@@ -23,7 +22,6 @@ export {
   Attributes,
   ImportData,
   Queue,
-  Jwt,
   Login,
   LogoutDialog,
   Map,

@@ -12,7 +12,7 @@ import {
   Queue,
   Analytics,
   Settings,
-  Jwt,
+  Login,
   About
 } from '../components';
 import NoMatch from './NoMatch';
@@ -40,7 +40,7 @@ export const Routes = ({ server, refer, google_maps_key }) => (
     <Route path="/queue/" render={() => <Queue server={server} />} />
     <Route path="/analytics/" render={() => <Analytics server={server} />} />
     <Route path="/settings/" render={() => <Settings server={server} />} />
-    <Route path="/jwt/" render={props => <Jwt {...props} refer={refer} />} />
+    <Route path="/jwt/" render={props => <Login {...props} refer={refer} />} />
     <Route path="/about/" render={() => <About server={server} />} />
     <Route component={NoMatch} />
   </Switch>

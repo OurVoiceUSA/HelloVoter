@@ -1,5 +1,10 @@
 import React, { Component } from 'react';
 
+import { Route, Redirect } from 'react-router';
+import { HashRouter as Router } from 'react-router-dom';
+import jwt from 'jsonwebtoken';
+import {notify_error} from '../common.js';
+
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -45,20 +50,41 @@ const styles = theme => ({
   },
 });
 
-class LogIn extends Component {
+class Login extends Component {
 
   constructor(props) {
     super(props);
 
+    let token;
+
+    try {
+      token = this.props.location.pathname.split('/').pop();
+      jwt.decode(token);
+      this.props.refer._loadData(token);
+    } catch (e) {
+      notify_error(e, 'Unable to extract jwt from URI');
+      token = 'error';
+    }
+
     this.state = {
       dev: (process.env.NODE_ENV === 'development'), // default to true if development
       classes: props.classes,
+      token: token,
     };
 
   }
 
   render() {
-    const { classes } = this.state;
+    const { classes, token } = this.state;
+
+    if (token && token !== "error")
+      return (
+        <Router>
+          <Route render={() => (
+            <Redirect to="/" />
+          )} />
+        </Router>
+      );
 
     return (
       <main className={classes.main}>
@@ -122,4 +148,4 @@ class LogIn extends Component {
   }
 }
 
-export default withStyles(styles)(LogIn);
+export default withStyles(styles)(Login);

@@ -3,8 +3,6 @@ import React, { Component } from 'react';
 import Select from 'react-select';
 
 import {
-  API_BASE_URI,
-  _fetch,
   _loadAttributes,
   _searchStringify,
   RootLoader,

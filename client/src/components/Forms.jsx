@@ -15,7 +15,6 @@ import DialogActions from '@material-ui/core/DialogActions';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 import {
-  faTimesCircle,
   faClipboard
 } from '@fortawesome/free-solid-svg-icons';
 

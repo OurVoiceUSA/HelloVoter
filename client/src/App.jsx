@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import { HashRouter as Router } from 'react-router-dom';
+import { HashRouter as Router, Route } from 'react-router-dom';
 import { NotificationContainer } from 'react-notifications';
 import 'react-notifications/lib/notifications.css';
 import jwt from 'jsonwebtoken';
@@ -28,6 +28,7 @@ class App extends Component {
 
     const v = queryString.parse(window.location.search);
     this.state = {
+      loading: true,
       open: true,
       menuLogout: false,
       server: {},
@@ -46,17 +47,36 @@ class App extends Component {
     this._loadData();
   }
 
-  _loadData = async jwt => {
-    if (jwt) localStorage.setItem('jwt', jwt);
-    else jwt = localStorage.getItem('jwt');
+  _loadData = async token => {
+    this.setState({loading: true});
+
+    if (token) localStorage.setItem('jwt', token);
+    else token = localStorage.getItem('jwt');
 
     let hostname = localStorage.getItem('server');
+
+    // assume error unless proven otherwise
+    let hai = {error: true};
+
+    if (hostname && token) {
+      try {
+        hai = await this.singHello(hostname, jwt.decode(token)['id'].split(":")[0], token);
+      } catch (e) {
+        console.warn(e)
+      }
+    }
+
+    if (hai.error) {
+      hostname = '';
+      token = '';
+    }
 
     this.setState({
       server: {
         hostname: hostname,
-        jwt: jwt,
-      }
+        jwt: token,
+      },
+      loading: false,
     }, () => this._loadKeys());
 
   };
@@ -66,6 +86,7 @@ class App extends Component {
     if (this.state.google_maps_key) return;
 
     let data = await _fetch(this.state.server, API_BASE_URI+'/google_maps_key');
+    if (!data) return;
 
     // load google places API
     var aScript = document.createElement('script');
@@ -125,8 +146,10 @@ class App extends Component {
     await this.singHello(server, target);
   };
 
-  singHello = async (server, target) => {
+  singHello = async (server, target, token) => {
     let res;
+
+
 
     localStorage.setItem('server', server);
 
@@ -139,7 +162,7 @@ class App extends Component {
         headers: {
           Authorization:
             'Bearer ' +
-            (this.state.server.jwt ? this.state.server.jwt : 'of the one ring'),
+            (token ? token : (this.state.server.jwt ? this.state.server.jwt : 'of the one ring')),
           'Content-Type': 'application/json'
         },
       });
@@ -203,9 +226,15 @@ class App extends Component {
 
   render() {
     const { classes } = this.props;
-    let { server } = this.state;
+    let { server, loading } = this.state;
 
-    if (!server.hostname) return <Login refer={this} />;
+    if (loading) return (<div>LOADING...</div>);
+
+    if (!server.hostname) return (
+      <Router>
+        <Route path="/" render={props => <Login {...props} refer={this} />} />
+      </Router>
+    );
 
     return (
       <Router>
