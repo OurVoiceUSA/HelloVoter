@@ -147,7 +147,6 @@ async function visitsAndPeople(req, res) {
   if (!req.query.formId) return _400(res, "Invalid value to parameter 'formId'.");
 
   if (req.query.limit) req.query.limit = parseInt(req.query.limit);
-  if (req.query.dist) req.query.dist = parseInt(req.query.dist);
 
   req.query.id = req.user.id;
   req.query.visit_status = [0,1,2,3];
@@ -181,12 +180,22 @@ async function visitsAndPeople(req, res) {
     empty_addrs = false;
   }
 
-  // caps & defaults on limit and dist
-  if (!req.query.dist) req.query.dist = 10000;
-  if (req.query.dist > 50000) req.query.dist = 50000;
+  // default & cap on limit
   if (!req.query.limit || req.query.limit > 1000) req.query.limit = 1000;
 
   try {
+
+    // get area density to optimize main query with a sane distance limit, based on given node limit & filter count
+    req.query.dist = 250;
+    let enough = false;
+
+    while (enough === false) {
+      // scale up distance
+      req.query.dist *= 2;
+      let ref = await req.db.query(`match (a:Address) using index a:Address(position) where distance(a.position, point({longitude: {longitude}, latitude: {latitude}})) < {dist} return count(a)`, req.query);
+      if (ref.data[0] >= (req.query.limit*(req.query.filters.length+1))) enough = true;
+      if (req.query.dist >= 16000) enough = true;
+    }
 
     let q = `match (v:Volunteer {id:{id}})
   optional match (t:Turf)-[:ASSIGNED]->(:Team)-[:MEMBERS]->(v)
