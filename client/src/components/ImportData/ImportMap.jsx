@@ -66,7 +66,7 @@ export class ImportMap extends React.Component {
         return { name, format, indexes };
       } else if (format) {
         const indexes = this.state.headers.findIndex(
-          i => i === format.value.value
+          i => format.value && i === format.value.value
         );
         return {
           name,
