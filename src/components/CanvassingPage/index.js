@@ -991,8 +991,17 @@ export default class App extends OVComponent {
           {nomap_content.length == 0 &&
           <TouchableOpacity style={styles.iconContainer}
             onPress={() => {
-              RNGooglePlaces.openAutocompleteModal()
-              .then((place) => {
+              RNGooglePlaces.openAutocompleteModal(
+                {
+                  locationBias: {
+                    latitudeNE: myPosition.latitude+0.1,
+                    longitudeNE: myPosition.longitude+0.1,
+                    latitudeSW: myPosition.latitude-0.1,
+                    longitudeSW: myPosition.longitude-0.1,
+                  }
+                },
+                ['location','address']
+              ).then((place) => {
                 this.dropSearchPin(place);
                 this.map.animateToCoordinate(place.location, 1000);
               })
