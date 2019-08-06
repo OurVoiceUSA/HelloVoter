@@ -93,6 +93,7 @@ export default class App extends OVComponent {
       activeCity: [0],
       activeStreet: [],
       last_fetch: 0,
+      mapCenter: {},
       loading: false,
       fetching: false,
       fetchingHistory: false,
@@ -154,6 +155,7 @@ export default class App extends OVComponent {
 
   onRegionChange(region) {
     this._dataGet(region);
+    this.setState({mapCenter: region})
   }
 
   setupConnectionListener = async () => {
@@ -779,7 +781,7 @@ export default class App extends OVComponent {
     const { navigate } = this.props.navigation;
     const {
       showDisclosure, myPosition, myNodes, locationAccess, serviceError, form, user,
-      loading, region, active, fetching, selectedTurf
+      loading, region, active, fetching, selectedTurf, mapCenter
     } = this.state;
 
     if (showDisclosure === "true") {
@@ -900,12 +902,15 @@ export default class App extends OVComponent {
         <MapView
           ref={component => this.map = component}
           initialRegion={{latitude: myPosition.latitude, longitude: myPosition.longitude, latitudeDelta: region.latitudeDelta, longitudeDelta: region.longitudeDelta}}
-          onMapReady={() => this.map.animateToRegion({
-            latitude: myPosition.latitude,
-            longitude: myPosition.longitude,
-            latitudeDelta: region.latitudeDelta,
-            longitudeDelta: region.longitudeDelta,
-          })}
+          onMapReady={() => {
+            this.setState({mapCenter: myPosition});
+            this.map.animateToRegion({
+              latitude: myPosition.latitude,
+              longitude: myPosition.longitude,
+              latitudeDelta: region.latitudeDelta,
+              longitudeDelta: region.longitudeDelta,
+            });
+          }}
           provider={PROVIDER_GOOGLE}
           style={(active==='map'?styles.map:null)}
           showsUserLocation={true}
@@ -995,10 +1000,10 @@ export default class App extends OVComponent {
               RNGooglePlaces.openAutocompleteModal(
                 {
                   locationBias: {
-                    latitudeNE: myPosition.latitude+0.1,
-                    longitudeNE: myPosition.longitude+0.1,
-                    latitudeSW: myPosition.latitude-0.1,
-                    longitudeSW: myPosition.longitude-0.1,
+                    latitudeNE: mapCenter.latitude+0.1,
+                    longitudeNE: mapCenter.longitude+0.1,
+                    latitudeSW: mapCenter.latitude-0.1,
+                    longitudeSW: mapCenter.longitude-0.1,
                   }
                 },
                 ['location','address']
