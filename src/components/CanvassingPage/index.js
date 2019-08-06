@@ -87,6 +87,7 @@ export default class App extends OVComponent {
       refer: props.navigation.state.params.refer,
       server: props.navigation.state.params.server,
       active: 'map',
+      selectedTurf: {},
       listview: {},
       listview_order: [],
       activeCity: [0],
@@ -152,6 +153,7 @@ export default class App extends OVComponent {
 
   onRegionChange(region) {
     this._dataGet(region);
+    this.updateTurfInfo(region);
   }
 
   setupConnectionListener = async () => {
@@ -750,11 +752,24 @@ export default class App extends OVComponent {
 
   acoc = (activeStreet) => this.setState({activeStreet})
 
+  updateTurfInfo(pos) {
+    if (this.state.turfs) {
+      let selectedTurf = {};
+      for (let i in this.state.turfs) {
+        if (ingeojson(this.state.turfs[i], pos.longitude, pos.latitude)) {
+          selectedTurf = this.state.turfs[i];
+          break;
+        }
+      }
+      this.setState({selectedTurf});
+    }
+  }
+
   render() {
     const { navigate } = this.props.navigation;
     const {
       showDisclosure, myPosition, myNodes, locationAccess, serviceError, form, user,
-      loading, region, active, fetching
+      loading, region, active, fetching, selectedTurf
     } = this.state;
 
     if (showDisclosure === "true") {
@@ -832,8 +847,9 @@ export default class App extends OVComponent {
 
     let geofence = [];
     if (this.state.turfs) {
-      for (let i in this.state.turfs)
-        geofence = geofence.concat(geojson2polygons(this.state.turfs[i], true));
+      for (let i in this.state.turfs) {
+        geojson2polygons(this.state.turfs[i], true).forEach(polygon => geofence.push({name: this.state.turfs[i].name, polygon: polygon}));
+      }
     }
 
     return (
@@ -888,8 +904,9 @@ export default class App extends OVComponent {
           onRegionChangeComplete={this.onRegionChange}
           showsIndoors={false}
           showsTraffic={false}
+          onPress={(e) => e.nativeEvent.coordinate && this.updateTurfInfo(e.nativeEvent.coordinate)}
           {...this.props}>
-          {geofence.map((polygon, idx) => <MapView.Polyline key={idx} coordinates={polygon} strokeWidth={2} />)}
+          {geofence.map((g, idx) => <MapView.Polyline key={idx} coordinates={g.polygon} strokeWidth={2} strokeColor={(g.name === selectedTurf.name ? "blue" : "black")} />)}
           {this.state.markers.map((marker) => (
               <MapView.Marker
                 key={marker.address.id}
@@ -911,6 +928,12 @@ export default class App extends OVComponent {
         {fetching&&
         <View style={{position: 'absolute', right: 0, ...styles.iconContainer}}>
           <ActivityIndicator size="large" />
+        </View>
+        }
+
+        {selectedTurf.name&&
+        <View style={{position: 'absolute', left: 0, ...styles.turfInfoContainer}}>
+          <Text>Turf: {selectedTurf.name}</Text>
         </View>
         }
 
@@ -1156,6 +1179,11 @@ const styles = StyleSheet.create({
   },
   iconContainer: {
     backgroundColor: '#ffffff', width: 65, height: 65, borderRadius: 65,
+    borderWidth: 2, borderColor: '#000000',
+    alignItems: 'center', justifyContent: 'center', margin: 2.5,
+  },
+  turfInfoContainer: {
+    backgroundColor: '#ffffff', width: 125, height: 45,
     borderWidth: 2, borderColor: '#000000',
     alignItems: 'center', justifyContent: 'center', margin: 2.5,
   },
