@@ -153,7 +153,6 @@ export default class App extends OVComponent {
 
   onRegionChange(region) {
     this._dataGet(region);
-    this.updateTurfInfo(region);
   }
 
   setupConnectionListener = async () => {
