@@ -57,7 +57,7 @@
 		"@babel/cli": "^7.5.5",
 		"@babel/core": "^7.5.5",
 		"@babel/node": "^7.5.5",
-		"detox": "^13.3.2",
+		"detox": "^14.0.0",
 		"geojson-bbox": "0.0.0",
 		"jetifier": "^1.6.3",
 		"metro-react-native-babel-preset": "^0.55.0",
