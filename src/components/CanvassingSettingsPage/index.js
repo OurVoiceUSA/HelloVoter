@@ -17,6 +17,19 @@ import {
   SettingsTextLabel,
 } from "react-native-settings-components";
 
+var size_matters = [
+  { size: 100, label: "small", value: "small" },
+  { size: 250, label: "medium", value: "medium" },
+  { size: 500, label: "large", value: "large" },
+];
+
+function limit2size(obj) {
+  if (!obj || !obj.limit) return "small";
+  let arr = size_matters.filter(m => m.size === obj.limit);
+  if (!arr || !arr.length) return "small";
+  return arr[0].label;
+}
+
 export default class App extends PureComponent {
   constructor(props) {
     super(props);
@@ -51,11 +64,7 @@ export default class App extends PureComponent {
       });
     }
 
-    let size_matters = [
-      { size: 100, label: "small", value: "small" },
-      { size: 250, label: "medium", value: "medium" },
-      { size: 500, label: "large", value: "large" },
-    ];
+    let size_limit = limit2size(refer.state.canvassSettings);
 
     return (
     <ScrollView style={{flex: 1, backgroundColor: colors.white}}>
@@ -68,7 +77,7 @@ export default class App extends PureComponent {
         title="Limit Addresses"
         options={size_matters}
         onValueChange={limit => this.changeSetting('limit', size_matters.filter(m => m.label === limit)[0].size)}
-        value={size_matters.filter(m => m.size === refer.state.canvassSettings.limit)[0].label}
+        value={limit2size(refer.state.canvassSettings)}
         styleModalButtonsText={{ color: colors.monza }}
       />
 
