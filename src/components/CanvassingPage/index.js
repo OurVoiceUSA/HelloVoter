@@ -104,6 +104,7 @@ export default class App extends OVComponent {
       lastFetchPosition: {latitude: null, longitude: null},
       region: {latitudeDelta: 0.004, longitudeDelta: 0.004},
       markers: [],
+      searchPins: [],
       fAddress: {},
       pAddress: {},
       DisclosureKey : 'OV_DISCLOUSER',
@@ -244,6 +245,12 @@ export default class App extends OVComponent {
       'connectionChange',
       this.handleConnectivityChange
     );
+  }
+
+  dropSearchPin(pos) {
+    let { searchPins } = this.state;
+    searchPins.push(pos);
+    this.setState({searchPins});
   }
 
   _pollHistory = async () => {
@@ -921,6 +928,13 @@ export default class App extends OVComponent {
                 </MapView.Callout>
               </MapView.Marker>
           ))}
+          {this.state.searchPins.map((pin, idx) => (
+              <MapView.Marker
+                key={idx}
+                coordinate={pin}
+                pinColor={"purple"}
+                />
+          ))}
         </MapView>
         }
 
@@ -967,8 +981,11 @@ export default class App extends OVComponent {
           <TouchableOpacity style={styles.iconContainer}
             onPress={() => {
               RNGooglePlaces.openAutocompleteModal()
-              .then((place) => this.map.animateToCoordinate(place.location, 1000))
-              .catch(error => console.warn(error.message));
+              .then((place) => {
+                this.dropSearchPin(place.location);
+                this.map.animateToCoordinate(place.location, 1000);
+              })
+              .catch(e => {});
             }}>
             <Icon
               name="search"
