@@ -920,6 +920,7 @@ export default class App extends OVComponent {
           showsIndoors={false}
           showsTraffic={false}
           onPress={(e) => e.nativeEvent.coordinate && this.updateTurfInfo(e.nativeEvent.coordinate)}
+          onLongPress={(e) => this.add_new && e.nativeEvent.coordinate && this.showConfirmAddress(e.nativeEvent.coordinate)}
           {...this.props}>
           {geofence.map((g, idx) => <MapView.Polyline key={idx} coordinates={g.polygon} strokeWidth={2} strokeColor={(g.name === selectedTurf.name ? "blue" : "black")} />)}
           {this.state.markers.map((marker) => (
@@ -971,18 +972,6 @@ export default class App extends OVComponent {
         {active==='map'&&
         <View style={{alignItems: 'center', justifyContent: 'flex-end'}}>
         <View style={styles.buttonContainer}>
-
-          {this.add_new &&
-          <TouchableOpacity style={styles.iconContainer}
-            onPress={() => this.showConfirmAddress()}>
-            <Icon
-              name="map-marker"
-              testID="map-marker"
-              size={50}
-              color="#8b4513"
-              {...iconStyles} />
-          </TouchableOpacity>
-          }
 
           {nomap_content.length == 0 &&
           <TouchableOpacity style={styles.iconContainer}
