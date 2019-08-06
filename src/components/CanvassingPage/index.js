@@ -247,9 +247,9 @@ export default class App extends OVComponent {
     );
   }
 
-  dropSearchPin(pos) {
+  dropSearchPin(place) {
     let { searchPins } = this.state;
-    searchPins.push(pos);
+    searchPins.push(place);
     this.setState({searchPins});
   }
 
@@ -292,7 +292,7 @@ export default class App extends OVComponent {
 
   }
 
-  showConfirmAddress = () => {
+  showConfirmAddress = (pos) => {
     const { myPosition } = this.state;
 
     if (!this.addOk()) {
@@ -305,11 +305,13 @@ export default class App extends OVComponent {
       return;
     }
 
-    if (myPosition.latitude !== null && myPosition.longitude !== null) {
+    if (!pos) pos = myPosition;
+
+    if (pos.latitude !== null && pos.longitude !== null) {
       if (this.state.turfs && this.state.turfs.length) {
         let flag = false;
         this.state.turfs.forEach(t => {
-          if (ingeojson(t, myPosition.longitude, myPosition.latitude)) flag = true;
+          if (ingeojson(t, pos.longitude, pos.latitude)) flag = true;
         });
         if (!flag) {
           Alert.alert('Outside Boundary', 'You are outside the turf boundary for this canvassing form.', [{text: 'OK'}], { cancelable: false });
@@ -327,7 +329,7 @@ export default class App extends OVComponent {
       try {
         if (this.state.locationAccess === false) throw "location access denied";
 
-        let res = await _doGeocode(myPosition.longitude, myPosition.latitude);
+        let res = await _doGeocode(pos.longitude, pos.latitude);
 
         if (!res.error) {
           let arr = res.address.split(", ");
@@ -338,6 +340,8 @@ export default class App extends OVComponent {
             zip: (state_zip?state_zip.split(" ")[1]:null),
             city: arr[arr.length-3],
             street: arr[arr.length-4],
+            longitude: pos.longitude,
+            latitude: pos.latitude,
           };
 
           this.setState({fAddress});
@@ -357,6 +361,7 @@ export default class App extends OVComponent {
 
   doConfirmAddress = async () => {
     const { myPosition, form, markers } = this.state;
+    let { fAddress } = this.state;
 
     let jsonStreet = this.refs.formStreet.getValue();
     let jsonCity = this.refs.formCity.getValue();
@@ -365,16 +370,15 @@ export default class App extends OVComponent {
     if (jsonStreet === null || jsonCity === null || jsonState === null) return;
 
     try {
-      await this.map.animateToCoordinate(myPosition, 500)
+      await this.map.animateToCoordinate({longitude: fAddress.longitude, latitude: fAddress.latitude}, 500)
     } catch (error) {}
 
     let epoch = this.getEpoch();
-    let fAddress = {
-      street: jsonStreet.street.trim(),
-      city: jsonCity.city.trim(),
-      state: jsonState.state.trim(),
-      zip: jsonState.zip.trim(),
-    };
+
+    fAddress.street = jsonStreet.street.trim();
+    fAddress.city = jsonCity.city.trim();
+    fAddress.state = jsonState.state.trim();
+    fAddress.zip = jsonState.zip.trim();
 
     // search for dupes
     let marker;
@@ -394,8 +398,8 @@ export default class App extends OVComponent {
         units: [],
         address: {
           id: md5(fAddress.street.toLowerCase()+fAddress.city.toLowerCase()+fAddress.state.toLowerCase()+fAddress.zip.substring(0, 5)),
-          longitude: myPosition.longitude,
-          latitude: myPosition.latitude,
+          longitude: fAddress.longitude,
+          latitude: fAddress.latitude,
           street: fAddress.street,
           city: fAddress.city,
           state: fAddress.state,
@@ -407,8 +411,8 @@ export default class App extends OVComponent {
         deviceId: DeviceInfo.getUniqueID(),
         formId: form.id,
         timestamp: getEpoch(),
-        longitude: myPosition.longitude,
-        latitude: myPosition.latitude,
+        longitude: fAddress.longitude,
+        latitude: fAddress.latitude,
         street: marker.address.street,
         city: marker.address.city,
         state: marker.address.state,
@@ -420,7 +424,7 @@ export default class App extends OVComponent {
       markers.push(marker);
     }
 
-    this.setState({ markers, fAddress, pAddress: fAddress, isModalVisible: false });
+    this.setState({ markers, fAddress, pAddress: fAddress, searchPins: [], isModalVisible: false });
     this.doMarkerPress(marker);
   }
 
@@ -928,12 +932,19 @@ export default class App extends OVComponent {
                 </MapView.Callout>
               </MapView.Marker>
           ))}
-          {this.state.searchPins.map((pin, idx) => (
+          {this.state.searchPins.map((place, idx) => (
               <MapView.Marker
                 key={idx}
-                coordinate={pin}
-                pinColor={"purple"}
-                />
+                coordinate={place.location}
+                pinColor={"purple"}>
+                <MapView.Callout onPress={() => this.add_new && this.showConfirmAddress(place.location)}>
+                  <View style={{backgroundColor: '#FFFFFF', padding: 5, width: 175}}>
+                    <Text style={{fontWeight: 'bold'}}>
+                      {place.address}
+                    </Text>
+                  </View>
+                </MapView.Callout>
+              </MapView.Marker>
           ))}
         </MapView>
         }
@@ -956,7 +967,7 @@ export default class App extends OVComponent {
 
           {this.add_new &&
           <TouchableOpacity style={styles.iconContainer}
-            onPress={this.showConfirmAddress}>
+            onPress={() => this.showConfirmAddress()}>
             <Icon
               name="map-marker"
               testID="map-marker"
@@ -982,7 +993,7 @@ export default class App extends OVComponent {
             onPress={() => {
               RNGooglePlaces.openAutocompleteModal()
               .then((place) => {
-                this.dropSearchPin(place.location);
+                this.dropSearchPin(place);
                 this.map.animateToCoordinate(place.location, 1000);
               })
               .catch(e => {});
@@ -1037,7 +1048,7 @@ export default class App extends OVComponent {
                         backgroundColor: '#d7d7d7', padding: 10, borderRadius: 20, marginLeft: 5,
                         ...(this.state.netInfo === 'none' ? displayNone : {})
                       }}
-                      onPress={this.showConfirmAddress}>
+                      onPress={() => this.showConfirmAddress()}>
                       <Text style={{textAlign: 'center'}}>Retry</Text>
                     </TouchableOpacity>
                   </View>
