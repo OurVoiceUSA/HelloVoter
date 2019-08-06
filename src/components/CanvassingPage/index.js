@@ -921,6 +921,7 @@ export default class App extends OVComponent {
               <MapView.Marker
                 key={marker.address.id}
                 coordinate={{longitude: marker.address.longitude, latitude: marker.address.latitude}}
+                onPress={(e) => e.nativeEvent.coordinate && this.updateTurfInfo(e.nativeEvent.coordinate)}
                 pinColor={this.getPinColor(marker)}>
                 <MapView.Callout onPress={() => this.doMarkerPress(marker)}>
                   <View style={{backgroundColor: '#FFFFFF', padding: 5, width: 175}}>
