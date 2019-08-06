@@ -950,6 +950,7 @@ export default class App extends OVComponent {
                     <Text style={{fontWeight: 'bold'}}>
                       {place.address}
                     </Text>
+                    {this.add_new&&<Text>Tap to add this address.</Text>}
                   </View>
                 </MapView.Callout>
               </MapView.Marker>
