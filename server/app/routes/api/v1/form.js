@@ -34,10 +34,11 @@ module.exports = Router({mergeParams: true})
       }
     }
     // add the user's turfs to this form
-    let c = await req.db.query('match (t:Turf) where t.id in {turfIds} return t.name, t.geometry', {turfIds: idFromArrObj(ass.turfs)});
+    let c = await req.db.query('match (t:Turf) where t.id in {turfIds} return t.id, t.name, t.geometry', {turfIds: idFromArrObj(ass.turfs)});
     form.turfs = c.data.map(t => {
-      let turf = JSON.parse(t[1]);
-      turf.name = t[0];
+      let turf = JSON.parse(t[2]);
+      turf.id = t[0];
+      turf.name = t[1];
       return turf;
     });
     // add default filters to this form
