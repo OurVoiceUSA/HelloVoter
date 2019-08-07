@@ -860,7 +860,7 @@ export default class App extends OVComponent {
     let geofence = [];
     if (this.state.turfs) {
       for (let i in this.state.turfs) {
-        geojson2polygons(this.state.turfs[i], true).forEach(polygon => geofence.push({name: this.state.turfs[i].name, polygon: polygon}));
+        geojson2polygons(this.state.turfs[i], true).forEach(polygon => geofence.push({id: this.state.turfs[i].id, name: this.state.turfs[i].name, polygon: polygon}));
       }
     }
 
@@ -922,7 +922,7 @@ export default class App extends OVComponent {
           onPress={(e) => e.nativeEvent.coordinate && this.updateTurfInfo(e.nativeEvent.coordinate)}
           onLongPress={(e) => this.add_new && e.nativeEvent.coordinate && this.showConfirmAddress(e.nativeEvent.coordinate)}
           {...this.props}>
-          {geofence.map((g, idx) => <MapView.Polyline key={idx} coordinates={g.polygon} strokeWidth={2} strokeColor={(g.name === selectedTurf.name ? "blue" : "black")} />)}
+          {geofence.map((g, idx) => <MapView.Polyline key={idx} coordinates={g.polygon} strokeWidth={2} strokeColor={(g.id === selectedTurf.id ? "blue" : "black")} />)}
           {this.state.markers.map((marker) => (
               <MapView.Marker
                 key={marker.address.id}
@@ -964,7 +964,7 @@ export default class App extends OVComponent {
         </View>
         }
 
-        {active==='map'&&selectedTurf.name&&
+        {active==='map'&&selectedTurf.id&&
         <View style={{position: 'absolute', left: 0, ...styles.turfInfoContainer}}>
           <Text>Turf: {selectedTurf.name}</Text>
         </View>
