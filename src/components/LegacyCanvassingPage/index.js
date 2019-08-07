@@ -27,7 +27,8 @@ import NetInfo from '@react-native-community/netinfo';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import sha1 from 'sha1';
 import { Marker, Callout, Polyline, PROVIDER_GOOGLE } from 'react-native-maps'
-import MapView from 'react-native-maps-super-cluster'
+import MapView from 'react-native-maps-super-cluster';
+import RNGooglePlaces from 'react-native-google-places';
 import encoding from 'encoding';
 import { transliterate as tr } from 'transliteration/src/main/browser';
 import { _doGeocode, _getApiToken, _fileReaderAsync } from '../../common';
@@ -186,16 +187,18 @@ export default class App extends OVComponent {
     );
   }
 
-  showConfirmAddress() {
+  showConfirmAddress(pos) {
     const { myPosition } = this.state;
+
+    if (!pos) pos = myPosition;
 
     if (this.state.netInfo === 'none') {
       this.setState({ isModalVisible: true });
       return;
     }
 
-    if (myPosition.latitude !== null && myPosition.longitude !== null) {
-      if (this.state.geofence && !ingeojson(this.state.geofence, myPosition.longitude, myPosition.latitude)) {
+    if (pos.latitude !== null && pos.longitude !== null) {
+      if (this.state.geofence && !ingeojson(this.state.geofence, pos.longitude, pos.latitude)) {
         Alert.alert('Outside District', 'You are outside the district boundary for this canvassing form. You need to be within the boundaries of '+this.state.geofencename+'.', [{text: 'OK'}], { cancelable: false });
         return;
       }
@@ -210,7 +213,7 @@ export default class App extends OVComponent {
       try {
         if (this.state.locationAccess === false) throw "location access denied";
 
-        let res = await _doGeocode(myPosition.longitude, myPosition.latitude);
+        let res = await _doGeocode(pos.longitude, pos.latitude);
 
         if (!res.error) {
           let arr = res.address.split(", ");
@@ -221,6 +224,8 @@ export default class App extends OVComponent {
             zip: (state_zip?state_zip.split(" ")[1]:null),
             city: arr[arr.length-3],
             street: arr[arr.length-4],
+            longitude: pos.longitude,
+            latitude: pos.latitude,
           };
 
           this.setState({fAddress});
@@ -240,6 +245,7 @@ export default class App extends OVComponent {
 
   doConfirmAddress = async () => {
     const { myPosition, form } = this.state;
+    let { fAddress } = this.state;
 
     let jsonStreet = this.refs.formStreet.getValue();
     let jsonCity = this.refs.formCity.getValue();
@@ -248,23 +254,22 @@ export default class App extends OVComponent {
     if (jsonStreet === null || jsonCity === null || jsonState === null) return;
 
     try {
-      await this.map.getMapRef().animateToCoordinate(myPosition, 500)
+      await this.map.getMapRef().animateToCoordinate({longitude: fAddress.longitude, latitude: fAddress.latitude}, 500)
     } catch (error) {}
 
     let epoch = this.getEpoch();
-    let fAddress = {
-      street: jsonStreet.street.trim(),
-      multi_unit: jsonCity.multi_unit,
-      city: jsonCity.city.trim(),
-      state: jsonState.state.trim(),
-      zip: jsonState.zip.trim(),
 
-    };
+    fAddress.street = jsonStreet.street.trim();
+    fAddress.multi_unit = jsonCity.multi_unit;
+    fAddress.city = jsonCity.city.trim();
+    fAddress.state = jsonState.state.trim();
+    fAddress.zip = jsonState.zip.trim();
+
     let address = [fAddress.street, fAddress.city, fAddress.state, fAddress.zip];
     let node = {
       type: "address",
       id: sha1(JSON.stringify(address)),
-      latlng: {latitude: myPosition.latitude, longitude: myPosition.longitude},
+      latlng: {latitude: fAddress.latitude, longitude: fAddress.longitude},
       address: address,
       multi_unit: jsonCity.multi_unit,
     };
@@ -1225,6 +1230,33 @@ export default class App extends OVComponent {
               name="location-arrow"
               size={50}
               color="#0084b4"
+              {...iconStyles} />
+          </TouchableOpacity>
+          }
+
+          {nomap_content.length == 0 &&
+          <TouchableOpacity style={styles.iconContainer}
+            onPress={() => {
+              RNGooglePlaces.openAutocompleteModal(
+                {
+                  locationBias: {
+                    latitudeNE: myPosition.latitude+0.1,
+                    longitudeNE: myPosition.longitude+0.1,
+                    latitudeSW: myPosition.latitude-0.1,
+                    longitudeSW: myPosition.longitude-0.1,
+                  }
+                },
+                ['location','address']
+              ).then((place) => {
+                this.map.getMapRef().animateToCoordinate(place.location, 1000);
+                this.showConfirmAddress(place.location);
+              })
+              .catch(e => {});
+            }}>
+            <Icon
+              name="search"
+              size={40}
+              color="#000000"
               {...iconStyles} />
           </TouchableOpacity>
           }
