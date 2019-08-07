@@ -57,6 +57,7 @@ const AppNavigator = createStackNavigator({
     navigationOptions: ({navigation}) => ({
       title: 'Canvassing',
       headerLeft: (<GoBack nav={navigation} />),
+      gesturesEnabled: false,
     }),
   },
   ListMultiUnit: {
@@ -93,6 +94,7 @@ const AppNavigator = createStackNavigator({
     navigationOptions: ({navigation}) => ({
       title: 'Canvassing',
       headerLeft: (<GoBack nav={navigation} />),
+      gesturesEnabled: false,
     }),
   },
   LegacyListMultiUnit: {
