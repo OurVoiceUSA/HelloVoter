@@ -83,13 +83,13 @@ PODS:
     - React-cxxreact (= 0.60.4)
     - React-jsi (= 0.60.4)
   - React-jsinspector (0.60.4)
-  - react-native-camera (3.1.0):
+  - react-native-camera (3.1.1):
     - React
-    - react-native-camera/RCT (= 3.1.0)
-    - react-native-camera/RN (= 3.1.0)
-  - react-native-camera/RCT (3.1.0):
+    - react-native-camera/RCT (= 3.1.1)
+    - react-native-camera/RN (= 3.1.1)
+  - react-native-camera/RCT (3.1.1):
     - React
-  - react-native-camera/RN (3.1.0):
+  - react-native-camera/RN (3.1.1):
     - React
   - react-native-geolocation (1.4.2):
     - React
@@ -258,7 +258,7 @@ SPEC CHECKSUMS:
   React-jsi: 21d3153b1153fbf6510a92b6b11e33e725cb7432
   React-jsiexecutor: 7549641e48bafae7bfee3f3ea19bf4901639c5de
   React-jsinspector: 73f24a02fa684ed6a2b828ba116874a2191ded88
-  react-native-camera: 64fe4afe4cc99b36704668c2d8ce6e7bf8826b37
+  react-native-camera: 9bf6e0cdce0d7dc059d9836eb381d96f58f83d83
   react-native-geolocation: 79c743ad7a2e86617811ef23f49308824e92520c
   react-native-google-maps: 88d750ad441b19c24885f20d43a55ecac25939b5
   react-native-google-places: 978bcc6ec4bd1d9b0ab3693e3705d4f1f2459caf
