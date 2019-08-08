@@ -1,5 +1,6 @@
 {
   "reject": [
-    "transliteration"
+    "transliteration",
+    "dropbox",
   ]
 }
