@@ -24,7 +24,7 @@
 		"rbush": "^3.0.1",
 		"react": "^16.8.6",
 		"react-native": "^0.60.4",
-		"react-native-camera": "^3.0.1",
+		"react-native-camera": "^3.1.0",
 		"react-native-collapsible": "^1.5.1",
 		"react-native-config": "^0.11.7",
 		"react-native-device-info": "^2.3.2",
