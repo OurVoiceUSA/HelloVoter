@@ -49,7 +49,7 @@
     "helmet": "^3.20.0",
     "jsonwebtoken": "^8.5.1",
     "jwt-decode": "^2.2.0",
-    "logops": "^2.1.0",
+    "logops": "^2.1.1",
     "neo4j-driver": "^1.7.5",
     "node-fetch": "^2.6.0",
     "node-neo4j-bolt-adapter": "github:OurVoiceUSA/node-neo4j-bolt-adapter",
