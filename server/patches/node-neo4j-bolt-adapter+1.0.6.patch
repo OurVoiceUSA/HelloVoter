@@ -1,0 +1,12 @@
+diff --git a/node_modules/node-neo4j-bolt-adapter/Mapper.js b/node_modules/node-neo4j-bolt-adapter/Mapper.js
+index d90814c..ada4c9e 100644
+--- a/node_modules/node-neo4j-bolt-adapter/Mapper.js
++++ b/node_modules/node-neo4j-bolt-adapter/Mapper.js
+@@ -61,6 +61,7 @@ const toNative = function (val) {
+     if (val === null) return val;
+     if (val instanceof neo4j.v1.types.Node) return toNative(val.properties);
+     if (val instanceof neo4j.v1.types.Relationship) return toNative(val.properties);
++    if (val instanceof neo4j.v1.types.Point) return val;
+     if (neo4j.v1.isInt(val)) return val.toNumber();
+     if (Array.isArray(val)) return val.map(a => toNative(a));
+     if (isRecord(val)) return toNative(recordToNative(val));
