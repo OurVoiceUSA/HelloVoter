@@ -1,9 +1,10 @@
 
 import wkx from 'wkx';
 import { asyncForEach, sleep } from 'ourvoiceusa-sdk-js';
+import { ov_config } from '../../../lib/ov_config';
 import {
   _volunteersFromCypher,
-  cqdo, valid, _400, _403, _500
+  cqdo, valid, _400, _403, _500, _501
 } from '../../../lib/utils';
 
 import { Router } from 'express';
@@ -56,7 +57,10 @@ module.exports = Router({mergeParams: true})
 
   try {
     // create Turf
-    ref = await req.db.query('match (a:Volunteer {id:{author_id}}) create (b:Turf {id:randomUUID(), created: timestamp(), name:{name}, geometry: {geometry}, wkt:{wkt}})-[:AUTHOR]->(a) WITH b, collect(b) AS t CALL spatial.addNodes(\'turf\', t) YIELD count return b.id', req.body);
+    ref = await req.db.query('match (v:Volunteer {id:{author_id}}) create (b:Turf {id:randomUUID(), created: timestamp(), name:{name}, geometry: {geometry}, wkt:{wkt}})-[:AUTHOR]->(v) '+
+        (ov_config.disable_spatial===false?'WITH b, collect(b) AS t CALL spatial.addNodes(\'turf\', t) YIELD count ':'')+
+        'return b.id',
+      req.body);
   } catch(e) {
     return _500(res, e);
   }
@@ -124,6 +128,7 @@ return last_touch, active_name, total_active, total_assigned`,
   req.query.latitude = parseFloat(req.query.latitude);
   req.query.dist = parseFloat(req.query.dist);
   if (isNaN(req.query.longitude) || isNaN(req.query.latitude)) return _400(res, "Invalid value to parameters 'longitude' and 'latitude'.");
+  if (ov_config.disable_spatial !== false) return _501(res, "Turf spatial queries are disabled");
 
   // TODO: if (req.user.admin) -- append a match (v:Volunteer) that's assigned to that node somehow
   if (req.query.dist)

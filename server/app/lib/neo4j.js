@@ -36,10 +36,12 @@ export default class db {
   }
 
   async version() {
+    if (this.config.disable_apoc !== false) return null;
     return ((await this.query('call apoc.monitor.kernel() yield kernelVersion return split(split(kernelVersion, ",")[1], " ")[2]'))).data[0];
   }
 
   async size() {
+    if (this.config.disable_apoc !== false) return null;
     return ((await this.query('CALL apoc.monitor.store() YIELD totalStoreSize return totalStoreSize'))).data[0];
   }
 

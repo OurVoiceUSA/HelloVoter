@@ -33,7 +33,8 @@ describe('Queue', function () {
     let r = await api.get(base_uri+'/queue/list')
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
-    expect(r.body.data.length).to.equal(2);
+    if (ov_config.disable_apoc === false)
+      expect(r.body.data.length).to.equal(2);
   });
 
   // TODO: orphaned queue, as deleted turfs leave a hanging queue object

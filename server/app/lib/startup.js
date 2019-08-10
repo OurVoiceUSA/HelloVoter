@@ -103,20 +103,25 @@ export async function doDbInit(db) {
 
   // make sure we have the plugins we need
   try {
-    await db.query('call spatial.procedures()');
-    await db.query('call apoc.config.map()');
+    if (ov_config.disable_spatial === false) await db.query('call spatial.procedures()');
+    else console.warn("WARNING: You have disabled the check for the neo4j spatial plugin. Turf features are limited.");
+    if (ov_config.disable_apoc === false) await db.query('call apoc.config.map()');
+    else console.warn("WARNING: You have disabled the check for the neo4j apoc plugin. Data import features are limited.");
   } catch (e) {
     console.error("The APOC and SPATIAL plugins are required for this application to function.");
     console.error(e);
     process.exit(1);
   }
 
-  let arr = (await db.version()).split('.');
-  let ver = Number.parseFloat(arr[0]+'.'+arr[1]);
+  let dbv = await db.version();
+  if (dbv) {
+    let arr = dbv.split('.');
+    let ver = Number.parseFloat(arr[0]+'.'+arr[1]);
 
-  if (ver < min_neo4j_version) {
-    console.warn("Neo4j version "+min_neo4j_version+" or higher is required.");
-    process.exit(1);
+    if (ver < min_neo4j_version) {
+      console.warn("Neo4j version "+min_neo4j_version+" or higher is required.");
+      process.exit(1);
+    }
   }
 
   // only call warmup there's enough room to cache the database
@@ -173,14 +178,16 @@ export async function doDbInit(db) {
     {name: "address", create: 'call spatial.addLayerWithEncoder("address", "NativePointEncoder", "position")'},
   ];
 
-  // create any spatial layers we need if they don't exist
-  await asyncForEach(spatialLayers, async (layer) => {
-    let ref = await db.query('match (a {layer:{layer}})-[:LAYER]-(:ReferenceNode {name:"spatial_root"}) return count(a)', {layer: layer.name});
-    if (ref.data[0] === 0) {
-      await db.query(layer.create);
-      await sleep(1000);
-    }
-  });
+  if(ov_config.disable_spatial === false) {
+    // create any spatial layers we need if they don't exist
+    await asyncForEach(spatialLayers, async (layer) => {
+      let ref = await db.query('match (a {layer:{layer}})-[:LAYER]-(:ReferenceNode {name:"spatial_root"}) return count(a)', {layer: layer.name});
+      if (ref.data[0] === 0) {
+        await db.query(layer.create);
+        await sleep(1000);
+      }
+    });
+  }
 
   // TODO: load race/language data from a 3rd party and have the client do "autocomplete" type functionality
 

@@ -32,7 +32,7 @@ describe('Database Init', function () {
     db.close();
   });
 
-  it('correct database version', async () => {
+  (ov_config.disable_apoc === false?it:it.skip)('correct database version', async () => {
     let r;
 
     let arr = (await db.version()).split('.');

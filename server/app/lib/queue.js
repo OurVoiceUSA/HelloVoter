@@ -93,6 +93,11 @@ export default class queue {
   async queueTask(task, pattern, input) {
     let job;
 
+    if (ov_config.disable_apoc !== false || ov_config.disable_spatial !== false) {
+      console.warn("WARNING: queueTask called while disable_apoc or disable_spatial was set");
+      return {};
+    }
+
     // create QueueTask object in database -- either we can execute now (active: true, started: timestamp()) or we have to wait (active: false)
     try {
       let args = deepCopy(input);

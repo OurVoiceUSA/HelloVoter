@@ -44,6 +44,7 @@ export async function volunteerIsLeader(req, id, teamId) {
 export async function onMyTurf(req, ida, idb) {
   if (ida === idb) return true;
   if (await sameTeam(req, ida, idb)) return true;
+  if (ov_config.disable_spatial !== false) return false;
   try {
     // TODO: extend to also seach for direct turf assignments with leader:true
     let ref = await req.db.query('match (v:Volunteer {id:{idb}}) where exists(v.location) call spatial.intersects("turf", v.location) yield node match (:Volunteer {id:{ida}})-[:MEMBERS {leader:true}]-(:Team)-[:ASSIGNED]-(node) return count(v)', {ida: ida, idb: idb});
@@ -143,6 +144,10 @@ export function _422(res, msg) {
 export function _500(res, obj) {
   console.warn(obj);
   return sendError(res, 500, "Internal server error.");
+}
+
+export function _501(res, msg) {
+  return sendError(res, 501, msg);
 }
 
 export function _503(res, msg) {

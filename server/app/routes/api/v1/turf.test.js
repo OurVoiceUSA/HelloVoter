@@ -67,7 +67,7 @@ describe('Turf', function () {
 
   // TODO: check polygon that doesn't end where it starts
 
-  it('create malformed geometry', async () => {
+  (ov_config.disable_spatial===false?it:it.skip)('create malformed geometry', async () => {
     let geom = JSON.parse(fs.readFileSync('./geojson/CA.geojson'));
     geom.coordinates[0].pop();
 
@@ -169,8 +169,12 @@ describe('Turf', function () {
 
     r = await api.get(base_uri+'/turf/list/byposition?longitude=-116.566483&latitude=35.6430223')
       .set('Authorization', 'Bearer '+c.admin.jwt);
-    expect(r.statusCode).to.equal(200);
-    expect(r.body.data.length).to.equal(1);
+    if (ov_config.disable_spatial === false) {
+      expect(r.statusCode).to.equal(200);
+      expect(r.body.data.length).to.equal(1);
+    } else {
+      expect(r.statusCode).to.equal(501);
+    }
   });
 
   it('list byposition turf overlap', async () => {
@@ -178,8 +182,12 @@ describe('Turf', function () {
 
     r = await api.get(base_uri+'/turf/list/byposition?longitude=-118.3281370&latitude=33.9208231')
       .set('Authorization', 'Bearer '+c.admin.jwt);
-    expect(r.statusCode).to.equal(200);
-    expect(r.body.data.length).to.equal(2);
+    if (ov_config.disable_spatial === false) {
+      expect(r.statusCode).to.equal(200);
+      expect(r.body.data.length).to.equal(2);
+    } else {
+      expect(r.statusCode).to.equal(501);
+    }
   });
 
   it.skip('list byposition non-admin', async () => {
