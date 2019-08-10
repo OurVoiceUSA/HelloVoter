@@ -28,7 +28,12 @@ export default class db {
   }
 
   async query(q, p) {
-    return this.dbwrap('cypherQueryAsync', q, p);
+    try {
+      return await this.dbwrap('cypherQueryAsync', q, p);
+    } catch (e) {
+      console.warn({q,p});
+      throw e;
+    }
   }
 
   close() {
