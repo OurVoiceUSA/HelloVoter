@@ -38,7 +38,7 @@ Install https://nodejs.org/en/download/ if you havne't already, and run:
     npm install
     npm install -g react-native-cli
 
-If you're developing the **Android** app - install https://developer.android.com/studio/releases/ if you haven't already, import the `OVMobile/android` project, and follow the prompts to download all the build and runtime dependancies. You'll also have to run this command:
+If you're developing the **Android** app - install https://developer.android.com/studio/releases/ if you haven't already, import the `HelloVoter/android` project, and follow the prompts to download all the build and runtime dependancies. You'll also have to run this command:
 
 `echo "sdk.dir = $HOME/Library/Android/sdk" > android/local.properties`
 
