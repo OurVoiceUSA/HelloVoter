@@ -34,6 +34,7 @@ import CanvassingSettingsPage from '../CanvassingSettingsPage';
 import Modal from 'react-native-simple-modal';
 import md5 from 'md5';
 import { debounce } from 'throttle-debounce';
+import { orderBy } from 'natural-orderby';
 import TimeAgo from 'javascript-time-ago'
 import en from 'javascript-time-ago/locale/en'
 import t from 'tcomb-form-native';
@@ -54,6 +55,9 @@ var formCity = t.struct({
 var formState = t.struct({
   'state': t.String,
   'zip': t.String,
+});
+var unitForm = t.struct({
+  'unit': t.String,
 });
 
 const formStyleRow = _.cloneDeep(t.form.Form.stylesheet);
@@ -108,11 +112,13 @@ export default class App extends OVComponent {
       searchPins: [],
       fAddress: {},
       pAddress: {},
+      fUnit: {},
       DisclosureKey : 'OV_DISCLOUSER',
       settingsStorageKey: 'OV_CANVASS_SETTINGS',
       canvassSettings: {},
       isModalVisible: false,
       isKnockMenuVisible: false,
+      newUnitModalVisible: false,
       showDisclosure: "true",
       form: props.navigation.state.params.form,
       user: props.navigation.state.params.user,
@@ -123,6 +129,7 @@ export default class App extends OVComponent {
     if (this.state.form.add_new) this.add_new = true;
 
     this.onChange = this.onChange.bind(this);
+    this.onUnitChange = this.onUnitChange.bind(this);
     this.onRegionChange = this.onRegionChange.bind(this);
     this.handleConnectivityChange = this.handleConnectivityChange.bind(this);
 
@@ -136,7 +143,7 @@ export default class App extends OVComponent {
         'Are you sure you wish to exit the canvassing?',
         [
           {text: 'Yes', onPress: () => {
-            this.state.refer._loadForms();
+            this._loadForms();
             this.goBack();
           }},
           {text: 'No'},
@@ -357,6 +364,10 @@ export default class App extends OVComponent {
     this.setState({fAddress});
   }
 
+  onUnitChange(fUnit) {
+    this.setState({fUnit});
+  }
+
   getEpoch() {
     return Math.floor(new Date().getTime())
   }
@@ -437,7 +448,7 @@ export default class App extends OVComponent {
     this.currentMarker = marker;
 
     if (marker.units.length)
-      navigate('ListMultiUnit', {refer: this, form: form});
+      this.setState({active: 'multiunit'});
     else
       this.setState({isKnockMenuVisible: true});
   }
@@ -693,6 +704,36 @@ export default class App extends OVComponent {
     }
   }
 
+  addUnit = async () => {
+    let { form, myPosition } = this.state;
+
+    let json = this.refs.unitForm.getValue();
+    if (json == null) return;
+
+    // search for dupes
+    let dupe = false;
+    this.currentMarker.units.forEach(u => {
+      if (u.name.toLowerCase() === json.unit.toLowerCase()) dupe = true;
+    });
+
+    if (!dupe) {
+      let input = {
+        deviceId: DeviceInfo.getUniqueID(),
+        formId: form.id,
+        timestamp: this.getEpoch(),
+        longitude: myPosition.longitude,
+        latitude: myPosition.latitude,
+        unit: json.unit,
+        addressId: this.currentMarker.address.id,
+      };
+
+      this.sendData('/address/add/unit', input);
+      this.currentMarker.units.push({name: json.unit, people: []});
+    }
+
+    this.setState({newUnitModalVisible: false, fUnit: {}});
+  }
+
   notHome = async (id, place, unit) => {
     this.sendStatus(0, id, place, unit);
   }
@@ -869,6 +910,52 @@ export default class App extends OVComponent {
     return (
       <View style={{flex: 1}}>
         <ScrollView style={{flex: 1, backgroundColor: '#FFF'}}>
+        {active==='multiunit'&&
+        <View>
+          <Text style={{fontSize: 20, padding: 10}}>{this.currentMarker.address.street}, {this.currentMarker.address.city}</Text>
+
+          {this.add_new &&
+          <Icon.Button
+            name="plus-circle"
+            backgroundColor="#d7d7d7"
+            color="#000000"
+            onPress={() => {
+              if (!this.addOk()) {
+                Alert.alert('Active Filter', 'You cannot add a new address while a filter is active.', [{text: 'OK'}], { cancelable: false });
+                return;
+              }
+              this.setState({ newUnitModalVisible: true });
+            }}
+            {...iconStyles}>
+            Add new unit/apt number
+          </Icon.Button>
+          }
+
+          <FlatList
+            scrollEnabled={false}
+            data={orderBy(this.currentMarker.units, u => u.name)}
+            extraData={this.state}
+            keyExtractor={item => item.name}
+            renderItem={({item}) => {
+              let color = this.getPinColor(item);
+              let icon = (color === "red" ? "ban" : "address-book");
+
+              return (
+                <View key={item.name} style={{padding: 10}}>
+                  <TouchableOpacity
+                    style={{flexDirection: 'row', alignItems: 'center'}}
+                    onPress={() => {
+                      this.setState({ isKnockMenuVisible: true, currentUnit: item });
+                    }}>
+                    <Icon name={icon} size={40} color={color} style={{margin: 5}} />
+                    <Text>Unit {item.name} - {this.getLastVisit(item)}</Text>
+                  </TouchableOpacity>
+                </View>
+              );
+            }}
+          />
+        </View>
+        }
         {active==='list'&&
           <View>
           {this.state.listview_order.length&&
@@ -1110,7 +1197,39 @@ export default class App extends OVComponent {
           modalDidClose={() => this.setState({isKnockMenuVisible: false})}
           closeOnTouchOutside={true}
           disableOnBackPress={false}>
-          <KnockPage refer={this} funcs={this} marker={this.currentMarker} form={form} />
+          <KnockPage refer={this} funcs={this} marker={this.currentMarker} unit={this.state.currentUnit} form={form} />
+        </Modal>
+
+        <Modal
+          open={this.state.newUnitModalVisible}
+          modalStyle={{width: 335, height: 250, backgroundColor: "transparent",
+            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
+          style={{alignItems: 'center'}}
+          offset={0}
+          overlayBackground={'rgba(0, 0, 0, 0.75)'}
+          animationDuration={200}
+          animationTension={40}
+          modalDidOpen={() => undefined}
+          modalDidClose={() => this.setState({newUnitModalVisible: false})}
+          closeOnTouchOutside={true}
+          disableOnBackPress={false}>
+          <View style={styles.container}>
+            <View>
+              <View style={{flex: 1, flexDirection: 'row', margin: 20, alignItems: 'center'}}>
+                <Text>Recording a new unit for this address:</Text>
+              </View>
+              <Form
+                ref="unitForm"
+                type={unitForm}
+                options={{fields: {unit: {autoFocus: true}}}}
+                onChange={this.onUnitChange}
+                value={this.state.fUnit}
+              />
+              <TouchableHighlight style={styles.button} onPress={this.addUnit} underlayColor='#99d9f4'>
+                <Text style={styles.buttonText}>Add</Text>
+              </TouchableHighlight>
+            </View>
+          </View>
         </Modal>
 
         <BottomNavigation active={this.state.active} hidden={false} >
@@ -1214,6 +1333,10 @@ const displayNone = {
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#FFF',
+  },
   content: {
     flex: 1,
     justifyContent: 'center',
@@ -1261,3 +1384,4 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
 });
+

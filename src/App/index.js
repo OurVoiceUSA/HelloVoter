@@ -25,7 +25,6 @@ import HomeScreenPage from '../components/HomeScreenPage';
 import PolProfilePage from '../components/PolProfilePage';
 import SettingsPage from '../components/SettingsPage';
 import CanvassingPage from '../components/CanvassingPage';
-import ListMultiUnitPage from '../components/ListMultiUnitPage';
 import SurveyPage from '../components/SurveyPage';
 import CreateSurveyPage from '../components/CreateSurveyPage';
 import LegacyCanvassingPage from '../components/LegacyCanvassingPage';
@@ -58,13 +57,6 @@ const AppNavigator = createStackNavigator({
       title: 'Canvassing',
       headerLeft: (<GoBack nav={navigation} />),
       gesturesEnabled: false,
-    }),
-  },
-  ListMultiUnit: {
-    screen: ListMultiUnitPage,
-    navigationOptions: ({navigation}) => ({
-      title: 'Units',
-      headerLeft: null,
     }),
   },
   Survey: {
