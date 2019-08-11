@@ -143,7 +143,7 @@ export default class App extends OVComponent {
         'Are you sure you wish to exit the canvassing?',
         [
           {text: 'Yes', onPress: () => {
-            this._loadForms();
+            this.state.refer._loadForms();
             this.goBack();
           }},
           {text: 'No'},
@@ -553,6 +553,12 @@ export default class App extends OVComponent {
 
       // gather unique cities & streets
       json.forEach((marker) => {
+        // catch null markers
+        if (!marker.address) {
+          console.warn("Null address on marker: ", marker);
+          marker.address = {longitude: 0, latitude: 0, id: parseInt(Math.random()*1000)};
+          return;
+        }
         let street = marker.address.street.replace(/\d+ /, '');
 
         if (!listview[street]) {
@@ -1395,4 +1401,3 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
 });
-
