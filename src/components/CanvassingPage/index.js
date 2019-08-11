@@ -975,6 +975,7 @@ export default class App extends OVComponent {
         {active==='history'&&
           <History refer={this} loading={this.state.fetchingHistory} data={this.state.history} onPress={(pos) => {
             this.setState({active: 'map'});
+            if (this.state.canvassSettings.chill_mode) this._dataGet(pos);
             this.map.animateToCoordinate(pos, 1000);
           }} />
         }
@@ -1075,7 +1076,10 @@ export default class App extends OVComponent {
             }
 
             <TouchableOpacity style={styles.iconContainer}
-              onPress={() => this.map.animateToCoordinate(myPosition, 1000)}>
+              onPress={() => {
+                if (this.state.canvassSettings.chill_mode) this._dataGet(myPosition);
+                this.map.animateToCoordinate(myPosition, 1000);
+              }}>
               <Icon
                 name="location-arrow"
                 size={50}
