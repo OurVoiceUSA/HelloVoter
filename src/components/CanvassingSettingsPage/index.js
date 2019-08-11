@@ -73,6 +73,20 @@ export default class App extends PureComponent {
 
       <SettingsDividerLong />
 
+      <SettingsSwitch
+        title="Chill Mode"
+        onValueChange={chill_mode => this.changeSetting('chill_mode', chill_mode)}
+        value={refer.state.canvassSettings.chill_mode}
+        trackColor={{
+          true: colors.switchEnabled,
+          false: colors.switchDisabled,
+        }}
+      />
+
+      <SettingsTextLabel title={"Use less cellular data and battery by only loading data when you tap the load button, rather than every time you move the map."} />
+
+      <SettingsDividerShort />
+
       <SettingsPicker
         title="Limit Addresses"
         options={size_matters}

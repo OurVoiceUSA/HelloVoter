@@ -154,8 +154,8 @@ export default class App extends OVComponent {
   }
 
   onRegionChange(region) {
-    this._dataGet(region);
     this.setState({mapCenter: region})
+    if (this.state.canvassSettings.chill_mode !== true) this._dataGet(region);
   }
 
   setupConnectionListener = async () => {
@@ -498,12 +498,14 @@ export default class App extends OVComponent {
   }
 
   _dataFetch = async (pos, flag) => {
-    const { canvassSettings, myPosition, lastFetchPosition } = this.state;
+    const { canvassSettings, myPosition, lastFetchPosition, fetching } = this.state;
     let ret = {error: false};
 
     if (!pos) pos = myPosition;
 
     if (!pos.longitude || !pos.latitude) return;
+
+    if (fetching) return;
 
     this.setState({fetching: true});
 
@@ -970,49 +972,56 @@ export default class App extends OVComponent {
         </View>
         }
 
-        {active==='map'&&
+        {active==='map' && nomap_content.length === 0 &&
         <View style={{alignItems: 'center', justifyContent: 'flex-end'}}>
-        <View style={styles.buttonContainer}>
+          <View style={styles.buttonContainer}>
 
-          {nomap_content.length == 0 &&
-          <TouchableOpacity style={styles.iconContainer}
-            onPress={() => this.map.animateToCoordinate(myPosition, 1000)}>
-            <Icon
-              name="location-arrow"
-              size={50}
-              color="#0084b4"
-              {...iconStyles} />
-          </TouchableOpacity>
-          }
+            {this.state.canvassSettings.chill_mode &&
+            <TouchableOpacity style={styles.iconContainer} disabled={fetching}
+              onPress={() => this._dataGet(mapCenter)}>
+              <Icon
+                name="refresh"
+                size={50}
+                color={(fetching?"#d3d3d3":"#00a86b")}
+                {...iconStyles} />
+            </TouchableOpacity>
+            }
 
-          {nomap_content.length == 0 &&
-          <TouchableOpacity style={styles.iconContainer}
-            onPress={() => {
-              RNGooglePlaces.openAutocompleteModal(
-                {
-                  locationBias: {
-                    latitudeNE: mapCenter.latitude+0.1,
-                    longitudeNE: mapCenter.longitude+0.1,
-                    latitudeSW: mapCenter.latitude-0.1,
-                    longitudeSW: mapCenter.longitude-0.1,
-                  }
-                },
-                ['location','address']
-              ).then((place) => {
-                this.dropSearchPin(place);
-                this.map.animateToCoordinate(place.location, 1000);
-              })
-              .catch(e => {});
-            }}>
-            <Icon
-              name="search"
-              size={40}
-              color="#000000"
-              {...iconStyles} />
-          </TouchableOpacity>
-          }
+            <TouchableOpacity style={styles.iconContainer}
+              onPress={() => this.map.animateToCoordinate(myPosition, 1000)}>
+              <Icon
+                name="location-arrow"
+                size={50}
+                color="#0084b4"
+                {...iconStyles} />
+            </TouchableOpacity>
 
-        </View>
+            <TouchableOpacity style={styles.iconContainer}
+              onPress={() => {
+                RNGooglePlaces.openAutocompleteModal(
+                  {
+                    locationBias: {
+                      latitudeNE: mapCenter.latitude+0.1,
+                      longitudeNE: mapCenter.longitude+0.1,
+                      latitudeSW: mapCenter.latitude-0.1,
+                      longitudeSW: mapCenter.longitude-0.1,
+                    }
+                  },
+                  ['location','address']
+                ).then((place) => {
+                  this.dropSearchPin(place);
+                  this.map.animateToCoordinate(place.location, 1000);
+                })
+                .catch(e => {});
+              }}>
+              <Icon
+                name="search"
+                size={40}
+                color="#000000"
+                {...iconStyles} />
+            </TouchableOpacity>
+
+          </View>
         </View>
         }
 
