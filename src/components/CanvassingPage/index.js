@@ -968,7 +968,7 @@ export default class App extends OVComponent {
 
         {active==='map'&&selectedTurf.id&&
         <View style={{position: 'absolute', left: 0, ...styles.turfInfoContainer}}>
-          <Text>Turf: {selectedTurf.name}</Text>
+          <Text>{selectedTurf.name}</Text>
         </View>
         }
 
