@@ -931,13 +931,20 @@ export default class App extends OVComponent {
           </Icon.Button>
           }
 
+          {(this.currentMarker.people && this.currentMarker.people.length !== 0) &&
+          <Unit unit={this.currentMarker}
+            unknown={true}
+            refer={this}
+            color={this.getPinColor(this.currentMarker)} />
+          }
+
           <FlatList
             scrollEnabled={false}
             data={orderBy(this.currentMarker.units, u => u.name)}
             extraData={this.state}
             keyExtractor={item => item.name}
             renderItem={({item}) => (
-              <Unit item={item}
+              <Unit unit={item}
                 refer={this}
                 color={this.getPinColor(item)} />
             )} />
@@ -1271,14 +1278,14 @@ function timeFormat(epoch) {
 }
 
 const Unit = props => (
-  <View key={props.item.name} style={{padding: 10}}>
+  <View key={props.unit.name} style={{padding: 10}}>
     <TouchableOpacity
       style={{flexDirection: 'row', alignItems: 'center'}}
       onPress={() => {
-        props.refer.setState({ isKnockMenuVisible: true, currentUnit: props.item });
+        props.refer.setState({ isKnockMenuVisible: true, currentUnit: props.unit });
       }}>
       <Icon name={(props.color === "red" ? "ban" : "address-book")} size={40} color={props.color} style={{margin: 5}} />
-      <Text>Unit {props.item.name} - {props.refer.getLastVisit(props.item)}</Text>
+      <Text>Unit {(props.unknown?"Unknown":props.unit.name)} - {props.refer.getLastVisit(props.unit)}</Text>
     </TouchableOpacity>
   </View>
 );
