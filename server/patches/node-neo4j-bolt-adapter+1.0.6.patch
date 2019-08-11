@@ -1,5 +1,9 @@
+diff --git a/node_modules/node-neo4j-bolt-adapter/.index.js.swp b/node_modules/node-neo4j-bolt-adapter/.index.js.swp
+new file mode 100644
+index 0000000..53b5c2c
+Binary files /dev/null and b/node_modules/node-neo4j-bolt-adapter/.index.js.swp differ
 diff --git a/node_modules/node-neo4j-bolt-adapter/Mapper.js b/node_modules/node-neo4j-bolt-adapter/Mapper.js
-index d90814c..8b0a72b 100644
+index d90814c..16d2bc1 100644
 --- a/node_modules/node-neo4j-bolt-adapter/Mapper.js
 +++ b/node_modules/node-neo4j-bolt-adapter/Mapper.js
 @@ -8,14 +8,14 @@
@@ -35,10 +39,10 @@ index d90814c..8b0a72b 100644
      if (isRecord(val)) return toNative(recordToNative(val));
      if (typeof val === 'object') return mapObj(toNative, val);
 diff --git a/node_modules/node-neo4j-bolt-adapter/index.js b/node_modules/node-neo4j-bolt-adapter/index.js
-index 76d1ae6..581f2c2 100644
+index 76d1ae6..05f3cc5 100644
 --- a/node_modules/node-neo4j-bolt-adapter/index.js
 +++ b/node_modules/node-neo4j-bolt-adapter/index.js
-@@ -8,14 +8,13 @@
+@@ -8,22 +8,21 @@
  //
  ////////////////////////////////////////////////////////////////////////////////
  
@@ -54,4 +58,29 @@ index 76d1ae6..581f2c2 100644
 +        this.mapper = new Mapper(lib);
      }
  
-     cypherQueryAsync(query, params) {
+-    cypherQueryAsync(query, params) {
++    cypherQueryAsync(query, params, database) {
+ 
+         const self = this;
+         return new Promise(function (resolve, reject) {
+ 
+-            const session = self.driver.session();
++            const session = self.driver.session((database?{database}:null));
+             const readPromise = session.readTransaction(transaction => transaction.run(query, params));
+ 
+             readPromise.then(result => {
+@@ -36,12 +35,12 @@ class BoltAdapter {
+         })
+     }
+ 
+-    writeQueryAsync(query, params) {
++    writeQueryAsync(query, params, database) {
+ 
+         const self = this;
+         return new Promise((resolve, reject) => {
+ 
+-            const session = self.driver.session();
++            const session = self.driver.session((database?{database}:null));
+             const writePromise = session.writeTransaction(transaction => transaction.run(query, params));
+ 
+             writePromise.then(result => {

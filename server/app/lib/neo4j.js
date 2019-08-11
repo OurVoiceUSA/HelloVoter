@@ -24,14 +24,14 @@ export default class db {
           console.log('DEBUG: :params '+str.substring(0, 1024));
         }
       }
-      return this.db[func](params[0], params[1]);
+      return this.db[func](params[0], params[1], params[2]);
   }
 
-  async query(q, p) {
+  async query(q, p, d) {
     try {
-      return await this.dbwrap('cypherQueryAsync', q, p);
+      return await this.dbwrap('cypherQueryAsync', q, p, d);
     } catch (e) {
-      console.warn({q,p});
+      console.warn({q,p,d});
       throw e;
     }
   }
