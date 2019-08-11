@@ -197,7 +197,7 @@ async function visitsAndPeople(req, res) {
       if (req.query.dist >= 16000) enough = true;
     }
 
-    let q;
+    let q = '';
 
     if (ov_config.disable_spatial === false) q = `match (v:Volunteer {id:{id}})
   optional match (t:Turf)-[:ASSIGNED]->(:Team)-[:MEMBERS]->(v)
@@ -214,7 +214,7 @@ async function visitsAndPeople(req, res) {
 
     q += `where `+(ov_config.disable_spatial === false?`(a)-[:WITHIN]->(t) `:``);
 
-    if (!req.query.aId) q += `distance(a.position, point({longitude: {longitude}, latitude: {latitude}})) < {dist}
+    if (!req.query.aId) q += (ov_config.disable_spatial === false?`and `:``)+`distance(a.position, point({longitude: {longitude}, latitude: {latitude}})) < {dist}
   with a, distance(a.position, point({longitude: {longitude}, latitude: {latitude}})) as dist
   order by dist limit {limit} `;
 
