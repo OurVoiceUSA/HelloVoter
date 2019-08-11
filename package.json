@@ -59,7 +59,7 @@
 		"@babel/node": "^7.5.5",
 		"detox": "^14.0.1",
 		"geojson-bbox": "0.0.0",
-		"jetifier": "^1.6.3",
+		"jetifier": "^1.6.4",
 		"metro-react-native-babel-preset": "^0.55.0",
 		"mocha": "^6.2.0",
 		"patch-package": "^6.1.2",
