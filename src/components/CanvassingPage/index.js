@@ -936,24 +936,11 @@ export default class App extends OVComponent {
             data={orderBy(this.currentMarker.units, u => u.name)}
             extraData={this.state}
             keyExtractor={item => item.name}
-            renderItem={({item}) => {
-              let color = this.getPinColor(item);
-              let icon = (color === "red" ? "ban" : "address-book");
-
-              return (
-                <View key={item.name} style={{padding: 10}}>
-                  <TouchableOpacity
-                    style={{flexDirection: 'row', alignItems: 'center'}}
-                    onPress={() => {
-                      this.setState({ isKnockMenuVisible: true, currentUnit: item });
-                    }}>
-                    <Icon name={icon} size={40} color={color} style={{margin: 5}} />
-                    <Text>Unit {item.name} - {this.getLastVisit(item)}</Text>
-                  </TouchableOpacity>
-                </View>
-              );
-            }}
-          />
+            renderItem={({item}) => (
+              <Unit item={item}
+                refer={this}
+                color={this.getPinColor(item)} />
+            )} />
         </View>
         }
         {active==='list'&&
@@ -1283,7 +1270,20 @@ function timeFormat(epoch) {
   return date.toLocaleDateString('en-us')+" "+date.toLocaleTimeString('en-us');
 }
 
-const History = (props) => (
+const Unit = props => (
+  <View key={props.item.name} style={{padding: 10}}>
+    <TouchableOpacity
+      style={{flexDirection: 'row', alignItems: 'center'}}
+      onPress={() => {
+        props.refer.setState({ isKnockMenuVisible: true, currentUnit: props.item });
+      }}>
+      <Icon name={(props.color === "red" ? "ban" : "address-book")} size={40} color={props.color} style={{margin: 5}} />
+      <Text>Unit {props.item.name} - {props.refer.getLastVisit(props.item)}</Text>
+    </TouchableOpacity>
+  </View>
+);
+
+const History = props => (
   <ScrollView>
     {props.loading&&
     <ActivityIndicator size="large" />
