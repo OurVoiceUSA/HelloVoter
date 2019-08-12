@@ -2,6 +2,7 @@
 import wkx from 'wkx';
 import { asyncForEach, sleep } from 'ourvoiceusa-sdk-js';
 import { ov_config } from '../../../lib/ov_config';
+import { deepCopy } from 'ourvoiceusa-sdk-js';
 import {
   _volunteersFromCypher,
   cqdo, valid, _400, _403, _500, _501
@@ -82,7 +83,7 @@ module.exports = Router({mergeParams: true})
 })
 .get('/turf/get', async (req, res) => {
   if (!valid(req.query.turfId)) return _400(res, "Invalid value to parameter 'turfId'.");
-  let ref, turf = {data: []};
+  let ref, turf = {};
   if (req.user.admin)
     ref = await req.db.query('match (a:Turf {id:{turfId}}) return a', req.query);
   else {
@@ -90,10 +91,10 @@ module.exports = Router({mergeParams: true})
     ref = await req.db.query('match (:Volunteer {id:{id}})-[:ASSIGNED]-(a:Turf {id:{turfId}}) return a UNION match (:Volunteer {id:{id}})-[:ASSIGNED]-(:Team)-[:ASSIGNED]-(a:Turf {id:{turfId}}) return a', req.query);
   }
 
-  turf.data = ref.data;
+  if (ref.data.length) {
+    turf = deepCopy(ref.data[0]);
 
-  if (turf.data.length) {
-    let ref = await req.db.query(`
+    ref = await req.db.query(`
 match (t:Turf {id:{turfId}})
 optional match (v:Volunteer)<-[:ASSIGNED]-(t)
   with t, count(v) as total_assigned
@@ -106,7 +107,7 @@ optional match (vi:Visit)-[:VISIT_AT]->()-[*0..1]-(:Address)-[:WITHIN]->(t)
 return last_touch, active_name, total_active, total_assigned`,
     req.query);
     // turf stats
-    turf.data[0].stats = {
+    turf.stats = {
       'Last Touch': ref.data[0][0],
       'Most active volunteer': ref.data[0][1],
       'Number of active volunteers': ref.data[0][2],
@@ -117,7 +118,7 @@ return last_touch, active_name, total_active, total_assigned`,
       }
     };
     await asyncForEach((await req.db.query('match (aq:AttributeQuery) return aq.id, aq.name')).data, async (aq) => {
-      turf.data[0].stats['Stats by Attribute'][aq[1]] = await stats_by_attr(req, aq[0]);
+      turf.stats['Stats by Attribute'][aq[1]] = await stats_by_attr(req, aq[0]);
     });
   }
 
