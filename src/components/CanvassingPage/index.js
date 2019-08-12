@@ -101,8 +101,10 @@ export default class App extends OVComponent {
       loading: false,
       fetching: false,
       fetchingHistory: false,
+      fetchingTurfStats: false,
       checkHistory: true,
       history: [],
+      turfStats: {},
       netInfo: 'none',
       serviceError: null,
       myPosition: {latitude: null, longitude: null},
@@ -506,6 +508,39 @@ export default class App extends OVComponent {
     if (!place.visits) place.visits = [];
     place.visits.push(input);
     this.forceUpdate();
+  }
+
+  _loadTurfStats = async () => {
+    const { selectedTurf } = this.state;
+
+    this.setState({active: 'turfstats', fetchingTurfStats: true});
+
+    try {
+      let https = true;
+      if (this.state.server.match(/:8080/)) https = false;
+      let res = await fetch(
+        'http'+(https?'s':'')+'://'+this.state.server+API_BASE_URI+'/turf/get?turfId='+selectedTurf.id,
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': 'Bearer '+await _getApiToken(),
+          'Content-Type': 'application/json',
+        },
+      });
+
+      let json = await res.json();
+
+      if (res.status !== 200 || json.error === true) {
+        if (json.msg) ret.msg = json.msg;
+        throw "Sync error";
+      }
+
+      this.setState({turfStats: json});
+    } catch (e) {
+      this.triggerNetworkWarning();
+    }
+
+    this.setState({fetchingTurfStats: false});
   }
 
   _dataFetch = async (pos, flag) => {
@@ -916,6 +951,9 @@ export default class App extends OVComponent {
     return (
       <View style={{flex: 1}}>
         <ScrollView style={{flex: 1, backgroundColor: '#FFF'}}>
+        {active==='turfstats'&&
+          <TurfStats refer={this} loading={this.state.fetchingTurfStats} data={this.state.turfStats} />
+        }
         {active==='multiunit'&&
         <View>
           <Text style={{fontSize: 20, padding: 10}}>{this.currentMarker.address.street}, {this.currentMarker.address.city}</Text>
@@ -1055,9 +1093,10 @@ export default class App extends OVComponent {
         }
 
         {active==='map'&&selectedTurf.id&&
-        <View style={{position: 'absolute', left: 0, ...styles.turfInfoContainer}}>
+        <TouchableOpacity style={{position: 'absolute', left: 0, ...styles.turfInfoContainer}}
+          onPress={() => this._loadTurfStats()}>
           <Text>{selectedTurf.name}</Text>
-        </View>
+        </TouchableOpacity>
         }
 
         {active==='map' && nomap_content.length === 0 &&
@@ -1293,6 +1332,19 @@ const Unit = props => (
       <Icon name={(props.color === "red" ? "ban" : "address-book")} size={40} color={props.color} style={{margin: 5}} />
       <Text>Unit {(props.unknown?"Unknown":props.unit.name)} - {props.refer.getLastVisit(props.unit)}</Text>
     </TouchableOpacity>
+  </View>
+);
+
+const TurfStats = props => (
+  <View>
+    {props.loading&&
+    <ActivityIndicator size="large" />
+    }
+    {!props.loading&&
+    <View style={{padding: 10}}>
+      <Text>{JSON.stringify(props.data.stats)}</Text>
+    </View>
+    }
   </View>
 );
 
