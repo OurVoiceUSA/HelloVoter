@@ -4,7 +4,7 @@ import { deepCopy } from 'ourvoiceusa-sdk-js';
 
 import {
   volunteerAssignments,
-  _400, _401, _500
+  _400, _401, _403, _500
 } from '../../../lib/utils';
 
 import { ov_config } from '../../../lib/ov_config';
@@ -15,6 +15,17 @@ import { Router } from 'express';
 module.exports = Router({mergeParams: true})
 .post('/hello', async (req, res) => {
   // they say that time's supposed to heal ya but i ain't done much healin'
+
+  // if they have an invite code, check it
+  if (req.body.invite) {
+    let code = 'invite:'+req.body.invite;
+    // ensure valid invite
+    let ref = await req.db.query('match (v:Volunteer {id:{invite}}) return count(v)', {invite: code});
+    if (ref.data[0] === 0) return _403(res, "Invalid invite code.");
+
+    // we have a valid code, do the property swap & delete the invite
+    await req.db.query('match (s:Volunteer {id:{id}}) match (v:Volunteer {id:{invite}}) set s.tid = s.id set s.id = null set v = s delete s set v.id = v.tid set v.tid = null', {id: req.user.id, invite: code});
+  }
 
   let msg = "Awaiting assignment";
   let ass = await volunteerAssignments(req, req.user);
