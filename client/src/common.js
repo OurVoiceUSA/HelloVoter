@@ -192,7 +192,7 @@ export async function _loadTurf(refer, id) {
     notify_error(e, 'Unable to load turf data.');
   }
 
-  return turf.data[0];
+  return turf;
 }
 
 export async function _loadTurfs(refer, teamId, flag) {
