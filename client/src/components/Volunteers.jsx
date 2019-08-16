@@ -107,16 +107,16 @@ export default class Volunteers extends Component {
     let ready = [];
     let unassigned = [];
     let denied = [];
+    let invited = [];
 
     this.state.volunteers.forEach(c => {
       if (this.state.search && !_searchStringify(c).includes(this.state.search))
         return;
       if (c.locked) {
         denied.push(c);
-      } else {
-        if (c.ass.ready || c.ass.teams.length) ready.push(c);
-        else unassigned.push(c);
-      }
+      } else if (c.invited) invited.push(c);
+      else if (c.ass.ready || c.ass.teams.length) ready.push(c);
+      else unassigned.push(c);
     });
 
     return (
@@ -146,6 +146,13 @@ export default class Volunteers extends Component {
             </Link>
             &nbsp;-&nbsp;
             <Link
+              to={'/volunteers/invited'}
+              onClick={() => this.setState({ pageNum: 1 })}
+            > 
+              Invited ({invited.length})
+            </Link>
+            &nbsp;-&nbsp;
+            <Link
               to={'/volunteers/denied'}
               onClick={() => this.setState({ pageNum: 1 })}
             >
@@ -164,6 +171,17 @@ export default class Volunteers extends Component {
                   refer={this}
                   type="Unassigned"
                   volunteers={unassigned}
+                />
+              )}
+            />
+            <Route
+              exact={true}
+              path="/volunteers/invited"
+              render={() => (
+                <ListVolunteers
+                  refer={this}
+                  type="Invited"
+                  volunteers={invited}
                 />
               )}
             />

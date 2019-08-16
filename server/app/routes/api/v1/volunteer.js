@@ -4,7 +4,21 @@ import {
   cqdo, valid, _400, _403, _500
 } from '../../../lib/utils';
 
+import crypto from 'crypto';
+
 import { Router } from 'express';
+
+function generateToken({ stringBase = 'base64', byteLength = 48 } = {}) {
+  return new Promise((resolve, reject) => {
+    crypto.randomBytes(byteLength, (err, buffer) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(buffer.toString(stringBase));
+      }
+    });
+  });
+}
 
 module.exports = Router({mergeParams: true})
 .get('/volunteer/list',  async (req, res) => {
@@ -50,6 +64,15 @@ module.exports = Router({mergeParams: true})
   }
 
   return res.json({});
+})
+.post('/volunteer/invite', async (req, res) => {
+  if (!req.user.admin) return _403(res, "Permission denied.");
+
+  let token = await generateToken();
+
+  await req.db.query('match (v:Volunteer {id:{id}}) create (i:Volunteer {id: {token}}) create (i)-[r:INVITED_BY]->(v) set r.created = timestamp(), i.invited = true', {id: req.user.id, token: 'invite:'+token});
+
+  return res.json({token});
 })
 .post('/volunteer/lock', async (req, res) => {
   if (req.body.id === req.user.id) return _403(res, "You can't lock yourself.");

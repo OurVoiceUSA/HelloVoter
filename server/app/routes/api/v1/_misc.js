@@ -24,7 +24,7 @@ module.exports = Router({mergeParams: true})
     if (ref.data[0] === 0) return _403(res, "Invalid invite code.");
 
     // we have a valid code, do the property swap & delete the invite
-    await req.db.query('match (s:Volunteer {id:{id}}) match (v:Volunteer {id:{invite}}) set s.tid = s.id set s.id = null set v = s delete s set v.id = v.tid set v.tid = null', {id: req.user.id, invite: code});
+    await req.db.query('match (s:Volunteer {id:{id}}) match (v:Volunteer {id:{invite}}) set s.tid = s.id set s.id = null set v = s delete s set v.id = v.tid set v.tid = null, v.invited = null', {id: req.user.id, invite: code});
   }
 
   let msg = "Awaiting assignment";
