@@ -13,6 +13,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Avatar from '@material-ui/core/Avatar';
+import Button from '@material-ui/core/Button';
 
 import {
   API_BASE_URI,
@@ -148,7 +149,7 @@ export default class Volunteers extends Component {
             <Link
               to={'/volunteers/invited'}
               onClick={() => this.setState({ pageNum: 1 })}
-            > 
+            >
               Invited ({invited.length})
             </Link>
             &nbsp;-&nbsp;
@@ -178,11 +179,27 @@ export default class Volunteers extends Component {
               exact={true}
               path="/volunteers/invited"
               render={() => (
-                <ListVolunteers
-                  refer={this}
-                  type="Invited"
-                  volunteers={invited}
-                />
+                <div>
+                  <ListVolunteers
+                    refer={this}
+                    type="Invited"
+                    volunteers={invited}
+                  />
+                  <Button onClick={async () => {
+                    let obj = await _fetch(
+                      this.props.server,
+                      API_BASE_URI+'/volunteer/invite',
+                      'POST'
+                    );
+                    if (obj.token) {
+                      this.setState({ thisVolunteer: {id: 'invite:'+obj.token} });
+                    } else {
+                      notify_error({}, 'Invite failed.');
+                    }
+                  }} color="primary">
+                    Invite Someone
+                  </Button>
+                </div>
               )}
             />
             <Route
