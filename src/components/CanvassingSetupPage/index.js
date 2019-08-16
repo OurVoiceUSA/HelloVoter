@@ -915,6 +915,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
         </Modal>
 
         <Prompt
+          autoCorrect={false}
           visible={this.state.askOrgId}
           title={"Organization ID"}
           belowInputText={"If you don’t have an Organization ID yet, please ask your organization to provide you with one."}

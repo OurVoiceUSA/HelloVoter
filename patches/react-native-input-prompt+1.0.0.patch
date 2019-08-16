@@ -1,26 +1,28 @@
 diff --git a/node_modules/react-native-input-prompt/src/Prompt.js b/node_modules/react-native-input-prompt/src/Prompt.js
-index 1f9353d..10dcd4a 100644
+index 1f9353d..63130f1 100644
 --- a/node_modules/react-native-input-prompt/src/Prompt.js
 +++ b/node_modules/react-native-input-prompt/src/Prompt.js
-@@ -14,6 +14,8 @@ import PropTypes from "prop-types";
+@@ -14,6 +14,9 @@ import PropTypes from "prop-types";
  export default class Prompt extends Component {
  	static propTypes = {
  		title: PropTypes.string.isRequired,
 +                aboveInputText: PropTypes.string,
 +                belowInputText: PropTypes.string,
++		autoCorrect: PropTypes.bool,
  		visible: PropTypes.bool.isRequired,
  		placeholder: PropTypes.string.isRequired,
  		cancelText: PropTypes.string,
-@@ -30,6 +32,8 @@ export default class Prompt extends Component {
+@@ -30,6 +33,9 @@ export default class Prompt extends Component {
  
  	static defaultProps = {
  		title: "Title",
 +                aboveInputText: "",
 +                belowInputText: "",
++                autoCorrect: true,
  		visible: false,
  		placeholder: "Placeholder",
  		cancelText: "Cancel",
-@@ -77,13 +81,24 @@ export default class Prompt extends Component {
+@@ -77,13 +83,25 @@ export default class Prompt extends Component {
  						<Text style={[styles.title, this.props.titleStyle]}>
  							{this.props.title}
  						</Text>
@@ -30,6 +32,7 @@ index 1f9353d..10dcd4a 100644
 +                                                </Text>
 +                                                }
  						<TextInput
++                                                        autoCorrect={this.props.autoCorrect}
  							placeholder={this.props.placeholder}
 +                                                        defaultValue={this.props.value}
  							style={styles.textInput}
