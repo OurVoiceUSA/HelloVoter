@@ -1,13 +1,52 @@
+diff --git a/node_modules/react-native-input-prompt/src/Prompt.js b/node_modules/react-native-input-prompt/src/Prompt.js
+index 1f9353d..10dcd4a 100644
 --- a/node_modules/react-native-input-prompt/src/Prompt.js
 +++ b/node_modules/react-native-input-prompt/src/Prompt.js
-@@ -79,6 +79,7 @@ export default class Prompt extends Component {
+@@ -14,6 +14,8 @@ import PropTypes from "prop-types";
+ export default class Prompt extends Component {
+ 	static propTypes = {
+ 		title: PropTypes.string.isRequired,
++                aboveInputText: PropTypes.string,
++                belowInputText: PropTypes.string,
+ 		visible: PropTypes.bool.isRequired,
+ 		placeholder: PropTypes.string.isRequired,
+ 		cancelText: PropTypes.string,
+@@ -30,6 +32,8 @@ export default class Prompt extends Component {
+ 
+ 	static defaultProps = {
+ 		title: "Title",
++                aboveInputText: "",
++                belowInputText: "",
+ 		visible: false,
+ 		placeholder: "Placeholder",
+ 		cancelText: "Cancel",
+@@ -77,13 +81,24 @@ export default class Prompt extends Component {
+ 						<Text style={[styles.title, this.props.titleStyle]}>
+ 							{this.props.title}
  						</Text>
++                                                {(this.props.aboveInputText?true:false)&&
++                                                <Text style={[styles.aboveInputText]}>
++                                                        {this.props.aboveInputText}
++                                                </Text>
++                                                }
  						<TextInput
  							placeholder={this.props.placeholder}
 +                                                        defaultValue={this.props.value}
  							style={styles.textInput}
  							onChangeText={this._onChangeText.bind(this)}
  							onSubmitEditing={this._onSubmit.bind(this)}
+ 							autoFocus={true}
+ 						/>
++                                                {(this.props.belowInputText?true:false)&&
++                                                <Text style={[styles.belowInputText]}>
++                                                        {this.props.belowInputText}
++                                                </Text>
++                                                }
+ 						<View style={styles.buttonsOuterView}>
+ 							<View style={styles.buttonsInnerView}>
+ 								<TouchableOpacity
+diff --git a/node_modules/react-native-input-prompt/src/styles.js b/node_modules/react-native-input-prompt/src/styles.js
+index b1be4c8..459bf1e 100644
 --- a/node_modules/react-native-input-prompt/src/styles.js
 +++ b/node_modules/react-native-input-prompt/src/styles.js
 @@ -3,25 +3,22 @@ import { StyleSheet, Platform, Dimensions } from "react-native";
@@ -40,3 +79,19 @@
  		flexDirection: "column",
  		justifyContent: "space-between",
  		alignItems: "center"
+@@ -31,6 +28,15 @@ export default StyleSheet.create({
+ 		fontSize: 26,
+ 		color: "black"
+ 	},
++        aboveInputText: {
++                fontSize: 16,
++                color: "black"
++        },
++        belowInputText: {
++                fontSize: 16,
++                color: "black",
++		marginBottom: 15
++        },
+ 	textInput: {
+ 		height: 40,
+ 		width: "100%",

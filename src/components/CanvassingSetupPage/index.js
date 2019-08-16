@@ -18,6 +18,7 @@ import sha1 from 'sha1';
 import Modal from 'react-native-simple-modal';
 import storage from 'react-native-storage-wrapper';
 import Swipeout from 'react-native-swipeout';
+import Prompt from 'react-native-input-prompt';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import SafariView from 'react-native-safari-view';
 import jwt_decode from 'jwt-decode';
@@ -756,7 +757,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
                     name="forward"
                     backgroundColor="#d7d7d7"
                     color="#000000"
-                    onPress={() => this.connectToGOTV()}
+                    onPress={() => this.setState({askOrgId: true})}
                     {...iconStyles}>
                     Get Out The Vote!
                   </Icon.Button>
@@ -912,6 +913,22 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
           disableOnBackPress={false}>
           <SmLoginPage refer={this} />
         </Modal>
+
+        <Prompt
+          visible={this.state.askOrgId}
+          title={"Organization ID"}
+          belowInputText={"If you don’t have an Organization ID yet, please ask your organization to provide you with one."}
+          value={""}
+          placeholder="Enter Org ID. Example: NCC1701"
+          submitText={"Let's do this!"}
+          onCancel={() => {
+            this.setState({askOrgId: false})
+          }}
+          onSubmit={text => {
+            console.warn(text); // connectToGOTV
+            this.setState({askOrgId: false});
+          }}
+        />
 
       </ScrollView>
     );
