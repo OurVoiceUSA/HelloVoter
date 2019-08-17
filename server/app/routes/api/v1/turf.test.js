@@ -102,15 +102,14 @@ describe('Turf', function () {
     let r = await api.get(base_uri+'/turf/get?turfId='+turfs.A.id)
       .set('Authorization', 'Bearer '+c.bob.jwt);
     expect(r.statusCode).to.equal(200);
-    expect(r.body.data.length).to.equal(0);
+    expect(r.body.id).to.not.exist;
   });
 
   it('get as admin', async () => {
     let r = await api.get(base_uri+'/turf/get?turfId='+turfs.A.id)
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
-    expect(r.body.data.length).to.equal(1);
-    expect(r.body.data[0].id).to.equal(turfs.A.id);
+    expect(r.body.id).to.equal(turfs.A.id);
   });
 
   // list
