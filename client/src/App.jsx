@@ -7,12 +7,15 @@ import jwt from 'jsonwebtoken';
 import queryString from 'query-string';
 import ReactTooltip from 'react-tooltip';
 
-import { Header, Sidebar, LogoutDialog, Login } from './components';
+import { Header, Sidebar, LogoutDialog, Login, Loading } from './components';
 import Routes from './routes/Routes';
 
 import 'typeface-roboto';
 import { withStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import Paper from '@material-ui/core/Paper';
+import Typography from '@material-ui/core/Typography';
 
 import {
   API_BASE_URI,
@@ -149,8 +152,6 @@ class App extends Component {
   singHello = async (server, target, token) => {
     let res;
 
-
-
     localStorage.setItem('server', server);
 
     let https = true;
@@ -228,7 +229,11 @@ class App extends Component {
     const { classes } = this.props;
     let { server, loading } = this.state;
 
-    if (loading) return (<div>LOADING...</div>);
+    if (loading) return (
+      <Router>
+        <Route path="/" render={props => <Loading {...props}  />} />
+      </Router>
+    );
 
     if (!server.hostname) return (
       <Router>

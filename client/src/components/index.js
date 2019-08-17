@@ -5,6 +5,7 @@ import Forms from './Forms';
 import Attributes from './Attributes';
 import { ImportData } from './ImportData/index';
 import Queue from './Queue';
+import Loading from './Loading';
 import Login from './Login';
 import LogoutDialog from './LogoutDialog';
 import Map from './Map';
@@ -22,6 +23,7 @@ export {
   Attributes,
   ImportData,
   Queue,
+  Loading,
   Login,
   LogoutDialog,
   Map,
