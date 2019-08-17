@@ -138,7 +138,12 @@ class App extends Component {
   doSave = async (event, target) => {
     let server;
 
-    if (event.target.server) {
+    if (event.target.orgId) {
+      this.setState({orgId: event.target.orgId});
+      // first two characters are the state code
+      let place = event.target.orgId.substring(0,2).toLowerCase();
+      server = 'gotv-'+place+'.ourvoiceusa.org';
+    } else if (event.target.server) {
       server = event.target.server.value;
     } else {
       server = 'localhost:8080';

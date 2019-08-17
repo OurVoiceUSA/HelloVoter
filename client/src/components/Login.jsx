@@ -4,6 +4,7 @@ import { Route, Redirect } from 'react-router';
 import { HashRouter as Router } from 'react-router-dom';
 import jwt from 'jsonwebtoken';
 import {notify_error} from '../common.js';
+import Select from 'react-select';
 
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
@@ -36,16 +37,21 @@ class Login extends Component {
       token = 'error';
     }
 
+    let loginOptions = [{label: 'Organization ID', value: 'org'}, {label: '3rd Party Server', value: 'server'}];
+    if (process.env.NODE_ENV === 'development') loginOptions.unshift({label: 'LOCAL DEVELOPMENT', value: 'dev'});
+
     this.state = {
       dev: (process.env.NODE_ENV === 'development'), // default to true if development
       classes: props.classes,
       token: token,
+      selectedLoginOption: loginOptions[0],
+      loginOptions: loginOptions,
     };
 
   }
 
   render() {
-    const { classes, token } = this.state;
+    const { classes, token, loginOptions, selectedLoginOption } = this.state;
 
     if (token && token !== "error")
       return (
@@ -67,54 +73,71 @@ class Login extends Component {
             Sign in to HelloVoterHQ
           </Typography>
           <form className={classes.form} onSubmit={(e) => { e.preventDefault(); this.props.refer.doSave(e, this.state.target); }} >
-            {(process.env.NODE_ENV === 'development')?
-              <FormControlLabel
-                control={<Checkbox id="dev" name="dev" value="dev" color="primary" checked={this.state.dev} onChange={(e, c) => this.setState({dev: c})} />}
-                label="DEVELOPMENT MODE"
-              />
-              :''}
-              <div>
-                {this.state.dev?
-                ''
-                :
-                <div>
-                  <FormControl margin="normal" required fullWidth>
-                    <InputLabel htmlFor="domain">Server Address</InputLabel>
-                    <Input id="server" name="server" autoComplete="server" autoFocus defaultValue={this.state.qserver} />
-                  </FormControl>
-                  <FormControlLabel
-                    control={<Checkbox value="ack" color="primary" required />}
-                    label="By checking this box you acknowledge that the server to which you are connecting is not affiliated with Our Voice USA and the data you send and receive is governed by that server's terms of use."
-                  />
-                </div>
-                }
-                <Button
-                  type="submit"
-                  fullWidth
-                  variant="contained"
-                  color="primary"
-                  className={classes.submit}
-                  onClick={() => this.setState({target: 'google'})}
-                >
-                  Google Sign In
-                </Button>
-                <Button
-                  type="submit"
-                  fullWidth
-                  variant="contained"
-                  color="secondary"
-                  onClick={() => this.setState({target: 'facebook'})}
-                  className={classes.submit}
-                >
-                  Facebook Sign In
-                </Button>
-              </div>
+            <Select
+              value={selectedLoginOption}
+              options={loginOptions}
+              onChange={selectedLoginOption => this.setState({selectedLoginOption})}
+            />
+            <LoginOption refer={this} />
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              color="primary"
+              className={classes.submit}
+              onClick={() => this.setState({target: 'google'})}
+            >
+              Google Sign In
+            </Button>
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              color="secondary"
+              onClick={() => this.setState({target: 'facebook'})}
+              className={classes.submit}
+            >
+              Facebook Sign In
+            </Button>
           </form>
         </Paper>
         <br />
         <center>Built with <span role="img" aria-label="Love">❤️</span> by Our Voice USA</center>
       </main>
     );
+  }
+}
+
+const LoginOption = props => {
+  switch (props.refer.state.selectedLoginOption.value) {
+    case 'org':
+      return (
+        <div>
+          <FormControl margin="normal" required fullWidth>
+            <InputLabel htmlFor="domain">Enter your Organization ID. Example: NCC1701</InputLabel>
+            <Input id="orgId" name="orgId" autoComplete="orgId" autoFocus defaultValue={props.refer.state.orgId} />
+          </FormControl>
+          <FormControlLabel
+            control={<Checkbox value="ack" color="primary" required />}
+            label="By checking this box you acknowledge that you have read and agreed to our terms of use."
+          />
+        </div>
+      );
+    case 'server':
+      return (
+        <div>
+          <FormControl margin="normal" required fullWidth>
+            <InputLabel htmlFor="domain">Server Address</InputLabel>
+            <Input id="server" name="server" autoComplete="server" autoFocus defaultValue={props.refer.state.qserver} />
+          </FormControl>
+          <FormControlLabel
+            control={<Checkbox value="ack" color="primary" required />}
+            label="By checking this box you acknowledge that the server to which you are connecting is not affiliated with Our Voice USA and the data you send and receive is governed by that server's terms of use."
+          />
+        </div>
+      );
+    default:
+      return null;
   }
 }
 
