@@ -47,28 +47,39 @@ class App extends Component {
     this._loadData();
   }
 
-  _loadData = async token => {
+  _loadData = async (t) => {
     this.setState({loading: true});
 
-    if (token) localStorage.setItem('jwt', token);
-    else token = localStorage.getItem('jwt');
+    let hostname = '';
+    let token = '';
 
-    let hostname = localStorage.getItem('server');
-
-    // assume error unless proven otherwise
-    let hai = {error: true};
-
-    if (hostname && token) {
-      try {
-        hai = await this.singHello(hostname, jwt.decode(token)['id'].split(":")[0], token);
-      } catch (e) {
-        console.warn(e)
+    try {
+      if (t) {
+        token = t;
+        localStorage.setItem('jwt', t);
+      } else {
+        token = localStorage.getItem('jwt');
       }
-    }
 
-    if (hai.error) {
-      hostname = '';
-      token = '';
+      hostname = localStorage.getItem('server');
+
+      // assume error unless proven otherwise
+      let hai = {error: true};
+
+      if (hostname && token) {
+        try {
+          hai = await this.singHello(hostname, jwt.decode(token)['id'].split(":")[0], token);
+        } catch (e) {
+          console.warn(e)
+        }
+      }
+
+      if (hai.error) {
+        hostname = '';
+        token = '';
+      }
+    } catch (e) {
+      console.warn(e);
     }
 
     this.setState({
@@ -85,17 +96,23 @@ class App extends Component {
     // don't load if already loaded
     if (this.state.google_maps_key) return;
 
-    let data = await _fetch(this.state.server, API_BASE_URI+'/google_maps_key');
-    if (!data) return;
+    let data;
 
-    // load google places API
-    var aScript = document.createElement('script');
-    aScript.type = 'text/javascript';
-    aScript.src =
-      'https://maps.googleapis.com/maps/api/js?key=' +
-      data.google_maps_key +
-      '&libraries=places';
-    document.head.appendChild(aScript);
+    try {
+      data = await _fetch(this.state.server, API_BASE_URI+'/google_maps_key');
+      if (!data) return;
+
+      // load google places API
+      var aScript = document.createElement('script');
+      aScript.type = 'text/javascript';
+      aScript.src =
+        'https://maps.googleapis.com/maps/api/js?key=' +
+        data.google_maps_key +
+        '&libraries=places';
+      document.head.appendChild(aScript);
+    } catch (e) {
+      console.warn(e);
+    }
 
     this.setState({ google_maps_key: data.google_maps_key });
   };
@@ -139,9 +156,9 @@ class App extends Component {
     let server;
 
     if (event.target.orgId) {
-      this.setState({orgId: event.target.orgId});
+      this.setState({orgId: event.target.orgId.value});
       // first two characters are the state code
-      let place = event.target.orgId.substring(0,2).toLowerCase();
+      let place = event.target.orgId.value.substring(0,2).toLowerCase();
       server = 'gotv-'+place+'.ourvoiceusa.org';
     } else if (event.target.server) {
       server = event.target.server.value;
