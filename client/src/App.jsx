@@ -243,7 +243,7 @@ class App extends Component {
 
   render() {
     const { classes } = this.props;
-    let { server, loading } = this.state;
+    let { server, token, loading } = this.state;
 
     if (loading) return (
       <Router>
@@ -251,9 +251,9 @@ class App extends Component {
       </Router>
     );
 
-    if (!server) return (
+    if (!server || !token) return (
       <Router>
-        <Route path="/" render={props => <Login {...props} refer={this} />} />
+        <Route path="/" render={props => <Login {...props} global={this} />} />
       </Router>
     );
 

@@ -33,13 +33,13 @@ class Login extends Component {
       if (this.props.location.pathname.match(/\/jwt\//)) {
         token = this.props.location.pathname.split('/').pop();
         localStorage.setItem('jwt', token);
-        props.refer._loadData();
       }
     } catch(e) {
       console.warn(e);
     }
 
     this.state = {
+      global: props.global,
       dev: (process.env.NODE_ENV === 'development'), // default to true if development
       classes: props.classes,
       token: token,
@@ -49,17 +49,19 @@ class Login extends Component {
 
   }
 
-  render() {
-    const { classes, token, loginOptions, selectedLoginOption } = this.state;
+  componentDidMount() {
+    const { global, token } = this.state;
 
-    if (token)
-      return (
-        <Router>
-          <Route render={() => (
-            <Redirect to="/" />
-          )} />
-        </Router>
-      );
+    if (token) {
+      window.location.href = '/HelloVoterHQ/#/';
+      window.location.reload();
+    }
+  }
+
+  render() {
+    const { global, classes, token, loginOptions, selectedLoginOption } = this.state;
+
+    if (token) return null;
 
     return (
       <main className={classes.main}>
@@ -71,13 +73,13 @@ class Login extends Component {
           <Typography component="h1" variant="h5">
             Sign in to HelloVoterHQ
           </Typography>
-          <form className={classes.form} onSubmit={(e) => { e.preventDefault(); this.props.refer.doSave(e, this.state.target); }} >
+          <form className={classes.form} onSubmit={(e) => { e.preventDefault(); global.doSave(e, this.state.target); }} >
             <Select
               value={selectedLoginOption}
               options={loginOptions}
               onChange={selectedLoginOption => this.setState({selectedLoginOption})}
             />
-            <LoginOption refer={this} />
+            <LoginOption global={global} refer={this} />
             <Button
               type="submit"
               fullWidth
@@ -114,7 +116,7 @@ const LoginOption = props => {
         <div>
           <FormControl margin="normal" required fullWidth>
             <InputLabel htmlFor="domain">Enter your Organization ID. Example: NCC1701</InputLabel>
-            <Input id="orgId" name="orgId" autoComplete="orgId" autoFocus defaultValue={props.refer.state.orgId} />
+            <Input id="orgId" name="orgId" autoComplete="orgId" autoFocus defaultValue={props.global.state.orgId} />
           </FormControl>
           <FormControlLabel
             control={<Checkbox value="ack" color="primary" required />}
@@ -127,7 +129,7 @@ const LoginOption = props => {
         <div>
           <FormControl margin="normal" required fullWidth>
             <InputLabel htmlFor="domain">Server Address</InputLabel>
-            <Input id="server" name="server" autoComplete="server" autoFocus defaultValue={props.refer.state.qserver} />
+            <Input id="server" name="server" autoComplete="server" autoFocus defaultValue={props.global.state.qserver} />
           </FormControl>
           <FormControlLabel
             control={<Checkbox value="ack" color="primary" required />}
