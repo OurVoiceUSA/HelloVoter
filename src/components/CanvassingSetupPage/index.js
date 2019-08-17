@@ -643,7 +643,7 @@ export default class App extends OVComponent {
     }
 
     return (
-      <ScrollView style={{flex: 1, backgroundColor: 'white'}} contentContainerStyle={{flexGrow:1}}>
+      <ScrollView style={{flex: 1, backgroundColor: 'white'}} contentContainerStyle={{flexGrow:1}} keyboardShouldPersistTaps={"handled"}>
 
         <Divider />
 
