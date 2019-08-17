@@ -70,7 +70,7 @@ class App extends Component {
       }
     } catch (e) {
       // if we had a token, it was bad, clear everything
-      if (token) {
+      if (token && server) {
         this.setState({server: null, token: null, orgId: null});
         localStorage.clear();
         console.warn("Cleaning localStorage");

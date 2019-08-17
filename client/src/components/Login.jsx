@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 
+import Loading from './Loading';
+
 import Select from 'react-select';
 
 import Avatar from '@material-ui/core/Avatar';
@@ -30,7 +32,6 @@ class Login extends Component {
     try {
       if (this.props.location.pathname.match(/\/jwt\//)) {
         token = this.props.location.pathname.split('/').pop();
-        localStorage.setItem('jwt', token);
       }
     } catch(e) {
       console.warn(e);
@@ -51,15 +52,16 @@ class Login extends Component {
     const { token } = this.state;
 
     if (token) {
-      window.location.href = '/HelloVoterHQ/#/';
-      window.location.reload();
+      localStorage.setItem('jwt', token);
+      setTimeout(() => {window.location.href = '/HelloVoterHQ/#/'}, 500);
+      setTimeout(() => {window.location.reload()}, 1500);
     }
   }
 
   render() {
     const { global, classes, token, loginOptions, selectedLoginOption } = this.state;
 
-    if (token) return null;
+    if (token) return (<Loading classes={classes} />);
 
     return (
       <main className={classes.main}>
