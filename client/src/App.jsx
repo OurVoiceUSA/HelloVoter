@@ -13,9 +13,6 @@ import Routes from './routes/Routes';
 import 'typeface-roboto';
 import { withStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import Paper from '@material-ui/core/Paper';
-import Typography from '@material-ui/core/Typography';
 
 import {
   API_BASE_URI,

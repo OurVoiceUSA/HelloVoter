@@ -57,9 +57,6 @@ export const styles = theme => ({
       duration: theme.transitions.duration.enteringScreen
     })
   },
-  avatar: {
-    margin: 10
-  },
   menuButton: {
     marginLeft: 12,
     marginRight: 36

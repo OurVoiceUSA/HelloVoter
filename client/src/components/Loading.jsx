@@ -20,7 +20,7 @@ class Loading extends Component {
   }
 
   render() {
-    const { classes, token } = this.state;
+    const { classes } = this.state;
 
     return (
       <main className={classes.main}>
