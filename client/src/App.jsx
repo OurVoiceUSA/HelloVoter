@@ -100,6 +100,7 @@ class App extends Component {
   _loadKeys = async () => {
     // don't load if already loaded
     if (this.state.google_maps_key) return;
+    if (!this.state.server.hostname) return;
 
     let data;
 
@@ -115,11 +116,11 @@ class App extends Component {
         data.google_maps_key +
         '&libraries=places';
       document.head.appendChild(aScript);
+
+      this.setState({ google_maps_key: data.google_maps_key });
     } catch (e) {
       console.warn(e);
     }
-
-    this.setState({ google_maps_key: data.google_maps_key });
   };
 
   handleClickLogout = () => {
