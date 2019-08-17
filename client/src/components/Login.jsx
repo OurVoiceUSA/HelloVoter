@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
 
-import { Route, Redirect } from 'react-router';
-import { HashRouter as Router } from 'react-router-dom';
 import Select from 'react-select';
 
 import Avatar from '@material-ui/core/Avatar';
@@ -50,7 +48,7 @@ class Login extends Component {
   }
 
   componentDidMount() {
-    const { global, token } = this.state;
+    const { token } = this.state;
 
     if (token) {
       window.location.href = '/HelloVoterHQ/#/';
