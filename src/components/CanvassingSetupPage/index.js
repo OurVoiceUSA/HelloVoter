@@ -326,7 +326,7 @@ export default class App extends OVComponent {
   componentDidUpdate(prevProps, prevState) {
     const { SmLoginScreen, server, user, orgId } = this.state;
     if (prevState.SmLoginScreen && !SmLoginScreen && user.loggedin) {
-      this.singHello(server, orgId);
+      this.connectToServer(server, orgId);
     }
   }
 
