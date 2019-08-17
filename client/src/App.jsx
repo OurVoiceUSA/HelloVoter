@@ -69,18 +69,20 @@ class App extends Component {
       let hai = {error: true};
 
       if (hostname && token) {
-        try {
-          hai = await this.singHello(hostname, jwt.decode(token)['id'].split(":")[0], token, orgId);
-        } catch (e) {
-          console.warn(e)
-        }
+        hai = await this.singHello(hostname, jwt.decode(token)['id'].split(":")[0], token, orgId);
       }
 
       if (hai.error) {
-        hostname = '';
-        token = '';
+        throw new Error("hai error")
       }
     } catch (e) {
+      // if we had a token, it was bad, clear everything
+      if (token) {
+        hostname = '';
+        token = '';
+        orgId = '';
+        localStorage.clear();
+      }
       console.warn(e);
     }
 
@@ -88,6 +90,7 @@ class App extends Component {
       server: {
         hostname: hostname,
         jwt: token,
+        orgId: orgId,
       },
       loading: false,
     }, () => this._loadKeys());
@@ -149,9 +152,7 @@ class App extends Component {
   };
 
   _logout = () => {
-    localStorage.removeItem('server');
-    localStorage.removeItem('jwt');
-    localStorage.removeItem('orgId');
+    localStorage.clear();
     this.setState({ menuLogout: false, server: {} });
   };
 
@@ -162,7 +163,6 @@ class App extends Component {
     if (event.target.orgId) {
       orgId = event.target.orgId.value;
       this.setState({orgId});
-      localStorage.setItem('orgId', orgId);
       let place = orgId.substring(0,2).toLowerCase();
       server = 'gotv-'+place+'.ourvoiceusa.org';
     } else if (event.target.server) {
