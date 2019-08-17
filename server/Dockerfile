@@ -9,8 +9,9 @@ WORKDIR /app
 COPY .babelrc .
 COPY package.json .
 COPY package-lock.json .
+COPY patches ./patches/
 
-RUN npm install
+RUN npm --unsafe-perm install
 
 FROM node:dubnium-alpine
 
