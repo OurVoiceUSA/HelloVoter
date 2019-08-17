@@ -52,6 +52,7 @@ class App extends Component {
 
     let hostname = '';
     let token = '';
+    let orgId = '';
 
     try {
       if (t) {
@@ -62,13 +63,14 @@ class App extends Component {
       }
 
       hostname = localStorage.getItem('server');
+      orgId = localStorage.getItem('orgId');
 
       // assume error unless proven otherwise
       let hai = {error: true};
 
       if (hostname && token) {
         try {
-          hai = await this.singHello(hostname, jwt.decode(token)['id'].split(":")[0], token);
+          hai = await this.singHello(hostname, jwt.decode(token)['id'].split(":")[0], token, orgId);
         } catch (e) {
           console.warn(e)
         }
@@ -149,29 +151,33 @@ class App extends Component {
   _logout = () => {
     localStorage.removeItem('server');
     localStorage.removeItem('jwt');
+    localStorage.removeItem('orgId');
     this.setState({ menuLogout: false, server: {} });
   };
 
   doSave = async (event, target) => {
     let server;
+    let orgId;
 
     if (event.target.orgId) {
-      this.setState({orgId: event.target.orgId.value});
-      // first two characters are the state code
-      let place = event.target.orgId.value.substring(0,2).toLowerCase();
+      orgId = event.target.orgId.value;
+      this.setState({orgId});
+      localStorage.setItem('orgId', orgId);
+      let place = orgId.substring(0,2).toLowerCase();
       server = 'gotv-'+place+'.ourvoiceusa.org';
     } else if (event.target.server) {
       server = event.target.server.value;
     } else {
       server = 'localhost:8080';
     }
-    await this.singHello(server, target);
+    await this.singHello(server, target, null, orgId);
   };
 
-  singHello = async (server, target, token) => {
+  singHello = async (server, target, token, orgId) => {
     let res;
 
     localStorage.setItem('server', server);
+    localStorage.setItem('orgId', orgId);
 
     let https = true;
     if (server.match(/^localhost/)) https = false;
