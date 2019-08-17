@@ -135,7 +135,7 @@ export function doExpressInit(log, db, qq) {
   })
 
   // routes from glob
-  app.use('/HelloVoterHQ/api/v1', router);
+  app.use('/HelloVoterHQ*api/v1', router);
 
   return app;
 }
