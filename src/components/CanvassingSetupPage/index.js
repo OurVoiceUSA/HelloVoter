@@ -244,7 +244,7 @@ export default class App extends OVComponent {
 
       this.setState({ConnectServerScreen: false});
 
-      if (body.data.ready !== true) return {error: false, msg: "The server said: "+body.msg};
+      if (body.data.ready !== true) return {error: false, msg: (body.msg?body.msg:"Awaiting assignment.")};
       else {
         let forms = this.state.forms;
         let forms_server = [];
