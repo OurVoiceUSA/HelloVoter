@@ -64,9 +64,10 @@ export default class App extends PureComponent {
 
   handleOpenURL = ({ url }) => {
     // Extract jwt token out of the URL
-    const [, jwt] = url.match(/jwt=([^#]+)/);
+    const m = url.match(/jwt=([^#]+)/);
 
-    _saveJWT(jwt);
+    if (m) _saveJWT(m[1]);
+
     this._doCheck();
 
     if (Platform.OS === 'ios') {

@@ -314,7 +314,6 @@ export default class App extends OVComponent {
     Linking.getInitialURL().then((url) => {
       if (url) this.handleOpenURL({ url });
     });
-
     this.requestLocationPermission();
     this._loadForms();
   }
@@ -332,12 +331,14 @@ export default class App extends OVComponent {
   }
 
   handleOpenURL = async ({ url }) => {
-    // Extract jwt token out of the URL
-    const [, token] = url.match(/dropbox=([^#]+)/);
     try {
-      let user = await _loginPing(this, false);
-      user.dropbox = jwt_decode(token);
-      await _saveUser(user, false);
+      // Extract jwt token out of the URL
+      const m = url.match(/dropbox=([^#]+)/);
+      if (m) {
+        let user = await _loginPing(this, false);
+        user.dropbox = jwt_decode(m[1]);
+        await _saveUser(user, false);
+      }
 
       // TODO: handle the navigate that would have been tapped had we already been logged in
     } catch(e) {
