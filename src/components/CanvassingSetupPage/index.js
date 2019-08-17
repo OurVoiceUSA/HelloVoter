@@ -25,7 +25,7 @@ import jwt_decode from 'jwt-decode';
 import SmLoginPage from '../SmLoginPage';
 import { Dropbox } from 'dropbox';
 import { ingeojson } from 'ourvoiceusa-sdk-js';
-import { Divider, API_BASE_URI, DINFO, _loginPing, _saveUser, _getApiToken, _fileReaderAsync } from '../../common';
+import { Divider, api_base_uri, DINFO, _loginPing, _saveUser, _getApiToken, _fileReaderAsync } from '../../common';
 import DeviceInfo from 'react-native-device-info';
 import { wsbase } from '../../config';
 
@@ -89,8 +89,6 @@ export default class App extends OVComponent {
   }
 
   doSave = async () => {
-    let { server } = this.state;
-
     let json = this.refs.mainForm.getValue();
     if (json === null) return;
 
@@ -125,7 +123,7 @@ export default class App extends OVComponent {
   }
 
   connectToGOTV = async() => {
-    const { myPosition } = this.state;
+    const { myPosition, orgId } = this.state;
 
     if (!this.checkLocationAccess()) return;
 
@@ -143,30 +141,38 @@ export default class App extends OVComponent {
         state = bb.state;
     });
 
-    if (state) this.connectToServer('gotv-'+state+'.ourvoiceusa.org');
-    else Alert.alert('Out of bounds', 'You are not located within the United States of America. Unable to continue.', [{text: 'OK'}], { cancelable: false });
+    if (!state) return setTimeout(() => Alert.alert('Out of bounds', 'You are not located within the United States of America. Unable to continue.', [{text: 'OK'}], { cancelable: false }), 500);
+
+    if (orgId) {
+      // first two characters are the state code
+      let place = this.state.orgId.substring(0,2).toLowerCase();
+
+      this.connectToServer('gotv-'+place+'.ourvoiceusa.org', orgId);
+    } else {
+      setTimeout(() => Alert.alert('Error', 'You must enter a valid Organization ID to continue.', [{text: 'OK'}], { cancelable: false }), 500);
+    }
   }
 
-  connectToServer = async(server) => {
-
+  connectToServer = async(server, orgId) => {
     if (!this.checkLocationAccess()) return;
 
-    this.setState({serverLoading: true});
+    this.setState({serverLoading: true, server});
 
-    let ret = await this.singHello(server);
+    let ret = await this.singHello(server, orgId);
 
     if (ret.flag !== true) Alert.alert((ret.error?'Error':'Connection Successful'), ret.msg, [{text: 'OK'}], { cancelable: false });
     if (ret.error !== true) server = null;
 
-    this.setState({serverLoading: false, server: server});
+    this.setState({serverLoading: false});
   }
 
-  sayHello = async (server) => {
+  sayHello = async (server, orgId) => {
     const { myPosition } = this.state;
 
     if (!this.checkLocationAccess()) return;
 
-    let res = {};
+    // mock a fetch object
+    let res = {headers: {get: () => wsbase+'/auth'}, status: 404};
     try {
       let jwt = await storage.get('OV_JWT');
 
@@ -176,16 +182,12 @@ export default class App extends OVComponent {
         if (!obj.id) throw "not a full user object";
       } catch (e) {
         await storage.del('OV_JWT');
-        // mock a fetch object
-        res.status = 401;
-        res.headers = {get: () => wsbase+'/auth'};
-        return res;
       }
 
       let https = true;
       if (server.match(/:8080/)) https = false;
 
-      res = await fetch('http'+(https?'s':'')+'://'+server+API_BASE_URI+'/hello', {
+      res = await fetch('http'+(https?'s':'')+'://'+server+api_base_uri(orgId)+'/hello', {
         method: 'POST',
         headers: {
           'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
@@ -199,21 +201,23 @@ export default class App extends OVComponent {
       });
       if (res.status === 400 || res.status === 401) await storage.del('OV_JWT');
     } catch (e) {
-      console.warn(""+e);
+      if (orgId) res = {headers: {get: () => ''}, status: 404};
+      console.warn("sayHello error: "+e);
     }
     return res;
   }
 
-  singHello = async (server) => {
+  singHello = async (server, orgId) => {
     const { navigate } = this.props.navigation;
     let ret;
 
     try {
-      let res = await this.sayHello(server);
+      let res = await this.sayHello(server, orgId);
       let auth_location = res.headers.get('x-sm-oauth-url');
 
       if (!auth_location || !auth_location.match(/^https:.*auth$/)) {
         // Invalid x-sm-oauth-url header means it's not a validy configured canvass-broker
+        if (orgId) return {error: true, msg: "Sorry, that is not a valid Organization ID."}
         return {error: true, msg: "That server is not running software compatible with this mobile app."};
       }
 
@@ -225,13 +229,6 @@ export default class App extends OVComponent {
         case 200:
           // valid - break to proceed
           break;
-/*
-TODO: accept a 302 redirect to where the server really is - to make things simple for the end-user
-      Prompt something like: "This server uses its own user login system. You'll be taken to their site to sign in. 1. Ok, let's go! 2. Nevermind"
-        case 302:
-          console.warn("Re-featch based on Location header")
-          break;
-*/
         case 400:
           return {error: true, msg: "The server didn't understand the request sent from this device."};
         case 401:
@@ -240,7 +237,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
         case 403:
           return {error: true, msg: "We're sorry, but your request to canvass with this server has been rejected."};
         default:
-          return {error: true, msg: "Unknown error connecting to server."};
+          return {error: true, msg: "There was a problem connecting, please try again later."};
       }
 
       let body = await res.json();
@@ -268,7 +265,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
           let https = true;
           if (server.match(/:8080/)) https = false;
 
-          res = await fetch('http'+(https?'s':'')+'://'+server+API_BASE_URI+'/form/get?formId='+body.data.forms[i].id, {
+          res = await fetch('http'+(https?'s':'')+'://'+server+api_base_uri(orgId)+'/form/get?formId='+body.data.forms[i].id, {
             headers: {
               'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
               'Content-Type': 'application/json',
@@ -281,6 +278,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
           let form = await res.json();
           form.server = server;
           form.backend = 'server';
+          form.orgId = orgId,
 
           forms_server.push(form);
 
@@ -304,7 +302,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
       }
     } catch (e) {
       console.warn("singHello: "+e);
-      return {error: true, msg: "Unable to make a connection to target server"};
+      return {error: true, msg: "There was an unexpected error, please try again later."};
     }
 
   }
@@ -327,9 +325,9 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
   };
 
   componentDidUpdate(prevProps, prevState) {
-    const { SmLoginScreen, user } = this.state;
+    const { SmLoginScreen, server, user, orgId } = this.state;
     if (prevState.SmLoginScreen && !SmLoginScreen && user.loggedin) {
-      this.singHello(this.state.server);
+      this.singHello(server, orgId);
     }
   }
 
@@ -451,7 +449,7 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
           let jwt = await storage.get('OV_JWT');
           let https = true;
           if (json.server.match(/:8080/)) https = false;
-          let res = await fetch('http'+(https?'s':'')+'://'+json.server+API_BASE_URI+'/form/get?formId='+json.id, {
+          let res = await fetch('http'+(https?'s':'')+'://'+json.server+api_base_uri(json.orgId)+'/form/get?formId='+json.id, {
             headers: {
               'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
               'Content-Type': 'application/json',
@@ -461,9 +459,12 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
           // don't store a form error
           if (res.status === 200) {
             let server = json.server;
+            let orgId = json.orgId;
             json = await res.json();
             json.server = server;
             json.backend = 'server';
+            json.orgId = orgId;
+            
             forms_local[i] = json;
           }
 
@@ -554,8 +555,8 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
                 } else {
                   if (json.backend === "server") {
                     // TODO: set loading state as this can take a few seconds
-                    let ret = await this.sayHello(json.server);
-                    if (ret.status === 200) this.navigate_canvassing({server: json.server, form: json, user: user, refer: this});
+                    let ret = await this.sayHello(json.server, json.orgId);
+                    if (ret.status === 200) this.navigate_canvassing({server: json.server, orgId: json.orgId, form: json, user: user, refer: this});
                     else setTimeout(() => this.setState({SmLoginScreen: true}), 500);
                  } else {
                     navigate('LegacyCanvassing', {dbx: (json.backend === "dropbox" ? dbx : null), form: json, user: user});
@@ -916,19 +917,14 @@ TODO: accept a 302 redirect to where the server really is - to make things simpl
 
         <Prompt
           autoCorrect={false}
+          autoCapitalize={"characters"}
           visible={this.state.askOrgId}
           title={"Organization ID"}
           belowInputText={"If you don’t have an Organization ID yet, please ask your organization to provide you with one."}
-          value={""}
           placeholder="Enter Org ID. Example: NCC1701"
           submitText={"Let's do this!"}
-          onCancel={() => {
-            this.setState({askOrgId: false})
-          }}
-          onSubmit={text => {
-            console.warn(text); // connectToGOTV
-            this.setState({askOrgId: false});
-          }}
+          onCancel={() => this.setState({askOrgId: false})}
+          onSubmit={text => this.setState({orgId: text, askOrgId: false}, () => this.connectToGOTV())}
         />
 
       </ScrollView>

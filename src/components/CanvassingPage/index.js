@@ -28,7 +28,7 @@ import DeviceInfo from 'react-native-device-info';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps'
 import RNGooglePlaces from 'react-native-google-places';
-import { Divider, API_BASE_URI, _doGeocode, _getApiToken, getEpoch } from '../../common';
+import { Divider, api_base_uri, _doGeocode, _getApiToken, getEpoch } from '../../common';
 import KnockPage from '../KnockPage';
 import CanvassingSettingsPage from '../CanvassingSettingsPage';
 import Modal from 'react-native-simple-modal';
@@ -123,6 +123,7 @@ export default class App extends OVComponent {
       newUnitModalVisible: false,
       showDisclosure: "true",
       form: props.navigation.state.params.form,
+      orgId: props.navigation.state.params.orgId,
       user: props.navigation.state.params.user,
       turfs: props.navigation.state.params.form.turfs,
       retry_queue: [],
@@ -272,7 +273,7 @@ export default class App extends OVComponent {
       let https = true;
       if (this.state.server.match(/:8080/)) https = false;
       let res = await fetch(
-        'http'+(https?'s':'')+'://'+this.state.server+API_BASE_URI+'/volunteer/visit/history?formId='+this.state.form.id,
+        'http'+(https?'s':'')+'://'+this.state.server+api_base_uri(this.state.orgId)+'/volunteer/visit/history?formId='+this.state.form.id,
       {
         method: 'GET',
         headers: {
@@ -519,7 +520,7 @@ export default class App extends OVComponent {
       let https = true;
       if (this.state.server.match(/:8080/)) https = false;
       let res = await fetch(
-        'http'+(https?'s':'')+'://'+this.state.server+API_BASE_URI+'/turf/get?turfId='+selectedTurf.id,
+        'http'+(https?'s':'')+'://'+this.state.server+api_base_uri(this.state.orgId)+'/turf/get?turfId='+selectedTurf.id,
       {
         method: 'GET',
         headers: {
@@ -558,7 +559,7 @@ export default class App extends OVComponent {
     try {
       let https = true;
       if (this.state.server.match(/:8080/)) https = false;
-      let res = await fetch('http'+(https?'s':'')+'://'+this.state.server+API_BASE_URI+'/people/get/byposition', {
+      let res = await fetch('http'+(https?'s':'')+'://'+this.state.server+api_base_uri(this.state.orgId)+'/people/get/byposition', {
         method: 'POST',
         body: JSON.stringify({
           formId: this.state.form.id,
@@ -681,7 +682,7 @@ export default class App extends OVComponent {
     try {
       let https = true;
       if (this.state.server.match(/:8080/)) https = false;
-      let res = await fetch('http'+(https?'s':'')+'://'+this.state.server+API_BASE_URI+uri, {
+      let res = await fetch('http'+(https?'s':'')+'://'+this.state.server+api_base_uri(this.state.orgId)+uri, {
         method: 'POST',
         headers: {
           'Authorization': 'Bearer '+await _getApiToken(),

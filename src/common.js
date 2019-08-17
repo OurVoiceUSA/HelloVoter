@@ -13,13 +13,15 @@ import RNGooglePlaces from 'react-native-google-places';
 import Geocoder from 'react-native-geocoder';
 import { wsbase } from './config';
 
-export const API_BASE_URI = '/HelloVoterHQ/api/v1';
-
 const JWT = 'OV_JWT';
 const USERLOCAL = 'OV_USER';
 
 export function getEpoch() {
   return Math.floor(new Date().getTime())
+}
+
+export function api_base_uri(orgId) {
+  return '/HelloVoterHQ/'+(orgId?orgId+'/':'')+'api/v1';
 }
 
 export function getPropFromArrObj(arr, id, prop) {
