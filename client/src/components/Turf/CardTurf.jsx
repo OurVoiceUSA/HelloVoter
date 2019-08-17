@@ -27,7 +27,7 @@ export class CardTurf extends Component {
     super(props);
 
     this.state = {
-      server: this.props.refer.props.server,
+      global: props.global,
       turf: this.props.turf,
       selectedTeamsOption: [],
       selectedMembersOption: []
@@ -39,6 +39,8 @@ export class CardTurf extends Component {
   }
 
   handleTeamsChange = async selectedTeamsOption => {
+    const { global } = this.state;
+
     if (!selectedTeamsOption) selectedTeamsOption = [];
     this.props.refer.setState({ saving: true });
     try {
@@ -49,7 +51,7 @@ export class CardTurf extends Component {
 
       for (let i in obj.add) {
         await _fetch(
-          this.state.server,
+          global,
           API_BASE_URI+'/turf/assigned/team/add',
           'POST',
           { teamId: obj.add[i], turfId: this.props.id }
@@ -58,7 +60,7 @@ export class CardTurf extends Component {
 
       for (let i in obj.rm) {
         await _fetch(
-          this.state.server,
+          global,
           API_BASE_URI+'/turf/assigned/team/remove',
           'POST',
           { teamId: obj.rm[i], turfId: this.props.id }
@@ -74,6 +76,8 @@ export class CardTurf extends Component {
   };
 
   handleMembersChange = async selectedMembersOption => {
+    const { global } = this.state;
+
     if (!selectedMembersOption) selectedMembersOption = [];
     this.props.refer.setState({ saving: true });
     try {
@@ -84,7 +88,7 @@ export class CardTurf extends Component {
 
       for (let i in obj.add) {
         await _fetch(
-          this.state.server,
+          global,
           API_BASE_URI+'/turf/assigned/volunteer/add',
           'POST',
           { vId: obj.add[i], turfId: this.props.id }
@@ -93,7 +97,7 @@ export class CardTurf extends Component {
 
       for (let i in obj.rm) {
         await _fetch(
-          this.state.server,
+          global,
           API_BASE_URI+'/turf/assigned/volunteer/remove',
           'POST',
           { vId: obj.rm[i], turfId: this.props.id }
@@ -109,6 +113,8 @@ export class CardTurf extends Component {
   };
 
   _loadData = async () => {
+    const { global } = this.state;
+
     let turf = {},
       volunteers = [],
       members = [],
@@ -119,11 +125,11 @@ export class CardTurf extends Component {
 
     try {
       [turf, volunteers, members, teams, teamsSelected] = await Promise.all([
-        _loadTurf(this, this.props.id, true),
-        _loadVolunteers(this.props.refer),
-        _loadVolunteers(this.props.refer, 'turf', this.props.id),
-        _loadTeams(this.props.refer),
-        _loadTeams(this.props.refer, 'turf', this.props.id)
+        _loadTurf(global, this.props.id, true),
+        _loadVolunteers(global),
+        _loadVolunteers(global, 'turf', this.props.id),
+        _loadTeams(global),
+        _loadTeams(global, 'turf', this.props.id)
       ]);
     } catch (e) {
       notify_error(e, 'Unable to load turf info.');
@@ -139,7 +145,7 @@ export class CardTurf extends Component {
       teamOptions.push({
         value: _searchStringify(t),
         id: t.id,
-        label: <CardTeam key={t.id} team={t} refer={this} />
+        label: <CardTeam global={global} key={t.id} team={t} refer={this} />
       });
     });
 
@@ -147,7 +153,7 @@ export class CardTurf extends Component {
       selectedTeamsOption.push({
         value: _searchStringify(t),
         id: t.id,
-        label: <CardTeam key={t.id} team={t} refer={this} />
+        label: <CardTeam global={global} key={t.id} team={t} refer={this} />
       });
     });
 
@@ -155,7 +161,7 @@ export class CardTurf extends Component {
       membersOption.push({
         value: _searchStringify(c),
         id: c.id,
-        label: <CardVolunteer key={c.id} volunteer={c} refer={this} />
+        label: <CardVolunteer global={global} key={c.id} volunteer={c} refer={this} />
       });
     });
 
@@ -163,7 +169,7 @@ export class CardTurf extends Component {
       selectedMembersOption.push({
         value: _searchStringify(c),
         id: c.id,
-        label: <CardVolunteer key={c.id} volunteer={c} refer={this} />
+        label: <CardVolunteer global={global} key={c.id} volunteer={c} refer={this} />
       });
     });
 
@@ -201,7 +207,7 @@ export class CardTurf extends Component {
             )}
           </div>
         </div>
-        {this.props.edit ? <CardTurfFull turf={turf} refer={this} /> : ''}
+        {this.props.edit ? <CardTurfFull global={global} turf={turf} refer={this} /> : ''}
       </div>
     );
   }

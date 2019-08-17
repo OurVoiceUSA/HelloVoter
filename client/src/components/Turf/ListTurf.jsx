@@ -14,7 +14,7 @@ export const ListTurf = props => {
   props.turf.forEach((t, idx) => {
     let tp = Math.floor(idx / perPage) + 1;
     if (tp !== props.refer.state.pageNum) return;
-    list.push(<CardTurf key={t.id} turf={t} refer={props.refer} />);
+    list.push(<CardTurf global={props.global} key={t.id} turf={t} refer={props.refer} />);
   });
 
   paginate = (

@@ -44,7 +44,7 @@ export default class Queue extends Component {
 
     this.state = {
       rows: [],
-      server: this.props.server,
+      global: props.global,
     };
   }
 
@@ -53,11 +53,13 @@ export default class Queue extends Component {
   }
 
   _loadData = async () => {
+    const { global } = this.state;
+
     let rows = [];
 
     this.setState({ loading: true });
 
-    let obj = await _fetch(this.state.server, API_BASE_URI+'/queue/list');
+    let obj = await _fetch(global, API_BASE_URI+'/queue/list');
     if (obj.data) {
       rows = obj.data.map(r => {
         let q = r[0];

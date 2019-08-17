@@ -28,7 +28,8 @@ export default class App extends Component {
   constructor(props) {
     super(props);
 
-    this.state = this.initState();
+    this.state = this.initState(props);
+    this.state.global = props.global;
 
     this.formServerItems = t.struct({
       name: t.String,
@@ -48,7 +49,7 @@ export default class App extends Component {
     this.handlePageNumChange = this.handlePageNumChange.bind(this);
   }
 
-  initState() {
+  initState(props) {
     let perPage = localStorage.getItem('turfperpage');
     if (!perPage) perPage = 5;
 
@@ -173,9 +174,11 @@ export default class App extends Component {
   }
 
   _deleteTurf = async id => {
+    const { global } = this.state;
+
     this.setState({ saving: true, menuDelete: false });
     try {
-      await _fetch(this.props.server, API_BASE_URI+'/turf/delete', 'POST', {
+      await _fetch(global, API_BASE_URI+'/turf/delete', 'POST', {
         turfId: id,
       });
       notify_success('Turf has been deleted.');
@@ -189,6 +192,8 @@ export default class App extends Component {
   }
 
   _createTurf = async () => {
+    const { global } = this.state;
+
     let json = this.addTurfForm.getValue();
     if (json === null) return;
 
@@ -265,7 +270,7 @@ export default class App extends Component {
           name = json.name + ' ' + obj.name;
         else name = json.name;
 
-        await _fetch(this.props.server, API_BASE_URI+'/turf/create', 'POST', {
+        await _fetch(global, API_BASE_URI+'/turf/create', 'POST', {
           name: name,
           geometry: geometry,
         });
@@ -360,11 +365,13 @@ export default class App extends Component {
   }
 
   _loadData = async () => {
+    const { global } = this.state;
+
     this.setState({ loading: true, search: '' });
     let turf = [];
 
     try {
-      turf = await _loadTurfs(this);
+      turf = await _loadTurfs(global);
     } catch (e) {
       notify_error(e, 'Unable to load turf.');
     }
@@ -373,6 +380,8 @@ export default class App extends Component {
   }
 
   render() {
+    const { global } = this.state;
+
     let drawOptions = [
       { value: 'select', label: 'Select from legislative boundary' },
       { value: 'import', label: 'Import GeoJSON shape file' },
@@ -404,7 +413,7 @@ export default class App extends Component {
                   data-tip="Search by name, email, location, or admin"
                 />
                 <br />
-                <ListTurf turf={list} refer={this} />
+                <ListTurf global={global} turf={list} refer={this} />
               </RootLoader>
             )}
           />
@@ -446,6 +455,7 @@ export default class App extends Component {
             render={props => (
               <div>
                 <CardTurf
+                  global={global}
                   key={props.match.params.id}
                   id={props.match.params.id}
                   edit={true}

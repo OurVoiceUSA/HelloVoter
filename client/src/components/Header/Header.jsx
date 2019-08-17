@@ -9,7 +9,7 @@ import classNames from 'classnames';
 
 export const Header = ({
   classes,
-  server,
+  global,
   open,
   handleDrawerOpen,
   getUserProp
@@ -37,7 +37,7 @@ export const Header = ({
         noWrap
         className={classes.title}
       >
-        <div style={{ margin: 10 }}>HelloVoterHQ @ {server.hostname}</div>
+        <div style={{ margin: 10 }}>HelloVoterHQ @ {global.state.server}</div>
       </Typography>
       <Avatar
         alt="Remy Sharp"

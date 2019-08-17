@@ -17,15 +17,18 @@ export default class App extends Component {
     super(props);
 
     this.state = {
+      global: props.global,
       cb_version: null,
       neo4j_version: null,
     };
   }
 
   componentDidMount = async () => {
+    const { global } = this.state;
+
     let data = {};
     try {
-      data = await _fetch(this.props.server, API_BASE_URI+'/dashboard');
+      data = await _fetch(global, API_BASE_URI+'/dashboard');
     } catch (e) {
       notify_error(e, 'Unable to load dashboard info.');
     }

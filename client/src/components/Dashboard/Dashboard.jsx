@@ -32,6 +32,7 @@ export default class App extends Component {
     const dash = (localStorage.getItem('dash') || 'vol,team,turf,form,attributes,addr,dbsz').split(',');
 
     this.state = {
+      global: props.global,
       loading: true,
       noAdmins: false,
       data: {},
@@ -53,13 +54,15 @@ export default class App extends Component {
   }
 
   _loadData = async () => {
+    const { global } = this.state;
+
     let data = {};
     let cards = [];
 
     this.setState({ loading: true });
 
     try {
-      data = await _fetch(this.props.server, API_BASE_URI+'/dashboard');
+      data = await _fetch(global, API_BASE_URI+'/dashboard');
 
       if (data.admins === 0) this.setState({noAdmins: true});
 
@@ -116,6 +119,8 @@ export default class App extends Component {
   }
 
   render() {
+    const { global } = this.state;
+
     return (
       <RootLoader flag={this.state.loading} func={this._loadData}>
         <Cards
@@ -147,7 +152,7 @@ export default class App extends Component {
             run the follow command from the shell:
             <br />
             <br />
-            <pre>npm run makeadmin -- {this.props.refer.getUserProp("id")}</pre>
+            <pre>npm run makeadmin -- {global.getUserProp("id")}</pre>
           </div>
         </Modal>
       </RootLoader>

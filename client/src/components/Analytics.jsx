@@ -33,6 +33,7 @@ export default class App extends Component {
     super(props);
 
     this.state = {
+      global: props.global,
       turfOptions: [],
       selectedTurfOption: null,
       data_breakdown: [],
@@ -45,18 +46,20 @@ export default class App extends Component {
   }
 
   _init = async () => {
+    const { global } = this.state;
+
     this.setState({ loading: true });
 
     let turfOptions = [];
-    let turfs = await _loadTurfs(this);
+    let turfs = await _loadTurfs(global);
     let attributeOptions = [];
-    let attributes = await _loadAttributes(this);
+    let attributes = await _loadAttributes(global);
 
     turfs.forEach(t => {
       turfOptions.push({
         value: _searchStringify(t),
         id: t.id,
-        label: <CardTurf key={t.id} turf={t} refer={this} />,
+        label: <CardTurf global={global} key={t.id} turf={t} refer={this} />,
       });
     });
 
@@ -72,6 +75,8 @@ export default class App extends Component {
   }
 
   doQuery = async () => {
+    const { global } = this.state;
+
     if (!this.state.selectedAttributeOption) return;
 
     this.setState({ loading: true });
@@ -83,7 +88,7 @@ export default class App extends Component {
     if (this.state.selectedAttributeOption && this.state.selectedAttributeOption.id) uri += '&aId='+this.state.selectedAttributeOption.id;
     if (this.state.include_null) uri += '&include_null=true';
 
-    let data = await _fetch(this.props.server, uri);
+    let data = await _fetch(global, uri);
 
     if (data && data.data) {
       data.data.map(d => data_breakdown.push({name: (d[0]?d[0]:'No Data'), value: d[1]}));

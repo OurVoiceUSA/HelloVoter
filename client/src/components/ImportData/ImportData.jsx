@@ -32,15 +32,20 @@ const defaultState = {
 };
 
 export default class ImportData extends Component {
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      global: props.global,
+      imports: [],
+      ...defaultState,
+    };
+  }
+
   componentDidMount() {
     this._loadData();
   }
-
-  state = {
-    server: this.props.server,
-    imports: [],
-    ...defaultState,
-  };
 
   // #region import methods
   preProcessError(e) {
@@ -55,11 +60,11 @@ export default class ImportData extends Component {
   };
 
   sendData = async () => {
-    const { mapped: data, filename } = this.state;
+    const { global, mapped: data, filename } = this.state;
     const total = data.length;
 
     this.setState({sending: true, completed: 1});
-    await _fetch(this.props.server, API_BASE_URI+'/import/begin', 'POST', {
+    await _fetch(global, API_BASE_URI+'/import/begin', 'POST', {
       filename: filename,
       attributes: ['Name', 'Party Affiliation'],
     });
@@ -87,14 +92,14 @@ export default class ImportData extends Component {
         }
       }
 
-      await _fetch(this.props.server, API_BASE_URI+'/import/add', 'POST', {
+      await _fetch(global, API_BASE_URI+'/import/add', 'POST', {
         filename: filename,
         data: arr,
       });
       const percentage = Math.ceil(((total - data.length) / total) * 100);
       this.setState({ completed: percentage });
     }
-    await _fetch(this.props.server, API_BASE_URI+'/import/end', 'POST', {
+    await _fetch(global, API_BASE_URI+'/import/end', 'POST', {
       filename: filename,
     });
 
@@ -109,10 +114,12 @@ export default class ImportData extends Component {
   };
 
   _loadData = async () => {
+    const { global } = this.state;
+
     let imports = [];
     this.setState({ loading: true });
     try {
-      imports = await _loadImports(this);
+      imports = await _loadImports(global);
     } catch (e) {
       notify_error(e, 'Unable to load import data.');
     }

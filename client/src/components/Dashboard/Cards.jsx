@@ -11,6 +11,7 @@ const _Cards = props => {
         const card = props.cards[item] || {};
         return (
           <CardDashboard
+            key={card.name}
             name={card.name}
             stat={card.stat}
             icon={card.icon}

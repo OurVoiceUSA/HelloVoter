@@ -28,10 +28,13 @@ class App extends Component {
 
     const v = queryString.parse(window.location.search);
     this.state = {
+      global: props.global,
       loading: true,
       open: true,
       menuLogout: false,
-      server: {},
+      server: localStorage.getItem('server'),
+      token: localStorage.getItem('jwt'),
+      orgId: localStorage.getItem('orgId'),
       qserver: v.server
     };
 
@@ -48,24 +51,18 @@ class App extends Component {
   }
 
   _loadData = async () => {
+    let { server, token, orgId } = this.state;
+
     this.setState({loading: true});
 
-    let hostname = '';
-    let token = '';
-    let orgId = '';
-
     try {
-      token = localStorage.getItem('jwt');
-      hostname = localStorage.getItem('server');
-      orgId = localStorage.getItem('orgId');
-
       // assume error unless proven otherwise
       let hai = {error: true};
 
-      if (hostname && token) {
-        hai = await this.singHello(hostname, jwt.decode(token)['id'].split(":")[0], token, orgId);
+      if (server && token) {
+        hai = await this.singHello(server, jwt.decode(token)['id'].split(":")[0], token, orgId);
       } else {
-        throw new Error("missing hostname or token");
+        throw new Error("missing server or token");
       }
 
       if (hai.error) {
@@ -74,9 +71,7 @@ class App extends Component {
     } catch (e) {
       // if we had a token, it was bad, clear everything
       if (token) {
-        hostname = '';
-        token = '';
-        orgId = '';
+        this.setState({server: null, token: null, orgId: null});
         localStorage.clear();
         console.warn("Cleaning localStorage");
       }
@@ -84,25 +79,22 @@ class App extends Component {
     }
 
     this.setState({
-      server: {
-        hostname: hostname,
-        jwt: token,
-        orgId: orgId,
-      },
       loading: false,
     }, () => this._loadKeys());
 
   };
 
   _loadKeys = async () => {
+    const { global } = this.state;
+
     // don't load if already loaded
     if (this.state.google_maps_key) return;
-    if (!this.state.server.hostname) return;
+    if (!this.state.server) return;
 
     let data;
 
     try {
-      data = await _fetch(this.state.server, API_BASE_URI+'/google_maps_key');
+      data = await _fetch(global, API_BASE_URI+'/google_maps_key');
       if (!data) return;
 
       // load google places API
@@ -135,10 +127,10 @@ class App extends Component {
   getUserProp = prop => {
     let item;
 
-    if (!this.state.server.jwt) return null;
+    if (!this.state.token) return null;
 
     try {
-      item = jwt.decode(this.state.server.jwt)[prop];
+      item = jwt.decode(this.state.token)[prop];
     } catch (e) {
       notify_error(
         e,
@@ -151,7 +143,7 @@ class App extends Component {
 
   _logout = () => {
     localStorage.clear();
-    this.setState({ menuLogout: false, server: {} });
+    this.setState({ menuLogout: false, server: null, token: null, orgId: null });
   };
 
   doSave = async (event, target) => {
@@ -176,6 +168,7 @@ class App extends Component {
 
     localStorage.setItem('server', server);
     localStorage.setItem('orgId', orgId);
+    this.setState({server, orgId});
 
     let https = true;
     if (server.match(/^localhost/)) https = false;
@@ -186,7 +179,7 @@ class App extends Component {
         headers: {
           Authorization:
             'Bearer ' +
-            (token ? token : (this.state.server.jwt ? this.state.server.jwt : 'of the one ring')),
+            (token ? token : (this.state.token ? this.state.token : 'of the one ring')),
           'Content-Type': 'application/json'
         },
       });
@@ -228,7 +221,7 @@ class App extends Component {
       else {
         // TODO: use form data from body.data.forms[0] and save it in the forms_local cache
         // TODO: if there's more than one form in body.data.forms - don't navigate
-        console.warn({ server: server, dbx: null, user: this.state.user });
+        console.warn({ user: this.state.user });
         return { error: false, flag: true };
       }
     } catch (e) {
@@ -258,7 +251,7 @@ class App extends Component {
       </Router>
     );
 
-    if (!server.hostname) return (
+    if (!server) return (
       <Router>
         <Route path="/" render={props => <Login {...props} refer={this} />} />
       </Router>
@@ -272,7 +265,7 @@ class App extends Component {
           <Header
             open={this.state.open}
             classes={classes}
-            server={server}
+            global={this}
             getUserProp={this.getUserProp}
             handleDrawerOpen={this.handleDrawerOpen}
           />
@@ -286,11 +279,7 @@ class App extends Component {
           <main className={classes.content}>
             <div className={classes.appBarSpacer} />
             <NotificationContainer />
-            <Routes
-              server={server}
-              refer={this}
-              google_maps_key={this.state.google_maps_key}
-            />
+            <Routes global={this} />
             <LogoutDialog
               menuLogout={this.state.menuLogout}
               handleCloseLogout={this.handleCloseLogout}

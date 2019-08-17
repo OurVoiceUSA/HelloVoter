@@ -34,23 +34,20 @@ export function notify_error(e, msg) {
   console.warn(e);
 }
 
-export async function _fetch(server, uri, method, body) {
-  if (!server) return;
+export async function _fetch(global, uri, method, body) {
+  if (!global || !global.state) return;
+
+  const { server, token } = global.state;
 
   let https = true;
-  if (server.hostname.match(/^localhost/)) https = false;
+  if (server.match(/^localhost/)) https = false;
 
   if (!method) method = 'GET';
 
-  if (!server.hostname) {
-    notify_error({}, 'API server definition error.');
-    return;
-  }
-
-  let res = await fetch('http'+(https?'s':'')+'://' + server.hostname + uri, {
+  let res = await fetch('http'+(https?'s':'')+'://' + server + uri, {
     method: method,
     headers: {
-      Authorization: 'Bearer ' + server.jwt,
+      Authorization: 'Bearer ' + token,
       'Content-Type': 'application/json'
     },
     body: body ? JSON.stringify(body) : null
@@ -136,10 +133,10 @@ export function _searchStringify(obj) {
   return JSON.stringify(o).toLowerCase();
 }
 
-export async function _loadImports(refer) {
+export async function _loadImports(global) {
   let imports = [];
   try {
-    let data = await _fetch(refer.state.server, API_BASE_URI+'/import/list');
+    let data = await _fetch(global, API_BASE_URI+'/import/list');
     imports = data && data.data ? data.data : [];
   } catch (e) {
     notify_error(e, 'Unable to load import info.');
@@ -147,11 +144,11 @@ export async function _loadImports(refer) {
   return imports;
 }
 
-export async function _loadVolunteer(refer, id) {
+export async function _loadVolunteer(global, id) {
   let volunteer = {};
   try {
     volunteer = await _fetch(
-      refer.state.server,
+      global,
       API_BASE_URI+'/volunteer/get?id=' + id
     );
   } catch (e) {
@@ -160,7 +157,7 @@ export async function _loadVolunteer(refer, id) {
   return volunteer;
 }
 
-export async function _loadVolunteers(refer, byType, id) {
+export async function _loadVolunteers(global, byType, id) {
   let volunteers = [];
 
   try {
@@ -172,7 +169,7 @@ export async function _loadVolunteers(refer, byType, id) {
     else if (byType === 'form')
       call = 'form/assigned/volunteer/list?formId=' + id;
 
-    volunteers = await _fetch(refer.props.server, API_BASE_URI+'/' + call);
+    volunteers = await _fetch(global, API_BASE_URI+'/' + call);
   } catch (e) {
     notify_error(e, 'Unable to load volunteer data.');
   }
@@ -180,12 +177,12 @@ export async function _loadVolunteers(refer, byType, id) {
   return volunteers;
 }
 
-export async function _loadTurf(refer, id) {
+export async function _loadTurf(global, id) {
   let turf = {};
 
   try {
     turf = await _fetch(
-      refer.state.server,
+      global,
       API_BASE_URI+'/turf/get?turfId=' + id
     );
   } catch (e) {
@@ -195,14 +192,14 @@ export async function _loadTurf(refer, id) {
   return turf;
 }
 
-export async function _loadTurfs(refer, teamId, flag) {
+export async function _loadTurfs(global, teamId, flag) {
   let turf = [];
 
   try {
     let call = 'turf/list' + (flag ? '?geometry=true' : '');
     if (teamId)
       call = 'team/turf/list?teamId=' + teamId + (flag ? '&geometry=true' : '');
-    let data = await _fetch(refer.props.server, API_BASE_URI+'/' + call);
+    let data = await _fetch(global, API_BASE_URI+'/' + call);
     turf = data.data ? data.data : [];
   } catch (e) {
     notify_error(e, 'Unable to load turf data.');
@@ -211,11 +208,11 @@ export async function _loadTurfs(refer, teamId, flag) {
   return turf;
 }
 
-export async function _loadNearbyTurfs(refer, lng, lat, dist) {
+export async function _loadNearbyTurfs(global, lng, lat, dist) {
   let turf = [];
 
   try {
-    let data = await _fetch(refer.props.server, API_BASE_URI+'/turf/list/byposition?longitude='+lng+'&latitude='+lat+(dist?'&dist='+dist:''));
+    let data = await _fetch(global, API_BASE_URI+'/turf/list/byposition?longitude='+lng+'&latitude='+lat+(dist?'&dist='+dist:''));
     turf = data.data ? data.data : [];
   } catch (e) {
     notify_error(e, 'Unable to load turf data.');
@@ -224,12 +221,12 @@ export async function _loadNearbyTurfs(refer, lng, lat, dist) {
   return turf;
 }
 
-export async function _loadTeam(refer, id) {
+export async function _loadTeam(global, id) {
   let team = {};
 
   try {
     team = await _fetch(
-      refer.state.server,
+      global,
       API_BASE_URI+'/team/get?teamId=' + id
     );
   } catch (e) {
@@ -239,7 +236,7 @@ export async function _loadTeam(refer, id) {
   return team.data[0];
 }
 
-export async function _loadTeams(refer, byType, id) {
+export async function _loadTeams(global, byType, id) {
   let teams = [];
 
   try {
@@ -248,7 +245,7 @@ export async function _loadTeams(refer, byType, id) {
     if (byType === 'turf') call = 'turf/assigned/team/list?turfId=' + id;
     else if (byType === 'form') call = 'form/assigned/team/list?formId=' + id;
 
-    let data = await _fetch(refer.props.server, API_BASE_URI+'/' + call);
+    let data = await _fetch(global, API_BASE_URI+'/' + call);
     teams = data.data ? data.data : [];
   } catch (e) {
     notify_error(e, 'Unable to load teams data.');
@@ -257,12 +254,12 @@ export async function _loadTeams(refer, byType, id) {
   return teams;
 }
 
-export async function _loadForm(refer, id) {
+export async function _loadForm(global, id) {
   let form = {};
 
   try {
     form = await _fetch(
-      refer.state.server,
+      global,
       API_BASE_URI+'/form/get?formId=' + id
     );
   } catch (e) {
@@ -272,7 +269,7 @@ export async function _loadForm(refer, id) {
   return form;
 }
 
-export async function _loadForms(refer, teamId) {
+export async function _loadForms(global, teamId) {
   let forms = [];
 
   try {
@@ -281,7 +278,7 @@ export async function _loadForms(refer, teamId) {
     if (teamId) uri = 'team/form/list?teamId=' + teamId;
     else uri = 'form/list';
 
-    let data = await _fetch(refer.props.server, API_BASE_URI+'/' + uri);
+    let data = await _fetch(global, API_BASE_URI+'/' + uri);
     forms = data.data ? data.data : [];
   } catch (e) {
     notify_error(e, 'Unable to load form data.');
@@ -290,11 +287,11 @@ export async function _loadForms(refer, teamId) {
   return forms;
 }
 
-export async function _loadAttributes(refer) {
+export async function _loadAttributes(global) {
   let attributes = [];
 
   try {
-    let data = await _fetch(refer.props.server, API_BASE_URI+'/attribute/list');
+    let data = await _fetch(global, API_BASE_URI+'/attribute/list');
     attributes = data.data ? data.data : [];
   } catch (e) {
     notify_error(e, 'Unable to load attribute data.');
@@ -306,20 +303,20 @@ export async function _loadAttributes(refer) {
 
   return attributes;
 }
-export async function _loadAddressData(refer, lng, lat, formId) {
+export async function _loadAddressData(global, lng, lat, formId) {
   let data = [];
   try {
-    data = await _fetch(refer.props.server, API_BASE_URI+'/address/get/byposition?limit=1000&longitude='+lng+'&latitude='+lat+(formId?'&formId='+formId:''));
+    data = await _fetch(global, API_BASE_URI+'/address/get/byposition?limit=1000&longitude='+lng+'&latitude='+lat+(formId?'&formId='+formId:''));
   } catch (e) {
     notify_error(e, 'Unable to load address information.');
   }
   return data;
 }
 
-export async function _loadPeopleAddressData(refer, aId, formId) {
+export async function _loadPeopleAddressData(global, aId, formId) {
   let data = [];
   try {
-    data = await _fetch(refer.props.server, API_BASE_URI+'/people/get/byaddress?aId='+aId+(formId?'&formId='+formId:''));
+    data = await _fetch(global, API_BASE_URI+'/people/get/byaddress?aId='+aId+(formId?'&formId='+formId:''));
   } catch (e) {
     notify_error(e, 'Unable to load address information.');
   }

@@ -24,24 +24,24 @@ import NoMatch from './NoMatch';
     server: <server description>
   }
 */
-export const Routes = ({ server, refer, google_maps_key }) => (
+export const Routes = ({ global }) => (
   <Switch>
-    <Route exact={true} path="/" render={() => <Dashboard server={server} refer={refer} />} />
-    <Route path="/volunteers/" render={() => <Volunteers server={server} />} />
-    <Route path="/teams/" render={() => <Teams server={server} />} />
-    <Route path="/turf/" render={() => <Turf server={server} />} />
-    <Route path="/forms/" render={() => <Forms server={server} />} />
-    <Route path="/attributes/" render={() => <Attributes server={server} />} />
+    <Route exact={true} path="/" render={() => <Dashboard global={global} />} />
+    <Route path="/jwt/" render={props => <Login {...props} global={global} />} />
+    <Route path="/volunteers/" render={() => <Volunteers global={global} />} />
+    <Route path="/teams/" render={() => <Teams global={global} />} />
+    <Route path="/turf/" render={() => <Turf global={global} />} />
+    <Route path="/forms/" render={() => <Forms global={global} />} />
+    <Route path="/attributes/" render={() => <Attributes global={global} />} />
     <Route
       path="/map/"
-      render={() => <Map server={server} apiKey={google_maps_key} />}
+      render={() => <Map global={global} apiKey={global.state.google_maps_key} />}
     />
-    <Route path="/import/" render={() => <ImportData server={server} />} />
-    <Route path="/queue/" render={() => <Queue server={server} />} />
-    <Route path="/analytics/" render={() => <Analytics server={server} />} />
-    <Route path="/settings/" render={() => <Settings server={server} />} />
-    <Route path="/jwt/" render={props => <Login {...props} refer={refer} />} />
-    <Route path="/about/" render={() => <About server={server} />} />
+    <Route path="/import/" render={() => <ImportData global={global} />} />
+    <Route path="/queue/" render={() => <Queue global={global} />} />
+    <Route path="/analytics/" render={() => <Analytics global={global} />} />
+    <Route path="/settings/" render={() => <Settings global={global} />} />
+    <Route path="/about/" render={() => <About global={global} />} />
     <Route component={NoMatch} />
   </Switch>
 );

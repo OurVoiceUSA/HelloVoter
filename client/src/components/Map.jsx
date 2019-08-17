@@ -23,6 +23,7 @@ export class App extends Component {
     super(props);
 
     this.state = {
+      global: props.global,
       turfs: [],
       addresses: [],
       showingInfoWindow: false,
@@ -37,21 +38,23 @@ export class App extends Component {
   }
 
   _loadData = async () => {
+    const { global } = this.state;
+
     let turfs = [], forms = [], formOptions = [{label: "None"}];
 
     [
       turfs,
       forms,
     ] = await Promise.all([
-      _loadTurfs(this, null, true),
-      _loadForms(this),
+      _loadTurfs(global, null, true),
+      _loadForms(global),
     ]);
 
     forms.forEach(f => {
       formOptions.push({
         value: _searchStringify(f),
         id: f.id,
-        label: <CardForm key={f.id} form={f} refer={this} />,
+        label: <CardForm global={global} key={f.id} form={f} refer={this} />,
       });
     });
 
@@ -66,7 +69,7 @@ export class App extends Component {
   onMarkerClick = async (props, marker, e) => {
     const { formId } = this.state;
     this.setState({showingInfoWindow: true});
-    let data = await _loadPeopleAddressData(this, props.address.id, formId);
+    let data = await _loadPeopleAddressData(global, props.address.id, formId);
     let place = data[0];
     place.title = props.title;
     this.setState({
@@ -84,6 +87,8 @@ export class App extends Component {
   }
 
   loadMarkerData = async (mapProps, map) => {
+    const { global } = this.state;
+
     let longitude, latitude;
 
     if (map) {
@@ -95,7 +100,7 @@ export class App extends Component {
       latitude = this.state.latitude;
     }
 
-    let addresses = await _loadAddressData(this, longitude, latitude, this.state.formId);
+    let addresses = await _loadAddressData(global, longitude, latitude, this.state.formId);
     this.setState({addresses});
   }
 

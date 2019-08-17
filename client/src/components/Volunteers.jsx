@@ -61,6 +61,7 @@ export default class Volunteers extends Component {
     if (!perPage) perPage = 5;
 
     this.state = {
+      global: props.global,
       loading: true,
       thisVolunteer: {},
       volunteers: [],
@@ -90,10 +91,12 @@ export default class Volunteers extends Component {
   }
 
   _loadData = async () => {
+    const { global } = this.state;
+
     let volunteers = [];
     this.setState({ loading: true, search: '' });
     try {
-      volunteers = await _loadVolunteers(this);
+      volunteers = await _loadVolunteers(global);
     } catch (e) {
       notify_error(e, 'Unable to load volunteers.');
     }
@@ -105,6 +108,8 @@ export default class Volunteers extends Component {
   };
 
   render() {
+    const { global } = this.state;
+
     let ready = [];
     let unassigned = [];
     let denied = [];
@@ -162,13 +167,14 @@ export default class Volunteers extends Component {
             <Route
               exact={true}
               path="/volunteers/"
-              render={() => <ListVolunteers refer={this} volunteers={ready} />}
+              render={() => <ListVolunteers global={global} refer={this} volunteers={ready} />}
             />
             <Route
               exact={true}
               path="/volunteers/unassigned"
               render={() => (
                 <ListVolunteers
+                  global={global}
                   refer={this}
                   type="Unassigned"
                   volunteers={unassigned}
@@ -181,13 +187,14 @@ export default class Volunteers extends Component {
               render={() => (
                 <div>
                   <ListVolunteers
+                    global={global}
                     refer={this}
                     type="Invited"
                     volunteers={invited}
                   />
                   <Button onClick={async () => {
                     let obj = await _fetch(
-                      this.props.server,
+                      global,
                       API_BASE_URI+'/volunteer/invite',
                       'POST'
                     );
@@ -207,6 +214,7 @@ export default class Volunteers extends Component {
               path="/volunteers/denied"
               render={() => (
                 <ListVolunteers
+                  global={global}
                   refer={this}
                   type="Denied"
                   volunteers={denied}
@@ -217,10 +225,10 @@ export default class Volunteers extends Component {
               path="/volunteers/view/:id"
               render={props => (
                 <CardVolunteer
+                  global={global}
                   key={props.match.params.id}
                   id={props.match.params.id}
                   edit={true}
-                  refer={this}
                 />
               )}
             />
@@ -241,6 +249,7 @@ export default class Volunteers extends Component {
                 }}
               >
                 <CardVolunteer
+                  global={global}
                   key={this.state.thisVolunteer.id}
                   id={this.state.thisVolunteer.id}
                   edit={true}
@@ -264,7 +273,7 @@ const ListVolunteers = props => {
   props.volunteers.forEach((c, idx) => {
     let tp = Math.floor(idx / perPage) + 1;
     if (tp !== props.refer.state.pageNum) return;
-    list.push(<CardVolunteer key={c.id} volunteer={c} refer={props.refer} />);
+    list.push(<CardVolunteer global={global} key={c.id} volunteer={c} refer={props.refer} />);
   });
 
   paginate = (
@@ -317,7 +326,8 @@ export class CardVolunteer extends Component {
     super(props);
 
     this.state = {
-      server: this.props.refer.props.server,
+      global: props.global,
+      refer: this.props.refer.props.refer,
       volunteer: this.props.volunteer,
       selectedTeamsOption: [],
       selectedLeaderOption: [],
@@ -337,6 +347,8 @@ export class CardVolunteer extends Component {
   }
 
   handleTeamsChange = async selectedTeamsOption => {
+    const { global } = this.state;
+
     if (!selectedTeamsOption) selectedTeamsOption = [];
     this.props.refer.setState({ saving: true });
     try {
@@ -347,7 +359,7 @@ export class CardVolunteer extends Component {
 
       for (let i in obj.add) {
         await _fetch(
-          this.state.server,
+          global,
           API_BASE_URI+'/team/members/add',
           'POST',
           { teamId: obj.add[i], vId: this.props.id }
@@ -356,7 +368,7 @@ export class CardVolunteer extends Component {
 
       for (let i in obj.rm) {
         await _fetch(
-          this.state.server,
+          global,
           API_BASE_URI+'/team/members/remove',
           'POST',
           { teamId: obj.rm[i], vId: this.props.id }
@@ -364,7 +376,7 @@ export class CardVolunteer extends Component {
       }
 
       // refresh volunteer info
-      let volunteer = await _loadVolunteer(this, this.props.id);
+      let volunteer = await _loadVolunteer(global, this.props.id);
       notify_success('Team assignments saved.');
       this.setState({
         selectedTeamsOption,
@@ -377,6 +389,8 @@ export class CardVolunteer extends Component {
   };
 
   handleLeaderChange = async selectedLeaderOption => {
+    const { global } = this.state;
+
     if (!selectedLeaderOption) selectedLeaderOption = [];
     this.props.refer.setState({ saving: true });
     try {
@@ -387,7 +401,7 @@ export class CardVolunteer extends Component {
 
       for (let i in obj.add) {
         await _fetch(
-          this.state.server,
+          global,
           API_BASE_URI+'/team/members/promote',
           'POST',
           { teamId: obj.add[i], vId: this.props.id }
@@ -396,7 +410,7 @@ export class CardVolunteer extends Component {
 
       for (let i in obj.rm) {
         await _fetch(
-          this.state.server,
+          global,
           API_BASE_URI+'/team/members/demote',
           'POST',
           { teamId: obj.rm[i], vId: this.props.id }
@@ -404,7 +418,7 @@ export class CardVolunteer extends Component {
       }
 
       // refresh volunteer info
-      let volunteer = await _loadVolunteer(this, this.props.id);
+      let volunteer = await _loadVolunteer(global, this.props.id);
       notify_success('Team leaders saved.');
       this.setState({ selectedLeaderOption, volunteer });
     } catch (e) {
@@ -414,6 +428,8 @@ export class CardVolunteer extends Component {
   };
 
   handleFormsChange = async selectedFormsOption => {
+    const { global } = this.state;
+
     if (!selectedFormsOption) selectedFormsOption = [];
     this.props.refer.setState({ saving: true });
     try {
@@ -424,7 +440,7 @@ export class CardVolunteer extends Component {
 
       for (let i in obj.add) {
         await _fetch(
-          this.state.server,
+          global,
           API_BASE_URI+'/form/assigned/volunteer/add',
           'POST',
           { formId: obj.add[i], vId: this.props.id }
@@ -433,7 +449,7 @@ export class CardVolunteer extends Component {
 
       for (let i in obj.rm) {
         await _fetch(
-          this.state.server,
+          global,
           API_BASE_URI+'/form/assigned/volunteer/remove',
           'POST',
           { formId: obj.rm[i], vId: this.props.id }
@@ -441,7 +457,7 @@ export class CardVolunteer extends Component {
       }
 
       // refresh volunteer info
-      let volunteer = await _loadVolunteer(this, this.props.id);
+      let volunteer = await _loadVolunteer(global, this.props.id);
       notify_success('Form selection saved.');
       this.setState({ selectedFormsOption, volunteer });
     } catch (e) {
@@ -451,6 +467,8 @@ export class CardVolunteer extends Component {
   };
 
   handleTurfChange = async selectedTurfOption => {
+    const { global } = this.state;
+
     if (!selectedTurfOption) selectedTurfOption = [];
     this.props.refer.setState({ saving: true });
     try {
@@ -461,7 +479,7 @@ export class CardVolunteer extends Component {
 
       for (let i in obj.add) {
         await _fetch(
-          this.state.server,
+          global,
           API_BASE_URI+'/turf/assigned/volunteer/add',
           'POST',
           { turfId: obj.add[i], vId: this.props.id }
@@ -470,7 +488,7 @@ export class CardVolunteer extends Component {
 
       for (let i in obj.rm) {
         await _fetch(
-          this.state.server,
+          global,
           API_BASE_URI+'/turf/assigned/volunteer/remove',
           'POST',
           { turfId: obj.rm[i], vId: this.props.id }
@@ -478,7 +496,7 @@ export class CardVolunteer extends Component {
       }
 
       // refresh volunteer info
-      let volunteer = await _loadVolunteer(this, this.props.id);
+      let volunteer = await _loadVolunteer(global, this.props.id);
       notify_success('Turf selection saved.');
       this.setState({ selectedTurfOption, volunteer });
     } catch (e) {
@@ -488,6 +506,8 @@ export class CardVolunteer extends Component {
   };
 
   _loadData = async () => {
+    const { global } = this.state;
+
     let volunteer = {},
       forms = [],
       turf = [],
@@ -499,10 +519,10 @@ export class CardVolunteer extends Component {
 
     try {
       [volunteer, forms, turf, teams] = await Promise.all([
-        _loadVolunteer(this, this.props.id),
-        _loadForms(this.props.refer),
-        _loadTurfs(this.props.refer),
-        _loadTeams(this.props.refer)
+        _loadVolunteer(global, this.props.id),
+        _loadForms(global),
+        _loadTurfs(global),
+        _loadTeams(global),
       ]);
     } catch (e) {
       notify_error(e, 'Unable to load canavasser info.');
@@ -510,8 +530,8 @@ export class CardVolunteer extends Component {
     }
 
     if (volunteer.location) {
-      hometurf = await _loadNearbyTurfs(this.props.refer, volunteer.location.x, volunteer.location.y, 0);
-      nearbyturf = await _loadNearbyTurfs(this.props.refer, volunteer.location.x, volunteer.location.y, NEARBY_DIST);
+      hometurf = await _loadNearbyTurfs(global, volunteer.location.x, volunteer.location.y, 0);
+      nearbyturf = await _loadNearbyTurfs(global, volunteer.location.x, volunteer.location.y, NEARBY_DIST);
     }
 
     let teamOptions = [];
@@ -530,6 +550,7 @@ export class CardVolunteer extends Component {
         id: 'auto',
         label: (
           <CardTurf
+            global={global}
             key="auto"
             turf={{
               id: 'auto',
@@ -546,25 +567,25 @@ export class CardVolunteer extends Component {
       teamOptions.push({
         value: _searchStringify(t),
         id: t.id,
-        label: <CardTeam key={t.id} team={t} refer={this} />
+        label: <CardTeam global={global} key={t.id} team={t} refer={this} />
       });
       volunteer.ass.teams.forEach((a, idx) => {
         if (a.id === t.id) {
           selectedTeamsOption.push({
             value: _searchStringify(t),
             id: t.id,
-            label: <CardTeam key={t.id} team={t} refer={this} />
+            label: <CardTeam global={global} key={t.id} team={t} refer={this} />
           });
           leaderOptions.push({
             value: _searchStringify(t),
             id: t.id,
-            label: <CardTeam key={t.id} team={t} refer={this} />
+            label: <CardTeam global={global} key={t.id} team={t} refer={this} />
           });
           if (a.leader) {
             selectedLeaderOption.push({
               value: _searchStringify(t),
               id: t.id,
-              label: <CardTeam key={t.id} team={t} refer={this} />
+              label: <CardTeam global={global} key={t.id} team={t} refer={this} />
             });
           }
         }
@@ -575,7 +596,7 @@ export class CardVolunteer extends Component {
       formOptions.push({
         value: _searchStringify(f),
         id: f.id,
-        label: <CardForm key={f.id} form={f} refer={this} />
+        label: <CardForm global={global} key={f.id} form={f} refer={this} />
       });
     });
 
@@ -584,7 +605,7 @@ export class CardVolunteer extends Component {
         selectedFormsOption.push({
           value: _searchStringify(f),
           id: f.id,
-          label: <CardForm key={f.id} form={f} refer={this} />
+          label: <CardForm global={global} key={f.id} form={f} refer={this} />
         });
       }
     });
@@ -593,7 +614,7 @@ export class CardVolunteer extends Component {
       turfOptions.push({
         value: _searchStringify(t),
         id: t.id,
-        label: <CardTurf key={t.id} turf={t} refer={this} />
+        label: <CardTurf global={global} key={t.id} turf={t} refer={this} />
       });
     });
 
@@ -604,6 +625,7 @@ export class CardVolunteer extends Component {
           id: t.id,
           label: (
             <CardTurf
+              global={global}
               key={t.id}
               turf={t}
               refer={this}
@@ -631,11 +653,13 @@ export class CardVolunteer extends Component {
   };
 
   _lockVolunteer = async (volunteer, flag) => {
+    const { global } = this.state;
+
     let term = flag ? 'lock' : 'unlock';
     this.props.refer.setState({ saving: true });
     try {
       await _fetch(
-        this.state.server,
+        global,
         API_BASE_URI+'/volunteer/' + term,
         'POST',
         { id: volunteer.id }
@@ -650,7 +674,7 @@ export class CardVolunteer extends Component {
   };
 
   render() {
-    const { volunteer } = this.state;
+    const { global, volunteer } = this.state;
 
     if (!volunteer || this.state.loading) {
       return <CircularProgress />;
@@ -673,7 +697,7 @@ export class CardVolunteer extends Component {
             />
             <VolunteerBadges volunteer={volunteer} />
           </ListItem>
-          <CardVolunteerFull volunteer={volunteer} refer={this} />
+          <CardVolunteerFull global={global} volunteer={volunteer} refer={this} />
         </div>
       );
 
@@ -722,7 +746,7 @@ export const CardVolunteerFull = props => (
     Phone: {props.volunteer.phone ? props.volunteer.phone : 'N/A'}
     <br />
     Address:{' '}
-    <VolunteerAddress refer={props.refer} volunteer={props.volunteer} />
+    <VolunteerAddress global={global} refer={props.refer} volunteer={props.volunteer} />
     <br />
     {props.refer.state.hometurf.length?
       <div>
@@ -773,10 +797,10 @@ export const CardVolunteerFull = props => (
         Forms / Turf this users sees based on the above team(s):
         <br />
         {props.volunteer.ass.forms.filter(f => !f.direct).map(f => (
-          <CardForm key={f.id} form={f} refer={props.refer} />
+          <CardForm global={global} key={f.id} form={f} refer={props.refer} />
         ))}
         {props.volunteer.ass.turfs.filter(t => !t.direct).map(t => (
-          <CardTurf key={t.id} turf={t} refer={props.refer} />
+          <CardTurf global={global} key={t.id} turf={t} refer={props.refer} />
         ))}
       </div>
     ):''
@@ -809,6 +833,7 @@ export class VolunteerAddress extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      global: props.global,
       edit: false,
       address: this.props.volunteer.locationstr
         ? this.props.volunteer.locationstr
@@ -818,12 +843,14 @@ export class VolunteerAddress extends Component {
   }
 
   submitAddress = async address => {
+    const { global } = this.state;
+
     this.setState({ address });
     try {
       let res = await geocodeByAddress(address);
       let pos = await getLatLng(res[0]);
       await _fetch(
-        this.props.refer.state.server,
+        global,
         API_BASE_URI+'/volunteer/update',
         'POST',
         {

@@ -119,6 +119,7 @@ export default class Forms extends Component {
     });
 
     this.state = {
+      global: props.global,
       loading: true,
       forms: [],
       attributes: [],
@@ -264,14 +265,16 @@ export default class Forms extends Component {
   }
 
   _loadData = async () => {
+    const { global } = this.state;
+
     this.setState({ loading: true });
     let forms = [];
     let attributes = [], attributes_selected = [];
     let fields = {};
 
     try {
-      forms = await _loadForms(this);
-      attributes = await _loadAttributes(this);
+      forms = await _loadForms(global);
+      attributes = await _loadAttributes(global);
 
       // convert attributes to fields
       attributes.forEach(a => {
@@ -285,9 +288,11 @@ export default class Forms extends Component {
   };
 
   _deleteForm = async id => {
+    const { global } = this.state;
+
     this.setState({ saving: true, menuDelete: false });
     try {
-      await _fetch(this.props.server, API_BASE_URI+'/form/delete', 'POST', {
+      await _fetch(global, API_BASE_URI+'/form/delete', 'POST', {
         formId: id
       });
       notify_success('Form has been deleted.');
@@ -301,6 +306,8 @@ export default class Forms extends Component {
   };
 
   _createForm = async () => {
+    const { global } = this.state;
+
     let json = this.addFormForm.getValue();
     if (json === null) return;
 
@@ -333,7 +340,7 @@ export default class Forms extends Component {
         attributes: Object.keys(this.state.fields),
       };
 
-      await _fetch(this.props.server, API_BASE_URI+'/form/create', 'POST', obj);
+      await _fetch(global, API_BASE_URI+'/form/create', 'POST', obj);
       notify_success('Form has been created.');
     } catch (e) {
       notify_error(e, 'Unable to create form.');
@@ -345,6 +352,8 @@ export default class Forms extends Component {
   };
 
   render() {
+    const { global } = this.state;
+
     let list = [];
 
     this.state.forms.forEach(f => {
@@ -372,7 +381,7 @@ export default class Forms extends Component {
                   data-tip="Search by name, email, location, or admin"
                 />
                 <br />
-                <ListForms forms={list} refer={this} />
+                <ListForms global={global} forms={list} refer={this} />
               </RootLoader>
             )}
           />
@@ -470,6 +479,7 @@ export default class Forms extends Component {
             render={props => (
               <div>
                 <CardForm
+                  global={global}
                   key={props.match.params.id}
                   id={props.match.params.id}
                   edit={true}
@@ -524,7 +534,7 @@ const ListForms = props => {
   props.forms.forEach((f, idx) => {
     let tp = Math.floor(idx / perPage) + 1;
     if (tp !== props.refer.state.pageNum) return;
-    list.push(<CardForm key={f.id} form={f} refer={props.refer} />);
+    list.push(<CardForm global={props.global} key={f.id} form={f} refer={props.refer} />);
   });
 
   paginate = (
@@ -580,7 +590,7 @@ export class CardForm extends Component {
     super(props);
 
     this.state = {
-      server: this.props.refer.props.server,
+      global: props.global,
       form: this.props.form,
       selectedTeamsOption: [],
       selectedMembersOption: []
@@ -592,6 +602,8 @@ export class CardForm extends Component {
   }
 
   handleTeamsChange = async selectedTeamsOption => {
+    const { global } = this.state;
+
     if (!selectedTeamsOption) selectedTeamsOption = [];
     this.props.refer.setState({ saving: true });
     try {
@@ -602,7 +614,7 @@ export class CardForm extends Component {
 
       for (let i in obj.add) {
         await _fetch(
-          this.state.server,
+          global,
           API_BASE_URI+'/form/assigned/team/add',
           'POST',
           { teamId: obj.add[i], formId: this.props.id }
@@ -611,7 +623,7 @@ export class CardForm extends Component {
 
       for (let i in obj.rm) {
         await _fetch(
-          this.state.server,
+          global,
           API_BASE_URI+'/form/assigned/team/remove',
           'POST',
           { teamId: obj.rm[i], formId: this.props.id }
@@ -627,6 +639,8 @@ export class CardForm extends Component {
   };
 
   handleMembersChange = async selectedMembersOption => {
+    const { global } = this.state;
+
     if (!selectedMembersOption) selectedMembersOption = [];
     this.props.refer.setState({ saving: true });
     try {
@@ -637,7 +651,7 @@ export class CardForm extends Component {
 
       for (let i in obj.add) {
         await _fetch(
-          this.state.server,
+          global,
           API_BASE_URI+'/form/assigned/volunteer/add',
           'POST',
           { vId: obj.add[i], formId: this.props.id }
@@ -646,7 +660,7 @@ export class CardForm extends Component {
 
       for (let i in obj.rm) {
         await _fetch(
-          this.state.server,
+          global,
           API_BASE_URI+'/form/assigned/volunteer/remove',
           'POST',
           { vId: obj.rm[i], formId: this.props.id }
@@ -662,6 +676,8 @@ export class CardForm extends Component {
   };
 
   _loadData = async () => {
+    const { global } = this.state;
+
     let form = {},
       volunteers = [],
       members = [],
@@ -672,11 +688,11 @@ export class CardForm extends Component {
 
     try {
       [form, volunteers, members, teams, teamsSelected] = await Promise.all([
-        _loadForm(this, this.props.id, true),
-        _loadVolunteers(this.props.refer),
-        _loadVolunteers(this.props.refer, 'form', this.props.id),
-        _loadTeams(this.props.refer),
-        _loadTeams(this.props.refer, 'form', this.props.id)
+        _loadForm(global, this.props.id, true),
+        _loadVolunteers(global),
+        _loadVolunteers(global, 'form', this.props.id),
+        _loadTeams(global),
+        _loadTeams(global, 'form', this.props.id)
       ]);
     } catch (e) {
       notify_error(e, 'Unable to load form info.');
@@ -692,7 +708,7 @@ export class CardForm extends Component {
       teamOptions.push({
         value: _searchStringify(t),
         id: t.id,
-        label: <CardTeam key={t.id} team={t} refer={this} />
+        label: <CardTeam global={global} key={t.id} team={t} refer={this} />
       });
     });
 
@@ -700,7 +716,7 @@ export class CardForm extends Component {
       selectedTeamsOption.push({
         value: _searchStringify(t),
         id: t.id,
-        label: <CardTeam key={t.id} team={t} refer={this} />
+        label: <CardTeam global={global} key={t.id} team={t} refer={this} />
       });
     });
 
@@ -708,7 +724,7 @@ export class CardForm extends Component {
       membersOption.push({
         value: _searchStringify(c),
         id: c.id,
-        label: <CardVolunteer key={c.id} volunteer={c} refer={this} />
+        label: <CardVolunteer global={global} key={c.id} volunteer={c} refer={this} />
       });
     });
 
@@ -716,7 +732,7 @@ export class CardForm extends Component {
       selectedMembersOption.push({
         value: _searchStringify(c),
         id: c.id,
-        label: <CardVolunteer key={c.id} volunteer={c} refer={this} />
+        label: <CardVolunteer global={global} key={c.id} volunteer={c} refer={this} />
       });
     });
 
@@ -732,7 +748,7 @@ export class CardForm extends Component {
   };
 
   render() {
-    const { form } = this.state;
+    const { global, form } = this.state;
 
     if (!form || this.state.loading) {
       return <CircularProgress />;
@@ -754,7 +770,7 @@ export class CardForm extends Component {
             )}
           </div>
         </div>
-        {this.props.edit ? <CardFormFull form={form} refer={this} /> : ''}
+        {this.props.edit ? <CardFormFull global={global} form={form} refer={this} /> : ''}
       </div>
     );
   }

@@ -13,7 +13,7 @@ export default class App extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {};
+    this.state = {global: props.global};
   }
 
   componentDidMount() {
@@ -21,10 +21,12 @@ export default class App extends Component {
   }
 
   _init = async () => {
+    const { global } = this.state;
+
     this.setState({ loading: true });
 
     let attributeOptions = [];
-    let attributes = await _loadAttributes(this);
+    let attributes = await _loadAttributes(global);
 
     attributes.forEach(a => {
       attributeOptions.push({
