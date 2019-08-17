@@ -75,7 +75,7 @@ describe('Database Init', function () {
         latitude: 33.9208231,
       });
     expect(r.statusCode).to.equal(200);
-    expect(r.body.msg).to.equal("Awaiting assignment");
+    expect(r.body.msg).to.equal("Thanks for your request to join us! You are currently awaiting an assignment.");
     expect(r.body.data.ready).to.equal(false);
 
     // make admin an admin
@@ -125,7 +125,7 @@ describe('Database Init', function () {
         latitude: 33.9208231,
       });
     expect(r.statusCode).to.equal(200);
-    expect(r.body.msg).to.equal("Awaiting assignment");
+    expect(r.body.msg).to.equal("Thanks for your request to join us! You are currently awaiting an assignment.");
     expect(r.body.data.ready).to.equal(false);
     expect(r.body.data).to.not.have.property("admin");
 
@@ -136,7 +136,7 @@ describe('Database Init', function () {
         latitude: 33.9208231,
       });
     expect(r.statusCode).to.equal(200);
-    expect(r.body.msg).to.equal("Awaiting assignment");
+    expect(r.body.msg).to.equal("Thanks for your request to join us! You are currently awaiting an assignment.");
     expect(r.body.data.ready).to.equal(false);
     expect(r.body.data).to.not.have.property("admin");
 
@@ -147,7 +147,7 @@ describe('Database Init', function () {
         latitude: 33.9208231,
       });
     expect(r.statusCode).to.equal(200);
-    expect(r.body.msg).to.equal("Awaiting assignment");
+    expect(r.body.msg).to.equal("Thanks for your request to join us! You are currently awaiting an assignment.");
     expect(r.body.data.ready).to.equal(false);
     expect(r.body.data).to.not.have.property("admin");
 
@@ -158,7 +158,7 @@ describe('Database Init', function () {
         latitude: 33.9208231,
       });
     expect(r.statusCode).to.equal(200);
-    expect(r.body.msg).to.equal("Awaiting assignment");
+    expect(r.body.msg).to.equal("Thanks for your request to join us! You are currently awaiting an assignment.");
     expect(r.body.data.ready).to.equal(false);
     expect(r.body.data).to.not.have.property("admin");
 
@@ -169,7 +169,7 @@ describe('Database Init', function () {
         latitude: 33.9208231,
       });
     expect(r.statusCode).to.equal(200);
-    expect(r.body.msg).to.equal("Awaiting assignment");
+    expect(r.body.msg).to.equal("Thanks for your request to join us! You are currently awaiting an assignment.");
     expect(r.body.data.ready).to.equal(false);
     expect(r.body.data).to.not.have.property("admin");
 
@@ -180,7 +180,7 @@ describe('Database Init', function () {
         latitude: 33.9208231,
       });
     expect(r.statusCode).to.equal(200);
-    expect(r.body.msg).to.equal("Awaiting assignment");
+    expect(r.body.msg).to.equal("Thanks for your request to join us! You are currently awaiting an assignment.");
     expect(r.body.data.ready).to.equal(false);
     expect(r.body.data).to.not.have.property("admin");
   });
