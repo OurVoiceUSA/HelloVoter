@@ -514,6 +514,8 @@ export default class App extends OVComponent {
   _loadTurfStats = async () => {
     const { selectedTurf } = this.state;
 
+    return; // TODO: enable turf stats
+
     this.setState({active: 'turfstats', fetchingTurfStats: true});
 
     try {
