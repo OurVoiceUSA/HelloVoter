@@ -27,7 +27,7 @@ module.exports = Router({mergeParams: true})
     await req.db.query('match (s:Volunteer {id:{id}}) match (v:Volunteer {id:{invite}}) set s.tid = s.id set s.id = null set v = s delete s set v.id = v.tid set v.tid = null, v.invited = null', {id: req.user.id, invite: code});
   }
 
-  let msg = "Awaiting assignment";
+  let msg = "Thanks for your request to join us! You are currently awaiting an assignment.";
   let ass = await volunteerAssignments(req, req.user);
   if (ass.ready)
     msg = "You are assigned turf and ready to volunteer!";
