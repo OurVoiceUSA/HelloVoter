@@ -47,7 +47,7 @@ class App extends Component {
     this._loadData();
   }
 
-  _loadData = async (t) => {
+  _loadData = async () => {
     this.setState({loading: true});
 
     let hostname = '';
@@ -55,13 +55,7 @@ class App extends Component {
     let orgId = '';
 
     try {
-      if (t) {
-        token = t;
-        localStorage.setItem('jwt', t);
-      } else {
-        token = localStorage.getItem('jwt');
-      }
-
+      token = localStorage.getItem('jwt');
       hostname = localStorage.getItem('server');
       orgId = localStorage.getItem('orgId');
 
@@ -70,6 +64,8 @@ class App extends Component {
 
       if (hostname && token) {
         hai = await this.singHello(hostname, jwt.decode(token)['id'].split(":")[0], token, orgId);
+      } else {
+        throw new Error("missing hostname or token");
       }
 
       if (hai.error) {
@@ -82,6 +78,7 @@ class App extends Component {
         token = '';
         orgId = '';
         localStorage.clear();
+        console.warn("Cleaning localStorage");
       }
       console.warn(e);
     }

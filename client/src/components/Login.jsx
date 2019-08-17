@@ -2,8 +2,6 @@ import React, { Component } from 'react';
 
 import { Route, Redirect } from 'react-router';
 import { HashRouter as Router } from 'react-router-dom';
-import jwt from 'jsonwebtoken';
-import {notify_error} from '../common.js';
 import Select from 'react-select';
 
 import Avatar from '@material-ui/core/Avatar';
@@ -26,19 +24,20 @@ class Login extends Component {
   constructor(props) {
     super(props);
 
+    let loginOptions = [{label: 'Organization ID', value: 'org'}, {label: '3rd Party Server', value: 'server'}];
+    if (process.env.NODE_ENV === 'development') loginOptions.unshift({label: 'LOCAL DEVELOPMENT', value: 'dev'});
+
     let token;
 
     try {
-      token = this.props.location.pathname.split('/').pop();
-      jwt.decode(token);
-      this.props.refer._loadData(token);
-    } catch (e) {
-      notify_error(e, 'Unable to extract jwt from URI');
-      token = 'error';
+      if (this.props.location.pathname.match(/\/jwt\//)) {
+        token = this.props.location.pathname.split('/').pop();
+        localStorage.setItem('jwt', token);
+        props.refer._loadData();
+      }
+    } catch(e) {
+      console.warn(e);
     }
-
-    let loginOptions = [{label: 'Organization ID', value: 'org'}, {label: '3rd Party Server', value: 'server'}];
-    if (process.env.NODE_ENV === 'development') loginOptions.unshift({label: 'LOCAL DEVELOPMENT', value: 'dev'});
 
     this.state = {
       dev: (process.env.NODE_ENV === 'development'), // default to true if development
@@ -53,7 +52,7 @@ class Login extends Component {
   render() {
     const { classes, token, loginOptions, selectedLoginOption } = this.state;
 
-    if (token && token !== "error")
+    if (token)
       return (
         <Router>
           <Route render={() => (
