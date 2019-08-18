@@ -727,15 +727,15 @@ export const CardVolunteerFull = props => (
   <div>
     <br />
     {props.volunteer.locked ? (
-      <button
+      <Button
         onClick={() => props.refer._lockVolunteer(props.volunteer, false)}
       >
         Restore Access
-      </button>
+      </Button>
     ) : (
-      <button onClick={() => props.refer._lockVolunteer(props.volunteer, true)}>
+      <Button onClick={() => props.refer._lockVolunteer(props.volunteer, true)}>
         Deny Access
-      </button>
+      </Button>
     )}
     <br />
     Last Seen:{' '}
@@ -881,9 +881,9 @@ export class VolunteerAddress extends Component {
     return (
       <div>
         {this.state.address}{' '}
-        <button onClick={() => this.setState({ edit: true })}>
+        <Button onClick={() => this.setState({ edit: true })}>
           click to edit
-        </button>
+        </Button>
       </div>
     );
   }
