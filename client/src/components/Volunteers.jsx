@@ -16,7 +16,6 @@ import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 
 import {
-  API_BASE_URI,
   notify_error,
   notify_success,
   _fetch,
@@ -188,7 +187,7 @@ export default class Volunteers extends Component {
                   <Button onClick={async () => {
                     let obj = await _fetch(
                       global,
-                      API_BASE_URI+'/volunteer/invite',
+                      '/volunteer/invite',
                       'POST'
                     );
                     if (obj.token) {
@@ -353,7 +352,7 @@ export class CardVolunteer extends Component {
       for (let i in obj.add) {
         await _fetch(
           global,
-          API_BASE_URI+'/team/members/add',
+          '/team/members/add',
           'POST',
           { teamId: obj.add[i], vId: this.props.id }
         );
@@ -362,7 +361,7 @@ export class CardVolunteer extends Component {
       for (let i in obj.rm) {
         await _fetch(
           global,
-          API_BASE_URI+'/team/members/remove',
+          '/team/members/remove',
           'POST',
           { teamId: obj.rm[i], vId: this.props.id }
         );
@@ -395,7 +394,7 @@ export class CardVolunteer extends Component {
       for (let i in obj.add) {
         await _fetch(
           global,
-          API_BASE_URI+'/team/members/promote',
+          '/team/members/promote',
           'POST',
           { teamId: obj.add[i], vId: this.props.id }
         );
@@ -404,7 +403,7 @@ export class CardVolunteer extends Component {
       for (let i in obj.rm) {
         await _fetch(
           global,
-          API_BASE_URI+'/team/members/demote',
+          '/team/members/demote',
           'POST',
           { teamId: obj.rm[i], vId: this.props.id }
         );
@@ -434,7 +433,7 @@ export class CardVolunteer extends Component {
       for (let i in obj.add) {
         await _fetch(
           global,
-          API_BASE_URI+'/form/assigned/volunteer/add',
+          '/form/assigned/volunteer/add',
           'POST',
           { formId: obj.add[i], vId: this.props.id }
         );
@@ -443,7 +442,7 @@ export class CardVolunteer extends Component {
       for (let i in obj.rm) {
         await _fetch(
           global,
-          API_BASE_URI+'/form/assigned/volunteer/remove',
+          '/form/assigned/volunteer/remove',
           'POST',
           { formId: obj.rm[i], vId: this.props.id }
         );
@@ -473,7 +472,7 @@ export class CardVolunteer extends Component {
       for (let i in obj.add) {
         await _fetch(
           global,
-          API_BASE_URI+'/turf/assigned/volunteer/add',
+          '/turf/assigned/volunteer/add',
           'POST',
           { turfId: obj.add[i], vId: this.props.id }
         );
@@ -482,7 +481,7 @@ export class CardVolunteer extends Component {
       for (let i in obj.rm) {
         await _fetch(
           global,
-          API_BASE_URI+'/turf/assigned/volunteer/remove',
+          '/turf/assigned/volunteer/remove',
           'POST',
           { turfId: obj.rm[i], vId: this.props.id }
         );
@@ -653,7 +652,7 @@ export class CardVolunteer extends Component {
     try {
       await _fetch(
         global,
-        API_BASE_URI+'/volunteer/' + term,
+        '/volunteer/' + term,
         'POST',
         { id: volunteer.id }
       );
@@ -844,7 +843,7 @@ export class VolunteerAddress extends Component {
       let pos = await getLatLng(res[0]);
       await _fetch(
         global,
-        API_BASE_URI+'/volunteer/update',
+        '/volunteer/update',
         'POST',
         {
           id: this.props.volunteer.id,

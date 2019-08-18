@@ -10,7 +10,6 @@ import { fields } from './constants';
 import { PAPER_TABLE_SPEC } from './utilities';
 
 import {
-  API_BASE_URI,
   notify_error,
   notify_success,
   _fetch,
@@ -64,7 +63,7 @@ export default class ImportData extends Component {
     const total = data.length;
 
     this.setState({sending: true, completed: 1});
-    await _fetch(global, API_BASE_URI+'/import/begin', 'POST', {
+    await _fetch(global, '/import/begin', 'POST', {
       filename: filename,
       attributes: ['Name', 'Party Affiliation'],
     });
@@ -92,14 +91,14 @@ export default class ImportData extends Component {
         }
       }
 
-      await _fetch(global, API_BASE_URI+'/import/add', 'POST', {
+      await _fetch(global, '/import/add', 'POST', {
         filename: filename,
         data: arr,
       });
       const percentage = Math.ceil(((total - data.length) / total) * 100);
       this.setState({ completed: percentage });
     }
-    await _fetch(global, API_BASE_URI+'/import/end', 'POST', {
+    await _fetch(global, '/import/end', 'POST', {
       filename: filename,
     });
 

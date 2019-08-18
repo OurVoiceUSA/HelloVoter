@@ -3,7 +3,6 @@ import React, { Component } from 'react';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
 import {
-  API_BASE_URI,
   _fetch,
   notify_error,
   Icon
@@ -28,7 +27,7 @@ export default class App extends Component {
 
     let data = {};
     try {
-      data = await _fetch(global, API_BASE_URI+'/dashboard');
+      data = await _fetch(global, '/dashboard');
     } catch (e) {
       notify_error(e, 'Unable to load dashboard info.');
     }

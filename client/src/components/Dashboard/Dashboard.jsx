@@ -17,7 +17,6 @@ import {
 import { arrayMove } from 'react-sortable-hoc';
 
 import {
-  API_BASE_URI,
   _fetch,
   notify_error,
   RootLoader
@@ -62,7 +61,7 @@ export default class App extends Component {
     this.setState({ loading: true });
 
     try {
-      data = await _fetch(global, API_BASE_URI+'/dashboard');
+      data = await _fetch(global, '/dashboard');
 
       if (data.admins === 0) this.setState({noAdmins: true});
 

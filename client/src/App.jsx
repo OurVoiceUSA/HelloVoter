@@ -15,7 +15,6 @@ import { withStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 
 import {
-  API_BASE_URI,
   _fetch,
   notify_error
 } from './common.js';
@@ -94,7 +93,7 @@ class App extends Component {
     let data;
 
     try {
-      data = await _fetch(global, API_BASE_URI+'/google_maps_key');
+      data = await _fetch(global, '/google_maps_key');
       if (!data) return;
 
       // load google places API
@@ -173,7 +172,7 @@ class App extends Component {
     if (server.match(/^localhost/)) https = false;
 
     try {
-      res = await fetch('http'+(https?'s':'')+'://' + server + API_BASE_URI+'/hello', {
+      res = await fetch('http'+(https?'s':'')+'://' + server + '/HelloVoterHQ/'+this.state.orgId+'/api/v1/hello', {
         method: 'POST',
         headers: {
           Authorization:

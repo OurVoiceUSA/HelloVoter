@@ -15,7 +15,6 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import Button from '@material-ui/core/Button';
 
 import {
-  API_BASE_URI,
   notify_error,
   notify_success,
   _fetch,
@@ -220,7 +219,7 @@ const ListQRCodes = props => {
       <Button onClick={async () => {
         let obj = await _fetch(
           props.global,
-          API_BASE_URI+'/qrcodes/create',
+          '/qrcodes/create',
           'POST'
         );
         if (obj && obj.id) {
@@ -274,7 +273,7 @@ export class CardQRCode extends Component {
       for (let i in obj.add) {
         await _fetch(
           global,
-          API_BASE_URI+'/qrcodes/team/add',
+          '/qrcodes/team/add',
           'POST',
           { teamId: obj.add[i], vId: this.props.id }
         );
@@ -283,7 +282,7 @@ export class CardQRCode extends Component {
       for (let i in obj.rm) {
         await _fetch(
           global,
-          API_BASE_URI+'/qrcodes/team/remove',
+          '/qrcodes/team/remove',
           'POST',
           { teamId: obj.rm[i], vId: this.props.id }
         );
@@ -316,7 +315,7 @@ export class CardQRCode extends Component {
       for (let i in obj.add) {
         await _fetch(
           global,
-          API_BASE_URI+'/qrcodes/form/add',
+          '/qrcodes/form/add',
           'POST',
           { formId: obj.add[i], vId: this.props.id }
         );
@@ -325,7 +324,7 @@ export class CardQRCode extends Component {
       for (let i in obj.rm) {
         await _fetch(
           global,
-          API_BASE_URI+'/qrcodes/form/remove',
+          '/qrcodes/form/remove',
           'POST',
           { formId: obj.rm[i], vId: this.props.id }
         );
@@ -355,7 +354,7 @@ export class CardQRCode extends Component {
       for (let i in obj.add) {
         await _fetch(
           global,
-          API_BASE_URI+'/qrcodes/turf/add',
+          '/qrcodes/turf/add',
           'POST',
           { turfId: obj.add[i], vId: this.props.id }
         );
@@ -364,7 +363,7 @@ export class CardQRCode extends Component {
       for (let i in obj.rm) {
         await _fetch(
           global,
-          API_BASE_URI+'/qrcodes/turf/remove',
+          '/qrcodes/turf/remove',
           'POST',
           { turfId: obj.rm[i], vId: this.props.id }
         );
@@ -499,7 +498,7 @@ export class CardQRCode extends Component {
     try {
       await _fetch(
         global,
-        API_BASE_URI+'/qrcodes/disable',
+        '/qrcodes/disable',
         'POST',
         { id: qrcode.id }
       );

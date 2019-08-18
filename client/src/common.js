@@ -12,8 +12,6 @@ import QRCode from 'qrcode';
 import Modal from '@material-ui/core/Modal';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
-export const API_BASE_URI = '/HelloVoterHQ/api/v1';
-
 export function jobRuntime(start, end) {
   if (end)
     return prettyMs(end-start);
@@ -45,7 +43,7 @@ export async function _fetch(global, uri, method, body) {
 
   if (!method) method = 'GET';
 
-  let res = await fetch('http'+(https?'s':'')+'://' + server + uri, {
+  let res = await fetch('http'+(https?'s':'')+'://' + server + '/HelloVoterHQ' + (global.state.orgId?'/'+global.state.orgId:'') + '/api/v1' + uri, {
     method: method,
     headers: {
       Authorization: 'Bearer ' + token,
@@ -137,7 +135,7 @@ export function _searchStringify(obj) {
 export async function _loadImports(global) {
   let imports = [];
   try {
-    let data = await _fetch(global, API_BASE_URI+'/import/list');
+    let data = await _fetch(global, '/import/list');
     imports = data && data.data ? data.data : [];
   } catch (e) {
     notify_error(e, 'Unable to load import info.');
@@ -150,7 +148,7 @@ export async function _loadQRCode(global, id) {
   try {
     qrcode = await _fetch(
       global,
-      API_BASE_URI+'/qrcodes/get?id=' + id
+      '/qrcodes/get?id=' + id
     );
     let code = {code: qrcode.id};
     if (global.state.orgId) code.orgId = global.state.orgId;
@@ -166,7 +164,7 @@ export async function _loadQRCodes(global, id) {
   let qrcodes = [];
 
   try {
-    qrcodes = await _fetch(global, API_BASE_URI+'/qrcodes/list');
+    qrcodes = await _fetch(global, '/qrcodes/list');
   } catch (e) {
     notify_error(e, 'Unable to load QRCode data.');
   }
@@ -179,7 +177,7 @@ export async function _loadVolunteer(global, id) {
   try {
     volunteer = await _fetch(
       global,
-      API_BASE_URI+'/volunteer/get?id=' + id
+      '/volunteer/get?id=' + id
     );
   } catch (e) {
     notify_error(e, 'Unable to load volunteer info.');
@@ -199,7 +197,7 @@ export async function _loadVolunteers(global, byType, id) {
     else if (byType === 'form')
       call = 'form/assigned/volunteer/list?formId=' + id;
 
-    volunteers = await _fetch(global, API_BASE_URI+'/' + call);
+    volunteers = await _fetch(global, '/' + call);
   } catch (e) {
     notify_error(e, 'Unable to load volunteer data.');
   }
@@ -214,7 +212,7 @@ export async function _loadTurf(global, id) {
   try {
     turf = await _fetch(
       global,
-      API_BASE_URI+'/turf/get?turfId=' + id
+      '/turf/get?turfId=' + id
     );
   } catch (e) {
     notify_error(e, 'Unable to load turf data.');
@@ -230,7 +228,7 @@ export async function _loadTurfs(global, teamId, flag) {
     let call = 'turf/list' + (flag ? '?geometry=true' : '');
     if (teamId)
       call = 'team/turf/list?teamId=' + teamId + (flag ? '&geometry=true' : '');
-    let data = await _fetch(global, API_BASE_URI+'/' + call);
+    let data = await _fetch(global, '/' + call);
     turf = data.data ? data.data : [];
   } catch (e) {
     notify_error(e, 'Unable to load turf data.');
@@ -243,7 +241,7 @@ export async function _loadNearbyTurfs(global, lng, lat, dist) {
   let turf = [];
 
   try {
-    let data = await _fetch(global, API_BASE_URI+'/turf/list/byposition?longitude='+lng+'&latitude='+lat+(dist?'&dist='+dist:''));
+    let data = await _fetch(global, '/turf/list/byposition?longitude='+lng+'&latitude='+lat+(dist?'&dist='+dist:''));
     turf = data.data ? data.data : [];
   } catch (e) {
     notify_error(e, 'Unable to load turf data.');
@@ -258,7 +256,7 @@ export async function _loadTeam(global, id) {
   try {
     team = await _fetch(
       global,
-      API_BASE_URI+'/team/get?teamId=' + id
+      '/team/get?teamId=' + id
     );
   } catch (e) {
     notify_error(e, 'Unable to load team data.');
@@ -276,7 +274,7 @@ export async function _loadTeams(global, byType, id) {
     if (byType === 'turf') call = 'turf/assigned/team/list?turfId=' + id;
     else if (byType === 'form') call = 'form/assigned/team/list?formId=' + id;
 
-    let data = await _fetch(global, API_BASE_URI+'/' + call);
+    let data = await _fetch(global, '/' + call);
     teams = data.data ? data.data : [];
   } catch (e) {
     notify_error(e, 'Unable to load teams data.');
@@ -291,7 +289,7 @@ export async function _loadForm(global, id) {
   try {
     form = await _fetch(
       global,
-      API_BASE_URI+'/form/get?formId=' + id
+      '/form/get?formId=' + id
     );
   } catch (e) {
     notify_error(e, 'Unable to load form data.');
@@ -309,7 +307,7 @@ export async function _loadForms(global, teamId) {
     if (teamId) uri = 'team/form/list?teamId=' + teamId;
     else uri = 'form/list';
 
-    let data = await _fetch(global, API_BASE_URI+'/' + uri);
+    let data = await _fetch(global, '/' + uri);
     forms = data.data ? data.data : [];
   } catch (e) {
     notify_error(e, 'Unable to load form data.');
@@ -322,7 +320,7 @@ export async function _loadAttributes(global) {
   let attributes = [];
 
   try {
-    let data = await _fetch(global, API_BASE_URI+'/attribute/list');
+    let data = await _fetch(global, '/attribute/list');
     attributes = data.data ? data.data : [];
   } catch (e) {
     notify_error(e, 'Unable to load attribute data.');
@@ -337,7 +335,7 @@ export async function _loadAttributes(global) {
 export async function _loadAddressData(global, lng, lat, formId) {
   let data = [];
   try {
-    data = await _fetch(global, API_BASE_URI+'/address/get/byposition?limit=1000&longitude='+lng+'&latitude='+lat+(formId?'&formId='+formId:''));
+    data = await _fetch(global, '/address/get/byposition?limit=1000&longitude='+lng+'&latitude='+lat+(formId?'&formId='+formId:''));
   } catch (e) {
     notify_error(e, 'Unable to load address information.');
   }
@@ -347,7 +345,7 @@ export async function _loadAddressData(global, lng, lat, formId) {
 export async function _loadPeopleAddressData(global, aId, formId) {
   let data = [];
   try {
-    data = await _fetch(global, API_BASE_URI+'/people/get/byaddress?aId='+aId+(formId?'&formId='+formId:''));
+    data = await _fetch(global, '/people/get/byaddress?aId='+aId+(formId?'&formId='+formId:''));
   } catch (e) {
     notify_error(e, 'Unable to load address information.');
   }

@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { PaperTable } from './Elements';
 
 import {
-  API_BASE_URI,
   _fetch,
   jobRuntime,
   RootLoader
@@ -59,7 +58,7 @@ export default class Queue extends Component {
 
     this.setState({ loading: true });
 
-    let obj = await _fetch(global, API_BASE_URI+'/queue/list');
+    let obj = await _fetch(global, '/queue/list');
     if (obj.data) {
       rows = obj.data.map(r => {
         let q = r[0];

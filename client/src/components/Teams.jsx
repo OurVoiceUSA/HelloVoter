@@ -12,7 +12,6 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogActions from '@material-ui/core/DialogActions';
 
 import {
-  API_BASE_URI,
   notify_error,
   notify_success,
   _fetch,
@@ -105,7 +104,7 @@ export default class App extends Component {
 
     this.setState({ saving: true, menuDelete: false });
     try {
-      await _fetch(global, API_BASE_URI+'/team/delete', 'POST', {
+      await _fetch(global, '/team/delete', 'POST', {
         teamId: id,
       });
       notify_success('Team has been deleted.');
@@ -127,7 +126,7 @@ export default class App extends Component {
     this.setState({ saving: true });
 
     try {
-      await _fetch(global, API_BASE_URI+'/team/create', 'POST', {
+      await _fetch(global, '/team/create', 'POST', {
         name: json.name,
       });
       notify_success('Team has been created.');
@@ -347,7 +346,7 @@ export class CardTeam extends Component {
       for (let i in obj.add) {
         await _fetch(
           global,
-          API_BASE_URI+'/team/members/add',
+          '/team/members/add',
           'POST',
           { teamId: this.props.id, vId: obj.add[i] }
         );
@@ -356,7 +355,7 @@ export class CardTeam extends Component {
       for (let i in obj.rm) {
         await _fetch(
           global,
-          API_BASE_URI+'/team/members/remove',
+          '/team/members/remove',
           'POST',
           { teamId: this.props.id, vId: obj.rm[i] }
         );
@@ -386,7 +385,7 @@ export class CardTeam extends Component {
       for (let i in obj.add) {
         await _fetch(
           global,
-          API_BASE_URI+'/form/assigned/team/add',
+          '/form/assigned/team/add',
           'POST',
           { formId: obj.add[i], teamId: this.props.id }
         );
@@ -395,7 +394,7 @@ export class CardTeam extends Component {
       for (let i in obj.rm) {
         await _fetch(
           global,
-          API_BASE_URI+'/form/assigned/team/remove',
+          '/form/assigned/team/remove',
           'POST',
           { formId: obj.rm[i], teamId: this.props.id }
         );
@@ -425,7 +424,7 @@ export class CardTeam extends Component {
       for (let i in obj.add) {
         await _fetch(
           global,
-          API_BASE_URI+'/turf/assigned/team/add',
+          '/turf/assigned/team/add',
           'POST',
           { turfId: obj.add[i], teamId: this.props.id }
         );
@@ -434,7 +433,7 @@ export class CardTeam extends Component {
       for (let i in obj.rm) {
         await _fetch(
           global,
-          API_BASE_URI+'/turf/assigned/team/remove',
+          '/turf/assigned/team/remove',
           'POST',
           { turfId: obj.rm[i], teamId: this.props.id }
         );
