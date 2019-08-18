@@ -537,7 +537,8 @@ export default class App extends OVComponent {
       let createdby = 'Created by '+json.author;
 
       if (json.backend === 'server') {
-        createdby = 'Hosted by '+json.server;
+        if (json.orgId) createdby = 'Organization ID '+json.orgId;
+        else createdby = 'Hosted by '+json.server;
         swipeoutBtns.shift();
       }
 
