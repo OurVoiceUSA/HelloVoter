@@ -152,13 +152,6 @@ export default class Volunteers extends Component {
             </Link>
             &nbsp;-&nbsp;
             <Link
-              to={'/volunteers/invited'}
-              onClick={() => this.setState({ pageNum: 1 })}
-            >
-              Invited ({invited.length})
-            </Link>
-            &nbsp;-&nbsp;
-            <Link
               to={'/volunteers/denied'}
               onClick={() => this.setState({ pageNum: 1 })}
             >
