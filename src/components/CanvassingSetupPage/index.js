@@ -50,7 +50,6 @@ export default class App extends OVComponent {
       dbx: null,
       dbxformfound: false,
       SelectModeScreen: false,
-      ConnectServerScreen: false,
       SmLoginScreen: false,
       server: null,
       serverLoading: false,
@@ -234,7 +233,7 @@ export default class App extends OVComponent {
         case 400:
           return {error: true, msg: "The server didn't understand the request sent from this device."};
         case 401:
-          this.setState({ConnectServerScreen: false}, () => setTimeout(() => this.setState({SmLoginScreen: true}), 500))
+          setTimeout(() => this.setState({SmLoginScreen: true}), 500);
           return {error: false, flag: true};
         case 403:
           return {error: true, msg: "We're sorry, but your request to canvass with this server has been rejected."};
@@ -243,8 +242,6 @@ export default class App extends OVComponent {
       }
 
       let body = await res.json();
-
-      this.setState({ConnectServerScreen: false});
 
       if (body.data.ready !== true) return {error: false, msg: (body.msg?body.msg:"Awaiting assignment.")};
       else {
@@ -882,49 +879,6 @@ export default class App extends OVComponent {
 
               </View>
 
-            </View>
-          </View>
-        </Modal>
-
-        <Modal
-          open={this.state.ConnectServerScreen}
-          modalStyle={{flex: 1, backgroundColor: "transparent"}}
-          overlayBackground={'rgba(0, 0, 0, 0.75)'}
-          animationDuration={200}
-          animationTension={40}
-          modalDidOpen={() => undefined}
-          modalDidClose={() => this.setState({ConnectServerScreen: false})}
-          closeOnTouchOutside={true}
-          disableOnBackPress={false}>
-          <View style={{flex: 1, alignItems: 'center'}} ref="backgroundWrapper">
-            <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
-              <View style={{backgroundColor: 'white', padding: 20, borderRadius: 40, borderWidth: 10, borderColor: '#d7d7d7'}}>
-
-                <View>
-                <Form
-                  ref="mainForm"
-                  type={this.formServerItems}
-                  options={this.formServerOptions}
-                  onChange={this.onChange}
-                  value={this.state.server}
-                />
-
-                {this.state.serverLoading &&
-                <View style={{alignItems: 'center'}}>
-                  <Text>Contacting server...</Text>
-                  <ActivityIndicator size="large" />
-                </View>
-                ||
-                <TouchableOpacity style={{
-                    backgroundColor: '#d7d7d7', padding: 10, borderRadius: 20,
-                    alignItems: 'center', marginTop: 10,
-                  }}
-                  onPress={this.doSave}>
-                  <Text>Connect to Server</Text>
-                </TouchableOpacity>
-                }
-                </View>
-              </View>
             </View>
           </View>
         </Modal>
