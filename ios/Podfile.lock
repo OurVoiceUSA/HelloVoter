@@ -90,7 +90,7 @@ PODS:
     - React
   - react-native-camera/RN (3.1.2):
     - React
-  - react-native-geolocation (1.4.2):
+  - react-native-geolocation (2.0.2):
     - React
   - react-native-google-maps (0.25.0):
     - Google-Maps-iOS-Utils (= 2.1.0)
@@ -253,7 +253,7 @@ SPEC CHECKSUMS:
   React-jsiexecutor: 90ad2f9db09513fc763bc757fdc3c4ff8bde2a30
   React-jsinspector: e08662d1bf5b129a3d556eb9ea343a3f40353ae4
   react-native-camera: d3bd7765a32c0584cea34b688e45e75652b067d2
-  react-native-geolocation: 79c743ad7a2e86617811ef23f49308824e92520c
+  react-native-geolocation: cbd9d6bd06bac411eed2671810f454d4908484a8
   react-native-google-maps: 88d750ad441b19c24885f20d43a55ecac25939b5
   react-native-google-places: 978bcc6ec4bd1d9b0ab3693e3705d4f1f2459caf
   react-native-maps: 190c02ca533fddac5bb49cf17bdece3644612107
