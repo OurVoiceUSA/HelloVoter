@@ -27,6 +27,7 @@ import { Dropbox } from 'dropbox';
 import { ingeojson } from 'ourvoiceusa-sdk-js';
 import { Divider, api_base_uri, DINFO, _loginPing, _saveUser, _getApiToken, _fileReaderAsync } from '../../common';
 import DeviceInfo from 'react-native-device-info';
+import { RNCamera } from 'react-native-camera';
 import { wsbase } from '../../config';
 
 import RBush from 'rbush';
@@ -54,6 +55,7 @@ export default class App extends OVComponent {
       server: null,
       serverLoading: false,
       myPosition: {latitude: null, longitude: null},
+      showCamera: false,
     };
 
     this.onChange = this.onChange.bind(this);
@@ -149,7 +151,7 @@ export default class App extends OVComponent {
 
       this.connectToServer('gotv-'+place+'.ourvoiceusa.org', orgId);
     } else {
-      setTimeout(() => Alert.alert('Error', 'You must enter a valid Organization ID to continue.', [{text: 'OK'}], { cancelable: false }), 500);
+      setTimeout(() => Alert.alert('Error', 'You must enter a valid QR Code or Organization ID to continue.', [{text: 'OK'}], { cancelable: false }), 500);
     }
   }
 
@@ -217,7 +219,7 @@ export default class App extends OVComponent {
 
       if (!auth_location || !auth_location.match(/^https:.*auth$/)) {
         // Invalid x-sm-oauth-url header means it's not a validy configured canvass-broker
-        if (orgId) return {error: true, msg: "Sorry, that is not a valid Organization ID."}
+        if (orgId) return {error: true, msg: "Sorry, that is not a valid QR Code or Organization ID."}
         return {error: true, msg: "That server is not running software compatible with this mobile app."};
       }
 
@@ -624,7 +626,7 @@ export default class App extends OVComponent {
   }
 
   render() {
-    const { connected, dbx, dbxformfound, loading, user, forms } = this.state;
+    const { showCamera, connected, dbx, dbxformfound, loading, user, forms } = this.state;
     const { navigate } = this.props.navigation;
 
     // wait for user object to become available
@@ -642,6 +644,35 @@ export default class App extends OVComponent {
         </View>
       );
     }
+
+    // if camera is open, render just that
+    if (showCamera) return (
+      <RNCamera
+        ref={ref => {this.camera = ref;}}
+        style={{
+          flex: 1,
+          justifyContent: 'space-between',
+        }}
+        androidCameraPermissionOptions={{
+         title: 'Permission to use camera',
+          message: 'We need your permission to use your camera',
+          buttonPositive: 'Ok',
+          buttonNegative: 'Cancel',
+        }}
+        onBarCodeRead={(b) => {
+          this.setState({showCamera: false, SelectModeScreen: false, askOrgId: false});
+          try {
+            let obj = JSON.parse(b.data);
+            // orgId means GOTV
+            if (obj.orgId) this.setState({orgId: obj.orgId}, () => this.connectToGOTV());
+            else this.connectToServer(obj.server);
+          } catch (e) {
+            console.warn(e);
+          }
+        }}
+        barCodeTypes={[RNCamera.Constants.BarCodeType.qr]}
+      />
+    );
 
     return (
       <ScrollView style={{flex: 1, backgroundColor: 'white'}} contentContainerStyle={{flexGrow:1}} keyboardShouldPersistTaps={"handled"}>
@@ -920,8 +951,14 @@ export default class App extends OVComponent {
           autoCorrect={false}
           autoCapitalize={"characters"}
           visible={this.state.askOrgId}
-          title={"Organization ID"}
-          belowInputText={"If you don’t have an Organization ID yet, please ask your organization to provide you with one."}
+          title={"Get Out The Vote"}
+          aboveInputRender={() => (
+            <TouchableOpacity style={{flexDirection: 'row', alignItems: 'center'}} onPress={() => this.setState({showCamera: true})}>
+              <Icon style={{marginRight: 15, marginTop: 10}} size={55} name={"qrcode"} />
+              <Text>Tap to scan, or enter code below.</Text>
+            </TouchableOpacity>
+          )}
+          belowInputRender={() => (<Text style={{marginBottom: 10}}>If you don’t have a QR Code or Organization ID yet, please ask your organization to provide you with one.</Text>)}
           placeholder="Enter Org ID. Example: NCC1701"
           submitText={"Let's do this!"}
           onCancel={() => this.setState({askOrgId: false})}

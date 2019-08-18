@@ -1,13 +1,13 @@
 diff --git a/node_modules/react-native-input-prompt/src/Prompt.js b/node_modules/react-native-input-prompt/src/Prompt.js
-index 1f9353d..8e31f39 100644
+index 1f9353d..c9f57a9 100644
 --- a/node_modules/react-native-input-prompt/src/Prompt.js
 +++ b/node_modules/react-native-input-prompt/src/Prompt.js
 @@ -14,6 +14,10 @@ import PropTypes from "prop-types";
  export default class Prompt extends Component {
  	static propTypes = {
  		title: PropTypes.string.isRequired,
-+                aboveInputText: PropTypes.string,
-+                belowInputText: PropTypes.string,
++                aboveInputRender: PropTypes.func,
++                belowInputRender: PropTypes.func,
 +		autoCorrect: PropTypes.bool,
 +		autoCapitalize: PropTypes.string,
  		visible: PropTypes.bool.isRequired,
@@ -17,22 +17,18 @@ index 1f9353d..8e31f39 100644
  
  	static defaultProps = {
  		title: "Title",
-+                aboveInputText: "",
-+                belowInputText: "",
++                aboveInputRender: () => {},
++                belowInputRender: () => {},
 +                autoCorrect: true,
 +                autoCapitalize: "none",
  		visible: false,
  		placeholder: "Placeholder",
  		cancelText: "Cancel",
-@@ -77,13 +85,26 @@ export default class Prompt extends Component {
+@@ -77,13 +85,18 @@ export default class Prompt extends Component {
  						<Text style={[styles.title, this.props.titleStyle]}>
  							{this.props.title}
  						</Text>
-+                                                {(this.props.aboveInputText?true:false)&&
-+                                                <Text style={[styles.aboveInputText]}>
-+                                                        {this.props.aboveInputText}
-+                                                </Text>
-+                                                }
++                                                {this.props.aboveInputRender()}
  						<TextInput
 +                                                        autoCorrect={this.props.autoCorrect}
 +                                                        autoCapitalize={this.props.autoCapitalize}
@@ -43,11 +39,7 @@ index 1f9353d..8e31f39 100644
  							onSubmitEditing={this._onSubmit.bind(this)}
  							autoFocus={true}
  						/>
-+                                                {(this.props.belowInputText?true:false)&&
-+                                                <Text style={[styles.belowInputText]}>
-+                                                        {this.props.belowInputText}
-+                                                </Text>
-+                                                }
++                                                {this.props.belowInputRender()}
  						<View style={styles.buttonsOuterView}>
  							<View style={styles.buttonsInnerView}>
  								<TouchableOpacity
