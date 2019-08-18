@@ -294,7 +294,7 @@ export default class App extends OVComponent {
 
         // if there's more than one form in body.data.forms, don't navigate
         if (forms_server.length === 1) {
-          this.navigate_canvassing({server: server, form: forms_server[0], user: this.state.user, refer: this});
+          this.navigate_canvassing({server, orgId, form: forms_server[0], user: this.state.user, refer: this});
         }
         await this._loadForms();
         return {error: false, flag: true};
