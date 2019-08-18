@@ -787,18 +787,35 @@ export default class App extends OVComponent {
 
                 <View style={{margin: 5}}>
                   <Icon.Button
-                    name="forward"
+                    name="qrcode"
                     backgroundColor="#d7d7d7"
                     color="#000000"
-                    onPress={() => this.setState({askOrgId: true})}
+                    onPress={() => this.setState({showCamera: true})}
                     {...iconStyles}>
-                    Get Out The Vote!
+                    Scan QR Code
                   </Icon.Button>
                 </View>
 
                 <View style={{margin: 5, marginTop: 0}}>
                   <Text style={{fontSize: 10, textAlign: 'justify'}}>
-                    Join us in an effort to knock doors and encourge our neighbors to get out and vote.
+                    Join an existing effort to knock doors and encourge our neighbors to get out and vote.
+                  </Text>
+                </View>
+
+                <View style={{margin: 5}}>
+                  <Icon.Button
+                    name="id-badge"
+                    backgroundColor="#d7d7d7"
+                    color="#000000"
+                    onPress={() => this.setState({askOrgId: true})}
+                    {...iconStyles}>
+                    Organization ID
+                  </Icon.Button>
+                </View>
+
+                <View style={{margin: 5, marginTop: 0}}>
+                  <Text style={{fontSize: 10, textAlign: 'justify'}}>
+                    Didn't receive a QR Code? Enter the Organization ID for your canvassing operation to join.
                   </Text>
                 </View>
 
@@ -836,25 +853,6 @@ export default class App extends OVComponent {
                 <View style={{margin: 5, marginTop: 0}}>
                   <Text style={{fontSize: 10, textAlign: 'justify'}}>
                     Login with a Dropbox account and share data with a small team. Uses Dropbox for data sharing & storage.
-                  </Text>
-                </View>
-
-                <View style={{margin: 5}}>
-                  <Icon.Button
-                    name="cloud-upload"
-                    backgroundColor="#d7d7d7"
-                    color="#000000"
-                    onPress={async () => {
-                      if (this.checkLocationAccess()) this.setState({SelectModeScreen: false}, () => setTimeout(() => this.setState({ConnectServerScreen: true}), 500))
-                    }}
-                    {...iconStyles}>
-                    Connect to Server
-                  </Icon.Button>
-                </View>
-
-                <View style={{margin: 5, marginTop: 0}}>
-                  <Text style={{fontSize: 10, textAlign: 'justify'}}>
-                    Join a large canvassing operation. Uses their server for data storage.
                   </Text>
                 </View>
 
@@ -951,13 +949,7 @@ export default class App extends OVComponent {
           autoCorrect={false}
           autoCapitalize={"characters"}
           visible={this.state.askOrgId}
-          title={"Get Out The Vote"}
-          aboveInputRender={() => (
-            <TouchableOpacity style={{flexDirection: 'row', alignItems: 'center'}} onPress={() => this.setState({showCamera: true})}>
-              <Icon style={{marginRight: 15, marginTop: 10}} size={55} name={"qrcode"} />
-              <Text>Tap to scan, or enter code below.</Text>
-            </TouchableOpacity>
-          )}
+          title={"Organization ID"}
           belowInputRender={() => (<Text style={{marginBottom: 10}}>If you don’t have a QR Code or Organization ID yet, please ask your organization to provide you with one.</Text>)}
           placeholder="Enter Org ID. Example: NCC1701"
           submitText={"Let's do this!"}
