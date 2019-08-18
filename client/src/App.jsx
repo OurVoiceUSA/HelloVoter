@@ -152,7 +152,6 @@ class App extends Component {
 
     if (event.target.orgId) {
       orgId = event.target.orgId.value;
-      this.setState({orgId});
       let place = orgId.substring(0,2).toLowerCase();
       server = 'gotv-'+place+'.ourvoiceusa.org';
     } else if (event.target.server) {
@@ -202,7 +201,9 @@ class App extends Component {
         let sm = '';
         if (target === 'google') sm = 'gm';
         if (target === 'facebook') sm = 'fm';
-        window.location.href = sm_oauth_url + '/'+sm+'/?app=HelloVoterHQ'+(https?'':'&local=true');
+        setTimeout(() => {
+          window.location.href = sm_oauth_url + '/'+sm+'/?app=HelloVoterHQ'+(https?'':'&local=true');
+        }, 500);
         return { error: false, flag: true };
       case 403:
         return {
