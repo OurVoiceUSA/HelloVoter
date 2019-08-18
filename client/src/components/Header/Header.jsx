@@ -37,7 +37,7 @@ export const Header = ({
         noWrap
         className={classes.title}
       >
-        <div style={{ margin: 10 }}>HelloVoterHQ {(global.state.orgId?'Orginization ID: '+global.state.orgId:'@ '+global.state.server)}</div>
+        <div style={{ margin: 10 }}>HelloVoterHQ {(global.state.orgId?'Organization ID: '+global.state.orgId:'@ '+global.state.server)}</div>
       </Typography>
       <Avatar
         alt="Remy Sharp"
