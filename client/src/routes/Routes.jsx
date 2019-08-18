@@ -6,6 +6,7 @@ import {
   Teams,
   Turf,
   Forms,
+  QRCodes,
   Attributes,
   Map,
   ImportData,
@@ -32,6 +33,7 @@ export const Routes = ({ global }) => (
     <Route path="/teams/" render={() => <Teams global={global} />} />
     <Route path="/turf/" render={() => <Turf global={global} />} />
     <Route path="/forms/" render={() => <Forms global={global} />} />
+    <Route path="/qrcodes/" render={() => <QRCodes global={global} />} />
     <Route path="/attributes/" render={() => <Attributes global={global} />} />
     <Route
       path="/map/"

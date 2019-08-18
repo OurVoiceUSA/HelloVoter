@@ -2,6 +2,7 @@ import About from './About';
 import Analytics from './Analytics';
 import Dashboard from './Dashboard';
 import Forms from './Forms';
+import QRCodes from './QRCodes';
 import Attributes from './Attributes';
 import { ImportData } from './ImportData/index';
 import Queue from './Queue';
@@ -20,6 +21,7 @@ export {
   Analytics,
   Dashboard,
   Forms,
+  QRCodes,
   Attributes,
   ImportData,
   Queue,

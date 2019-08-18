@@ -20,6 +20,7 @@
     "lodash": "^4.17.15",
     "ourvoiceusa-sdk-js": "github:OurVoiceUSA/ourvoiceusa-sdk-js",
     "pretty-ms": "^5.0.0",
+    "qrcode": "^1.4.1",
     "query-string": "^6.8.2",
     "react": "^16.9.0",
     "react-beautiful-dnd": "^11.0.5",

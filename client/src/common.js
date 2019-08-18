@@ -7,6 +7,7 @@ import GooglePlacesAutocomplete from 'react-places-autocomplete';
 import { NotificationManager } from 'react-notifications';
 import formatNumber from 'simple-format-number';
 import prettyMs from 'pretty-ms';
+import QRCode from 'qrcode';
 
 import Modal from '@material-ui/core/Modal';
 import CircularProgress from '@material-ui/core/CircularProgress';
@@ -144,6 +145,35 @@ export async function _loadImports(global) {
   return imports;
 }
 
+export async function _loadQRCode(global, id) {
+  let qrcode = {};
+  try {
+    qrcode = await _fetch(
+      global,
+      API_BASE_URI+'/qrcodes/get?id=' + id
+    );
+    let code = {code: qrcode.id};
+    if (global.state.orgId) code.orgId = global.state.orgId;
+    else code.server = global.state.server;
+    qrcode.img = await QRCode.toDataURL(JSON.stringify(code));
+  } catch (e) {
+    notify_error(e, 'Unable to load QRCode info.');
+  }
+  return qrcode;
+}
+
+export async function _loadQRCodes(global, id) {
+  let qrcodes = [];
+
+  try {
+    qrcodes = await _fetch(global, API_BASE_URI+'/qrcodes/list');
+  } catch (e) {
+    notify_error(e, 'Unable to load QRCode data.');
+  }
+
+  return qrcodes;
+}
+
 export async function _loadVolunteer(global, id) {
   let volunteer = {};
   try {
@@ -176,6 +206,7 @@ export async function _loadVolunteers(global, byType, id) {
 
   return volunteers;
 }
+
 
 export async function _loadTurf(global, id) {
   let turf = {};

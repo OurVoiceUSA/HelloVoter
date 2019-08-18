@@ -1,4 +1,6 @@
 
+import crypto from 'crypto';
+
 import { ov_config } from './ov_config';
 
 export var min_neo4j_version = 3.5;
@@ -123,6 +125,25 @@ export async function _volunteersFromCypher(req, query, args) {
   }
 
   return volunteers;
+}
+
+export function generateToken({ stringBase = 'base64', byteLength = 48 } = {}) {
+  return new Promise((resolve, reject) => {
+    crypto.randomBytes(byteLength, (err, buffer) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(base64edit(buffer.toString(stringBase)));
+      }
+    });
+  });
+}
+
+export function base64edit(str) {
+  return str
+    .replace(/=/g, '_')
+    .replace(/\+/g, '.')
+    .replace(/\//g, '-');
 }
 
 export function _400(res, msg) {

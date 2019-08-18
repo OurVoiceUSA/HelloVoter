@@ -166,7 +166,7 @@ class App extends Component {
     let res;
 
     localStorage.setItem('server', server);
-    localStorage.setItem('orgId', orgId);
+    if (orgId) localStorage.setItem('orgId', orgId);
     this.setState({server, orgId});
 
     let https = true;

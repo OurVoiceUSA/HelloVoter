@@ -1,24 +1,10 @@
 
 import {
-  _volunteersFromCypher, onMyTurf, volunteerCanSee,
+  _volunteersFromCypher, onMyTurf, volunteerCanSee, generateToken,
   cqdo, valid, _400, _403, _500
 } from '../../../lib/utils';
 
-import crypto from 'crypto';
-
 import { Router } from 'express';
-
-function generateToken({ stringBase = 'base64', byteLength = 48 } = {}) {
-  return new Promise((resolve, reject) => {
-    crypto.randomBytes(byteLength, (err, buffer) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(buffer.toString(stringBase));
-      }
-    });
-  });
-}
 
 module.exports = Router({mergeParams: true})
 .get('/volunteer/list',  async (req, res) => {
