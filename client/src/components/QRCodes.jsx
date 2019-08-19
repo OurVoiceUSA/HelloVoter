@@ -556,7 +556,7 @@ export const CardQRCodeFull = props => (
     Last Used:{' '}
     {(props.qrcode.last_used?new TimeAgo('en-US').format(new Date(props.qrcode.last_used-30000)):'Never')}
     <br />
-    Number of people who've used it: N/A
+    Number of people who've used it: {props.qrcode.num_volunteers}
     <br />
     <br />
     <div>

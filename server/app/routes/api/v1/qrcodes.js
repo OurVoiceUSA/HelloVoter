@@ -41,7 +41,7 @@ module.exports = Router({mergeParams: true})
   let qrcode = {};
 
   try {
-    let ref = await req.db.query('match (qr:QRCode {id:{id}}) return qr', req.query);
+    let ref = await req.db.query('match (qr:QRCode {id:{id}}) optional match (v:Volunteer)-[:SCANNED]->(qr) return qr{.*, num_volunteers: count(distinct(v))}', req.query);
     qrcode = ref.data[0];
     qrcode.ass = await volunteerAssignments(req, 'QRCode', qrcode);
   } catch (e) {
