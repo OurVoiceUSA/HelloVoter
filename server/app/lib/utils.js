@@ -75,32 +75,28 @@ export async function volunteerCanSee(req, ida, idb) {
   return false;
 }
 
-export async function volunteerAssignments(req, vol) {
+export async function volunteerAssignments(req, type, vol) {
   let obj = {
     ready: false,
     teams: [],
     turfs: [],
     forms: [],
   };
+  let members = "MEMBERS";
+  let assigned = "ASSIGNED";
 
   if (vol.admin) obj.admin = vol.admin;
+  if (type === 'QRCode') {
+    members = "AUTOASSIGN_TO";
+    assigned = "AUTOASSIGN_TO";
+  }
 
   try {
-    let ref = await req.db.query('match (a:Volunteer {id:{id}}) optional match (a)-[r:MEMBERS]-(b:Team) with a, collect(b{.*,leader:r.leader}) as teams optional match (a)-[:ASSIGNED]-(b:Form) with a, teams, collect(b{.*,direct:true}) as dforms optional match (a)-[:MEMBERS]-(:Team)-[:ASSIGNED]-(b:Form) with a, teams, dforms + collect(b{.*}) as forms optional match (a)-[:ASSIGNED]-(b:Turf) with a, teams, forms, collect(b{.id,.name,direct:true}) as dturf optional match (a)-[:MEMBERS]-(:Team)-[:ASSIGNED]-(b:Turf) with a, teams, forms, dturf + collect(b{.id,.name}) as turf return teams, forms, turf', vol);
+    let ref = await req.db.query('match (a:'+type+' {id:{id}}) optional match (a)-[r:'+members+']-(b:Team) with a, collect(b{.*,leader:r.leader}) as teams optional match (a)-[:'+assigned+']-(b:Form) with a, teams, collect(b{.*,direct:true}) as dforms optional match (a)-[:'+members+']-(:Team)-[:ASSIGNED]-(b:Form) with a, teams, dforms + collect(b{.*}) as forms optional match (a)-[:'+assigned+']-(b:Turf) with a, teams, forms, collect(b{.id,.name,direct:true}) as dturf optional match (a)-[:'+members+']-(:Team)-[:ASSIGNED]-(b:Turf) with a, teams, forms, dturf + collect(b{.id,.name}) as turf return teams, forms, turf', vol);
 
     obj.teams = ref.data[0][0];
     obj.forms = ref.data[0][1];
     obj.turfs = ref.data[0][2];
-
-    if (ov_config.autoenroll_formid) {
-      let b = await req.db.query('match (b:Form {id:{formId}}) return b{.*,direct:true}', {formId: ov_config.autoenroll_formid});
-      obj.forms.push(b.data[0]);
-      vol.autoturf = true;
-    }
-
-    if (vol.autoturf && vol.location) {
-      obj.turfs.push({id: 'auto', name: 'auto', direct: true});
-    }
 
   } catch (e) {
     console.warn(e);
@@ -120,7 +116,7 @@ export async function _volunteersFromCypher(req, query, args) {
   let ref = await req.db.query(query, args)
   for (let i in ref.data) {
     let c = ref.data[i];
-    c.ass = await volunteerAssignments(req, c);
+    c.ass = await volunteerAssignments(req, 'Volunteer', c);
     volunteers.push(c);
   }
 

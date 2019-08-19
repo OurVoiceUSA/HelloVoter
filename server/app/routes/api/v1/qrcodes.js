@@ -1,6 +1,6 @@
 
 import {
-  _400, _403, _500, generateToken
+  _400, _403, _500, generateToken, volunteerAssignments
 } from '../../../lib/utils';
 
 import crypto from 'crypto';
@@ -43,7 +43,7 @@ module.exports = Router({mergeParams: true})
   try {
     let ref = await req.db.query('match (qr:QRCode {id:{id}}) return qr', req.query);
     qrcode = ref.data[0];
-    qrcode.ass = {teams: [], forms: [], turfs: []};
+    qrcode.ass = await volunteerAssignments(req, 'QRCode', qrcode);
   } catch (e) {
     return _500(res, e);
   }
