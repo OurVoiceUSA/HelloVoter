@@ -58,7 +58,6 @@ export default class App extends OVComponent {
     };
 
     this.onChange = this.onChange.bind(this);
-    this.doSave = this.doSave.bind(this);
 
     this.formServerItems = t.struct({
       server: t.String,
@@ -89,19 +88,6 @@ export default class App extends OVComponent {
     this.setState({server});
   }
 
-  doSave = async () => {
-    let json = this.refs.mainForm.getValue();
-    if (json === null) return;
-
-    if (json.ack !== true) {
-      // need to correctly trigger this.formServerOptions.fields.ack.hasError
-      this.formServerOptions.fields.ack.hasError = true;
-      return;
-    }
-
-    this.connectToServer(json.server);
-  }
-
   checkLocationAccess() {
     const { myPosition } = this.state;
     if (!this.state.locationAccess) {
@@ -124,7 +110,7 @@ export default class App extends OVComponent {
   }
 
   connectToGOTV = async() => {
-    const { myPosition, orgId } = this.state;
+    const { myPosition, orgId, inviteCode } = this.state;
 
     if (!this.checkLocationAccess()) return;
 
@@ -148,18 +134,18 @@ export default class App extends OVComponent {
       // first two characters are the state code
       let place = this.state.orgId.substring(0,2).toLowerCase();
 
-      this.connectToServer('gotv-'+place+'.ourvoiceusa.org', orgId);
+      this.connectToServer('gotv-'+place+'.ourvoiceusa.org', orgId, inviteCode);
     } else {
       setTimeout(() => Alert.alert('Error', 'You must enter a valid QR Code or Organization ID to continue.', [{text: 'OK'}], { cancelable: false }), 500);
     }
   }
 
-  connectToServer = async(server, orgId) => {
+  connectToServer = async(server, orgId, inviteCode) => {
     if (!this.checkLocationAccess()) return;
 
     this.setState({serverLoading: true, server});
 
-    let ret = await this.singHello(server, orgId);
+    let ret = await this.singHello(server, orgId, inviteCode);
 
     if (ret.flag !== true) Alert.alert((ret.error?'Error':'Connection Successful'), ret.msg, [{text: 'OK'}], { cancelable: false });
     if (ret.error !== true) server = null;
@@ -167,7 +153,7 @@ export default class App extends OVComponent {
     this.setState({serverLoading: false});
   }
 
-  sayHello = async (server, orgId) => {
+  sayHello = async (server, orgId, inviteCode) => {
     const { myPosition } = this.state;
 
     if (!this.checkLocationAccess()) return;
@@ -198,6 +184,7 @@ export default class App extends OVComponent {
           longitude: myPosition.longitude,
           latitude: myPosition.latitude,
           dinfo: DINFO,
+          inviteCode,
         }),
       });
       if (res.status === 400 || res.status === 401) await storage.del('OV_JWT');
@@ -208,12 +195,12 @@ export default class App extends OVComponent {
     return res;
   }
 
-  singHello = async (server, orgId) => {
+  singHello = async (server, orgId, inviteCode) => {
     const { navigate } = this.props.navigation;
     let ret;
 
     try {
-      let res = await this.sayHello(server, orgId);
+      let res = await this.sayHello(server, orgId, inviteCode);
       let auth_location = res.headers.get('x-sm-oauth-url');
 
       if (!auth_location || !auth_location.match(/^https:.*auth$/)) {
@@ -323,9 +310,9 @@ export default class App extends OVComponent {
   };
 
   componentDidUpdate(prevProps, prevState) {
-    const { SmLoginScreen, server, user, orgId } = this.state;
+    const { SmLoginScreen, server, user, orgId, inviteCode } = this.state;
     if (prevState.SmLoginScreen && !SmLoginScreen && user.loggedin) {
-      this.connectToServer(server, orgId);
+      this.connectToServer(server, orgId, inviteCode);
     }
   }
 
@@ -662,8 +649,8 @@ export default class App extends OVComponent {
           try {
             let obj = JSON.parse(b.data);
             // orgId means GOTV
-            if (obj.orgId) this.setState({orgId: obj.orgId}, () => this.connectToGOTV());
-            else this.connectToServer(obj.server);
+            if (obj.orgId) this.setState({orgId: obj.orgId, inviteCode: obj.inviteCode}, () => this.connectToGOTV());
+            else this.connectToServer(obj.server, null, obj.inviteCode);
           } catch (e) {
             console.warn(e);
           }
