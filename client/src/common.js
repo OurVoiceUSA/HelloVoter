@@ -150,7 +150,7 @@ export async function _loadQRCode(global, id) {
       global,
       '/qrcodes/get?id=' + id
     );
-    let code = {code: qrcode.id};
+    let code = {inviteCode: qrcode.id};
     if (global.state.orgId) code.orgId = global.state.orgId;
     else code.server = global.state.server;
     qrcode.img = await QRCode.toDataURL(JSON.stringify(code));
