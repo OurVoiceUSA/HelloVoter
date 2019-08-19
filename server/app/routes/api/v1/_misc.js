@@ -17,7 +17,8 @@ module.exports = Router({mergeParams: true})
   // they say that time's supposed to heal ya but i ain't done much healin'
 
   // if they have an invite code, check it
-  if (req.body.invite) {
+  if (req.body.inviteCode) {
+    /* TODO: direct invite
     let code = 'invite:'+req.body.invite;
     // ensure valid invite
     let ref = await req.db.query('match (v:Volunteer {id:{invite}}) return count(v)', {invite: code});
@@ -25,6 +26,17 @@ module.exports = Router({mergeParams: true})
 
     // we have a valid code, do the property swap & delete the invite
     await req.db.query('match (s:Volunteer {id:{id}}) match (v:Volunteer {id:{invite}}) set s.tid = s.id set s.id = null set v = s delete s set v.id = v.tid set v.tid = null, v.invited = null', {id: req.user.id, invite: code});
+    */
+
+    try {
+      // check inviteCode against QRCode objects and copy assignments to this volunteer
+      let params = {id: req.user.id, inviteCode: req.body.inviteCode};
+      await req.db.query('match (v:Volunteer {id:{id}}) match (qr:QRCode {id:{inviteCode}}) where qr.disable is null match (qr)-[:AUTOASSIGN_TO]->(t:Turf) merge (t)-[:ASSIGNED]->(v)', params);
+      await req.db.query('match (v:Volunteer {id:{id}}) match (qr:QRCode {id:{inviteCode}}) where qr.disable is null match (qr)-[:AUTOASSIGN_TO]->(f:Form) merge (f)-[:ASSIGNED]->(v)', params);
+      await req.db.query('match (v:Volunteer {id:{id}}) match (qr:QRCode {id:{inviteCode}}) where qr.disable is null match (qr)-[:AUTOASSIGN_TO]->(t:Team) merge (t)-[:MEMBERS]->(v)', params);
+    } catch (e) {
+      return _500(res, e);
+    }
   }
 
   let msg = "Thanks for your request to join us! You are currently awaiting an assignment.";
