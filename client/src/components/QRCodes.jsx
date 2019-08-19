@@ -275,7 +275,7 @@ export class CardQRCode extends Component {
           global,
           '/qrcodes/team/add',
           'POST',
-          { teamId: obj.add[i], vId: this.props.id }
+          { teamId: obj.add[i], qId: this.props.id }
         );
       }
 
@@ -284,7 +284,7 @@ export class CardQRCode extends Component {
           global,
           '/qrcodes/team/remove',
           'POST',
-          { teamId: obj.rm[i], vId: this.props.id }
+          { teamId: obj.rm[i], qId: this.props.id }
         );
       }
 
@@ -317,7 +317,7 @@ export class CardQRCode extends Component {
           global,
           '/qrcodes/form/add',
           'POST',
-          { formId: obj.add[i], vId: this.props.id }
+          { formId: obj.add[i], qId: this.props.id }
         );
       }
 
@@ -326,7 +326,7 @@ export class CardQRCode extends Component {
           global,
           '/qrcodes/form/remove',
           'POST',
-          { formId: obj.rm[i], vId: this.props.id }
+          { formId: obj.rm[i], qId: this.props.id }
         );
       }
 
@@ -356,7 +356,7 @@ export class CardQRCode extends Component {
           global,
           '/qrcodes/turf/add',
           'POST',
-          { turfId: obj.add[i], vId: this.props.id }
+          { turfId: obj.add[i], qId: this.props.id }
         );
       }
 
@@ -365,7 +365,7 @@ export class CardQRCode extends Component {
           global,
           '/qrcodes/turf/remove',
           'POST',
-          { turfId: obj.rm[i], vId: this.props.id }
+          { turfId: obj.rm[i], qId: this.props.id }
         );
       }
 
