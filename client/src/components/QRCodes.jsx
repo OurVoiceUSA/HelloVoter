@@ -526,7 +526,7 @@ export class CardQRCode extends Component {
               <img alt="QR Code" src={qrcode.img} />
             </ListItemAvatar>
           </ListItem>
-          <CardQRCodeFull global={global} qrcode={qrcode} refer={this} />
+          <CardQRCodeFull global={global} qrcode={qrcode} refer={this} link={inviteLink(qrcode.id, global.state.server, global.state.orgId)} />
         </div>
       );
 
@@ -549,9 +549,17 @@ export class CardQRCode extends Component {
   }
 }
 
+function inviteLink(inviteCode, server, orgId) {
+  return 'https://'+server+'/HelloVoterHQ/mobile/invite?inviteCode='+inviteCode+'&'+(orgId?'orgId='+orgId:'server='+server);
+}
+
 export const CardQRCodeFull = props => (
   <div>
     <h1>{props.qrcode.name}{(props.qrcode.disabled?' (DISABLED)':'')}</h1>
+    <br />
+    <br />
+    Link to use on a mobile device: <a target="_blank" rel="noopener noreferrer" href={props.link}>{props.link}</a>
+    <br />
     <br />
     Last Used:{' '}
     {(props.qrcode.last_used?new TimeAgo('en-US').format(new Date(props.qrcode.last_used-30000)):'Never')}

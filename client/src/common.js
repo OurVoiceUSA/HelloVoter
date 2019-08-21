@@ -150,10 +150,7 @@ export async function _loadQRCode(global, id) {
       global,
       '/qrcodes/get?id=' + id
     );
-    let code = {inviteCode: qrcode.id};
-    if (global.state.orgId) code.orgId = global.state.orgId;
-    else code.server = global.state.server;
-    qrcode.img = await QRCode.toDataURL(JSON.stringify(code));
+    qrcode.img = await QRCode.toDataURL('ourvoiceapp://homescreen?inviteCode='+qrcode.id+'&'+(global.state.orgId?'orgId='+global.state.orgId:'server='+global.state.server));
   } catch (e) {
     notify_error(e, 'Unable to load QRCode info.');
   }

@@ -87,6 +87,7 @@ export function doExpressInit(log, db, qq) {
       default:
         break;
     }
+    if (req.url.match(/^\/HelloVoterHQ\/mobile\//)) return next();
 
     try {
       let u;
@@ -128,11 +129,9 @@ export function doExpressInit(log, db, qq) {
     return cqdo(req, res, 'return timestamp()', false)
   });
 
-  // root redirect to HQ
-  app.get('/', (req, res) => {
-    let host = req.header('host');
-    res.redirect(ov_config.wabase+'/HelloVoterHQ/'+(host?'?server='+host:''));
-  })
+  app.get('/HelloVoterHQ/mobile/invite', (req, res) => {
+    res.redirect('OurVoiceApp://homescreen?inviteCode='+req.query.inviteCode+'&'+(req.query.orgId?'orgId='+req.query.orgId:'server='+req.query.server));
+  });
 
   // routes from glob
   app.use('/HelloVoterHQ*api/v1', router);
