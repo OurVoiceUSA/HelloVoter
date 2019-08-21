@@ -24,7 +24,7 @@ import SafariView from 'react-native-safari-view';
 import jwt_decode from 'jwt-decode';
 import SmLoginPage from '../SmLoginPage';
 import { Dropbox } from 'dropbox';
-import { ingeojson } from 'ourvoiceusa-sdk-js';
+import { deepCopy, ingeojson } from 'ourvoiceusa-sdk-js';
 import { Divider, api_base_uri, DINFO, _loginPing, _saveUser, _getApiToken, _fileReaderAsync } from '../../common';
 import DeviceInfo from 'react-native-device-info';
 import { RNCamera } from 'react-native-camera';
@@ -44,6 +44,7 @@ export default class App extends OVComponent {
     super(props);
 
     this.state = {
+      refer: props.refer,
       loading: true,
       user: null,
       forms: [],
@@ -55,6 +56,7 @@ export default class App extends OVComponent {
       serverLoading: false,
       myPosition: {latitude: null, longitude: null},
       showCamera: false,
+      inviteUrl: props.refer.state.inviteUrl,
     };
 
     this.onChange = this.onChange.bind(this);
@@ -300,7 +302,6 @@ export default class App extends OVComponent {
     Linking.getInitialURL().then((url) => {
       if (url) this.handleOpenURL({ url });
     });
-    this.requestLocationPermission();
     this._loadForms();
   }
 
@@ -355,11 +356,23 @@ export default class App extends OVComponent {
 
   _loadForms = async () => {
     const { navigate } = this.props.navigation;
+    const { refer, inviteUrl } = this.state;
+
     let folders = [];
     let forms_local = [];
     let dbxformfound = false;
 
     this.setState({loading: true});
+
+    await this.requestLocationPermission();
+    if (inviteUrl) {
+      setTimeout(() => {
+        this.setState({inviteUrl: null}, () => {
+          this.parseInvite(inviteUrl);
+          refer.setState({inviteUrl: null});
+        });
+      }, 500);
+    }
 
     try {
       forms_local = JSON.parse(await storage.get('OV_CANVASS_FORMS'));
@@ -610,6 +623,27 @@ export default class App extends OVComponent {
     this.props.navigation.goBack();
   }
 
+  parseInvite(url) {
+    let obj = {};
+
+    this.setState({showCamera: false, SelectModeScreen: false, askOrgId: false});
+
+    try {
+      // Why oh why is the "new URL()" object not implemented in RN?!? gah
+      // brings me back to my perl days with ugly one liners. Ahh, the nostalgia! convert URI key/values to object
+      url.split('?')[1].split('&').forEach(p => {
+        const [p1,p2] = p.split('=');
+        obj[p1] = p2;
+      });
+
+      // orgId means GOTV
+      if (obj.orgId) this.setState({orgId: obj.orgId, inviteCode: obj.inviteCode}, () => this.connectToGOTV());
+      else this.connectToServer(obj.server, null, obj.inviteCode);
+    } catch (e) {
+      console.warn(""+e);
+    }
+  }
+
   render() {
     const { showCamera, connected, dbx, dbxformfound, loading, user, forms } = this.state;
     const { navigate } = this.props.navigation;
@@ -644,17 +678,7 @@ export default class App extends OVComponent {
           buttonPositive: 'Ok',
           buttonNegative: 'Cancel',
         }}
-        onBarCodeRead={(b) => {
-          this.setState({showCamera: false, SelectModeScreen: false, askOrgId: false});
-          try {
-            let obj = JSON.parse(b.data);
-            // orgId means GOTV
-            if (obj.orgId) this.setState({orgId: obj.orgId, inviteCode: obj.inviteCode}, () => this.connectToGOTV());
-            else this.connectToServer(obj.server, null, obj.inviteCode);
-          } catch (e) {
-            console.warn(e);
-          }
-        }}
+        onBarCodeRead={(b) => this.parseInvite(b.data)}
         barCodeTypes={[RNCamera.Constants.BarCodeType.qr]}
       />
     );

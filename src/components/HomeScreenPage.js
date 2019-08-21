@@ -95,6 +95,29 @@ export default class App extends PureComponent {
 
   componentDidMount() {
     this.requestPushPermission();
+    // Add event listener to handle inviteCode
+    Linking.addEventListener('url', this.handleOpenURL);
+    // Launched from an external URL
+    Linking.getInitialURL().then((url) => {
+      if (url) this.handleOpenURL({ url });
+    });
+  }
+
+  componentWillUnmount() {
+    // Remove event listener
+    Linking.removeEventListener('url', this.handleOpenURL);
+  };
+
+  handleOpenURL = async ({ url }) => {
+    try {
+      // Extract jwt token out of the URL
+      if (url.match(/homescreen\?/)) {
+        this.setState({inviteUrl: url}, () => this.setState({active: 'canvassing'}));
+      }
+      // TODO: handle the navigate that would have been tapped had we already been logged in
+    } catch(e) {
+      console.warn("handleOpenURL: "+e);
+    }
 
   }
 
@@ -193,7 +216,7 @@ export default class App extends PureComponent {
           <YourReps navigation={this.props.navigation} />
         }
         {this.state.active === 'canvassing' &&
-          <CanvassingSetup navigation={this.props.navigation} />
+          <CanvassingSetup navigation={this.props.navigation} refer={this} />
         }
 
         <BottomNavigation active={this.state.active} hidden={false} >
