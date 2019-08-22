@@ -46,6 +46,7 @@
     "express-logging": "^1.1.1",
     "form-data": "^2.5.0",
     "helmet": "^3.20.0",
+    "is-mobile": "^2.1.0",
     "jsonwebtoken": "^8.5.1",
     "jwt-decode": "^2.2.0",
     "logops": "^2.1.1",

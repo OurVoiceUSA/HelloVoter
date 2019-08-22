@@ -6,6 +6,7 @@ import logger from 'logops';
 import helmet from 'helmet';
 import jwt from 'jsonwebtoken';
 import bodyParser from 'body-parser';
+import mobile from 'is-mobile';
 import fs from 'fs';
 import fetch from 'node-fetch';
 
@@ -130,7 +131,9 @@ export function doExpressInit(log, db, qq) {
   });
 
   app.get('/HelloVoterHQ*mobile/invite', (req, res) => {
-    res.redirect('OurVoiceApp://homescreen?inviteCode='+req.query.inviteCode+'&'+(req.query.orgId?'orgId='+req.query.orgId:'server='+req.query.server));
+    let url = 'https://ourvoiceusa.org/hellovoter/';
+    if (mobile({ua:req.get('User-Agent')})) url = 'OurVoiceApp://homescreen?inviteCode='+req.query.inviteCode+'&'+(req.query.orgId?'orgId='+req.query.orgId:'server='+req.query.server);
+    res.redirect(url);
   });
 
   // routes from glob
