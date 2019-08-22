@@ -64,7 +64,8 @@
 		"mocha": "^6.2.0",
 		"patch-package": "^6.1.2",
 		"react-native-cli": "^2.0.1",
-		"react-test-renderer": "^16.9.0"
+		"react-test-renderer": "^16.9.0",
+		"ws": "^7.1.2"
 	},
 	"detox": {
 		"configurations": {
