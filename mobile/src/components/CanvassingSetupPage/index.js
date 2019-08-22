@@ -132,7 +132,7 @@ export default class App extends OVComponent {
 
     if (!state) return setTimeout(() => Alert.alert('Out of bounds', 'You are not located within the United States of America. Unable to continue.', [{text: 'OK'}], { cancelable: false }), 500);
 
-    if (orgId) {
+    if (orgId && orgId.match(/^[0-9A-Z]*$/)) {
       // first two characters are the state code
       let place = this.state.orgId.substring(0,2).toLowerCase();
 
