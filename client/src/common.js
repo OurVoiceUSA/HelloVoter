@@ -144,7 +144,7 @@ export async function _loadImports(global) {
 }
 
 export function _inviteLink(inviteCode, server, orgId) {
-  return 'https://'+server+'/HelloVoterHQ/mobile/invite?inviteCode='+inviteCode+'&'+(orgId?'orgId='+orgId:'server='+server);
+  return 'https://'+server+'/HelloVoterHQ/'+(orgId?orgId+'/':'')+'mobile/invite?inviteCode='+inviteCode+'&'+(orgId?'orgId='+orgId:'server='+server);
 }
 
 export async function _loadQRCode(global, id) {
