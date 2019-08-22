@@ -143,6 +143,10 @@ export async function _loadImports(global) {
   return imports;
 }
 
+export function _inviteLink(inviteCode, server, orgId) {
+  return 'https://'+server+'/HelloVoterHQ/mobile/invite?inviteCode='+inviteCode+'&'+(orgId?'orgId='+orgId:'server='+server);
+}
+
 export async function _loadQRCode(global, id) {
   let qrcode = {};
   try {
@@ -150,7 +154,7 @@ export async function _loadQRCode(global, id) {
       global,
       '/qrcodes/get?id=' + id
     );
-    qrcode.img = await QRCode.toDataURL('ourvoiceapp://homescreen?inviteCode='+qrcode.id+'&'+(global.state.orgId?'orgId='+global.state.orgId:'server='+global.state.server));
+    qrcode.img = await QRCode.toDataURL(_inviteLink(id, global.state.server, global.state.orgId));
   } catch (e) {
     notify_error(e, 'Unable to load QRCode info.');
   }

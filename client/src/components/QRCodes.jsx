@@ -25,6 +25,7 @@ import {
   _loadTeams,
   _loadForms,
   _loadTurfs,
+  _inviteLink,
   RootLoader,
   Icon,
   DialogSaving
@@ -526,7 +527,7 @@ export class CardQRCode extends Component {
               <img alt="QR Code" src={qrcode.img} />
             </ListItemAvatar>
           </ListItem>
-          <CardQRCodeFull global={global} qrcode={qrcode} refer={this} link={inviteLink(qrcode.id, global.state.server, global.state.orgId)} />
+          <CardQRCodeFull global={global} qrcode={qrcode} refer={this} link={_inviteLink(qrcode.id, global.state.server, global.state.orgId)} />
         </div>
       );
 
@@ -547,10 +548,6 @@ export class CardQRCode extends Component {
       </ListItem>
     );
   }
-}
-
-function inviteLink(inviteCode, server, orgId) {
-  return 'https://'+server+'/HelloVoterHQ/mobile/invite?inviteCode='+inviteCode+'&'+(orgId?'orgId='+orgId:'server='+server);
 }
 
 export const CardQRCodeFull = props => (
