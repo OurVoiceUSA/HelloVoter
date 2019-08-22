@@ -1,0 +1,63 @@
+{
+  "name": "HelloVoterAPI",
+  "version": "1.8.4",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "postinstall": "patch-package",
+    "makeadmin": "node node_modules/@babel/node/lib/_babel-node scripts/makeadmin.js",
+    "database": "node node_modules/@babel/node/lib/_babel-node scripts/runDatabase.js",
+    "sandboxdatabase": "node node_modules/@babel/node/lib/_babel-node scripts/runSandboxDatabase.js",
+    "genkeys": "node node_modules/@babel/node/lib/_babel-node scripts/genkeys.js",
+    "test": "reset && npm run sandboxdatabase && npm run genkeys && JUNIT_REPORT_PATH=test-result/result.xml JUNIT_REPORT_STACK=1 nyc mocha --file ./test/lib/config.js --recursive --require @babel/register --timeout 25000 --colors --reporter mocha-jenkins-reporter || true",
+    "start": "node node_modules/nodemon/bin/nodemon.js --signal SIGKILL --exec babel-node server.js"
+  },
+  "author": "Our Voice USA",
+  "license": "AGPL-3.0",
+  "devDependencies": {
+    "@babel/register": "^7.5.5",
+    "chai": "^4.2.0",
+    "docker-cli-js": "^2.5.3",
+    "keypair": "^1.0.1",
+    "mocha": "^6.2.0",
+    "mocha-jenkins-reporter": "^0.4.2",
+    "nodemon": "^1.19.1",
+    "nyc": "^14.1.1",
+    "supertest": "^4.0.2"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "test"
+    ]
+  },
+  "dependencies": {
+    "@babel/cli": "^7.5.5",
+    "@babel/core": "^7.5.5",
+    "@babel/node": "^7.5.5",
+    "@babel/plugin-transform-runtime": "^7.5.5",
+    "@babel/preset-env": "^7.5.5",
+    "@babel/runtime": "^7.5.5",
+    "body-parser": "^1.19.0",
+    "circle-to-polygon": "^1.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^8.1.0",
+    "express": "^4.17.1",
+    "express-jwt": "^5.3.1",
+    "express-logging": "^1.1.1",
+    "form-data": "^2.5.0",
+    "helmet": "^3.20.0",
+    "jsonwebtoken": "^8.5.1",
+    "jwt-decode": "^2.2.0",
+    "logops": "^2.1.1",
+    "neo4j-driver": "^1.7.5",
+    "node-fetch": "^2.6.0",
+    "node-neo4j-bolt-adapter": "^1.0.6",
+    "ourvoiceusa-sdk-js": "github:OurVoiceUSA/ourvoiceusa-sdk-js",
+    "papaparse": "^5.0.2",
+    "patch-package": "^6.1.2",
+    "wkx": "^0.4.8"
+  },
+  "optionalDependencies": {
+    "jmx": "^0.7.0"
+  }
+}

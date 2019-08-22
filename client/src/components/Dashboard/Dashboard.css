@@ -1,0 +1,8 @@
+.dashboard-container {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.dashboard-card {
+  width: 20rem;
+}

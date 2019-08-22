@@ -1,0 +1,14 @@
+.preview-item {
+  min-height: 50px;
+  padding: 5px 0;
+  display: flex;
+}
+
+.preview-title {
+  font-weight: bold;
+}
+
+.records-wrapper {
+  display: flex;
+  flex-flow: column;
+}

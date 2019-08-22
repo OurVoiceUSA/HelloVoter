@@ -1,9 +1,30 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+node_modules
+client/node_modules
+mobile/node_modules
+server/node_modules
+
+# production
+client/build
+
+# test data
+server/test/*.json
+server/test/rsa.pub
+server/test/rsa.key
+server/.nyc_output
+server/test-result
+
 # misc files
 *.orig
 *.swp
-
-# react-native stuff
+.DS_Store
 .env*
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # postinstall build stuff
 rtree.json
@@ -31,7 +52,7 @@ DerivedData
 *.ipa
 *.xcuserstate
 project.xcworkspace
-ios/Pods
+mobile/ios/Pods
 
 # Android/IntelliJ
 #
@@ -43,7 +64,6 @@ local.properties
 
 # node.js
 #
-node_modules/
 npm-debug.log
 yarn-error.log
 
