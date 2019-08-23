@@ -56,7 +56,6 @@ export default class App extends OVComponent {
       serverLoading: false,
       myPosition: {latitude: null, longitude: null},
       showCamera: false,
-      inviteUrl: props.refer.state.inviteUrl,
     };
 
     this.onChange = this.onChange.bind(this);
@@ -302,7 +301,19 @@ export default class App extends OVComponent {
     Linking.getInitialURL().then((url) => {
       if (url) this.handleOpenURL({ url });
     });
+    this._doSetup();
     this._loadForms();
+  }
+
+  _doSetup = async () => {
+    let access = await this.requestLocationPermission();
+
+    let inviteUrl = await storage.get('HV_INVITE_URL');
+
+    if (access && inviteUrl) {
+      await storage.del('HV_INVITE_URL');
+      this.parseInvite(inviteUrl);
+    }
   }
 
   componentWillUnmount() {
@@ -356,23 +367,13 @@ export default class App extends OVComponent {
 
   _loadForms = async () => {
     const { navigate } = this.props.navigation;
-    const { refer, inviteUrl } = this.state;
+    const { refer } = this.state;
 
     let folders = [];
     let forms_local = [];
     let dbxformfound = false;
 
     this.setState({loading: true});
-
-    await this.requestLocationPermission();
-    if (inviteUrl) {
-      setTimeout(() => {
-        this.setState({inviteUrl: null}, () => {
-          this.parseInvite(inviteUrl);
-          refer.setState({inviteUrl: null});
-        });
-      }, 500);
-    }
 
     try {
       forms_local = JSON.parse(await storage.get('OV_CANVASS_FORMS'));

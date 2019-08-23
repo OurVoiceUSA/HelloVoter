@@ -19,6 +19,7 @@ import Permissions from 'react-native-permissions';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Rate, { AndroidMarket } from 'react-native-rate'
 import Carousel, { Pagination } from 'react-native-snap-carousel';
+import storage from 'react-native-storage-wrapper';
 
 import { sliderWidth, itemWidth } from '../styles/SliderEntry.style';
 import styles, { colors } from '../styles/index.style';
@@ -95,6 +96,7 @@ export default class App extends PureComponent {
 
   componentDidMount() {
     this.requestPushPermission();
+    this.checkForInvite();
   }
 
   requestPushPermission = async () => {
@@ -102,6 +104,15 @@ export default class App extends PureComponent {
       res = await Permissions.request('notification');
     } catch(error) {
       // nothing we can do about it
+    }
+  }
+
+  checkForInvite = async() => {
+    try {
+      let inviteUrl = await storage.get('HV_INVITE_URL');
+      if (inviteUrl) this.setState({active: 'canvassing'});
+    } catch(e) {
+      console.warn(e);
     }
   }
 
