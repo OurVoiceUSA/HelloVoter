@@ -3,6 +3,8 @@ import React from 'react';
 import {
   Text,
   TouchableOpacity,
+  View,
+  Image,
   YellowBox,
 } from 'react-native';
 
@@ -40,7 +42,15 @@ const AppNavigator = createStackNavigator({
   HomeScreen: {
     screen: HomeScreenPage,
     navigationOptions: ({navigation}) => ({
-      title: 'HelloVoter',
+      headerTitle: (
+        <View style={{flex:1, flexDirection:'row', justifyContent:'center'}}>
+          <Text style={{fontSize:20}}>HelloVoter</Text>
+          <Image
+            source={require("../../img/OVlogo.png")}
+            style={{width:25, height:25, marginLeft: 15}}
+          />
+        </View>
+      ),
       headerRight: (<SettingsButton nav={navigation} />),
     }),
   },
