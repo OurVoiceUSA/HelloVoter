@@ -1,6 +1,6 @@
 {
 	"name": "HelloVoter",
-	"version": "1.8.4",
+	"version": "1.8.5",
 	"private": true,
 	"scripts": {
 		"postinstall": "patch-package; npx jetify; node node_modules/@babel/node/lib/_babel-node scripts/postinstall.js",
