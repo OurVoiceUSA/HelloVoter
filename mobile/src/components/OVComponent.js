@@ -64,7 +64,7 @@ export default class OVComponent extends PureComponent {
           }
         }
       } else {
-        this.getLocation();
+        await this.getLocation();
         this.timerID = setInterval(() => this.getLocation(), 5000);
       }
     }
@@ -74,19 +74,20 @@ export default class OVComponent extends PureComponent {
     return access;
   }
 
-  getLocation() {
+  getCurrentPositionAsync(options) {
+    return new Promise(function (resolve, reject) {
+      navigator.geolocation.getCurrentPosition(resolve, reject, options);
+    });
+  }
+
+  getLocation = async () => {
     const { myPosition } = this.state;
     try {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          let pos = JSON.parse(JSON.stringify(myPosition));
-          pos.latitude = position.coords.latitude;
-          pos.longitude = position.coords.longitude;
-          this.setState({ myPosition: pos });
-        },
-        (error) => { },
-        { enableHighAccuracy: true, timeout: 2000, maximumAge: 1000 }
-      );
+      const position = await this.getCurrentPositionAsync({ enableHighAccuracy: true, timeout: 2000, maximumAge: 1000 });
+      let pos = JSON.parse(JSON.stringify(myPosition));
+      pos.latitude = position.coords.latitude;
+      pos.longitude = position.coords.longitude;
+      this.setState({ myPosition: pos });
     } catch (e) {
       console.warn("getLocation(): "+e);
     }
