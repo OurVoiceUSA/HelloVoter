@@ -828,24 +828,7 @@ export default class App extends OVComponent {
                   </Text>
                 </View>
 
-                <View style={{margin: 5}}>
-                  <Icon.Button
-                    name="user-circle"
-                    backgroundColor="#d7d7d7"
-                    color="#000000"
-                    onPress={() => navigate('CreateSurvey', {title: 'Solo Project', dbx: null, form: null, refer: this})}
-                    {...iconStyles}>
-                    Solo Project
-                  </Icon.Button>
-                </View>
-
-                <View style={{margin: 5, marginTop: 0}}>
-                  <Text style={{fontSize: 10, textAlign: 'justify'}}>
-                    No login required; use the canvassing tool by yourself for a solo project. Uses your device for data storage.
-                  </Text>
-                </View>
-
-                <View style={{margin: 5}}>
+               <View style={{margin: 5}}>
                   <Icon.Button
                     name="dropbox"
                     backgroundColor="#d7d7d7"
@@ -865,7 +848,25 @@ export default class App extends OVComponent {
                   </Text>
                 </View>
 
-                {__DEV__&&DeviceInfo.isEmulator()?
+                <View style={{margin: 5}}>
+                  <Icon.Button
+                    name="user-circle"
+                    backgroundColor="#d7d7d7"
+                    color="#000000"
+                    onPress={() => navigate('CreateSurvey', {title: 'Solo Project', dbx: null, form: null, refer: this})}
+                    {...iconStyles}>
+                    Solo Project
+                  </Icon.Button>
+                </View>
+
+                <View style={{margin: 5, marginTop: 0}}>
+                  <Text style={{fontSize: 10, textAlign: 'justify'}}>
+                    No login required; use the canvassing tool by yourself for a solo project. Uses your device for data storage.
+                  </Text>
+                </View>
+
+ 
+                {(__DEV__&&DeviceInfo.isEmulator())&&
                 <View>
                   <View style={{margin: 5}}>
                     <Icon.Button
@@ -880,12 +881,9 @@ export default class App extends OVComponent {
 
                   <View style={{margin: 5, marginTop: 0}}>
                     <Text style={{fontSize: 10, textAlign: 'justify'}}>
-                      Connect to your local development instance of HelloVoterHQ
+                      Connect to your localhost development instance of HelloVoterAPI
                     </Text>
                   </View>
-                </View>
-                :
-                <View>
                 </View>
                 }
 
