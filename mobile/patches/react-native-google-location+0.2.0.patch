@@ -80,6 +80,6 @@ index 137fef2..d21ec5f 100644
  dependencies {
    compile 'com.facebook.react:react-native:0.12.+'
 -  compile 'com.google.android.gms:play-services-location:8.3.0'
-+  compile 'com.google.android.gms:play-services-location:16.0.0'
++  compile 'com.google.android.gms:play-services-location:17.0.0'
  }
  
