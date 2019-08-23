@@ -38,7 +38,7 @@
             <category android:name="android.intent.category.DEFAULT" />
             <category android:name="android.intent.category.BROWSABLE" />
             <data android:scheme="ourvoiceapp" android:host="login" />
-            <data android:scheme="ourvoiceapp" android:host="homescreen" />
+            <data android:scheme="ourvoiceapp" android:host="invite" />
         </intent-filter>
       </activity>
       <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" />

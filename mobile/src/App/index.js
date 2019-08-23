@@ -24,6 +24,7 @@ YellowBox.ignoreWarnings([
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 import HomeScreenPage from '../components/HomeScreenPage';
+import InvitePage from '../components/InvitePage';
 import PolProfilePage from '../components/PolProfilePage';
 import SettingsPage from '../components/SettingsPage';
 import CanvassingPage from '../components/CanvassingPage';
@@ -52,6 +53,13 @@ const AppNavigator = createStackNavigator({
         </View>
       ),
       headerRight: (<SettingsButton nav={navigation} />),
+    }),
+  },
+  Invite: {
+    screen: InvitePage,
+    navigationOptions: ({navigation}) => ({
+      title: 'Invited',
+      headerLeft: null,
     }),
   },
   Settings: {

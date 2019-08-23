@@ -132,7 +132,7 @@ export function doExpressInit(log, db, qq) {
 
   app.get('/HelloVoterHQ*mobile/invite', (req, res) => {
     let url = 'https://ourvoiceusa.org/hellovoter/';
-    if (mobile({ua:req.get('User-Agent')})) url = 'OurVoiceApp://homescreen?inviteCode='+req.query.inviteCode+'&'+(req.query.orgId?'orgId='+req.query.orgId:'server='+req.query.server);
+    if (mobile({ua:req.get('User-Agent')})) url = 'OurVoiceApp://invite?inviteCode='+req.query.inviteCode+'&'+(req.query.orgId?'orgId='+req.query.orgId:'server='+req.query.server);
     res.redirect(url);
   });
 
