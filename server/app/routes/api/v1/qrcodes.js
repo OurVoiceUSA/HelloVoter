@@ -50,6 +50,18 @@ module.exports = Router({mergeParams: true})
 
   return res.json(qrcode);
 })
+.post('/qrcodes/update', async (req, res) => {
+  if (!req.user.admin) return _403(res, "Permission denied.");
+  if (!req.body.id || !req.body.name) return _400(res, "Invalid value to parameter 'id' or 'name'");
+
+  try {
+    await req.db.query('match (qr:QRCode {id:{id}}) set qr.name = {name}', req.body);
+  } catch (e) {
+    return _500(res, e);
+  }
+
+  return res.json({});
+})
 .post('/qrcodes/turf/add', async (req, res) => {
   if (!valid(req.body.turfId) || !valid(req.body.qId)) return _400(res, "Invalid value to parameter 'turfId' or 'qId'.");
   return cqdo(req, res, 'match (t:Turf {id:{turfId}}) match (qr:QRCode {id:{qId}}) merge (qr)-[:AUTOASSIGN_TO]->(t)', req.body);

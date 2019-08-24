@@ -4,6 +4,7 @@ import { HashRouter as Router, Route } from 'react-router-dom';
 import ReactPaginate from 'react-paginate';
 import ReactTooltip from 'react-tooltip';
 import Select from 'react-select';
+import EdiText from 'react-editext';
 import { faQrcode } from '@fortawesome/free-solid-svg-icons';
 
 import Modal from '@material-ui/core/Modal';
@@ -503,14 +504,34 @@ export class CardQRCode extends Component {
         'POST',
         { id: qrcode.id }
       );
-      notify_success('QRCode hass been disabled.');
+      notify_success('QRCode has been disabled.');
     } catch (e) {
       notify_error(e, 'Unable to disable QRCode.');
     }
     this.props.refer.setState({ saving: false });
 
-    this._loadData();
+    this.props.refer._loadData();
   };
+
+  onSave = async (val) => {
+    const { global, qrcode } = this.state;
+
+    this.props.refer.setState({ saving: true });
+    try {
+      await _fetch(
+        global,
+        '/qrcodes/update',
+        'POST',
+        { id: qrcode.id, name: val }
+      );
+      notify_success('QRCode has been updated.');
+    } catch (e) {
+      notify_error(e, 'Unable to update QRCode.');
+    }
+    this.props.refer.setState({ saving: false });
+
+    this.props.refer._loadData();
+  }
 
   render() {
     const { global, qrcode } = this.state;
@@ -527,7 +548,7 @@ export class CardQRCode extends Component {
               <img alt="QR Code" src={qrcode.img} />
             </ListItemAvatar>
           </ListItem>
-          <CardQRCodeFull global={global} qrcode={qrcode} refer={this} link={_inviteLink(qrcode.id, global.state.server, global.state.orgId)} />
+          <CardQRCodeFull global={global} qrcode={qrcode} refer={this} link={_inviteLink(qrcode.id, global.state.server, global.state.orgId)} onSave={this.onSave} />
         </div>
       );
 
@@ -552,7 +573,7 @@ export class CardQRCode extends Component {
 
 export const CardQRCodeFull = props => (
   <div>
-    <h1>{props.qrcode.name}{(props.qrcode.disabled?' (DISABLED)':'')}</h1>
+    <h1><EdiText type="text" value={props.qrcode.name} onSave={props.onSave} /></h1>
     <br />
     <br />
     Link to use on a mobile device: <a target="_blank" rel="noopener noreferrer" href={props.link}>{props.link}</a>
