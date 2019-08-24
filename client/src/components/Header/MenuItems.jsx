@@ -21,7 +21,7 @@ import IndeterminateCheckBoxIcon from '@material-ui/icons/IndeterminateCheckBox'
 import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
 import HelpIcon from '@material-ui/icons/Help';
 
-const MenuItems = ({ handleClickLogout }) => (
+const MenuItems = ({ assignments, handleClickLogout }) => (
   <Fragment>
     <List>
       <Link to={'/'}>
@@ -64,6 +64,8 @@ const MenuItems = ({ handleClickLogout }) => (
           <ListItemText primary="Forms" />
         </ListItem>
       </Link>
+      {assignments.admin&&
+      <div>
       <Link to={'/qrcodes/'}>
         <ListItem button>
           <ListItemIcon>
@@ -122,6 +124,8 @@ const MenuItems = ({ handleClickLogout }) => (
         </ListItem>
       </Link>
 */}
+    </div>
+    }
     </List>
     <Divider />
     <List>
@@ -145,7 +149,7 @@ const MenuItems = ({ handleClickLogout }) => (
       <a
         target="_blank"
         rel="noopener noreferrer"
-        href="https://github.com/OurVoiceUSA/HelloVoterHQ/tree/master/docs/"
+        href="https://github.com/OurVoiceUSA/HelloVoter/tree/master/docs/"
       >
         <ListItem button>
           <ListItemIcon>

@@ -28,6 +28,7 @@ class App extends Component {
     const v = queryString.parse(window.location.search);
     this.state = {
       global: props.global,
+      assignments: {},
       loading: true,
       open: true,
       menuLogout: false,
@@ -54,10 +55,10 @@ class App extends Component {
 
     this.setState({loading: true});
 
-    try {
-      // assume error unless proven otherwise
-      let hai = {error: true};
+    // assume error unless proven otherwise
+    let hai = {error: true};
 
+    try {
       if (server && token) {
         hai = await this.singHello(server, jwt.decode(token)['id'].split(":")[0], token, orgId);
       } else {
@@ -79,6 +80,7 @@ class App extends Component {
 
     this.setState({
       loading: false,
+      assignments: (hai.data?hai.data:{}),
     }, () => this._loadKeys());
 
   };
@@ -217,7 +219,7 @@ class App extends Component {
       let body = await res.json();
 
       if (body.data.ready !== true)
-        return { error: false, msg: 'The server said: ' + body.msg };
+        return { error: false, msg: 'The server said: ' + body.msg, data: body.data };
       else {
         // TODO: use form data from body.data.forms[0] and save it in the forms_local cache
         // TODO: if there's more than one form in body.data.forms - don't navigate
@@ -243,7 +245,7 @@ class App extends Component {
 
   render() {
     const { classes } = this.props;
-    let { server, token, loading } = this.state;
+    let { assignments, server, token, loading } = this.state;
 
     if (loading) return (
       <Router>
@@ -270,6 +272,7 @@ class App extends Component {
             handleDrawerOpen={this.handleDrawerOpen}
           />
           <Sidebar
+            assignments={assignments}
             classes={classes}
             open={this.state.open}
             getUserProp={this.getUserProp}

@@ -9,6 +9,7 @@ import MenuItems from './MenuItems';
 export const Sidebar = ({
   classes,
   open,
+  assignments,
   handleClickLogout,
   handleDrawerClose
 }) => (
@@ -25,7 +26,7 @@ export const Sidebar = ({
       </IconButton>
     </div>
     <Divider />
-    <MenuItems handleClickLogout={handleClickLogout} />
+    <MenuItems assignments={assignments} handleClickLogout={handleClickLogout} />
   </Drawer>
 );
 
