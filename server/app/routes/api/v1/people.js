@@ -1,6 +1,6 @@
 
 import {
-  peopleVisitUpdate, volunteerAssignments,
+  volunteerAssignments,
   _400, _403, _422, _500
 } from '../../../lib/utils';
 
@@ -39,6 +39,10 @@ module.exports = Router({mergeParams: true})
   return peopleVisitUpdate(req, res);
 })
 .post('/people/visit/update', async (req, res) => {
+  return peopleVisitUpdate(req, res);
+});
+
+async function peopleVisitUpdate(req, res) {
   let ref = {};
 
   if (!req.body.deviceId) return _400(res, "Invalid value to parameter 'deviceId'.");
@@ -139,8 +143,7 @@ TODO: constrain update to a turf their assigned to, but without creating multipl
   if (!ref.data[0]) return _422(res, "Query returned no data. Something went wrong with your request.");
 
   return res.json(ref.data);
-});
-
+}
 async function visitsAndPeople(req, res) {
   let ref = {};
 
