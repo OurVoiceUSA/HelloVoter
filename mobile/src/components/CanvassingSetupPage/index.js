@@ -639,7 +639,7 @@ export default class App extends OVComponent {
 
       // orgId means GOTV
       if (obj.orgId) this.setState({orgId: obj.orgId, inviteCode: obj.inviteCode}, () => this.connectToGOTV());
-      else this.connectToServer(obj.server, null, obj.inviteCode);
+      else this.setState({server: obj.server, inviteCode: obj.inviteCode}, () => this.connectToServer(obj.server, null, obj.inviteCode));
     } catch (e) {
       console.warn(""+e);
     }
