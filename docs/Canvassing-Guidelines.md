@@ -1,4 +1,4 @@
-# OUR VOICE APP CANVASSING TOOL GUIDELINES
+# CANVASSING APP CANVASSING TOOL GUIDELINES
 
 ## Your 1st Amendment Rights to Canvass
 
@@ -11,8 +11,8 @@ While your right to canvass is a protected right, be mindful of state and munici
 
 ### No Soliciting
 
-The Our Voice mobile app is designed to gather information about people's positions on specific policy issues. We expressly prohibit activities related to the solicitation of products, or for donations, or
-other collection of money, while canvassing with the Our Voice app. Many municipalities also have specific laws regarding solicitation. Basically, the moment you ask for money, you’re a peddler and not a canvasser.
+The HelloVoter mobile app is designed to gather information about people's positions on specific policy issues. We expressly prohibit activities related to the solicitation of products, or for donations, or
+other collection of money, while canvassing with the HelloVoter app. Many municipalities also have specific laws regarding solicitation. Basically, the moment you ask for money, you’re a peddler and not a canvasser.
 
 ### No Trespassing
 
@@ -20,7 +20,7 @@ If you encounter a residence with a “No Trespassing” sign or similar privacy
 
 ### No Leaving Materials
 
-Feel free to hand out any materials you may have created for your own canvassing purposes. However, Our Voice does not recommend leaving them unattended. Leaving anything on their door or doorstep may be considered littering. Also, adding things in or on mailboxes are off limits. It isn't just nosey, it's a federal offense!
+Feel free to hand out any materials you may have created for your own canvassing purposes. However, Our Voice USA does not recommend leaving them unattended. Leaving anything on their door or doorstep may be considered littering. Also, adding things in or on mailboxes are off limits. It isn't just nosey, it's a federal offense!
 
 ### If you receive compensation
 
@@ -36,7 +36,7 @@ By importing data into the canvassing tool, and sharing a form with others, user
 
 ### You represent yourself
 
-Our Voice provides this canvassing tool for free for you to use for your own purposes. You will be talking to real people and asking real questions about policy positions that matter, and hopefully also collaborating with other canvassers.
+Our Voice USA provides this canvassing tool for free for you to use for your own purposes. You will be talking to real people and asking real questions about policy positions that matter, and hopefully also collaborating with other canvassers.
 
 By using this tool you acknowledge that you are acting on your own behalf, do not represent Our Voice USA or our affiliates, and have read our canvassing guidelines.
 
@@ -68,11 +68,11 @@ No better way to stay safe and have fun than to group up and walk together. The 
 
 Never extend your hand to shake a person’s hand at the door unless they extend theirs first as it can be off-putting to some folks. No matter what the outcome of the encounter, always thank them for their time and remind them to be sure to register and vote!
 
-Our Voice will never presume to put words into your mouth, but we can recommend some simple ice-breaker opening lines for those new to chatting up strangers!  The following are merely examples and are in no way required statements for canvassing. Be creative and turn them into your own unique lines!
+Our Voice USA will never presume to put words into your mouth, but we can recommend some simple ice-breaker opening lines for those new to chatting up strangers!  The following are merely examples and are in no way required statements for canvassing. Be creative and turn them into your own unique lines!
 
 “Hello [sir] [ma’am], how are you this [morning] [afternoon]? “ <Allow them to answer>
-“My name is [your name] and I am gathering some information for [your group’s name] in order to better understand how real people like you and I think and feel about the big issues we all face as a nation. I am using this canvassing tool on my phone from Our Voice in order to keep an accurate track of the information people provide. I have just a few important questions to ask you. Do you mind participating for a few minutes?”
-“Hey there! My fellow canvassers and I are checking in with everyone we can in [your city/town] so we can get a better understanding of what folks around here think of major issues we all have to deal with these days. My name is [your name] and I am with [your group] and I’d like to spend just a few minutes asking you some simple, yet super important questions while I mark your answers with this Our Voice canvassing tool. May I ask your name, [ma’am] [sir]?”
+“My name is [your name] and I am gathering some information for [your group’s name] in order to better understand how real people like you and I think and feel about the big issues we all face as a nation. I am using this canvassing tool on my phone from HelloVoter in order to keep an accurate track of the information people provide. I have just a few important questions to ask you. Do you mind participating for a few minutes?”
+“Hey there! My fellow canvassers and I are checking in with everyone we can in [your city/town] so we can get a better understanding of what folks around here think of major issues we all have to deal with these days. My name is [your name] and I am with [your group] and I’d like to spend just a few minutes asking you some simple, yet super important questions while I mark your answers with this HelloVoter canvassing tool. May I ask your name, [ma’am] [sir]?”
 
 ### The Importance Of Data
 
