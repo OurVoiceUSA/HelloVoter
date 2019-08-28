@@ -14,7 +14,7 @@ Check out our [Frequently Asked Questions](Canvassing-FAQ.md).
 
 Watch the latest version of our [Canvassing Mobile App Walkthrough](https://www.youtube.com/watch?v=seMrSoTrCJ0).
 
-Watch the latest version of our [HelloVoterHQ Beta Demo](https://www.youtube.com/watch?v=ah3HnFT197s).
+Watch our [Getting Started with HelloVoterHQ](https://www.youtube.com/watch?v=ZWLllN5SvhI) video, as well as our more in-depth (but older) [HelloVoterHQ Beta Demo](https://www.youtube.com/watch?v=ah3HnFT197s).
 
 ## Other Helpful Tips
 
