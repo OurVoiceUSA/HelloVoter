@@ -248,7 +248,7 @@ async function visitsAndPeople(req, res) {
     q += `
   optional match (r)<-[:VISIT_AT]-(v:Visit)-[:VISIT_FORM]->(:Form {id:{formId}})
     where v.status in {visit_status}
-    with aid, r, people, collect(v) as visits, collect(v.status) as status where not 2 in status or status is null
+    with aid, r, people, collect(v) as visits, collect(v.status) as status `+(req.user.admin?``:`where not 2 in status or status is null`)+`
     with aid, r{.*, visits: visits, people: people} as r
     with aid, CASE WHEN (r.street is null) THEN null ELSE r END as r, collect(CASE WHEN (r.street is null) THEN r ELSE null END) as units
     with aid, collect({address: r, units: units}) as addrs
