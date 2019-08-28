@@ -224,7 +224,7 @@ class App extends Component {
         // TODO: use form data from body.data.forms[0] and save it in the forms_local cache
         // TODO: if there's more than one form in body.data.forms - don't navigate
         console.warn({ user: this.state.user });
-        return { error: false, flag: true };
+        return { error: false, flag: true, data: body.data };
       }
     } catch (e) {
       console.warn('singHello: ' + e);
