@@ -7,7 +7,7 @@ import { Router } from 'express';
 
 module.exports = Router({mergeParams: true})
 .post('/attribute/create', (req, res) => {
-  if (!valid(req.body.name) || !valid(req.body.type)) return _400(res, "Invalid value to parameter 'name' or 'type'.");
+  if (!valid(req.body.name)) return _400(res, "Invalid value to parameter 'name'.");
   req.body.author_id = req.user.id;
 
   switch (req.body.type) {
@@ -23,9 +23,27 @@ module.exports = Router({mergeParams: true})
 
   return cqdo(req, res, 'match (v:Volunteer {id:{author_id}}) create (a:Attribute {id:randomUUID(), created: timestamp(), name:{name}, type:{type}})-[:AUTHOR]->(v) return a.id', req.body, true);
 })
+.post('/attribute/update', (req, res) => {
+  if (!valid(req.body.id)) return _400(res, "Invalid value to parameter 'id'.");
+
+  if (req.body.type) {
+    switch (req.body.type) {
+      case 'string':
+      case 'textbox':
+      case 'number':
+      case 'boolean':
+      case 'date':
+      case 'SAND':
+        break;
+      default: return _400(res, "Invalid value to parameter 'type'.");
+    }
+  }
+
+  return cqdo(req, res, 'match (at:Attribute {id:{id}}) set at.updated = timestamp(), at.name = {name}'+(req.body.type?', at.type = {type}':'')+' return at', req.body, true);
+})
 .get('/attribute/get', (req, res) => {
-  if (!valid(req.query.aId)) return _400(res, "Invalid value to parameter 'aId'.");
-  return cqdo(req, res, 'match (a:Attribute {id:{aId}}) return a', req.query, true);
+  if (!valid(req.query.id)) return _400(res, "Invalid value to parameter 'id'.");
+  return cqdo(req, res, 'match (a:Attribute {id:{id}}) return a', req.query, true);
 })
 .get('/attribute/list', (req, res) => {
   if (req.user.admin === true)

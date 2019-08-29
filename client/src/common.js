@@ -317,6 +317,19 @@ export async function _loadForms(global, teamId) {
   return forms;
 }
 
+export async function _loadAttribute(global, id) {
+  let attribute = {};
+
+  try {
+    let data = await _fetch(global, '/attribute/get?id='+id);
+    if (data.data) attribute = data.data[0];
+  } catch (e) {
+    notify_error(e, 'Unable to load attribute data.');
+  }
+
+  return attribute;
+}
+
 export async function _loadAttributes(global) {
   let attributes = [];
 
@@ -333,6 +346,7 @@ export async function _loadAttributes(global) {
 
   return attributes;
 }
+
 export async function _loadAddressData(global, lng, lat, formId) {
   let data = [];
   try {
