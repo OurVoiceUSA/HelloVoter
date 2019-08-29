@@ -130,14 +130,17 @@ export function doExpressInit(log, db, qq) {
     return cqdo(req, res, 'return timestamp()', false)
   });
 
-  app.get('/HelloVoterHQ*mobile/invite', (req, res) => {
-    let url = 'https://ourvoiceusa.org/hellovoter/';
-    if (mobile({ua:req.get('User-Agent')})) url = 'OurVoiceApp://invite?inviteCode='+req.query.inviteCode+'&'+(req.query.orgId?'orgId='+req.query.orgId:'server='+req.query.server);
-    res.redirect(url);
-  });
+  app.get('/HelloVoterHQ/mobile/invite', invite);
+  app.get('/HelloVoterHQ/[0-9A-Z]+/mobile/invite', invite);
 
-  // routes from glob
-  app.use('/HelloVoterHQ*api/v1', router);
+  app.use('/HelloVoterHQ/api/v1', router);
+  app.use('/HelloVoterHQ/[0-9A-Z]+/api/v1', router);
 
   return app;
+}
+
+function invite(req, res) {
+ let url = 'https://ourvoiceusa.org/hellovoter/';
+ if (mobile({ua:req.get('User-Agent')})) url = 'OurVoiceApp://invite?inviteCode='+req.query.inviteCode+'&'+(req.query.orgId?'orgId='+req.query.orgId:'server='+req.query.server);
+ res.redirect(url);
 }
