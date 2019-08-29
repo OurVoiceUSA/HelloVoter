@@ -67,7 +67,7 @@ async function doJmxInit(db, qq) {
     jmxclient.disconnect();
 
   } catch (e) {
-    console.warn("Unable to connect to JMX, see error below. As a result, we won't be able to optimize database queries, nor can we honor the JOB_CONCURRENCY configuration.");
+    console.warn("Unable to connect to JMX, see error below. As a result, we won't be able to optimize database queries on large sets of data, nor can we honor the JOB_CONCURRENCY configuration.");
     console.warn(e);
   }
 
