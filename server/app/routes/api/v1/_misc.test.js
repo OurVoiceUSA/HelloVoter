@@ -31,8 +31,20 @@ describe('MISC endpoints', function () {
     expect(r.body.data[0]).to.satisfy(Number.isInteger);
   });
 
-  it('root uri redirects', async () => {
+  it('root uri 404', async () => {
     let r = await api.get('/');
+    expect(r.statusCode).to.equal(404);
+  });
+
+  it('invite URL desktop redirects to web', async () => {
+    let r = await api.get('/HelloVoterHQ/mobile/invite');
+    expect(r.statusCode).to.equal(302);
+  });
+
+  // TODO: spoof mobile aser-agent and test OurVoiceApp:// redirect
+
+  it('invite URL desktop redirects to web with orgId', async () => {
+    let r = await api.get('/HelloVoterHQ/NA2DEMO/mobile/invite');
     expect(r.statusCode).to.equal(302);
   });
 
