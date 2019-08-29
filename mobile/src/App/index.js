@@ -47,7 +47,7 @@ const AppNavigator = createStackNavigator({
         <View style={{flex:1, flexDirection:'row', justifyContent:'center'}}>
           <Text style={{fontSize:20}}>HelloVoter</Text>
           <Image
-            source={require("../../img/OVlogo.png")}
+            source={require("../../img/HVlogo.png")}
             style={{width:25, height:25, marginLeft: 15}}
           />
         </View>
