@@ -174,7 +174,7 @@ class App extends Component {
     if (server.match(/^localhost/)) https = false;
 
     try {
-      res = await fetch('http'+(https?'s':'')+'://' + server + '/HelloVoterHQ/'+(orgId?orgId:'')+'/api/v1/hello', {
+      res = await fetch('http'+(https?'s':'')+'://' + server + '/HelloVoterHQ/'+(orgId?orgId+'/':'')+'api/v1/hello', {
         method: 'POST',
         headers: {
           Authorization:
