@@ -17,7 +17,7 @@
   "devDependencies": {
     "@babel/register": "^7.5.5",
     "chai": "^4.2.0",
-    "docker-cli-js": "^2.5.3",
+    "docker-cli-js": "^2.6.0",
     "keypair": "^1.0.1",
     "mocha": "^6.2.0",
     "mocha-jenkins-reporter": "^0.4.2",
@@ -45,7 +45,7 @@
     "express-jwt": "^5.3.1",
     "express-logging": "^1.1.1",
     "form-data": "^2.5.0",
-    "helmet": "^3.20.0",
+    "helmet": "^3.20.1",
     "is-mobile": "^2.1.0",
     "jsonwebtoken": "^8.5.1",
     "jwt-decode": "^2.2.0",
