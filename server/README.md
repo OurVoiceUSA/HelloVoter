@@ -7,7 +7,7 @@ For this server, configure an `.env` file. The following is a complete list of v
     NEO4J_HOST=localhost
     NEO4J_PORT=7687
     NEO4J_USER=neo4j
-    NEO4J_PASS=neo4j
+    NEO4J_PASS=hellovoter
     NEO4J_JMX_PORT=9999
     NEO4J_JMX_USER=monitor
     NEO4J_JMX_PASS=Neo4j
