@@ -37,25 +37,6 @@ import {
   DialogSaving
 } from '../common.js';
 
-const FTYPE = t.enums(
-  {
-    String: 'Text Input',
-    TEXTBOX: 'Large Text Box',
-    Number: 'Number',
-    Boolean: 'On/Off Switch',
-    SAND: 'Agree/Disagree'
-    //  'List': 'Select from List',
-  },
-  'FTYPE'
-);
-
-var addItem = {
-  key: t.String,
-  label: t.String,
-  type: FTYPE
-};
-
-
 // a little function to help us with reordering the result
 const reorder = (list, startIndex, endIndex) => {
     const result = Array.from(list);
@@ -113,9 +94,6 @@ export default class Forms extends Component {
     // TODO: this is only for brand new forms
     let fields = {};
     let order = Object.keys(fields);
-    this.mainForm = t.struct({
-      name: t.String
-    });
 
     this.state = {
       global: props.global,
@@ -125,7 +103,6 @@ export default class Forms extends Component {
       attributes_selected: [],
       fields: fields,
       order: order,
-      customForm: null,
       search: '',
       perPage: perPage,
       pageNum: 1,
@@ -141,8 +118,6 @@ export default class Forms extends Component {
       name: t.String
     });
 
-    this.customFormItems = t.struct(addItem);
-
     this.formServerOptions = {
       fields: {
         name: {
@@ -152,7 +127,6 @@ export default class Forms extends Component {
       }
     };
 
-    this.onChange = this.onChange.bind(this);
     this.onTypeSearch = this.onTypeSearch.bind(this);
     this.handlePageNumChange = this.handlePageNumChange.bind(this);
   }
@@ -239,22 +213,6 @@ export default class Forms extends Component {
     }
   }
 
-  rmField(obj) {
-    let { fields, order } = this.state;
-    for (let f in fields) {
-      if (fields[f] === obj) {
-        delete fields[f];
-        order.splice(order.indexOf(f), 1);
-      }
-    }
-    this.setState({ fields, order });
-    this.forceUpdate();
-  }
-
-  onChange(value) {
-    if (value.type === 'List') value = t.String; // do something...
-  }
-
   onChangeForm(addFormForm) {
     this.setState({ addFormForm });
   }
@@ -278,7 +236,6 @@ export default class Forms extends Component {
       // convert attributes to fields
       attributes.forEach(a => {
         fields[a.id] = { label: a.name, type: a.type, optional: true, options: a.values };
-        //if (a.values) fields[a.id].options =
       });
     } catch (e) {
       notify_error(e, 'Unable to load forms.');
