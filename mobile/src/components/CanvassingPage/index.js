@@ -458,10 +458,6 @@ export default class App extends OVComponent {
 
   getCurrentMarker() { return this.currentMarker; }
 
-  ucFirst(str) {
-      return str.charAt(0).toUpperCase() + str.slice(1);
-  }
-
   getLastVisitObj(place) {
     let latest = {status:-1,end:0};
 

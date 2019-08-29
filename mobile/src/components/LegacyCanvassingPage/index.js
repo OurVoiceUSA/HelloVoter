@@ -40,7 +40,7 @@ import base64 from 'base-64';
 import en from 'javascript-time-ago/locale/en'
 import t from 'tcomb-form-native';
 import _ from 'lodash';
-import {geojson2polygons, ingeojson} from 'ourvoiceusa-sdk-js';
+import {geojson2polygons, ingeojson, ucFirst} from 'ourvoiceusa-sdk-js';
 
 TimeAgo.addLocale(en);
 
@@ -314,10 +314,6 @@ export default class App extends OVComponent {
     return node;
   }
 
-  ucFirst(str) {
-      return str.charAt(0).toUpperCase() + str.slice(1);
-  }
-
   getLastInteraction(id) {
     let nodes = this.getChildNodesByIdTypes(id, ["survey", "import"]);
     const timeAgo = new TimeAgo('en-US')
@@ -329,7 +325,7 @@ export default class App extends OVComponent {
         // App was released in early 2018 with timestamps in seconds
         // If the timestamp is earlier than that, assume it's in seconds and convert to milliseconds
         if (last.updated < 1514764801000) last.updated *= 1000;
-        str = this.ucFirst(last.status)+' '+timeAgo.format(new Date(last.updated));
+        str = ucFirst(last.status)+' '+timeAgo.format(new Date(last.updated));
       }
       else
         str = "Haven't visited";
