@@ -171,7 +171,7 @@ class App extends Component {
     this.setState({server, orgId});
 
     let https = true;
-    if (server.match(/^localhost/)) https = false;
+    if (server.match(/:8080$/)) https = false;
 
     try {
       res = await fetch('http'+(https?'s':'')+'://' + server + '/HelloVoterHQ/'+(orgId?orgId+'/':'')+'api/v1/hello', {

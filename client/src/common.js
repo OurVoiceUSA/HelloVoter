@@ -39,7 +39,7 @@ export async function _fetch(global, uri, method, body) {
   const { server, token } = global.state;
 
   let https = true;
-  if (server.match(/^localhost/)) https = false;
+  if (server.match(/:8080$/)) https = false;
 
   if (!method) method = 'GET';
 
@@ -144,7 +144,7 @@ export async function _loadImports(global) {
 }
 
 export function _inviteLink(inviteCode, server, orgId) {
-  return 'http'+(server.match(/^localhost/)?'':'s')+'://'+server+'/HelloVoterHQ/'+(orgId?orgId+'/':'')+'mobile/invite?inviteCode='+inviteCode+'&'+(orgId?'orgId='+orgId:'server='+server);
+  return 'http'+(server.match(/:8080$/)?'':'s')+'://'+server+'/HelloVoterHQ/'+(orgId?orgId+'/':'')+'mobile/invite?inviteCode='+inviteCode+'&'+(orgId?'orgId='+orgId:'server='+server);
 }
 
 export async function _loadQRCode(global, id) {
