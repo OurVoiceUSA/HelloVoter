@@ -198,10 +198,10 @@ export default class App extends Component {
                   ref={ref => (this.addattributeForm = ref)}
                   type={this.formServerItems}
                   options={this.formServerOptions}
-                  onChange={e => this.onChangeattribute(e)}
+                  onChange={e => this.onChangeAttribute(e)}
                   value={this.state.addattributeForm}
                 />
-                <button onClick={() => this._createattribute()}>Submit</button>
+                <button onClick={() => this._createAttribute()}>Submit</button>
               </div>
             )}
           />
