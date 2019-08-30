@@ -30,7 +30,7 @@ Please be sure to write any tests that correspond to your code changes before yo
 
 ## Production Setup
 
-This app is designed such that you do not need to deploy the mobile app or the web client, as Our Voice USA publishes the mobile app to the app stores and hosts a production copy of the react app here: https://apps.ourvoiceusa.org/HelloVoterHQ/
+This app is designed such that you do not need to deploy the mobile app or the web client, as Our Voice USA publishes the mobile app to the app stores and hosts a production copy of the react app here: https://apps.ourvoiceusa.org/HelloVoterHQ/ (details in [client/README.md](client/README.md))
 
 See [database/README.md](database/README.md) for details on how to setup a database and [server/README.md](server/README.md) for details on how to configure and deploy the server.
 
@@ -60,7 +60,6 @@ Please also read our [code of conduct](CODE_OF_CONDUCT.md).
         along with this program; if not, write to the Free Software
         Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-**NOTE:** We relicense the mobile app code for the purposes of distribution on the App Store. For details, read our CLA Rationale. 
+**NOTE:** We relicense the mobile app code for the purposes of distribution on the App Store. For details, read our CLA Rationale.
 
 Logos, icons, and other artwork depicting the Our Voice bird are copyright and not for redistribution without express written permission by Our Voice USA.
-

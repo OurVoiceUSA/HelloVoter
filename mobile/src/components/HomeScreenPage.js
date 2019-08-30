@@ -1,7 +1,7 @@
 
 import React, { PureComponent } from 'react';
 
-import { BottomNavigation } from 'react-native-material-ui';
+import { BottomNavigation, Button } from 'react-native-material-ui';
 
 import YourReps from './YourRepsPage';
 import CanvassingSetup from './CanvassingSetupPage';
@@ -20,6 +20,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import Rate, { AndroidMarket } from 'react-native-rate'
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 import storage from 'react-native-storage-wrapper';
+import DeviceInfo from 'react-native-device-info';
 
 import { sliderWidth, itemWidth } from '../styles/SliderEntry.style';
 import styles, { colors } from '../styles/index.style';
@@ -140,12 +141,12 @@ export default class App extends PureComponent {
   }
 
   render () {
-    const { mainMenu, sliderActiveSlide } = this.state;
+    const { active, mainMenu, sliderActiveSlide } = this.state;
 
     return (
       <View style={styles.safeArea}>
         <StatusBar />
-        {this.state.active === 'home' &&
+        {active === 'home' &&
           <View style={styles.container}>
            <ScrollView
               style={styles.scrollview}
@@ -184,10 +185,10 @@ export default class App extends PureComponent {
                 tappableDots={!!this._sliderRef}
               />
             </View>
-            <Text style={{marginTop: 0, margin: 15, color: 'dimgray'}}>
-              Our Voice USA, the maker of HelloVoter, is a non-partisan organization registered as a 501(c)(3)
-              non-profit charity. We provide access to tools, resources, and collaboration that
-              enables every day people to be politically engaged. Check us out on social media!
+            <Text style={styles.homeScreenText}>
+              Our Voice USA is a 501(c)(3) non-profit charity. Not for any candidate or political party.
+              We provide access to tools that enables every day people to be politically engaged. Check
+              us out on social media!
             </Text>
             <View style={{flexDirection: 'row', justifyContent: 'center', marginBottom: 15}}>
               <Icon name="facebook-official" size={40} color="#3b5998" style={{marginRight: 25}} onPress={this.openFacebook} />
@@ -196,14 +197,40 @@ export default class App extends PureComponent {
               <Icon name="github" size={40} style={{marginRight: 25}} onPress={() => {this.openGitHub(null)}} />
               <Icon name="globe" size={40} color="#008080" onPress={this.openWebsite} />
             </View>
+
+            <View style={{flexDirection: 'row', justifyContent: 'center'}}>
+              <Button raised primary text="Legal Notice" onPress={() => this.setState({active: 'legal'})} />
+            </View>
+
           </ScrollView>
         </View>
         }
-        {this.state.active === 'reps' &&
+        {active === 'reps' &&
           <YourReps navigation={this.props.navigation} />
         }
-        {this.state.active === 'canvassing' &&
+        {active === 'canvassing' &&
           <CanvassingSetup navigation={this.props.navigation} refer={this} />
+        }
+        {active === 'legal' &&
+        <View style={styles.container}>
+          <ScrollView style={styles.scrollview}>
+            <Text style={styles.homeScreenText}>
+              HelloVoter Version {DeviceInfo.getVersion()}
+            </Text>
+            <Text style={styles.homeScreenText}>
+              Copyright (c) 2018, Our Voice USA. All rights reserved.
+            </Text>
+            <Text style={styles.homeScreenText}>
+              This program is free software; you can redistribute it and/or
+              modify it under the terms of the GNU Affero General Public License
+              as published by the Free Software Foundation; either version 3
+              of the License, or (at your option) any later version.
+            </Text>
+            <View style={{flexDirection: 'row', justifyContent: 'center'}}>
+              <Button raised primary text="Tap here for the source code" onPress={() => this.openGitHub('HelloVoter')} />
+            </View>
+          </ScrollView>
+        </View>
         }
 
         <BottomNavigation active={this.state.active} hidden={false} >

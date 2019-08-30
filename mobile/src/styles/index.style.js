@@ -22,7 +22,7 @@ export default StyleSheet.create({
         flex: 1
     },
     exampleContainer: {
-        paddingVertical: 30
+        paddingVertical: 10
     },
     exampleContainerDark: {
         backgroundColor: colors.black
@@ -51,7 +51,7 @@ export default StyleSheet.create({
         textAlign: 'center'
     },
     slider: {
-        marginTop: 15,
+        marginTop: 0,
         overflow: 'visible' // for custom animations
     },
     sliderContentContainer: {
@@ -65,5 +65,10 @@ export default StyleSheet.create({
         height: 8,
         borderRadius: 4,
         marginHorizontal: 8
+    },
+    homeScreenText: {
+        marginTop: 0,
+        margin: 15,
+        color: 'dimgray'
     }
 });

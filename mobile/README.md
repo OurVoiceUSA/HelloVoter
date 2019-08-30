@@ -2,11 +2,14 @@
 
 Find this app on the [Google Play Store (Android)](https://play.google.com/store/apps/details?id=org.ourvoiceinitiative.ourvoice) and the [Apple Store (iPhone)](https://itunes.apple.com/us/app/our-voice-usa/id1275301651?ls=1&mt=8).
 
-## Features
+## Production Deployment
 
-Our Voice is a mobile app for civic education and engagement. You can:
-* View information on the politicians in office who represent you, contact them, and rate them.
-* Canvass for any cause at zero cost.
+Our Voice USA pushes regular releases to the app stores. Our desire is to collaborate on changes you may require in this mobile app and publish them in HelloVoter. If however you need to roll your own version of this app, make sure you comply with the license! While this app is open source, that does not make it yours. Things you have to do include (but are not limited to) the following:
+
+* The license notice in the app must remain in prominent and conspicuous place, accessible prior to any kind of login.
+* You must state next to the notice that this is a modified work of the original.
+* You must provide a link next to the notice that sends the user to the corresponding modified source code.
+* Logos, icons, and other artwork depicting the Our Voice bird are not for redistribution without express written permission by Our Voice USA.
 
 ## Development Setup
 
@@ -20,7 +23,7 @@ Set up your `.env` file:
     GOOGLE_API_KEY_ANDROID=YOUR_KEY
     EOF
 
-* The `GOOGLE_API_KEY_` values are credentials created by visiting http://console.developers.google.com/. If you plan on releasing this app, or a fork of it yourself, be sure you lock down the API key to the assosiated platform device specified to avoid quota theft.
+* The `GOOGLE_API_KEY_` values are credentials created by visiting http://console.developers.google.com/
 * Without these keys, address searches and geocoding won't function, which limits functionality
 
 Install https://nodejs.org/en/download/ if you havne't already, and run:
@@ -61,4 +64,3 @@ Then build/execute the tests:
     detox test -c android.emu.debug
 
 NOTE: Test Automation for Android generally seems to have issues due to it not following the latest version react native very well.
-

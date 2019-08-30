@@ -103,7 +103,18 @@ class Login extends Component {
           </form>
         </Paper>
         <br />
-        <center>Built with <span role="img" aria-label="Love">❤️</span> by Our Voice USA</center>
+        <center>
+          Built with <span role="img" aria-label="Love">❤️</span> by Our Voice USA
+          <p />
+          Not for any candidate or political party.
+          <p />
+          Copyright (c) 2018, Our Voice USA. All rights reserved.
+          <p />
+          This program is free software; you can redistribute it and/or
+          modify it under the terms of the GNU Affero General Public License
+          as published by the Free Software Foundation; either version 3
+          of the License, or (at your option) any later version.
+        </center>
       </main>
     );
   }
