@@ -63,9 +63,9 @@ describe('Attributes', function () {
         type: type,
       });
     expect(r.statusCode).to.equal(200);
-    let aId = r.body.data[0];
+    let id = r.body.data[0];
 
-    r = await api.get(base_uri+'/attribute/get?aId='+aId)
+    r = await api.get(base_uri+'/attribute/get?id='+id)
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.data[0].type).to.equal(type);
@@ -82,9 +82,9 @@ describe('Attributes', function () {
         type: type,
       });
     expect(r.statusCode).to.equal(200);
-    let aId = r.body.data[0];
+    let id = r.body.data[0];
 
-    r = await api.get(base_uri+'/attribute/get?aId='+aId)
+    r = await api.get(base_uri+'/attribute/get?id='+id)
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.data[0].type).to.equal(type);
@@ -101,9 +101,9 @@ describe('Attributes', function () {
         type: type,
       });
     expect(r.statusCode).to.equal(200);
-    let aId = r.body.data[0];
+    let id = r.body.data[0];
 
-    r = await api.get(base_uri+'/attribute/get?aId='+aId)
+    r = await api.get(base_uri+'/attribute/get?id='+id)
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.data[0].type).to.equal(type);
@@ -120,9 +120,9 @@ describe('Attributes', function () {
         type: type,
       });
     expect(r.statusCode).to.equal(200);
-    let aId = r.body.data[0];
+    let id = r.body.data[0];
 
-    r = await api.get(base_uri+'/attribute/get?aId='+aId)
+    r = await api.get(base_uri+'/attribute/get?id='+id)
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.data[0].type).to.equal(type);
@@ -139,9 +139,9 @@ describe('Attributes', function () {
         type: type,
       });
     expect(r.statusCode).to.equal(200);
-    let aId = r.body.data[0];
+    let id = r.body.data[0];
 
-    r = await api.get(base_uri+'/attribute/get?aId='+aId)
+    r = await api.get(base_uri+'/attribute/get?id='+id)
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.data[0].type).to.equal(type);
@@ -158,9 +158,9 @@ describe('Attributes', function () {
         type: type,
       });
     expect(r.statusCode).to.equal(200);
-    let aId = r.body.data[0];
+    let id = r.body.data[0];
 
-    r = await api.get(base_uri+'/attribute/get?aId='+aId)
+    r = await api.get(base_uri+'/attribute/get?id='+id)
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.data[0].type).to.equal(type);
