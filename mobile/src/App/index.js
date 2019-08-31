@@ -35,7 +35,8 @@ import LegacyCanvassingSettingsPage from '../components/LegacyCanvassingSettings
 import LegacyListMultiUnitPage from '../components/LegacyListMultiUnitPage';
 import LegacySurveyPage from '../components/LegacySurveyPage';
 
-import { createStackNavigator, createAppContainer } from 'react-navigation';
+import { createAppContainer } from 'react-navigation';
+import { createStackNavigator } from 'react-navigation-stack';
 
 import SettingsButton from './settings-button';
 
