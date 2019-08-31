@@ -11,6 +11,7 @@ import {
   Text,
   Linking,
   PermissionsAndroid,
+  Platform,
   ScrollView,
   StatusBar,
 } from 'react-native';
@@ -226,6 +227,7 @@ export default class App extends PureComponent {
               as published by the Free Software Foundation; either version 3
               of the License, or (at your option) any later version.
             </Text>
+            <AppleEULA />
             <View style={{flexDirection: 'row', justifyContent: 'center'}}>
               <Button raised primary text="Tap here for the source code" onPress={() => this.openGitHub('HelloVoter')} />
             </View>
@@ -258,3 +260,14 @@ export default class App extends PureComponent {
     );
   }
 }
+
+const AppleEULA = props => {
+  if (Platform.OS === 'ios') return (
+    <Text style={styles.homeScreenText}>
+      NOTE: Distribution on the iOS App Store means this specific copy
+      of the app falls under the Apple Inc. Standard EULA.
+    </Text>
+  );
+  return null;
+};
+
