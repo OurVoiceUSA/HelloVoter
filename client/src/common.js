@@ -24,6 +24,10 @@ export function jobNumber(num) {
   else return '';
 }
 
+export function tsToStr(ts) {
+  return new Date(ts).toString();
+};
+
 export function notify_success(msg) {
   NotificationManager.success(msg, 'Success', 3000);
 }

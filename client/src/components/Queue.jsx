@@ -3,13 +3,10 @@ import { PaperTable } from './Elements';
 
 import {
   _fetch,
+  tsToStr,
   jobRuntime,
   RootLoader
 } from '../common.js';
-
-const tsToStr = ts => {
-  return new Date(ts).toString();
-};
 
 const jobStatus = job => {
   if (typeof job.success === 'boolean') {

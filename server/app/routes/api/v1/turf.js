@@ -106,6 +106,7 @@ optional match (vi:Visit)-[:VISIT_AT]->()-[*0..1]-(:Address)-[:WITHIN]->(t)
   with t, vi.end as last_touch, active_name, total_active, total_assigned order by vi.end desc limit 1
 return last_touch, active_name, total_active, total_assigned`,
     req.query);
+
     // turf stats
     turf.stats = {
       'Last Touch': ref.data[0][0],
