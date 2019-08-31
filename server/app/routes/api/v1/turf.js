@@ -118,7 +118,7 @@ return last_touch, active_name, total_active, total_assigned`,
         'total': await stats_by_attr(req),
       }
     };
-    await asyncForEach((await req.db.query('match (aq:AttributeQuery) return aq.id, aq.name')).data, async (aq) => {
+    await asyncForEach((await req.db.query('match (aq:AttributeQuery) return aq.id, aq.name order by aq.name')).data, async (aq) => {
       turf.stats['Stats by Attribute'][aq[1]] = await stats_by_attr(req, aq[0]);
     });
   }
