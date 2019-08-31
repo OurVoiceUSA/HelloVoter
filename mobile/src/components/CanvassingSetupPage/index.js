@@ -25,7 +25,7 @@ import jwt_decode from 'jwt-decode';
 import SmLoginPage from '../SmLoginPage';
 import { Dropbox } from 'dropbox';
 import { deepCopy, ingeojson } from 'ourvoiceusa-sdk-js';
-import { Divider, api_base_uri, DINFO, _loginPing, _saveUser, _getApiToken, _fileReaderAsync } from '../../common';
+import { Divider, api_base_uri, DINFO, _loginPing, _saveUser, _fileReaderAsync } from '../../common';
 import DeviceInfo from 'react-native-device-info';
 import { RNCamera } from 'react-native-camera';
 import { wsbase } from '../../config';
@@ -170,6 +170,7 @@ export default class App extends OVComponent {
         if (!obj.id) throw "not a full user object";
       } catch (e) {
         await storage.del('OV_JWT');
+        jwt = null;
       }
 
       let https = true;
