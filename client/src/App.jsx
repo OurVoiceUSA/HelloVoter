@@ -158,7 +158,7 @@ class App extends Component {
     } else if (event.target.server) {
       server = event.target.server.value;
     } else {
-      server = 'localhost:8080';
+      server = window.location.host.replace(':3000',':8080');
     }
     await this.singHello(server, target, null, orgId);
   };
