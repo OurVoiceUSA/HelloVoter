@@ -1,19 +1,12 @@
 import React, { Component } from 'react';
 
-import { HashRouter as Router, Route, Link } from 'react-router-dom';
-import { geocodeByAddress, getLatLng } from 'react-places-autocomplete';
-import ReactPaginate from 'react-paginate';
 import ReactTooltip from 'react-tooltip';
-import Select from 'react-select';
 
-import Modal from '@material-ui/core/Modal';
-import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Avatar from '@material-ui/core/Avatar';
-import Button from '@material-ui/core/Button';
 
 import {
   notify_error,
@@ -21,21 +14,18 @@ import {
   _fetch,
   _searchStringify,
   _handleSelectChange,
-  _loadVolunteers,
   _loadVolunteer,
   _loadTeams,
   _loadForms,
   _loadTurfs,
   _loadNearbyTurfs,
-  RootLoader,
   Icon,
-  PlacesAutocomplete,
-  DialogSaving
-} from '../common.js';
+} from '../../common.js';
 
-import { CardTurf } from './Turf';
-import { CardForm } from './Forms';
-import { CardTeam } from './Teams';
+import { CardTurf } from '../Turf';
+import { CardForm } from '../Forms';
+import { CardTeam } from '../Teams';
+import { CardVolunteerFull } from './CardVolunteerFull';
 
 import {
   faCrown,
@@ -52,255 +42,12 @@ TimeAgo.locale(en);
 
 const NEARBY_DIST = 50;
 
-export default class Volunteers extends Component {
-  constructor(props) {
-    super(props);
-
-    let perPage = localStorage.getItem('volunteersperpage');
-    if (!perPage) perPage = 5;
-
-    this.state = {
-      global: props.global,
-      loading: true,
-      thisVolunteer: {},
-      volunteers: [],
-      search: '',
-      perPage: perPage,
-      pageNum: 1
-    };
-
-    this.onTypeSearch = this.onTypeSearch.bind(this);
-    this.handlePageNumChange = this.handlePageNumChange.bind(this);
-  }
-
-  componentDidMount() {
-    this._loadData();
-  }
-
-  handlePageNumChange(obj) {
-    localStorage.setItem('volunteersperpage', obj.value);
-    this.setState({ pageNum: 1, perPage: obj.value });
-  }
-
-  onTypeSearch(event) {
-    this.setState({
-      search: event.target.value.toLowerCase(),
-      pageNum: 1
-    });
-  }
-
-  _loadData = async () => {
-    const { global } = this.state;
-
-    let volunteers = [];
-    this.setState({ loading: true, search: '' });
-    try {
-      volunteers = await _loadVolunteers(global);
-    } catch (e) {
-      notify_error(e, 'Unable to load volunteers.');
-    }
-    this.setState({ loading: false, volunteers });
-  };
-
-  handlePageClick = data => {
-    this.setState({ pageNum: data.selected + 1 });
-  };
-
-  render() {
-    const { global } = this.state;
-
-    let ready = [];
-    let unassigned = [];
-    let denied = [];
-    let invited = [];
-
-    this.state.volunteers.forEach(c => {
-      if (this.state.search && !_searchStringify(c).includes(this.state.search))
-        return;
-      if (c.locked) {
-        denied.push(c);
-      } else if (c.invited) invited.push(c);
-      else if (c.ass.ready || c.ass.teams.length) ready.push(c);
-      else unassigned.push(c);
-    });
-
-    return (
-      <RootLoader flag={this.state.loading} func={() => this._loadData()}>
-        <Router>
-          <div>
-            Search:{' '}
-            <input
-              type="text"
-              value={this.state.value}
-              onChange={this.onTypeSearch}
-              data-tip="Search by name, email, location, or admin"
-            />
-            <br />
-            <Link
-              to={'/volunteers/'}
-              onClick={() => this.setState({ pageNum: 1 })}
-            >
-              Volunteers ({ready.length})
-            </Link>
-            &nbsp;-&nbsp;
-            <Link
-              to={'/volunteers/unassigned'}
-              onClick={() => this.setState({ pageNum: 1 })}
-            >
-              Unassigned ({unassigned.length})
-            </Link>
-            &nbsp;-&nbsp;
-            <Link
-              to={'/volunteers/denied'}
-              onClick={() => this.setState({ pageNum: 1 })}
-            >
-              Denied ({denied.length})
-            </Link>
-            <Route
-              exact={true}
-              path="/volunteers/"
-              render={() => <ListVolunteers global={global} refer={this} volunteers={ready} />}
-            />
-            <Route
-              exact={true}
-              path="/volunteers/unassigned"
-              render={() => (
-                <ListVolunteers
-                  global={global}
-                  refer={this}
-                  type="Unassigned"
-                  volunteers={unassigned}
-                />
-              )}
-            />
-            <Route
-              exact={true}
-              path="/volunteers/invited"
-              render={() => (
-                <div>
-                  <ListVolunteers
-                    global={global}
-                    refer={this}
-                    type="Invited"
-                    volunteers={invited}
-                  />
-                  <Button onClick={async () => {
-                    let obj = await _fetch(
-                      global,
-                      '/volunteer/invite',
-                      'POST'
-                    );
-                    if (obj.token) {
-                      this.setState({ thisVolunteer: {id: 'invite:'+obj.token} });
-                    } else {
-                      notify_error({}, 'Invite failed.');
-                    }
-                  }} color="primary">
-                    Invite Someone
-                  </Button>
-                </div>
-              )}
-            />
-            <Route
-              exact={true}
-              path="/volunteers/denied"
-              render={() => (
-                <ListVolunteers
-                  global={global}
-                  refer={this}
-                  type="Denied"
-                  volunteers={denied}
-                />
-              )}
-            />
-            <Modal
-              aria-labelledby="simple-modal-title"
-              aria-describedby="simple-modal-description"
-              open={this.state.thisVolunteer.id ? true : false}
-              onClose={() => this.setState({ thisVolunteer: {} })}
-            >
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 100,
-                  left: 200,
-                  right: 200,
-                  backgroundColor: 'white',
-                  padding: 40
-                }}
-              >
-                <CardVolunteer
-                  global={global}
-                  key={this.state.thisVolunteer.id}
-                  id={this.state.thisVolunteer.id}
-                  edit={true}
-                  refer={this}
-                />
-              </div>
-            </Modal>
-            <DialogSaving flag={this.state.saving} />
-          </div>
-        </Router>
-      </RootLoader>
-    );
-  }
+function extract_addr(addr) {
+  let arr = addr.split(', ');
+  if (arr.length < 4) return addr;
+  arr.shift();
+  return arr.join(', ');
 }
-
-const ListVolunteers = props => {
-  const perPage = props.refer.state.perPage;
-  let paginate = <div />;
-  let list = [];
-
-  props.volunteers.forEach((c, idx) => {
-    let tp = Math.floor(idx / perPage) + 1;
-    if (tp !== props.refer.state.pageNum) return;
-    list.push(<CardVolunteer global={global} key={c.id} volunteer={c} refer={props.refer} />);
-  });
-
-  paginate = (
-    <div style={{ display: 'flex' }}>
-      <ReactPaginate
-        previousLabel={'previous'}
-        nextLabel={'next'}
-        breakLabel={'...'}
-        breakClassName={'break-me'}
-        pageCount={props.volunteers.length / perPage}
-        marginPagesDisplayed={1}
-        pageRangeDisplayed={8}
-        onPageChange={props.refer.handlePageClick}
-        containerClassName={'pagination'}
-        subContainerClassName={'pages pagination'}
-        activeClassName={'active'}
-      />
-      &nbsp;&nbsp;&nbsp;
-      <div style={{ width: 75 }}>
-        # Per Page{' '}
-        <Select
-          value={{ value: perPage, label: perPage }}
-          onChange={props.refer.handlePageNumChange}
-          options={[
-            { value: 5, label: 5 },
-            { value: 10, label: 10 },
-            { value: 25, label: 25 },
-            { value: 50, label: 50 },
-            { value: 100, label: 100 }
-          ]}
-        />
-      </div>
-    </div>
-  );
-
-  return (
-    <div>
-      <h3>
-        {props.type}Volunteers ({props.volunteers.length})
-      </h3>
-      {paginate}
-      <List component="nav">{list}</List>
-      {paginate}
-    </div>
-  );
-};
 
 export class CardVolunteer extends Component {
   constructor(props) {
@@ -704,173 +451,7 @@ export class CardVolunteer extends Component {
   }
 }
 
-export const CardVolunteerFull = props => (
-  <div>
-    <br />
-    {props.volunteer.locked ? (
-      <Button
-        onClick={() => props.refer._lockVolunteer(props.volunteer, false)}
-      >
-        Restore Access
-      </Button>
-    ) : (
-      <Button onClick={() => props.refer._lockVolunteer(props.volunteer, true)}>
-        Deny Access
-      </Button>
-    )}
-    <br />
-    Last Seen:{' '}
-    {new TimeAgo('en-US').format(new Date(props.volunteer.last_seen - 30000))}
-    <br />
-    Email: {props.volunteer.email ? props.volunteer.email : 'N/A'}
-    <br />
-    Phone: {props.volunteer.phone ? props.volunteer.phone : 'N/A'}
-    <br />
-    Address:{' '}
-    <VolunteerAddress global={global} refer={props.refer} volunteer={props.volunteer} />
-    <br />
-    {props.refer.state.hometurf.length?
-      <div>
-        Turf this volunteer's home address is in:
-        {props.refer.state.hometurf.map(t => <div>{t.name}</div>)}
-      </div>
-      :
-      <div>This volunteer's home address isn't in any turf.</div>
-    }
-    <br />
-    {props.refer.state.nearbyturf.length?
-      <div>
-        Turf this volunteer's home address is near by:
-        {props.refer.state.nearbyturf.slice(0,5).map(t => <div>{t.name}</div>)}
-      </div>
-      :
-      <div>No turfs are within {NEARBY_DIST}km of this volunteer.</div>
-    }
-    <br />
-    # of doors knocked: N/A
-    <br />
-    <br />
-    <div>
-      Teams this volunteer is a member of:
-      <Select
-        value={props.refer.state.selectedTeamsOption}
-        onChange={props.refer.handleTeamsChange}
-        options={props.refer.state.teamOptions}
-        isMulti={true}
-        isSearchable={true}
-        placeholder="None"
-      />
-      <br />
-      Teams this volunteer is a leader of:
-      <Select
-        value={props.refer.state.selectedLeaderOption}
-        onChange={props.refer.handleLeaderChange}
-        options={props.refer.state.selectedTeamsOption}
-        isMulti={true}
-        isSearchable={true}
-        placeholder="None"
-      />
-    </div>
-
-    <br />
-    {props.refer.state.selectedTeamsOption.length ? (
-      <div>
-        Forms / Turf this users sees based on the above team(s):
-        <br />
-        {props.volunteer.ass.forms.filter(f => !f.direct).map(f => (
-          <CardForm global={global} key={f.id} form={f} refer={props.refer} />
-        ))}
-        {props.volunteer.ass.turfs.filter(t => !t.direct).map(t => (
-          <CardTurf global={global} key={t.id} turf={t} refer={props.refer} />
-        ))}
-      </div>
-    ):''
-    }
-    <div>
-      Forms this volunteer is directly assigned to:
-      <Select
-        value={props.refer.state.selectedFormsOption}
-        onChange={props.refer.handleFormsChange}
-        options={props.refer.state.formOptions}
-        isMulti={true}
-        isSearchable={true}
-        placeholder="None"
-      />
-      <br />
-      Turf this volunteer is directly assigned to:
-      <Select
-        value={props.refer.state.selectedTurfOption}
-        onChange={props.refer.handleTurfChange}
-        options={props.refer.state.turfOptions}
-        isMulti={true}
-        isSearchable={true}
-        placeholder="None"
-      />
-    </div>
-  </div>
-);
-
-export class VolunteerAddress extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      global: props.global,
-      edit: false,
-      address: this.props.volunteer.locationstr
-        ? this.props.volunteer.locationstr
-        : ''
-    };
-    this.onTypeAddress = address => this.setState({ address });
-  }
-
-  submitAddress = async address => {
-    const { global } = this.state;
-
-    this.setState({ address });
-    try {
-      let res = await geocodeByAddress(address);
-      let pos = await getLatLng(res[0]);
-      await _fetch(
-        global,
-        '/volunteer/update',
-        'POST',
-        {
-          id: this.props.volunteer.id,
-          address: address,
-          lat: pos.lat,
-          lng: pos.lng
-        }
-      );
-      this.props.refer._loadData();
-      notify_success('Address hass been saved.');
-    } catch (e) {
-      notify_error(e, 'Unable to update address info.');
-    }
-  };
-
-  render() {
-    if (this.state.edit)
-      return (
-        <PlacesAutocomplete
-          debounce={500}
-          value={this.state.address}
-          onChange={this.onTypeAddress}
-          onSelect={this.submitAddress}
-        />
-      );
-
-    return (
-      <div>
-        {this.state.address}{' '}
-        <Button onClick={() => this.setState({ edit: true })}>
-          click to edit
-        </Button>
-      </div>
-    );
-  }
-}
-
-export const VolunteerBadges = props => {
+const VolunteerBadges = props => {
   let badges = [];
   let id = props.volunteer.id;
 
@@ -933,10 +514,3 @@ export const VolunteerBadges = props => {
 
   return badges;
 };
-
-function extract_addr(addr) {
-  let arr = addr.split(', ');
-  if (arr.length < 4) return addr;
-  arr.shift();
-  return arr.join(', ');
-}

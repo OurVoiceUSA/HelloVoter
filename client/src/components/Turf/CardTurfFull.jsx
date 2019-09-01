@@ -3,8 +3,6 @@ import Select from 'react-select';
 
 import { PaperTable } from '../Elements';
 
-import { tsToStr } from '../../common';
-
 export const CardTurfFull = props => (
   <div>
     <div>

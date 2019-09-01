@@ -18,8 +18,8 @@ import {
   faClipboard
 } from '@fortawesome/free-solid-svg-icons';
 
-import { CardVolunteer } from './Volunteers.jsx';
-import { CardTeam } from './Teams.jsx';
+import { CardVolunteer } from './Volunteers';
+import { CardTeam } from './Teams';
 
 import {
   _fetch,
