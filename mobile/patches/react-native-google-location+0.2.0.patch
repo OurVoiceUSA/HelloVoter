@@ -83,3 +83,17 @@ index 137fef2..d21ec5f 100644
 +  compile 'com.google.android.gms:play-services-location:17.0.0'
  }
  
+diff --git a/node_modules/react-native-google-location/android/app/build.gradle b/node_modules/react-native-google-location/android/app/build.gradle
+index 5b2e551..c83c065 100644
+--- a/node_modules/react-native-google-location/android/app/build.gradle
++++ b/node_modules/react-native-google-location/android/app/build.gradle
+@@ -30,7 +30,7 @@ repositories {
+ }
+ 
+ dependencies {
+-  compile 'com.facebook.react:react-native:0.12.+'
+-  compile 'com.google.android.gms:play-services-location:8.3.0'
++  implementation 'com.facebook.react:react-native:0.12.+'
++  implementation 'com.google.android.gms:play-services-location:17.0.0'
+ }
+ 
