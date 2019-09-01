@@ -60,6 +60,6 @@ Please also read our [code of conduct](CODE_OF_CONDUCT.md).
         along with this program; if not, write to the Free Software
         Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-**NOTE:** We relicense the mobile app code for the purposes of distribution on the App Store. For details, read our CLA Rationale.
+**NOTE:** We relicense the mobile app code for the purposes of distribution on the App Store. For details, read our [CLA Rationale](CLA-Rationale.md)
 
 Logos, icons, and other artwork depicting the Our Voice bird are copyright and not for redistribution without express written permission by Our Voice USA.
