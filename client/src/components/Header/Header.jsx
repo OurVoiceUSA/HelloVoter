@@ -43,10 +43,6 @@ export const Header = ({
         alt="Remy Sharp"
         src={getUserProp('avatar')}
         className={classes.avatar}
-        onClick={() =>
-          (window.location.href =
-            '/HelloVoterHQ/#/volunteers/view/' + getUserProp('id'))
-        }
       />
     </Toolbar>
   </AppBar>

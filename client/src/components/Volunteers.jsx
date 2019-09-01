@@ -213,17 +213,6 @@ export default class Volunteers extends Component {
                 />
               )}
             />
-            <Route
-              path="/volunteers/view/:id"
-              render={props => (
-                <CardVolunteer
-                  global={global}
-                  key={props.match.params.id}
-                  id={props.match.params.id}
-                  edit={true}
-                />
-              )}
-            />
             <Modal
               aria-labelledby="simple-modal-title"
               aria-describedby="simple-modal-description"
