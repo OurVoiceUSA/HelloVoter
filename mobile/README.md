@@ -31,7 +31,7 @@ Install https://nodejs.org/en/download/ if you havne't already, and run:
     git clone https://github.com/OurVoiceUSA/HelloVoter.git
     cd HelloVoter/mobile/
     npm install
-    npm install -g react-native-cli
+    npm install -g @react-native-community/cli
 
 If you're developing the **Android** app - install https://developer.android.com/studio/releases/ if you haven't already, import the `HelloVoter/mobile/android` project, and follow the prompts to download all the build and runtime dependancies. You'll also have to run this command:
 
