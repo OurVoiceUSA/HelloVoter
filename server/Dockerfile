@@ -1,3 +1,4 @@
+FROM openjdk:alpine as jdk
 FROM node:dubnium-alpine as build
 
 RUN apk update && apk upgrade && \
@@ -15,14 +16,14 @@ RUN npm --unsafe-perm install
 
 FROM node:dubnium-alpine
 
+COPY --from=jdk /usr/lib/jvm /usr/lib/jvm
 COPY --from=build /app /app
 WORKDIR /app
 
+ENV JAVA_HOME=/usr/lib/jvm/default-jvm
 ENV NODE_ENV=production
 ENV BABEL_CACHE_PATH=/tmp/.babel_cache
 ENV NO_UPDATE_NOTIFIER=1
-
-ENV DISABLE_JMX=1
 
 HEALTHCHECK --interval=15s --timeout=5s --start-period=5s CMD node /app/poke.js
 COPY app app
