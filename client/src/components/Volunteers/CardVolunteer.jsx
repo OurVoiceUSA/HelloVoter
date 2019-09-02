@@ -85,23 +85,27 @@ export class CardVolunteer extends Component {
         selectedTeamsOption
       );
 
-      for (let i in obj.add) {
-        await _fetch(
+      let adrm = [];
+
+      obj.add.forEach(add => {
+        adrm.push(_fetch(
           global,
           '/team/members/add',
           'POST',
-          { teamId: obj.add[i], vId: this.props.id }
-        );
-      }
+          { teamId: add, vId: this.props.id }
+        ));
+      });
 
-      for (let i in obj.rm) {
-        await _fetch(
+      obj.rm.forEach(rm => {
+        adrm.push(_fetch(
           global,
           '/team/members/remove',
           'POST',
-          { teamId: obj.rm[i], vId: this.props.id }
-        );
-      }
+          { teamId: rm, vId: this.props.id }
+        ));
+      });
+
+      await Promise.all(adrm);
 
       // refresh volunteer info
       let volunteer = await _loadVolunteer(global, this.props.id);
@@ -127,23 +131,27 @@ export class CardVolunteer extends Component {
         selectedLeaderOption
       );
 
-      for (let i in obj.add) {
-        await _fetch(
+      let adrm = [];
+
+      obj.add.forEach(add => {
+        adrm.push(_fetch(
           global,
           '/team/members/promote',
           'POST',
-          { teamId: obj.add[i], vId: this.props.id }
-        );
-      }
+          { teamId: add, vId: this.props.id }
+        ));
+      });
 
-      for (let i in obj.rm) {
-        await _fetch(
+      obj.rm.forEach(rm => {
+        adrm.push(_fetch(
           global,
           '/team/members/demote',
           'POST',
-          { teamId: obj.rm[i], vId: this.props.id }
-        );
-      }
+          { teamId: rm, vId: this.props.id }
+        ));
+      });
+
+      await Promise.all(adrm);
 
       // refresh volunteer info
       let volunteer = await _loadVolunteer(global, this.props.id);
@@ -166,23 +174,27 @@ export class CardVolunteer extends Component {
         selectedFormsOption
       );
 
-      for (let i in obj.add) {
-        await _fetch(
+      let adrm = [];
+
+      obj.add.forEach(add => {
+        adrm.push(_fetch(
           global,
           '/form/assigned/volunteer/add',
           'POST',
-          { formId: obj.add[i], vId: this.props.id }
-        );
-      }
+          { formId: add, vId: this.props.id }
+        ));
+      })
 
-      for (let i in obj.rm) {
-        await _fetch(
+      obj.rm.forEach(rm => {
+        adrm.push(_fetch(
           global,
           '/form/assigned/volunteer/remove',
           'POST',
-          { formId: obj.rm[i], vId: this.props.id }
-        );
-      }
+          { formId: rm, vId: this.props.id }
+        ));
+      });
+
+      await Promise.all(adrm);
 
       // refresh volunteer info
       let volunteer = await _loadVolunteer(global, this.props.id);
@@ -205,23 +217,27 @@ export class CardVolunteer extends Component {
         selectedTurfOption
       );
 
-      for (let i in obj.add) {
-        await _fetch(
+      let adrm = [];
+
+      obj.add.forEach(add => {
+        adrm.push(_fetch(
           global,
           '/turf/assigned/volunteer/add',
           'POST',
-          { turfId: obj.add[i], vId: this.props.id }
-        );
-      }
+          { turfId: add, vId: this.props.id }
+        ));
+      })
 
-      for (let i in obj.rm) {
-        await _fetch(
+      obj.rm.forEach(rm => {
+        adrm.push(_fetch(
           global,
           '/turf/assigned/volunteer/remove',
           'POST',
-          { turfId: obj.rm[i], vId: this.props.id }
-        );
-      }
+          { turfId: rm, vId: this.props.id }
+        ));
+      })
+
+      await Promise.all(adrm);
 
       // refresh volunteer info
       let volunteer = await _loadVolunteer(global, this.props.id);

@@ -19,11 +19,9 @@ import {
   _loadAttributes,
   _searchStringify,
   _fetch,
-  _handleSelectChange,
   notify_error,
   notify_success,
   RootLoader,
-  Icon,
   DialogSaving,
 } from '../common.js';
 
@@ -335,7 +333,6 @@ export class CardAttribute extends Component {
   }
 
   handleMembersChange = async selectedMembersOption => {
-    const { global } = this.state;
 
     if (!selectedMembersOption) selectedMembersOption = [];
     this.props.refer.setState({ saving: true });

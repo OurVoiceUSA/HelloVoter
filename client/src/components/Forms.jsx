@@ -568,23 +568,27 @@ export class CardForm extends Component {
         selectedTeamsOption
       );
 
-      for (let i in obj.add) {
-        await _fetch(
+      let adrm = [];
+
+      obj.add.forEach(add => {
+        adrm.push(_fetch(
           global,
           '/form/assigned/team/add',
           'POST',
-          { teamId: obj.add[i], formId: this.props.id }
-        );
-      }
+          { teamId: add, formId: this.props.id }
+        ));
+      });
 
-      for (let i in obj.rm) {
-        await _fetch(
+      obj.rm.forEach(rm => {
+        adrm.push(_fetch(
           global,
           '/form/assigned/team/remove',
           'POST',
-          { teamId: obj.rm[i], formId: this.props.id }
-        );
-      }
+          { teamId: rm, formId: this.props.id }
+        ));
+      });
+
+      await Promise.all(adrm);
 
       notify_success('Team assignments saved.');
       this.setState({ selectedTeamsOption });
@@ -605,23 +609,27 @@ export class CardForm extends Component {
         selectedMembersOption
       );
 
-      for (let i in obj.add) {
-        await _fetch(
+      let adrm = [];
+
+      obj.add.forEach(add => {
+        adrm.push(_fetch(
           global,
           '/form/assigned/volunteer/add',
           'POST',
-          { vId: obj.add[i], formId: this.props.id }
-        );
-      }
+          { vId: add, formId: this.props.id }
+        ));
+      });
 
-      for (let i in obj.rm) {
-        await _fetch(
+      obj.rm.forEach(rm => {
+        adrm.push(_fetch(
           global,
           '/form/assigned/volunteer/remove',
           'POST',
-          { vId: obj.rm[i], formId: this.props.id }
-        );
-      }
+          { vId: rm, formId: this.props.id }
+        ));
+      });
+
+      await Promise.all(adrm);
 
       notify_success('Volunteer assignments saved.');
       this.setState({ selectedMembersOption });

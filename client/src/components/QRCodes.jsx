@@ -272,23 +272,27 @@ export class CardQRCode extends Component {
         selectedTeamsOption
       );
 
-      for (let i in obj.add) {
-        await _fetch(
+      let adrm = [];
+
+      obj.add.forEach(add => {
+        adrm.push(_fetch(
           global,
           '/qrcodes/team/add',
           'POST',
-          { teamId: obj.add[i], qId: this.props.id }
-        );
-      }
+          { teamId: add, qId: this.props.id }
+        ));
+      });
 
-      for (let i in obj.rm) {
-        await _fetch(
+      obj.rm.forEach(rm => {
+        adrm.push(_fetch(
           global,
           '/qrcodes/team/remove',
           'POST',
-          { teamId: obj.rm[i], qId: this.props.id }
-        );
-      }
+          { teamId: rm, qId: this.props.id }
+        ));
+      });
+
+      await Promise.all(adrm);
 
       // refresh info
       let qrcode = await _loadQRCode(global, this.props.id);
@@ -314,23 +318,27 @@ export class CardQRCode extends Component {
         selectedFormsOption
       );
 
-      for (let i in obj.add) {
-        await _fetch(
+      let adrm = [];
+
+      obj.add.forEach(add => {
+        adrm.push(_fetch(
           global,
           '/qrcodes/form/add',
           'POST',
-          { formId: obj.add[i], qId: this.props.id }
-        );
-      }
+          { formId: add, qId: this.props.id }
+        ));
+      });
 
-      for (let i in obj.rm) {
-        await _fetch(
+      obj.rm.forEach(rm => {
+        adrm.push(_fetch(
           global,
           '/qrcodes/form/remove',
           'POST',
-          { formId: obj.rm[i], qId: this.props.id }
-        );
-      }
+          { formId: rm, qId: this.props.id }
+        ));
+      });
+
+      await Promise.all(adrm);
 
       // refresh info
       let qrcode = await _loadQRCode(global, this.props.id);
@@ -353,23 +361,27 @@ export class CardQRCode extends Component {
         selectedTurfOption
       );
 
-      for (let i in obj.add) {
-        await _fetch(
+      let adrm = [];
+
+      obj.add.forEach(add => {
+        adrm.push(_fetch(
           global,
           '/qrcodes/turf/add',
           'POST',
-          { turfId: obj.add[i], qId: this.props.id }
-        );
-      }
+          { turfId: add, qId: this.props.id }
+        ));
+      });
 
-      for (let i in obj.rm) {
-        await _fetch(
+      obj.rm.forEach(rm => {
+        adrm.push(_fetch(
           global,
           '/qrcodes/turf/remove',
           'POST',
-          { turfId: obj.rm[i], qId: this.props.id }
-        );
-      }
+          { turfId: rm, qId: this.props.id }
+        ));
+      });
+
+      await Promise.all(adrm);
 
       // refresh info
       let qrcode = await _loadQRCode(global, this.props.id);
@@ -643,4 +655,3 @@ export const CardQRCodeFull = props => (
     }
   </div>
 );
-

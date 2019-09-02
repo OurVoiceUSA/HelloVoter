@@ -343,23 +343,27 @@ export class CardTeam extends Component {
         selectedMembersOption
       );
 
-      for (let i in obj.add) {
-        await _fetch(
+      let adrm = [];
+
+      obj.add.forEach(add => {
+        adrm.push(_fetch(
           global,
           '/team/members/add',
           'POST',
-          { teamId: this.props.id, vId: obj.add[i] }
-        );
-      }
+          { teamId: this.props.id, vId: add }
+        ));
+      });
 
-      for (let i in obj.rm) {
-        await _fetch(
+      obj.rm.forEach(rm => {
+        adrm.push(_fetch(
           global,
           '/team/members/remove',
           'POST',
-          { teamId: this.props.id, vId: obj.rm[i] }
-        );
-      }
+          { teamId: this.props.id, vId: rm }
+        ));
+      });
+
+      await Promise.all(adrm);
 
       // refresh team info
       let team = await _loadTeam(global, this.props.id);
@@ -382,23 +386,27 @@ export class CardTeam extends Component {
         selectedFormsOption
       );
 
-      for (let i in obj.add) {
-        await _fetch(
+      let adrm = [];
+
+      obj.add.forEach(add => {
+        adrm.push(_fetch(
           global,
           '/form/assigned/team/add',
           'POST',
-          { formId: obj.add[i], teamId: this.props.id }
-        );
-      }
+          { formId: add, teamId: this.props.id }
+        ));
+      });
 
-      for (let i in obj.rm) {
-        await _fetch(
+      obj.rm.forEach(rm => {
+        adrm.push(_fetch(
           global,
           '/form/assigned/team/remove',
           'POST',
-          { formId: obj.rm[i], teamId: this.props.id }
-        );
-      }
+          { formId: rm, teamId: this.props.id }
+        ));
+      });
+
+      await Promise.all(adrm);
 
       // refresh team info
       let teamn = await _loadTeam(global, this.props.id);
@@ -421,23 +429,27 @@ export class CardTeam extends Component {
         selectedTurfOption
       );
 
-      for (let i in obj.add) {
-        await _fetch(
+      let adrm = [];
+
+      obj.add.forEach(add => {
+        adrm.push(_fetch(
           global,
           '/turf/assigned/team/add',
           'POST',
-          { turfId: obj.add[i], teamId: this.props.id }
-        );
-      }
+          { turfId: add, teamId: this.props.id }
+        ));
+      });
 
-      for (let i in obj.rm) {
-        await _fetch(
+      obj.rm.forEach(rm => {
+        adrm.push(_fetch(
           global,
           '/turf/assigned/team/remove',
           'POST',
-          { turfId: obj.rm[i], teamId: this.props.id }
-        );
-      }
+          { turfId: rm, teamId: this.props.id }
+        ));
+      });
+
+      await Promise.all(adrm);
 
       // refresh team info
       let team = await _loadTeam(global, this.props.id);

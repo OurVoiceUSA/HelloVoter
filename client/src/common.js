@@ -387,20 +387,14 @@ export function _handleSelectChange(oldopt, newopt) {
   });
 
   // anything in "now" that isn't in "prior" gets added
-  for (let ni in now) {
-    let n = now[ni];
-    if (prior.indexOf(n) === -1) {
-      add.push(n);
-    }
-  }
+  now.forEach(n => {
+    if (prior.indexOf(n) === -1) add.push(n);
+  });
 
   // anything in "prior" that isn't in "now" gets removed
-  for (let pi in prior) {
-    let p = prior[pi];
-    if (now.indexOf(p) === -1) {
-      rm.push(p);
-    }
-  }
+  prior.forEach(p => {
+    if (now.indexOf(p) === -1) rm.push(p);
+  });
 
   return { add: add, rm: rm };
 }

@@ -48,23 +48,27 @@ export class CardTurf extends Component {
         selectedTeamsOption
       );
 
-      for (let i in obj.add) {
-        await _fetch(
+      let adrm = [];
+
+      obj.add.forEach(add => {
+        adrm.push(_fetch(
           global,
           '/turf/assigned/team/add',
           'POST',
-          { teamId: obj.add[i], turfId: this.props.id }
-        );
-      }
+          { teamId: add, turfId: this.props.id }
+        ));
+      });
 
-      for (let i in obj.rm) {
-        await _fetch(
+      obj.rm.forEach(rm => {
+        adrm.push(_fetch(
           global,
           '/turf/assigned/team/remove',
           'POST',
-          { teamId: obj.rm[i], turfId: this.props.id }
-        );
-      }
+          { teamId: rm, turfId: this.props.id }
+        ));
+      });
+
+      await Promise.all(adrm);
 
       notify_success('Team assignments saved.');
       this.setState({ selectedTeamsOption });
@@ -85,23 +89,27 @@ export class CardTurf extends Component {
         selectedMembersOption
       );
 
-      for (let i in obj.add) {
-        await _fetch(
+      let adrm = [];
+
+      obj.add.forEach(add => {
+        adrm.push(_fetch(
           global,
           '/turf/assigned/volunteer/add',
           'POST',
-          { vId: obj.add[i], turfId: this.props.id }
-        );
-      }
+          { vId: add, turfId: this.props.id }
+        ));
+      });
 
-      for (let i in obj.rm) {
-        await _fetch(
+      obj.rm.forEach(rm => {
+        adrm.push(_fetch(
           global,
           '/turf/assigned/volunteer/remove',
           'POST',
-          { vId: obj.rm[i], turfId: this.props.id }
-        );
-      }
+          { vId: rm, turfId: this.props.id }
+        ));
+      });
+
+      await Promise.all(adrm);
 
       notify_success('Volunteer assignments saved.');
       this.setState({ selectedMembersOption });
