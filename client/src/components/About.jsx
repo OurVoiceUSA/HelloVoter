@@ -17,7 +17,7 @@ export default class App extends Component {
 
     this.state = {
       global: props.global,
-      cb_version: null,
+      api_version: null,
       neo4j_version: null,
     };
   }
@@ -33,31 +33,36 @@ export default class App extends Component {
     }
 
     this.setState({
-      cb_version: data.version ? data.version : 'unknown',
+      api_version: data.version ? data.version : 'unknown',
       neo4j_version: data.neo4j_version ? data.neo4j_version : 'unknown',
     });
   };
 
   render() {
+    const { api_version, neo4j_version } = this.state;
+
     return (
       <div>
         <div>
           {process.env.REACT_APP_NAME} version {process.env.REACT_APP_VERSION}
         </div>
         <div>
-          {this.state.cb_version ? (
-            'HelloVoterAPI version ' + this.state.cb_version
+          {api_version ? (
+            'HelloVoterAPI version ' + api_version
           ) : (
             <CircularProgress height={15} />
           )}
         </div>
         <div>
-          {this.state.neo4j_version ? (
-            'Neo4j version ' + this.state.neo4j_version
+          {neo4j_version ? (
+            'Neo4j version ' + neo4j_version
           ) : (
             <CircularProgress height={15} />
           )}
         </div>
+        {(api_version && api_version !== "unknown" && api_version !== process.env.REACT_APP_VERSION)&&
+        <h3 style={{color: "red"}}>WARNING: API version doesn't match HQ version.</h3>
+        }
         <div>
           &copy; 2018, Our Voice USA, a 501(c)(3) Non-Profit Organization. Not
           for any candidate or political party.

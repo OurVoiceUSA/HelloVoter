@@ -118,10 +118,13 @@ export default class App extends Component {
   }
 
   render() {
-    const { global } = this.state;
+    const { global, data, loading, noAdmins } = this.state;
 
     return (
-      <RootLoader flag={this.state.loading} func={this._loadData}>
+      <RootLoader flag={loading} func={this._loadData}>
+        {(data.version && data.version !== process.env.REACT_APP_VERSION)&&
+        <h3 style={{color: "red"}}>WARNING: API version doesn't match HQ version.</h3>
+        }
         <Cards
           state={this.state}
           axis="xy"
@@ -133,7 +136,7 @@ export default class App extends Component {
         <Modal
           aria-labelledby="simple-modal-title"
           aria-describedby="simple-modal-description"
-          open={this.state.noAdmins}
+          open={noAdmins}
           onClose={() => this.setState({ noAdmins: false })}
         >
           <div
