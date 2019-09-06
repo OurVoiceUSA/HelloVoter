@@ -22,7 +22,7 @@ Then setup neo4j with docker:
     sudo mv jmx.access jmx.password /opt/neo4j/logs/
     sudo chown -R 101:101 /opt/neo4j
 
-    docker build -t neo4j-hv neo4j
+    docker build -t neo4j-hv database
 
     docker run -d --name neo4j \
       --mount type=bind,src=/opt/neo4j/data,dst=/data \
