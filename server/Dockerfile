@@ -1,11 +1,12 @@
 FROM openjdk:alpine as jdk
 FROM node:dubnium-alpine as build
 
+RUN mkdir -p /run
+
 RUN apk update && apk upgrade && \
     apk add --no-cache git
 
-RUN mkdir -p /app
-WORKDIR /app
+WORKDIR /run
 
 COPY .babelrc .
 COPY package.json .
@@ -17,21 +18,24 @@ RUN npm --unsafe-perm install
 FROM node:dubnium-alpine
 
 COPY --from=jdk /usr/lib/jvm /usr/lib/jvm
-COPY --from=build /app /app
-WORKDIR /app
+COPY --from=build /run /run
+
+WORKDIR /run
 
 ENV JAVA_HOME=/usr/lib/jvm/default-jvm
 ENV NODE_ENV=production
 ENV BABEL_CACHE_PATH=/tmp/.babel_cache
 ENV NO_UPDATE_NOTIFIER=1
 
-HEALTHCHECK --interval=15s --timeout=5s --start-period=5s CMD node /app/poke.js
+HEALTHCHECK --interval=15s --timeout=5s --start-period=5s CMD node /run/app/poke.js
+
 COPY app app
-COPY *.js ./
+COPY scripts scripts
+
+RUN CI=true npm test
 
 EXPOSE 8080
 EXPOSE 8443
 USER node
 
-CMD [ "node", "node_modules/@babel/node/lib/_babel-node", "server.js" ]
-
+CMD [ "node", "node_modules/@babel/node/lib/_babel-node", "app/server.js" ]
