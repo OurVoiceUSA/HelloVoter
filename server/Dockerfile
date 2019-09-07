@@ -32,8 +32,8 @@ ENV NO_UPDATE_NOTIFIER=1
 
 HEALTHCHECK --interval=15s --timeout=5s --start-period=5s CMD node /run/app/poke.js
 
-COPY app app
 COPY scripts scripts
+COPY app app
 
 EXPOSE 8080
 EXPOSE 8443
