@@ -32,10 +32,10 @@ HEALTHCHECK --interval=15s --timeout=5s --start-period=5s CMD node /run/app/poke
 COPY app app
 COPY scripts scripts
 
-RUN CI=true npm test
-
 EXPOSE 8080
 EXPOSE 8443
 USER node
+
+RUN CI=true npm test
 
 CMD [ "node", "node_modules/@babel/node/lib/_babel-node", "app/server.js" ]
