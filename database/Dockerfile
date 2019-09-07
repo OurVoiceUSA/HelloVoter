@@ -11,5 +11,9 @@ RUN mkdir -p /jmx \
   && chmod 400 /jmx/*
 
 EXPOSE 9999
-ENV NEO4J_dbms_jvm_additional="-Dcom.sun.management.jmxremote.authenticate=true -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.password.file=/jmx/password -Dcom.sun.management.jmxremote.access.file=/jmx/access -Dcom.sun.management.jmxremote.port=9999 -Djava.rmi.server.hostname=127.0.0.1"
+
+ENV NEO4J_dbms_security_procedures_unrestricted=apoc.*
+ENV NEO4J_dbms_tx__log_rotation_retention__policy=false
+ENV NEO4J_dbms_tx__log_rotation_size=1m
+ENV NEO4J_dbms_jvm_additional="-Dcom.sun.management.jmxremote.authenticate=true -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.password.file=/jmx/password -Dcom.sun.management.jmxremote.access.file=/jmx/access -Dcom.sun.management.jmxremote.port=9999"
 

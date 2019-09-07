@@ -1,10 +1,13 @@
 FROM openjdk:alpine as jdk
 FROM node:dubnium-alpine as build
 
+ENV JAVA_HOME=/usr/lib/jvm/default-jvm
+COPY --from=jdk /usr/lib/jvm /usr/lib/jvm
+
 RUN mkdir -p /run
 
 RUN apk update && apk upgrade && \
-    apk add --no-cache git
+    apk add --no-cache git bash make python g++
 
 WORKDIR /run
 

@@ -28,7 +28,7 @@ export async function runDatabase(sandbox) {
         await docker.command("rm -f "+nc);
       } catch (e) {}
 
-      await docker.command("run -d -v "+nc+":/data -p "+(sandbox?"5":"")+"7687:7687 -p "+(sandbox?"5":"")+"7474:7474 -e NEO4J_AUTH=neo4j/"+ov_config.neo4j_pass+" -e NEO4J_dbms_security_procedures_unrestricted=apoc.\\\\\\\\\* --name "+nc+" "+ni);
+      await docker.command("run -d -v "+nc+":/data -p "+(sandbox?"5":"")+"7687:7687 -p "+(sandbox?"5":"")+"7474:7474 -e NEO4J_AUTH=neo4j/"+ov_config.neo4j_pass+" --name "+nc+" "+ni);
     } else {
       console.log("Using already running "+nc+" container.");
     }
