@@ -10,7 +10,7 @@
 	"dependencies": {
 		"@react-native-community/async-storage": "^1.6.1",
 		"@react-native-community/geolocation": "^2.0.2",
-		"@react-native-community/netinfo": "^4.2.0",
+		"@react-native-community/netinfo": "^4.2.1",
 		"base-64": "^0.1.0",
 		"dropbox": "4.0.28",
 		"encoding": "^0.1.12",
@@ -58,7 +58,7 @@
 		"@babel/cli": "^7.6.0",
 		"@babel/core": "^7.6.0",
 		"@babel/node": "^7.6.1",
-		"detox": "^14.1.0",
+		"detox": "^14.2.0",
 		"geojson-bbox": "0.0.0",
 		"jetifier": "^1.6.4",
 		"metro-react-native-babel-preset": "^0.56.0",
