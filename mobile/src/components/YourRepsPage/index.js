@@ -19,7 +19,7 @@ import RNGooglePlaces from 'react-native-google-places';
 import Modal from 'react-native-simple-modal';
 import DisplayRep from './display-rep';
 import { wsbase } from '../../config'
-import { Divider, _apiCall, _loginPing, _doGeocode, _saveUser, _specificAddress } from '../../common';
+import { Divider, translate, _apiCall, _loginPing, _doGeocode, _saveUser, _specificAddress } from '../../common';
 
 export default class App extends LocationComponent {
 
@@ -146,14 +146,14 @@ export default class App extends LocationComponent {
       if (!_specificAddress(place.address)) {
         setTimeout(() => {
           Alert.alert(
-            'Ambiguous Address',
-            'Unfortunately we can\'t guarantee accurate district results without a whole address.',
+            translate("ambiguous_address"),
+            translate("no_guarantee_district"),
             [
-              {text: 'Continue Anyway', onPress: () => {
+              {text: translate("continue_anyway"), onPress: () => {
                 place.icon = this.locationIcon;
                 this._whorepme(place);
               }},
-              {text: 'Cancel'}
+              {text: translate("cancel")}
             ], { cancelable: false }
           );
         }, 500);
@@ -182,14 +182,14 @@ export default class App extends LocationComponent {
     let access = await this.requestLocationPermission();
     if (access) return;
 
-    this.setState({loading: false, myPosition: {icon: 'map-marker', address: 'location access denied', error: true}, apiData: null});
-    Alert.alert('Current Location', 'To use your current location, go into your phone settings and enable location access for Our Voice.', [{text: 'OK'}], { cancelable: false });
+    this.setState({loading: false, myPosition: {icon: 'map-marker', address: translate("location_access_denied"), error: true}, apiData: null});
+    Alert.alert(translate("current_location"), translate("howto_use_current_location"), [{text: translate("ok")}], { cancelable: false });
   }
 
   email = async (email) => {
     const url = 'mailto:' + email;
     return Linking.openURL(url).catch(() => {
-      Alert.alert('App Error', 'Unable to launch external application.', [{text: 'OK'}], { cancelable: false })
+      Alert.alert(translate("app_error"), translate("unable_to_launch_external"), [{text: translate("ok")}], { cancelable: false })
     });
   }
 
@@ -199,36 +199,36 @@ export default class App extends LocationComponent {
     if (apiData && !apiData.msg) {
 
       if (apiData.cd.length == 0) {
-        var nodata = {key: 1, title: 'U.S. House of Representatives'};
+        var nodata = {key: 1, title: translate("us_house_of_reps")};
         apiData.cd.push(nodata);
       }
 
       if (apiData.sen.length == 0) {
-        var nodata = {key: 1, title: 'U.S. Senate'};
+        var nodata = {key: 1, title: translate("us_senate")};
         apiData.sen.push(nodata);
       }
 
       if (apiData.sldl.length == 0) {
-        var nodata = {key: 1, title: 'State Legislative Lower House'};
+        var nodata = {key: 1, title: translate("sldl")};
         apiData.sldl.push(nodata);
       }
 
       if (apiData.sldu.length == 0) {
-        var nodata = {key: 1, title: 'State Legislative Upper House'};
+        var nodata = {key: 1, title: translate("sldu")};
         apiData.sldu.push(nodata);
       }
 
       if (apiData.other.length == 0) {
-        var nodata = {key: 1, title: 'State/Local Officials'};
+        var nodata = {key: 1, title: translate("state_local_offials")};
         apiData.other.push(nodata);
       }
 
     }
 
     switch(myPosition.icon) {
-      case 'map-marker': basedOnYour = "approximate address"; break;
-      case 'home': basedOnYour = "home address"; break;
-      case 'map-signs': basedOnYour = "searched address"; break;
+      case 'map-marker': basedOnYour = translate("approximate_address"); break;
+      case 'home': basedOnYour = translate("home_address"); break;
+      case 'map-signs': basedOnYour = translate("searched_address"); break;
       default: basedOnYour = "..";
     }
 
@@ -244,7 +244,7 @@ export default class App extends LocationComponent {
             style={{margin: 0, backgroundColor: '#d7d7d7', padding: 10}}
             onPress={() => {this.setState({modalIsOpen: true})}}>
           <View style={{flexDirection: 'row', marginBottom: 5}}>
-            <Text>Based on your {basedOnYour}. Tap to change.</Text>
+            <Text>{translate("based_on_your")} {basedOnYour}. {translate("tap_to_change")}</Text>
           </View>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
             <Icon style={{marginRight: 10}} name={myPosition.icon} size={20} color="black" />
@@ -253,7 +253,7 @@ export default class App extends LocationComponent {
             ||
             <View style={{flexDirection: 'row'}}>
             <ActivityIndicator />
-            <Text style={{fontStyle: 'italic'}}> loading address</Text>
+            <Text style={{fontStyle: 'italic'}}> {translate("loading_address")}</Text>
             </View>
             }
           </View>
@@ -264,7 +264,7 @@ export default class App extends LocationComponent {
         {loading &&
         <View style={{flex: 1}}>
           <View style={{flex: 1, margin: 10, justifyContent: 'center', alignItems: 'center'}}>
-            <Text style={{fontSize: 18, textAlign: 'center', marginBottom: 10}}>Loading district information.</Text>
+            <Text style={{fontSize: 18, textAlign: 'center', marginBottom: 10}}>{translate("loading_district_information")}</Text>
             <ActivityIndicator />
           </View>
         </View>
@@ -359,24 +359,24 @@ export default class App extends LocationComponent {
           disableOnBackPress={(apiData ? false : true)}>
           <View style={{backgroundColor: 'white', alignItems: 'center', padding: 40, borderRadius: 40, borderWidth: 10,
 borderColor: '#d7d7d7'}}>
-            <Text style={{fontSize: 18, textAlign: 'center', marginBottom: 10}}>Show Representatives by:</Text>
+            <Text style={{fontSize: 18, textAlign: 'center', marginBottom: 10}}>{translate("show_representatives_by")}:</Text>
             <TouchableOpacity
               style={{margin: 10, flexDirection: 'row', backgroundColor: '#d7d7d7', alignItems: 'center', padding: 10}}
               onPress={this.doCurrentLocation}>
               <Icon style={{marginRight: 15}} name="map-marker" size={20} color="black" />
-              <Text style={{textAlign: 'center'}}>Current Location</Text>
+              <Text style={{textAlign: 'center'}}>{translate("current_location")}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={{margin: 10, flexDirection: 'row', backgroundColor: '#d7d7d7', alignItems: 'center', padding: 10}}
               onPress={this._useHomeAddress}>
               <Icon style={{marginRight: 15}} name="home" size={20} color="black" />
-              <Text style={{textAlign: 'center'}}>Home Address</Text>
+              <Text style={{textAlign: 'center'}}>{translate("home_address_cap")}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={{margin: 10, flexDirection: 'row', backgroundColor: '#d7d7d7', alignItems: 'center', padding: 10}}
               onPress={this._useCustomAddress}>
               <Icon style={{marginRight: 15}} name="map-signs" size={20} color="black" />
-              <Text style={{textAlign: 'center'}}>Search Address</Text>
+              <Text style={{textAlign: 'center'}}>{translate("search_address_cap")}</Text>
             </TouchableOpacity>
           </View>
         </Modal>

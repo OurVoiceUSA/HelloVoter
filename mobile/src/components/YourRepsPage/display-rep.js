@@ -17,12 +17,7 @@ export default DisplayRep = (props) => {
 
   const call = async (profile) => {
     const url = 'tel:+1' + profile.phone;
-
-    if (profile.donotcall) {
-      Alert.alert('Phone was de-listed', 'This official has requested we de-list their phone number, and did not provide an alternate one.', [{text: 'That\'s Lame'}], { cancelable: false });
-    } else {
-      initiateLink(url);
-    }
+    initiateLink(url);
   }
 
   const email = async (email) => {
@@ -32,7 +27,7 @@ export default DisplayRep = (props) => {
 
   const initiateLink = async (url) => {
     return Linking.openURL(url).catch(() => {
-      Alert.alert('App Error', 'Unable to launch external application.', [{text: 'OK'}], { cancelable: false })
+      Alert.alert(translate("app_error"), translate("unable_to_launch_external"), [{text: translate("ok")}], { cancelable: false })
     });
   }
 
@@ -53,9 +48,7 @@ export default DisplayRep = (props) => {
     <View style={{margin: 5, flex: 1, flexDirection: 'row'}} key='nodata'>
       <Icon name="question-circle" size={55} color='#e3e3e3' />
       <View style={{flex: 1, flexDirection: 'row', alignItems: 'center'}}>
-        <Text style={{marginLeft: 10, fontSize: 16}}>
-          Unable to determine your district
-        </Text>
+        <Text style={{marginLeft: 10, fontSize: 16}}>{translate("unable_determine_district")}</Text>
       </View>
     </View>
     )

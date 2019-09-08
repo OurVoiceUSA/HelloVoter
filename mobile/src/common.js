@@ -70,11 +70,11 @@ export function _specificAddress(address) {
 
 export function _partyNameFromKey(party) {
   switch (party) {
-    case 'D': return 'Democrat';
-    case 'R': return 'Republican';
-    case 'I': return 'Independent';
-    case 'G': return 'Green';
-    case 'L': return 'Libertarian';
+    case 'D': return translate("democrat");
+    case 'R': return translate("republican");
+    case 'I': return translate("independent");
+    case 'G': return translate("green");
+    case 'L': return translate("libertarian");
     default: return '';
   }
 }
