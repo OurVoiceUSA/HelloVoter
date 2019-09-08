@@ -7,6 +7,7 @@ import YourReps from './YourRepsPage';
 import CanvassingSetup from './CanvassingSetupPage';
 
 import {
+  I18nManager,
   View,
   Text,
   Linking,
@@ -16,6 +17,9 @@ import {
   StatusBar,
 } from 'react-native';
 
+import * as RNLocalize from "react-native-localize";
+import i18n from "i18n-js";
+import memoize from "lodash.memoize";
 import Permissions from 'react-native-permissions';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Rate, { AndroidMarket } from 'react-native-rate'
@@ -28,40 +32,69 @@ import styles, { colors } from '../styles/index.style';
 import SliderEntry from './SliderEntry';
 import { _loginPing } from '../common';
 
+const translationGetters = {
+  // lazy requires (metro bundler does not support symlinks)
+  en: () => require("../translations/en.json"),
+  es: () => require("../translations/es.json")
+};
+
+const translate = memoize(
+  (key, config) => i18n.t(key, config),
+  (key, config) => (config ? key + JSON.stringify(config) : key)
+);
+
+const setI18nConfig = () => {
+  // fallback if no available language fits
+  const fallback = { languageTag: "en", isRTL: false };
+
+  const { languageTag, isRTL } =
+    RNLocalize.findBestAvailableLanguage(Object.keys(translationGetters)) ||
+    fallback;
+
+  // clear translation cache
+  translate.cache.clear();
+  // update layout direction
+  I18nManager.forceRTL(isRTL);
+  // set i18n-js config
+  i18n.translations = { [languageTag]: translationGetters[languageTag]() };
+  i18n.locale = languageTag;
+};
+
 export default class App extends PureComponent {
 
   constructor(props) {
     super(props);
+    setI18nConfig();
     this.state = {
       active: 'home',
       mainMenu: [
       {
-        title: 'Contact Your Reps',
-        subtitle: 'Know who represents you! (or doesn\'t) Give \'em a piece of your mind.',
+        title: translate("contact_your_reps"),
+        subtitle: translate("know_who_represents_you"),
         illustration: require('../../img/phone-your-rep.png'),
         onPress: () => this.setState({active: 'reps'}),
       },
       {
-        title: 'Canvass for any cause',
-        subtitle: 'Our zero cost tool enables you to hit the pavement with the latest tech.',
+        title: translate("canvas_for_any_cause"),
+        subtitle: translate("our_zero_cost_tool"),
         illustration: require('../../img/canvassing.png'),
         onPress: () => this.setState({active: 'canvassing'}),
       },
       {
-        title: 'Coming soon; Desktop Tools',
-        subtitle: 'Canvassing at scale; import data, create turf, better volunteer management.',
+        title: translate("coming_zoon_desktop_tools"),
+        subtitle: translate("canvassing_at_scale"),
         illustration: require('../../img/phone-banking.png'),
         onPress: () => this.openDonate(),
       },
       {
-        title: 'Donate',
-        subtitle: 'We operate on donations. Keep this app free by making a contribution today.',
+        title: translate("donate"),
+        subtitle: translate("we_operate_on_donations"),
         illustration: require('../../img/donate.png'),
         onPress: () => this.openDonate(),
       },
       {
-        title: 'Rate this App!',
-        subtitle: 'Feedback helps us make this app better. Share your experience with the world.',
+        title: translate("rate_this_app"),
+        subtitle: translate("feedback_helps_us"),
         illustration: require('../../img/rate.png'),
         onPress: () => {
           let options = {
@@ -75,8 +108,8 @@ export default class App extends PureComponent {
         },
       },
       {
-        title: 'Open Source Software',
-        subtitle: 'You can help us out directly! Contribute art, how-to\'s, or write code. The power is yours.',
+        title: translate("open_source_software"),
+        subtitle: translate("help_us_out_directly"),
         illustration: require('../../img/open-source.png'),
         onPress: () => this.openGitHub(),
       },
@@ -186,11 +219,7 @@ export default class App extends PureComponent {
                 tappableDots={!!this._sliderRef}
               />
             </View>
-            <Text style={styles.homeScreenText}>
-              Our Voice USA is a 501(c)(3) non-profit charity. Not for any candidate or political party.
-              We provide access to tools that enables every day people to be politically engaged. Check
-              us out on social media!
-            </Text>
+            <Text style={styles.homeScreenText}>{translate("homescreen_summary")}</Text>
             <View style={{flexDirection: 'row', justifyContent: 'center', marginBottom: 15}}>
               <Icon name="facebook-official" size={40} color="#3b5998" style={{marginRight: 25}} onPress={this.openFacebook} />
               <Icon name="twitter" size={40} color="#0084b4" style={{marginRight: 25}} onPress={this.openTwitter} />
@@ -200,7 +229,7 @@ export default class App extends PureComponent {
             </View>
 
             <View style={{flexDirection: 'row', justifyContent: 'center'}}>
-              <Button raised primary text="Legal Notice" onPress={() => this.setState({active: 'legal'})} />
+              <Button raised primary text={translate("legal_notice")} onPress={() => this.setState({active: 'legal'})} />
             </View>
 
           </ScrollView>
@@ -219,17 +248,12 @@ export default class App extends PureComponent {
               HelloVoter Version {DeviceInfo.getVersion()}
             </Text>
             <Text style={styles.homeScreenText}>
-              Copyright (c) 2018, Our Voice USA. All rights reserved.
+              Copyright (c) 2018, Our Voice USA. {translate("all_rights_reserved")}
             </Text>
-            <Text style={styles.homeScreenText}>
-              This program is free software; you can redistribute it and/or
-              modify it under the terms of the GNU Affero General Public License
-              as published by the Free Software Foundation; either version 3
-              of the License, or (at your option) any later version.
-            </Text>
+            <Text style={styles.homeScreenText}>{translate("this_program_is_free_software")}</Text>
             <AppleEULA />
             <View style={{flexDirection: 'row', justifyContent: 'center'}}>
-              <Button raised primary text="Tap here for the source code" onPress={() => this.openGitHub('HelloVoter')} />
+              <Button raised primary text={translate("tap_here_for_source_code")} onPress={() => this.openGitHub('HelloVoter')} />
             </View>
           </ScrollView>
         </View>
@@ -239,19 +263,19 @@ export default class App extends PureComponent {
           <BottomNavigation.Action
             key="home"
             icon="home"
-            label="Home"
+            label={translate("home")}
             onPress={() => this.setState({ active: 'home' })}
           />
           <BottomNavigation.Action
             key="reps"
             icon="people"
-            label="Your Reps"
+            label={translate("your_reps")}
             onPress={() => this.setState({ active: 'reps' })}
           />
           <BottomNavigation.Action
             key="canvassing"
             icon="map"
-            label="Canvassing"
+            label={translate("canvassing")}
             onPress={() => this.setState({ active: 'canvassing' })}
           />
         </BottomNavigation>
@@ -263,10 +287,7 @@ export default class App extends PureComponent {
 
 const AppleEULA = props => {
   if (Platform.OS === 'ios') return (
-    <Text style={styles.homeScreenText}>
-      NOTE: Distribution on the iOS App Store means this specific copy
-      of the app falls under the Apple Inc. Standard EULA.
-    </Text>
+    <Text style={styles.homeScreenText}>{translate("note_about_apple_eula")}</Text>
   );
   return null;
 };

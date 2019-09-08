@@ -1,0 +1,27 @@
+{
+  // Navigation Buttons
+  "home": "Casa",
+  "your_reps": "Sus Rep",
+  "canvassing": "Pedir votos",
+  // HomeScreenPage
+  "we_translated_this": "¡Tradujimos esto a tu idioma!",
+  "we_used_google_translate": "Si ve alguna redacción extraña, infórmenos para que podamos solucionarlo.",
+  "contact_your_reps": "Póngase en contacto con sus representantes",
+  "know_who_represents_you": "¡Sepa quién lo representa! (o no) Déles una parte de su mente.",
+  "canvas_for_any_cause": "Lienzo por cualquier causa",
+  "our_zero_cost_tool": "Nuestra herramienta de costo cero le permite realizar un pedir votos con la última tecnología.",
+  "coming_zoon_desktop_tools": "Próximamente; Herramientas Informáticas",
+  "canvassing_at_scale": "Toca muchas puertas. Administra muchos voluntarios.",
+  "donate": "Donar",
+  "we_operate_on_donations": "Operamos con donaciones. Mantenga esta aplicación gratis haciendo una contribución hoy.",
+  "rate_this_app": "¡Califica esta App!",
+  "feedback_helps_us": "Los comentarios nos ayudan a mejorar esta aplicación. Comparte tu experiencia con el mundo.",
+  "open_source_software": "Software de código abierto",
+  "help_us_out_directly": "¡Puedes ayudarnos directamente! Contribuya con arte, instrucciones o escriba código. El poder es tuyo.",
+  "all_rights_reserved": "Todos los derechos reservados.",
+  "this_program_is_free_software": "Este programa es software libre; puedes redistribuirlo y / o modificarlo bajo los términos de la Licencia Pública General Affero de GNU según lo publicado por la Free Software Foundation; ya sea la versión 3 de la Licencia, o (a su elección) cualquier versión posterior.",
+  "note_about_apple_eula": "NOTA: La distribución en la App Store de iOS significa esta copia específica de la aplicación cae bajo el EULA estándar de Apple Inc.",
+  "tap_here_for_source_code": "toca aquí para ver el código fuente",
+  "homescreen_summary": "Our Voice USA es una organización benéfica sin fines de lucro 501(c)(3). No para ningún candidato o partido político. Brindamos acceso a herramientas que permiten que la gente común participe políticamente. ¡Descúbrenos en las redes sociales!",
+  "legal_notice": "AVISO LEGAL",
+}

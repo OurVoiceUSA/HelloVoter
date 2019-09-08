@@ -49,6 +49,8 @@ target 'OurVoice' do
 
   pod 'react-native-camera', :path => '../node_modules/react-native-camera'
 
+  pod 'RNLocalize', :path => '../node_modules/react-native-localize'
+
   post_install do |installer|
     installer.pods_project.targets.each do |target|
       if target.name == 'react-native-google-maps'

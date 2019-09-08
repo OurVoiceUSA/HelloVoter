@@ -1,0 +1,27 @@
+{
+  // Navigation Buttons
+  "home": "Home",
+  "your_reps": "Your Reps",
+  "canvassing": "Canvassing",
+  // HomeScreenPage
+  "we_translated_this": "We translated this to your language!",
+  "we_used_google_translate": "If you see any wording that is odd, please let us know so we can fix it.",
+  "contact_your_reps": "Contact Your Reps",
+  "know_who_represents_you": "Know who represents you! (or doesn't) Give 'em a piece of your mind.",
+  "canvas_for_any_cause": "Canvas for any cause",
+  "our_zero_cost_tool": "Our zero cost tool enables you to hit the pavement with the latest tech.",
+  "coming_zoon_desktop_tools": "Coming Soon; Desktop Tools",
+  "canvassing_at_scale": "Canvassing at scale; import data, create turf, better volunteer management.",
+  "donate": "Donate",
+  "we_operate_on_donations": "We operate on donations. Keep this app free by making a contribution today.",
+  "rate_this_app": "Rate this App!",
+  "feedback_helps_us": "Feedback helps us make this app better. Share your experience with the world.",
+  "open_source_software": "Open Source Software",
+  "help_us_out_directly": "You can help us out directly! Contribute art, how-to's, or write code. The power is yours.",
+  "all_rights_reserved": "All rights reserved.",
+  "this_program_is_free_software": "This program is free software; you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.",
+  "note_about_apple_eula": "NOTE: Distribution on the iOS App Store means this specific copy of the app falls under the Apple Inc. Standard EULA.",
+  "tap_here_for_source_code": "Tap here for the source code",
+  "homescreen_summary": "Our Voice USA is a 501(c)(3) non-profit charity. Not for any candidate or political party. We provide access to tools that enables every day people to be politically engaged. Check us out on social media!",
+  "legal_notice": "LEGAL NOTICE",
+}
