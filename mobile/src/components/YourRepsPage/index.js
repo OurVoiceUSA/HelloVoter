@@ -12,7 +12,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
-import OVComponent from '../OVComponent';
+import LocationComponent from '../LocationComponent';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 import RNGooglePlaces from 'react-native-google-places';
@@ -21,7 +21,7 @@ import DisplayRep from './display-rep';
 import { wsbase } from '../../config'
 import { Divider, _apiCall, _loginPing, _doGeocode, _saveUser, _specificAddress } from '../../common';
 
-export default class App extends OVComponent {
+export default class App extends LocationComponent {
 
   locationIcon = null;
 

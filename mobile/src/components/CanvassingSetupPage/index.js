@@ -34,11 +34,11 @@ import RBush from 'rbush';
 import rtree from '../../../rtree.json';
 import { geographies } from '../../geographies';
 
-import OVComponent from '../OVComponent';
+import LocationComponent from '../LocationComponent';
 
 var Form = t.form.Form;
 
-export default class App extends OVComponent {
+export default class App extends LocationComponent {
 
   constructor(props) {
     super(props);

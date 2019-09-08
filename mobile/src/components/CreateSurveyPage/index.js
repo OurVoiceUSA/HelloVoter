@@ -17,7 +17,7 @@ import {
   ScrollView,
 } from 'react-native';
 
-import OVComponent from '../OVComponent';
+import LocationComponent from '../LocationComponent';
 
 import { BottomNavigation } from 'react-native-material-ui';
 import t from 'tcomb-form-native';
@@ -82,7 +82,7 @@ var premade = {
     ]},
 };
 
-export default class App extends OVComponent {
+export default class App extends LocationComponent {
 
   constructor(props) {
     super(props);

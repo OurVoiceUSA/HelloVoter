@@ -1,5 +1,6 @@
 
-import React, { PureComponent } from 'react';
+import React from 'react';
+import HVComponent from './HVComponent';
 
 import { BottomNavigation, Button } from 'react-native-material-ui';
 
@@ -7,7 +8,6 @@ import YourReps from './YourRepsPage';
 import CanvassingSetup from './CanvassingSetupPage';
 
 import {
-  I18nManager,
   View,
   Text,
   Linking,
@@ -17,9 +17,6 @@ import {
   StatusBar,
 } from 'react-native';
 
-import * as RNLocalize from "react-native-localize";
-import i18n from "i18n-js";
-import memoize from "lodash.memoize";
 import Permissions from 'react-native-permissions';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Rate, { AndroidMarket } from 'react-native-rate'
@@ -30,41 +27,13 @@ import DeviceInfo from 'react-native-device-info';
 import { sliderWidth, itemWidth } from '../styles/SliderEntry.style';
 import styles, { colors } from '../styles/index.style';
 import SliderEntry from './SliderEntry';
-import { _loginPing } from '../common';
+import { _loginPing, translate } from '../common';
 
-const translationGetters = {
-  // lazy requires (metro bundler does not support symlinks)
-  en: () => require("../translations/en.json"),
-  es: () => require("../translations/es.json")
-};
-
-const translate = memoize(
-  (key, config) => i18n.t(key, config),
-  (key, config) => (config ? key + JSON.stringify(config) : key)
-);
-
-const setI18nConfig = () => {
-  // fallback if no available language fits
-  const fallback = { languageTag: "en", isRTL: false };
-
-  const { languageTag, isRTL } =
-    RNLocalize.findBestAvailableLanguage(Object.keys(translationGetters)) ||
-    fallback;
-
-  // clear translation cache
-  translate.cache.clear();
-  // update layout direction
-  I18nManager.forceRTL(isRTL);
-  // set i18n-js config
-  i18n.translations = { [languageTag]: translationGetters[languageTag]() };
-  i18n.locale = languageTag;
-};
-
-export default class App extends PureComponent {
+export default class App extends HVComponent {
 
   constructor(props) {
     super(props);
-    setI18nConfig();
+
     this.state = {
       active: 'home',
       mainMenu: [

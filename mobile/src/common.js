@@ -11,10 +11,17 @@ import jwt_decode from 'jwt-decode';
 import DeviceInfo from 'react-native-device-info';
 import RNGooglePlaces from 'react-native-google-places';
 import Geocoder from 'react-native-geocoder';
+import memoize from 'lodash.memoize';
+import i18n from 'i18n-js';
 import { wsbase } from './config';
 
 const JWT = 'OV_JWT';
 const USERLOCAL = 'OV_USER';
+
+export const translate = memoize(
+  (key, config) => i18n.t(key, config),
+  (key, config) => (config ? key + JSON.stringify(config) : key)
+);
 
 export function getEpoch() {
   return Math.floor(new Date().getTime())

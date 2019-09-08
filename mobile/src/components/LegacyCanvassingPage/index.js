@@ -16,7 +16,7 @@ import {
   Keyboard,
 } from 'react-native';
 
-import OVComponent from '../OVComponent';
+import LocationComponent from '../LocationComponent';
 
 import { NavigationActions } from 'react-navigation';
 import { BottomNavigation } from 'react-native-material-ui';
@@ -69,7 +69,7 @@ const formOptRow = {
   stylesheet: formStyleRow,
 };
 
-export default class App extends OVComponent {
+export default class App extends LocationComponent {
 
   constructor(props) {
     super(props);

@@ -17,7 +17,7 @@ import {
   Keyboard,
 } from 'react-native';
 
-import OVComponent from '../OVComponent';
+import LocationComponent from '../LocationComponent';
 
 import Accordion from 'react-native-collapsible/Accordion';
 import { BottomNavigation } from 'react-native-material-ui';
@@ -82,7 +82,7 @@ function bystreet(a,b) {
   return 0;
 }
 
-export default class App extends OVComponent {
+export default class App extends LocationComponent {
 
   constructor(props) {
     super(props);

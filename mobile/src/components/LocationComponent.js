@@ -1,4 +1,5 @@
-import React, { PureComponent } from 'react';
+import React from 'react';
+import HVComponent from './HVComponent';
 
 import {
   Alert,
@@ -14,7 +15,7 @@ if (Platform.OS === 'ios') {
   navigator.geolocation = require('@react-native-community/geolocation');
 }
 
-export default class OVComponent extends PureComponent {
+export default class LocationComponent extends HVComponent {
 
   constructor(props) {
     super(props);
