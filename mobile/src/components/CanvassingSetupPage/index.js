@@ -25,7 +25,7 @@ import jwt_decode from 'jwt-decode';
 import SmLoginPage from '../SmLoginPage';
 import { Dropbox } from 'dropbox';
 import { deepCopy, ingeojson } from 'ourvoiceusa-sdk-js';
-import { Divider, api_base_uri, DINFO, _loginPing, _saveUser, _fileReaderAsync } from '../../common';
+import { Divider, translate, api_base_uri, DINFO, _loginPing, _saveUser, _fileReaderAsync } from '../../common';
 import DeviceInfo from 'react-native-device-info';
 import { RNCamera } from 'react-native-camera';
 import { wsbase } from '../../config';
@@ -64,25 +64,6 @@ export default class App extends LocationComponent {
       server: t.String,
       ack: t.subtype(t.Boolean, function (s) { return s }), // boolean that fails validation if not selected
     });
-
-    this.formServerOptions = {
-      fields: {
-        server: {
-          label: 'Server Domain Name',
-          help: 'Enter the domain name of the server you wish to connect to.',
-          error: 'You must enter a domain name.',
-          autoCapitalize: 'none',
-          autoCorrect: false,
-          autoFocus: true,
-          keyboardType: 'email-address',
-        },
-        ack: {
-          label: 'Terms of Use',
-          help: 'By checking this you acknowledge that the server to which you are connecting is not affiliated with Our Voice USA and the data you send and receive is governed by that server\'s terms of use.',
-          error: 'You must acknowledge the terms of use.',
-        },
-      },
-    };
   }
 
   onChange(server) {
@@ -92,11 +73,11 @@ export default class App extends LocationComponent {
   checkLocationAccess() {
     const { myPosition } = this.state;
     if (!this.state.locationAccess) {
-      Alert.alert('Location Access', 'Your device settings deny this app access to your location, please enable location access for this app in your device settings to continue.', [{text: 'OK'}], { cancelable: false });
+      Alert.alert(translate("location_access"), translate("device_settings_deny_location"), [{text: translate("ok")}], { cancelable: false });
       return false;
     }
     if (!myPosition.longitude || !myPosition.latitude) {
-      Alert.alert('Location Services', 'Location Services is unavailable, please turn on Location Seervices in your device settings and restart this app to continue.');
+      Alert.alert(translate("location_service"), translate("location_services_unavailable"));
       return false;
     }
     return true;
@@ -129,7 +110,7 @@ export default class App extends LocationComponent {
         state = bb.state;
     });
 
-    if (!state) return setTimeout(() => Alert.alert('Out of bounds', 'You are not located within the United States of America. Unable to continue.', [{text: 'OK'}], { cancelable: false }), 500);
+    if (!state) return setTimeout(() => Alert.alert(translate("out of bounds"), translate("not_located_within_us_bounds"), [{text: translate("ok")}], { cancelable: false }), 500);
 
     if (orgId && orgId.match(/^[0-9A-Z]*$/)) {
       // first two characters are the state code
@@ -137,7 +118,7 @@ export default class App extends LocationComponent {
 
       this.connectToServer('gotv-'+place+'.ourvoiceusa.org', orgId, inviteCode);
     } else {
-      setTimeout(() => Alert.alert('Error', 'You must enter a valid QR Code or Organization ID to continue.', [{text: 'OK'}], { cancelable: false }), 500);
+      setTimeout(() => Alert.alert('Error', translate("must_enter_valid_qr_code"), [{text: translate("ok")}], { cancelable: false }), 500);
     }
   }
 
@@ -148,7 +129,7 @@ export default class App extends LocationComponent {
 
     let ret = await this.singHello(server, orgId, inviteCode);
 
-    if (ret.flag !== true) Alert.alert((ret.error?'Error':'Connection Successful'), ret.msg, [{text: 'OK'}], { cancelable: false });
+    if (ret.flag !== true) Alert.alert((ret.error?translate("error"):translate("connection_successful")), ret.msg, [{text: translate("ok")}], { cancelable: false });
     if (ret.error !== true) server = null;
 
     this.setState({serverLoading: false});
@@ -207,12 +188,12 @@ export default class App extends LocationComponent {
 
       if (!auth_location || !auth_location.match(/^https:.*auth$/)) {
         // Invalid x-sm-oauth-url header means it's not a validy configured canvass-broker
-        if (orgId) return {error: true, msg: "Sorry, that is not a valid QR Code or Organization ID."}
-        return {error: true, msg: "That server is not running software compatible with this mobile app."};
+        if (orgId) return {error: true, msg: translate("not_a_vlid_qr_code")}
+        return {error: true, msg: translate("not_running_compatible_software")};
       }
 
       if (auth_location !== wsbase+'/auth') {
-        return {error: true, msg: "Custom authentication not yet supported."};
+        return {error: true, msg: translate("custom_auth_not_supported")};
       }
 
       switch (res.status) {
@@ -220,19 +201,19 @@ export default class App extends LocationComponent {
           // valid - break to proceed
           break;
         case 400:
-          return {error: true, msg: "The server didn't understand the request sent from this device."};
+          return {error: true, msg: translate("server_didnt_understand_request")};
         case 401:
           setTimeout(() => this.setState({SmLoginScreen: true}), 500);
           return {error: false, flag: true};
         case 403:
-          return {error: true, msg: "We're sorry, but your request to canvass with this server has been rejected."};
+          return {error: true, msg: translate("request_to_canvas_rejected")};
         default:
-          return {error: true, msg: "There was a problem connecting, please try again later."};
+          return {error: true, msg: translate("problem_connecting_try_again")};
       }
 
       let body = await res.json();
 
-      if (body.data.ready !== true) return {error: false, msg: (body.msg?body.msg:"Awaiting assignment.")};
+      if (body.data.ready !== true) return {error: false, msg: (body.msg?body.msg:translate("awaiting_assignment"))};
       else {
         let forms = this.state.forms;
         let forms_server = [];
@@ -290,7 +271,7 @@ export default class App extends LocationComponent {
       }
     } catch (e) {
       console.warn("singHello: "+e);
-      return {error: true, msg: "There was an unexpected error, please try again later."};
+      return {error: true, msg: translate("unexpected_error_try_again")};
     }
 
   }
@@ -466,7 +447,7 @@ export default class App extends LocationComponent {
             json.server = server;
             json.backend = 'server';
             json.orgId = orgId;
-            
+
             forms_local[i] = json;
           }
 
@@ -482,25 +463,25 @@ export default class App extends LocationComponent {
 
       let swipeoutBtns = [
         {
-          text: 'Edit',
+          text: translate("Edit"),
           type: 'primary',
           onPress: () => {
             if (json.backend === "dropbox" && !user.dropbox) {
               this.openURL(wsbase+'/auth/dm');
               return;
             }
-            navigate('CreateSurvey', {title: 'Edit Form', dbx: dbx, form: json, refer: this});
+            navigate('CreateSurvey', {title: translate("edit_form"), dbx: dbx, form: json, refer: this});
           },
         },
         {
-          text: 'Delete',
+          text: translate("delete"),
           type: 'delete',
           onPress: () => {
             Alert.alert(
-              'Delete Form',
-              'Are you sure you wish to delete this form? All related canvassing data will be lost.',
+              translate("delete_form"),
+              translate("confirm_delete_form"),
               [
-                {text: 'Yes', onPress: async () => {
+                {text: translate("yes"), onPress: async () => {
                   try {
                     if (json.backend === "dropbox") {
                       await dbx.filesDeleteV2({path: json.folder_path});
@@ -509,23 +490,23 @@ export default class App extends LocationComponent {
                     await storage.del('OV_CANVASS_PINS@'+json.id);
                     await storage.set('OV_CANVASS_FORMS', JSON.stringify(forms_local));
                     Alert.alert(
-                      'Delete Success',
-                      'You have deleted the form: '+json.name,
-                      [{text: 'OK'}],
+                      translate("delete_success"),
+                      translate("have_deleted_form")+': '+json.name,
+                      [{text: translate("ok")}],
                       { cancelable: false }
                     );
                     this._loadForms();
                   } catch (e) {
                     Alert.alert(
-                      'Delete Failed',
-                      'There was an error deleting the form: '+json.name,
-                      [{text: 'OK'}],
+                      translate("delete_failed"),
+                      translage("error_delete_form")+': '+json.name,
+                      [{text: translate("ok")}],
                       { cancelable: false }
                     );
                     console.warn("_loadForms 3: "+e);
                   }
                 }},
-                {text: 'No'},
+                {text: translate("no")},
               ], { cancelable: false }
             );
           },
@@ -536,11 +517,11 @@ export default class App extends LocationComponent {
         if (this.state.connected !== true || user.dropbox.account_id !== json.author_id)
           swipeoutBtns.shift();
 
-      let createdby = 'Created by '+json.author;
+      let createdby = translate("created_by")+' '+json.author;
 
       if (json.backend === 'server') {
-        if (json.orgId) createdby = 'Organization ID '+json.orgId;
-        else createdby = 'Hosted by '+json.server;
+        if (json.orgId) createdby = translate("org_id")+' '+json.orgId;
+        else createdby = translate("hosted_by")+' '+json.server;
         swipeoutBtns.shift();
       }
 
@@ -653,7 +634,7 @@ export default class App extends LocationComponent {
     // wait for user object to become available
     if (!user) return (
         <View style={{flex: 1, backgroundColor: 'white', alignItems: 'center', justifyContent: 'center'}}>
-          <Text style={{fontSize: 20}}>Loading user data...</Text>
+          <Text style={{fontSize: 20}}>{translate("loading_user_data")}...</Text>
           <ActivityIndicator />
         </View>
       );
@@ -661,7 +642,7 @@ export default class App extends LocationComponent {
     if (!loading && !forms.length) {
       forms.push(
         <View key={1}>
-          <Text>No Canvassing forms. Ask someone who created one to share their form with you, or create a new one.</Text>
+          <Text>{translate("no_canvas_forms_ask_someone")}</Text>
         </View>
       );
     }
@@ -675,10 +656,10 @@ export default class App extends LocationComponent {
           justifyContent: 'space-between',
         }}
         androidCameraPermissionOptions={{
-         title: 'Permission to use camera',
-          message: 'We need your permission to use your camera',
-          buttonPositive: 'Ok',
-          buttonNegative: 'Cancel',
+         title: translate("permission_use_camera"),
+          message: translate("we_need_permission_use_camera"),
+          buttonPositive: translate("ok"),
+          buttonNegative: translate("cancel"),
         }}
         onBarCodeRead={(b) => this.parseInvite(b.data)}
         barCodeTypes={[RNCamera.Constants.BarCodeType.qr]}
@@ -693,12 +674,12 @@ export default class App extends LocationComponent {
         <View style={{flexDirection: 'row', margin: 20, marginTop: 0}}>
             {loading &&
             <View style={{flex: 1, margin: 20, alignItems: 'center'}}>
-              <Text>Loading data...</Text>
+              <Text>{translate("loading_data")}...</Text>
               <ActivityIndicator size="large" />
             </View>
             ||
             <View style={{flex: 1, alignItems: 'center'}}>
-              <Text style={{margin: 10}}>Select a canvassing campaign:</Text>
+              <Text style={{margin: 10}}>{translate("select_canvassing_campaign")}:</Text>
               { forms }
             </View>
             }
@@ -713,7 +694,7 @@ export default class App extends LocationComponent {
               backgroundColor="#d7d7d7"
               color="black"
               onPress={() => this.setState({SelectModeScreen: true})}>
-              Start a new Canvassing Activity
+              {translate("start_new_canvas_activity")}
             </Icon.Button>
           </View>
 
@@ -723,7 +704,7 @@ export default class App extends LocationComponent {
             <Divider />
 
             <View style={{margin: 20, alignItems: 'center'}}>
-              <Text>You are logged into Dropbox as:</Text>
+              <Text>{translate("dropbox_logged_in_as")}:</Text>
               <Text>{user.dropbox.name.display_name}</Text>
             </View>
 
@@ -733,15 +714,15 @@ export default class App extends LocationComponent {
               color="#ffffff"
               onPress={() => {
                 Alert.alert(
-                  'Dropbox Logout',
-                  'Are you sure you wish to logout of Dropbox?',
+                  'Dropbox '+translate("logout"),
+                  translate("sure_you_wish_logout"),
                   [
-                    {text: 'Yes', onPress: () => this.dropboxLogout()},
-                    {text: 'No'},
+                    {text: translate("yes"), onPress: () => this.dropboxLogout()},
+                    {text: translate("no")},
                   ], { cancelable: false }
                 );
               }}>
-              Dropbox Logout
+              Dropbox {translate("logout")}
             </Icon.Button>
           </View>
           }
@@ -753,7 +734,7 @@ export default class App extends LocationComponent {
               backgroundColor="#3d9ae8"
               color="#ffffff"
               onPress={() => this.setState({SelectModeScreen: true})}>
-              Login with Dropbox
+              Dropbox {translate("login")}
             </Icon.Button>
           </View>
           }
@@ -764,8 +745,8 @@ export default class App extends LocationComponent {
 
         <View style={{margin: 12}}>
           <Text>
-            Need help using this tool? Check out our <Text style={{fontWeight: 'bold', color: 'blue'}} onPress={() => {this._canvassUrlHandler()}}>
-            canvassing documentation</Text> with useful articles and video demos.
+            {translate("need_help_using_tool")} <Text style={{fontWeight: 'bold', color: 'blue'}} onPress={() => {this._canvassUrlHandler()}}>
+            {translate("canvassing_documentation")}</Text> {translate("with_useful_articles")}
           </Text>
         </View>
 
@@ -773,9 +754,8 @@ export default class App extends LocationComponent {
 
         <View style={{margin: 12}}>
           <Text>
-            By using this tool you acknowledge that you are acting on your own behalf, do not represent Our Voice USA
-            or its affiliates, and have read our <Text style={{fontWeight: 'bold', color: 'blue'}} onPress={() => {this._canvassGuidelinesUrlHandler()}}>
-            canvassing guidelines</Text>. Please be courteous to those you meet.
+            {translate("using_tool_you_acknowledge")} <Text style={{fontWeight: 'bold', color: 'blue'}} onPress={() => {this._canvassGuidelinesUrlHandler()}}>
+            {translate("canvassing_guidelines")}</Text>. {translate("be_courteous_to_those")}
           </Text>
         </View>
 
@@ -792,9 +772,7 @@ export default class App extends LocationComponent {
           <View style={{flex: 1, alignItems: 'center'}} ref="backgroundWrapper">
             <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
               <View style={{backgroundColor: 'white', padding: 20, borderRadius: 40, borderWidth: 10, borderColor: '#d7d7d7'}}>
-                <Text style={styles.header}>
-                  Select Canvassing Mode
-                </Text>
+                <Text style={styles.header}>{translate("select_canvassing_mode")}</Text>
 
                 <View style={{margin: 5}}>
                   <Icon.Button
@@ -803,13 +781,13 @@ export default class App extends LocationComponent {
                     color="#000000"
                     onPress={() => this.setState({showCamera: true})}
                     {...iconStyles}>
-                    Scan QR Code
+                    {translate("scan_qr_code")}
                   </Icon.Button>
                 </View>
 
                 <View style={{margin: 5, marginTop: 0}}>
                   <Text style={{fontSize: 10, textAlign: 'justify'}}>
-                    Join an existing effort to knock doors and encourge our neighbors to get out and vote.
+                    {translate("join_existing_effort")}
                   </Text>
                 </View>
 
@@ -820,14 +798,12 @@ export default class App extends LocationComponent {
                     color="#000000"
                     onPress={() => this.setState({askOrgId: true})}
                     {...iconStyles}>
-                    Organization ID
+                    {translate("org_id")}
                   </Icon.Button>
                 </View>
 
                 <View style={{margin: 5, marginTop: 0}}>
-                  <Text style={{fontSize: 10, textAlign: 'justify'}}>
-                    Didn't receive a QR Code? Enter the Organization ID for your canvassing operation to join.
-                  </Text>
+                  <Text style={{fontSize: 10, textAlign: 'justify'}}>{translate("didnt_receive_qr_code")}</Text>
                 </View>
 
                <View style={{margin: 5}}>
@@ -840,14 +816,12 @@ export default class App extends LocationComponent {
                       else this.openURL(wsbase+'/auth/dm');
                     }}
                     {...iconStyles}>
-                    Collaborate with Dropbox
+                    {translate("collaborate_with_dropbox")}
                   </Icon.Button>
                 </View>
 
                 <View style={{margin: 5, marginTop: 0}}>
-                  <Text style={{fontSize: 10, textAlign: 'justify'}}>
-                    Login with a Dropbox account and share data with a small team. Uses Dropbox for data sharing & storage.
-                  </Text>
+                  <Text style={{fontSize: 10, textAlign: 'justify'}}>{translate("login_with_dropbox_share_data")}</Text>
                 </View>
 
                 <View style={{margin: 5}}>
@@ -857,17 +831,14 @@ export default class App extends LocationComponent {
                     color="#000000"
                     onPress={() => navigate('CreateSurvey', {title: 'Solo Project', dbx: null, form: null, refer: this})}
                     {...iconStyles}>
-                    Solo Project
+                    {translate("solo_project")}
                   </Icon.Button>
                 </View>
 
                 <View style={{margin: 5, marginTop: 0}}>
-                  <Text style={{fontSize: 10, textAlign: 'justify'}}>
-                    No login required; use the canvassing tool by yourself for a solo project. Uses your device for data storage.
-                  </Text>
+                  <Text style={{fontSize: 10, textAlign: 'justify'}}>{translate("solo_project_desc")}</Text>
                 </View>
 
- 
                 {(__DEV__&&DeviceInfo.isEmulator())&&
                 <View>
                   <View style={{margin: 5}}>
@@ -915,10 +886,10 @@ export default class App extends LocationComponent {
           autoCorrect={false}
           autoCapitalize={"characters"}
           visible={this.state.askOrgId}
-          title={"Organization ID"}
-          belowInputRender={() => (<Text style={{marginBottom: 10}}>If you don’t have a QR Code or Organization ID yet, please ask your organization to provide you with one.</Text>)}
-          placeholder="Enter Org ID. Example: NCC1701"
-          submitText={"Let's do this!"}
+          title={translate("org_id")}
+          belowInputRender={() => (<Text style={{marginBottom: 10}}>{translate("no_qr_code_please_ask")}</Text>)}
+          placeholder={translate("enter_org_id_example")+': NCC1701'}
+          submitText={translate("lets_do_this")}
           onCancel={() => this.setState({askOrgId: false})}
           onSubmit={text => this.setState({orgId: text, askOrgId: false}, () => this.connectToGOTV())}
         />
