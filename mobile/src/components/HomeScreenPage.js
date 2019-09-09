@@ -18,6 +18,7 @@ import {
 } from 'react-native';
 
 import Permissions from 'react-native-permissions';
+import { getLocales } from 'react-native-localize';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Rate, { AndroidMarket } from 'react-native-rate'
 import Carousel, { Pagination } from 'react-native-snap-carousel';
@@ -34,33 +35,66 @@ export default class App extends HVComponent {
   constructor(props) {
     super(props);
 
-    this.state = {
-      active: 'home',
-      mainMenu: [
+    let mainMenu = [];
+    let lang;
+
+    try {
+      lang = getLocales().shift().languageCode;
+    } catch (e) {
+      lang = "en";
+      console.warn(e);
+    };
+
+    // non-english sees translation card first
+    if (lang !== "en")
+    mainMenu.push(
+      {
+        title: translate("we_translated_this"),
+        subtitle: translate("we_used_google_translate"),
+        illustration: require('../../img/translate.png'),
+        onPress: () => this.openGitHub(),
+      }
+    );
+
+    mainMenu.push(
       {
         title: translate("contact_your_reps"),
         subtitle: translate("know_who_represents_you"),
         illustration: require('../../img/phone-your-rep.png'),
         onPress: () => this.setState({active: 'reps'}),
-      },
+      }
+    );
+
+    mainMenu.push(
       {
         title: translate("canvas_for_any_cause"),
         subtitle: translate("our_zero_cost_tool"),
         illustration: require('../../img/canvassing.png'),
         onPress: () => this.setState({active: 'canvassing'}),
-      },
+      }
+    );
+
+    // since non-english got an extra card, need to swap one out to keep the count even
+    if (lang === "en")
+    mainMenu.push(
       {
         title: translate("coming_zoon_desktop_tools"),
         subtitle: translate("canvassing_at_scale"),
         illustration: require('../../img/phone-banking.png'),
         onPress: () => this.openDonate(),
-      },
+      }
+    );
+
+    mainMenu.push(
       {
         title: translate("donate"),
         subtitle: translate("we_operate_on_donations"),
         illustration: require('../../img/donate.png'),
         onPress: () => this.openDonate(),
-      },
+      }
+    );
+
+    mainMenu.push(
       {
         title: translate("rate_this_app"),
         subtitle: translate("feedback_helps_us"),
@@ -75,14 +109,21 @@ export default class App extends HVComponent {
           }
           Rate.rate(options, (success) => {});
         },
-      },
+      }
+    );
+
+    mainMenu.push(
       {
         title: translate("open_source_software"),
         subtitle: translate("help_us_out_directly"),
         illustration: require('../../img/open-source.png'),
         onPress: () => this.openGitHub(),
-      },
-    ],
+      }
+    );
+
+    this.state = {
+      active: 'home',
+      mainMenu,
       sliderActiveSlide: 0,
     };
   }
