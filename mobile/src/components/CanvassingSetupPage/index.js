@@ -26,7 +26,6 @@ import SmLoginPage from '../SmLoginPage';
 import { Dropbox } from 'dropbox';
 import { deepCopy, ingeojson } from 'ourvoiceusa-sdk-js';
 import { Divider, translate, api_base_uri, DINFO, _loginPing, _saveUser, _fileReaderAsync } from '../../common';
-import DeviceInfo from 'react-native-device-info';
 import { RNCamera } from 'react-native-camera';
 import { wsbase } from '../../config';
 
@@ -45,6 +44,7 @@ export default class App extends LocationComponent {
 
     this.state = {
       refer: props.refer,
+      dinfo: {},
       loading: true,
       user: null,
       forms: [],
@@ -136,7 +136,7 @@ export default class App extends LocationComponent {
   }
 
   sayHello = async (server, orgId, inviteCode) => {
-    const { myPosition } = this.state;
+    const { dinfo, myPosition } = this.state;
 
     if (!this.checkLocationAccess()) return;
 
@@ -166,7 +166,7 @@ export default class App extends LocationComponent {
         body: JSON.stringify({
           longitude: myPosition.longitude,
           latitude: myPosition.latitude,
-          dinfo: DINFO,
+          dinfo,
           inviteCode,
         }),
       });
@@ -288,6 +288,9 @@ export default class App extends LocationComponent {
   }
 
   _doSetup = async () => {
+    let dinfo = await DINFO();
+    this.setState({dinfo});
+
     let access = await this.requestLocationPermission();
 
     let inviteUrl = await storage.get('HV_INVITE_URL');
@@ -628,7 +631,7 @@ export default class App extends LocationComponent {
   }
 
   render() {
-    const { showCamera, connected, dbx, dbxformfound, loading, user, forms } = this.state;
+    const { showCamera, connected, dbx, dbxformfound, dinfo, loading, user, forms } = this.state;
     const { navigate } = this.props.navigation;
 
     // wait for user object to become available
@@ -722,7 +725,7 @@ export default class App extends LocationComponent {
                   ], { cancelable: false }
                 );
               }}>
-              Dropbox {translate("logout")}
+              {'Dropbox '+translate("logout")}
             </Icon.Button>
           </View>
           }
@@ -734,7 +737,7 @@ export default class App extends LocationComponent {
               backgroundColor="#3d9ae8"
               color="#ffffff"
               onPress={() => this.setState({SelectModeScreen: true})}>
-              Dropbox {translate("login")}
+              {'Dropbox '+translate("login")}
             </Icon.Button>
           </View>
           }
@@ -839,7 +842,7 @@ export default class App extends LocationComponent {
                   <Text style={{fontSize: 10, textAlign: 'justify'}}>{translate("solo_project_desc")}</Text>
                 </View>
 
-                {(__DEV__&&DeviceInfo.isEmulator())&&
+                {(__DEV__&&dinfo.Emulator)&&
                 <View>
                   <View style={{margin: 5}}>
                     <Icon.Button

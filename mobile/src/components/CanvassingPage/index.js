@@ -24,11 +24,10 @@ import { BottomNavigation } from 'react-native-material-ui';
 import { NavigationActions } from 'react-navigation';
 import storage from 'react-native-storage-wrapper';
 import NetInfo from '@react-native-community/netinfo';
-import DeviceInfo from 'react-native-device-info';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps'
 import RNGooglePlaces from 'react-native-google-places';
-import { Divider, api_base_uri, _doGeocode, _getApiToken, getEpoch } from '../../common';
+import { Divider, DINFO, api_base_uri, _doGeocode, _getApiToken, getEpoch } from '../../common';
 import KnockPage from '../KnockPage';
 import CanvassingSettingsPage from '../CanvassingSettingsPage';
 import Modal from 'react-native-simple-modal';
@@ -107,6 +106,7 @@ export default class App extends LocationComponent {
       turfStats: {},
       netInfo: 'none',
       serviceError: null,
+      deviceError: null,
       myPosition: {latitude: null, longitude: null},
       lastFetchPosition: {latitude: null, longitude: null},
       region: {latitudeDelta: 0.004, longitudeDelta: 0.004},
@@ -156,6 +156,7 @@ export default class App extends LocationComponent {
   }
 
   componentDidMount() {
+    DINFO().then(i => this.setState({UniqueID: i.UniqueID})).catch(() => this.setState({deviceError: true}));
     this._getCanvassSettings();
     this.requestLocationPermission();
     this.setupConnectionListener();
@@ -376,7 +377,7 @@ export default class App extends LocationComponent {
   }
 
   doConfirmAddress = async () => {
-    const { myPosition, form, markers } = this.state;
+    const { myPosition, form, markers, UniqueID } = this.state;
     let { fAddress } = this.state;
 
     let jsonStreet = this.refs.formStreet.getValue();
@@ -424,7 +425,7 @@ export default class App extends LocationComponent {
       };
 
       let input = {
-        deviceId: DeviceInfo.getUniqueID(),
+        deviceId: UniqueID,
         formId: form.id,
         timestamp: getEpoch(),
         longitude: fAddress.longitude,
@@ -618,7 +619,7 @@ export default class App extends LocationComponent {
   }
 
   sendVisit(id, place, unit, person, start, json) {
-    const { form, myPosition } = this.state;
+    const { form, myPosition, UniqueID } = this.state;
     let attrs = [];
 
     // convert object key/value to an array of id/value
@@ -631,7 +632,7 @@ export default class App extends LocationComponent {
     }
 
     let input = {
-      deviceId: DeviceInfo.getUniqueID(),
+      deviceId: UniqueID,
       addressId: id,
       formId: form.id,
       status: 1,
@@ -653,12 +654,12 @@ export default class App extends LocationComponent {
   }
 
   sendStatus(status, id, place, unit, personId) {
-    const { form, myPosition } = this.state;
+    const { form, myPosition, UniqueID } = this.state;
 
     let now = getEpoch();
 
     let input = {
-      deviceId: DeviceInfo.getUniqueID(),
+      deviceId: UniqueID,
       addressId: id,
       formId: form.id,
       status: status,
@@ -745,7 +746,7 @@ export default class App extends LocationComponent {
   }
 
   addUnit = async () => {
-    let { form, myPosition } = this.state;
+    let { form, myPosition, UniqueID } = this.state;
 
     let json = this.refs.unitForm.getValue();
     if (json == null) return;
@@ -758,7 +759,7 @@ export default class App extends LocationComponent {
 
     if (!dupe) {
       let input = {
-        deviceId: DeviceInfo.getUniqueID(),
+        deviceId: UniqueID,
         formId: form.id,
         timestamp: this.getEpoch(),
         longitude: myPosition.longitude,
@@ -863,8 +864,8 @@ export default class App extends LocationComponent {
   render() {
     const { navigate } = this.props.navigation;
     const {
-      showDisclosure, myPosition, myNodes, locationAccess, serviceError, form, user,
-      loading, region, active, fetching, selectedTurf, mapCenter
+      showDisclosure, myPosition, myNodes, locationAccess, serviceError, deviceError,
+      form, user, loading, region, active, fetching, selectedTurf, mapCenter
     } = this.state;
 
     if (showDisclosure === "true") {
@@ -929,6 +930,12 @@ export default class App extends LocationComponent {
       nomap_content.push(
         <View key={1} style={styles.content}>
           <Text>Unable to load location services from your device.</Text>
+        </View>
+      );
+    } else if (deviceError === true) {
+      nomap_content.push(
+        <View key={1} style={styles.content}>
+          <Text>Device Error.</Text>
         </View>
       );
     } else if (myPosition.latitude === null || myPosition.longitude === null) {

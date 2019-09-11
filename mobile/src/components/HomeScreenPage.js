@@ -23,12 +23,11 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import Rate, { AndroidMarket } from 'react-native-rate'
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 import storage from 'react-native-storage-wrapper';
-import DeviceInfo from 'react-native-device-info';
 
 import { sliderWidth, itemWidth } from '../styles/SliderEntry.style';
 import styles, { colors } from '../styles/index.style';
 import SliderEntry from './SliderEntry';
-import { _loginPing, translate } from '../common';
+import { _loginPing, translate, DINFO } from '../common';
 
 export default class App extends HVComponent {
 
@@ -39,7 +38,7 @@ export default class App extends HVComponent {
     let lang;
 
     try {
-      lang = getLocales().shift().languageCode;
+      lang = getLocales()[0].languageCode;
     } catch (e) {
       lang = "en";
       console.warn(e);
@@ -125,6 +124,7 @@ export default class App extends HVComponent {
       active: 'home',
       mainMenu,
       sliderActiveSlide: 0,
+      appVersion: "unknown",
     };
   }
 
@@ -142,6 +142,7 @@ export default class App extends HVComponent {
   componentDidMount() {
     this.requestPushPermission();
     this.checkForInvite();
+    DINFO().then(i => this.setState({appVersion: i.Version})).catch(e => console.warn(e));
   }
 
   requestPushPermission = async () => {
@@ -185,7 +186,7 @@ export default class App extends HVComponent {
   }
 
   render () {
-    const { active, mainMenu, sliderActiveSlide } = this.state;
+    const { active, appVersion, mainMenu, sliderActiveSlide } = this.state;
 
     return (
       <View style={styles.safeArea}>
@@ -255,7 +256,7 @@ export default class App extends HVComponent {
         <View style={styles.container}>
           <ScrollView style={styles.scrollview}>
             <Text style={styles.homeScreenText}>
-              HelloVoter Version {DeviceInfo.getVersion()}
+              HelloVoter Version {appVersion}
             </Text>
             <Text style={styles.homeScreenText}>
               Copyright (c) 2018, Our Voice USA. {translate("all_rights_reserved")}
@@ -301,4 +302,3 @@ const AppleEULA = props => {
   );
   return null;
 };
-

@@ -7,6 +7,7 @@ import {
 } from 'react-native';
 
 import storage from 'react-native-storage-wrapper';
+import { getLocales, getTimeZone } from 'react-native-localize';
 import jwt_decode from 'jwt-decode';
 import DeviceInfo from 'react-native-device-info';
 import RNGooglePlaces from 'react-native-google-places';
@@ -112,10 +113,11 @@ export async function _doGeocode(lng, lat) {
   return position;
 }
 
-function _UserAgent() {
-  return 'OurVoiceApp/'+DeviceInfo.getVersion()+
-    ' ('+DeviceInfo.getManufacturer()+' '+DeviceInfo.getModel()+'; '+
-    DeviceInfo.getSystemName()+' '+DeviceInfo.getSystemVersion()+')';
+async function _UserAgent() {
+  let info = await DINFO();
+  return 'OurVoiceApp/'+info.Version+
+    ' ('+info.Manufacturer+' '+info.Model+'; '+
+    info.SystemName+' '+info.SystemVersion+')';
 }
 
 export async function _getApiToken() {
@@ -126,9 +128,9 @@ export async function _getApiToken() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'User-Agent': _UserAgent(),
+        'User-Agent': await _UserAgent(),
       },
-      body: JSON.stringify({apiKey: DeviceInfo.getUniqueID()})
+      body: JSON.stringify({apiKey: await DeviceInfo.getUniqueId()})
     });
     jwt = JSON.parse(await res.text()).jwt;
     _saveJWT(jwt);
@@ -149,7 +151,7 @@ export async function _apiCall(uri, input) {
       headers: {
         'Authorization': 'Bearer '+jwt,
         'Content-Type': 'application/json',
-        'User-Agent': _UserAgent(),
+        'User-Agent': await _UserAgent(),
       },
       body: JSON.stringify(input),
     });
@@ -191,33 +193,83 @@ export async function _saveUser(user, remote) {
 }
 
 // assemble device info
-export const DINFO = {
-    ApplicationName: DeviceInfo.getApplicationName(),
-    Brand: DeviceInfo.getBrand(),
-    BuildNumber: DeviceInfo.getBuildNumber(),
-    BundleId: DeviceInfo.getBundleId(),
-    Carrier: DeviceInfo.getCarrier(),
-    DeviceCountr: DeviceInfo.getDeviceCountry(),
-    DeviceId: DeviceInfo.getDeviceId(),
-    DeviceLocale: DeviceInfo.getDeviceLocale(),
-    DeviceName: DeviceInfo.getDeviceName(),
-    FontScale: DeviceInfo.getFontScale(),
-    FreeDiskStorage: DeviceInfo.getFreeDiskStorage(),
-    Manufacturer: DeviceInfo.getManufacturer(),
-    Model: DeviceInfo.getModel(),
-    ReadableVersion: DeviceInfo.getReadableVersion(),
-    SystemName: DeviceInfo.getSystemName(),
-    SystemVersion: DeviceInfo.getSystemVersion(),
-    Timezone: DeviceInfo.getTimezone(),
-    TotalDiskCapacity: DeviceInfo.getTotalDiskCapacity(),
-    TotalMemory: DeviceInfo.getTotalMemory(),
-    UniqueID: DeviceInfo.getUniqueID(),
-    UserAgent: DeviceInfo.getUserAgent(),
-    Version: DeviceInfo.getVersion(),
-    Emulator: DeviceInfo.isEmulator(),
-    Tablet: DeviceInfo.isTablet(),
-    hasNotch: DeviceInfo.hasNotch(),
-    Landscape: DeviceInfo.isLandscape(),
+export async function DINFO() {
+  let locale;
+  let info = {};
+
+  try {
+    let [
+      ApplicationName, Brand, BuildNumber, BundleId, Carrier, DeviceId,
+      DeviceName, FontScale, FreeDiskStorage, Manufacturer, Model,
+      ReadableVersion, SystemName, SystemVersion, TotalDiskCapacity,
+      TotalMemory, UniqueID, UserAgent, Version, Emulator, Tablet,
+      hasNotch, Landscape
+    ] = await Promise.all([
+      DeviceInfo.getApplicationName(),
+      DeviceInfo.getBrand(),
+      DeviceInfo.getBuildNumber(),
+      DeviceInfo.getBundleId(),
+      DeviceInfo.getCarrier(),
+      DeviceInfo.getDeviceId(),
+      DeviceInfo.getDeviceName(),
+      DeviceInfo.getFontScale(),
+      DeviceInfo.getFreeDiskStorage(),
+      DeviceInfo.getManufacturer(),
+      DeviceInfo.getModel(),
+      DeviceInfo.getReadableVersion(),
+      DeviceInfo.getSystemName(),
+      DeviceInfo.getSystemVersion(),
+      DeviceInfo.getTotalDiskCapacity(),
+      DeviceInfo.getTotalMemory(),
+      DeviceInfo.getUniqueId(),
+      DeviceInfo.getUserAgent(),
+      DeviceInfo.getVersion(),
+      DeviceInfo.isEmulator(),
+      DeviceInfo.isTablet(),
+      DeviceInfo.hasNotch(),
+      DeviceInfo.isLandscape(),
+    ]);
+
+    info.ApplicationName = ApplicationName;
+    info.Brand = Brand;
+    info.BuildNumber = BuildNumber;
+    info.BundleId = BundleId;
+    info.Carrier = Carrier;
+    info.DeviceId = DeviceId;
+    info.DeviceName = DeviceName;
+    info.FontScale = FontScale;
+    info.FreeDiskStorage = FreeDiskStorage;
+    info.Manufacturer = Manufacturer;
+    info.Model = Model;
+    info.ReadableVersion = ReadableVersion;
+    info.SystemName = SystemName;
+    info.SystemVersion = SystemVersion;
+    info.TotalDiskCapacity = TotalDiskCapacity;
+    info.TotalMemory = TotalMemory;
+    info.UniqueID = UniqueID;
+    info.UserAgent = UserAgent;
+    info.Version = Version;
+    info.Emulator = Emulator;
+    info.Tablet = Tablet;
+    info.hasNotch = hasNotch;
+    info.Landscape = Landscape;
+  } catch (e) {
+    console.warn("DeviceInfo:"+e);
+  }
+
+  // DeviceInfo used to have these ... no more. Get them from another module
+  try {
+    locale = getLocales()[0];
+    info.Timezone = getTimeZone();
+  } catch (e) {
+    locale = {};
+    console.warn(e);
+  };
+
+  info.DeviceCountry = locale.countryCode;
+  info.DeviceLocale = locale.languageCode;
+
+  return info;
 };
 
 export async function _getJWT(remote) {
@@ -250,7 +302,7 @@ export async function _getJWT(remote) {
         headers: {
           'Authorization': 'Bearer '+jwt,
           'Content-Type': 'application/json',
-          'User-Agent': _UserAgent(),
+          'User-Agent': await _UserAgent(),
         },
         body: JSON.stringify(DINFO),
       });

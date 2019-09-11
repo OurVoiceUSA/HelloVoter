@@ -21,7 +21,6 @@ import LocationComponent from '../LocationComponent';
 import { NavigationActions } from 'react-navigation';
 import { BottomNavigation } from 'react-native-material-ui';
 import { Dropbox } from 'dropbox';
-import DeviceInfo from 'react-native-device-info';
 import storage from 'react-native-storage-wrapper';
 import NetInfo from '@react-native-community/netinfo';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -31,7 +30,7 @@ import MapView from 'react-native-maps-super-cluster';
 import RNGooglePlaces from 'react-native-google-places';
 import encoding from 'encoding';
 import { transliterate as tr } from 'transliteration/src/main/browser';
-import { _doGeocode, _getApiToken, _fileReaderAsync } from '../../common';
+import { _doGeocode, _getApiToken, _fileReaderAsync, DINFO } from '../../common';
 import LegacyKnockPage from '../LegacyKnockPage';
 import Modal from 'react-native-simple-modal';
 import TimeAgo from 'javascript-time-ago'
@@ -82,6 +81,7 @@ export default class App extends LocationComponent {
       exportRunning: false,
       syncRunning: false,
       serviceError: null,
+      deviceError: null,
       locationAccess: null,
       myPosition: {latitude: null, longitude: null},
       region: {latitudeDelta: 0.004, longitudeDelta: 0.004},
@@ -128,6 +128,7 @@ export default class App extends LocationComponent {
   }
 
   componentDidMount() {
+    DINFO().then(i => this.setState({UniqueID: i.UniqueID})).catch(() => this.setState({deviceError: true}));
     this.requestLocationPermission();
     this.setupConnectionListener();
     this._getCanvassSettings();
@@ -696,7 +697,7 @@ export default class App extends LocationComponent {
   }
 
   _syncDropbox = async () => {
-    let { dbx, form, user } = this.state;
+    let { dbx, form, user, UniqueID } = this.state;
     let folders = [];
     let allsrc = [this.allNodes];
     let ret = {error: false};
@@ -709,7 +710,7 @@ export default class App extends LocationComponent {
       for (let i in res.entries) {
         let item = res.entries[i];
         if (item['.tag'] === 'folder') folders.push(item.path_display);
-        if (item.path_display.match(/\.jtxt$/) && !item.path_display.match(DeviceInfo.getUniqueID())) {
+        if (item.path_display.match(/\.jtxt$/) && !item.path_display.match(UniqueID)) {
           try {
             let data = await dbx.filesDownload({ path: item.path_display });
             allsrc.push(this._nodesFromJtxt(await _fileReaderAsync(data.fileBlob)));
@@ -719,7 +720,7 @@ export default class App extends LocationComponent {
 
       // download "turf" for this device
       try {
-        let data = await dbx.filesDownload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtrf' });
+        let data = await dbx.filesDownload({ path: form.folder_path+'/'+UniqueID+'.jtrf' });
         this.turfNodes = this._nodesFromJtxt(await _fileReaderAsync(data.fileBlob));
         allsrc.push(this.turfNodes);
       } catch (e) {}
@@ -730,7 +731,7 @@ export default class App extends LocationComponent {
         allsrc.push(this._nodesFromJtxt(await _fileReaderAsync(data.fileBlob)));
       } catch (e) {}
 
-      await dbx.filesUpload({ path: form.folder_path+'/'+DeviceInfo.getUniqueID()+'.jtxt', contents: encoding.convert(tr(this._nodesToJtxt(this.myNodes)), 'ISO-8859-1'), mute: true, mode: {'.tag': 'overwrite'} });
+      await dbx.filesUpload({ path: form.folder_path+'/'+UniqueID+'.jtxt', contents: encoding.convert(tr(this._nodesToJtxt(this.myNodes)), 'ISO-8859-1'), mute: true, mode: {'.tag': 'overwrite'} });
       allsrc.push(this.myNodes);
 
       // extra sync stuff for the form owner
@@ -1052,8 +1053,8 @@ export default class App extends LocationComponent {
   render() {
     const { navigate } = this.props.navigation;
     const {
-      showDisclosure, myPosition, myNodes, locationAccess, serviceError, form, user,
-      fAddress, loading, dbx, region,
+      showDisclosure, myPosition, myNodes, locationAccess, serviceError, deviceError,
+      form, user, fAddress, loading, dbx, region, UniqueID,
     } = this.state;
 
     if (showDisclosure === "true") {
@@ -1118,6 +1119,12 @@ export default class App extends LocationComponent {
       nomap_content.push(
         <View key={1} style={styles.content}>
           <Text>Unable to load location services from your device.</Text>
+        </View>
+      );
+    } else if (deviceError === true) {
+      nomap_content.push(
+        <View key={1} style={styles.content}>
+          <Text>Device Error.</Text>
         </View>
       );
     } else if (myPosition.latitude === null || myPosition.longitude === null) {
@@ -1373,7 +1380,7 @@ export default class App extends LocationComponent {
             key="settings"
             icon="settings"
             label="Settings"
-            onPress={() => navigate("LegacyCanvassingSettingsPage", {refer: this})}
+            onPress={() => navigate("LegacyCanvassingSettingsPage", {refer: this, UniqueID: UniqueID})}
           />
         </BottomNavigation>
 

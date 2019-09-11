@@ -16,7 +16,6 @@ import {
 import { BottomNavigation } from 'react-native-material-ui';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import DropboxSharePage from '../DropboxSharePage';
-import DeviceInfo from 'react-native-device-info';
 import Modal from 'react-native-simple-modal';
 import t from 'tcomb-form-native';
 
@@ -67,6 +66,7 @@ export default class App extends PureComponent {
 
     this.state = {
       refer: props.navigation.state.params.refer,
+      UniqueID: props.navigation.state.params.UniqueID,
       exportRunning: false,
       DropboxShareScreen: false,
     };
@@ -103,7 +103,7 @@ export default class App extends PureComponent {
   }
 
   render() {
-    const { refer } = this.state;
+    const { refer, UniqueID } = this.state;
 
     let formOpt = {
       'draggable_pins': t.Boolean,
@@ -130,7 +130,7 @@ export default class App extends PureComponent {
 
         <View style={{flex: 1, alignItems: 'flex-end'}}>
           <Text>Your device ID is:</Text>
-          <Text>{DeviceInfo.getUniqueID()}</Text>
+          <Text>{UniqueID}</Text>
         </View>
 
         {refer.state.dbx && refer.state.user.dropbox.account_id == refer.state.form.author_id &&

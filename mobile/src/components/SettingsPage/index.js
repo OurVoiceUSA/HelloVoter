@@ -16,7 +16,6 @@ import {
 
 import { StackActions, NavigationActions } from 'react-navigation';
 import { BottomNavigation } from 'react-native-material-ui';
-import DeviceInfo from 'react-native-device-info';
 import Permissions from 'react-native-permissions';
 import RNGooglePlaces from 'react-native-google-places';
 import Modal from 'react-native-simple-modal';
@@ -25,7 +24,10 @@ import storage from 'react-native-storage-wrapper';
 import SmLoginPage from '../SmLoginPage';
 import { Dropbox } from 'dropbox';
 import { google_api_key } from '../../config';
-import { _getJWT, _loginPing, _rmJWT, _saveUser, _rmUser, _apiCall, _specificAddress } from '../../common';
+import {
+  _getJWT, _loginPing, _rmJWT, _saveUser, DINFO,
+  _rmUser, _apiCall, _specificAddress,
+} from '../../common';
 
 import {
   SettingsDividerShort,
@@ -73,6 +75,7 @@ export default class App extends PureComponent {
       myPosition: { address: null, longitude: null, latitude: null },
       permissionLocation: null,
       permissionNotification: null,
+      appVersion: "unknown",
     };
 
   }
@@ -131,6 +134,7 @@ export default class App extends PureComponent {
   }
 
   componentDidMount() {
+    DINFO().then(i => this.setState({appVersion: i.Version})).catch(e => console.warn(e));
     this.checkPermissionLocation();
     this.checkPermissionNotification();
     this._loadProfile();
@@ -180,7 +184,7 @@ export default class App extends PureComponent {
 
   render() {
     const { user, permissionLocation, permissionNotification, SmLoginScreen,
-            surveyComplete, surveyPartial, party, myPosition } = this.state;
+            surveyComplete, surveyPartial, party, myPosition, appVersion } = this.state;
     const { navigate } = this.props.navigation;
 
     // wait for user object to become available
@@ -386,7 +390,7 @@ export default class App extends PureComponent {
             </View>
           </View>
           <View style={{flexDirection: 'row', alignItems: 'center', marginRight: 20}}>
-            <Text style={{marginRight: 7, fontWeight: 'bold'}}>{DeviceInfo.getVersion()}</Text>
+            <Text style={{marginRight: 7, fontWeight: 'bold'}}>{appVersion}</Text>
             <Icon name="github" size={30} onPress={() => {this.openGitHub('HelloVoter')}} />
           </View>
         </View>
