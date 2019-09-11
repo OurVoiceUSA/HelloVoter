@@ -49,12 +49,18 @@ module.exports = Router({mergeParams: true})
   if (typeof req.body.dinfo === 'object') {
     try {
       // create query save their device info
-      let dinfo_str = ['ApplicationName', 'Brand', 'BuildNumber', 'BundleId', 'Carrier', 'DeviceCountr', 'DeviceId', 'DeviceLocale', 'DeviceName', 'FontScale', 'FreeDiskStorage', 'Manufacturer', 'Model', 'ReadableVersion', 'SystemName', 'SystemVersion', 'Timezone', 'TotalDiskCapacity', 'TotalMemory', 'UniqueID', 'UserAgent', 'Version', 'Emulator', 'Tablet', 'hasNotch', 'Landscape'].map(d => d+':{'+d+'}').join(',');
+      let dkeys = ['ApplicationName', 'Brand', 'BuildNumber', 'BundleId', 'Carrier', 'DeviceCountry', 'DeviceId', 'DeviceLocale', 'DeviceName', 'FontScale', 'FreeDiskStorage', 'Manufacturer', 'Model', 'ReadableVersion', 'SystemName', 'SystemVersion', 'Timezone', 'TotalDiskCapacity', 'TotalMemory', 'UniqueID', 'UserAgent', 'Version', 'Emulator', 'Tablet', 'hasNotch', 'Landscape'];
+      let dinfo_str = dkeys.map(d => d+':{'+d+'}').join(',');
 
       let args = deepCopy(req.body.dinfo);
       args.id = req.user.id;
       args.lng = parseFloat(req.body.longitude);
       args.lat = parseFloat(req.body.latitude);
+
+      // convert null to empty string on device keys
+      dkeys.forEach(k => {
+        if (!args[k]) args[k] = "";
+      });
 
       await req.db.query('match (v:Volunteer {id:{id}}) merge (b:Device {UniqueID:{UniqueID}}) on create set b += {created: timestamp(), updated: timestamp(), '+dinfo_str+'} on match set b += {updated: timestamp(), '+dinfo_str+'} merge (v)<-[:USED_BY]-(b)', args);
 
