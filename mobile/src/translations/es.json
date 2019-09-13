@@ -34,7 +34,11 @@
   "note_about_apple_eula": "NOTA: La distribución en la App Store de iOS significa esta copia específica de la aplicación cae bajo el EULA estándar de Apple Inc.",
   "tap_here_for_source_code": "toca aquí para ver el código fuente",
   "homescreen_summary": "Our Voice USA es una organización benéfica sin fines de lucro 501(c)(3). No para ningún candidato o partido político. Brindamos acceso a herramientas que permiten que la gente común participe políticamente. ¡Descúbrenos en las redes sociales!",
+  "app_supporters": "Partidarios",
   "legal_notice": "AVISO LEGAL",
+  "our_signature_supporters": "¡Nuestros partidarios exclusivos!",
+  "this_app_is_made_possible_by": "Esta aplicación es posible gracias a personas que se han convertido en patrocinadores de HelloVoter. ¡Tu nombre podría incluirse aquí también!",
+  "support_us_on_patreon": "Apóyanos en Patreon",
   // YourRepsPage
   "ambiguous_address": "Dirección Ambigua",
   "no_guarantee_district": "Lamentablemente, no podemos garantizar resultados precisos del distrito sin una dirección completa.",

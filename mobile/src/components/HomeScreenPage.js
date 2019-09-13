@@ -8,6 +8,7 @@ import YourReps from './YourRepsPage';
 import CanvassingSetup from './CanvassingSetupPage';
 
 import {
+  ActivityIndicator,
   View,
   Text,
   Linking,
@@ -122,9 +123,10 @@ export default class App extends HVComponent {
 
     this.state = {
       active: 'home',
+      appVersion: "unknown",
       mainMenu,
       sliderActiveSlide: 0,
-      appVersion: "unknown",
+      patreonNames: [],
     };
   }
 
@@ -133,16 +135,23 @@ export default class App extends HVComponent {
   openYouTube = () => this.openURL('https://www.youtube.com/channel/UCw5fpnK-IZVQ4IkYuapIbiw');
   openWebsite = () => this.openURL('https://ourvoiceusa.org/');
   openGitHub = (repo) => this.openURL('https://github.com/OurVoiceUSA/'+(repo?repo:''));
-  openDonate = () => this.openURL('https://secure.givelively.org/donate/our-voice-usa');
+  openDonate = () => this.openURL('https://www.patreon.com/join/hellovoter');
 
   openURL = (url) => {
     return Linking.openURL(url).catch(() => null);
   }
 
   componentDidMount() {
+    this.loadPatreonNames();
     this.requestPushPermission();
     this.checkForInvite();
     DINFO().then(i => this.setState({appVersion: i.Version})).catch(e => console.warn(e));
+  }
+
+  loadPatreonNames = async () => {
+    let patreonNames = [];
+    // TODO: fetch json object
+    this.setState({patreonNames});
   }
 
   requestPushPermission = async () => {
@@ -186,7 +195,7 @@ export default class App extends HVComponent {
   }
 
   render () {
-    const { active, appVersion, mainMenu, sliderActiveSlide } = this.state;
+    const { active, appVersion, mainMenu, sliderActiveSlide, patreonNames } = this.state;
 
     return (
       <View style={styles.safeArea}>
@@ -240,6 +249,8 @@ export default class App extends HVComponent {
             </View>
 
             <View style={{flexDirection: 'row', justifyContent: 'center'}}>
+              <Button raised primary text={translate("app_supporters")} onPress={() => this.setState({active: 'supporters'})} />
+              <Text>{'  '}</Text>
               <Button raised primary text={translate("legal_notice")} onPress={() => this.setState({active: 'legal'})} />
             </View>
 
@@ -251,6 +262,16 @@ export default class App extends HVComponent {
         }
         {active === 'canvassing' &&
           <CanvassingSetup navigation={this.props.navigation} refer={this} />
+        }
+        {active === 'supporters' &&
+        <View style={styles.container}>
+          <ScrollView style={styles.scrollview}>
+            <Text style={styles.homeScreenText}>{translate("our_signature_supporters")}</Text>
+            <Text style={styles.homeScreenText}>{translate("this_app_is_made_possible_by")}</Text>
+            <Button style={{margin: 15}} raised primary text={translate("support_us_on_patreon")} onPress={() => this.openDonate()} />
+            <PatreonNames names={patreonNames} />
+          </ScrollView>
+        </View>
         }
         {active === 'legal' &&
         <View style={styles.container}>
@@ -295,6 +316,13 @@ export default class App extends HVComponent {
     );
   }
 }
+
+const PatreonNames = props => {
+  if (!props.names || props.names.length === 0) return (<View><ActivityIndicator /><Text>{translate("loading_data")}...</Text></View>);
+  return props.names.map(name => (
+    <Text style={styles.homeScreenText}>{name}</Text>
+  ));
+};
 
 const AppleEULA = props => {
   if (Platform.OS === 'ios') return (
