@@ -136,7 +136,7 @@ export default class queue {
   async doTurfIndexing(jobId, input) {
     let start = new Date().getTime();
 
-    let ref = await this.db.query('CALL apoc.periodic.iterate("match (a:Turf {id:\\"'+input.turfId+'\\"}) call spatial.intersects(\\"address\\", a.wkt) yield node return node, a", "merge (node)-[:WITHIN]->(a)", {batchSize:10000,iterateList:true}) yield total return total', input);
+    let ref = await this.db.query('CALL apoc.periodic.iterate("match (a:Turf {id:\\"'+input.turfId+'\\"}) call spatial.intersects(\\"address\\", a.wkt) yield node return node, a", "merge (node)-[:WITHIN]->(a)", {batchSize:1000,iterateList:true}) yield total return total', input);
     let total = ref.data[0];
     console.log("Processed "+total+" records for "+input.turfId+" in "+((new Date().getTime())-start)+" milliseconds");
 
@@ -154,7 +154,7 @@ export default class queue {
     // parse_start
     await this.db.query('match (a:ImportFile {filename:{filename}}) set a.parse_start = timestamp()', {filename: filename});
 
-    let limit = 100000;
+    let limit = 1000;
 
     // non-unit addresses
     await this.db.query(`match (a:ImportFile {filename:{filename}})
@@ -219,7 +219,7 @@ export default class queue {
 
     // find instances of duplicate Address(id) and merge them into a single node
     // TODO: we only merge :Address here - can still have dupe Unit & Person nodes
-    stats = await this.db.query('match (a:ImportFile {filename: {filename}}) call apoc.periodic.iterate("match (aa:Address)-[:SOURCE]->(:ImportRecord)-[:FILE]->(:ImportFile {filename:\\""+a.filename+"\\"}) with distinct(aa) as a match (b:Address {id:a.id}) with a, count(b) as count where count > 1 return distinct(a.id) as id", "match (a:Address {id:{id}}) with collect(a) as nodes call apoc.refactor.mergeNodes(nodes) yield node return node", {iterateList:false}) yield total return total', {filename: filename});
+    stats = await this.db.query('match (a:ImportFile {filename: {filename}}) call apoc.periodic.iterate("match (aa:Address)-[:SOURCE]->(:ImportRecord)-[:FILE]->(:ImportFile {filename:\\""+a.filename+"\\"}) with distinct(aa) as a return a", "match (b:Address {id:a.id}) with a, count(b) as count where count > 1 match (aa:Address {id:{a.id}}) with collect(aa) as nodes call apoc.refactor.mergeNodes(nodes) yield node return node", {batchSize:100,iterateList:false}) yield total return total', {filename: filename});
 
     // dedupe_end, dupes, turfadd_start
     await this.db.query('match (a:ImportFile {filename:{filename}}) set a.dedupe_end = timestamp(), a.dupes_address = toInt({dupes_address}), a.turfadd_start = timestamp()', {filename: filename, dupes_address: stats.data[0]});
@@ -234,7 +234,7 @@ export default class queue {
 
       // add this import file's nodes to the temporary point layer
       // TODO: parallel imports of files above the below transaction limit have a possibility of a org.neo4j.kernel.DeadlockDetectedException
-      limit = 100000;
+      limit = 1000;
       count = limit;
 
       while (count === limit) {
@@ -260,7 +260,7 @@ export default class queue {
       await asyncForEach(ref.data, async (turfId) => {
         // TODO: refactor; this is a copy/paste of doTurfIndexing, it's just done on a different spatial layer
         let st = new Date().getTime();
-        let t = await this.db.query('CALL apoc.periodic.iterate("match (a:Turf {id:\\"'+turfId+'\\"}) call spatial.intersects(\\"'+filename+'\\", a.wkt) yield node return node, a", "merge (node)-[:WITHIN]->(a)", {batchSize:10000,iterateList:true}) yield total return total', input);
+        let t = await this.db.query('CALL apoc.periodic.iterate("match (a:Turf {id:\\"'+turfId+'\\"}) call spatial.intersects(\\"'+filename+'\\", a.wkt) yield node return node, a", "merge (node)-[:WITHIN]->(a)", {batchSize:1000,iterateList:true}) yield total return total', input);
         let total = t.data[0];
         console.log("Processed "+total+" records for "+turfId+" in "+((new Date().getTime())-st)+" milliseconds");
       });
@@ -276,7 +276,7 @@ export default class queue {
 
     // aquire a write lock so we can only do addNodes from a single job at a time, for heap safety
     // TODO: limit based on max heap
-    limit = 100000;
+    limit = 1000;
     count = limit;
 
     while (count === limit) {
