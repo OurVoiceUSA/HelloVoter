@@ -376,7 +376,7 @@ borderColor: '#d7d7d7'}}>
               style={{margin: 10, flexDirection: 'row', backgroundColor: '#d7d7d7', alignItems: 'center', padding: 10}}
               onPress={this._useCustomAddress}>
               <Icon style={{marginRight: 15}} name="map-signs" size={20} color="black" />
-              <Text style={{textAlign: 'center'}}>{translate("search_address_cap")}</Text>
+              <Text style={{textAlign: 'center'}}>{translate("searched_address_cap")}</Text>
             </TouchableOpacity>
           </View>
         </Modal>
