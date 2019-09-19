@@ -54,7 +54,7 @@
     "node-fetch": "^2.6.0",
     "node-neo4j-bolt-adapter": "^1.0.6",
     "ourvoiceusa-sdk-js": "github:OurVoiceUSA/ourvoiceusa-sdk-js",
-    "papaparse": "^5.0.2",
+    "papaparse": "^5.1.0",
     "patch-package": "^6.2.0",
     "wkx": "^0.4.8"
   },

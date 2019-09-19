@@ -102,7 +102,7 @@ PODS:
     - React
   - react-native-maps (0.25.0):
     - React
-  - react-native-netinfo (4.2.1):
+  - react-native-netinfo (4.2.2):
     - React
   - React-RCTActionSheet (0.60.5):
     - React-Core (= 0.60.5)
@@ -131,7 +131,7 @@ PODS:
     - React
   - RNGestureHandler (1.4.1):
     - React
-  - RNLocalize (1.2.0):
+  - RNLocalize (1.2.1):
     - React
   - yoga (0.60.5.React)
 
@@ -262,7 +262,7 @@ SPEC CHECKSUMS:
   react-native-google-maps: 88d750ad441b19c24885f20d43a55ecac25939b5
   react-native-google-places: 978bcc6ec4bd1d9b0ab3693e3705d4f1f2459caf
   react-native-maps: 190c02ca533fddac5bb49cf17bdece3644612107
-  react-native-netinfo: c49569600a0b435767cc1d97c6c4fb090a49d7de
+  react-native-netinfo: 0edde14215abf6352ea5c8f9440e777e12ad6a0f
   React-RCTActionSheet: b0f1ea83f4bf75fb966eae9bfc47b78c8d3efd90
   React-RCTAnimation: 359ba1b5690b1e87cc173558a78e82d35919333e
   React-RCTBlob: 5e2b55f76e9a1c7ae52b826923502ddc3238df24
@@ -275,7 +275,7 @@ SPEC CHECKSUMS:
   React-RCTWebSocket: cd932a16b7214898b6b7f788c8bddb3637246ac4
   RNCAsyncStorage: 621bad7a889b5bf1583a52547f2dcd3a4d1ff15e
   RNGestureHandler: 4cb47a93019c1a201df2644413a0a1569a51c8aa
-  RNLocalize: 3d67438cbed25c21d512edb6357e29b6db9ed2d9
+  RNLocalize: 7206d44eb341d6e2a61a8184b831c64a5539fcdf
   yoga: 312528f5bbbba37b4dcea5ef00e8b4033fdd9411
 
 PODFILE CHECKSUM: 6134ecc5a36e8fe49404a4c6d4c9d7775c2f4478
