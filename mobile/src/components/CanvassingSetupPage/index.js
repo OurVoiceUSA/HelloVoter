@@ -25,7 +25,7 @@ import jwt_decode from 'jwt-decode';
 import SmLoginPage from '../SmLoginPage';
 import { Dropbox } from 'dropbox';
 import { deepCopy, ingeojson } from 'ourvoiceusa-sdk-js';
-import { Divider, translate, api_base_uri, DINFO, _loginPing, _saveUser, _fileReaderAsync } from '../../common';
+import { Divider, say, api_base_uri, DINFO, _loginPing, _saveUser, _fileReaderAsync } from '../../common';
 import { RNCamera } from 'react-native-camera';
 import { wsbase } from '../../config';
 
@@ -73,11 +73,11 @@ export default class App extends LocationComponent {
   checkLocationAccess() {
     const { myPosition } = this.state;
     if (!this.state.locationAccess) {
-      Alert.alert(translate("location_access"), translate("device_settings_deny_location"), [{text: translate("ok")}], { cancelable: false });
+      Alert.alert(say("location_access"), say("device_settings_deny_location"), [{text: say("ok")}], { cancelable: false });
       return false;
     }
     if (!myPosition.longitude || !myPosition.latitude) {
-      Alert.alert(translate("location_service"), translate("location_services_unavailable"));
+      Alert.alert(say("location_service"), say("location_services_unavailable"));
       return false;
     }
     return true;
@@ -110,7 +110,7 @@ export default class App extends LocationComponent {
         state = bb.state;
     });
 
-    if (!state) return setTimeout(() => Alert.alert(translate("out of bounds"), translate("not_located_within_us_bounds"), [{text: translate("ok")}], { cancelable: false }), 500);
+    if (!state) return setTimeout(() => Alert.alert(say("out of bounds"), say("not_located_within_us_bounds"), [{text: say("ok")}], { cancelable: false }), 500);
 
     if (orgId && orgId.match(/^[0-9A-Z]*$/)) {
       // first two characters are the state code
@@ -118,7 +118,7 @@ export default class App extends LocationComponent {
 
       this.connectToServer('gotv-'+place+'.ourvoiceusa.org', orgId, inviteCode);
     } else {
-      setTimeout(() => Alert.alert('Error', translate("must_enter_valid_qr_code"), [{text: translate("ok")}], { cancelable: false }), 500);
+      setTimeout(() => Alert.alert('Error', say("must_enter_valid_qr_code"), [{text: say("ok")}], { cancelable: false }), 500);
     }
   }
 
@@ -129,7 +129,7 @@ export default class App extends LocationComponent {
 
     let ret = await this.singHello(server, orgId, inviteCode);
 
-    if (ret.flag !== true) Alert.alert((ret.error?translate("error"):translate("connection_successful")), ret.msg, [{text: translate("ok")}], { cancelable: false });
+    if (ret.flag !== true) Alert.alert((ret.error?say("error"):say("connection_successful")), ret.msg, [{text: say("ok")}], { cancelable: false });
     if (ret.error !== true) server = null;
 
     this.setState({serverLoading: false});
@@ -188,12 +188,12 @@ export default class App extends LocationComponent {
 
       if (!auth_location || !auth_location.match(/^https:.*auth$/)) {
         // Invalid x-sm-oauth-url header means it's not a validy configured canvass-broker
-        if (orgId) return {error: true, msg: translate("not_a_vlid_qr_code")}
-        return {error: true, msg: translate("not_running_compatible_software")};
+        if (orgId) return {error: true, msg: say("not_a_vlid_qr_code")}
+        return {error: true, msg: say("not_running_compatible_software")};
       }
 
       if (auth_location !== wsbase+'/auth') {
-        return {error: true, msg: translate("custom_auth_not_supported")};
+        return {error: true, msg: say("custom_auth_not_supported")};
       }
 
       switch (res.status) {
@@ -201,19 +201,19 @@ export default class App extends LocationComponent {
           // valid - break to proceed
           break;
         case 400:
-          return {error: true, msg: translate("server_didnt_understand_request")};
+          return {error: true, msg: say("server_didnt_understand_request")};
         case 401:
           setTimeout(() => this.setState({SmLoginScreen: true}), 500);
           return {error: false, flag: true};
         case 403:
-          return {error: true, msg: translate("request_to_canvas_rejected")};
+          return {error: true, msg: say("request_to_canvas_rejected")};
         default:
-          return {error: true, msg: translate("problem_connecting_try_again")};
+          return {error: true, msg: say("problem_connecting_try_again")};
       }
 
       let body = await res.json();
 
-      if (body.data.ready !== true) return {error: false, msg: (body.msg?body.msg:translate("awaiting_assignment"))};
+      if (body.data.ready !== true) return {error: false, msg: (body.msg?body.msg:say("awaiting_assignment"))};
       else {
         let forms = this.state.forms;
         let forms_server = [];
@@ -271,7 +271,7 @@ export default class App extends LocationComponent {
       }
     } catch (e) {
       console.warn("singHello: "+e);
-      return {error: true, msg: translate("unexpected_error_try_again")};
+      return {error: true, msg: say("unexpected_error_try_again")};
     }
 
   }
@@ -466,25 +466,25 @@ export default class App extends LocationComponent {
 
       let swipeoutBtns = [
         {
-          text: translate("Edit"),
+          text: say("Edit"),
           type: 'primary',
           onPress: () => {
             if (json.backend === "dropbox" && !user.dropbox) {
               this.openURL(wsbase+'/auth/dm');
               return;
             }
-            navigate('CreateSurvey', {title: translate("edit_form"), dbx: dbx, form: json, refer: this});
+            navigate('CreateSurvey', {title: say("edit_form"), dbx: dbx, form: json, refer: this});
           },
         },
         {
-          text: translate("delete"),
+          text: say("delete"),
           type: 'delete',
           onPress: () => {
             Alert.alert(
-              translate("delete_form"),
-              translate("confirm_delete_form"),
+              say("delete_form"),
+              say("confirm_delete_form"),
               [
-                {text: translate("yes"), onPress: async () => {
+                {text: say("yes"), onPress: async () => {
                   try {
                     if (json.backend === "dropbox") {
                       await dbx.filesDeleteV2({path: json.folder_path});
@@ -493,23 +493,23 @@ export default class App extends LocationComponent {
                     await storage.del('OV_CANVASS_PINS@'+json.id);
                     await storage.set('OV_CANVASS_FORMS', JSON.stringify(forms_local));
                     Alert.alert(
-                      translate("delete_success"),
-                      translate("have_deleted_form")+': '+json.name,
-                      [{text: translate("ok")}],
+                      say("delete_success"),
+                      say("have_deleted_form")+': '+json.name,
+                      [{text: say("ok")}],
                       { cancelable: false }
                     );
                     this._loadForms();
                   } catch (e) {
                     Alert.alert(
-                      translate("delete_failed"),
+                      say("delete_failed"),
                       translage("error_delete_form")+': '+json.name,
-                      [{text: translate("ok")}],
+                      [{text: say("ok")}],
                       { cancelable: false }
                     );
                     console.warn("_loadForms 3: "+e);
                   }
                 }},
-                {text: translate("no")},
+                {text: say("no")},
               ], { cancelable: false }
             );
           },
@@ -520,11 +520,11 @@ export default class App extends LocationComponent {
         if (this.state.connected !== true || user.dropbox.account_id !== json.author_id)
           swipeoutBtns.shift();
 
-      let createdby = translate("created_by")+' '+json.author;
+      let createdby = say("created_by")+' '+json.author;
 
       if (json.backend === 'server') {
-        if (json.orgId) createdby = translate("org_id")+' '+json.orgId;
-        else createdby = translate("hosted_by")+' '+json.server;
+        if (json.orgId) createdby = say("org_id")+' '+json.orgId;
+        else createdby = say("hosted_by")+' '+json.server;
         swipeoutBtns.shift();
       }
 
@@ -637,7 +637,7 @@ export default class App extends LocationComponent {
     // wait for user object to become available
     if (!user) return (
         <View style={{flex: 1, backgroundColor: 'white', alignItems: 'center', justifyContent: 'center'}}>
-          <Text style={{fontSize: 20}}>{translate("loading_user_data")}...</Text>
+          <Text style={{fontSize: 20}}>{say("loading_user_data")}...</Text>
           <ActivityIndicator />
         </View>
       );
@@ -645,7 +645,7 @@ export default class App extends LocationComponent {
     if (!loading && !forms.length) {
       forms.push(
         <View key={1}>
-          <Text>{translate("no_canvas_forms_ask_someone")}</Text>
+          <Text>{say("no_canvas_forms_ask_someone")}</Text>
         </View>
       );
     }
@@ -659,10 +659,10 @@ export default class App extends LocationComponent {
           justifyContent: 'space-between',
         }}
         androidCameraPermissionOptions={{
-         title: translate("permission_use_camera"),
-          message: translate("we_need_permission_use_camera"),
-          buttonPositive: translate("ok"),
-          buttonNegative: translate("cancel"),
+         title: say("permission_use_camera"),
+          message: say("we_need_permission_use_camera"),
+          buttonPositive: say("ok"),
+          buttonNegative: say("cancel"),
         }}
         onBarCodeRead={(b) => this.parseInvite(b.data)}
         barCodeTypes={[RNCamera.Constants.BarCodeType.qr]}
@@ -677,12 +677,12 @@ export default class App extends LocationComponent {
         <View style={{flexDirection: 'row', margin: 20, marginTop: 0}}>
             {loading &&
             <View style={{flex: 1, margin: 20, alignItems: 'center'}}>
-              <Text>{translate("loading_data")}...</Text>
+              <Text>{say("loading_data")}...</Text>
               <ActivityIndicator size="large" />
             </View>
             ||
             <View style={{flex: 1, alignItems: 'center'}}>
-              <Text style={{margin: 10}}>{translate("select_canvassing_campaign")}:</Text>
+              <Text style={{margin: 10}}>{say("select_canvassing_campaign")}:</Text>
               { forms }
             </View>
             }
@@ -697,7 +697,7 @@ export default class App extends LocationComponent {
               backgroundColor="#d7d7d7"
               color="black"
               onPress={() => this.setState({SelectModeScreen: true})}>
-              {translate("start_new_canvas_activity")}
+              {say("start_new_canvas_activity")}
             </Icon.Button>
           </View>
 
@@ -707,7 +707,7 @@ export default class App extends LocationComponent {
             <Divider />
 
             <View style={{margin: 20, alignItems: 'center'}}>
-              <Text>{translate("dropbox_logged_in_as")}:</Text>
+              <Text>{say("dropbox_logged_in_as")}:</Text>
               <Text>{user.dropbox.name.display_name}</Text>
             </View>
 
@@ -717,15 +717,15 @@ export default class App extends LocationComponent {
               color="#ffffff"
               onPress={() => {
                 Alert.alert(
-                  'Dropbox '+translate("logout"),
-                  translate("sure_you_wish_logout"),
+                  'Dropbox '+say("logout"),
+                  say("sure_you_wish_logout"),
                   [
-                    {text: translate("yes"), onPress: () => this.dropboxLogout()},
-                    {text: translate("no")},
+                    {text: say("yes"), onPress: () => this.dropboxLogout()},
+                    {text: say("no")},
                   ], { cancelable: false }
                 );
               }}>
-              {'Dropbox '+translate("logout")}
+              {'Dropbox '+say("logout")}
             </Icon.Button>
           </View>
           }
@@ -737,7 +737,7 @@ export default class App extends LocationComponent {
               backgroundColor="#3d9ae8"
               color="#ffffff"
               onPress={() => this.setState({SelectModeScreen: true})}>
-              {'Dropbox '+translate("login")}
+              {'Dropbox '+say("login")}
             </Icon.Button>
           </View>
           }
@@ -748,8 +748,8 @@ export default class App extends LocationComponent {
 
         <View style={{margin: 12}}>
           <Text>
-            {translate("need_help_using_tool")} <Text style={{fontWeight: 'bold', color: 'blue'}} onPress={() => {this._canvassUrlHandler()}}>
-            {translate("canvassing_documentation")}</Text> {translate("with_useful_articles")}
+            {say("need_help_using_tool")} <Text style={{fontWeight: 'bold', color: 'blue'}} onPress={() => {this._canvassUrlHandler()}}>
+            {say("canvassing_documentation")}</Text> {say("with_useful_articles")}
           </Text>
         </View>
 
@@ -757,8 +757,8 @@ export default class App extends LocationComponent {
 
         <View style={{margin: 12}}>
           <Text>
-            {translate("using_tool_you_acknowledge")} <Text style={{fontWeight: 'bold', color: 'blue'}} onPress={() => {this._canvassGuidelinesUrlHandler()}}>
-            {translate("canvassing_guidelines")}</Text>. {translate("be_courteous_to_those")}
+            {say("using_tool_you_acknowledge")} <Text style={{fontWeight: 'bold', color: 'blue'}} onPress={() => {this._canvassGuidelinesUrlHandler()}}>
+            {say("canvassing_guidelines")}</Text>. {say("be_courteous_to_those")}
           </Text>
         </View>
 
@@ -775,7 +775,7 @@ export default class App extends LocationComponent {
           <View style={{flex: 1, alignItems: 'center'}} ref="backgroundWrapper">
             <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
               <View style={{backgroundColor: 'white', padding: 20, borderRadius: 40, borderWidth: 10, borderColor: '#d7d7d7'}}>
-                <Text style={styles.header}>{translate("select_canvassing_mode")}</Text>
+                <Text style={styles.header}>{say("select_canvassing_mode")}</Text>
 
                 <View style={{margin: 5}}>
                   <Icon.Button
@@ -784,13 +784,13 @@ export default class App extends LocationComponent {
                     color="#000000"
                     onPress={() => this.setState({showCamera: true})}
                     {...iconStyles}>
-                    {translate("scan_qr_code")}
+                    {say("scan_qr_code")}
                   </Icon.Button>
                 </View>
 
                 <View style={{margin: 5, marginTop: 0}}>
                   <Text style={{fontSize: 10, textAlign: 'justify'}}>
-                    {translate("join_existing_effort")}
+                    {say("join_existing_effort")}
                   </Text>
                 </View>
 
@@ -801,12 +801,12 @@ export default class App extends LocationComponent {
                     color="#000000"
                     onPress={() => this.setState({askOrgId: true})}
                     {...iconStyles}>
-                    {translate("org_id")}
+                    {say("org_id")}
                   </Icon.Button>
                 </View>
 
                 <View style={{margin: 5, marginTop: 0}}>
-                  <Text style={{fontSize: 10, textAlign: 'justify'}}>{translate("didnt_receive_qr_code")}</Text>
+                  <Text style={{fontSize: 10, textAlign: 'justify'}}>{say("didnt_receive_qr_code")}</Text>
                 </View>
 
                <View style={{margin: 5}}>
@@ -819,12 +819,12 @@ export default class App extends LocationComponent {
                       else this.openURL(wsbase+'/auth/dm');
                     }}
                     {...iconStyles}>
-                    {translate("collaborate_with_dropbox")}
+                    {say("collaborate_with_dropbox")}
                   </Icon.Button>
                 </View>
 
                 <View style={{margin: 5, marginTop: 0}}>
-                  <Text style={{fontSize: 10, textAlign: 'justify'}}>{translate("login_with_dropbox_share_data")}</Text>
+                  <Text style={{fontSize: 10, textAlign: 'justify'}}>{say("login_with_dropbox_share_data")}</Text>
                 </View>
 
                 <View style={{margin: 5}}>
@@ -834,12 +834,12 @@ export default class App extends LocationComponent {
                     color="#000000"
                     onPress={() => navigate('CreateSurvey', {title: 'Solo Project', dbx: null, form: null, refer: this})}
                     {...iconStyles}>
-                    {translate("solo_project")}
+                    {say("solo_project")}
                   </Icon.Button>
                 </View>
 
                 <View style={{margin: 5, marginTop: 0}}>
-                  <Text style={{fontSize: 10, textAlign: 'justify'}}>{translate("solo_project_desc")}</Text>
+                  <Text style={{fontSize: 10, textAlign: 'justify'}}>{say("solo_project_desc")}</Text>
                 </View>
 
                 {(__DEV__&&dinfo.Emulator)&&
@@ -889,10 +889,10 @@ export default class App extends LocationComponent {
           autoCorrect={false}
           autoCapitalize={"characters"}
           visible={this.state.askOrgId}
-          title={translate("org_id")}
-          belowInputRender={() => (<Text style={{marginBottom: 10}}>{translate("no_qr_code_please_ask")}</Text>)}
-          placeholder={translate("enter_org_id_example")+': NCC1701'}
-          submitText={translate("lets_do_this")}
+          title={say("org_id")}
+          belowInputRender={() => (<Text style={{marginBottom: 10}}>{say("no_qr_code_please_ask")}</Text>)}
+          placeholder={say("enter_org_id_example")+': NCC1701'}
+          submitText={say("lets_do_this")}
           onCancel={() => this.setState({askOrgId: false})}
           onSubmit={text => this.setState({orgId: text, askOrgId: false}, () => this.connectToGOTV())}
         />

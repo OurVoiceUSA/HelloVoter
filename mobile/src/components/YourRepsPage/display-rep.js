@@ -27,7 +27,7 @@ export default DisplayRep = (props) => {
 
   const initiateLink = async (url) => {
     return Linking.openURL(url).catch(() => {
-      Alert.alert(translate("app_error"), translate("unable_to_launch_external"), [{text: translate("ok")}], { cancelable: false })
+      Alert.alert(say("app_error"), say("unable_to_launch_external"), [{text: say("ok")}], { cancelable: false })
     });
   }
 
@@ -48,7 +48,7 @@ export default DisplayRep = (props) => {
     <View style={{margin: 5, flex: 1, flexDirection: 'row'}} key='nodata'>
       <Icon name="question-circle" size={55} color='#e3e3e3' />
       <View style={{flex: 1, flexDirection: 'row', alignItems: 'center'}}>
-        <Text style={{marginLeft: 10, fontSize: 16}}>{translate("unable_determine_district")}</Text>
+        <Text style={{marginLeft: 10, fontSize: 16}}>{say("unable_determine_district")}</Text>
       </View>
     </View>
     )

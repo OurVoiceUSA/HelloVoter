@@ -19,7 +19,7 @@ import RNGooglePlaces from 'react-native-google-places';
 import Modal from 'react-native-simple-modal';
 import DisplayRep from './display-rep';
 import { wsbase } from '../../config'
-import { Divider, translate, _apiCall, _loginPing, _doGeocode, _saveUser, _specificAddress } from '../../common';
+import { Divider, say, _apiCall, _loginPing, _doGeocode, _saveUser, _specificAddress } from '../../common';
 
 export default class App extends LocationComponent {
 
@@ -146,14 +146,14 @@ export default class App extends LocationComponent {
       if (!_specificAddress(place.address)) {
         setTimeout(() => {
           Alert.alert(
-            translate("ambiguous_address"),
-            translate("no_guarantee_district"),
+            say("ambiguous_address"),
+            say("no_guarantee_district"),
             [
-              {text: translate("continue_anyway"), onPress: () => {
+              {text: say("continue_anyway"), onPress: () => {
                 place.icon = this.locationIcon;
                 this._whorepme(place);
               }},
-              {text: translate("cancel")}
+              {text: say("cancel")}
             ], { cancelable: false }
           );
         }, 500);
@@ -182,14 +182,14 @@ export default class App extends LocationComponent {
     let access = await this.requestLocationPermission();
     if (access) return;
 
-    this.setState({loading: false, myPosition: {icon: 'map-marker', address: translate("location_access_denied"), error: true}, apiData: null});
-    Alert.alert(translate("current_location"), translate("howto_use_current_location"), [{text: translate("ok")}], { cancelable: false });
+    this.setState({loading: false, myPosition: {icon: 'map-marker', address: say("location_access_denied"), error: true}, apiData: null});
+    Alert.alert(say("current_location"), say("howto_use_current_location"), [{text: say("ok")}], { cancelable: false });
   }
 
   email = async (email) => {
     const url = 'mailto:' + email;
     return Linking.openURL(url).catch(() => {
-      Alert.alert(translate("app_error"), translate("unable_to_launch_external"), [{text: translate("ok")}], { cancelable: false })
+      Alert.alert(say("app_error"), say("unable_to_launch_external"), [{text: say("ok")}], { cancelable: false })
     });
   }
 
@@ -199,36 +199,36 @@ export default class App extends LocationComponent {
     if (apiData && !apiData.msg) {
 
       if (apiData.cd.length == 0) {
-        var nodata = {key: 1, title: translate("us_house_of_reps")};
+        var nodata = {key: 1, title: say("us_house_of_reps")};
         apiData.cd.push(nodata);
       }
 
       if (apiData.sen.length == 0) {
-        var nodata = {key: 1, title: translate("us_senate")};
+        var nodata = {key: 1, title: say("us_senate")};
         apiData.sen.push(nodata);
       }
 
       if (apiData.sldl.length == 0) {
-        var nodata = {key: 1, title: translate("sldl")};
+        var nodata = {key: 1, title: say("sldl")};
         apiData.sldl.push(nodata);
       }
 
       if (apiData.sldu.length == 0) {
-        var nodata = {key: 1, title: translate("sldu")};
+        var nodata = {key: 1, title: say("sldu")};
         apiData.sldu.push(nodata);
       }
 
       if (apiData.other.length == 0) {
-        var nodata = {key: 1, title: translate("state_local_offials")};
+        var nodata = {key: 1, title: say("state_local_offials")};
         apiData.other.push(nodata);
       }
 
     }
 
     switch(myPosition.icon) {
-      case 'map-marker': basedOnYour = translate("approximate_address"); break;
-      case 'home': basedOnYour = translate("home_address"); break;
-      case 'map-signs': basedOnYour = translate("searched_address"); break;
+      case 'map-marker': basedOnYour = say("approximate_address"); break;
+      case 'home': basedOnYour = say("home_address"); break;
+      case 'map-signs': basedOnYour = say("searched_address"); break;
       default: basedOnYour = "..";
     }
 
@@ -244,7 +244,7 @@ export default class App extends LocationComponent {
             style={{margin: 0, backgroundColor: '#d7d7d7', padding: 10}}
             onPress={() => {this.setState({modalIsOpen: true})}}>
           <View style={{flexDirection: 'row', marginBottom: 5}}>
-            <Text>{translate("based_on_your")} {basedOnYour}. {translate("tap_to_change")}</Text>
+            <Text>{say("based_on_your")} {basedOnYour}. {say("tap_to_change")}</Text>
           </View>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
             <Icon style={{marginRight: 10}} name={myPosition.icon} size={20} color="black" />
@@ -253,7 +253,7 @@ export default class App extends LocationComponent {
             ||
             <View style={{flexDirection: 'row'}}>
             <ActivityIndicator />
-            <Text style={{fontStyle: 'italic'}}> {translate("loading_address")}</Text>
+            <Text style={{fontStyle: 'italic'}}> {say("loading_address")}</Text>
             </View>
             }
           </View>
@@ -264,7 +264,7 @@ export default class App extends LocationComponent {
         {loading &&
         <View style={{flex: 1}}>
           <View style={{flex: 1, margin: 10, justifyContent: 'center', alignItems: 'center'}}>
-            <Text style={{fontSize: 18, textAlign: 'center', marginBottom: 10}}>{translate("loading_district_information")}</Text>
+            <Text style={{fontSize: 18, textAlign: 'center', marginBottom: 10}}>{say("loading_district_information")}</Text>
             <ActivityIndicator />
           </View>
         </View>
@@ -359,24 +359,24 @@ export default class App extends LocationComponent {
           disableOnBackPress={(apiData ? false : true)}>
           <View style={{backgroundColor: 'white', alignItems: 'center', padding: 40, borderRadius: 40, borderWidth: 10,
 borderColor: '#d7d7d7'}}>
-            <Text style={{fontSize: 18, textAlign: 'center', marginBottom: 10}}>{translate("show_representatives_by")}:</Text>
+            <Text style={{fontSize: 18, textAlign: 'center', marginBottom: 10}}>{say("show_representatives_by")}:</Text>
             <TouchableOpacity
               style={{margin: 10, flexDirection: 'row', backgroundColor: '#d7d7d7', alignItems: 'center', padding: 10}}
               onPress={this.doCurrentLocation}>
               <Icon style={{marginRight: 15}} name="map-marker" size={20} color="black" />
-              <Text style={{textAlign: 'center'}}>{translate("current_location")}</Text>
+              <Text style={{textAlign: 'center'}}>{say("current_location")}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={{margin: 10, flexDirection: 'row', backgroundColor: '#d7d7d7', alignItems: 'center', padding: 10}}
               onPress={this._useHomeAddress}>
               <Icon style={{marginRight: 15}} name="home" size={20} color="black" />
-              <Text style={{textAlign: 'center'}}>{translate("home_address_cap")}</Text>
+              <Text style={{textAlign: 'center'}}>{say("home_address_cap")}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={{margin: 10, flexDirection: 'row', backgroundColor: '#d7d7d7', alignItems: 'center', padding: 10}}
               onPress={this._useCustomAddress}>
               <Icon style={{marginRight: 15}} name="map-signs" size={20} color="black" />
-              <Text style={{textAlign: 'center'}}>{translate("searched_address_cap")}</Text>
+              <Text style={{textAlign: 'center'}}>{say("searched_address_cap")}</Text>
             </TouchableOpacity>
           </View>
         </Modal>

@@ -7,7 +7,7 @@ import {
   I18nManager,
 } from 'react-native';
 
-import { translate } from '../common';
+import { say } from '../common';
 
 const translationGetters = {
   // lazy requires (metro bundler does not support symlinks)
@@ -24,7 +24,7 @@ const setI18nConfig = () => {
     fallback;
 
   // clear translation cache
-  translate.cache.clear();
+  say.cache.clear();
   // update layout direction
   I18nManager.forceRTL(isRTL);
   // set i18n-js config

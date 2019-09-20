@@ -19,7 +19,7 @@ import { wsbase } from './config';
 const JWT = 'OV_JWT';
 const USERLOCAL = 'OV_USER';
 
-export const translate = memoize(
+export const say = memoize(
   (key, config) => i18n.t(key, config),
   (key, config) => (config ? key + JSON.stringify(config) : key)
 );
@@ -71,11 +71,11 @@ export function _specificAddress(address) {
 
 export function _partyNameFromKey(party) {
   switch (party) {
-    case 'D': return translate("democrat");
-    case 'R': return translate("republican");
-    case 'I': return translate("independent");
-    case 'G': return translate("green");
-    case 'L': return translate("libertarian");
+    case 'D': return say("democrat");
+    case 'R': return say("republican");
+    case 'I': return say("independent");
+    case 'G': return say("green");
+    case 'L': return say("libertarian");
     default: return '';
   }
 }

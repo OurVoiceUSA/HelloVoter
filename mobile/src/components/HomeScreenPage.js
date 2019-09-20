@@ -28,7 +28,7 @@ import storage from 'react-native-storage-wrapper';
 import { sliderWidth, itemWidth } from '../styles/SliderEntry.style';
 import styles, { colors } from '../styles/index.style';
 import SliderEntry from './SliderEntry';
-import { _loginPing, translate, DINFO } from '../common';
+import { _loginPing, say, DINFO } from '../common';
 
 export default class App extends HVComponent {
 
@@ -49,8 +49,8 @@ export default class App extends HVComponent {
     if (lang !== "en")
     mainMenu.push(
       {
-        title: translate("we_translated_this"),
-        subtitle: translate("we_used_google_translate"),
+        title: say("we_translated_this"),
+        subtitle: say("we_used_google_translate"),
         illustration: require('../../img/translate.png'),
         onPress: () => this.openGitHub(),
       }
@@ -58,8 +58,8 @@ export default class App extends HVComponent {
 
     mainMenu.push(
       {
-        title: translate("contact_your_reps"),
-        subtitle: translate("know_who_represents_you"),
+        title: say("contact_your_reps"),
+        subtitle: say("know_who_represents_you"),
         illustration: require('../../img/phone-your-rep.png'),
         onPress: () => this.setState({active: 'reps'}),
       }
@@ -67,8 +67,8 @@ export default class App extends HVComponent {
 
     mainMenu.push(
       {
-        title: translate("canvas_for_any_cause"),
-        subtitle: translate("our_zero_cost_tool"),
+        title: say("canvas_for_any_cause"),
+        subtitle: say("our_zero_cost_tool"),
         illustration: require('../../img/canvassing.png'),
         onPress: () => this.setState({active: 'canvassing'}),
       }
@@ -78,8 +78,8 @@ export default class App extends HVComponent {
     if (lang === "en")
     mainMenu.push(
       {
-        title: translate("coming_zoon_desktop_tools"),
-        subtitle: translate("canvassing_at_scale"),
+        title: say("coming_zoon_desktop_tools"),
+        subtitle: say("canvassing_at_scale"),
         illustration: require('../../img/phone-banking.png'),
         onPress: () => this.openDonate(),
       }
@@ -87,8 +87,8 @@ export default class App extends HVComponent {
 
     mainMenu.push(
       {
-        title: translate("donate"),
-        subtitle: translate("we_operate_on_donations"),
+        title: say("donate"),
+        subtitle: say("we_operate_on_donations"),
         illustration: require('../../img/donate.png'),
         onPress: () => this.openDonate(),
       }
@@ -96,8 +96,8 @@ export default class App extends HVComponent {
 
     mainMenu.push(
       {
-        title: translate("rate_this_app"),
-        subtitle: translate("feedback_helps_us"),
+        title: say("rate_this_app"),
+        subtitle: say("feedback_helps_us"),
         illustration: require('../../img/rate.png'),
         onPress: () => {
           let options = {
@@ -114,8 +114,8 @@ export default class App extends HVComponent {
 
     mainMenu.push(
       {
-        title: translate("open_source_software"),
-        subtitle: translate("help_us_out_directly"),
+        title: say("open_source_software"),
+        subtitle: say("help_us_out_directly"),
         illustration: require('../../img/open-source.png'),
         onPress: () => this.openGitHub(),
       }
@@ -239,7 +239,7 @@ export default class App extends HVComponent {
                 tappableDots={!!this._sliderRef}
               />
             </View>
-            <Text style={styles.homeScreenText}>{translate("homescreen_summary")}</Text>
+            <Text style={styles.homeScreenText}>{say("homescreen_summary")}</Text>
             <View style={{flexDirection: 'row', justifyContent: 'center', marginBottom: 15}}>
               <Icon name="facebook-official" size={40} color="#3b5998" style={{marginRight: 25}} onPress={this.openFacebook} />
               <Icon name="twitter" size={40} color="#0084b4" style={{marginRight: 25}} onPress={this.openTwitter} />
@@ -249,9 +249,9 @@ export default class App extends HVComponent {
             </View>
 
             <View style={{flexDirection: 'row', justifyContent: 'center'}}>
-              <Button raised primary text={translate("app_supporters")} onPress={() => this.setState({active: 'supporters'})} />
+              <Button raised primary text={say("app_supporters")} onPress={() => this.setState({active: 'supporters'})} />
               <Text>{'  '}</Text>
-              <Button raised primary text={translate("legal_notice")} onPress={() => this.setState({active: 'legal'})} />
+              <Button raised primary text={say("legal_notice")} onPress={() => this.setState({active: 'legal'})} />
             </View>
 
           </ScrollView>
@@ -266,9 +266,9 @@ export default class App extends HVComponent {
         {active === 'supporters' &&
         <View style={styles.container}>
           <ScrollView style={styles.scrollview}>
-            <Text style={styles.homeScreenText}>{translate("our_signature_supporters")}</Text>
-            <Text style={styles.homeScreenText}>{translate("this_app_is_made_possible_by")}</Text>
-            <Button style={{margin: 15}} raised primary text={translate("support_us_on_patreon")} onPress={() => this.openDonate()} />
+            <Text style={styles.homeScreenText}>{say("our_signature_supporters")}</Text>
+            <Text style={styles.homeScreenText}>{say("this_app_is_made_possible_by")}</Text>
+            <Button style={{margin: 15}} raised primary text={say("support_us_on_patreon")} onPress={() => this.openDonate()} />
             <PatreonNames names={patreonNames} />
           </ScrollView>
         </View>
@@ -280,12 +280,12 @@ export default class App extends HVComponent {
               HelloVoter Version {appVersion}
             </Text>
             <Text style={styles.homeScreenText}>
-              Copyright (c) 2018, Our Voice USA. {translate("all_rights_reserved")}
+              Copyright (c) 2018, Our Voice USA. {say("all_rights_reserved")}
             </Text>
-            <Text style={styles.homeScreenText}>{translate("this_program_is_free_software")}</Text>
+            <Text style={styles.homeScreenText}>{say("this_program_is_free_software")}</Text>
             <AppleEULA />
             <View style={{flexDirection: 'row', justifyContent: 'center'}}>
-              <Button raised primary text={translate("tap_here_for_source_code")} onPress={() => this.openGitHub('HelloVoter')} />
+              <Button raised primary text={say("tap_here_for_source_code")} onPress={() => this.openGitHub('HelloVoter')} />
             </View>
           </ScrollView>
         </View>
@@ -295,19 +295,19 @@ export default class App extends HVComponent {
           <BottomNavigation.Action
             key="home"
             icon="home"
-            label={translate("home")}
+            label={say("home")}
             onPress={() => this.setState({ active: 'home' })}
           />
           <BottomNavigation.Action
             key="reps"
             icon="people"
-            label={translate("your_reps")}
+            label={say("your_reps")}
             onPress={() => this.setState({ active: 'reps' })}
           />
           <BottomNavigation.Action
             key="canvassing"
             icon="map"
-            label={translate("canvassing")}
+            label={say("canvassing")}
             onPress={() => this.setState({ active: 'canvassing' })}
           />
         </BottomNavigation>
@@ -318,7 +318,7 @@ export default class App extends HVComponent {
 }
 
 const PatreonNames = props => {
-  if (!props.names || props.names.length === 0) return (<View><ActivityIndicator /><Text>{translate("loading_data")}...</Text></View>);
+  if (!props.names || props.names.length === 0) return (<View><ActivityIndicator /><Text>{say("loading_data")}...</Text></View>);
   return props.names.map(name => (
     <Text style={styles.homeScreenText}>{name}</Text>
   ));
@@ -326,7 +326,7 @@ const PatreonNames = props => {
 
 const AppleEULA = props => {
   if (Platform.OS === 'ios') return (
-    <Text style={styles.homeScreenText}>{translate("note_about_apple_eula")}</Text>
+    <Text style={styles.homeScreenText}>{say("note_about_apple_eula")}</Text>
   );
   return null;
 };
