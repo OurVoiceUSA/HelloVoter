@@ -59,6 +59,6 @@
     "wkx": "^0.4.8"
   },
   "optionalDependencies": {
-    "jmx": "^0.7.0"
+    "jmx": "github:OurVoiceUSA/node-jmx"
   }
 }
