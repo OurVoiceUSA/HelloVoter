@@ -26,8 +26,9 @@ npm install
 )
 
 # build client & server via docker
-docker build -t ourvoiceusa/hellovoterhq client
-docker build -t ourvoiceusa/hellovoterapi server
+docker build --pull -t ourvoiceusa/hellovoterhq client
+docker build --pull -t ourvoiceusa/hellovoterapi server
+docker build --pull -t ourvoiceusa/neo4j-hv database
 
 # build mobile app
 cd mobile
