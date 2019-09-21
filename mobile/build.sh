@@ -6,6 +6,9 @@ set -e
 # clean entire build cache
 rm -rf node_modules ios/build ios/pods ios/Podfile.lock android/build android/app/build package-lock.json 
 
+# update all dependancies
+ncu -u
+
 # install dependancies
 npm install
 
