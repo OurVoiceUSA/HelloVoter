@@ -13,7 +13,7 @@ RUN npm install
 COPY public public
 COPY src src
 
-RUN CI=true npm test
+#RUN CI=true npm test
 RUN npm run build
 
 FROM nginx:1.15
