@@ -53,5 +53,5 @@ npm install
 )
 
 # build/launch iPhone simulator
-react-native run-ios
+react-native run-ios --simulator "iPhone 11"
 
