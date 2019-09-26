@@ -45,24 +45,3 @@ Finally, build the app:
 
 `react-native run-ios` or `react-native run-android`
 
-## Test Automation
-
-For testing we use `mocha` and `detox`. Run the below to get setup with that:
-
-    npm install -g detox-cli mocha-cli
-    brew tap wix/brew
-    brew install wix/brew/applesimutils
-    brew tap facebook/fb
-    brew install fbsimctl --HEAD
-
-Then build/execute the tests:
-
-* for iOS:
-    detox build -c ios.sim.debug
-    detox test -c ios.sim.debug
-
-* for Android:
-    detox build -c android.emu.debug
-    detox test -c android.emu.debug
-
-NOTE: Test Automation for Android generally seems to have issues due to it not following the latest version react native very well.
