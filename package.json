@@ -8,9 +8,8 @@
     "makeadmin": "cd server && npm run makeadmin --",
     "test": "cd server && npm test",
     "ncu": "ncu && cd client && ncu && cd ../server && ncu",
-    "postinstall": "cd client && npm install && cd ../server && npm install",
-    "client": "cd client && npm start",
-    "server": "cd server && npm start",
+    "client": "cd client && npm install && npm start",
+    "server": "cd server && npm install && npm start",
     "start": "concurrently -k \"npm run client\" \"npm run server\""
   },
   "keywords": [],

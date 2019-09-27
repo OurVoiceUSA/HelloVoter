@@ -14,7 +14,7 @@
     "@react-native-community/geolocation": "^2.0.2",
     "@react-native-community/netinfo": "^4.2.2",
     "base-64": "^0.1.0",
-    "dropbox": "^4.0.28",
+    "dropbox": "4.0.28",
     "encoding": "^0.1.12",
     "i18n-js": "^3.3.0",
     "javascript-time-ago": "^2.0.2",
@@ -26,7 +26,7 @@
     "ourvoiceusa-sdk-js": "github:OurVoiceUSA/ourvoiceusa-sdk-js",
     "pako": "^1.0.10",
     "rbush": "^3.0.1",
-    "react": "16.9.0",
+    "react": "16.10.0",
     "react-native": "0.61.1",
     "react-native-camera": "^3.6.0",
     "react-native-collapsible": "^1.5.1",
@@ -51,12 +51,12 @@
     "react-native-storage-wrapper": "^0.1.0",
     "react-native-swipeout": "^2.3.6",
     "react-native-vector-icons": "^6.6.0",
-    "react-navigation": "^4.0.9",
+    "react-navigation": "^4.0.10",
     "react-navigation-stack": "^1.9.0",
     "sha1": "^1.1.1",
     "tcomb-form-native": "^0.6.20",
     "throttle-debounce": "^2.1.0",
-    "transliteration": "^1.6.6",
+    "transliteration": "1.6.6",
     "uuid": "^3.3.3"
   },
   "devDependencies": {
@@ -72,7 +72,7 @@
     "metro-react-native-babel-preset": "^0.56.0",
     "patch-package": "^6.2.0",
     "react-native-cli": "^2.0.1",
-    "react-test-renderer": "16.9.0",
+    "react-test-renderer": "16.10.0",
     "ws": "^7.1.2"
   },
   "jest": {
