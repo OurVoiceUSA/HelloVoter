@@ -20,7 +20,7 @@ npm install
 (
   set -ex
   cd android
-  ./gradlew assembleRelease
+  ./gradlew app:assembleRelease
 )
 
 # build/launch iPhone simulator
