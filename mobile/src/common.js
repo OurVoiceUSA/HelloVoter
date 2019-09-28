@@ -3,6 +3,7 @@ import React, { PureComponent } from 'react';
 
 import {
   Dimensions,
+  Platform,
   View,
 } from 'react-native';
 
@@ -10,6 +11,7 @@ import storage from 'react-native-storage-wrapper';
 import { getLocales, getTimeZone } from 'react-native-localize';
 import jwt_decode from 'jwt-decode';
 import DeviceInfo from 'react-native-device-info';
+import Permissions from 'react-native-permissions';
 import RNGooglePlaces from 'react-native-google-places';
 import Geocoder from 'react-native-geocoder';
 import memoize from 'lodash.memoize';
@@ -35,6 +37,37 @@ export function api_base_uri(orgId) {
 export function getPropFromArrObj(arr, id, prop) {
   for (let i in arr)
     if (arr[i].id === id) return arr[i][prop];
+  return false;
+}
+
+export async function permissionNotify() {
+  try {
+    let res = await Permissions.checkNotifications();
+    if (res.status === "denied") res = await Permissions.requestNotifications(['alert', 'badge', 'sound']);
+    if (res.status === "granted") return true;
+  } catch(error) {
+    // nothing we can do about it
+  }
+  return false;  
+}
+
+export async function permissionLocation() {
+  let perm;
+
+  if (Platform.OS === 'ios') {
+    perm = Permissions.PERMISSIONS.IOS.LOCATION_WHEN_IN_USE;
+  } else {
+    perm = Permissions.PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION;
+  }
+
+  try {
+    let res = await Permissions.check(perm);
+    if (res === "denied") res = await Permissions.request(perm);
+    if (res === "granted") return true;
+  } catch (e) {
+    console.warn(e);
+  }
+
   return false;
 }
 

@@ -16,7 +16,6 @@ import {
 
 import { StackActions, NavigationActions } from 'react-navigation';
 import { BottomNavigation } from 'react-native-material-ui';
-import Permissions from 'react-native-permissions';
 import RNGooglePlaces from 'react-native-google-places';
 import Modal from 'react-native-simple-modal';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -26,7 +25,7 @@ import { Dropbox } from 'dropbox';
 import { google_api_key } from '../../config';
 import {
   _getJWT, _loginPing, _rmJWT, _saveUser, DINFO,
-  _rmUser, _apiCall, _specificAddress,
+  _rmUser, _apiCall, _specificAddress, permissionNotify, permissionLocation,
 } from '../../common';
 
 import {
@@ -73,8 +72,8 @@ export default class App extends PureComponent {
       user: null,
       party: null,
       myPosition: { address: null, longitude: null, latitude: null },
-      permissionLocation: null,
-      permissionNotification: null,
+      havePermLocation: false,
+      havePermNotification: false,
       appVersion: "unknown",
     };
 
@@ -153,23 +152,21 @@ export default class App extends PureComponent {
   checkPermissionLocation = async () => {
     let access = false;
     try {
-      res = await Permissions.check('location');
-      if (res === "authorized") access = true;
+      access = await permissionLocation();
     } catch(error) {
       // nothing we can do about it
     }
-    this.setState({permissionLocation: access});
+    this.setState({havePermLocation: access});
   }
 
   checkPermissionNotification = async () => {
     let access = false;
     try {
-      res = await Permissions.check('notification');
-      if (res === "authorized") access = true;
+      access = await permissionNotify();
     } catch(error) {
       // nothing we can do about it
     }
-    this.setState({permissionNotification: access});
+    this.setState({havePermNotification: access});
   }
 
   sessionExpired() {
@@ -183,7 +180,7 @@ export default class App extends PureComponent {
   }
 
   render() {
-    const { user, permissionLocation, permissionNotification, SmLoginScreen,
+    const { user, havePermLocation, havePermNotification, SmLoginScreen,
             surveyComplete, surveyPartial, party, myPosition, appVersion } = this.state;
     const { navigate } = this.props.navigation;
 
@@ -336,7 +333,7 @@ export default class App extends PureComponent {
               <Text style={{fontSize: 20}}>Location Permissions:</Text>
             </View>
           </View>
-          {permissionLocation &&
+          {havePermLocation &&
           <View style={{flexDirection: 'row', alignItems: 'center', marginRight: 20}}>
             <Text style={{marginRight: 7, fontWeight: 'bold'}}>On</Text>
             <Icon name="check-circle" size={30} color="green" />
@@ -360,7 +357,7 @@ export default class App extends PureComponent {
               <Text style={{fontSize: 20}}>Push Notifications:</Text>
             </View>
           </View>
-          {permissionNotification &&
+          {havePermNotification &&
           <View style={{flexDirection: 'row', alignItems: 'center', marginRight: 20}}>
             <Text style={{marginRight: 7, fontWeight: 'bold'}}>On</Text>
             <Icon name="check-circle" size={30} color="green" />

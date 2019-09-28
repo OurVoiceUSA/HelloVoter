@@ -42,6 +42,12 @@ PODS:
     - GoogleMaps/Base
   - GooglePlaces (3.1.0):
     - GoogleMaps/Base (= 3.1.0)
+  - Permission-Camera (2.0.0):
+    - RNPermissions
+  - Permission-LocationWhenInUse (2.0.0):
+    - RNPermissions
+  - Permission-Notifications (2.0.0):
+    - RNPermissions
   - RCTRequired (0.61.1)
   - RCTTypeSafety (0.61.1):
     - FBLazyVector (= 0.61.1)
@@ -268,8 +274,6 @@ PODS:
     - React-cxxreact (= 0.61.1)
     - React-jsi (= 0.61.1)
     - ReactCommon/jscallinvoker (= 0.61.1)
-  - ReactNativePermissions (1.2.1):
-    - React
   - RNCAsyncStorage (1.6.2):
     - React
   - RNDeviceInfo (3.1.4):
@@ -277,6 +281,8 @@ PODS:
   - RNGestureHandler (1.4.1):
     - React
   - RNLocalize (1.2.1):
+    - React
+  - RNPermissions (2.0.0):
     - React
   - RNRate (1.0.1):
     - React
@@ -290,6 +296,9 @@ DEPENDENCIES:
   - FBReactNativeSpec (from `../node_modules/react-native/Libraries/FBReactNativeSpec`)
   - Folly (from `../node_modules/react-native/third-party-podspecs/Folly.podspec`)
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
+  - Permission-Camera (from `../node_modules/react-native-permissions/ios/Camera.podspec`)
+  - Permission-LocationWhenInUse (from `../node_modules/react-native-permissions/ios/LocationWhenInUse.podspec`)
+  - Permission-Notifications (from `../node_modules/react-native-permissions/ios/Notifications.podspec`)
   - RCTRequired (from `../node_modules/react-native/Libraries/RCTRequired`)
   - RCTTypeSafety (from `../node_modules/react-native/Libraries/TypeSafety`)
   - React (from `../node_modules/react-native/`)
@@ -321,11 +330,11 @@ DEPENDENCIES:
   - React-RCTVibration (from `../node_modules/react-native/Libraries/Vibration`)
   - ReactCommon/jscallinvoker (from `../node_modules/react-native/ReactCommon`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
-  - ReactNativePermissions (from `../node_modules/react-native-permissions`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-community/async-storage`)"
   - RNDeviceInfo (from `../node_modules/react-native-device-info`)
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - RNLocalize (from `../node_modules/react-native-localize`)
+  - RNPermissions (from `../node_modules/react-native-permissions`)
   - RNRate (from `../node_modules/react-native-rate/ios`)
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
@@ -348,6 +357,12 @@ EXTERNAL SOURCES:
     :podspec: "../node_modules/react-native/third-party-podspecs/Folly.podspec"
   glog:
     :podspec: "../node_modules/react-native/third-party-podspecs/glog.podspec"
+  Permission-Camera:
+    :path: "../node_modules/react-native-permissions/ios/Camera.podspec"
+  Permission-LocationWhenInUse:
+    :path: "../node_modules/react-native-permissions/ios/LocationWhenInUse.podspec"
+  Permission-Notifications:
+    :path: "../node_modules/react-native-permissions/ios/Notifications.podspec"
   RCTRequired:
     :path: "../node_modules/react-native/Libraries/RCTRequired"
   RCTTypeSafety:
@@ -404,8 +419,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/Libraries/Vibration"
   ReactCommon:
     :path: "../node_modules/react-native/ReactCommon"
-  ReactNativePermissions:
-    :path: "../node_modules/react-native-permissions"
   RNCAsyncStorage:
     :path: "../node_modules/@react-native-community/async-storage"
   RNDeviceInfo:
@@ -414,6 +427,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-gesture-handler"
   RNLocalize:
     :path: "../node_modules/react-native-localize"
+  RNPermissions:
+    :path: "../node_modules/react-native-permissions"
   RNRate:
     :path: "../node_modules/react-native-rate/ios"
   RNVectorIcons:
@@ -431,6 +446,9 @@ SPEC CHECKSUMS:
   Google-Maps-iOS-Utils: c32891ff472eaaa1fca032beedafa1a013af7875
   GoogleMaps: 5c13302e6fe6bb6e686b267196586b91cd594225
   GooglePlaces: e874db179f2675c4f3eeda0b686b540273a578b0
+  Permission-Camera: 4c4d5fc58e1a37e8a807e63403b64cda05a3fcdd
+  Permission-LocationWhenInUse: 9f540674150fa2e854020ba679341e8575e0513b
+  Permission-Notifications: db1a88bded0b2b23edb41ac56168f487636c2379
   RCTRequired: 53825815218847d3e9c7b6d92ad2d197a926d51e
   RCTTypeSafety: d886540c518e53064dfa081bf7693fd650699b92
   React: 5dea58967c421bd1fdf6b94c18b9ed0f5134683c
@@ -459,15 +477,15 @@ SPEC CHECKSUMS:
   React-RCTText: 81b62b4e7f11531a5154e4daa5617670d5a2d5de
   React-RCTVibration: 8be61459e3749d1fb02cf414edd05b3007622882
   ReactCommon: 4fba5be89efdf0b5720e0adb3d8d7edf6e532db0
-  ReactNativePermissions: e7db6c38a2f3fb8f26dbfdcaeb5c5e9364657a6d
   RNCAsyncStorage: 5ae4d57458804e99f73d427214442a6b10a53856
   RNDeviceInfo: 9e88577c51bd42f65275e53bb0de0a0f728ed6b8
   RNGestureHandler: 4cb47a93019c1a201df2644413a0a1569a51c8aa
   RNLocalize: 7206d44eb341d6e2a61a8184b831c64a5539fcdf
+  RNPermissions: 43fe093bcfe89d3a05a4b82a695db9db9e7dcf21
   RNRate: 29be49c24b314c4e8ec09d848c3965f61cb0be47
   RNVectorIcons: 0bb4def82230be1333ddaeee9fcba45f0b288ed4
   Yoga: d8c572ddec8d05b7dba08e4e5f1924004a177078
 
-PODFILE CHECKSUM: 5d8aab2a749b8fa6118107502132fe7b3ba4fef0
+PODFILE CHECKSUM: 43845c7b63db6e13dee4a53bb38be412fe6bcefb
 
 COCOAPODS: 1.7.5

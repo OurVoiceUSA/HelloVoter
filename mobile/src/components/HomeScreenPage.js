@@ -12,13 +12,11 @@ import {
   View,
   Text,
   Linking,
-  PermissionsAndroid,
   Platform,
   ScrollView,
   StatusBar,
 } from 'react-native';
 
-import Permissions from 'react-native-permissions';
 import { getLocales } from 'react-native-localize';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Rate, { AndroidMarket } from 'react-native-rate'
@@ -28,7 +26,7 @@ import storage from 'react-native-storage-wrapper';
 import { sliderWidth, itemWidth } from '../styles/SliderEntry.style';
 import styles, { colors } from '../styles/index.style';
 import SliderEntry from './SliderEntry';
-import { _loginPing, say, DINFO } from '../common';
+import { _loginPing, say, DINFO, permissionNotify } from '../common';
 
 export default class App extends HVComponent {
 
@@ -143,7 +141,7 @@ export default class App extends HVComponent {
 
   componentDidMount() {
     this.loadPatreonNames();
-    this.requestPushPermission();
+    permissionNotify();
     this.checkForInvite();
     DINFO().then(i => this.setState({appVersion: i.Version})).catch(e => console.warn(e));
   }
@@ -152,14 +150,6 @@ export default class App extends HVComponent {
     let patreonNames = [];
     // TODO: fetch json object
     this.setState({patreonNames});
-  }
-
-  requestPushPermission = async () => {
-    try {
-      res = await Permissions.request('notification');
-    } catch(error) {
-      // nothing we can do about it
-    }
   }
 
   checkForInvite = async() => {

@@ -3,14 +3,14 @@ import HVComponent from './HVComponent';
 
 import {
   Alert,
-  PermissionsAndroid,
   Platform,
   DeviceEventEmitter,
 } from 'react-native';
 
-import Permissions from 'react-native-permissions';
 import RNGLocation from 'react-native-google-location';
 import RNGooglePlaces from 'react-native-google-places';
+import { permissionLocation } from '../common';
+
 if (Platform.OS === 'ios') {
   navigator.geolocation = require('@react-native-community/geolocation');
 }
@@ -46,8 +46,7 @@ export default class LocationComponent extends HVComponent {
       this.alerts.active = true;
       this.alerts.queue.push({});
 
-      res = await Permissions.request('location');
-      if (res === "authorized") access = true;
+      access = await permissionLocation();
 
       // clean up after Permissions Alert
       this.alertFinish();

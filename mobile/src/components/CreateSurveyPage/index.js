@@ -11,7 +11,6 @@ import {
   Text,
   View,
   DeviceEventEmitter,
-  PermissionsAndroid,
   Platform,
   StyleSheet,
   ScrollView,
@@ -24,14 +23,13 @@ import t from 'tcomb-form-native';
 import Modal from 'react-native-simple-modal';
 import storage from 'react-native-storage-wrapper';
 import SortableList from 'react-native-sortable-list';
-import Permissions from 'react-native-permissions';
 import RNGLocation from 'react-native-google-location';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import sha1 from 'sha1';
 import encoding from 'encoding';
 import { transliterate as tr } from 'transliteration/src/main/browser';
 import { Dropbox } from 'dropbox';
-import { _apiCall } from '../../common';
+import { _apiCall, permissionLocation } from '../../common';
 
 var Form = t.form.Form;
 
@@ -234,7 +232,10 @@ export default class App extends LocationComponent {
   showGeofenceModal = async () => {
     this.setState({geofenceModal: true, loading: true});
 
-    let access = await this.requestLocationPermission();
+    let access = false;
+    try {
+      access = await permissionLocation();
+    } catch (e) {}
     if (access) return;
 
     this.setState({geofenceModal: false, loading: false});
