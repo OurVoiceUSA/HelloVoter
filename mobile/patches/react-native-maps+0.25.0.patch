@@ -22,17 +22,3 @@ index 397d4a6..64822e1 100644
  
  public class AirMapView extends MapView implements GoogleMap.InfoWindowAdapter,
      GoogleMap.OnMarkerDragListener, OnMapReadyCallback, GoogleMap.OnPoiClickListener, GoogleMap.OnIndoorStateChangeListener {
-diff --git a/node_modules/react-native-maps/react-native.config.js b/node_modules/react-native-maps/react-native.config.js
-new file mode 100644
-index 0000000..d61e958
---- /dev/null
-+++ b/node_modules/react-native-maps/react-native.config.js
-@@ -0,0 +1,8 @@
-+module.exports = {
-+  project: {
-+    ios: {},
-+    android: {
-+      sourceDir: './lib/android',
-+    },
-+  },
-+};
