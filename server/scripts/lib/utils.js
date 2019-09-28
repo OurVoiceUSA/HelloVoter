@@ -15,7 +15,7 @@ export async function runDatabase(sandbox) {
 
     if (d.images.filter(i => i.repository === ni).length === 0) {
       console.log("Building the "+ni+" image, this may take several minutes.");
-      await docker.command("build -t "+ni+" ../database");
+      await docker.command("build --pull -t "+ni+" ../database");
     } else {
       console.log("Using cached local build of "+ni+" image.");
     }
