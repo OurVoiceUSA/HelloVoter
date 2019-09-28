@@ -6,7 +6,7 @@
   "scripts": {
     "postinstall": "patch-package",
     "makeadmin": "node node_modules/@babel/node/lib/_babel-node scripts/makeadmin.js",
-    "database": "node node_modules/@babel/node/lib/_babel-node scripts/runDatabase.js",
+    "database": "npm install && node node_modules/@babel/node/lib/_babel-node scripts/runDatabase.js",
     "sandboxdatabase": "node node_modules/@babel/node/lib/_babel-node scripts/runSandboxDatabase.js",
     "genkeys": "node node_modules/@babel/node/lib/_babel-node scripts/genkeys.js",
     "test": "reset && npm run sandboxdatabase && npm run genkeys && JUNIT_REPORT_PATH=test-result/result.xml JUNIT_REPORT_STACK=1 nyc mocha --exit --file ./test/lib/config.js --recursive --require @babel/register --timeout 25000 --colors --reporter mocha-jenkins-reporter || true",
