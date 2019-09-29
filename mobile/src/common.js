@@ -13,7 +13,7 @@ import jwt_decode from 'jwt-decode';
 import DeviceInfo from 'react-native-device-info';
 import Permissions from 'react-native-permissions';
 import RNGooglePlaces from 'react-native-google-places';
-import Geocoder from 'react-native-geocoder';
+import Geocoder from 'react-native-geocoder-reborn';
 import memoize from 'lodash.memoize';
 import i18n from 'i18n-js';
 import { wsbase } from './config';
