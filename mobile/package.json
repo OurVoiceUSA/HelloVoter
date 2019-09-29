@@ -7,7 +7,7 @@
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "start": "react-native start",
-    "test": "jest"
+    "test": "jest --forceExit"
   },
   "dependencies": {
     "@react-native-community/async-storage": "^1.6.2",
@@ -22,11 +22,12 @@
     "lodash": "^4.17.15",
     "lodash.memoize": "^4.1.2",
     "md5": "^2.2.1",
+    "native-base": "^2.13.8",
     "natural-orderby": "^2.0.3",
     "ourvoiceusa-sdk-js": "github:OurVoiceUSA/ourvoiceusa-sdk-js",
     "pako": "^1.0.10",
     "rbush": "^3.0.1",
-    "react": "16.10.0",
+    "react": "16.10.1",
     "react-native": "0.61.1",
     "react-native-camera": "^3.6.0",
     "react-native-collapsible": "^1.5.1",
@@ -40,7 +41,6 @@
     "react-native-localize": "^1.2.1",
     "react-native-maps": "^0.25.0",
     "react-native-maps-super-cluster": "^1.6.0",
-    "react-native-material-ui": "^1.30.1",
     "react-native-permissions": "^2.0.0",
     "react-native-rate": "^1.1.7",
     "react-native-safari-view": "^2.1.0",
@@ -70,12 +70,19 @@
     "jest": "^24.9.0",
     "jetifier": "^1.6.4",
     "metro-react-native-babel-preset": "^0.56.0",
+    "mock-async-storage": "^2.2.0",
     "patch-package": "^6.2.0",
     "react-native-cli": "^2.0.1",
-    "react-test-renderer": "16.10.0",
+    "react-test-renderer": "16.10.1",
     "ws": "^7.1.2"
   },
   "jest": {
-    "preset": "react-native"
+    "preset": "react-native",
+    "setupFiles": [
+      "./__mocks__/setup.js"
+    ],
+    "transformIgnorePatterns": [
+      "node_modules/(?!react-native|native-base-shoutem-theme|@shoutem/animation|@shoutem/ui|tcomb-form-native|react-navigation|transliteration)"
+    ]
   }
 }
