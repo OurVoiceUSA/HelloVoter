@@ -1,9 +1,7 @@
 {
-  // Navigation Buttons
   "home": "Home",
   "your_reps": "Your Reps",
   "canvassing": "Canvassing",
-  // errors
   "error": "Error",
   "error_fetching_data": "There was an error fetching data for this request.",
   "location_access_denied": "Location access denied",
@@ -14,7 +12,6 @@
   "server_didnt_understand_request": "The server didn't understand the request sent from this device.",
   "problem_connecting_try_again": "There was a problem connecting, please try again later.",
   "unexpected_error_try_again": "There was an unexpected error, please try again later.",
-  // HomeScreenPage
   "we_translated_this": "We translated this to your language!",
   "we_used_google_translate": "If you see any wording that is odd, please let us know so we can fix it.",
   "contact_your_reps": "Contact Your Reps",
@@ -35,11 +32,10 @@
   "tap_here_for_source_code": "Tap here for the source code",
   "homescreen_summary": "Our Voice USA is a 501(c)(3) non-profit charity. Not for any candidate or political party. We provide access to tools that enables every day people to be politically engaged. Check us out on social media!",
   "app_supporters": "App Supporters",
-  "legal_notice": "LEGAL NOTICE",
+  "legal_notice": "Legal Notice",
   "our_signature_supporters": "Our Signature Supporters!",
   "this_app_is_made_possible_by": "This app is made possible by everday people who have become patrons of HelloVoter. Your name could be included here too!",
   "support_us_on_patreon": "Support us on Patreon",
-  // YourRepsPage
   "ambiguous_address": "Ambiguous Address",
   "no_guarantee_district": "Unfortunately we can't guarantee accurate district results without a whole address.",
   "continue_anyway": "Continue Anyway",
@@ -68,7 +64,6 @@
   "independent": "Independent",
   "green": "Green",
   "libertarian": "Libertarian",
-  // CanvassingSetupPage
   "location_access": "Location Access",
   "device_settings_deny_location": "Your device settings deny this app access to your location, please enable location access for this app in your device settings to continue.",
   "location_services": "Location Services",
@@ -121,5 +116,5 @@
   "solo_project_desc": "No login required; use the canvassing tool by yourself for a solo project. Uses your device for data storage.",
   "no_qr_code_please_ask": "If you don’t have a QR Code or Organization ID yet, please ask your organization to provide you with one.",
   "enter_org_id_example": "Enter Org ID. Example",
-  "lets_do_this": "Let's do this!",
+  "lets_do_this": "Let's do this!"
 }

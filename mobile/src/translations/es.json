@@ -1,9 +1,7 @@
 {
-  // Navigation Buttons
   "home": "Casa",
   "your_reps": "Sus Rep",
   "canvassing": "Pedir votos",
-  // errors
   "error": "Error",
   "error_fetching_data": "Se produjo un error al obtener datos para esta solicitud.",
   "location_access_denied": "acceso de ubicación denegado",
@@ -14,7 +12,6 @@
   "server_didnt_understand_request": "El servidor no entendió la solicitud enviada desde este dispositivo.",
   "problem_connecting_try_again": "Hubo un problema al conectar, intente nuevamente más tarde.",
   "unexpected_error_try_again": "Se produjo un error inesperado. Vuelve a intentarlo más tarde.",
-  // HomeScreenPage
   "we_translated_this": "¡Tradujimos esto a tu idioma!",
   "we_used_google_translate": "Si ve alguna redacción extraña, infórmenos para que podamos solucionarlo.",
   "contact_your_reps": "Póngase en contacto con sus representantes",
@@ -35,11 +32,10 @@
   "tap_here_for_source_code": "toca aquí para ver el código fuente",
   "homescreen_summary": "Our Voice USA es una organización benéfica sin fines de lucro 501(c)(3). No para ningún candidato o partido político. Brindamos acceso a herramientas que permiten que la gente común participe políticamente. ¡Descúbrenos en las redes sociales!",
   "app_supporters": "Partidarios",
-  "legal_notice": "AVISO LEGAL",
+  "legal_notice": "Aviso Legal",
   "our_signature_supporters": "¡Nuestros partidarios exclusivos!",
   "this_app_is_made_possible_by": "Esta aplicación es posible gracias a personas que se han convertido en patrocinadores de HelloVoter. ¡Tu nombre podría incluirse aquí también!",
   "support_us_on_patreon": "Apóyanos en Patreon",
-  // YourRepsPage
   "ambiguous_address": "Dirección Ambigua",
   "no_guarantee_district": "Lamentablemente, no podemos garantizar resultados precisos del distrito sin una dirección completa.",
   "continue_anyway": "De todas maneras, continúe",
@@ -68,7 +64,6 @@
   "independent": "Independiente",
   "green": "Verde",
   "libertarian": "Libertario",
-  // CanvassingSetupPage
   "location_access": "Acceso a la ubicación",
   "device_settings_deny_location": "La configuración de su dispositivo denegará el acceso de esta aplicación a su ubicación, habilite el acceso a la ubicación para esta aplicación en la configuración de su dispositivo para continuar.",
   "location_services": "Servicios de localización",
@@ -121,5 +116,5 @@
   "solo_project_desc": "No se requiere inicio de sesión; use la herramienta de sondeo usted mismo para un proyecto en solitario. Utiliza su dispositivo para el almacenamiento de datos.",
   "no_qr_code_please_ask": "Si aún no tiene un código QR o ID de organización, solicite a su organización que le proporcione uno.",
   "enter_org_id_example": "Ingrese ID. Ejemplo",
-  "lets_do_this": "¡Hagámoslo!",
+  "lets_do_this": "¡Hagámoslo!"
 }
