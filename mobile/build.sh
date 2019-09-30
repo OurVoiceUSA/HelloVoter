@@ -8,6 +8,8 @@ rm -rf node_modules package-lock.json ios/build ios/pods ios/Podfile.lock androi
 ncu -u
 npm install
 
+npm test
+
 # iOS pods
 (
   set -ex
