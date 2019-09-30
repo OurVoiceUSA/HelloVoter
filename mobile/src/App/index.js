@@ -29,11 +29,6 @@ import PolProfilePage from '../components/PolProfilePage';
 import SettingsPage from '../components/SettingsPage';
 import CanvassingPage from '../components/CanvassingPage';
 import SurveyPage from '../components/SurveyPage';
-import CreateSurveyPage from '../components/CreateSurveyPage';
-import LegacyCanvassingPage from '../components/LegacyCanvassingPage';
-import LegacyCanvassingSettingsPage from '../components/LegacyCanvassingSettingsPage';
-import LegacyListMultiUnitPage from '../components/LegacyListMultiUnitPage';
-import LegacySurveyPage from '../components/LegacySurveyPage';
 
 import { createAppContainer } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
@@ -93,42 +88,6 @@ const AppNavigator = createStackNavigator({
       headerLeft: null,
     }),
   },
-  LegacyCanvassingSettingsPage: {
-    screen: LegacyCanvassingSettingsPage,
-    navigationOptions: ({navigation}) => ({
-      title: 'Canvassing Settings',
-      headerLeft: null,
-     }),
-  },
-  LegacyCanvassing: {
-    screen: LegacyCanvassingPage,
-    navigationOptions: ({navigation}) => ({
-      title: 'Canvassing',
-      headerLeft: (<GoBack nav={navigation} />),
-      gesturesEnabled: false,
-    }),
-  },
-  LegacyListMultiUnit: {
-    screen: LegacyListMultiUnitPage,
-    navigationOptions: ({navigation}) => ({
-      title: 'Units',
-      headerLeft: null,
-    }),
-  },
-  LegacySurvey: {
-    screen: LegacySurveyPage,
-    navigationOptions: ({navigation}) => ({
-      title: 'Canvassing Form',
-      headerLeft: null,
-    }),
-  },
-  CreateSurvey: {
-    screen: CreateSurveyPage,
-    navigationOptions: ({navigation}) => ({
-      title: `${navigation.state.params.title}`,
-      headerLeft: null,
-    }),
-   },
 });
 
 const GoBack = (props) => (

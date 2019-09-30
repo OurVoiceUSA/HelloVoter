@@ -20,7 +20,6 @@ import { Dialog } from 'react-native-simple-dialogs';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import storage from 'react-native-storage-wrapper';
 import SmLoginPage from '../SmLoginPage';
-import { Dropbox } from 'dropbox';
 import { google_api_key } from '../../config';
 import {
   _getJWT, _loginPing, _rmJWT, _saveUser, DINFO,
@@ -80,11 +79,6 @@ export default class App extends PureComponent {
 
   _logout() {
     const { user } = this.state;
-    try {
-      if (user.dropbox) new Dropbox({ fetch: fetch, accessToken: user.dropbox.accessToken }).authTokenRevoke();
-    } catch (error) {
-      console.warn("error: "+error);
-    }
     const resetAction = StackActions.reset({
       index: 0,
       actions: [

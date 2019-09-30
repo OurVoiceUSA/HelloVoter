@@ -1,7 +1,0 @@
-{
-  "reject": [
-    "react-native-maps-super-cluster",
-    "transliteration",
-    "dropbox",
-  ]
-}

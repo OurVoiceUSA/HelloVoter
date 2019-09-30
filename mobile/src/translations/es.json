@@ -96,7 +96,6 @@
   "loading_data": "Cargando datos",
   "select_canvassing_campaign": "Seleccione una campaña de sondeo",
   "start_new_canvas_activity": "Comience una nueva actividad de sondeo",
-  "dropbox_logged_in_as": "Has iniciado sesión en Dropbox como",
   "logout": "Cerrar sesión",
   "sure_you_wish_logout": "Are you sure you wish to logout?",
   "login": "Iniciar sesión",
@@ -110,10 +109,6 @@
   "scan_qr_code": "Escanear código QR",
   "join_existing_effort": "Únase a un esfuerzo existente para tocar puertas y alentar a nuestros vecinos a salir y votar.",
   "didnt_receive_qr_code": "¿No recibió un código QR? Ingrese el ID de la organización para unirse a su operación de sondeo.",
-  "collaborate_with_dropbox": "Colabora con Dropbox",
-  "login_with_dropbox_share_data": "Inicie sesión con una cuenta de Dropbox y comparta datos con un pequeño equipo. Utiliza Dropbox para compartir y almacenar datos.",
-  "solo_project": "Proyecto en solitario",
-  "solo_project_desc": "No se requiere inicio de sesión; use la herramienta de sondeo usted mismo para un proyecto en solitario. Utiliza su dispositivo para el almacenamiento de datos.",
   "no_qr_code_please_ask": "Si aún no tiene un código QR o ID de organización, solicite a su organización que le proporcione uno.",
   "enter_org_id_example": "Ingrese ID. Ejemplo",
   "lets_do_this": "¡Hagámoslo!"

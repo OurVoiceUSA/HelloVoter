@@ -48,7 +48,7 @@ export async function permissionNotify() {
   } catch(error) {
     // nothing we can do about it
   }
-  return false;  
+  return false;
 }
 
 export async function permissionLocation() {
@@ -70,25 +70,6 @@ export async function permissionLocation() {
 
   return false;
 }
-
-export const _fileReaderAsync = (blob) => {
-  const fr = new FileReader();
-  const to = typeof blob;
-
-  return new Promise((resolve, reject) => {
-    fr.onerror = () => {
-      fr.abort();
-      reject(new DOMException("Problem parsing input file."));
-    };
-    fr.onload = () => {
-      resolve(fr.result);
-    };
-    if (to === 'string')
-      resolve(blob);
-    else
-      fr.readAsText(blob);
-  });
-};
 
 export async function _loginPing(refer, remote) {
   let user = await _getJWT(remote);
@@ -353,7 +334,6 @@ export async function _getJWT(remote) {
     if (localuser) {
       // copy local objects
       user.lastsearchpos = localuser.lastsearchpos;
-      user.dropbox = localuser.dropbox;
       // merge localuser with user where user profile item is null
       if (localuser.profile) {
         if (!user.profile.party && localuser.profile.party) { user.profile.party = localuser.profile.party; remote = true; }

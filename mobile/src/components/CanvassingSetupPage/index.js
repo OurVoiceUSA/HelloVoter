@@ -23,7 +23,6 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import SafariView from 'react-native-safari-view';
 import jwt_decode from 'jwt-decode';
 import SmLoginPage from '../SmLoginPage';
-import { Dropbox } from 'dropbox';
 import { deepCopy, ingeojson } from 'ourvoiceusa-sdk-js';
 import { Divider, say, api_base_uri, DINFO, _loginPing, _saveUser, _fileReaderAsync } from '../../common';
 import { RNCamera } from 'react-native-camera';
@@ -48,10 +47,9 @@ export default class App extends LocationComponent {
       loading: true,
       user: null,
       forms: [],
-      dbx: null,
-      dbxformfound: false,
       SelectModeScreen: false,
       SmLoginScreen: false,
+      showLegacyDialog: false,
       server: null,
       serverLoading: false,
       myPosition: {latitude: null, longitude: null},
@@ -313,28 +311,6 @@ export default class App extends LocationComponent {
     }
   }
 
-  handleOpenURL = async ({ url }) => {
-    try {
-      // Extract jwt token out of the URL
-      const m = url.match(/dropbox=([^#]+)/);
-      if (m) {
-        let user = await _loginPing(this, false);
-        user.dropbox = jwt_decode(m[1]);
-        await _saveUser(user, false);
-      }
-
-      // TODO: handle the navigate that would have been tapped had we already been logged in
-    } catch(e) {
-      console.warn("handleOpenURL: "+e);
-    }
-
-    if (Platform.OS === 'ios') {
-      SafariView.dismiss();
-    }
-
-    this._loadForms();
-  }
-
   // Open URL in a browser
   openURL = (url) => {
     // Use SafariView on iOS
@@ -356,7 +332,6 @@ export default class App extends LocationComponent {
 
     let folders = [];
     let forms_local = [];
-    let dbxformfound = false;
 
     this.setState({loading: true});
 
@@ -369,46 +344,12 @@ export default class App extends LocationComponent {
     }
 
     let user;
-    let dbx;
     let forms = [];
 
     // look for canvassing forms
     try {
       user = await _loginPing(this, false);
-      dbx = new Dropbox({ fetch: fetch, accessToken: user.dropbox.accessToken });
-      let res = await dbx.filesListFolder({path: ''});
-      for (let i in res.entries) {
-        item = res.entries[i];
-        if (item['.tag'] != 'folder') continue;
-        folders.push(item.path_display);
-      }
-      this.setState({connected: true});
     } catch (e) {
-    }
-
-    let pro = [];
-
-    for (let i in folders) {
-      pro.push(dbx.filesDownload({ path: folders[i]+'/canvassingform.json' }));
-    }
-
-    let objs = await Promise.all(pro.map(p => p.catch(e => e)));
-    for (let i in objs) {
-      try {
-        item = objs[i];
-        if (item.error) continue;
-        let json = JSON.parse(await _fileReaderAsync(item.fileBlob));
-        json.backend = "dropbox";
-        json.folder_path = item.path_display.match('.*/')[0].slice(0, -1);
-
-        for (let idx in forms_local) {
-          if (forms_local[idx] === null || forms_local[idx].id === json.id) delete forms_local[idx];
-        }
-
-        forms_local.push(json);
-      } catch(e) {
-        console.warn("_loadForms 2: "+e);
-      }
     }
 
     for (let i in forms_local) {
@@ -423,7 +364,6 @@ export default class App extends LocationComponent {
         icon = "dropbox";
         color = "#3d9ae8";
         size = 25;
-        dbxformfound = true;
       }
 
       if (json.backend === "server") {
@@ -466,17 +406,6 @@ export default class App extends LocationComponent {
 
       let swipeoutBtns = [
         {
-          text: say("Edit"),
-          type: 'primary',
-          onPress: () => {
-            if (json.backend === "dropbox" && !user.dropbox) {
-              this.openURL(wsbase+'/auth/dm');
-              return;
-            }
-            navigate('CreateSurvey', {title: say("edit_form"), dbx: dbx, form: json, refer: this});
-          },
-        },
-        {
           text: say("delete"),
           type: 'delete',
           onPress: () => {
@@ -486,9 +415,6 @@ export default class App extends LocationComponent {
               [
                 {text: say("yes"), onPress: async () => {
                   try {
-                    if (json.backend === "dropbox") {
-                      await dbx.filesDeleteV2({path: json.folder_path});
-                    }
                     delete forms_local[i];
                     await storage.del('OV_CANVASS_PINS@'+json.id);
                     await storage.set('OV_CANVASS_FORMS', JSON.stringify(forms_local));
@@ -516,16 +442,11 @@ export default class App extends LocationComponent {
         },
       ];
 
-      if (user.dropbox && json.backend === "dropbox")
-        if (this.state.connected !== true || user.dropbox.account_id !== json.author_id)
-          swipeoutBtns.shift();
-
       let createdby = say("created_by")+' '+json.author;
 
       if (json.backend === 'server') {
         if (json.orgId) createdby = say("org_id")+' '+json.orgId;
         else createdby = say("hosted_by")+' '+json.server;
-        swipeoutBtns.shift();
       }
 
       if (!json.deleted) {
@@ -537,18 +458,14 @@ export default class App extends LocationComponent {
             autoClose={true}>
             <TouchableOpacity
               onPress={async () => {
-                if (json.backend === "dropbox" && !user.dropbox) {
-                  this.setState({SelectModeScreen: true});
-                } else {
-                  if (json.backend === "server") {
-                    // TODO: set loading state as this can take a few seconds
-                    let ret = await this.sayHello(json.server, json.orgId);
-                    if (ret.status === 200) this.navigate_canvassing({server: json.server, orgId: json.orgId, form: json, user: user, refer: this});
-                    else setTimeout(() => this.setState({SmLoginScreen: true}), 500);
-                 } else {
-                    navigate('LegacyCanvassing', {dbx: (json.backend === "dropbox" ? dbx : null), form: json, user: user});
-                  }
-                }
+                if (json.backend === "server") {
+                  // TODO: set loading state as this can take a few seconds
+                  let ret = await this.sayHello(json.server, json.orgId);
+                  if (ret.status === 200) this.navigate_canvassing({server: json.server, orgId: json.orgId, form: json, user: user, refer: this});
+                  else setTimeout(() => this.setState({SmLoginScreen: true}), 500);
+               } else {
+                 this.setState({showLegacyDialog: true});
+               }
               }}>
               <View style={{flexDirection: 'row'}}>
                 <Icon style={{margin: 5, marginRight: 10}} name={icon} size={size} color={color} />
@@ -576,7 +493,7 @@ export default class App extends LocationComponent {
     } catch (error) {
     }
 
-    this.setState({dbxformfound, dbx, forms, loading: false, SelectModeScreen: (forms.length === 0)});
+    this.setState({forms, loading: false, SelectModeScreen: (forms.length === 0)});
   }
 
   _canvassGuidelinesUrlHandler() {
@@ -587,26 +504,6 @@ export default class App extends LocationComponent {
   _canvassUrlHandler() {
     const url = "https://github.com/OurVoiceUSA/HelloVoter/blob/master/docs/Canvassing.md";
     return Linking.openURL(url).catch(() => null);
-  }
-
-  dropboxLogout = async () => {
-    let { user } = this.state;
-    if (user.dropbox)
-      new Dropbox({ fetch: fetch, accessToken: user.dropbox.accessToken }).authTokenRevoke();
-    delete user.dropbox;
-    _saveUser(user, false);
-    try {
-      forms_local = JSON.parse(await storage.get('OV_CANVASS_FORMS'));
-      if (forms_local !== null) {
-        for (let idx in forms_local) {
-          if (forms_local[idx] === null || forms_local[idx].backend === "dropbox") delete forms_local[idx];
-        }
-        await storage.set('OV_CANVASS_FORMS', JSON.stringify(forms_local));
-      }
-    } catch (e) {
-      console.warn("dropboxLogout: "+e)
-    }
-    this.props.navigation.goBack();
   }
 
   parseInvite(url) {
@@ -632,8 +529,8 @@ export default class App extends LocationComponent {
 
   render() {
     const {
-      showCamera, connected, dbx, dbxformfound, dinfo, loading, user, forms,
-      askOrgId, SelectModeScreen, SmLoginScreen,
+      showCamera, dinfo, loading, user, forms,
+      askOrgId, SelectModeScreen, SmLoginScreen, showLegacyDialog,
     } = this.state;
     const { navigate } = this.props.navigation;
 
@@ -701,48 +598,6 @@ export default class App extends LocationComponent {
               {say("start_new_canvas_activity")}
             </Icon.Button>
           </View>
-
-          {user.dropbox &&
-          <View style={{margin: 12, marginTop: 0, alignItems: 'center'}}>
-
-            <Divider />
-
-            <View style={{margin: 20, alignItems: 'center'}}>
-              <Text>{say("dropbox_logged_in_as")}:</Text>
-              <Text>{user.dropbox.name.display_name}</Text>
-            </View>
-
-            <Icon.Button
-              name="dropbox"
-              backgroundColor="#3d9ae8"
-              color="#ffffff"
-              onPress={() => {
-                Alert.alert(
-                  'Dropbox '+say("logout"),
-                  say("sure_you_wish_logout"),
-                  [
-                    {text: say("yes"), onPress: () => this.dropboxLogout()},
-                    {text: say("no")},
-                  ], { cancelable: false }
-                );
-              }}>
-              {'Dropbox '+say("logout")}
-            </Icon.Button>
-          </View>
-          }
-
-          {!user.dropbox && dbxformfound &&
-          <View style={{margin: 12, marginTop: 0, alignItems: 'center'}}>
-            <Icon.Button
-              name="dropbox"
-              backgroundColor="#3d9ae8"
-              color="#ffffff"
-              onPress={() => this.setState({SelectModeScreen: true})}>
-              {'Dropbox '+say("login")}
-            </Icon.Button>
-          </View>
-          }
-
         </View>
 
         <Divider />
@@ -764,7 +619,7 @@ export default class App extends LocationComponent {
         </View>
 
         <Dialog
-          title={say("select_canvassing_mode")}
+          title={say("start_new_canvas_activity")}
           visible={SelectModeScreen}
           animationType="fade"
           onTouchOutside={() => this.setState({SelectModeScreen: false})}>
@@ -781,21 +636,6 @@ export default class App extends LocationComponent {
               <Text>{say("org_id")}</Text>
             </Button>
             <Text style={{fontSize: 12, marginBottom: 10, textAlign: 'justify'}}>{say("didnt_receive_qr_code")}</Text>
-
-            <Button block bordered dark onPress={() => {
-              if (user.dropbox) navigate('CreateSurvey', {title: 'Dropbox Project', dbx: dbx, form: null, refer: this})
-              else this.openURL(wsbase+'/auth/dm');
-            }}>
-              <Icon name="dropbox" {...iconStyles} />
-              <Text>{say("collaborate_with_dropbox")}</Text>
-            </Button>
-            <Text style={{fontSize: 12, marginBottom: 10, textAlign: 'justify'}}>{say("login_with_dropbox_share_data")}</Text>
-
-            <Button block bordered dark onPress={() => navigate('CreateSurvey', {title: 'Solo Project', dbx: null, form: null, refer: this})}>
-              <Icon name="user-circle" {...iconStyles} />
-              <Text>{say("solo_project")}</Text>
-            </Button>
-            <Text style={{fontSize: 12, marginBottom: 10, textAlign: 'justify'}}>{say("solo_project_desc")}</Text>
 
             {(__DEV__&&dinfo.Emulator)&&
             <View>
@@ -821,6 +661,23 @@ export default class App extends LocationComponent {
           animationType="fade"
           onTouchOutside={() => this.setState({SmLoginScreen: false})}>
           <SmLoginPage refer={this} />
+        </Dialog>
+
+        <Dialog
+          visible={showLegacyDialog}
+          animationType="fade"
+          onTouchOutside={() => this.setState({showLegacyDialog: false})}>
+          <Text>
+            Thanks for using this tool to canvas! Due to unforeseen circumstances, we are no
+            longer able to integrate with Dropbox. To continue canvassing with this tool, you
+            need to sign up for an Organization ID.
+          </Text>
+          <Button block style={{margin: 10}}><Text>Sign up for an Organization ID</Text></Button>
+          <Text>
+            If you'd like to transfer your canvassing data from your Dropbox account into
+            your new Org account, share the Dropbox folder you used for canvassing with
+            tech@ourvoiceusa.org and we will take care of that for you.
+          </Text>
         </Dialog>
 
         <Prompt

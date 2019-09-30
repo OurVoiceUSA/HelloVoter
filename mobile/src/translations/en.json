@@ -96,7 +96,6 @@
   "loading_data": "Loading data",
   "select_canvassing_campaign": "Select a canvassing campaign",
   "start_new_canvas_activity": "Start a new Canvassing Activity",
-  "dropbox_logged_in_as": "You are logged into Dropbox as",
   "logout": "Logout",
   "sure_you_wish_logout": "Are you sure you wish to logout?",
   "login": "Login",
@@ -110,10 +109,6 @@
   "scan_qr_code": "Scan QR Code",
   "join_existing_effort": "Join an existing effort to knock doors and encourge our neighbors to get out and vote.",
   "didnt_receive_qr_code": "Didn't receive a QR Code? Enter the Organization ID for your canvassing operation to join.",
-  "collaborate_with_dropbox": "Collaborate with Dropbox",
-  "login_with_dropbox_share_data": "Login with a Dropbox account and share data with a small team. Uses Dropbox for data sharing & storage.",
-  "solo_project": "Solo Project",
-  "solo_project_desc": "No login required; use the canvassing tool by yourself for a solo project. Uses your device for data storage.",
   "no_qr_code_please_ask": "If you don’t have a QR Code or Organization ID yet, please ask your organization to provide you with one.",
   "enter_org_id_example": "Enter Org ID. Example",
   "lets_do_this": "Let's do this!"
