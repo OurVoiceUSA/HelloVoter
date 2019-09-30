@@ -2,7 +2,6 @@
 import React, { PureComponent } from 'react';
 
 import {
-  ActivityIndicator,
   Alert,
   Linking,
   View,
@@ -13,11 +12,11 @@ import {
   TouchableWithoutFeedback,
 } from 'react-native';
 
-import { Container, Header, Content, Footer, FooterTab, Text, Button } from 'native-base';
+import { Container, Header, Content, Footer, FooterTab, Text, Button, Spinner } from 'native-base';
 
 import { StackActions, NavigationActions } from 'react-navigation';
 import RNGooglePlaces from 'react-native-google-places';
-import Modal from 'react-native-simple-dialogs';
+import { Dialog } from 'react-native-simple-dialogs';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import storage from 'react-native-storage-wrapper';
 import SmLoginPage from '../SmLoginPage';
@@ -188,14 +187,13 @@ export default class App extends PureComponent {
     if (!user) return (
         <View style={{flex: 1, backgroundColor: 'white', alignItems: 'center', justifyContent: 'center'}}>
           <Text style={{fontSize: 20}}>Loading profile information...</Text>
-          <ActivityIndicator />
+          <Spinner />
         </View>
       );
 
     return (
-    <View style={{flex: 1}}>
-      <ScrollView style={{flex: 1, backgroundColor: 'white'}} contentContainerStyle={{flexGrow:1}}>
-
+      <Container>
+        <Content>
       <SettingsCategoryHeader title={"Personal Settings"} />
 
       <SettingsDividerLong />
@@ -430,33 +428,24 @@ export default class App extends PureComponent {
           </View>
         </View>
 
-        <Modal
-          open={SmLoginScreen}
-          modalStyle={{width: 335, height: 400, backgroundColor: "transparent",
-            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
-          style={{alignItems: 'center'}}
-          overlayBackground={'rgba(0, 0, 0, 0.75)'}
-          animationDuration={200}
-          animationTension={40}
-          modalDidOpen={() => undefined}
-          modalDidClose={() => this.setState({SmLoginScreen: false})}
-          closeOnTouchOutside={true}
-          disableOnBackPress={false}>
+        <Dialog
+          visible={SmLoginScreen}
+          animationType="fade"
+          onTouchOutside={() => this.setState({SmLoginScreen: false})}>
           <SmLoginPage refer={this} />
-        </Modal>
+        </Dialog>
 
-      </ScrollView>
+      </Content>
 
-      <BottomNavigation active={'done'} hidden={false} >
-        <BottomNavigation.Action
-          key="done"
-          icon="undo"
-          label="Go Back"
-          onPress={() => this.props.navigation.goBack()}
-        />
-      </BottomNavigation>
-
-    </View>
+      <Footer>
+        <FooterTab>
+          <Button onPress={() => this.props.navigation.goBack()}>
+            <Icon name="undo" size={25} />
+            <Text>Go back</Text>
+          </Button>
+        </FooterTab>
+      </Footer>
+    </Container>
     );
   }
 
