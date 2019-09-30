@@ -18,9 +18,13 @@ npm install
 
 # android release build
 (
-  set -ex
   cd android
-  ./gradlew app:assembleRelease
+  if [ -x ~/Library/Android/sdk/emulator/emulator ]; then
+    set -ex
+    ./gradlew app:assembleRelease
+  else
+    echo "WARNING: No emulator found. Not building android app!"
+  fi
 )
 
 # build/launch iPhone simulator
