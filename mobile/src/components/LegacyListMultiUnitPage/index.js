@@ -3,7 +3,6 @@ import {
   Alert,
   ScrollView,
   StyleSheet,
-  Text,
   View,
   FlatList,
   Dimensions,
@@ -11,10 +10,11 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
+import { Container, Header, Content, Footer, FooterTab, Text, Button } from 'native-base';
+
 import sha1 from 'sha1';
-import { BottomNavigation } from 'react-native-material-ui';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import Modal from 'react-native-simple-modal';
+import Modal from 'react-native-simple-dialogs';
 import LegacyKnockPage from '../LegacyKnockPage';
 
 import t from 'tcomb-form-native';

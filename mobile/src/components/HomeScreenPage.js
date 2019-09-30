@@ -2,20 +2,17 @@
 import React from 'react';
 import HVComponent from './HVComponent';
 
-import { BottomNavigation, Button } from 'react-native-material-ui';
-
 import YourReps from './YourRepsPage';
 import CanvassingSetup from './CanvassingSetupPage';
 
 import {
-  ActivityIndicator,
   View,
-  Text,
   Linking,
   Platform,
   ScrollView,
-  StatusBar,
 } from 'react-native';
+
+import { Container, Header, Content, Footer, FooterTab, Text, Button, Spinner } from 'native-base';
 
 import { getLocales } from 'react-native-localize';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -184,51 +181,46 @@ export default class App extends HVComponent {
     return <SliderEntry data={item} even={true} />;
   }
 
-  render () {
+  render() {
     const { active, appVersion, mainMenu, sliderActiveSlide, patreonNames } = this.state;
 
     return (
-      <View style={styles.safeArea}>
-        <StatusBar />
-        {active === 'home' &&
-          <View style={styles.container}>
-           <ScrollView
-              style={styles.scrollview}
-              scrollEventThrottle={200}
-              directionalLockEnabled={true}>
-            <View style={styles.exampleContainer}>
-              <Carousel
-                ref={c => this._sliderRef = c}
-                data={mainMenu}
-                renderItem={this._renderItemWithParallax}
-                sliderWidth={sliderWidth}
-                itemWidth={itemWidth}
-                hasParallaxImages={true}
-                firstItem={this.state.sliderActiveSlide}
-                inactiveSlideScale={0.94}
-                inactiveSlideOpacity={0.7}
-                containerCustomStyle={styles.slider}
-                contentContainerCustomStyle={styles.sliderContentContainer}
-                loop={true}
-                loopClonesPerSide={2}
-                autoplay={true}
-                autoplayDelay={500}
-                autoplayInterval={5000}
-                onSnapToItem={(index) => this.setState({ sliderActiveSlide: index }) }
-              />
-              <Pagination
-                dotsLength={mainMenu.length}
-                activeDotIndex={sliderActiveSlide}
-                containerStyle={styles.paginationContainer}
-                dotColor={'rgba(55, 55, 55, 0.92)'}
-                dotStyle={styles.paginationDot}
-                inactiveDotColor={colors.black}
-                inactiveDotOpacity={0.4}
-                inactiveDotScale={0.6}
-                carouselRef={this._sliderRef}
-                tappableDots={!!this._sliderRef}
-              />
-            </View>
+      <Container>
+        <Content>
+          {active === 'home' &&
+          <View>
+            <Carousel
+              ref={c => this._sliderRef = c}
+              data={mainMenu}
+              renderItem={this._renderItemWithParallax}
+              sliderWidth={sliderWidth}
+              itemWidth={itemWidth}
+              hasParallaxImages={true}
+              firstItem={this.state.sliderActiveSlide}
+              inactiveSlideScale={0.94}
+              inactiveSlideOpacity={0.7}
+              containerCustomStyle={styles.slider}
+              contentContainerCustomStyle={styles.sliderContentContainer}
+              loop={true}
+              loopClonesPerSide={2}
+              autoplay={true}
+              autoplayDelay={500}
+              autoplayInterval={5000}
+              onSnapToItem={(index) => this.setState({ sliderActiveSlide: index }) }
+            />
+            <Pagination
+              dotsLength={mainMenu.length}
+              activeDotIndex={sliderActiveSlide}
+              containerStyle={styles.paginationContainer}
+              dotColor={'rgba(55, 55, 55, 0.92)'}
+              dotStyle={styles.paginationDot}
+              inactiveDotColor={colors.black}
+              inactiveDotOpacity={0.4}
+              inactiveDotScale={0.6}
+              carouselRef={this._sliderRef}
+              tappableDots={!!this._sliderRef}
+            />
+
             <Text style={styles.homeScreenText}>{say("homescreen_summary")}</Text>
             <View style={{flexDirection: 'row', justifyContent: 'center', marginBottom: 15}}>
               <Icon name="facebook-official" size={40} color="#3b5998" style={{marginRight: 25}} onPress={this.openFacebook} />
@@ -238,14 +230,12 @@ export default class App extends HVComponent {
               <Icon name="globe" size={40} color="#008080" onPress={this.openWebsite} />
             </View>
 
-            <View style={{flexDirection: 'row', justifyContent: 'center'}}>
-              <Button raised primary text={say("app_supporters")} onPress={() => this.setState({active: 'supporters'})} />
+            <View style={{flexDirection: 'row', justifyContent: 'center', marginBottom: 15}}>
+              <Button primary onPress={() => this.setState({active: 'supporters'})}><Text>{say("app_supporters")}</Text></Button>
               <Text>{'  '}</Text>
-              <Button raised primary text={say("legal_notice")} onPress={() => this.setState({active: 'legal'})} />
+              <Button primary onPress={() => this.setState({active: 'legal'})}><Text>{say("legal_notice")}</Text></Button>
             </View>
-
-          </ScrollView>
-        </View>
+          </View>
         }
         {active === 'reps' &&
           <YourReps navigation={this.props.navigation} />
@@ -254,61 +244,52 @@ export default class App extends HVComponent {
           <CanvassingSetup navigation={this.props.navigation} refer={this} />
         }
         {active === 'supporters' &&
-        <View style={styles.container}>
-          <ScrollView style={styles.scrollview}>
-            <Text style={styles.homeScreenText}>{say("our_signature_supporters")}</Text>
-            <Text style={styles.homeScreenText}>{say("this_app_is_made_possible_by")}</Text>
-            <Button style={{margin: 15}} raised primary text={say("support_us_on_patreon")} onPress={() => this.openDonate()} />
-            <PatreonNames names={patreonNames} />
-          </ScrollView>
+        <View>
+          <Text style={styles.homeScreenText}>{say("our_signature_supporters")}</Text>
+          <Text style={styles.homeScreenText}>{say("this_app_is_made_possible_by")}</Text>
+          <Button style={{margin: 15}} raised primary text={say("support_us_on_patreon")} onPress={() => this.openDonate()} />
+          <PatreonNames names={patreonNames} />
         </View>
         }
         {active === 'legal' &&
-        <View style={styles.container}>
-          <ScrollView style={styles.scrollview}>
-            <Text style={styles.homeScreenText}>
-              HelloVoter Version {appVersion}
-            </Text>
-            <Text style={styles.homeScreenText}>
-              Copyright (c) 2018, Our Voice USA. {say("all_rights_reserved")}
-            </Text>
-            <Text style={styles.homeScreenText}>{say("this_program_is_free_software")}</Text>
-            <AppleEULA />
-            <View style={{flexDirection: 'row', justifyContent: 'center'}}>
-              <Button raised primary text={say("tap_here_for_source_code")} onPress={() => this.openGitHub('HelloVoter')} />
-            </View>
-          </ScrollView>
+        <View>
+          <Text style={styles.homeScreenText}>
+            HelloVoter Version {appVersion}
+          </Text>
+          <Text style={styles.homeScreenText}>
+            Copyright (c) 2018, Our Voice USA. {say("all_rights_reserved")}
+          </Text>
+          <Text style={styles.homeScreenText}>{say("this_program_is_free_software")}</Text>
+          <AppleEULA />
+          <View style={{flexDirection: 'row', justifyContent: 'center'}}>
+            <Button raised primary text={say("tap_here_for_source_code")} onPress={() => this.openGitHub('HelloVoter')} />
+          </View>
         </View>
         }
-
-        <BottomNavigation active={this.state.active} hidden={false} >
-          <BottomNavigation.Action
-            key="home"
-            icon="home"
-            label={say("home")}
-            onPress={() => this.setState({ active: 'home' })}
-          />
-          <BottomNavigation.Action
-            key="reps"
-            icon="people"
-            label={say("your_reps")}
-            onPress={() => this.setState({ active: 'reps' })}
-          />
-          <BottomNavigation.Action
-            key="canvassing"
-            icon="map"
-            label={say("canvassing")}
-            onPress={() => this.setState({ active: 'canvassing' })}
-          />
-        </BottomNavigation>
-
-      </View>
+        </Content>
+        <Footer>
+          <FooterTab>
+            <Button active={(active === 'home'?true:false)} onPress={() => this.setState({active: 'home'})}>
+              <Icon name="home" size={25} />
+              <Text>{say("home")}</Text>
+            </Button>
+            <Button active={(active === 'reps'?true:false)} onPress={() => this.setState({active: 'reps'})}>
+              <Icon name="group" size={25} />
+              <Text>{say("your_reps")}</Text>
+            </Button>
+            <Button active={(active === 'canvassing'?true:false)} onPress={() => this.setState({active: 'canvassing'})}>
+              <Icon name="map" size={25} />
+              <Text>{say("canvassing")}</Text>
+            </Button>
+          </FooterTab>
+        </Footer>
+      </Container>
     );
   }
 }
 
 const PatreonNames = props => {
-  if (!props.names || props.names.length === 0) return (<View><ActivityIndicator /><Text>{say("loading_data")}...</Text></View>);
+  if (!props.names || props.names.length === 0) return (<View><Spinner /><Text>{say("loading_data")}...</Text></View>);
   return props.names.map(name => (
     <Text style={styles.homeScreenText}>{name}</Text>
   ));

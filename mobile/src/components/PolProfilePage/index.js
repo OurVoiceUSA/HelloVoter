@@ -5,15 +5,15 @@ import {
   Dimensions,
   Linking,
   TouchableOpacity,
-  Text,
   TextInput,
   ScrollView,
   View,
   Image,
 } from 'react-native';
 
-import { BottomNavigation } from 'react-native-material-ui';
-import Modal from 'react-native-simple-modal';
+import { Container, Header, Content, Footer, FooterTab, Text, Button } from 'native-base';
+
+import Modal from 'react-native-simple-dialogs';
 import SmLoginPage from '../SmLoginPage';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { _getJWT, _apiCall, _partyNameFromKey } from '../../common';
@@ -54,7 +54,7 @@ export default class App extends PureComponent {
     if (prevState.SmLoginScreen && !SmLoginScreen && user.loggedin) {
       // lots of state updates in these calls - do it outside of componentDidUpdate
       if (numberReturn) {
-        setTimeout(() => { 
+        setTimeout(() => {
           this._doTheRate(numberReturn);
           this.setState({numberReturn: null});
         }, 500);
@@ -341,5 +341,3 @@ export default class App extends PureComponent {
   }
 
 }
-
-

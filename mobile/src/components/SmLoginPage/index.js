@@ -101,59 +101,54 @@ export default class App extends PureComponent {
     const { user } = this.state;
 
     return (
-      <View style={{flex: 1, alignItems: 'center'}} ref="backgroundWrapper">
-        <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: 335}}>
-          <View style={{backgroundColor: 'white', padding: 40, borderRadius: 40, borderWidth: 10, borderColor: '#d7d7d7'}}>
-            {user && user.lastsmlogin &&
-            <Text style={styles.header}>
-              Welcome back! Your session has expired. Please login to continue.
-            </Text>
-            ||
-            <Text style={styles.header}>
-              Please login to continue
-            </Text>
-            }
+      <View>
+        {user && user.lastsmlogin &&
+        <Text style={styles.header}>
+          Welcome back! Your session has expired. Please login to continue.
+        </Text>
+        ||
+        <Text style={styles.header}>
+          Please login to continue
+        </Text>
+        }
 
-            <View style={{margin: 5}}>
-              <Icon.Button
-                name="facebook"
-                backgroundColor="#3b5998"
-                onPress={this.loginWithFacebook}
-                {...iconStyles}>
-                Login with Facebook
-              </Icon.Button>
-            </View>
-            <View style={{margin: 5}}>
-              <Icon.Button
-                name="google"
-                backgroundColor="#DD4B39"
-                onPress={() => {this.loginWithGoogle(null)}}
-                {...iconStyles}>
-                Login with Google
-              </Icon.Button>
-            </View>
-            <View style={{margin: 5}}>
-              <Icon.Button
-                name="ban"
-                backgroundColor="#d7d7d7"
-                color="#000000"
-                onPress={() => {
-                  this.props.refer.setState({SmLoginScreen: false});
-                }}
-                {...iconStyles}>
-                No Thanks
-              </Icon.Button>
-            </View>
+        <View style={{margin: 5}}>
+          <Icon.Button
+            name="facebook"
+            backgroundColor="#3b5998"
+            onPress={this.loginWithFacebook}
+            {...iconStyles}>
+            Login with Facebook
+          </Icon.Button>
+        </View>
+        <View style={{margin: 5}}>
+          <Icon.Button
+            name="google"
+            backgroundColor="#DD4B39"
+            onPress={() => {this.loginWithGoogle(null)}}
+            {...iconStyles}>
+            Login with Google
+          </Icon.Button>
+        </View>
+        <View style={{margin: 5}}>
+          <Icon.Button
+            name="ban"
+            backgroundColor="#d7d7d7"
+            color="#000000"
+            onPress={() => {
+              this.props.refer.setState({SmLoginScreen: false});
+            }}
+            {...iconStyles}>
+            No Thanks
+          </Icon.Button>
+        </View>
 
-            <View style={{marginTop: 30}}>
-              <Text style={{fontSize: 10, textAlign: 'justify'}}>
-                For a better overall experience for everyone, certain application functions require a login.
-                We value your privacy, any information you give us, stays with us.
-                Read our <Text style={{fontSize: 10, fontWeight: 'bold', color: 'blue'}} onPress={() => {this._policyUrlHandler()}}>privacy policy</Text> for details.
-              </Text>
-            </View>
-          </View>
-
+        <View style={{marginTop: 30}}>
+          <Text style={{fontSize: 10, textAlign: 'justify'}}>
+            For a better overall experience for everyone, certain application functions require a login.
+            We value your privacy, any information you give us, stays with us.
+            Read our <Text style={{fontSize: 10, fontWeight: 'bold', color: 'blue'}} onPress={() => {this._policyUrlHandler()}}>privacy policy</Text> for details.
+          </Text>
         </View>
       </View>
     );

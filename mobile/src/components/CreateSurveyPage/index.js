@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   TouchableHighlight,
   FlatList,
-  Text,
   View,
   DeviceEventEmitter,
   Platform,
@@ -16,11 +15,12 @@ import {
   ScrollView,
 } from 'react-native';
 
+import { Container, Header, Content, Footer, FooterTab, Text, Button } from 'native-base';
+
 import LocationComponent from '../LocationComponent';
 
-import { BottomNavigation } from 'react-native-material-ui';
 import t from 'tcomb-form-native';
-import Modal from 'react-native-simple-modal';
+import Modal from 'react-native-simple-dialogs';
 import storage from 'react-native-storage-wrapper';
 import SortableList from 'react-native-sortable-list';
 import RNGLocation from 'react-native-google-location';

@@ -45,7 +45,7 @@
     "react-native-rate": "^1.1.7",
     "react-native-safari-view": "^2.1.0",
     "react-native-settings-components": "0.0.2",
-    "react-native-simple-modal": "^9.0.1",
+    "react-native-simple-dialogs": "^1.2.0",
     "react-native-snap-carousel": "^3.8.1",
     "react-native-sortable-list": "0.0.23",
     "react-native-storage-wrapper": "^0.1.0",

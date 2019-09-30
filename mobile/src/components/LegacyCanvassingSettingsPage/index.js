@@ -7,16 +7,16 @@ import {
   TouchableWithoutFeedback,
   TouchableOpacity,
   Keyboard,
-  Text,
   View,
   StyleSheet,
   ScrollView,
 } from 'react-native';
 
-import { BottomNavigation } from 'react-native-material-ui';
+import { Container, Header, Content, Footer, FooterTab, Text, Button } from 'native-base';
+
 import Icon from 'react-native-vector-icons/FontAwesome';
 import DropboxSharePage from '../DropboxSharePage';
-import Modal from 'react-native-simple-modal';
+import Modal from 'react-native-simple-dialogs';
 import t from 'tcomb-form-native';
 
 var Form = t.form.Form;

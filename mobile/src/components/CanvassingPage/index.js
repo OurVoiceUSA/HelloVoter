@@ -1,12 +1,10 @@
 import React, { PureComponent } from 'react';
 
 import {
-  ActivityIndicator,
   Alert,
   StyleSheet,
   FlatList,
   Image,
-  Text,
   TextInput,
   View,
   Linking,
@@ -17,10 +15,11 @@ import {
   Keyboard,
 } from 'react-native';
 
+import { Header, Footer, FooterTab, Text, Button, Spinner } from 'native-base';
+
 import LocationComponent from '../LocationComponent';
 
 import Accordion from 'react-native-collapsible/Accordion';
-import { BottomNavigation } from 'react-native-material-ui';
 import { NavigationActions } from 'react-navigation';
 import storage from 'react-native-storage-wrapper';
 import NetInfo from '@react-native-community/netinfo';
@@ -30,7 +29,7 @@ import RNGooglePlaces from 'react-native-google-places';
 import { Divider, DINFO, api_base_uri, _doGeocode, _getApiToken, getEpoch } from '../../common';
 import KnockPage from '../KnockPage';
 import CanvassingSettingsPage from '../CanvassingSettingsPage';
-import Modal from 'react-native-simple-modal';
+import { Dialog } from 'react-native-simple-dialogs';
 import md5 from 'md5';
 import { debounce } from 'throttle-debounce';
 import { orderBy } from 'natural-orderby';
@@ -865,7 +864,8 @@ export default class App extends LocationComponent {
     const { navigate } = this.props.navigation;
     const {
       showDisclosure, myPosition, myNodes, locationAccess, serviceError, deviceError,
-      form, user, loading, region, active, fetching, selectedTurf, mapCenter
+      form, user, loading, region, active, fetching, selectedTurf, mapCenter,
+      isModalVisible, isKnockMenuVisible, newUnitModalVisible
     } = this.state;
 
     if (showDisclosure === "true") {
@@ -942,7 +942,7 @@ export default class App extends LocationComponent {
       nomap_content.push(
         <View key={1} style={styles.content}>
           <Text>Waiting on location data from your device...</Text>
-          <ActivityIndicator />
+          <Spinner />
         </View>
       );
     }
@@ -1094,7 +1094,7 @@ export default class App extends LocationComponent {
 
         {fetching&&
         <View style={{position: 'absolute', right: 0, ...styles.iconContainer}}>
-          <ActivityIndicator size="large" />
+          <Spinner />
         </View>
         }
 
@@ -1161,153 +1161,115 @@ export default class App extends LocationComponent {
         </View>
         }
 
-        <Modal
-          open={this.state.isModalVisible}
-          modalStyle={{width: 350, height: 400, backgroundColor: "transparent",
-            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
-          style={{alignItems: 'center'}}
-          offset={0}
-          overlayBackground={'rgba(0, 0, 0, 0.75)'}
-          animationDuration={200}
-          animationTension={40}
-          modalDidOpen={() => undefined}
-          modalDidClose={() => this.setState({isModalVisible: false})}
-          closeOnTouchOutside={true}
-          disableOnBackPress={false}>
-          <View style={{flexDirection: 'column'}}>
-            <View style={{width: 325, backgroundColor: 'white', marginTop: 5, borderRadius: 15, padding: 10, alignSelf: 'flex-start'}}>
-              {loading &&
-              <View>
-                <Text style={{color: 'blue', fontWeight: 'bold', fontSize: 15}}>Loading Address</Text>
-                <ActivityIndicator size="large" />
-              </View>
-              ||
-              <View>
-                <View style={{flexDirection: 'row'}}>
-                  <Text style={{color: 'blue', fontWeight: 'bold', fontSize: 15}}>Confirm the Address</Text>
-                  <View style={{flexDirection: 'row'}}>
-                    <TouchableOpacity
-                      style={{
-                        backgroundColor: '#d7d7d7', padding: 10, borderRadius: 20, marginLeft: 5,
-                        ...((this.state.pAddress.street && this.state.pAddress.street !== this.state.fAddress.street) ? {} : displayNone)
-                      }}
-                      onPress={() => {this.setState({fAddress: this.state.pAddress})}}>
-                      <Text style={{textAlign: 'center'}}>Use Previous</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={{
-                        backgroundColor: '#d7d7d7', padding: 10, borderRadius: 20, marginLeft: 5,
-                        ...(this.state.netInfo === 'none' ? displayNone : {})
-                      }}
-                      onPress={() => this.showConfirmAddress()}>
-                      <Text style={{textAlign: 'center'}}>Retry</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-                <Form
-                 ref="formStreet"
-                 type={formStreet}
-                 onChange={this.onChange}
-                 value={this.state.fAddress}
-                />
-                <Form
-                 ref="formCity"
-                 type={formCity}
-                 onChange={this.onChange}
-                 options={formOptRow}
-                 value={this.state.fAddress}
-                />
-                <Form
-                 ref="formState"
-                 type={formState}
-                 onChange={this.onChange}
-                 options={formOptRow}
-                 value={this.state.fAddress}
-                />
-                <TouchableHighlight style={styles.addButton} onPress={this.doConfirmAddress} underlayColor='#99d9f4'>
-                  <Text style={styles.buttonText}>Add</Text>
-                </TouchableHighlight>
-              </View>
-              }
-            </View>
-          </View>
-        </Modal>
-
-        <Modal
-          open={this.state.isKnockMenuVisible}
-          modalStyle={{width: 335, height: 350, backgroundColor: "transparent",
-            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
-          style={{alignItems: 'center'}}
-          offset={0}
-          overlayBackground={'rgba(0, 0, 0, 0.75)'}
-          animationDuration={200}
-          animationTension={40}
-          modalDidOpen={() => undefined}
-          modalDidClose={() => this.setState({isKnockMenuVisible: false})}
-          closeOnTouchOutside={true}
-          disableOnBackPress={false}>
-          <KnockPage refer={this} funcs={this} marker={this.currentMarker} unit={this.state.currentUnit} form={form} />
-        </Modal>
-
-        <Modal
-          open={this.state.newUnitModalVisible}
-          modalStyle={{width: 335, height: 250, backgroundColor: "transparent",
-            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
-          style={{alignItems: 'center'}}
-          offset={0}
-          overlayBackground={'rgba(0, 0, 0, 0.75)'}
-          animationDuration={200}
-          animationTension={40}
-          modalDidOpen={() => undefined}
-          modalDidClose={() => this.setState({newUnitModalVisible: false})}
-          closeOnTouchOutside={true}
-          disableOnBackPress={false}>
-          <View style={styles.container}>
+        <Dialog
+          visible={isModalVisible}
+          animationType="fade"
+          onTouchOutside={() => this.setState({isModalVisible: false})}>
+          <View>
+            {loading &&
             <View>
-              <View style={{flex: 1, flexDirection: 'row', margin: 20, alignItems: 'center'}}>
-                <Text>Recording a new unit for this address:</Text>
+              <Text style={{color: 'blue', fontWeight: 'bold', fontSize: 15}}>Loading Address</Text>
+              <Spinner />
+            </View>
+            ||
+            <View>
+              <View style={{flexDirection: 'row'}}>
+                <Text style={{color: 'blue', fontWeight: 'bold', fontSize: 15}}>Confirm the Address</Text>
+                <View style={{flexDirection: 'row'}}>
+                  <TouchableOpacity
+                    style={{
+                      backgroundColor: '#d7d7d7', padding: 10, borderRadius: 20, marginLeft: 5,
+                      ...((this.state.pAddress.street && this.state.pAddress.street !== this.state.fAddress.street) ? {} : displayNone)
+                    }}
+                    onPress={() => {this.setState({fAddress: this.state.pAddress})}}>
+                    <Text style={{textAlign: 'center'}}>Use Previous</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={{
+                      backgroundColor: '#d7d7d7', padding: 10, borderRadius: 20, marginLeft: 5,
+                      ...(this.state.netInfo === 'none' ? displayNone : {})
+                    }}
+                    onPress={() => this.showConfirmAddress()}>
+                    <Text style={{textAlign: 'center'}}>Retry</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
               <Form
-                ref="unitForm"
-                type={unitForm}
-                options={{fields: {unit: {autoFocus: true}}}}
-                onChange={this.onUnitChange}
-                value={this.state.fUnit}
+               ref="formStreet"
+               type={formStreet}
+               onChange={this.onChange}
+               value={this.state.fAddress}
               />
-              <TouchableHighlight style={styles.button} onPress={this.addUnit} underlayColor='#99d9f4'>
+              <Form
+               ref="formCity"
+               type={formCity}
+               onChange={this.onChange}
+               options={formOptRow}
+               value={this.state.fAddress}
+              />
+              <Form
+               ref="formState"
+               type={formState}
+               onChange={this.onChange}
+               options={formOptRow}
+               value={this.state.fAddress}
+              />
+              <TouchableHighlight style={styles.addButton} onPress={this.doConfirmAddress} underlayColor='#99d9f4'>
                 <Text style={styles.buttonText}>Add</Text>
               </TouchableHighlight>
             </View>
+            }
           </View>
-        </Modal>
+        </Dialog>
 
-        <BottomNavigation active={this.state.active} hidden={false} >
-          <BottomNavigation.Action
-            key="map"
-            icon="map"
-            label="Map View"
-            onPress={() => this.setState({active: 'map'})}
-          />
-          <BottomNavigation.Action
-            key="list"
-            icon="menu"
-            label="List View"
-            onPress={() => this.setState({active: 'list'})}
-          />
-          <BottomNavigation.Action
-            key="history"
-            icon="history"
-            label="History"
-            onPress={() => this.setState({active: 'history'})}
-          />
-          <BottomNavigation.Action
-            key="settings"
-            icon="settings"
-            label="Settings"
-            onPress={() => this.setState({active: 'settings'})}
-          />
-        </BottomNavigation>
+        <Dialog
+          visible={isKnockMenuVisible}
+          animationType="fade"
+          onTouchOutside={() => this.setState({isKnockMenuVisible: false})}>
+          <KnockPage refer={this} funcs={this} marker={this.currentMarker} unit={this.state.currentUnit} form={form} />
+        </Dialog>
 
+        <Dialog
+          visible={newUnitModalVisible}
+          animationType="fade"
+          onTouchOutside={() => this.setState({newUnitModalVisible: false})}>
+          <View>
+            <View style={{flex: 1, flexDirection: 'row', margin: 20, alignItems: 'center'}}>
+              <Text>Recording a new unit for this address:</Text>
+            </View>
+            <Form
+              ref="unitForm"
+              type={unitForm}
+              options={{fields: {unit: {autoFocus: true}}}}
+              onChange={this.onUnitChange}
+              value={this.state.fUnit}
+            />
+            <TouchableHighlight style={styles.button} onPress={this.addUnit} underlayColor='#99d9f4'>
+              <Text style={styles.buttonText}>Add</Text>
+            </TouchableHighlight>
+          </View>
+        </Dialog>
+
+        <Footer>
+          <FooterTab>
+            <Button active={(active === 'map'?true:false)} onPress={() => this.setState({active: 'map'})}>
+              <Icon name="map" size={25} />
+              <Text>Map View</Text>
+            </Button>
+            <Button active={(active === 'list'?true:false)} onPress={() => this.setState({active: 'list'})}>
+              <Icon name="list" size={25} />
+              <Text>List View</Text>
+            </Button>
+            <Button active={(active === 'history'?true:false)} onPress={() => this.setState({active: 'history'})}>
+              <Icon name="history" size={25} />
+              <Text>History</Text>
+            </Button>
+            <Button active={(active === 'settings'?true:false)} onPress={() => this.setState({active: 'settings'})}>
+              <Icon name="cog" size={25} />
+              <Text>Settings</Text>
+            </Button>
+          </FooterTab>
+        </Footer>
       </View>
     );
   }
@@ -1344,7 +1306,7 @@ const Unit = props => (
 const TurfStats = props => (
   <View>
     {props.loading&&
-    <ActivityIndicator size="large" />
+    <Spinner />
     }
     {!props.loading&&
     <View style={{padding: 10}}>
@@ -1357,7 +1319,7 @@ const TurfStats = props => (
 const History = props => (
   <ScrollView>
     {props.loading&&
-    <ActivityIndicator size="large" />
+    <Spinner />
     }
     {!props.loading&&
     <View style={{padding: 10}}>

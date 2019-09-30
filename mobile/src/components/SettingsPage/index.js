@@ -4,7 +4,6 @@ import React, { PureComponent } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  Text,
   Linking,
   View,
   ScrollView,
@@ -14,10 +13,11 @@ import {
   TouchableWithoutFeedback,
 } from 'react-native';
 
+import { Container, Header, Content, Footer, FooterTab, Text, Button } from 'native-base';
+
 import { StackActions, NavigationActions } from 'react-navigation';
-import { BottomNavigation } from 'react-native-material-ui';
 import RNGooglePlaces from 'react-native-google-places';
-import Modal from 'react-native-simple-modal';
+import Modal from 'react-native-simple-dialogs';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import storage from 'react-native-storage-wrapper';
 import SmLoginPage from '../SmLoginPage';

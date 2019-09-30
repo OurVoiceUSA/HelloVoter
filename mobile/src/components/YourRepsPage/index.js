@@ -1,22 +1,20 @@
 import React, { PureComponent } from 'react';
 import {
   Alert,
-  ActivityIndicator,
   Image,
   ScrollView,
-  StyleSheet,
-  Text,
   View,
   FlatList,
   Linking,
-  TouchableOpacity,
+  TouchableWithoutFeedback,
 } from 'react-native';
 
+import { Card, CardItem, Content, Text, Body, Button, Spinner } from 'native-base';
 import LocationComponent from '../LocationComponent';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 import RNGooglePlaces from 'react-native-google-places';
-import Modal from 'react-native-simple-modal';
+import { Dialog } from 'react-native-simple-dialogs';
 import DisplayRep from './display-rep';
 import { wsbase } from '../../config'
 import { Divider, say, _apiCall, _loginPing, _doGeocode, _saveUser, _specificAddress } from '../../common';
@@ -233,31 +231,31 @@ export default class App extends LocationComponent {
     }
 
     return (
-
-      <ScrollView style={{flex: 1, backgroundColor: 'white'}} contentContainerStyle={{flexGrow:1}}>
-
-        <Divider />
-
+      <View>
         {myPosition.icon &&
         <View style={{margin: 10}}>
-          <TouchableOpacity
+          <TouchableWithoutFeedback
             style={{margin: 0, backgroundColor: '#d7d7d7', padding: 10}}
             onPress={() => {this.setState({modalIsOpen: true})}}>
-          <View style={{flexDirection: 'row', marginBottom: 5}}>
-            <Text>{say("based_on_your")} {basedOnYour}. {say("tap_to_change")}</Text>
-          </View>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <Icon style={{marginRight: 10}} name={myPosition.icon} size={20} color="black" />
-            {myPosition.address &&
-            <Text style={{fontStyle: (myPosition.error?'italic':'normal')}}>{myPosition.address}</Text>
-            ||
-            <View style={{flexDirection: 'row'}}>
-            <ActivityIndicator />
-            <Text style={{fontStyle: 'italic'}}> {say("loading_address")}</Text>
-            </View>
-            }
-          </View>
-          </TouchableOpacity>
+              <Card>
+                <CardItem header bordered>
+                  <Icon style={{marginRight: 10}} name={myPosition.icon} size={20} color="black" />
+                  <Text>{say("based_on_your")} {basedOnYour}. {say("tap_to_change")}</Text>
+                </CardItem>
+                <CardItem bordered>
+                  <Body>
+                  {myPosition.address &&
+                  <Text style={{fontStyle: (myPosition.error?'italic':'normal')}}>{myPosition.address}</Text>
+                  ||
+                  <View style={{flexDirection: 'row'}}>
+                    <Spinner />
+                    <Text style={{fontStyle: 'italic'}}> {say("loading_address")}</Text>
+                  </View>
+                  }
+                  </Body>
+                </CardItem>
+              </Card>
+          </TouchableWithoutFeedback>
         </View>
         }
 
@@ -265,7 +263,7 @@ export default class App extends LocationComponent {
         <View style={{flex: 1}}>
           <View style={{flex: 1, margin: 10, justifyContent: 'center', alignItems: 'center'}}>
             <Text style={{fontSize: 18, textAlign: 'center', marginBottom: 10}}>{say("loading_district_information")}</Text>
-            <ActivityIndicator />
+            <Spinner />
           </View>
         </View>
         }
@@ -273,7 +271,7 @@ export default class App extends LocationComponent {
         {apiData && apiData.msg && !loading &&
         <View style={{flex: 1}}>
           <View style={{flex: 1, margin: 10, justifyContent: 'center', alignItems: 'center'}}>
-            <Text style={styles.centerscreen}>{apiData.msg}</Text>
+            <Text style={{fontSize: 20, textAlign: 'center', margin: 10}}>{apiData.msg}</Text>
           </View>
         </View>
         }
@@ -345,89 +343,27 @@ export default class App extends LocationComponent {
         </View>
         }
 
-        <Modal
-          open={modalIsOpen}
-          modalStyle={{width: 335, height: 400, backgroundColor: "transparent",
-            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
-          offset={0}
-          overlayBackground={'rgba(0, 0, 0, 0.75)'}
-          animationDuration={200}
-          animationTension={40}
-          modalDidOpen={() => undefined}
-          modalDidClose={() => this.setState({modalIsOpen: false})}
-          closeOnTouchOutside={(apiData ? true : false)}
-          disableOnBackPress={(apiData ? false : true)}>
-          <View style={{backgroundColor: 'white', alignItems: 'center', padding: 40, borderRadius: 40, borderWidth: 10,
-borderColor: '#d7d7d7'}}>
-            <Text style={{fontSize: 18, textAlign: 'center', marginBottom: 10}}>{say("show_representatives_by")}:</Text>
-            <TouchableOpacity
-              style={{margin: 10, flexDirection: 'row', backgroundColor: '#d7d7d7', alignItems: 'center', padding: 10}}
-              onPress={this.doCurrentLocation}>
-              <Icon style={{marginRight: 15}} name="map-marker" size={20} color="black" />
-              <Text style={{textAlign: 'center'}}>{say("current_location")}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={{margin: 10, flexDirection: 'row', backgroundColor: '#d7d7d7', alignItems: 'center', padding: 10}}
-              onPress={this._useHomeAddress}>
-              <Icon style={{marginRight: 15}} name="home" size={20} color="black" />
-              <Text style={{textAlign: 'center'}}>{say("home_address_cap")}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={{margin: 10, flexDirection: 'row', backgroundColor: '#d7d7d7', alignItems: 'center', padding: 10}}
-              onPress={this._useCustomAddress}>
-              <Icon style={{marginRight: 15}} name="map-signs" size={20} color="black" />
-              <Text style={{textAlign: 'center'}}>{say("searched_address_cap")}</Text>
-            </TouchableOpacity>
-          </View>
-        </Modal>
-      </ScrollView>
+        <Dialog
+          title={say("show_representatives_by")+":"}
+          visible={modalIsOpen}
+          animationType="fade"
+          onTouchOutside={() => this.setState({modalIsOpen: false})}>
+          <Button block bordered primary onPress={this.doCurrentLocation}>
+            <Icon name="map-marker" size={25} color="black" />
+            <Text>{say("current_location")}</Text>
+          </Button>
+          <Text>{'  '}</Text>
+          <Button block bordered primary onPress={this._useHomeAddress}>
+            <Icon name="home" size={25} color="black" />
+            <Text>{say("home_address_cap")}</Text>
+          </Button>
+          <Text>{'  '}</Text>
+          <Button block bordered primary onPress={this._useCustomAddress}>
+            <Icon name="map-signs" size={20} color="black" />
+            <Text>{say("searched_address_cap")}</Text>
+          </Button>
+        </Dialog>
+      </View>
     );
   }
 }
-
-const iconStyles = {
-  justifyContent: 'center',
-  borderRadius: 10,
-  padding: 10,
-};
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFF',
-  },
-  content: {
-    flex: 1,
-    margin: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  avatar: {
-    margin: 20,
-  },
-  avatarImage: {
-    borderRadius: 50,
-    height: 100,
-    width: 100,
-  },
-  centerscreen: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  header: {
-    fontSize: 22,
-    marginBottom: 10,
-    marginLeft: 10,
-    fontWeight: 'bold',
-  },
-  text: {
-    textAlign: 'center',
-  },
-  buttons: {
-    justifyContent: 'space-between',
-    flexDirection: 'row',
-    margin: 20,
-    marginBottom: 30,
-  },
-});

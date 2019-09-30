@@ -5,17 +5,17 @@ import {
   ActivityIndicator,
   Alert,
   Linking,
-  Text,
   View,
   Platform,
   ScrollView,
-  StyleSheet,
   TouchableOpacity,
 } from 'react-native';
 
+import { Container, Header, Content, Footer, FooterTab, Text, Button, Spinner } from 'native-base';
+
 import t from 'tcomb-form-native';
 import sha1 from 'sha1';
-import Modal from 'react-native-simple-modal';
+import { Dialog } from 'react-native-simple-dialogs';
 import storage from 'react-native-storage-wrapper';
 import Swipeout from 'react-native-swipeout';
 import Prompt from 'react-native-input-prompt';
@@ -631,7 +631,10 @@ export default class App extends LocationComponent {
   }
 
   render() {
-    const { showCamera, connected, dbx, dbxformfound, dinfo, loading, user, forms } = this.state;
+    const {
+      showCamera, connected, dbx, dbxformfound, dinfo, loading, user, forms,
+      askOrgId, SelectModeScreen, SmLoginScreen,
+    } = this.state;
     const { navigate } = this.props.navigation;
 
     // wait for user object to become available
@@ -670,9 +673,7 @@ export default class App extends LocationComponent {
     );
 
     return (
-      <ScrollView style={{flex: 1, backgroundColor: 'white'}} contentContainerStyle={{flexGrow:1}} keyboardShouldPersistTaps={"handled"}>
-
-        <Divider />
+      <View>
 
         <View style={{flexDirection: 'row', margin: 20, marginTop: 0}}>
             {loading &&
@@ -762,133 +763,70 @@ export default class App extends LocationComponent {
           </Text>
         </View>
 
-        <Modal
-          open={this.state.SelectModeScreen}
-          modalStyle={{flex: 1, backgroundColor: "transparent"}}
-          overlayBackground={'rgba(0, 0, 0, 0.75)'}
-          animationDuration={200}
-          animationTension={40}
-          modalDidOpen={() => undefined}
-          modalDidClose={() => this.setState({SelectModeScreen: false})}
-          closeOnTouchOutside={true}
-          disableOnBackPress={false}>
-          <View style={{flex: 1, alignItems: 'center'}} ref="backgroundWrapper">
-            <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
-              <View style={{backgroundColor: 'white', padding: 20, borderRadius: 40, borderWidth: 10, borderColor: '#d7d7d7'}}>
-                <Text style={styles.header}>{say("select_canvassing_mode")}</Text>
+        <Dialog
+          title={say("select_canvassing_mode")}
+          visible={SelectModeScreen}
+          animationType="fade"
+          onTouchOutside={() => this.setState({SelectModeScreen: false})}>
+          <View>
 
-                <View style={{margin: 5}}>
-                  <Icon.Button
-                    name="qrcode"
-                    backgroundColor="#d7d7d7"
-                    color="#000000"
-                    onPress={() => this.setState({showCamera: true})}
-                    {...iconStyles}>
-                    {say("scan_qr_code")}
-                  </Icon.Button>
-                </View>
+            <Button block bordered dark onPress={() => this.setState({showCamera: true})}>
+              <Icon name="qrcode" {...iconStyles} />
+              <Text>{say("scan_qr_code")}</Text>
+            </Button>
+            <Text style={{fontSize: 12, marginBottom: 10, textAlign: 'justify'}}>{say("join_existing_effort")}</Text>
 
-                <View style={{margin: 5, marginTop: 0}}>
-                  <Text style={{fontSize: 10, textAlign: 'justify'}}>
-                    {say("join_existing_effort")}
-                  </Text>
-                </View>
+            <Button block bordered dark onPress={() => this.setState({SelectModeScreen: false, askOrgId: true})}>
+              <Icon name="id-badge" {...iconStyles} />
+              <Text>{say("org_id")}</Text>
+            </Button>
+            <Text style={{fontSize: 12, marginBottom: 10, textAlign: 'justify'}}>{say("didnt_receive_qr_code")}</Text>
 
-                <View style={{margin: 5}}>
-                  <Icon.Button
-                    name="id-badge"
-                    backgroundColor="#d7d7d7"
-                    color="#000000"
-                    onPress={() => this.setState({askOrgId: true})}
-                    {...iconStyles}>
-                    {say("org_id")}
-                  </Icon.Button>
-                </View>
+            <Button block bordered dark onPress={() => {
+              if (user.dropbox) navigate('CreateSurvey', {title: 'Dropbox Project', dbx: dbx, form: null, refer: this})
+              else this.openURL(wsbase+'/auth/dm');
+            }}>
+              <Icon name="dropbox" {...iconStyles} />
+              <Text>{say("collaborate_with_dropbox")}</Text>
+            </Button>
+            <Text style={{fontSize: 12, marginBottom: 10, textAlign: 'justify'}}>{say("login_with_dropbox_share_data")}</Text>
 
-                <View style={{margin: 5, marginTop: 0}}>
-                  <Text style={{fontSize: 10, textAlign: 'justify'}}>{say("didnt_receive_qr_code")}</Text>
-                </View>
+            <Button block bordered dark onPress={() => navigate('CreateSurvey', {title: 'Solo Project', dbx: null, form: null, refer: this})}>
+              <Icon name="user-circle" {...iconStyles} />
+              <Text>{say("solo_project")}</Text>
+            </Button>
+            <Text style={{fontSize: 12, marginBottom: 10, textAlign: 'justify'}}>{say("solo_project_desc")}</Text>
 
-               <View style={{margin: 5}}>
-                  <Icon.Button
-                    name="dropbox"
-                    backgroundColor="#d7d7d7"
-                    color="#000000"
-                    onPress={() => {
-                      if (user.dropbox) navigate('CreateSurvey', {title: 'Dropbox Project', dbx: dbx, form: null, refer: this})
-                      else this.openURL(wsbase+'/auth/dm');
-                    }}
-                    {...iconStyles}>
-                    {say("collaborate_with_dropbox")}
-                  </Icon.Button>
-                </View>
-
-                <View style={{margin: 5, marginTop: 0}}>
-                  <Text style={{fontSize: 10, textAlign: 'justify'}}>{say("login_with_dropbox_share_data")}</Text>
-                </View>
-
-                <View style={{margin: 5}}>
-                  <Icon.Button
-                    name="user-circle"
-                    backgroundColor="#d7d7d7"
-                    color="#000000"
-                    onPress={() => navigate('CreateSurvey', {title: 'Solo Project', dbx: null, form: null, refer: this})}
-                    {...iconStyles}>
-                    {say("solo_project")}
-                  </Icon.Button>
-                </View>
-
-                <View style={{margin: 5, marginTop: 0}}>
-                  <Text style={{fontSize: 10, textAlign: 'justify'}}>{say("solo_project_desc")}</Text>
-                </View>
-
-                {(__DEV__&&dinfo.Emulator)&&
-                <View>
-                  <View style={{margin: 5}}>
-                    <Icon.Button
-                      name="code"
-                      backgroundColor="#d7d7d7"
-                      color="#000000"
-                      onPress={() => this.connectToServer((Platform.OS === 'ios'?'localhost':'10.0.2.2')+':8080')}
-                      {...iconStyles}>
-                      Local Dev
-                    </Icon.Button>
-                  </View>
-
-                  <View style={{margin: 5, marginTop: 0}}>
-                    <Text style={{fontSize: 10, textAlign: 'justify'}}>
-                      Connect to your localhost development instance of HelloVoterAPI
-                    </Text>
-                  </View>
-                </View>
-                }
-
-              </View>
-
+            {(__DEV__&&dinfo.Emulator)&&
+            <View>
+              <Button block bordered dark onPress={() => {
+                this.setState({SelectModeScreen: false});
+                this.connectToServer((Platform.OS === 'ios'?'localhost':'10.0.2.2')+':8080')}
+              }>
+                <Icon name="code" {...iconStyles} />
+                <Text>Local Dev</Text>
+              </Button>
+              <Text style={{fontSize: 12, marginBottom: 10, textAlign: 'justify'}}>
+                Connect to your localhost development instance of HelloVoterAPI
+              </Text>
             </View>
-          </View>
-        </Modal>
+            }
 
-        <Modal
-          open={this.state.SmLoginScreen}
-          modalStyle={{flex: 1, backgroundColor: "transparent",
-            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
-          style={{alignItems: 'center'}}
-          offset={0}
-          overlayBackground={'rgba(0, 0, 0, 0.75)'}
-          animationDuration={200}
-          animationTension={40}
-          modalDidOpen={() => undefined}
-          modalDidClose={() => this.setState({SmLoginScreen: false})}
-          closeOnTouchOutside={true}
-          disableOnBackPress={false}>
+          </View>
+
+        </Dialog>
+
+        <Dialog
+          visible={SmLoginScreen}
+          animationType="fade"
+          onTouchOutside={() => this.setState({SmLoginScreen: false})}>
           <SmLoginPage refer={this} />
-        </Modal>
+        </Dialog>
 
         <Prompt
           autoCorrect={false}
           autoCapitalize={"characters"}
-          visible={this.state.askOrgId}
+          visible={askOrgId}
           title={say("org_id")}
           belowInputRender={() => (<Text style={{marginBottom: 10}}>{say("no_qr_code_please_ask")}</Text>)}
           placeholder={say("enter_org_id_example")+': NCC1701'}
@@ -897,7 +835,7 @@ export default class App extends LocationComponent {
           onSubmit={text => this.setState({orgId: text, askOrgId: false}, () => this.connectToGOTV())}
         />
 
-      </ScrollView>
+      </View>
     );
   }
 
@@ -907,21 +845,5 @@ const iconStyles = {
   borderRadius: 10,
   paddingLeft: 25,
   padding: 10,
+  size: 25,
 };
-
-const styles = StyleSheet.create({
-  header: {
-    fontSize: 16,
-    textAlign: 'center',
-    margin: 10,
-  },
-  text: {
-    textAlign: 'center',
-  },
-  buttons: {
-    justifyContent: 'space-between',
-    flexDirection: 'row',
-    margin: 20,
-    marginBottom: 30,
-  },
-});

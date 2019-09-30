@@ -5,7 +5,6 @@ import {
   Alert,
   Dimensions,
   StyleSheet,
-  Text,
   TextInput,
   View,
   Linking,
@@ -16,10 +15,11 @@ import {
   Keyboard,
 } from 'react-native';
 
+import { Container, Header, Content, Footer, FooterTab, Text, Button } from 'native-base';
+
 import LocationComponent from '../LocationComponent';
 
 import { NavigationActions } from 'react-navigation';
-import { BottomNavigation } from 'react-native-material-ui';
 import { Dropbox } from 'dropbox';
 import storage from 'react-native-storage-wrapper';
 import NetInfo from '@react-native-community/netinfo';
@@ -32,7 +32,7 @@ import encoding from 'encoding';
 import { transliterate as tr } from 'transliteration/src/main/browser';
 import { _doGeocode, _getApiToken, _fileReaderAsync, DINFO } from '../../common';
 import LegacyKnockPage from '../LegacyKnockPage';
-import Modal from 'react-native-simple-modal';
+import Modal from 'react-native-simple-dialogs';
 import TimeAgo from 'javascript-time-ago'
 import pako from 'pako';
 import base64 from 'base-64';

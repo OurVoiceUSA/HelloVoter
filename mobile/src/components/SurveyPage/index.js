@@ -1,22 +1,17 @@
 import React, { PureComponent } from 'react';
 import {
   Alert,
-  Dimensions,
-  TouchableOpacity,
-  TouchableHighlight,
   TouchableWithoutFeedback,
-  FlatList,
   Keyboard,
-  Text,
   View,
-  StyleSheet,
-  ScrollView,
 } from 'react-native';
+
+import { Container, Header, Content, Footer, FooterTab, Text, Button } from 'native-base';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 import { getEpoch, getPropFromArrObj } from '../../common';
 
 import {BackHandler} from 'react-native';
-import { BottomNavigation } from 'react-native-material-ui';
 import storage from 'react-native-storage-wrapper';
 import t from 'tcomb-form-native';
 import sha1 from 'sha1';
@@ -202,10 +197,8 @@ export default class App extends PureComponent {
     options = newOptions;
 
     return (
-    <View style={{flex: 1}}>
-      <ScrollView style={{flex: 1, backgroundColor: 'white'}}>
-
-        <View style={styles.container}>
+      <Container>
+        <Content>
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <Form
               ref="form"
@@ -215,54 +208,20 @@ export default class App extends PureComponent {
               onChange={this.onChange}
             />
           </TouchableWithoutFeedback>
-        </View>
-
-      </ScrollView>
-
-      <BottomNavigation active={'done'} hidden={false} >
-        <BottomNavigation.Action
-          key="undo"
-          icon="undo"
-          label="Go Back"
-          onPress={() => this.props.navigation.goBack()}
-        />
-        <BottomNavigation.Action
-          key="done"
-          icon="done"
-          label="Save Changes"
-          onPress={this.doSave}
-        />
-      </BottomNavigation>
-
-    </View>
+        </Content>
+        <Footer>
+          <FooterTab>
+            <Button onPress={() => this.props.navigation.goBack()}>
+              <Icon name="undo" size={25} color="red" />
+              <Text>Go Back</Text>
+            </Button>
+            <Button onPress={this.doSave}>
+              <Icon name="check" size={25} color="green" />
+              <Text>Save Changes</Text>
+            </Button>
+          </FooterTab>
+        </Footer>
+      </Container>
     );
   }
 }
-
-var styles = StyleSheet.create({
-  container: {
-    justifyContent: 'center',
-    padding: 20,
-    backgroundColor: '#ffffff',
-  },
-  title: {
-    fontSize: 30,
-    alignSelf: 'center',
-    marginBottom: 30
-  },
-  buttonText: {
-    fontSize: 18,
-    color: 'white',
-    alignSelf: 'center'
-  },
-  button: {
-    height: 36,
-    backgroundColor: '#48BBEC',
-    borderColor: '#48BBEC',
-    borderWidth: 1,
-    borderRadius: 8,
-    marginBottom: 10,
-    alignSelf: 'stretch',
-    justifyContent: 'center'
-  }
-});
