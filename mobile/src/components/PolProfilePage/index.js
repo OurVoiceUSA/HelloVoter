@@ -1,22 +1,17 @@
 import React, { PureComponent } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
   Dimensions,
   Linking,
   TouchableOpacity,
   TextInput,
-  ScrollView,
   View,
   Image,
 } from 'react-native';
 
-import { Container, Header, Content, Footer, FooterTab, Text, Button } from 'native-base';
+import { Container, Header, Content, Footer, FooterTab, Text, Button, Spinner } from 'native-base';
 
-import Modal from 'react-native-simple-dialogs';
-import SmLoginPage from '../SmLoginPage';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { _getJWT, _apiCall, _partyNameFromKey } from '../../common';
+import { _partyNameFromKey } from '../../common';
 
 export default class App extends PureComponent {
 
@@ -24,48 +19,11 @@ export default class App extends PureComponent {
     super(props);
 
     this.state = {
-      SmLoginScreen: false,
-      numberReturn: null,
-      tellUsReturn: false,
-      loading: false,
       office: props.navigation.state.params.office,
       profile: props.navigation.state.params.profile,
       ratings: props.navigation.state.params.profile.ratings,
       location: props.navigation.state.params.location,
-      asked2update: false,
     };
-
-  }
-
-  _loginPing = async () => {
-    var user = await _getJWT(true);
-    if (user !== null) {
-      this.setState({user: user});
-      if (user.loggedin) this._doTheRate(null);
-    }
-  }
-
-  componentDidMount() {
-    this._loginPing();
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    const { SmLoginScreen, user, numberReturn, tellUsReturn } = this.state;
-    if (prevState.SmLoginScreen && !SmLoginScreen && user.loggedin) {
-      // lots of state updates in these calls - do it outside of componentDidUpdate
-      if (numberReturn) {
-        setTimeout(() => {
-          this._doTheRate(numberReturn);
-          this.setState({numberReturn: null});
-        }, 500);
-      }
-      if (tellUsReturn) {
-        setTimeout(() => {
-          this._doTellUs();
-          this.setState({tellUsReturn: false});
-        }, 500);
-      }
-    }
   }
 
   openFacebook = (id) => this.openURL('https://m.facebook.com/'+id);
@@ -83,77 +41,12 @@ export default class App extends PureComponent {
     return Linking.openURL(url).catch(() => null);
   }
 
-  _doTellUs = async () => {
-    const { user, office } = this.state;
-
-    if (!user.loggedin) {
-      this.setState({SmLoginScreen: true, tellUsReturn: true});
-    } else {
-      this.openURL(
-        "https://docs.google.com/forms/d/e/1FAIpQLSfmtSKEZh66HLNpkvOIg4W4MbFOIvklGBwweuExsQCL0P11FQ/viewform?usp=pp_url"
-        +((user.profile && user.profile.name)?"&entry.775957053="+user.profile.name:"")
-        +((user.profile && user.profile.email)?"&entry.2004667629="+user.profile.email:"")
-        +"&entry.839337160="+office.state
-        +"&entry.883929373="+((office.type == "country")?"Federal":"State")
-        +"&entry.1678115432="+office.name
-        +(office.district?"&entry.1511558516="+office.district:"")
-      );
-    }
-  }
-
-  _doTheRate = async (number) => {
-    const { profile, location, ratings, user, asked2update } = this.state;
-    if (number && !user.loggedin) {
-      this.setState({SmLoginScreen: true, numberReturn: number});
-    } else {
-      if (!ratings.user || ratings.user != number) {
-        this.setState({loading: true});
-        var input = { politician_id: profile.id, lng: location.longitude, lat: location.latitude };
-        if (number) input.rating = number;
-        try {
-          var blah = await _apiCall('/api/v1/politician_rate', input);
-          var json = JSON.parse(blah._bodyInit);
-          this.setState({ratings: json});
-        } catch (error) {
-          console.warn(error);
-        }
-      }
-    }
-    this.setState({loading: false});
-    if (number && user.loggedin && (!user.profile.party || !user.profile.home_address) && asked2update === false) {
-      this.setState({asked2update: true});
-      Alert.alert(
-        'Tell Us About You',
-        'Thanks for rating a politician! In order to provide you with the most accurate and useful rating information, please update your profile.',
-        [
-          {text: 'Update Profile', onPress: () => {
-            this.props.navigation.navigate('Settings');
-          }},
-          {text: 'Maybe later'},
-        ], { cancelable: false }
-      );
-    }
-  }
-
-  _starRatingColor(number, rating) {
-    const { profile } = this.state;
-
-    if (number <= Math.ceil(rating))
-      return '#FFD700';
-
-    return '#e3e3e3';
-  }
-
   render() {
-
-    const { office, user, pic_url, profile, ratings, SmLoginScreen, loading } = this.state;
-
-    var star_rating = ratings.user;
+    const { office, user, pic_url, profile } = this.state;
 
     var profilePic;
     var polPic;
     var polPicFallback;
-    var starArea;
 
     if (profile.bioguide_id) {
       polPic = {uri: 'https://raw.githubusercontent.com/unitedstates/images/gh-pages/congress/225x275/'+profile.bioguide_id+'.jpg'};
@@ -174,31 +67,9 @@ export default class App extends PureComponent {
       }
     }
 
-    if (user && ratings.msg) {
-      starArea = (<Text>{ratings.msg}</Text>);
-    } else {
-      starArea = (
-        <View style={{alignItems: 'center'}}>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <Text style={{fontSize: 16}}>
-              {(star_rating ? 'Your rating for this politician:' : 'Rate this politician:')}
-            </Text>
-          </View>
-          <View style={{alignItems: 'center', flexDirection: 'row'}}>
-            {(loading ? (<ActivityIndicator size="large" />) : (<Icon style={{margin: 10}} name="star" size={30} color={this._starRatingColor(1, star_rating)} onPress={() => {this._doTheRate(1)}}  />))}
-            {(loading ? (<ActivityIndicator size="large" />) : (<Icon style={{margin: 10}} name="star" size={30} color={this._starRatingColor(2, star_rating)} onPress={() => {this._doTheRate(2)}}  />))}
-            {(loading ? (<ActivityIndicator size="large" />) : (<Icon style={{margin: 10}} name="star" size={30} color={this._starRatingColor(3, star_rating)} onPress={() => {this._doTheRate(3)}}  />))}
-            {(loading ? (<ActivityIndicator size="large" />) : (<Icon style={{margin: 10}} name="star" size={30} color={this._starRatingColor(4, star_rating)} onPress={() => {this._doTheRate(4)}}  />))}
-            {(loading ? (<ActivityIndicator size="large" />) : (<Icon style={{margin: 10}} name="star" size={30} color={this._starRatingColor(5, star_rating)} onPress={() => {this._doTheRate(5)}}  />))}
-          </View>
-        </View>
-      );
-    }
-
     return (
-    <View style={{flex: 1}}>
-      <ScrollView style={{flex: 1, backgroundColor: 'white'}} contentContainerStyle={{flexGrow:1}}>
-
+    <Container>
+      <Content>
         <View style={{flexDirection: 'row', alignItems: 'flex-start', margin: 10, marginBottom: 0}}>
           <View style={{height: 150, marginRight: 10}}>
             <Image resizeMode={'contain'} style={{flex: 1, width: Dimensions.get('window').width/3}} source={polPic} />
@@ -263,80 +134,16 @@ export default class App extends PureComponent {
           </View>
         </View>
 
-        <View style={{alignItems: 'center'}}>
-          {starArea}
-        </View>
-
-        <View style={{margin: 5, marginLeft: 20, marginRight: 20, alignItems: 'center'}}>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <Text style={{fontSize: 16}}>
-              User Ratings of this Politician:
-            </Text>
-          </View>
-        </View>
-
-        <View style={{marginLeft: 20, marginRight: 20, paddingBottom: 35, alignItems: 'center'}}>
-          <View style={{flex: 1, alignItems: 'center'}}>
-            <View style={{flex: 1, flexDirection: 'row'}}>
-              <View style={{marginRight: 5}}>
-                <Text style={{fontSize: 13, textDecorationLine: 'underline'}}>Party</Text>
-                <Text style={{fontSize: 13}}>Democrats:</Text>
-                <Text style={{fontSize: 13}}>Republicans:</Text>
-                <Text style={{fontSize: 13}}>Independents:</Text>
-                <Text style={{fontSize: 13}}>Greens:</Text>
-                <Text style={{fontSize: 13}}>Libertarians:</Text>
-                <Text style={{fontSize: 13}}>Other:</Text>
-              </View>
-              <View style={{marginRight: 5}}>
-                <Text style={{fontSize: 13, textDecorationLine: 'underline'}}>Constituents</Text>
-                <Text style={{fontSize: 13}}>{(ratings.D.rating?ratings.D.rating.toFixed(1)+' ('+ratings.D.total+')':'N/A')}</Text>
-                <Text style={{fontSize: 13}}>{(ratings.R.rating?ratings.R.rating.toFixed(1)+' ('+ratings.R.total+')':'N/A')}</Text>
-                <Text style={{fontSize: 13}}>{(ratings.I.rating?ratings.I.rating.toFixed(1)+' ('+ratings.I.total+')':'N/A')}</Text>
-                <Text style={{fontSize: 13}}>{(ratings.G.rating?ratings.G.rating.toFixed(1)+' ('+ratings.G.total+')':'N/A')}</Text>
-                <Text style={{fontSize: 13}}>{(ratings.L.rating?ratings.L.rating.toFixed(1)+' ('+ratings.L.total+')':'N/A')}</Text>
-                <Text style={{fontSize: 13}}>{(ratings.O.rating?ratings.O.rating.toFixed(1)+' ('+ratings.O.total+')':'N/A')}</Text>
-              </View>
-              <View>
-                <Text style={{fontSize: 13, textDecorationLine: 'underline'}}>Outside District</Text>
-                <Text style={{fontSize: 13}}>{(ratings.outsider.D.rating?ratings.outsider.D.rating.toFixed(1)+' ('+ratings.outsider.D.total+')':'N/A')}</Text>
-                <Text style={{fontSize: 13}}>{(ratings.outsider.R.rating?ratings.outsider.R.rating.toFixed(1)+' ('+ratings.outsider.R.total+')':'N/A')}</Text>
-                <Text style={{fontSize: 13}}>{(ratings.outsider.I.rating?ratings.outsider.I.rating.toFixed(1)+' ('+ratings.outsider.I.total+')':'N/A')}</Text>
-                <Text style={{fontSize: 13}}>{(ratings.outsider.G.rating?ratings.outsider.G.rating.toFixed(1)+' ('+ratings.outsider.G.total+')':'N/A')}</Text>
-                <Text style={{fontSize: 13}}>{(ratings.outsider.L.rating?ratings.outsider.L.rating.toFixed(1)+' ('+ratings.outsider.L.total+')':'N/A')}</Text>
-                <Text style={{fontSize: 13}}>{(ratings.outsider.O.rating?ratings.outsider.O.rating.toFixed(1)+' ('+ratings.outsider.O.total+')':'N/A')}</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-
-        <Modal
-          open={SmLoginScreen}
-          modalStyle={{width: 335, height: 400, backgroundColor: "transparent",
-            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
-          style={{alignItems: 'center'}}
-          offset={0}
-          overlayBackground={'rgba(0, 0, 0, 0.75)'}
-          animationDuration={200}
-          animationTension={40}
-          modalDidOpen={() => undefined}
-          modalDidClose={() => this.setState({SmLoginScreen: false})}
-          closeOnTouchOutside={true}
-          disableOnBackPress={false}>
-          <SmLoginPage refer={this} />
-        </Modal>
-
-      </ScrollView>
-
-      <BottomNavigation active={'done'} hidden={false} >
-        <BottomNavigation.Action
-          key="done"
-          icon="undo"
-          label="Go Back"
-          onPress={() => this.props.navigation.goBack()}
-        />
-      </BottomNavigation>
-
-    </View>
+      </Content>
+      <Footer>
+        <FooterTab>
+          <Button onPress={() => this.props.navigation.goBack()}>
+            <Icon name="undo" size={25} />
+            <Text>Go Back</Text>
+          </Button>
+        </FooterTab>
+      </Footer>
+    </Container>
     );
   }
 
