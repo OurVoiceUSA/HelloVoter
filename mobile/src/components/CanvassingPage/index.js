@@ -1389,7 +1389,13 @@ const SegmentPeople = props => {
 
   if (rstate.onlyPhonePeople) people = people.filter(p => pnumber(p));
 
-  return people.map(p => (
+  let arr = [(
+    <View>
+      <Text>Showing {(people.length>=10?10:people.length)} of {people.length} in this area.</Text>
+    </View>
+  )];
+
+  people.filter((p, i) => (i < 10)).map(p => arr.push((
     <View key={p.id} style={{padding: 5}}>
       <View style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20, maxWidth: 350}}>
                   <TouchableOpacity
@@ -1407,7 +1413,9 @@ const SegmentPeople = props => {
       </View>
       <Text>{' '}</Text>
     </View>
-  ));
+  )));
+
+  return arr;
 };
 
 const History = props => (
