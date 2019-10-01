@@ -1257,6 +1257,9 @@ const SegmentStreets = props => {
   return (
     <Accordion
       dataArray={rstate.listview_order}
+      onAccordionOpen={(s, idx) => props.refer.setState({selectedStreet: idx})}
+      onAccordionClose={(s, idx) => props.refer.setState({selectedStreet: null})}
+      expanded={rstate.selectedStreet}
       renderHeader={(street, ex) => (
         <View>
           <View style={{flex: 1, flexDirection: 'row'}}>
