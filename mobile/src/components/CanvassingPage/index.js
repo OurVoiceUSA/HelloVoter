@@ -5,7 +5,6 @@ import {
   StyleSheet,
   FlatList,
   Image,
-  TextInput,
   View,
   Linking,
   ScrollView,
@@ -15,18 +14,18 @@ import {
   Keyboard,
 } from 'react-native';
 
-import { Header, Footer, FooterTab, Text, Button, Spinner } from 'native-base';
+import { Accordion, Container, Content, Header, Footer, FooterTab, Tab, Tabs, Text, Button, Segment, Spinner, ListItem, Body, CheckBox, Item, Input } from 'native-base';
 
 import LocationComponent from '../LocationComponent';
 
-import Accordion from 'react-native-collapsible/Accordion';
+import CAccordion from 'react-native-collapsible/Accordion';
 import { NavigationActions } from 'react-navigation';
 import storage from 'react-native-storage-wrapper';
 import NetInfo from '@react-native-community/netinfo';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps'
 import RNGooglePlaces from 'react-native-google-places';
-import { Divider, DINFO, api_base_uri, _doGeocode, _getApiToken, getEpoch } from '../../common';
+import { Divider, DINFO, api_base_uri, _doGeocode, _getApiToken, getEpoch, PersonAttr } from '../../common';
 import KnockPage from '../KnockPage';
 import CanvassingSettingsPage from '../CanvassingSettingsPage';
 import { Dialog } from 'react-native-simple-dialogs';
@@ -89,6 +88,7 @@ export default class App extends LocationComponent {
       refer: props.navigation.state.params.refer,
       server: props.navigation.state.params.server,
       active: 'map',
+      segment: 'streets',
       selectedTurf: {},
       listview: {},
       listview_order: [],
@@ -110,6 +110,9 @@ export default class App extends LocationComponent {
       lastFetchPosition: {latitude: null, longitude: null},
       region: {latitudeDelta: 0.004, longitudeDelta: 0.004},
       markers: [],
+      people: [],
+      peopleSearch: null,
+      onlyPhonePeople: false,
       searchPins: [],
       fAddress: {},
       pAddress: {},
@@ -118,7 +121,6 @@ export default class App extends LocationComponent {
       settingsStorageKey: 'OV_CANVASS_SETTINGS',
       canvassSettings: {},
       isModalVisible: false,
-      isKnockMenuVisible: false,
       newUnitModalVisible: false,
       showDisclosure: "true",
       form: props.navigation.state.params.form,
@@ -136,6 +138,7 @@ export default class App extends LocationComponent {
     this.handleConnectivityChange = this.handleConnectivityChange.bind(this);
 
     this._dataGet = debounce(500, this._dataFetch)
+    this.peopleSearchDebounce = debounce(500, this.peopleSearch);
 
     // confirm exit, and reload forms when they do
     this.goBack = this.props.navigation.goBack;
@@ -241,7 +244,7 @@ export default class App extends LocationComponent {
 
     if (prevState.active !== active) {
       // close any open modals
-      this.setState({isModalVisible: false, isKnockMenuVisible: false});
+      this.setState({isModalVisible: false, newUnitModalVisible: false});
 
       // reload filters, etc
       if (prevState.active === 'settings') this._setCanvassSettings(canvassSettings);
@@ -448,15 +451,10 @@ export default class App extends LocationComponent {
     const { navigate } = this.props.navigation;
     const { form } = this.state;
 
-    this.currentMarker = marker;
+    this.setState({currentMarker: marker});
 
-    if (marker.units.length)
-      this.setState({active: 'multiunit'});
-    else
-      this.setState({isKnockMenuVisible: true});
+    this.setState({active: 'list', segment: 'residence'});
   }
-
-  getCurrentMarker() { return this.currentMarker; }
 
   getLastVisitObj(place) {
     let latest = {status:-1,end:0};
@@ -582,6 +580,7 @@ export default class App extends LocationComponent {
 
       let listview = {};
       let listview_order = [];
+      let people = [];
       let cities = [];
       let streets = [];
 
@@ -593,6 +592,10 @@ export default class App extends LocationComponent {
           marker.address = {longitude: 0, latitude: 0, id: parseInt(Math.random()*1000)};
           return;
         }
+
+        if (marker.people) marker.people.forEach(p => people.push(p));
+        if (marker.units && marker.units.people) marker.units.people(p => people.push(p));
+
         let street = marker.address.street.replace(/\d+ /, '');
 
         if (!listview[street]) {
@@ -605,7 +608,7 @@ export default class App extends LocationComponent {
 
       Object.keys(listview).forEach((street) => listview[street].sort(bystreet));
 
-      this.setState({lastFetchPosition: pos, markers: json, listview, listview_order, last_fetch: getEpoch()});
+      this.setState({lastFetchPosition: pos, markers: json, listview, listview_order, people, last_fetch: getEpoch()});
     } catch (e) {
       console.warn("Error: "+e);
       ret.error = true;
@@ -752,7 +755,7 @@ export default class App extends LocationComponent {
 
     // search for dupes
     let dupe = false;
-    this.currentMarker.units.forEach(u => {
+    this.state.currentMarker.units.forEach(u => {
       if (u.name.toLowerCase() === json.unit.toLowerCase()) dupe = true;
     });
 
@@ -764,11 +767,11 @@ export default class App extends LocationComponent {
         longitude: myPosition.longitude,
         latitude: myPosition.latitude,
         unit: json.unit,
-        addressId: this.currentMarker.address.id,
+        addressId: this.state.currentMarker.address.id,
       };
 
       this.sendData('/address/add/unit', input);
-      this.currentMarker.units.push({name: json.unit, people: []});
+      this.state.currentMarker.units.push({name: json.unit, people: []});
     }
 
     this.setState({newUnitModalVisible: false, fUnit: {}});
@@ -860,12 +863,16 @@ export default class App extends LocationComponent {
     }
   }
 
+  peopleSearch(text) {
+    this.setState({peopleSearch: text})
+  }
+
   render() {
     const { navigate } = this.props.navigation;
     const {
       showDisclosure, myPosition, myNodes, locationAccess, serviceError, deviceError,
-      form, user, loading, region, active, fetching, selectedTurf, mapCenter,
-      isModalVisible, isKnockMenuVisible, newUnitModalVisible
+      form, user, loading, region, active, segment, fetching, selectedTurf, mapCenter,
+      isModalVisible, newUnitModalVisible, onlyPhonePeople
     } = this.state;
 
     if (showDisclosure === "true") {
@@ -960,61 +967,36 @@ export default class App extends LocationComponent {
         {active==='turfstats'&&
           <TurfStats refer={this} loading={this.state.fetchingTurfStats} data={this.state.turfStats} />
         }
-        {active==='multiunit'&&
-        <View>
-          <Text style={{fontSize: 20, padding: 10}}>{this.currentMarker.address.street}, {this.currentMarker.address.city}</Text>
-
-          {this.add_new &&
-          <Icon.Button
-            name="plus-circle"
-            backgroundColor="#d7d7d7"
-            color="#000000"
-            onPress={() => {
-              if (!this.addOk()) {
-                Alert.alert('Active Filter', 'You cannot add a new address while a filter is active.', [{text: 'OK'}], { cancelable: false });
-                return;
-              }
-              this.setState({ newUnitModalVisible: true });
-            }}
-            {...iconStyles}>
-            Add new unit/apt number
-          </Icon.Button>
-          }
-
-          {(this.currentMarker.people && this.currentMarker.people.length !== 0) &&
-          <Unit unit={this.currentMarker}
-            unknown={true}
-            refer={this}
-            color={this.getPinColor(this.currentMarker)} />
-          }
-
-          <FlatList
-            scrollEnabled={false}
-            data={orderBy(this.currentMarker.units, u => u.name)}
-            extraData={this.state}
-            keyExtractor={item => item.name}
-            renderItem={({item}) => (
-              <Unit unit={item}
-                refer={this}
-                color={this.getPinColor(item)} />
-            )} />
-        </View>
-        }
         {active==='list'&&
-          <View>
-          {this.state.listview_order.length&&
-            <Accordion
-              activeSections={this.state.activeStreet}
-              sections={this.state.listview_order}
-              renderSectionTitle={() => null}
-              renderHeader={this.acrh}
-              renderContent={this.acstreet}
-              onChange={this.acoc}
-            />
-          ||
-            <Text style={{margin: 10}}>No address data for this area. Try widening your view on the map or adjusting your filter settings.</Text>
-          }
-          </View>
+          <Container>
+            <Segment>
+              <Button first active={(segment==='streets')} onPress={() => this.setState({segment: 'streets'})}><Text>Streets</Text></Button>
+              <Button last active={(segment==='residence')} onPress={() => this.setState({segment: 'residence'})}><Text>Residence</Text></Button>
+              <Button last active={(segment==='people')} onPress={() => this.setState({segment: 'people'})}><Text>People</Text></Button>
+            </Segment>
+            <Content>
+              {segment==='people'&&
+              <View>
+                <Header searchBar rounded>
+                  <Item>
+                    <Icon name="search" />
+                    <Input placeholder="Search" onChangeText={text => this.peopleSearchDebounce(text)} />
+                    <Icon name="group" />
+                  </Item>
+                </Header>
+                <ListItem onPress={() => this.setState({onlyPhonePeople: !onlyPhonePeople})}>
+                  <CheckBox checked={onlyPhonePeople} onPress={() => this.setState({onlyPhonePeople: !onlyPhonePeople})} />
+                  <Body>
+                    <Text>Only show those with a Phone Number</Text>
+                  </Body>
+                </ListItem>
+              </View>
+              }
+              <SegmentStreets refer={this} />
+              <SegmentResidence refer={this} />
+              <SegmentPeople refer={this} />
+            </Content>
+          </Container>
         }
         {active==='history'&&
           <History refer={this} loading={this.state.fetchingHistory} data={this.state.history} onPress={(pos) => {
@@ -1223,13 +1205,6 @@ export default class App extends LocationComponent {
         </Dialog>
 
         <Dialog
-          visible={isKnockMenuVisible}
-          animationType="fade"
-          onTouchOutside={() => this.setState({isKnockMenuVisible: false})}>
-          <KnockPage refer={this} funcs={this} marker={this.currentMarker} unit={this.state.currentUnit} form={form} />
-        </Dialog>
-
-        <Dialog
           visible={newUnitModalVisible}
           animationType="fade"
           onTouchOutside={() => this.setState({newUnitModalVisible: false})}>
@@ -1292,14 +1267,11 @@ function timeFormat(epoch) {
 
 const Unit = props => (
   <View key={props.unit.name} style={{padding: 10}}>
-    <TouchableOpacity
-      style={{flexDirection: 'row', alignItems: 'center'}}
-      onPress={() => {
-        props.refer.setState({ isKnockMenuVisible: true, currentUnit: props.unit });
-      }}>
+    <View
+      style={{flexDirection: 'row', alignItems: 'center'}}>
       <Icon name={(props.color === "red" ? "ban" : "address-book")} size={40} color={props.color} style={{margin: 5}} />
       <Text>Unit {(props.unknown?"Unknown":props.unit.name)} - {props.refer.getLastVisit(props.unit)}</Text>
-    </TouchableOpacity>
+    </View>
   </View>
 );
 
@@ -1315,6 +1287,132 @@ const TurfStats = props => (
     }
   </View>
 );
+
+const SegmentStreets = props => {
+  if (props.refer.state.segment!=='streets') return null;
+
+  if (!props.refer.state.listview_order.length) return (<Text style={{margin: 10}}>No address data for this area. Try widening your view on the map or adjusting your filter settings.</Text>);
+
+  return (
+    <CAccordion
+      activeSections={props.refer.state.activeStreet}
+      sections={props.refer.state.listview_order}
+      renderSectionTitle={() => null}
+      renderHeader={props.refer.acrh}
+      renderContent={props.refer.acstreet}
+      onChange={props.refer.acoc}
+    />
+  );
+};
+
+const SegmentResidence = props => {
+  let rstate = props.refer.state;
+  if (rstate.segment!=='residence') return null;
+
+  if (!rstate.currentMarker) return (<Text>No residence is selected.</Text>);
+
+  if (rstate.currentMarker.units && rstate.currentMarker.units.length) {
+    return (
+      <View>
+        <Text style={{fontSize: 20, padding: 10}}>{rstate.currentMarker.address.street}, {rstate.currentMarker.address.city}</Text>
+
+        {props.refer.add_new &&
+        <Icon.Button
+          name="plus-circle"
+          backgroundColor="#d7d7d7"
+          color="#000000"
+          onPress={() => {
+            if (!props.refer.addOk()) {
+              Alert.alert('Active Filter', 'You cannot add a new address while a filter is active.', [{text: 'OK'}], { cancelable: false });
+              return;
+            }
+            props.refer.setState({ newUnitModalVisible: true });
+          }}
+          {...iconStyles}>
+          Add new unit/apt number
+        </Icon.Button>
+        }
+
+        {(rstate.currentMarker.people && rstate.currentMarker.people.length !== 0) &&
+        <Unit unit={rstate.currentMarker}
+          unknown={true}
+          refer={props.refer}
+          color={props.refer.getPinColor(rstate.currentMarker)} />
+        }
+
+        <Accordion dataArray={rstate.currentMarker.units}
+          renderHeader={(u) => (
+            <Unit unit={u}
+              refer={props.refer}
+              color={props.refer.getPinColor(u)} />
+          )}
+          renderContent={(u) => (
+            <KnockPage refer={props.refer} funcs={props.refer} marker={rstate.currentMarker} unit={u} form={rstate.form} />
+          )}
+        />
+    </View>
+    );
+  }
+
+  return (
+    <KnockPage refer={props.refer} funcs={props.refer} marker={rstate.currentMarker} form={rstate.form} />
+  );
+}
+
+function pname(person) {
+  let name = "";
+  if (person.attrs) {
+    person.attrs.forEach(a => {
+      if (a.id === "013a31db-fe24-4fad-ab6a-dd9d831e72f9") name = a.value;
+    });
+  }
+  return name.toLowerCase();
+}
+
+function pnumber(person) {
+  let havePhone = false;
+  if (person.attrs) {
+    person.attrs.forEach(a => {
+      if (a.id === "7d3466e5-2cee-491e-b3f4-bfea3a4b010a" && a.value) havePhone = true;
+    });
+  }
+  return havePhone;
+}
+
+const SegmentPeople = props => {
+  let rstate = props.refer.state;
+  if (rstate.segment!=='people') return null;
+
+  if (!rstate.people.length) return (<Text style={{margin: 10}}>No people data for this area. Try widening your view on the map or adjusting your filter settings.</Text>);
+
+  let form = rstate.form;
+  let people;
+
+  if (rstate.peopleSearch) people = rstate.people.filter(p => pname(p).match(rstate.peopleSearch.toLowerCase()));
+  else people = rstate.people;
+
+  if (rstate.onlyPhonePeople) people = people.filter(p => pnumber(p));
+
+  return people.map(p => (
+    <View key={p.id} style={{padding: 5}}>
+      <View style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20, maxWidth: 350}}>
+                  <TouchableOpacity
+                    style={{flexDirection: 'row', alignItems: 'center'}}
+                    onPress={() => {
+                      navigate('Survey', {refer: props.refer, funcs: props.refer, form: form, person: p});
+                    }}>
+                    <Icon name="user" color="black" size={40} style={{margin: 5}} />
+                    <View>
+                      <PersonAttr form={form} idx={0} attrs={p.attrs} />
+                      <PersonAttr form={form} idx={1} attrs={p.attrs} />
+                      <PersonAttr form={form} idx={2} attrs={p.attrs} />
+                    </View>
+                  </TouchableOpacity>
+      </View>
+      <Text>{' '}</Text>
+    </View>
+  ));
+};
 
 const History = props => (
   <ScrollView>

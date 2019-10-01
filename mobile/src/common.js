@@ -7,6 +7,8 @@ import {
   View,
 } from 'react-native';
 
+import { Text } from 'native-base';
+
 import storage from 'react-native-storage-wrapper';
 import { getLocales, getTimeZone } from 'react-native-localize';
 import jwt_decode from 'jwt-decode';
@@ -410,3 +412,25 @@ export const Divider = props => (
     }}
   />
 );
+
+export const PersonAttr = props => {
+  if (props.form.attributes[props.idx]) {
+    let id = props.form.attributes[props.idx].id;
+    let name = props.form.attributes[props.idx].name;
+    let attr = (props.attrs.filter(a => a.id === id))[0];
+    if (attr) {
+      let value = attr.value;
+      if (props.form.attributes[props.idx].type === 'boolean') {
+        if (value) value = "Yes";
+        else value = "No";
+      }
+      return (
+        <Text>
+          {name}: {value}
+        </Text>
+      );
+    }
+  }
+  return null;
+};
+

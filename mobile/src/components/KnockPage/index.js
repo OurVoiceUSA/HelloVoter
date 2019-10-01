@@ -14,7 +14,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import Swipeout from 'react-native-swipeout';
 import uuidv4 from 'uuid/v4';
 
-import { getEpoch } from '../../common';
+import { getEpoch, PersonAttr } from '../../common';
 
 export default class App extends PureComponent {
 
@@ -164,27 +164,6 @@ export default class App extends PureComponent {
     );
   }
 }
-
-const PersonAttr = props => {
-  if (props.form.attributes[props.idx]) {
-    let id = props.form.attributes[props.idx].id;
-    let name = props.form.attributes[props.idx].name;
-    let attr = (props.attrs.filter(a => a.id === id))[0];
-    if (attr) {
-      let value = attr.value;
-      if (props.form.attributes[props.idx].type === 'boolean') {
-        if (value) value = "Yes";
-        else value = "No";
-      }
-      return (
-        <Text>
-          {name}: {value}
-        </Text>
-      );
-    }
-  }
-  return null;
-};
 
 const iconStyles = {
   justifyContent: 'center',
