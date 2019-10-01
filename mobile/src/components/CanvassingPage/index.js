@@ -18,7 +18,6 @@ import { Accordion, Container, Content, Header, Footer, FooterTab, Tab, Tabs, Te
 
 import LocationComponent from '../LocationComponent';
 
-import CAccordion from 'react-native-collapsible/Accordion';
 import { NavigationActions } from 'react-navigation';
 import storage from 'react-native-storage-wrapper';
 import NetInfo from '@react-native-community/netinfo';
@@ -93,7 +92,6 @@ export default class App extends LocationComponent {
       listview: {},
       listview_order: [],
       activeCity: [0],
-      activeStreet: [],
       last_fetch: 0,
       mapCenter: {},
       loading: false,
@@ -812,44 +810,6 @@ export default class App extends LocationComponent {
     return Linking.openURL(url).catch(() => null);
   }
 
-  acstreet = (street) => this.state.listview[street].map((marker, idx) => {
-    let color = this.getPinColor(marker);
-    let icon = (color === "red" ? "ban" : "home");
-    let num_people = marker.people.length;
-    marker.units.forEach((u) => num_people+=u.people.length);
-
-    return (
-      <View key={idx} style={{padding: 10, paddingTop: 0}}>
-        <TouchableOpacity
-          style={{flexDirection: 'row', alignItems: 'center'}}
-          onPress={() => this.doMarkerPress(marker)}>
-          <Icon name={icon} size={40} color={color} style={{margin: 5}} />
-          <Text>{marker.address.street} - {this.getLastVisit(marker)} ({num_people})</Text>
-          </TouchableOpacity>
-          <Divider />
-        </View>
-      );
-    }
-  )
-
-  acrh = (street, idx) => (
-    <View>
-      <View style={{flex: 1, flexDirection: 'row'}}>
-        <Icon
-          style={{margin: 20, marginRight: 10}}
-          size={20}
-          name={(parseInt(this.state.activeStreet)===idx?"minus-circle":"plus-circle")}
-          backgroundColor="#d7d7d7"
-          color="black"
-        />
-        <Text style={{alignSelf: 'center', margin: 20, marginLeft: 10}}>{street} ({this.state.listview[street].length})</Text>
-      </View>
-      <Divider />
-    </View>
-  )
-
-  acoc = (activeStreet) => this.setState({activeStreet})
-
   updateTurfInfo(pos) {
     if (this.state.turfs) {
       let selectedTurf = {};
@@ -1289,18 +1249,51 @@ const TurfStats = props => (
 );
 
 const SegmentStreets = props => {
-  if (props.refer.state.segment!=='streets') return null;
+  let rstate = props.refer.state;
+  if (rstate.segment!=='streets') return null;
 
-  if (!props.refer.state.listview_order.length) return (<Text style={{margin: 10}}>No address data for this area. Try widening your view on the map or adjusting your filter settings.</Text>);
+  if (!rstate.listview_order.length) return (<Text style={{margin: 10}}>No address data for this area. Try widening your view on the map or adjusting your filter settings.</Text>);
 
   return (
-    <CAccordion
-      activeSections={props.refer.state.activeStreet}
-      sections={props.refer.state.listview_order}
-      renderSectionTitle={() => null}
-      renderHeader={props.refer.acrh}
-      renderContent={props.refer.acstreet}
-      onChange={props.refer.acoc}
+    <Accordion
+      dataArray={rstate.listview_order}
+      renderHeader={(street, ex) => (
+        <View>
+          <View style={{flex: 1, flexDirection: 'row'}}>
+            <Icon
+              style={{margin: 20, marginRight: 10}}
+              size={20}
+              name={(ex?"minus-circle":"plus-circle")}
+              backgroundColor="#d7d7d7"
+              color="black"
+            />
+            <Text style={{alignSelf: 'center', margin: 20, marginLeft: 10}}>{street} ({rstate.listview[street].length})</Text>
+          </View>
+          <Divider />
+        </View>
+      )}
+      renderContent={(street) => {
+        return rstate.listview[street].map((marker, idx) => {
+          let color = props.refer.getPinColor(marker);
+          let icon = (color === "red" ? "ban" : "home");
+          let num_people = marker.people.length;
+          marker.units.forEach((u) => num_people+=u.people.length);
+
+          return (
+            <View key={idx} style={{padding: 10, paddingTop: 0}}>
+              <TouchableOpacity
+                style={{flexDirection: 'row', alignItems: 'center'}}
+                onPress={() => props.refer.doMarkerPress(marker)}>
+                <Icon name={icon} size={40} color={color} style={{margin: 5}} />
+                <Text>{marker.address.street} - {props.refer.getLastVisit(marker)} ({num_people})</Text>
+                </TouchableOpacity>
+                <Divider />
+              </View>
+            );
+          }
+        )
+
+      }}
     />
   );
 };
