@@ -1,7 +1,6 @@
 import React, { PureComponent } from 'react';
 
 import {
-  Alert,
   StyleSheet,
   FlatList,
   Image,
@@ -27,7 +26,7 @@ import RNGooglePlaces from 'react-native-google-places';
 import { Divider, DINFO, api_base_uri, _doGeocode, _getApiToken, getEpoch, PersonAttr } from '../../common';
 import KnockPage from '../KnockPage';
 import CanvassingSettingsPage from '../CanvassingSettingsPage';
-import { Dialog } from 'react-native-simple-dialogs';
+import { ConfirmDialog, Dialog } from 'react-native-simple-dialogs';
 import md5 from 'md5';
 import { debounce } from 'throttle-debounce';
 import { orderBy } from 'natural-orderby';
@@ -126,6 +125,7 @@ export default class App extends LocationComponent {
       user: props.navigation.state.params.user,
       turfs: props.navigation.state.params.form.turfs,
       retry_queue: [],
+      confirmDialog: false,
     };
 
     if (this.state.form.add_new) this.add_new = true;
@@ -141,16 +141,21 @@ export default class App extends LocationComponent {
     // confirm exit, and reload forms when they do
     this.goBack = this.props.navigation.goBack;
     this.props.navigation.goBack = () => {
-      Alert.alert(
-        'Exit Canvassing',
-        'Are you sure you wish to exit the canvassing?',
-        [
-          {text: 'Yes', onPress: () => {
+      this.alert(
+        "Exit Canvassing",
+        "Are you sure you wish to exit the canvassing tool?",
+        {
+          title: "Yes",
+          onPress: () => {
+            this.setState({confirmDialog: false});
             this.state.refer._loadForms();
             this.goBack();
-          }},
-          {text: 'No'},
-        ], { cancelable: false }
+          },
+        },
+        {
+          title: "No",
+          onPress: () => this.setState({confirmDialog: false}),
+        }
       );
     };
   }
@@ -308,10 +313,7 @@ export default class App extends LocationComponent {
   showConfirmAddress = (pos) => {
     const { myPosition } = this.state;
 
-    if (!this.addOk()) {
-      Alert.alert('Active Filter', 'You cannot add a new address while a filter is active.', [{text: 'OK'}], { cancelable: false });
-      return;
-    }
+    if (!this.addOk()) return this.alert("Active Filter", "You cannot add a new address while a filter is active.");
 
     if (this.state.netInfo === 'none') {
       this.setState({ isModalVisible: true });
@@ -326,10 +328,7 @@ export default class App extends LocationComponent {
         this.state.turfs.forEach(t => {
           if (ingeojson(t, pos.longitude, pos.latitude)) flag = true;
         });
-        if (!flag) {
-          Alert.alert('Outside Boundary', 'You are outside the turf boundary for this canvassing form.', [{text: 'OK'}], { cancelable: false });
-          return;
-        }
+        if (!flag) return this.alert("Outside Boundary", "You are outside the turf boundary for this canvassing form.");
       }
     }
 
@@ -832,7 +831,8 @@ export default class App extends LocationComponent {
     const {
       showDisclosure, myPosition, myNodes, locationAccess, serviceError, deviceError,
       form, user, loading, region, active, segment, fetching, selectedTurf, mapCenter,
-      isModalVisible, newUnitModalVisible, onlyPhonePeople
+      isModalVisible, newUnitModalVisible, onlyPhonePeople, confirmDialog, confirmDialogTitle,
+      confirmDialogMessage, confirmDialogPositiveButton, confirmDialogNegativeButton,
     } = this.state;
 
     if (showDisclosure === "true") {
@@ -1185,6 +1185,15 @@ export default class App extends LocationComponent {
           </View>
         </Dialog>
 
+        <ConfirmDialog
+          title={confirmDialogTitle}
+          message={confirmDialogMessage}
+          visible={confirmDialog}
+          onTouchOutside={() => this.setState({confirmDialog: false})}
+          positiveButton={confirmDialogPositiveButton}
+          negativeButton={confirmDialogNegativeButton}
+        />
+
         <Footer>
           <FooterTab>
             <Button active={(active === 'map'?true:false)} onPress={() => this.setState({active: 'map'})}>
@@ -1318,10 +1327,7 @@ const SegmentResidence = props => {
           backgroundColor="#d7d7d7"
           color="#000000"
           onPress={() => {
-            if (!props.refer.addOk()) {
-              Alert.alert('Active Filter', 'You cannot add a new address while a filter is active.', [{text: 'OK'}], { cancelable: false });
-              return;
-            }
+            if (!props.refer.addOk()) return this.alert("Active Filter", "You cannot add a new address while a filter is active.");
             props.refer.setState({ newUnitModalVisible: true });
           }}
           {...iconStyles}>
