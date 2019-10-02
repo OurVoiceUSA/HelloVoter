@@ -86,7 +86,8 @@ export default class App extends LocationComponent {
       refer: props.navigation.state.params.refer,
       server: props.navigation.state.params.server,
       active: 'map',
-      segment: 'streets',
+      segmentList: 'streets',
+      segmentTurf: 'list',
       selectedTurf: {},
       listview: {},
       listview_order: [],
@@ -243,7 +244,7 @@ export default class App extends LocationComponent {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const { active, canvassSettings, checkHistory } = this.state;
+    const { active, segmentList, canvassSettings, checkHistory } = this.state;
 
     if (prevState.active !== active) {
       // close any open modals
@@ -251,9 +252,11 @@ export default class App extends LocationComponent {
 
       // reload filters, etc
       if (prevState.active === 'settings') this._setCanvassSettings(canvassSettings);
+    }
 
+    if (prevState.segmentList !== segmentList) {
       // poll history if needed
-      if (active === 'history' && checkHistory) this._pollHistory();
+      if (segmentList === 'history' && checkHistory) this._pollHistory();
     }
   }
 
@@ -450,7 +453,7 @@ export default class App extends LocationComponent {
 
     this.setState({currentMarker: marker});
 
-    this.setState({active: 'list', segment: 'residence'});
+    this.setState({active: 'list', segmentList: 'residence'});
   }
 
   getLastVisitObj(place) {
@@ -830,7 +833,7 @@ export default class App extends LocationComponent {
     const { navigate } = this.props.navigation;
     const {
       showDisclosure, myPosition, myNodes, locationAccess, serviceError, deviceError,
-      form, user, loading, region, active, segment, fetching, selectedTurf, mapCenter,
+      form, user, loading, region, active, segmentList, segmentTurf, fetching, selectedTurf, mapCenter,
       isModalVisible, newUnitModalVisible, onlyPhonePeople, confirmDialog, confirmDialogTitle,
       confirmDialogMessage, confirmDialogPositiveButton, confirmDialogNegativeButton,
     } = this.state;
@@ -930,12 +933,13 @@ export default class App extends LocationComponent {
         {active==='list'&&
           <Container>
             <Segment>
-              <Button first active={(segment==='streets')} onPress={() => this.setState({segment: 'streets'})}><Text>Streets</Text></Button>
-              <Button last active={(segment==='residence')} onPress={() => this.setState({segment: 'residence'})}><Text>Residence</Text></Button>
-              <Button last active={(segment==='people')} onPress={() => this.setState({segment: 'people'})}><Text>People</Text></Button>
+              <Button first active={(segmentList==='streets')} onPress={() => this.setState({segmentList: 'streets'})}><Text>Streets</Text></Button>
+              <Button active={(segmentList==='residence')} onPress={() => this.setState({segmentList: 'residence'})}><Text>Residence</Text></Button>
+              <Button active={(segmentList==='people')} onPress={() => this.setState({segmentList: 'people'})}><Text>People</Text></Button>
+              <Button last active={(segmentList==='history')} onPress={() => this.setState({segmentList: 'history'})}><Text>History</Text></Button>
             </Segment>
             <Content>
-              {segment==='people'&&
+              {segmentList==='people'&&
               <View>
                 <Header searchBar rounded>
                   <Item>
@@ -955,15 +959,20 @@ export default class App extends LocationComponent {
               <SegmentStreets refer={this} />
               <SegmentResidence refer={this} />
               <SegmentPeople refer={this} />
+              <SegmentHistory refer={this} />
             </Content>
           </Container>
         }
-        {active==='history'&&
-          <History refer={this} loading={this.state.fetchingHistory} data={this.state.history} onPress={(pos) => {
-            this.setState({active: 'map'});
-            if (this.state.canvassSettings.chill_mode) this._dataGet(pos);
-            this.map.animateToCoordinate(pos, 1000);
-          }} />
+        {active==='turf'&&
+          <Container>
+            <Segment>
+              <Button first active={(segmentTurf==='list')} onPress={() => this.setState({segmentTurf: 'list'})}><Text>List</Text></Button>
+              <Button last active={(segmentTurf==='stats')} onPress={() => this.setState({segmentTurf: 'stats'})}><Text>Stats</Text></Button>
+            </Segment>
+            <Content>
+              <Text>{JSON.stringify(this.state.turfs.map(t => t.name))}</Text>
+            </Content>
+          </Container>
         }
         {active==='settings'&&
           <CanvassingSettingsPage refer={this} form={form} />
@@ -1042,7 +1051,10 @@ export default class App extends LocationComponent {
 
         {active==='map'&&selectedTurf.id&&
         <TouchableOpacity style={{position: 'absolute', left: 0, ...styles.turfInfoContainer}}
-          onPress={() => this._loadTurfStats()}>
+          onPress={() => {
+            this._loadTurfStats();
+            this.setState({active: 'turf', segmentTurf: 'stats'});
+          }}>
           <Text>{selectedTurf.name}</Text>
         </TouchableOpacity>
         }
@@ -1204,9 +1216,9 @@ export default class App extends LocationComponent {
               <Icon name="list" size={25} />
               <Text>List View</Text>
             </Button>
-            <Button active={(active === 'history'?true:false)} onPress={() => this.setState({active: 'history'})}>
-              <Icon name="history" size={25} />
-              <Text>History</Text>
+            <Button active={(active === 'turf'?true:false)} onPress={() => this.setState({active: 'turf'})}>
+              <Icon name="compass" size={25} />
+              <Text>Turf</Text>
             </Button>
             <Button active={(active === 'settings'?true:false)} onPress={() => this.setState({active: 'settings'})}>
               <Icon name="cog" size={25} />
@@ -1259,7 +1271,7 @@ const TurfStats = props => (
 
 const SegmentStreets = props => {
   let rstate = props.refer.state;
-  if (rstate.segment!=='streets') return null;
+  if (rstate.segmentList!=='streets') return null;
 
   if (!rstate.listview_order.length) return (<Text style={{margin: 10}}>No address data for this area. Try widening your view on the map or adjusting your filter settings.</Text>);
 
@@ -1312,7 +1324,7 @@ const SegmentStreets = props => {
 
 const SegmentResidence = props => {
   let rstate = props.refer.state;
-  if (rstate.segment!=='residence') return null;
+  if (rstate.segmentList!=='residence') return null;
 
   if (!rstate.currentMarker) return (<Text>No residence is selected.</Text>);
 
@@ -1383,7 +1395,7 @@ function pnumber(person) {
 
 const SegmentPeople = props => {
   let rstate = props.refer.state;
-  if (rstate.segment!=='people') return null;
+  if (rstate.segmentList!=='people') return null;
 
   if (!rstate.people.length) return (<Text style={{margin: 10}}>No people data for this area. Try widening your view on the map or adjusting your filter settings.</Text>);
 
@@ -1424,46 +1436,56 @@ const SegmentPeople = props => {
   return arr;
 };
 
-const History = props => (
-  <ScrollView>
-    {props.loading&&
-    <Spinner />
-    }
-    {!props.loading&&
-    <View style={{padding: 10}}>
-      <Text>{(props.data.length?'Loaded '+props.data.length+' historical actions:':'No history to view')}</Text>
-    </View>
-    }
-    <FlatList
-      scrollEnabled={false}
-      data={props.data}
-      keyExtractor={item => ""+item.id}
-      renderItem={({item}) => (
-        <View key={item.id}>
-          <Divider />
-          <TouchableOpacity style={{marginTop: 10, marginBottom: 10}}
-            onPress={() => props.onPress({
-              longitude: item.address.position.x,
-              latitude: item.address.position.y,
-            })}>
-            <View style={{flexDirection: 'row'}}>
-              <View style={{width: 100, alignItems: 'center'}}>
-                <Image source={{ uri: item.volunteer.avatar }} style={{height: 50, width: 50, padding: 10, borderRadius: 20}} />
-                <Text>{item.volunteer.name}</Text>
+const SegmentHistory = props => {
+  let rstate = props.refer.state;
+  if (rstate.segmentList!=='history') return null;
+
+  return (
+    <Content>
+      {rstate.fetchingHistory&&
+      <Spinner />
+      }
+      {!rstate.fetchingHistory&&
+      <View style={{padding: 10}}>
+        <Text>{(rstate.history.length?'Loaded '+rstate.history.length+' historical actions:':'No history to view')}</Text>
+      </View>
+      }
+      <FlatList
+        scrollEnabled={false}
+        data={rstate.history}
+        keyExtractor={item => ""+item.id}
+        renderItem={({item}) => (
+          <View key={item.id}>
+            <Divider />
+            <TouchableOpacity style={{marginTop: 10, marginBottom: 10}}
+              onPress={() => {
+                props.refer.setState({active: 'map'});
+                  if (rstate.canvassSettings.chill_mode)
+                    props.refer._dataGet({
+                      longitude: item.address.position.x,
+                      latitude: item.address.position.y,
+                    });
+                  props.refer.map.animateToCoordinate(pos, 1000);
+              }}>
+              <View style={{flexDirection: 'row'}}>
+                <View style={{width: 100, alignItems: 'center'}}>
+                  <Image source={{ uri: item.volunteer.avatar }} style={{height: 50, width: 50, padding: 10, borderRadius: 20}} />
+                  <Text>{item.volunteer.name}</Text>
+                </View>
+                <View>
+                  <Text>Date: {timeFormat(item.datetime)}</Text>
+                  <Text>Address: {item.address.street}</Text>
+                  <Text>Status: {statusToText(item.status)}</Text>
+                  <Text>Contact: {(item.person?item.person.name:'N/A')}</Text>
+                </View>
               </View>
-              <View>
-                <Text>Date: {timeFormat(item.datetime)}</Text>
-                <Text>Address: {item.address.street}</Text>
-                <Text>Status: {statusToText(item.status)}</Text>
-                <Text>Contact: {(item.person?item.person.name:'N/A')}</Text>
-              </View>
-            </View>
-          </TouchableOpacity>
-        </View>
-      )}
-    />
-  </ScrollView>
-);
+            </TouchableOpacity>
+          </View>
+        )}
+      />
+    </Content>
+  );
+};
 
 const iconStyles = {
   justifyContent: 'center',
