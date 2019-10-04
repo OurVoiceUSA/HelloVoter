@@ -225,7 +225,7 @@ PODS:
     - React
   - react-native-geolocation (2.0.2):
     - React
-  - react-native-google-maps (0.26.0):
+  - react-native-google-maps (0.26.1):
     - Google-Maps-iOS-Utils (= 2.1.0)
     - GoogleMaps (= 3.2.0)
     - React
@@ -233,9 +233,9 @@ PODS:
     - GoogleMaps (~> 3.2.0)
     - GooglePlaces (~> 3.2.0)
     - React
-  - react-native-maps (0.26.0):
+  - react-native-maps (0.26.1):
     - React
-  - react-native-netinfo (4.3.0):
+  - react-native-netinfo (4.3.1):
     - React
   - react-native-safari-view (1.0.0):
     - React
@@ -335,7 +335,7 @@ DEPENDENCIES:
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - RNLocalize (from `../node_modules/react-native-localize`)
   - RNPermissions (from `../node_modules/react-native-permissions`)
-  - RNRate (from `../node_modules/react-native-rate/ios`)
+  - RNRate (from `../node_modules/react-native-rate`)
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -430,7 +430,7 @@ EXTERNAL SOURCES:
   RNPermissions:
     :path: "../node_modules/react-native-permissions"
   RNRate:
-    :path: "../node_modules/react-native-rate/ios"
+    :path: "../node_modules/react-native-rate"
   RNVectorIcons:
     :path: "../node_modules/react-native-vector-icons"
   Yoga:
@@ -462,10 +462,10 @@ SPEC CHECKSUMS:
   react-native-config: 55548054279d92e0e4566ea15a8b9b81028ec342
   react-native-geocoder-reborn: 2fc7d5eb30cc85e00c8505121b66549f0468ad5a
   react-native-geolocation: cbd9d6bd06bac411eed2671810f454d4908484a8
-  react-native-google-maps: 31fc6de4abc38ce08896c242373b2fecf12a8389
+  react-native-google-maps: 2e2e697dab576abd5809d78cd74e775865b62bf7
   react-native-google-places: 1531c5b40622f71b6dacfb476e30be9e08e857b8
-  react-native-maps: e113fc992ce79e18622d6d647ce36d8367e801cb
-  react-native-netinfo: 19ea7ffad6159777c77a34a3ed283b994a520d19
+  react-native-maps: 6e499eee4eabf422ba8b6f94e993cc768bf35153
+  react-native-netinfo: 14b4f052d463ca41844bac926d5141406826bcf5
   react-native-safari-view: 955d7160d159241b8e9395d12d10ea0ef863dcdd
   React-RCTActionSheet: 89b037c0fb7d2671607cb645760164e7e0c013f6
   React-RCTAnimation: e3cefa93c38c004c318f7ec04b883eb14b8b8235

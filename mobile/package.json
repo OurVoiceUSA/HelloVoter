@@ -12,7 +12,7 @@
   "dependencies": {
     "@react-native-community/async-storage": "^1.6.2",
     "@react-native-community/geolocation": "^2.0.2",
-    "@react-native-community/netinfo": "^4.3.0",
+    "@react-native-community/netinfo": "^4.3.1",
     "i18n-js": "^3.3.0",
     "javascript-time-ago": "^2.0.2",
     "jwt-decode": "^2.2.0",
@@ -23,7 +23,7 @@
     "natural-orderby": "^2.0.3",
     "ourvoiceusa-sdk-js": "github:OurVoiceUSA/ourvoiceusa-sdk-js",
     "rbush": "^3.0.1",
-    "react": "16.10.1",
+    "react": "16.10.2",
     "react-native": "0.61.2",
     "react-native-camera": "^3.6.0",
     "react-native-config": "^0.11.7",
@@ -34,9 +34,9 @@
     "react-native-google-places": "^3.1.2",
     "react-native-input-prompt": "^1.0.0",
     "react-native-localize": "^1.2.1",
-    "react-native-maps": "^0.26.0",
+    "react-native-maps": "^0.26.1",
     "react-native-permissions": "^2.0.0",
-    "react-native-rate": "^1.1.7",
+    "react-native-rate": "^1.1.9",
     "react-native-safari-view": "^2.1.0",
     "react-native-settings-components": "0.0.2",
     "react-native-simple-dialogs": "^1.2.0",
@@ -66,7 +66,7 @@
     "mock-async-storage": "^2.2.0",
     "patch-package": "^6.2.0",
     "react-native-cli": "^2.0.1",
-    "react-test-renderer": "16.10.1",
+    "react-test-renderer": "16.10.2",
     "ws": "^7.1.2"
   },
   "jest": {
