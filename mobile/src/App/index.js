@@ -9,6 +9,10 @@ import {
 } from 'react-native';
 
 YellowBox.ignoreWarnings([
+  'VirtualizedLists should never',
+  'positiveButton',
+  'perform a React state update on an unmounted component',
+  'componentWillReceiveProps', 'componentWillMount',
   'animateCamera',
   'RNCNetInfo - You are', // my fire, my one desire! (not)
   'Warning: isMounted(...) is deprecated',
