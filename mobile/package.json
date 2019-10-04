@@ -12,7 +12,7 @@
   "dependencies": {
     "@react-native-community/async-storage": "^1.6.2",
     "@react-native-community/geolocation": "^2.0.2",
-    "@react-native-community/netinfo": "^4.3.1",
+    "@react-native-community/netinfo": "^4.3.3",
     "i18n-js": "^3.3.0",
     "javascript-time-ago": "^2.0.2",
     "jwt-decode": "^2.2.0",
