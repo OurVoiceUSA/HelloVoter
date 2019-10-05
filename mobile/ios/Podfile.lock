@@ -284,7 +284,7 @@ PODS:
     - React
   - RNPermissions (2.0.0):
     - React
-  - RNRate (1.0.1):
+  - RNRate (1.1.10):
     - React
   - RNVectorIcons (6.6.0):
     - React
@@ -482,7 +482,7 @@ SPEC CHECKSUMS:
   RNGestureHandler: 4cb47a93019c1a201df2644413a0a1569a51c8aa
   RNLocalize: 7206d44eb341d6e2a61a8184b831c64a5539fcdf
   RNPermissions: 43fe093bcfe89d3a05a4b82a695db9db9e7dcf21
-  RNRate: 29be49c24b314c4e8ec09d848c3965f61cb0be47
+  RNRate: d44a8bca6ee08f5d890ecccddaec2810955ffbb3
   RNVectorIcons: 0bb4def82230be1333ddaeee9fcba45f0b288ed4
   Yoga: 14927e37bd25376d216b150ab2a561773d57911f
 
