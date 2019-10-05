@@ -496,8 +496,13 @@ export default class App extends LocationComponent {
     this.setState({forms, loading: false, SelectModeScreen: (forms.length === 0)});
   }
 
-  _canvassGuidelinesUrlHandler() {
+  _tosUrlHandler() {
     const url = "https://github.com/OurVoiceUSA/HelloVoter/blob/master/docs/Canvassing-Guidelines.md";
+    return Linking.openURL(url).catch(() => null);
+  }
+
+  _signupUrlHandler() {
+    const url = "https://docs.google.com/forms/d/1YF90nYiem5FeBflrkPTQSdjFEOAm55SVkSf7QtB-nBw/viewform";
     return Linking.openURL(url).catch(() => null);
   }
 
@@ -613,7 +618,7 @@ export default class App extends LocationComponent {
 
         <View style={{margin: 12}}>
           <Text>
-            {say("using_tool_you_acknowledge")} <Text style={{fontWeight: 'bold', color: 'blue'}} onPress={() => {this._canvassGuidelinesUrlHandler()}}>
+            {say("using_tool_you_acknowledge")} <Text style={{fontWeight: 'bold', color: 'blue'}} onPress={() => {this._tosUrlHandler()}}>
             {say("canvassing_guidelines")}</Text>. {say("be_courteous_to_those")}
           </Text>
         </View>
@@ -636,6 +641,12 @@ export default class App extends LocationComponent {
               <Text>{say("org_id")}</Text>
             </Button>
             <Text style={{fontSize: 12, marginBottom: 10, textAlign: 'justify'}}>{say("didnt_receive_qr_code")}</Text>
+
+            <Button block bordered dark onPress={() => this._signupUrlHandler()}>
+              <Icon name="clipboard" {...iconStyles} />
+              <Text>{say("org_id_signup")}</Text>
+            </Button>
+            <Text style={{fontSize: 12, marginBottom: 10, textAlign: 'justify'}}>{say("org_id_signup_subtext")}</Text>
 
             {(__DEV__&&dinfo.Emulator)&&
             <View>

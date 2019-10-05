@@ -110,6 +110,8 @@
   "join_existing_effort": "Únase a un esfuerzo existente para tocar puertas y alentar a nuestros vecinos a salir y votar.",
   "didnt_receive_qr_code": "¿No recibió un código QR? Ingrese el ID de la organización para unirse a su operación de sondeo.",
   "no_qr_code_please_ask": "Si aún no tiene un código QR o ID de organización, solicite a su organización que le proporcione uno.",
+  "org_id_signup": "Nueva Organización",
+  "org_id_signup_subtext": "Regístrese para obtener una identificación de la organización y, según los recursos disponibles, es posible que podamos alojar sus datos.",
   "enter_org_id_example": "Ingrese ID. Ejemplo",
   "lets_do_this": "¡Hagámoslo!"
 }

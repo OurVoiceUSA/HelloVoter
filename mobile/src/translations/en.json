@@ -110,6 +110,8 @@
   "join_existing_effort": "Join an existing effort to knock doors and encourge our neighbors to get out and vote.",
   "didnt_receive_qr_code": "Didn't receive a QR Code? Enter the Organization ID for your canvassing operation to join.",
   "no_qr_code_please_ask": "If you don’t have a QR Code or Organization ID yet, please ask your organization to provide you with one.",
+  "org_id_signup": "New Organization",
+  "org_id_signup_subtext": "Sign up for an Organization ID, and based on available resources, we may be able to host your data.",
   "enter_org_id_example": "Enter Org ID. Example",
   "lets_do_this": "Let's do this!"
 }
