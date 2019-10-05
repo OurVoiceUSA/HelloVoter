@@ -7,7 +7,6 @@ import {
   View,
   Linking,
   TouchableOpacity,
-  Keyboard,
 } from 'react-native';
 
 import {

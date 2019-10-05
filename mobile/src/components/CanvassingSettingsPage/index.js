@@ -1,11 +1,8 @@
 import React, { PureComponent } from 'react';
 
-import {
-  Text,
-  View,
-  StyleSheet,
-  ScrollView,
-} from 'react-native';
+import { View } from 'react-native';
+
+import { Content, Text, } from 'native-base';
 
 import {
   SettingsDividerShort,
@@ -67,7 +64,7 @@ export default class App extends PureComponent {
     let size_limit = limit2size(refer.state.canvassSettings);
 
     return (
-    <ScrollView style={{flex: 1, backgroundColor: colors.white}}>
+    <Content>
 
       <SettingsCategoryHeader title={"Settings"} />
 
@@ -143,7 +140,7 @@ export default class App extends PureComponent {
       </View>
       }
 
-    </ScrollView>
+    </Content>
     );
   }
 }

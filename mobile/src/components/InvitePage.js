@@ -2,10 +2,11 @@
 import React, { PureComponent } from 'react';
 
 import {
-  ActivityIndicator,
   Alert,
   Linking,
 } from 'react-native';
+
+import { Spinner } from 'native-base';
 
 import { StackActions, NavigationActions } from 'react-navigation';
 import storage from 'react-native-storage-wrapper';
@@ -58,8 +59,7 @@ export default class App extends PureComponent {
   }
 
   render() {
-    return (<ActivityIndicator size="large" />);
+    return (<Spinner />);
   }
 
 }
-

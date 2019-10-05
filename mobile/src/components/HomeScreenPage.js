@@ -9,7 +9,6 @@ import {
   View,
   Linking,
   Platform,
-  ScrollView,
 } from 'react-native';
 
 import { Container, Header, Content, Footer, FooterTab, Text, Button, Spinner } from 'native-base';

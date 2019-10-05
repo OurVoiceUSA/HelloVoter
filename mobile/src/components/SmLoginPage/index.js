@@ -2,15 +2,12 @@
 import React, { PureComponent } from 'react';
 
 import {
-  ActivityIndicator,
   Image,
   Linking,
-  StyleSheet,
   Platform,
   Text,
   View,
   TouchableOpacity,
-  findNodeHandle,
 } from 'react-native';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -103,11 +100,11 @@ export default class App extends PureComponent {
     return (
       <View>
         {user && user.lastsmlogin &&
-        <Text style={styles.header}>
+        <Text style={{fontSize: 20, textAlign: 'center', margin: 10}}>
           Welcome back! Your session has expired. Please login to continue.
         </Text>
         ||
-        <Text style={styles.header}>
+        <Text style={{fontSize: 20, textAlign: 'center', margin: 10}}>
           Please login to continue
         </Text>
         }
@@ -160,20 +157,3 @@ const iconStyles = {
   borderRadius: 10,
   padding: 10,
 };
-
-const styles = StyleSheet.create({
-  header: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  text: {
-    textAlign: 'center',
-  },
-  buttons: {
-    justifyContent: 'space-between',
-    flexDirection: 'row',
-    margin: 20,
-    marginBottom: 30,
-  },
-});

@@ -5,11 +5,8 @@ import {
   Alert,
   Linking,
   View,
-  ScrollView,
   Image,
-  Platform,
   TouchableOpacity,
-  TouchableWithoutFeedback,
 } from 'react-native';
 
 import { Container, Header, Content, Footer, FooterTab, Text, Button, Spinner } from 'native-base';

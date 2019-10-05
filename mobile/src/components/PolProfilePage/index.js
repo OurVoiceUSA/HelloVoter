@@ -1,9 +1,9 @@
 import React, { PureComponent } from 'react';
+
 import {
   Dimensions,
   Linking,
   TouchableOpacity,
-  TextInput,
   View,
   Image,
 } from 'react-native';

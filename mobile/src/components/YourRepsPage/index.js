@@ -2,7 +2,6 @@ import React, { PureComponent } from 'react';
 import {
   Alert,
   Image,
-  ScrollView,
   View,
   FlatList,
   Linking,

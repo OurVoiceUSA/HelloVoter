@@ -3,7 +3,6 @@ import React, { PureComponent } from 'react';
 
 import {
   Alert,
-  StyleSheet,
   Text,
   View,
   TouchableOpacity,
@@ -170,20 +169,3 @@ const iconStyles = {
   borderRadius: 10,
   padding: 10,
 };
-
-const styles = StyleSheet.create({
-  header: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  text: {
-    textAlign: 'center',
-  },
-  buttons: {
-    justifyContent: 'space-between',
-    flexDirection: 'row',
-    margin: 20,
-    marginBottom: 30,
-  },
-});

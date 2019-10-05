@@ -7,7 +7,6 @@ import {
   Linking,
   View,
   Platform,
-  ScrollView,
   TouchableOpacity,
 } from 'react-native';
 
