@@ -1468,12 +1468,13 @@ const SegmentHistory = props => {
             <TouchableOpacity style={{marginTop: 10, marginBottom: 10}}
               onPress={() => {
                 props.refer.setState({active: 'map'});
-                  if (rstate.canvassSettings.chill_mode)
-                    props.refer._dataGet({
-                      longitude: item.address.position.x,
-                      latitude: item.address.position.y,
-                    });
-                  props.refer.map.animateToCoordinate(pos, 1000);
+                let pos = {
+                  longitude: item.address.position.x,
+                  latitude: item.address.position.y,
+                }
+                if (rstate.canvassSettings.chill_mode)
+                  props.refer._dataGet(pos);
+                props.refer.map.animateToCoordinate(pos, 1000);
               }}>
               <View style={{flexDirection: 'row'}}>
                 <View style={{width: 100, alignItems: 'center'}}>
