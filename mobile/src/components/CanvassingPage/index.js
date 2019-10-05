@@ -593,8 +593,12 @@ export default class App extends LocationComponent {
           return;
         }
 
-        if (marker.people) marker.people.forEach(p => people.push(p));
-        if (marker.units && marker.units.people) marker.units.people(p => people.push(p));
+        if (marker.people) marker.people.forEach(p => people.push({person: p, address_id: marker.address.id}));
+        if (marker.units) {
+          marker.units.forEach(u => {
+            if (u.people) u.people.forEach(p => people.push({person: p, address_id: marker.address.id, unit: u}));
+          });
+        }
 
         let street = marker.address.street.replace(/\d+ /, '');
 
@@ -1394,7 +1398,9 @@ function pnumber(person) {
 }
 
 const SegmentPeople = props => {
+  const { navigate } = props.refer.props.navigation;
   let rstate = props.refer.state;
+
   if (rstate.segmentList!=='people') return null;
 
   if (!rstate.people.length) return (<Text style={{margin: 10}}>No people data for this area. Try widening your view on the map or adjusting your filter settings.</Text>);
@@ -1402,10 +1408,10 @@ const SegmentPeople = props => {
   let form = rstate.form;
   let people;
 
-  if (rstate.peopleSearch) people = rstate.people.filter(p => pname(p).match(rstate.peopleSearch.toLowerCase()));
+  if (rstate.peopleSearch) people = rstate.people.filter(p => pname(p.person).match(rstate.peopleSearch.toLowerCase()));
   else people = rstate.people;
 
-  if (rstate.onlyPhonePeople) people = people.filter(p => pnumber(p));
+  if (rstate.onlyPhonePeople) people = people.filter(p => pnumber(p.person));
 
   let arr = [(
     <View>
@@ -1419,13 +1425,15 @@ const SegmentPeople = props => {
                   <TouchableOpacity
                     style={{flexDirection: 'row', alignItems: 'center'}}
                     onPress={() => {
-                      navigate('Survey', {refer: props.refer, funcs: props.refer, form: form, person: p});
+                      // find marker & unit by person
+                      let marker = rstate.markers.find(m => m.address.id === p.address_id)
+                      navigate('Survey', {refer: props.refer, funcs: props.refer, form: form, marker: marker, unit: p.unit, person: p.person});
                     }}>
                     <Icon name="user" color="black" size={40} style={{margin: 5}} />
                     <View>
-                      <PersonAttr form={form} idx={0} attrs={p.attrs} />
-                      <PersonAttr form={form} idx={1} attrs={p.attrs} />
-                      <PersonAttr form={form} idx={2} attrs={p.attrs} />
+                      <PersonAttr form={form} idx={0} attrs={p.person.attrs} />
+                      <PersonAttr form={form} idx={1} attrs={p.person.attrs} />
+                      <PersonAttr form={form} idx={2} attrs={p.person.attrs} />
                     </View>
                   </TouchableOpacity>
       </View>

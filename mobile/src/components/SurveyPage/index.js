@@ -56,7 +56,6 @@ export default class App extends PureComponent {
       funcs: state.params.funcs,
       form: state.params.form,
       marker: state.params.marker,
-      place: state.params.place,
       unit: state.params.unit,
       person: state.params.person,
       values: values,
@@ -99,7 +98,9 @@ export default class App extends PureComponent {
   }
 
   doSave = async () => {
-    const { funcs, refer, marker, place, unit, person } = this.state;
+    const { funcs, refer, marker, unit, person } = this.state;
+
+    const place = (unit?unit:marker);
 
     let json = this.refs.form.getValue();
     if (json == null) return;

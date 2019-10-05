@@ -48,7 +48,7 @@ export default class App extends PureComponent {
             backgroundColor="#d7d7d7"
             color="#000000"
             onPress={() => {
-              navigate('Survey', {refer: this, funcs: funcs, form: form, marker: marker, place: place, unit: unit, person: {id: uuidv4(), new: true, attrs:[]}});
+              navigate('Survey', {refer: this, funcs: funcs, form: form, marker: marker, unit: unit, person: {id: uuidv4(), new: true, attrs:[]}});
             }}
             {...iconStyles}>
             Add Person
@@ -100,7 +100,7 @@ export default class App extends PureComponent {
                   <TouchableOpacity
                     style={{flexDirection: 'row', alignItems: 'center'}}
                     onPress={() => {
-                      navigate('Survey', {refer: this, funcs: funcs, form: form, marker: marker, place: place, unit: unit, person: item});
+                      navigate('Survey', {refer: this, funcs: funcs, form: form, marker: marker, unit: unit, person: item});
                     }}>
                     <Icon name={icon} color={color} size={40} style={{margin: 5}} />
                     <View>
