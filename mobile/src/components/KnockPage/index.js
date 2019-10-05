@@ -58,7 +58,7 @@ export default class App extends PureComponent {
 
         {place.people.length?
         <FlatList
-          scrollEnabled={true}
+          scrollEnabled={false}
           data={place.people}
           extraData={this.state}
           keyExtractor={item => item.id}

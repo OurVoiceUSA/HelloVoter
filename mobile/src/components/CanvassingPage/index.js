@@ -6,7 +6,6 @@ import {
   Image,
   View,
   Linking,
-  ScrollView,
   TouchableHighlight,
   TouchableOpacity,
   TouchableWithoutFeedback,
@@ -844,13 +843,12 @@ export default class App extends LocationComponent {
 
     if (showDisclosure === "true") {
       return (
-        <ScrollView style={{flex: 1, backgroundColor: 'white'}}>
-          <View style={styles.content}>
+        <Container>
+          <Content>
             <Text style={{margin: 15, fontSize: 18, color: 'dimgray'}}>
-              Our Voice provides this canvassing tool for free for you to use for your own purposes. You will be talking
+              Our Voice USA provides this canvassing tool for free for you to use for your own purposes. You will be talking
               to real people and asking real questions about policy positions that matter, and hopefully also collaborating
-              with other canvassers. Together, we can crowd source the answers to how our country thinks outside of
-              partisan politics.
+              with other canvassers.
             </Text>
 
             <View style={{margin: 15}}>
@@ -886,8 +884,8 @@ export default class App extends LocationComponent {
                   </Icon.Button>
                 </View>
 
-          </View>
-        </ScrollView>
+          </Content>
+        </Container>
       );
     }
 
@@ -929,20 +927,20 @@ export default class App extends LocationComponent {
     }
 
     return (
-      <View style={{flex: 1}}>
-        <ScrollView style={{flex: 1, backgroundColor: '#FFF'}}>
+      <Container>
+        <Content>
         {active==='turfstats'&&
           <TurfStats refer={this} loading={this.state.fetchingTurfStats} data={this.state.turfStats} />
         }
         {active==='list'&&
-          <Container>
+          <View>
             <Segment>
               <Button first active={(segmentList==='streets')} onPress={() => this.setState({segmentList: 'streets'})}><Text>Streets</Text></Button>
               <Button active={(segmentList==='residence')} onPress={() => this.setState({segmentList: 'residence'})}><Text>Residence</Text></Button>
               <Button active={(segmentList==='people')} onPress={() => this.setState({segmentList: 'people'})}><Text>People</Text></Button>
               <Button last active={(segmentList==='history')} onPress={() => this.setState({segmentList: 'history'})}><Text>History</Text></Button>
             </Segment>
-            <Content>
+            <View>
               {segmentList==='people'&&
               <View>
                 <Header searchBar rounded>
@@ -964,11 +962,11 @@ export default class App extends LocationComponent {
               <SegmentResidence refer={this} />
               <SegmentPeople refer={this} />
               <SegmentHistory refer={this} />
-            </Content>
-          </Container>
+            </View>
+          </View>
         }
         {active==='turf'&&
-          <Container>
+          <View>
             <Segment>
               <Button first active={(segmentTurf==='list')} onPress={() => this.setState({segmentTurf: 'list'})}><Text>List</Text></Button>
               <Button last active={(segmentTurf==='stats')} onPress={() => this.setState({segmentTurf: 'stats'})}><Text>Stats</Text></Button>
@@ -976,12 +974,12 @@ export default class App extends LocationComponent {
             <Content>
               <Text>{JSON.stringify(this.state.turfs.map(t => t.name))}</Text>
             </Content>
-          </Container>
+          </View>
         }
         {active==='settings'&&
           <CanvassingSettingsPage refer={this} form={form} />
         }
-        </ScrollView>
+        </Content>
 
         {nomap_content.length &&
           <View>
@@ -1230,7 +1228,7 @@ export default class App extends LocationComponent {
             </Button>
           </FooterTab>
         </Footer>
-      </View>
+      </Container>
     );
   }
 }
