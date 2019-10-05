@@ -7,7 +7,6 @@ import {
   View,
   Linking,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   Keyboard,
 } from 'react-native';
 
@@ -122,6 +121,7 @@ export default class App extends LocationComponent {
       canvassSettings: {},
       isModalVisible: false,
       newUnitModalVisible: false,
+      tosError: false,
       showDisclosure: "true",
       form: props.navigation.state.params.form,
       orgId: props.navigation.state.params.orgId,
@@ -495,6 +495,7 @@ export default class App extends LocationComponent {
   }
 
   SaveDisclosure = async () => {
+    this.setState({ showDisclosure: "false"});
     try {
       await storage.set(this.state.DisclosureKey, "false");
     } catch (error) {}
@@ -841,51 +842,67 @@ export default class App extends LocationComponent {
       showDisclosure, myPosition, myNodes, locationAccess, serviceError, deviceError,
       form, user, loading, region, active, segmentList, segmentTurf, fetching, selectedTurf, mapCenter,
       isModalVisible, newUnitModalVisible, onlyPhonePeople, confirmDialog, confirmDialogTitle,
-      confirmDialogMessage, confirmDialogPositiveButton, confirmDialogNegativeButton,
+      confirmDialogMessage, confirmDialogPositiveButton, confirmDialogNegativeButton, ack, tosError,
     } = this.state;
 
     if (showDisclosure === "true") {
       return (
         <Container>
-          <Content>
-            <Text style={{margin: 15, fontSize: 18, color: 'dimgray'}}>
-              Our Voice USA provides this canvassing tool for free for you to use for your own purposes. You will be talking
-              to real people and asking real questions about policy positions that matter, and hopefully also collaborating
-              with other canvassers.
+          <Content padder>
+            <Button block transparent onPress={() => {this._canvassGuidelinesUrlHandler()}}>
+              <H3>Terms of Service</H3>
+            </Button>
+
+            <Text></Text>
+
+            <Text>
+              Our Voice USA provides this canvassing tool for free for you to use for your own purposes.
             </Text>
 
-            <View style={{margin: 15}}>
-              <Text style={{fontSize: 18, color: 'dimgray'}}>
-                By using this tool you acknowledge that you are acting on your own behalf, do not represent Our Voice USA
-                or its affiliates, and have read our <Text style={{fontSize: 18, fontWeight: 'bold', color: 'blue'}} onPress={() => {this._canvassGuidelinesUrlHandler()}}>
-                canvassing guidelines</Text>. Please be courteous to those you meet.
-              </Text>
-            </View>
+            <Text></Text>
 
-                <View style={{margin: 5, flexDirection: 'row'}}>
-                  <Icon.Button
-                    name="check-circle"
-                    backgroundColor="#d7d7d7"
-                    color="#000000"
-                    onPress={() => {
-                      this.setState({ showDisclosure: "false"}); //Hide disclosure
-                      this.SaveDisclosure(); //Save the disclosures acceptance
-                    }}
-                    {...iconStyles}>
-                    I understand & agree to the guidelines
-                  </Icon.Button>
-                </View>
+            <Text>
+              By using this tool you acknowledge that you are acting on your own behalf, do not represent Our Voice USA
+              or its affiliates, and have read our <Text style={{fontSize: 18, fontWeight: 'bold', color: 'blue'}} onPress={() => {this._canvassGuidelinesUrlHandler()}}>
+              Terms of Service</Text>.
+            </Text>
 
-                <View style={{margin: 5, flexDirection: 'row'}}>
-                  <Icon.Button
-                    name="ban"
-                    backgroundColor="#d7d7d7"
-                    color="#000000"
-                    onPress={() => {this.props.navigation.dispatch(NavigationActions.back())}}
-                    {...iconStyles}>
-                    I do not agree to this! Take me back!
-                  </Icon.Button>
-                </View>
+            <Text></Text>
+
+            <Text>Please be courteous to those you meet.</Text>
+
+            <Text></Text>
+
+            <ListItem onPress={() => this.setState({ack: !ack})} error>
+              <CheckBox checked={ack} onPress={() => this.setState({ack: !ack})} />
+              <Body>
+                <Text>I have read & agree to the Terms of Service</Text>
+              </Body>
+            </ListItem>
+
+            <Text></Text>
+
+            <Button block onPress={() => {
+              if (ack) this.SaveDisclosure();
+              else this.setState({tosError: true});
+            }}>
+              <Text>Continue</Text>
+            </Button>
+
+            <Text></Text>
+
+            <Button block danger onPress={() => this.props.navigation.dispatch(NavigationActions.back())}>
+              <Text>Exit</Text>
+            </Button>
+
+            <ConfirmDialog
+              title="Terms of Service"
+              message="You must agree to the terms of service to continue."
+              visible={tosError}
+              animationType="fade"
+              onTouchOutside={() => this.setState({tosError: false})}
+              positiveButton={{title: "OK", onPress: () => this.setState({tosError: false})}}
+            />
 
           </Content>
         </Container>
@@ -943,29 +960,27 @@ export default class App extends LocationComponent {
               <Button active={(segmentList==='people')} onPress={() => this.setState({segmentList: 'people'})}><Text>People</Text></Button>
               <Button last active={(segmentList==='history')} onPress={() => this.setState({segmentList: 'history'})}><Text>History</Text></Button>
             </Segment>
+            {segmentList==='people'&&
             <View>
-              {segmentList==='people'&&
-              <View>
-                <Header searchBar rounded>
-                  <Item>
-                    <Icon name="search" />
-                    <Input placeholder="Search" onChangeText={text => this.peopleSearchDebounce(text)} />
-                    <Icon name="group" />
-                  </Item>
-                </Header>
-                <ListItem onPress={() => this.setState({onlyPhonePeople: !onlyPhonePeople})}>
-                  <CheckBox checked={onlyPhonePeople} onPress={() => this.setState({onlyPhonePeople: !onlyPhonePeople})} />
-                  <Body>
-                    <Text>Only show those with a Phone Number</Text>
-                  </Body>
-                </ListItem>
-              </View>
-              }
-              <SegmentStreets refer={this} />
-              <SegmentResidence refer={this} />
-              <SegmentPeople refer={this} />
-              <SegmentHistory refer={this} />
+              <Header searchBar rounded>
+                <Item>
+                  <Icon name="search" />
+                  <Input placeholder="Search" onChangeText={text => this.peopleSearchDebounce(text)} />
+                  <Icon name="group" />
+                </Item>
+              </Header>
+              <ListItem onPress={() => this.setState({onlyPhonePeople: !onlyPhonePeople})}>
+                <CheckBox checked={onlyPhonePeople} onPress={() => this.setState({onlyPhonePeople: !onlyPhonePeople})} />
+                <Body>
+                  <Text>Only show those with a Phone Number</Text>
+                </Body>
+              </ListItem>
             </View>
+            }
+            <SegmentStreets refer={this} />
+            <SegmentResidence refer={this} />
+            <SegmentPeople refer={this} />
+            <SegmentHistory refer={this} />
           </View>
         }
         {active==='turf'&&
