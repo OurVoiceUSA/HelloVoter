@@ -6,13 +6,16 @@ import {
   Image,
   View,
   Linking,
-  TouchableHighlight,
   TouchableOpacity,
   TouchableWithoutFeedback,
   Keyboard,
 } from 'react-native';
 
-import { Accordion, Container, Content, Header, Footer, FooterTab, Tab, Tabs, Text, Button, Segment, Spinner, ListItem, Body, CheckBox, Item, Input } from 'native-base';
+import {
+  Accordion, Container, Content, Header, Footer, FooterTab, Tab, Tabs, Text,
+  Button, Segment, Spinner, ListItem, Body, CheckBox, Item, Input, CardItem,
+  H3,
+} from 'native-base';
 
 import LocationComponent from '../LocationComponent';
 
@@ -1124,32 +1127,14 @@ export default class App extends LocationComponent {
           <View>
             {loading &&
             <View>
-              <Text style={{color: 'blue', fontWeight: 'bold', fontSize: 15}}>Loading Address</Text>
+              <H3>Loading Address</H3>
               <Spinner />
             </View>
             ||
             <View>
-              <View style={{flexDirection: 'row'}}>
-                <Text style={{color: 'blue', fontWeight: 'bold', fontSize: 15}}>Confirm the Address</Text>
-                <View style={{flexDirection: 'row'}}>
-                  <TouchableOpacity
-                    style={{
-                      backgroundColor: '#d7d7d7', padding: 10, borderRadius: 20, marginLeft: 5,
-                      ...((this.state.pAddress.street && this.state.pAddress.street !== this.state.fAddress.street) ? {} : displayNone)
-                    }}
-                    onPress={() => {this.setState({fAddress: this.state.pAddress})}}>
-                    <Text style={{textAlign: 'center'}}>Use Previous</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={{
-                      backgroundColor: '#d7d7d7', padding: 10, borderRadius: 20, marginLeft: 5,
-                      ...(this.state.netInfo === 'none' ? displayNone : {})
-                    }}
-                    onPress={() => this.showConfirmAddress()}>
-                    <Text style={{textAlign: 'center'}}>Retry</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
+              <Button block dark transparent onPress={() => this.showConfirmAddress()}>
+                <H3>Confirm the Address</H3>
+              </Button>
               <Form
                ref="formStreet"
                type={formStreet}
@@ -1170,9 +1155,9 @@ export default class App extends LocationComponent {
                options={formOptRow}
                value={this.state.fAddress}
               />
-              <TouchableHighlight style={styles.addButton} onPress={this.doConfirmAddress} underlayColor='#99d9f4'>
-                <Text style={styles.buttonText}>Add</Text>
-              </TouchableHighlight>
+              <Button block onPress={this.doConfirmAddress}>
+                <Text>Add Address</Text>
+              </Button>
             </View>
             }
           </View>
@@ -1193,9 +1178,9 @@ export default class App extends LocationComponent {
               onChange={this.onUnitChange}
               value={this.state.fUnit}
             />
-            <TouchableHighlight style={styles.button} onPress={this.addUnit} underlayColor='#99d9f4'>
-              <Text style={styles.buttonText}>Add</Text>
-            </TouchableHighlight>
+            <Button block onPress={this.addUnit}>
+              <Text>Add Unit</Text>
+            </Button>
           </View>
         </Dialog>
 
@@ -1498,12 +1483,6 @@ const iconStyles = {
   justifyContent: 'center',
   borderRadius: 10,
   padding: 10,
-};
-
-const displayNone = {
-  height: 0,
-  maxHeight: 0,
-  opacity: 0,
 };
 
 const styles = StyleSheet.create({
