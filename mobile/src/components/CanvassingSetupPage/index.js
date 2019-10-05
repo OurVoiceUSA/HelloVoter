@@ -305,9 +305,10 @@ export default class App extends LocationComponent {
   };
 
   componentDidUpdate(prevProps, prevState) {
-    const { SmLoginScreen, server, user, orgId, inviteCode } = this.state;
+    const { SmLoginScreen, server, user, orgId, inviteCode, signupReturn } = this.state;
     if (prevState.SmLoginScreen && !SmLoginScreen && user.loggedin) {
       if (server || inviteCode) this.connectToServer(server, orgId, inviteCode);
+      if (signupReturn) this._signupUrlHandler();
     }
   }
 
@@ -642,7 +643,13 @@ export default class App extends LocationComponent {
             </Button>
             <Text style={{fontSize: 12, marginBottom: 10, textAlign: 'justify'}}>{say("didnt_receive_qr_code")}</Text>
 
-            <Button block bordered dark onPress={() => this._signupUrlHandler()}>
+            <Button block bordered dark onPress={() => {
+              if (!user.id) {
+                this.setState({SelectModeScreen: false, SmLoginScreen: true, signupReturn: true});
+              } else {
+                this._signupUrlHandler();
+              }
+            }}>
               <Icon name="clipboard" {...iconStyles} />
               <Text>{say("org_id_signup")}</Text>
             </Button>

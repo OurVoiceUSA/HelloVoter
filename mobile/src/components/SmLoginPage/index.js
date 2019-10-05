@@ -136,7 +136,7 @@ export default class App extends PureComponent {
             backgroundColor="#d7d7d7"
             color="#000000"
             onPress={() => {
-              this.props.refer.setState({SmLoginScreen: false});
+              this.props.refer.setState({SmLoginScreen: false, signupReturn: false});
             }}
             {...iconStyles}>
             No Thanks
