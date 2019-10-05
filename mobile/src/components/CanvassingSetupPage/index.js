@@ -307,7 +307,7 @@ export default class App extends LocationComponent {
   componentDidUpdate(prevProps, prevState) {
     const { SmLoginScreen, server, user, orgId, inviteCode } = this.state;
     if (prevState.SmLoginScreen && !SmLoginScreen && user.loggedin) {
-      this.connectToServer(server, orgId, inviteCode);
+      if (server || inviteCode) this.connectToServer(server, orgId, inviteCode);
     }
   }
 
