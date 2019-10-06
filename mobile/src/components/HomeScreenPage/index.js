@@ -1,9 +1,9 @@
 
 import React from 'react';
-import HVComponent from './HVComponent';
+import HVComponent from '../HVComponent';
 
-import YourReps from './YourRepsPage';
-import CanvassingSetup from './CanvassingSetupPage';
+import YourReps from '../YourRepsPage';
+import CanvassingSetup from '../CanvassingSetupPage';
 
 import {
   View,
@@ -19,10 +19,10 @@ import Rate, { AndroidMarket } from 'react-native-rate'
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 import storage from 'react-native-storage-wrapper';
 
-import { sliderWidth, itemWidth } from '../styles/SliderEntry.style';
-import styles, { colors } from '../styles/index.style';
-import SliderEntry from './SliderEntry';
-import { _loginPing, say, DINFO, permissionNotify } from '../common';
+import { sliderWidth, itemWidth } from '../../styles/SliderEntry.style';
+import styles, { colors } from '../../styles/index.style';
+import SliderEntry from '../SliderEntry';
+import { _loginPing, say, DINFO, permissionNotify } from '../../common';
 
 export default class App extends HVComponent {
 
@@ -45,7 +45,7 @@ export default class App extends HVComponent {
       {
         title: say("we_translated_this"),
         subtitle: say("we_used_google_translate"),
-        illustration: require('../../img/translate.png'),
+        illustration: require('../../../img/translate.png'),
         onPress: () => this.openGitHub(),
       }
     );
@@ -54,7 +54,7 @@ export default class App extends HVComponent {
       {
         title: say("contact_your_reps"),
         subtitle: say("know_who_represents_you"),
-        illustration: require('../../img/phone-your-rep.png'),
+        illustration: require('../../../img/phone-your-rep.png'),
         onPress: () => this.setState({active: 'reps'}),
       }
     );
@@ -63,7 +63,7 @@ export default class App extends HVComponent {
       {
         title: say("canvas_for_any_cause"),
         subtitle: say("our_zero_cost_tool"),
-        illustration: require('../../img/canvassing.png'),
+        illustration: require('../../../img/canvassing.png'),
         onPress: () => this.setState({active: 'canvassing'}),
       }
     );
@@ -74,7 +74,7 @@ export default class App extends HVComponent {
       {
         title: say("coming_zoon_desktop_tools"),
         subtitle: say("canvassing_at_scale"),
-        illustration: require('../../img/phone-banking.png'),
+        illustration: require('../../../img/phone-banking.png'),
         onPress: () => this.openDonate(),
       }
     );
@@ -83,7 +83,7 @@ export default class App extends HVComponent {
       {
         title: say("donate"),
         subtitle: say("we_operate_on_donations"),
-        illustration: require('../../img/donate.png'),
+        illustration: require('../../../img/donate.png'),
         onPress: () => this.openDonate(),
       }
     );
@@ -92,7 +92,7 @@ export default class App extends HVComponent {
       {
         title: say("rate_this_app"),
         subtitle: say("feedback_helps_us"),
-        illustration: require('../../img/rate.png'),
+        illustration: require('../../../img/rate.png'),
         onPress: () => {
           let options = {
             AppleAppID: "1275301651",
@@ -110,7 +110,7 @@ export default class App extends HVComponent {
       {
         title: say("open_source_software"),
         subtitle: say("help_us_out_directly"),
-        illustration: require('../../img/open-source.png'),
+        illustration: require('../../../img/open-source.png'),
         onPress: () => this.openGitHub(),
       }
     );

@@ -172,7 +172,6 @@ export default class App extends PureComponent {
   render() {
     const { user, havePermLocation, havePermNotification, SmLoginScreen,
             surveyComplete, surveyPartial, party, myPosition, appVersion } = this.state;
-    const { navigate } = this.props.navigation;
 
     // wait for user object to become available
     if (!user) return (
