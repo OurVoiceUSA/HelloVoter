@@ -118,8 +118,8 @@ export default class App extends LocationComponent {
       DisclosureKey : 'OV_DISCLOUSER',
       settingsStorageKey: 'OV_CANVASS_SETTINGS',
       canvassSettings: {},
-      isModalVisible: false,
-      newUnitModalVisible: false,
+      newAddressDialog: false,
+      newUnitDialog: false,
       tosError: false,
       showDisclosure: "true",
       form: props.navigation.state.params.form,
@@ -249,7 +249,7 @@ export default class App extends LocationComponent {
 
     if (prevState.active !== active) {
       // close any open modals
-      this.setState({isModalVisible: false, newUnitModalVisible: false});
+      this.setState({newAddressDialog: false, newUnitDialog: false});
 
       // reload filters, etc
       if (prevState.active === 'settings') this._setCanvassSettings(canvassSettings);
@@ -320,7 +320,7 @@ export default class App extends LocationComponent {
     if (!this.addOk()) return this.alert("Active Filter", "You cannot add a new address while a filter is active.");
 
     if (this.state.netInfo === 'none') {
-      this.setState({ isModalVisible: true });
+      this.setState({ newAddressDialog: true });
       return;
     }
 
@@ -338,7 +338,7 @@ export default class App extends LocationComponent {
 
     this.setState({
       loading: true,
-      isModalVisible: true,
+      newAddressDialog: true,
     });
 
     setTimeout(async () => {
@@ -444,7 +444,7 @@ export default class App extends LocationComponent {
       markers.push(marker);
     }
 
-    this.setState({ markers, fAddress, pAddress: fAddress, searchPins: [], isModalVisible: false });
+    this.setState({ markers, fAddress, pAddress: fAddress, searchPins: [], newAddressDialog: false });
     this.doMarkerPress(marker);
   }
 
@@ -780,7 +780,7 @@ export default class App extends LocationComponent {
       this.state.currentMarker.units.push({name: json.unit, people: []});
     }
 
-    this.setState({newUnitModalVisible: false, fUnit: {}});
+    this.setState({newUnitDialog: false, fUnit: {}});
   }
 
   notHome = async (id, place, unit) => {
@@ -840,7 +840,7 @@ export default class App extends LocationComponent {
     const {
       showDisclosure, myPosition, myNodes, locationAccess, serviceError, deviceError,
       form, user, loading, region, active, segmentList, segmentTurf, fetching, selectedTurf, mapCenter,
-      isModalVisible, newUnitModalVisible, onlyPhonePeople, confirmDialog, confirmDialogTitle,
+      newAddressDialog, newUnitDialog, onlyPhonePeople, confirmDialog, confirmDialogTitle,
       confirmDialogMessage, confirmDialogPositiveButton, confirmDialogNegativeButton, ack, tosError,
     } = this.state;
 
@@ -1080,7 +1080,7 @@ export default class App extends LocationComponent {
 
         {active==='map' && nomap_content.length === 0 &&
         <View style={{alignItems: 'center', justifyContent: 'flex-end'}}>
-          <View style={styles.buttonContainer}>
+          <View style={{flexDirection: 'row', marginVertical: 5, backgroundColor: 'transparent',}}>
 
             {this.state.canvassSettings.chill_mode &&
             <TouchableOpacity style={styles.iconContainer} disabled={fetching}
@@ -1135,9 +1135,9 @@ export default class App extends LocationComponent {
         }
 
         <Dialog
-          visible={isModalVisible}
+          visible={newAddressDialog}
           animationType="fade"
-          onTouchOutside={() => this.setState({isModalVisible: false})}>
+          onTouchOutside={() => this.setState({newAddressDialog: false})}>
           <View>
             {loading &&
             <View>
@@ -1146,7 +1146,7 @@ export default class App extends LocationComponent {
             </View>
             ||
             <View>
-              <Button block dark transparent onPress={() => this.showConfirmAddress()}>
+              <Button block dark transparent>
                 <H3>Confirm the Address</H3>
               </Button>
               <Form
@@ -1178,9 +1178,9 @@ export default class App extends LocationComponent {
         </Dialog>
 
         <Dialog
-          visible={newUnitModalVisible}
+          visible={newUnitDialog}
           animationType="fade"
-          onTouchOutside={() => this.setState({newUnitModalVisible: false})}>
+          onTouchOutside={() => this.setState({newUnitDialog: false})}>
           <View>
             <View style={{flex: 1, flexDirection: 'row', margin: 20, alignItems: 'center'}}>
               <Text>Recording a new unit for this address:</Text>
@@ -1341,7 +1341,7 @@ const SegmentResidence = props => {
           color="#000000"
           onPress={() => {
             if (!props.refer.addOk()) return this.alert("Active Filter", "You cannot add a new address while a filter is active.");
-            props.refer.setState({ newUnitModalVisible: true });
+            props.refer.setState({ newUnitDialog: true });
           }}
           {...iconStyles}>
           Add new unit/apt number
@@ -1500,10 +1500,6 @@ const iconStyles = {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFF',
-  },
   content: {
     flex: 1,
     justifyContent: 'center',
@@ -1521,33 +1517,5 @@ const styles = StyleSheet.create({
   },
   map: {
     ...StyleSheet.absoluteFillObject,
-  },
-  button: {
-    width: 300,
-    paddingHorizontal: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginHorizontal: 5,
-    backgroundColor: '#d7d7d7',
-  },
-  buttonText: {
-    fontSize: 18,
-    color: 'white',
-    alignSelf: 'center'
-  },
-  addButton: {
-    height: 36,
-    backgroundColor: '#48BBEC',
-    borderColor: '#48BBEC',
-    borderWidth: 1,
-    borderRadius: 8,
-    marginBottom: 10,
-    alignSelf: 'stretch',
-    justifyContent: 'center'
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    marginVertical: 5,
-    backgroundColor: 'transparent',
   },
 });
