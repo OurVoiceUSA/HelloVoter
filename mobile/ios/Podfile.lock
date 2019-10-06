@@ -42,11 +42,11 @@ PODS:
     - GoogleMaps/Base
   - GooglePlaces (3.2.0):
     - GoogleMaps/Base (= 3.2.0)
-  - Permission-Camera (2.0.0):
+  - Permission-Camera (2.0.1):
     - RNPermissions
-  - Permission-LocationWhenInUse (2.0.0):
+  - Permission-LocationWhenInUse (2.0.1):
     - RNPermissions
-  - Permission-Notifications (2.0.0):
+  - Permission-Notifications (2.0.1):
     - RNPermissions
   - RCTRequired (0.61.2)
   - RCTTypeSafety (0.61.2):
@@ -235,7 +235,7 @@ PODS:
     - React
   - react-native-maps (0.26.1):
     - React
-  - react-native-netinfo (4.3.3):
+  - react-native-netinfo (4.4.0):
     - React
   - react-native-safari-view (1.0.0):
     - React
@@ -280,9 +280,9 @@ PODS:
     - React
   - RNGestureHandler (1.4.1):
     - React
-  - RNLocalize (1.2.1):
+  - RNLocalize (1.3.0):
     - React
-  - RNPermissions (2.0.0):
+  - RNPermissions (2.0.1):
     - React
   - RNRate (1.1.10):
     - React
@@ -446,9 +446,9 @@ SPEC CHECKSUMS:
   Google-Maps-iOS-Utils: c32891ff472eaaa1fca032beedafa1a013af7875
   GoogleMaps: 5046d7edfe381c1a0b20fdaf293915a375c3122b
   GooglePlaces: 41bc2e480816b1234a48f4bec92e1c886f37cfe1
-  Permission-Camera: 4c4d5fc58e1a37e8a807e63403b64cda05a3fcdd
-  Permission-LocationWhenInUse: 9f540674150fa2e854020ba679341e8575e0513b
-  Permission-Notifications: db1a88bded0b2b23edb41ac56168f487636c2379
+  Permission-Camera: abcc2d1b943c41aa64a0c95576aee8d7008c0f6d
+  Permission-LocationWhenInUse: 9bd770f35cd22876352763133d6e9ec243863c77
+  Permission-Notifications: 0614d4e828ba44079d1ed20fab70f9b1884653e7
   RCTRequired: c639d59ed389cfb1f1203f65c2ea946d8ec586e2
   RCTTypeSafety: dc23fb655d6c77667c78e327bf661bc11e3b8aec
   React: 7e586e5d7bec12b91c1a096826b0fc9ab1da7865
@@ -465,7 +465,7 @@ SPEC CHECKSUMS:
   react-native-google-maps: 2e2e697dab576abd5809d78cd74e775865b62bf7
   react-native-google-places: 1531c5b40622f71b6dacfb476e30be9e08e857b8
   react-native-maps: 6e499eee4eabf422ba8b6f94e993cc768bf35153
-  react-native-netinfo: f0ebf8831cacc58f49870e41e739476a7b0d7ac0
+  react-native-netinfo: 892a5130be97ff8bb69c523739c424a2ffc296d1
   react-native-safari-view: 955d7160d159241b8e9395d12d10ea0ef863dcdd
   React-RCTActionSheet: 89b037c0fb7d2671607cb645760164e7e0c013f6
   React-RCTAnimation: e3cefa93c38c004c318f7ec04b883eb14b8b8235
@@ -480,8 +480,8 @@ SPEC CHECKSUMS:
   RNCAsyncStorage: 5ae4d57458804e99f73d427214442a6b10a53856
   RNDeviceInfo: 9e88577c51bd42f65275e53bb0de0a0f728ed6b8
   RNGestureHandler: 4cb47a93019c1a201df2644413a0a1569a51c8aa
-  RNLocalize: 7206d44eb341d6e2a61a8184b831c64a5539fcdf
-  RNPermissions: 43fe093bcfe89d3a05a4b82a695db9db9e7dcf21
+  RNLocalize: 6e4a6b8582dfbb50b452464d208c30a7a20516f4
+  RNPermissions: ba8e81753965c98fd0aed0719759ba1f4d3cc6eb
   RNRate: d44a8bca6ee08f5d890ecccddaec2810955ffbb3
   RNVectorIcons: 0bb4def82230be1333ddaeee9fcba45f0b288ed4
   Yoga: 14927e37bd25376d216b150ab2a561773d57911f
