@@ -41,6 +41,8 @@ If you're developing the **iOS** app - simply install the build dependancies wit
 
 `(cd ios/ && pod install)`
 
+You also may need to configure xcode to properly be able to do a `xcrun simctl`, more information here: https://stackoverflow.com/questions/29108172/xcrun-unable-to-find-simctl
+
 Finally, build the app:
 
 `react-native run-ios` or `react-native run-android`
