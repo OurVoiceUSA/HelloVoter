@@ -11,7 +11,7 @@ import {
   Platform,
 } from 'react-native';
 
-import { Container, Header, Content, Footer, FooterTab, Text, Button, Spinner } from 'native-base';
+import { H3, Container, Header, Content, Footer, FooterTab, Text, Button, Spinner } from 'native-base';
 
 import { getLocales } from 'react-native-localize';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -143,9 +143,13 @@ export default class App extends HVComponent {
   }
 
   loadPatreonNames = async () => {
-    let patreonNames = [];
-    // TODO: fetch json object
-    this.setState({patreonNames});
+    try {
+      let str = await fetch("https://raw.githubusercontent.com/OurVoiceUSA/HelloVoter/master/supporters.json");
+      let patreonNames = JSON.parse(str).patreon;
+      this.setState({patreonNames});
+    } catch (e) {
+      this.setState({patreonNames:[say("unexpected_error_try_again")]});
+    }
   }
 
   checkForInvite = async() => {
@@ -244,9 +248,14 @@ export default class App extends HVComponent {
         }
         {active === 'supporters' &&
         <View>
-          <Text>{say("our_signature_supporters")}</Text>
+          <H3>{say("our_signature_supporters")}</H3>
+          <Text></Text>
           <Text>{say("this_app_is_made_possible_by")}</Text>
-          <Button style={{margin: 15}} raised primary text={say("support_us_on_patreon")} onPress={() => this.openDonate()} />
+          <Text></Text>
+          <Button block onPress={() => this.openDonate()}>
+            <Text>{say("support_us_on_patreon")}</Text>
+          </Button>
+          <Text></Text>
           <PatreonNames names={patreonNames} />
         </View>
         }
@@ -277,8 +286,8 @@ export default class App extends HVComponent {
 
 const PatreonNames = props => {
   if (!props.names || props.names.length === 0) return (<View><Spinner /><Text>{say("loading_data")}...</Text></View>);
-  return props.names.map(name => (
-    <Text>{name}</Text>
+  return props.names.map((name, idx) => (
+    <Text key={idx}>{name}</Text>
   ));
 };
 
