@@ -7,29 +7,6 @@ export const colors = {
 };
 
 export default StyleSheet.create({
-    safeArea: {
-        flex: 1,
-        backgroundColor: colors.black
-    },
-    container: {
-        flex: 1,
-        backgroundColor: colors.background1
-    },
-    gradient: {
-        ...StyleSheet.absoluteFillObject
-    },
-    scrollview: {
-        flex: 1
-    },
-    exampleContainer: {
-        paddingVertical: 10
-    },
-    exampleContainerDark: {
-        backgroundColor: colors.black
-    },
-    exampleContainerLight: {
-        backgroundColor: 'white'
-    },
     title: {
         paddingHorizontal: 30,
         backgroundColor: 'transparent',
@@ -37,9 +14,6 @@ export default StyleSheet.create({
         fontSize: 20,
         fontWeight: 'bold',
         textAlign: 'center'
-    },
-    titleDark: {
-        color: colors.black
     },
     subtitle: {
         marginTop: 5,
