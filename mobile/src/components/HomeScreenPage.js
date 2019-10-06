@@ -144,8 +144,8 @@ export default class App extends HVComponent {
 
   loadPatreonNames = async () => {
     try {
-      let str = await fetch("https://raw.githubusercontent.com/OurVoiceUSA/HelloVoter/master/supporters.json");
-      let patreonNames = JSON.parse(str).patreon;
+      let res = await fetch("https://raw.githubusercontent.com/OurVoiceUSA/HelloVoter/master/supporters.json");
+      let patreonNames = (await res.json()).patreon;
       this.setState({patreonNames});
     } catch (e) {
       this.setState({patreonNames:[say("unexpected_error_try_again")]});
