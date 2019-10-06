@@ -1,6 +1,6 @@
 import React from 'react';
+
 import {
-  Alert,
   Linking,
   View,
   TouchableOpacity,
@@ -13,7 +13,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 export default DisplayRep = (props) => {
 
   const { navigate } = props.navigation;
-  var { office, location } = props;
+  var { office, location, refer } = props;
 
   const call = async (profile) => {
     const url = 'tel:+1' + profile.phone;
@@ -26,8 +26,8 @@ export default DisplayRep = (props) => {
   }
 
   const initiateLink = async (url) => {
-    return Linking.openURL(url).catch(() => {
-      Alert.alert(say("app_error"), say("unable_to_launch_external"), [{text: say("ok")}], { cancelable: false })
+    return Linking.openURL('asdf'+url).catch(() => {
+      refer.alert(say("app_error"), say("unable_to_launch_external"));
     });
   }
 

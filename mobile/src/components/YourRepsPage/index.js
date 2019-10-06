@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
+
 import {
-  Alert,
   Image,
   View,
   FlatList,
@@ -13,7 +13,7 @@ import LocationComponent from '../LocationComponent';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 import RNGooglePlaces from 'react-native-google-places';
-import { Dialog } from 'react-native-simple-dialogs';
+import { ConfirmDialog, Dialog } from 'react-native-simple-dialogs';
 import DisplayRep from './display-rep';
 import { wsbase } from '../../config'
 import { Divider, say, _apiCall, _loginPing, _doGeocode, _saveUser, _specificAddress } from '../../common';
@@ -73,8 +73,10 @@ export default class App extends LocationComponent {
   }
 
   _genericServiceError(error, msg) {
-    this.setState({ loading: false, apiData: null });
-    Alert.alert('Error', msg, [{text: 'OK'}], { cancelable: false });
+    this.setState(
+      { modalIsOpen: false, confirmDialog: false, loading: false, apiData: null },
+      this.alert('Error', msg)
+    );
     console.warn(error);
   }
 
@@ -104,7 +106,6 @@ export default class App extends LocationComponent {
 
     } catch (error) {
       this._genericServiceError(error, "There was an error fetching data for this request.");
-      console.warn(JSON.stringify(error));
     }
 
     this.setState({
@@ -141,19 +142,22 @@ export default class App extends LocationComponent {
     RNGooglePlaces.openAutocompleteModal()
     .then((place) => {
       if (!_specificAddress(place.address)) {
-        setTimeout(() => {
-          Alert.alert(
-            say("ambiguous_address"),
-            say("no_guarantee_district"),
-            [
-              {text: say("continue_anyway"), onPress: () => {
-                place.icon = this.locationIcon;
-                this._whorepme(place);
-              }},
-              {text: say("cancel")}
-            ], { cancelable: false }
-          );
-        }, 500);
+        this.setState({modalIsOpen: false});
+        this.alert(
+          say("ambiguous_address"),
+          say("no_guarantee_district"),
+          {
+            title: say("continue_anyway"),
+            onPress: () => {
+              place.icon = this.locationIcon;
+              this._whorepme(place);
+            },
+          },
+          {
+            title: say("cancel"),
+            onPress: () => this.setState({confirmDialog: false}),
+          }
+        );
       } else {
         place.icon = this.locationIcon;
         this._whorepme(place);
@@ -180,18 +184,21 @@ export default class App extends LocationComponent {
     if (access) return;
 
     this.setState({loading: false, myPosition: {icon: 'map-marker', address: say("location_access_denied"), error: true}, apiData: null});
-    Alert.alert(say("current_location"), say("howto_use_current_location"), [{text: say("ok")}], { cancelable: false });
+    this.alert(say("current_location"), say("howto_use_current_location"));
   }
 
   email = async (email) => {
     const url = 'mailto:' + email;
     return Linking.openURL(url).catch(() => {
-      Alert.alert(say("app_error"), say("unable_to_launch_external"), [{text: say("ok")}], { cancelable: false })
+      this.alert(say("app_error"), say("unable_to_launch_external"));
     });
   }
 
   render() {
-    const { user, loading, apiData, myPosition, modalIsOpen } = this.state;
+    const {
+      user, loading, apiData, myPosition, modalIsOpen, confirmDialog, confirmDialogTitle,
+      confirmDialogMessage, confirmDialogPositiveButton, confirmDialogNegativeButton,
+    } = this.state;
 
     if (apiData && !apiData.msg) {
 
@@ -230,11 +237,10 @@ export default class App extends LocationComponent {
     }
 
     return (
-      <View>
+      <Content>
         {myPosition.icon &&
-        <View style={{margin: 10}}>
           <TouchableWithoutFeedback
-            style={{margin: 0, backgroundColor: '#d7d7d7', padding: 10}}
+            style={{backgroundColor: '#d7d7d7', padding: 10}}
             onPress={() => {this.setState({modalIsOpen: true})}}>
               <Card>
                 <CardItem header bordered>
@@ -255,7 +261,6 @@ export default class App extends LocationComponent {
                 </CardItem>
               </Card>
           </TouchableWithoutFeedback>
-        </View>
         }
 
         {loading &&
@@ -282,6 +287,7 @@ export default class App extends LocationComponent {
             data={apiData.cd}
             renderItem={({item}) =>
               <DisplayRep
+                refer={this}
                 navigation={this.props.navigation}
                 office={item}
                 location={myPosition}
@@ -294,6 +300,7 @@ export default class App extends LocationComponent {
             data={apiData.sen}
             renderItem={({item}) =>
               <DisplayRep
+                refer={this}
                 navigation={this.props.navigation}
                 office={item}
                 location={myPosition}
@@ -306,6 +313,7 @@ export default class App extends LocationComponent {
             data={apiData.sldl}
             renderItem={({item}) =>
               <DisplayRep
+                refer={this}
                 navigation={this.props.navigation}
                 office={item}
                 location={myPosition}
@@ -318,6 +326,7 @@ export default class App extends LocationComponent {
             data={apiData.sldu}
             renderItem={({item}) =>
               <DisplayRep
+                refer={this}
                 navigation={this.props.navigation}
                 office={item}
                 location={myPosition}
@@ -330,6 +339,7 @@ export default class App extends LocationComponent {
             data={apiData.other}
             renderItem={({item}) =>
               <DisplayRep
+                refer={this}
                 navigation={this.props.navigation}
                 office={item}
                 location={myPosition}
@@ -362,7 +372,17 @@ export default class App extends LocationComponent {
             <Text>{say("searched_address_cap")}</Text>
           </Button>
         </Dialog>
-      </View>
+
+        <ConfirmDialog
+          title={confirmDialogTitle}
+          message={confirmDialogMessage}
+          visible={confirmDialog}
+          onTouchOutside={() => this.setState({confirmDialog: false})}
+          positiveButton={confirmDialogPositiveButton}
+          negativeButton={confirmDialogNegativeButton}
+        />
+
+      </Content>
     );
   }
 }

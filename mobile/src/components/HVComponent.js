@@ -41,13 +41,15 @@ export default class HVComponent extends PureComponent {
 
   alert(title, message, pos, neg) {
     if (!pos) pos = {title: "OK", onPress: () => this.setState({confirmDialog: false})};
-    this.setState({
-      confirmDialog: true,
-      confirmDialogTitle: title,
-      confirmDialogMessage: message,
-      confirmDialogPositiveButton: pos,
-      confirmDialogNegativeButton: neg,
-    });
+    setTimeout(() =>
+      this.setState({
+        confirmDialog: true,
+        confirmDialogTitle: title,
+        confirmDialogMessage: message,
+        confirmDialogPositiveButton: pos,
+        confirmDialogNegativeButton: neg,
+      })
+    , 500);
   }
 
 }
