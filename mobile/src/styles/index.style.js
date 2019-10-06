@@ -66,9 +66,4 @@ export default StyleSheet.create({
         borderRadius: 4,
         marginHorizontal: 8
     },
-    homeScreenText: {
-        marginTop: 0,
-        margin: 15,
-        color: 'dimgray'
-    }
 });

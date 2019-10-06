@@ -185,7 +185,7 @@ export default class App extends HVComponent {
 
     return (
       <Container>
-        <Content>
+        <Content padder>
           {active === 'home' &&
           <View>
             <Carousel
@@ -220,7 +220,7 @@ export default class App extends HVComponent {
               tappableDots={!!this._sliderRef}
             />
 
-            <Text style={styles.homeScreenText}>{say("homescreen_summary")}</Text>
+            <Text>{say("homescreen_summary")}</Text>
             <View style={{flexDirection: 'row', justifyContent: 'center', marginBottom: 15}}>
               <Icon name="facebook-official" size={40} color="#3b5998" style={{marginRight: 25}} onPress={this.openFacebook} />
               <Icon name="twitter" size={40} color="#0084b4" style={{marginRight: 25}} onPress={this.openTwitter} />
@@ -244,26 +244,14 @@ export default class App extends HVComponent {
         }
         {active === 'supporters' &&
         <View>
-          <Text style={styles.homeScreenText}>{say("our_signature_supporters")}</Text>
-          <Text style={styles.homeScreenText}>{say("this_app_is_made_possible_by")}</Text>
+          <Text>{say("our_signature_supporters")}</Text>
+          <Text>{say("this_app_is_made_possible_by")}</Text>
           <Button style={{margin: 15}} raised primary text={say("support_us_on_patreon")} onPress={() => this.openDonate()} />
           <PatreonNames names={patreonNames} />
         </View>
         }
         {active === 'legal' &&
-        <View>
-          <Text style={styles.homeScreenText}>
-            HelloVoter Version {appVersion}
-          </Text>
-          <Text style={styles.homeScreenText}>
-            Copyright (c) 2018, Our Voice USA. {say("all_rights_reserved")}
-          </Text>
-          <Text style={styles.homeScreenText}>{say("this_program_is_free_software")}</Text>
-          <AppleEULA />
-          <View style={{flexDirection: 'row', justifyContent: 'center'}}>
-            <Button raised primary text={say("tap_here_for_source_code")} onPress={() => this.openGitHub('HelloVoter')} />
-          </View>
-        </View>
+          <Legal version={appVersion} />
         }
         </Content>
         <Footer>
@@ -290,13 +278,27 @@ export default class App extends HVComponent {
 const PatreonNames = props => {
   if (!props.names || props.names.length === 0) return (<View><Spinner /><Text>{say("loading_data")}...</Text></View>);
   return props.names.map(name => (
-    <Text style={styles.homeScreenText}>{name}</Text>
+    <Text>{name}</Text>
   ));
 };
 
-const AppleEULA = props => {
-  if (Platform.OS === 'ios') return (
-    <Text style={styles.homeScreenText}>{say("note_about_apple_eula")}</Text>
-  );
-  return null;
-};
+const Legal = props => (
+  <View>
+    <Text>
+      HelloVoter Version {props.version}
+    </Text>
+    <Text></Text>
+    <Text>
+      Copyright (c) 2018, Our Voice USA. {say("all_rights_reserved")}
+    </Text>
+    <Text></Text>
+    <Text>{say("this_program_is_free_software")}</Text>
+    <Text></Text>
+    {Platform.OS === 'ios'&&
+      <Text>{say("note_about_apple_eula")}</Text>
+    }
+    <View style={{flexDirection: 'row', justifyContent: 'center'}}>
+      <Button raised primary text={say("tap_here_for_source_code")} onPress={() => this.openGitHub('HelloVoter')} />
+    </View>
+  </View>
+);
