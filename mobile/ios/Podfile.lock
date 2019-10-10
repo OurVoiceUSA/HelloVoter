@@ -42,11 +42,11 @@ PODS:
     - GoogleMaps/Base
   - GooglePlaces (3.2.0):
     - GoogleMaps/Base (= 3.2.0)
-  - Permission-Camera (2.0.1):
+  - Permission-Camera (2.0.2):
     - RNPermissions
-  - Permission-LocationWhenInUse (2.0.1):
+  - Permission-LocationWhenInUse (2.0.2):
     - RNPermissions
-  - Permission-Notifications (2.0.1):
+  - Permission-Notifications (2.0.2):
     - RNPermissions
   - RCTRequired (0.61.2)
   - RCTTypeSafety (0.61.2):
@@ -211,13 +211,13 @@ PODS:
     - React-cxxreact (= 0.61.2)
     - React-jsi (= 0.61.2)
   - React-jsinspector (0.61.2)
-  - react-native-camera (3.6.0):
+  - react-native-camera (3.7.1):
     - React
-    - react-native-camera/RCT (= 3.6.0)
-    - react-native-camera/RN (= 3.6.0)
-  - react-native-camera/RCT (3.6.0):
+    - react-native-camera/RCT (= 3.7.1)
+    - react-native-camera/RN (= 3.7.1)
+  - react-native-camera/RCT (3.7.1):
     - React
-  - react-native-camera/RN (3.6.0):
+  - react-native-camera/RN (3.7.1):
     - React
   - react-native-config (0.11.7):
     - React
@@ -282,7 +282,7 @@ PODS:
     - React
   - RNLocalize (1.3.0):
     - React
-  - RNPermissions (2.0.1):
+  - RNPermissions (2.0.2):
     - React
   - RNRate (1.1.10):
     - React
@@ -446,9 +446,9 @@ SPEC CHECKSUMS:
   Google-Maps-iOS-Utils: c32891ff472eaaa1fca032beedafa1a013af7875
   GoogleMaps: 5046d7edfe381c1a0b20fdaf293915a375c3122b
   GooglePlaces: 41bc2e480816b1234a48f4bec92e1c886f37cfe1
-  Permission-Camera: abcc2d1b943c41aa64a0c95576aee8d7008c0f6d
-  Permission-LocationWhenInUse: 9bd770f35cd22876352763133d6e9ec243863c77
-  Permission-Notifications: 0614d4e828ba44079d1ed20fab70f9b1884653e7
+  Permission-Camera: c483d4636407d7e6c13c2dad5bc83c6b258e0df6
+  Permission-LocationWhenInUse: 1482ab86e9a058e963fa51955a0124b6ce458667
+  Permission-Notifications: 239d88f23915b360b596da931dfdb91f0b3b6d8f
   RCTRequired: c639d59ed389cfb1f1203f65c2ea946d8ec586e2
   RCTTypeSafety: dc23fb655d6c77667c78e327bf661bc11e3b8aec
   React: 7e586e5d7bec12b91c1a096826b0fc9ab1da7865
@@ -458,7 +458,7 @@ SPEC CHECKSUMS:
   React-jsi: 32285a21b1b24c36060493ed3057a34677d58d09
   React-jsiexecutor: 8909917ff7d8f21a57e443a866fd8d4560e50c65
   React-jsinspector: 111d7d342b07a904c400592e02a2b958f1098b60
-  react-native-camera: 4f614d2da6526be735ecbe658c3f57eebfb0686a
+  react-native-camera: 574d8c9b8bfe08af65c12da2a1ade397a6374152
   react-native-config: 55548054279d92e0e4566ea15a8b9b81028ec342
   react-native-geocoder-reborn: 2fc7d5eb30cc85e00c8505121b66549f0468ad5a
   react-native-geolocation: cbd9d6bd06bac411eed2671810f454d4908484a8
@@ -481,11 +481,11 @@ SPEC CHECKSUMS:
   RNDeviceInfo: 9e88577c51bd42f65275e53bb0de0a0f728ed6b8
   RNGestureHandler: 4cb47a93019c1a201df2644413a0a1569a51c8aa
   RNLocalize: 6e4a6b8582dfbb50b452464d208c30a7a20516f4
-  RNPermissions: ba8e81753965c98fd0aed0719759ba1f4d3cc6eb
+  RNPermissions: 76d6d5a65496b33378afe4b90ae5b30629ddd900
   RNRate: d44a8bca6ee08f5d890ecccddaec2810955ffbb3
   RNVectorIcons: 0bb4def82230be1333ddaeee9fcba45f0b288ed4
   Yoga: 14927e37bd25376d216b150ab2a561773d57911f
 
 PODFILE CHECKSUM: 43845c7b63db6e13dee4a53bb38be412fe6bcefb
 
-COCOAPODS: 1.8.1
+COCOAPODS: 1.8.3
