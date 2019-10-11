@@ -53,8 +53,8 @@
     "uuid": "^3.3.3"
   },
   "devDependencies": {
-    "@babel/cli": "^7.6.3",
-    "@babel/core": "^7.6.3",
+    "@babel/cli": "^7.6.4",
+    "@babel/core": "^7.6.4",
     "@babel/node": "^7.6.3",
     "@babel/runtime": "^7.6.3",
     "@react-native-community/eslint-config": "^0.0.5",
