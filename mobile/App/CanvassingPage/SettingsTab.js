@@ -42,6 +42,8 @@ export default class SettingsTab extends PureComponent {
 
     canvassSettings[name] = value;
 
+    if (name === 'limit' && value > 100) this.changeSetting('chill_mode', true);
+
     refer.setState({canvassSettings});
     this.forceUpdate();
   }
