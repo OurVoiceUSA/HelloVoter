@@ -2,7 +2,7 @@ import React from 'react';
 
 import Rate, { AndroidMarket } from 'react-native-rate'
 import { getLocales } from 'react-native-localize';
-import { say } from '../common';
+import { say, openGitHub, openDonate } from '../common';
 
 export function carouselItems(refer) {
   let items = [];
@@ -22,7 +22,7 @@ export function carouselItems(refer) {
         title: say("we_translated_this"),
         subtitle: say("we_used_google_translate"),
         illustration: require('../../img/translate.png'),
-        onPress: () => refer.openGitHub(),
+        onPress: () => openGitHub(),
       }
     );
 
@@ -51,7 +51,7 @@ export function carouselItems(refer) {
         title: say("coming_zoon_desktop_tools"),
         subtitle: say("canvassing_at_scale"),
         illustration: require('../../img/phone-banking.png'),
-        onPress: () => refer.openDonate(),
+        onPress: () => openDonate(),
       }
     );
 
@@ -60,7 +60,7 @@ export function carouselItems(refer) {
       title: say("donate"),
       subtitle: say("we_operate_on_donations"),
       illustration: require('../../img/donate.png'),
-      onPress: () => refer.openDonate(),
+      onPress: () => openDonate(),
     }
   );
 
@@ -87,7 +87,7 @@ export function carouselItems(refer) {
       title: say("open_source_software"),
       subtitle: say("help_us_out_directly"),
       illustration: require('../../img/open-source.png'),
-      onPress: () => refer.openGitHub(),
+      onPress: () => openGitHub(),
     }
   );
 

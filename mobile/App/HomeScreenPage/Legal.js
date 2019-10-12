@@ -6,7 +6,7 @@ import {
 } from 'react-native';
 
 import { Text, Button, Spinner } from 'native-base';
-import { say } from '../common';
+import { say, openGitHub } from '../common';
 
 export default Legal = props => (
   <View>
@@ -24,7 +24,7 @@ export default Legal = props => (
       <Text>{say("note_about_apple_eula")}</Text>
     }
     <Text></Text>
-    <Button block primary onPress={() => props.refer.openGitHub('HelloVoter')}>
+    <Button block primary onPress={() => openGitHub('HelloVoter')}>
       <Text>{say("tap_here_for_source_code")}</Text>
     </Button>
   </View>

@@ -2,6 +2,7 @@
 import React from 'react';
 import HVComponent from '../HVComponent';
 
+import Home from './Home';
 import YourReps from './YourReps';
 import CanvassingSetup from './CanvassingSetup';
 import Supporters from './Supporters';
@@ -16,12 +17,8 @@ import {
 import { Container, Header, Content, Footer, FooterTab, Text, Button, Spinner } from 'native-base';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
-import Carousel, { Pagination } from 'react-native-snap-carousel';
 import storage from 'react-native-storage-wrapper';
 
-import { sliderWidth, itemWidth } from '../styles/SliderEntry.style';
-import styles, { colors } from '../styles/index.style';
-import SliderEntry from '../SliderEntry';
 import { say, DINFO, permissionNotify, openURL } from '../common';
 
 export default class App extends HVComponent {
@@ -32,18 +29,11 @@ export default class App extends HVComponent {
     this.state = {
       active: 'home',
       appVersion: "unknown",
-      mainMenu: carouselItems(this),
+      carouselItems: carouselItems(this),
       sliderActiveSlide: 0,
       patreonNames: [],
     };
   }
-
-  openFacebook = () => openURL('https://m.facebook.com/OurVoiceUsa');
-  openTwitter = () => openURL('https://twitter.com/OurVoiceUsa');
-  openYouTube = () => openURL('https://www.youtube.com/channel/UCw5fpnK-IZVQ4IkYuapIbiw');
-  openWebsite = () => openURL('https://ourvoiceusa.org/');
-  openGitHub = (repo) => openURL('https://github.com/OurVoiceUSA/'+(repo?repo:''));
-  openDonate = () => openURL('https://www.patreon.com/join/hellovoter');
 
   componentDidMount() {
     this.loadPatreonNames();
@@ -71,97 +61,27 @@ export default class App extends HVComponent {
     }
   }
 
-  _renderItem ({item, index}) {
-    return <SliderEntry data={item} even={(index + 1) % 2 === 0} />;
-  }
-
-  _renderItemWithParallax ({item, index}, parallaxProps) {
-    return (
-      <SliderEntry
-        data={item}
-        even={(index + 1) % 2 === 0}
-        parallax={true}
-        parallaxProps={parallaxProps}
-      />
-    );
-  }
-
-  _renderLightItem ({item, index}) {
-    return <SliderEntry data={item} even={false} />;
-  }
-
-  _renderDarkItem ({item, index}) {
-    return <SliderEntry data={item} even={true} />;
-  }
-
   render() {
-    const { active, appVersion, mainMenu, sliderActiveSlide, patreonNames } = this.state;
+    const { active, appVersion, carouselItems, sliderActiveSlide, patreonNames } = this.state;
 
     return (
       <Container>
         <Content padder>
           {active === 'home' &&
-          <View>
-            <Carousel
-              ref={c => this._sliderRef = c}
-              data={mainMenu}
-              renderItem={this._renderItemWithParallax}
-              sliderWidth={sliderWidth}
-              itemWidth={itemWidth}
-              hasParallaxImages={true}
-              firstItem={this.state.sliderActiveSlide}
-              inactiveSlideScale={0.94}
-              inactiveSlideOpacity={0.7}
-              containerCustomStyle={styles.slider}
-              contentContainerCustomStyle={styles.sliderContentContainer}
-              loop={true}
-              loopClonesPerSide={2}
-              autoplay={true}
-              autoplayDelay={500}
-              autoplayInterval={5000}
-              onSnapToItem={(index) => this.setState({ sliderActiveSlide: index }) }
-            />
-            <Pagination
-              dotsLength={mainMenu.length}
-              activeDotIndex={sliderActiveSlide}
-              containerStyle={styles.paginationContainer}
-              dotColor={'rgba(55, 55, 55, 0.92)'}
-              dotStyle={styles.paginationDot}
-              inactiveDotColor={colors.black}
-              inactiveDotOpacity={0.4}
-              inactiveDotScale={0.6}
-              carouselRef={this._sliderRef}
-              tappableDots={!!this._sliderRef}
-            />
-
-            <Text>{say("homescreen_summary")}</Text>
-            <View style={{flexDirection: 'row', justifyContent: 'center', marginBottom: 15}}>
-              <Icon name="facebook-official" size={40} color="#3b5998" style={{marginRight: 25}} onPress={this.openFacebook} />
-              <Icon name="twitter" size={40} color="#0084b4" style={{marginRight: 25}} onPress={this.openTwitter} />
-              <Icon name="youtube-play" size={40} color="#ff0000" style={{marginRight: 25}} onPress={this.openYouTube} />
-              <Icon name="github" size={40} style={{marginRight: 25}} onPress={() => {this.openGitHub(null)}} />
-              <Icon name="globe" size={40} color="#008080" onPress={this.openWebsite} />
-            </View>
-
-            <View style={{flexDirection: 'row', justifyContent: 'center', marginBottom: 15}}>
-              <Button primary onPress={() => this.setState({active: 'supporters'})}><Text>{say("app_supporters")}</Text></Button>
-              <Text>{'  '}</Text>
-              <Button primary onPress={() => this.setState({active: 'legal'})}><Text>{say("legal_notice")}</Text></Button>
-            </View>
-          </View>
-        }
-        {active === 'reps' &&
-          <YourReps navigation={this.props.navigation} />
-        }
-        {active === 'canvassing' &&
-          <CanvassingSetup navigation={this.props.navigation} refer={this} />
-        }
-        {active === 'supporters' &&
-          <Supporters refer={this} names={patreonNames} />
-        }
-        {active === 'legal' &&
-          <Legal version={appVersion} refer={this} />
-        }
+            <Home refer={this} items={carouselItems} />
+          }
+          {active === 'reps' &&
+            <YourReps navigation={this.props.navigation} />
+          }
+          {active === 'canvassing' &&
+            <CanvassingSetup navigation={this.props.navigation} refer={this} />
+          }
+          {active === 'supporters' &&
+            <Supporters refer={this} names={patreonNames} />
+          }
+          {active === 'legal' &&
+            <Legal version={appVersion} refer={this} />
+          }
         </Content>
         <Footer>
           <FooterTab>

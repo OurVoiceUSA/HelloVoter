@@ -58,6 +58,14 @@ export async function openURL(url) {
   return false;
 }
 
+export function openGitHub(repo) {
+  openURL('https://github.com/OurVoiceUSA/'+(repo?repo:''));
+}
+
+export function openDonate() {
+  openURL('https://www.patreon.com/join/hellovoter');
+}
+
 export function getPropFromArrObj(arr, id, prop) {
   for (let i in arr)
     if (arr[i].id === id) return arr[i][prop];
