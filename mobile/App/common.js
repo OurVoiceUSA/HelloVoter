@@ -22,8 +22,10 @@ import memoize from 'lodash.memoize';
 import i18n from 'i18n-js';
 import { wsbase } from './config';
 
-const JWT = 'OV_JWT';
-const USERLOCAL = 'OV_USER';
+export const STORAGE_KEY_JWT = 'OV_JWT';
+export const STORAGE_KEY_USERLOCAL = 'OV_USER';
+export const STORAGE_KEY_DISCLOSURE = 'OV_DISCLOUSER';
+export const STORAGE_KEY_SETTINGS = 'OV_CANVASS_SETTINGS';
 
 export const say = memoize(
   (key, config) => i18n.t(key, config),
@@ -167,7 +169,7 @@ async function _UserAgent() {
 }
 
 export async function _getApiToken() {
-  var jwt = await storage.get(JWT);
+  var jwt = await storage.get(STORAGE_KEY_JWT);
 
   if (!jwt) {
     res = await fetch(wsbase+'/auth/jwt', {
@@ -232,7 +234,7 @@ export async function _saveUser(user, remote) {
   }
 
   try {
-    await storage.set(USERLOCAL, JSON.stringify(user));
+    await storage.set(STORAGE_KEY_USERLOCAL, JSON.stringify(user));
   } catch (error) {
     console.warn(error);
   }
@@ -321,7 +323,7 @@ export async function DINFO() {
 export async function _getJWT(remote) {
 
   let user = null;
-  var localuser = await _getUserLocal();
+  var localuser = await _getSTORAGE_KEY_USERLOCAL();
 
   // just use locally cached data
   if (!remote) {
@@ -378,7 +380,7 @@ export async function _getJWT(remote) {
     user.loggedin = true;
     _saveUser(user, remote);
   } else {
-    user = await _getUserLocal();
+    user = await _getSTORAGE_KEY_USERLOCAL();
   }
 
   if (user == null) user = { profile: {} };
@@ -388,16 +390,16 @@ export async function _getJWT(remote) {
 
 export async function _saveJWT(jwt) {
   try {
-    await storage.set(JWT, jwt);
+    await storage.set(STORAGE_KEY_JWT, jwt);
   } catch (error) {
     console.warn(error);
   }
 }
 
-export async function _getUserLocal() {
+export async function _getSTORAGE_KEY_USERLOCAL() {
   let user = null;
   try {
-    let str = await storage.get(USERLOCAL);
+    let str = await storage.get(STORAGE_KEY_USERLOCAL);
     if (str) {
       user = JSON.parse(str);
       user.loggedin = false;
@@ -410,8 +412,8 @@ export async function _getUserLocal() {
 
 export async function _rmUser() {
   try {
-    await storage.del(USERLOCAL);
-    await storage.del('OV_DISCLOUSER');
+    await storage.del(STORAGE_KEY_USERLOCAL);
+    await storage.del(STORAGE_KEY_DISCLOSURE);
     await storage.del('OV_CANVASS_SETTINGS');
     try {
       let forms = JSON.parse(await storage.get('OV_CANVASS_FORMS'));
@@ -428,7 +430,7 @@ export async function _rmUser() {
 
 export async function _rmJWT() {
   try {
-    await storage.del(JWT);
+    await storage.del(STORAGE_KEY_JWT);
   } catch (error) {
     console.warn(error);
   }

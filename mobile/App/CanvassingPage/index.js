@@ -9,7 +9,7 @@ import {
 import { Container, Content, Footer, FooterTab, Text, H3, Button, Spinner } from 'native-base';
 
 import {
-  DINFO, api_base_uri, _doGeocode, _getApiToken, getEpoch, openURL,
+  DINFO, api_base_uri, _doGeocode, _getApiToken, getEpoch, openURL, STORAGE_KEY_SETTINGS,
 } from '../common';
 
 import LocationComponent from '../LocationComponent';
@@ -32,8 +32,6 @@ import t from 'tcomb-form-native';
 import _ from 'lodash';
 
 import {deepCopy, geojson2polygons, ingeojson} from 'ourvoiceusa-sdk-js';
-
-const STORAGE_KEY_SETTINGS = 'OV_CANVASS_SETTINGS';
 
 TimeAgo.addLocale(en);
 

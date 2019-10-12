@@ -8,10 +8,8 @@ import { NavigationActions } from 'react-navigation';
 import storage from 'react-native-storage-wrapper';
 import { ConfirmDialog } from 'react-native-simple-dialogs';
 
-import { say, getEpoch, openURL } from '../common';
+import { say, getEpoch, openURL, STORAGE_KEY_DISCLOSURE } from '../common';
 import HVComponent from '../HVComponent';
-
-const STORAGE_KEY_DISCLOSURE = 'OV_DISCLOUSER';
 
 export async function loadDisclosure(refer) {
   try {

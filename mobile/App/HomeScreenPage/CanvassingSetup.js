@@ -19,7 +19,7 @@ import SafariView from 'react-native-safari-view';
 import jwt_decode from 'jwt-decode';
 import SmLogin from '../SmLogin';
 import { ingeojson } from 'ourvoiceusa-sdk-js';
-import { Divider, say, api_base_uri, DINFO, _loginPing, openURL } from '../common';
+import { Divider, say, api_base_uri, DINFO, _loginPing, openURL, STORAGE_KEY_JWT } from '../common';
 import { RNCamera } from 'react-native-camera';
 import { wsbase } from '../config';
 
@@ -123,14 +123,14 @@ export default class App extends LocationComponent {
     // mock a fetch object
     let res = {headers: {get: () => wsbase+'/auth'}, status: 404};
     try {
-      let jwt = await storage.get('OV_JWT');
+      let jwt = await storage.get(STORAGE_KEY_JWT);
 
       try {
         // if the jwt doesn't have an id, discard it
         let obj = jwt_decode(jwt);
         if (!obj.id) throw "not a full user object";
       } catch (e) {
-        await storage.del('OV_JWT');
+        await storage.del(STORAGE_KEY_JWT);
         jwt = null;
       }
 
@@ -150,7 +150,7 @@ export default class App extends LocationComponent {
           inviteCode,
         }),
       });
-      if (res.status === 400 || res.status === 401) await storage.del('OV_JWT');
+      if (res.status === 400 || res.status === 401) await storage.del(STORAGE_KEY_JWT);
     } catch (e) {
       if (orgId) res = {headers: {get: () => ''}, status: 404};
       console.warn("sayHello error: "+e);
@@ -209,7 +209,7 @@ export default class App extends LocationComponent {
           return;
         }
 
-        let jwt = await storage.get('OV_JWT');
+        let jwt = await storage.get(STORAGE_KEY_JWT);
         for (let i = 0; i < body.data.forms.length; i++) {
           let https = true;
           if (server.match(/:8080/)) https = false;
@@ -329,7 +329,7 @@ export default class App extends LocationComponent {
 
         // atempt to re-pull the form to see if it's changed
         try {
-          let jwt = await storage.get('OV_JWT');
+          let jwt = await storage.get(STORAGE_KEY_JWT);
           let https = true;
           if (json.server.match(/:8080/)) https = false;
           let res = await fetch('http'+(https?'s':'')+'://'+json.server+api_base_uri(json.orgId)+'/form/get?formId='+json.id, {
