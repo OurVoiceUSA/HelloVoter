@@ -19,6 +19,7 @@ import {
 
 import LocationComponent from '../LocationComponent';
 import ListTab from './ListTab';
+import TurfTab from './TurfTab';
 
 import { NavigationActions } from 'react-navigation';
 import storage from 'react-native-storage-wrapper';
@@ -513,7 +514,7 @@ export default class App extends LocationComponent {
 
     return; // TODO: enable turf stats
 
-    this.setState({active: 'turfstats', fetchingTurfStats: true});
+    this.setState({active: 'turf', segmentTurf: 'stats', fetchingTurfStats: true});
 
     try {
       let https = true;
@@ -952,22 +953,11 @@ export default class App extends LocationComponent {
     return (
       <Container>
         <Content>
-        {active==='turfstats'&&
-          <TurfStats refer={this} loading={this.state.fetchingTurfStats} data={this.state.turfStats} />
-        }
         {active==='list'&&
           <ListTab refer={this} />
         }
         {active==='turf'&&
-          <View>
-            <Segment>
-              <Button first active={(segmentTurf==='list')} onPress={() => this.setState({segmentTurf: 'list'})}><Text>List</Text></Button>
-              <Button last active={(segmentTurf==='stats')} onPress={() => this.setState({segmentTurf: 'stats'})}><Text>Stats</Text></Button>
-            </Segment>
-            <Content>
-              <Text>{JSON.stringify(this.state.turfs.map(t => t.name))}</Text>
-            </Content>
-          </View>
+          <TurfTab refer={this} />
         }
         {active==='settings'&&
           <Settings refer={this} form={form} />
@@ -1215,19 +1205,6 @@ const Unit = props => (
       <Icon name={(props.color === "red" ? "ban" : "address-book")} size={40} color={props.color} style={{margin: 5}} />
       <Text>Unit {(props.unknown?"Unknown":props.unit.name)} - {props.refer.getLastVisit(props.unit)}</Text>
     </View>
-  </View>
-);
-
-const TurfStats = props => (
-  <View>
-    {props.loading&&
-    <Spinner />
-    }
-    {!props.loading&&
-    <View style={{padding: 10}}>
-      <Text>{JSON.stringify(props.data.stats)}</Text>
-    </View>
-    }
   </View>
 );
 
