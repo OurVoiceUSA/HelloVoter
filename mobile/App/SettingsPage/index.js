@@ -15,7 +15,7 @@ import RNGooglePlaces from 'react-native-google-places';
 import { Dialog } from 'react-native-simple-dialogs';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import storage from 'react-native-storage-wrapper';
-import SmLoginPage from '../SmLoginPage';
+import SmLogin from '../SmLogin';
 import { google_api_key } from '../config';
 import {
   _getJWT, _loginPing, _rmJWT, _saveUser, DINFO,
@@ -417,7 +417,7 @@ export default class App extends PureComponent {
           visible={SmLoginScreen}
           animationType="fade"
           onTouchOutside={() => this.setState({SmLoginScreen: false})}>
-          <SmLoginPage refer={this} />
+          <SmLogin refer={this} />
         </Dialog>
 
       </Content>

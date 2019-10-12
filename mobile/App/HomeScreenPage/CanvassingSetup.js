@@ -17,7 +17,7 @@ import Prompt from 'react-native-input-prompt';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import SafariView from 'react-native-safari-view';
 import jwt_decode from 'jwt-decode';
-import SmLoginPage from '../SmLoginPage';
+import SmLogin from '../SmLogin';
 import { ingeojson } from 'ourvoiceusa-sdk-js';
 import { Divider, say, api_base_uri, DINFO, _loginPing, openURL } from '../common';
 import { RNCamera } from 'react-native-camera';
@@ -634,7 +634,7 @@ export default class App extends LocationComponent {
           visible={SmLoginScreen}
           animationType="fade"
           onTouchOutside={() => this.setState({SmLoginScreen: false})}>
-          <SmLoginPage refer={this} />
+          <SmLogin refer={this} />
         </Dialog>
 
         <Dialog

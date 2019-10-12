@@ -2,8 +2,8 @@ import 'react-native';
 import React from 'react';
 import renderer from 'react-test-renderer';
 
-import SmLoginPage from '.';
+import SmLogin from './SmLogin';
 
 it('SmLogin renders correctly', () => {
-  renderer.create(<SmLoginPage />);
+  renderer.create(<SmLogin />);
 });
