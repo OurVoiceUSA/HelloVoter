@@ -49,7 +49,7 @@ export default class HVComponent extends PureComponent {
         confirmDialogPositiveButton: pos,
         confirmDialogNegativeButton: neg,
       })
-    , 500);
+    , 250);
   }
 
 }
