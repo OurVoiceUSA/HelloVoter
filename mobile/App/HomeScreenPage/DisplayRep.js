@@ -4,9 +4,9 @@ import {
   Linking,
   View,
   TouchableOpacity,
-  Text,
 } from 'react-native';
 
+import { Text } from 'native-base';
 import { _partyNameFromKey, say } from '../common';
 import Icon from 'react-native-vector-icons/FontAwesome';
 

@@ -2,7 +2,6 @@
 import React, { PureComponent } from 'react';
 
 import {
-  ActivityIndicator,
   Alert,
   Linking,
   View,
@@ -12,8 +11,6 @@ import {
 
 import { Container, Header, Content, Footer, FooterTab, Text, Button, Spinner } from 'native-base';
 
-import t from 'tcomb-form-native';
-import sha1 from 'sha1';
 import { Dialog } from 'react-native-simple-dialogs';
 import storage from 'react-native-storage-wrapper';
 import Swipeout from 'react-native-swipeout';
@@ -22,8 +19,8 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import SafariView from 'react-native-safari-view';
 import jwt_decode from 'jwt-decode';
 import SmLoginPage from '../SmLoginPage';
-import { deepCopy, ingeojson } from 'ourvoiceusa-sdk-js';
-import { Divider, say, api_base_uri, DINFO, _loginPing, _saveUser, _fileReaderAsync } from '../common';
+import { ingeojson } from 'ourvoiceusa-sdk-js';
+import { Divider, say, api_base_uri, DINFO, _loginPing } from '../common';
 import { RNCamera } from 'react-native-camera';
 import { wsbase } from '../config';
 
@@ -32,8 +29,6 @@ import rtree from '../../rtree.json';
 import { geographies } from '../geographies';
 
 import LocationComponent from '../LocationComponent';
-
-var Form = t.form.Form;
 
 export default class App extends LocationComponent {
 
@@ -54,17 +49,6 @@ export default class App extends LocationComponent {
       myPosition: {latitude: null, longitude: null},
       showCamera: false,
     };
-
-    this.onChange = this.onChange.bind(this);
-
-    this.formServerItems = t.struct({
-      server: t.String,
-      ack: t.subtype(t.Boolean, function (s) { return s }), // boolean that fails validation if not selected
-    });
-  }
-
-  onChange(server) {
-    this.setState({server});
   }
 
   checkLocationAccess() {
@@ -543,7 +527,7 @@ export default class App extends LocationComponent {
     if (!user) return (
         <View style={{flex: 1, backgroundColor: 'white', alignItems: 'center', justifyContent: 'center'}}>
           <Text style={{fontSize: 20}}>{say("loading_user_data")}...</Text>
-          <ActivityIndicator />
+          <Spinner />
         </View>
       );
 
@@ -581,7 +565,7 @@ export default class App extends LocationComponent {
             {loading &&
             <View style={{flex: 1, margin: 20, alignItems: 'center'}}>
               <Text>{say("loading_data")}...</Text>
-              <ActivityIndicator size="large" />
+              <Spinner />
             </View>
             ||
             <View style={{flex: 1, alignItems: 'center'}}>
