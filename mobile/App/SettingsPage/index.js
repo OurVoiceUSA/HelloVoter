@@ -18,7 +18,7 @@ import storage from 'react-native-storage-wrapper';
 import SmLogin from '../SmLogin';
 import { google_api_key } from '../config';
 import {
-  _getJWT, _loginPing, _rmJWT, _saveUser, DINFO,
+  DINFO, _getJWT, _saveJWT, _loginPing, _rmJWT, _saveUser, openURL,
   _rmUser, _apiCall, _specificAddress, permissionNotify, permissionLocation,
 } from '../common';
 
@@ -75,14 +75,18 @@ export default class App extends PureComponent {
 
   _logout() {
     const { user } = this.state;
+    _rmJWT();
+    _rmUser();
+    this.goHome();
+  }
+
+  goHome() {
     const resetAction = StackActions.reset({
       index: 0,
       actions: [
         NavigationActions.navigate({ routeName: 'HomeScreen'})
       ]
     });
-    _rmJWT();
-    _rmUser();
     this.props.navigation.dispatch(resetAction);
   }
 
@@ -396,9 +400,7 @@ export default class App extends PureComponent {
 
         <View style={{flex: 1, alignItems: 'center'}}>
           <View style={{margin: 20, marginTop: 0}}>
-            <TouchableOpacity
-              style={{flexDirection: 'row', padding: 10, alignItems: 'center', backgroundColor: '#d7d7d7'}}
-              onPress={() => {
+            <Button block danger onPress={() => {
                 Alert.alert(
                   (user.lastsmlogin ? 'Log Out' : 'Clear Data'),
                   (user.lastsmlogin ? 'Are you sure you wish to log out?' : 'Are you sure you wish to clear your profile data? This action cannot be undone.'),
@@ -406,10 +408,22 @@ export default class App extends PureComponent {
                     {text: 'Yes', onPress: () => {this._logout()}},
                     {text: 'No'}
                   ], { cancelable: false });
-              }}>
+            }}>
               <Icon style={{width: 20}} name="sign-out" size={22} color="black" />
-              <Text style={{marginLeft: 10, fontSize: 16}}>{(user.lastsmlogin ? 'Log Out' : 'Clear Data')}</Text>
-            </TouchableOpacity>
+              <Text>{(user.lastsmlogin ? 'Log Out' : 'Clear Data')}</Text>
+            </Button>
+
+            <Text></Text>
+
+            {__DEV__&&user.lastsmlogin&&
+              <Button block danger onPress={() => {
+                _saveJWT("eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Imdvb2dsZTpleHBpcmVkIiwibmFtZSI6IkV4cGlyZWQgVXNlciIsImVtYWlsIjoiZXhwaXJlZEBleGFtcGxlLmNvbSIsImlzcyI6Im91cnZvaWNldXNhLm9yZyIsImlhdCI6MSwiZXhwIjoyLCJkaXNjbGFpbWVyIjoiQmxhaCBibGFoIGRpc2NsYWltZXIifQ.hKEGFLQQuzjJFozrPyYCTDrQrRq3_bg5ZIKg6765DEEq1xcuKluWVhWYC_VeepHiEg5w9J60wXsS05NCr_f79P6DG8dL5HYdCCR3f7oyLUxa8ZLhUXbSViV42ASdQyX3dY00r890uybpU0zWKGegLfpBaZRZgFb1j67tH1MHdL-mRPOSHLpCdKFtfPoqh_HizeKQssdw46kUZgTpudlyuFp5nD04YQCw_VUrvT2xX1Hh8ViXkQIUkCBtvooi5S-e61NBcKvNoxxu5qWxEYx7lJJDpCaLHXJliJEkv0we_TnNfiZyQHpYlgZoYl25F192uEvZmIxA0vProV__j0bZVg");
+                this.goHome();
+              }}>
+                <Text>Expire my session</Text>
+              </Button>
+            }
+
           </View>
         </View>
 
