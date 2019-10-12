@@ -1,21 +1,22 @@
 
-import React, { PureComponent } from 'react';
+import React from 'react';
 
 import {
-  Alert,
   Text,
   View,
   TouchableOpacity,
   FlatList,
 } from 'react-native';
 
+import HVComponent, { HVConfirmDialog } from '../HVComponent';
+
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Swipeout from 'react-native-swipeout';
 import uuidv4 from 'uuid/v4';
 
-import { getEpoch, PersonAttr } from '../common';
+import { say, getEpoch, PersonAttr } from '../common';
 
-export default class App extends PureComponent {
+export default class App extends HVComponent {
 
   constructor(props) {
     super(props);
@@ -80,18 +81,22 @@ export default class App extends PureComponent {
                     text: 'Moved',
                     type: 'delete',
                     onPress: () => {
-                      Alert.alert(
+                      this.alert(
                         'No longer lives here',
                         'Are you sure you wish to mark this person as no longer lives here?',
-                        [
-                          {text: 'Yes', onPress: async () => {
+                        {
+                          title: say("yes"),
+                          onPress: () => {
                             funcs.personMoved(marker.address.id, place, unit, item.id);
                             item.moved = true;
-                            this.setState({updated: getEpoch()}); // have to change state to have FlatList re-render
+                            this.setState({confirmDialog: false, updated: getEpoch()}); // have to change state to have FlatList re-render
                             refer.setState({updated: getEpoch()});
-                          }},
-                          {text: 'No'},
-                        ], { cancelable: false }
+                          },
+                        },
+                        {
+                          title: say("no"),
+                          onPress: () => this.setState({confirmDialog: false}),
+                        },
                       );
                     },
                   }]}
@@ -158,6 +163,8 @@ export default class App extends PureComponent {
             Not Interested
           </Icon.Button>
         </View>
+
+        <HVConfirmDialog refer={this} />
 
       </View>
     );

@@ -7,6 +7,8 @@ import {
   I18nManager,
 } from 'react-native';
 
+import { ConfirmDialog } from 'react-native-simple-dialogs';
+
 import { say } from './common';
 
 const translationGetters = {
@@ -53,3 +55,21 @@ export default class HVComponent extends PureComponent {
   }
 
 }
+
+export const HVConfirmDialog = props => {
+  const {
+    confirmDialog, confirmDialogTitle, confirmDialogMessage,
+    confirmDialogPositiveButton, confirmDialogNegativeButton,
+  } = props.refer.state;
+
+  return (
+    <ConfirmDialog
+      title={confirmDialogTitle}
+      message={confirmDialogMessage}
+      visible={confirmDialog}
+      onTouchOutside={() => props.refer.setState({confirmDialog: false})}
+      positiveButton={confirmDialogPositiveButton}
+      negativeButton={confirmDialogNegativeButton}
+    />
+  );
+};

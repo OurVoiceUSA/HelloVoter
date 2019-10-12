@@ -13,6 +13,7 @@ import {
 } from '../common';
 
 import LocationComponent from '../LocationComponent';
+import { HVConfirmDialog } from '../HVComponent';
 import TermsDisclosure, { loadDisclosure } from './TermsDisclosure';
 import ListTab from './ListTab';
 import TurfTab from './TurfTab';
@@ -23,7 +24,7 @@ import NetInfo from '@react-native-community/netinfo';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps'
 import RNGooglePlaces from 'react-native-google-places';
-import { ConfirmDialog, Dialog } from 'react-native-simple-dialogs';
+import { Dialog } from 'react-native-simple-dialogs';
 import md5 from 'md5';
 import { debounce } from 'throttle-debounce';
 import TimeAgo from 'javascript-time-ago';
@@ -808,8 +809,7 @@ export default class App extends LocationComponent {
     const {
       showDisclosure, myPosition, myNodes, locationAccess, serviceError, deviceError,
       form, loading, region, active, segmentList, segmentTurf, fetching, selectedTurf, mapCenter,
-      newAddressDialog, newUnitDialog, onlyPhonePeople, confirmDialog, confirmDialogTitle,
-      confirmDialogMessage, confirmDialogPositiveButton, confirmDialogNegativeButton,
+      newAddressDialog, newUnitDialog, onlyPhonePeople,
     } = this.state;
 
     if (showDisclosure) {
@@ -1069,14 +1069,7 @@ export default class App extends LocationComponent {
           </View>
         </Dialog>
 
-        <ConfirmDialog
-          title={confirmDialogTitle}
-          message={confirmDialogMessage}
-          visible={confirmDialog}
-          onTouchOutside={() => this.setState({confirmDialog: false})}
-          positiveButton={confirmDialogPositiveButton}
-          negativeButton={confirmDialogNegativeButton}
-        />
+        <HVConfirmDialog refer={this} />
 
         <Footer>
           <FooterTab>

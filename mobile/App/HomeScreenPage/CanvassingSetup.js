@@ -2,13 +2,15 @@
 import React, { PureComponent } from 'react';
 
 import {
-  Alert,
   View,
   Platform,
   TouchableOpacity,
 } from 'react-native';
 
 import { Container, Header, Content, Footer, FooterTab, Text, Button, Spinner } from 'native-base';
+
+import LocationComponent from '../LocationComponent';
+import { HVConfirmDialog } from '../HVComponent';
 
 import { Dialog } from 'react-native-simple-dialogs';
 import storage from 'react-native-storage-wrapper';
@@ -26,8 +28,6 @@ import { wsbase } from '../config';
 import RBush from 'rbush';
 import rtree from '../../rtree.json';
 import { geographies } from '../geographies';
-
-import LocationComponent from '../LocationComponent';
 
 export default class App extends LocationComponent {
 
@@ -53,11 +53,11 @@ export default class App extends LocationComponent {
   checkLocationAccess() {
     const { myPosition } = this.state;
     if (!this.state.locationAccess) {
-      Alert.alert(say("location_access"), say("device_settings_deny_location"), [{text: say("ok")}], { cancelable: false });
+      this.alert(say("location_access"), say("device_settings_deny_location"));
       return false;
     }
     if (!myPosition.longitude || !myPosition.latitude) {
-      Alert.alert(say("location_service"), say("location_services_unavailable"));
+      this.alert(say("location_service"), say("location_services_unavailable"));
       return false;
     }
     return true;
@@ -90,7 +90,7 @@ export default class App extends LocationComponent {
         state = bb.state;
     });
 
-    if (!state) return setTimeout(() => Alert.alert(say("out of bounds"), say("not_located_within_us_bounds"), [{text: say("ok")}], { cancelable: false }), 500);
+    if (!state) return this.alert(say("out of bounds"), say("not_located_within_us_bounds"));
 
     if (orgId && orgId.match(/^[0-9A-Z]*$/)) {
       // first two characters are the state code
@@ -98,7 +98,7 @@ export default class App extends LocationComponent {
 
       this.connectToServer('gotv-'+place+'.ourvoiceusa.org', orgId, inviteCode);
     } else {
-      setTimeout(() => Alert.alert('Error', say("must_enter_valid_qr_code"), [{text: say("ok")}], { cancelable: false }), 500);
+      this.alert('Error', say("must_enter_valid_qr_code"));
     }
   }
 
@@ -109,7 +109,7 @@ export default class App extends LocationComponent {
 
     let ret = await this.singHello(server, orgId, inviteCode);
 
-    if (ret.flag !== true) Alert.alert((ret.error?say("error"):say("connection_successful")), ret.msg, [{text: say("ok")}], { cancelable: false });
+    if (ret.flag !== true) this.alert((ret.error?say("error"):say("connection_successful")), ret.msg);
     if (ret.error !== true) server = null;
 
     this.setState({serverLoading: false});
@@ -366,34 +366,27 @@ export default class App extends LocationComponent {
           text: say("delete"),
           type: 'delete',
           onPress: () => {
-            Alert.alert(
+            this.alert(
               say("delete_form"),
               say("confirm_delete_form"),
-              [
-                {text: say("yes"), onPress: async () => {
+              {
+                title: say("yes"),
+                onPress: async () => {
                   try {
                     delete forms_local[i];
                     await storage.del('OV_CANVASS_PINS@'+json.id);
                     await storage.set('OV_CANVASS_FORMS', JSON.stringify(forms_local));
-                    Alert.alert(
-                      say("delete_success"),
-                      say("have_deleted_form")+': '+json.name,
-                      [{text: say("ok")}],
-                      { cancelable: false }
-                    );
+                    this.setState({confirmDialog: false})
                     this._loadForms();
                   } catch (e) {
-                    Alert.alert(
-                      say("delete_failed"),
-                      translage("error_delete_form")+': '+json.name,
-                      [{text: say("ok")}],
-                      { cancelable: false }
-                    );
                     console.warn("_loadForms 3: "+e);
                   }
-                }},
-                {text: say("no")},
-              ], { cancelable: false }
+                },
+              },
+              {
+                title: say("no"),
+                onPress: () => this.setState({confirmDialog: false}),
+              },
             );
           },
         },
@@ -665,6 +658,8 @@ export default class App extends LocationComponent {
           onCancel={() => this.setState({askOrgId: false})}
           onSubmit={text => this.setState({orgId: text, askOrgId: false}, () => this.connectToGOTV())}
         />
+
+        <HVConfirmDialog refer={this} />
 
       </View>
     );

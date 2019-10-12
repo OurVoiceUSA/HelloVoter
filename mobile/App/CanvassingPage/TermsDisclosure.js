@@ -6,10 +6,9 @@ import {
 } from 'native-base';
 import { NavigationActions } from 'react-navigation';
 import storage from 'react-native-storage-wrapper';
-import { ConfirmDialog } from 'react-native-simple-dialogs';
 
 import { say, getEpoch, openURL, STORAGE_KEY_DISCLOSURE } from '../common';
-import HVComponent from '../HVComponent';
+import HVComponent, { HVConfirmDialog } from '../HVComponent';
 
 export async function loadDisclosure(refer) {
   try {
@@ -45,7 +44,7 @@ export default class ListTab extends HVComponent {
       <Container>
         <Content padder>
           <Button block transparent onPress={() => openCanvassGuidelines()}>
-            <H3>Terms of Service</H3>
+            <H3>{say("termsofservice")}</H3>
           </Button>
 
           <Text></Text>
@@ -84,7 +83,7 @@ export default class ListTab extends HVComponent {
                 refer.setState({ showDisclosure: false});
               } catch (error) {}
             } else {
-            this.setState({tosError: true});
+              this.alert(say("termsofservice"), say("must_agree_to_tos"));
             }
           }}>
             <Text>Continue</Text>
@@ -96,14 +95,7 @@ export default class ListTab extends HVComponent {
             <Text>Exit</Text>
           </Button>
 
-          <ConfirmDialog
-            title="Terms of Service"
-            message="You must agree to the terms of service to continue."
-            visible={tosError}
-            animationType="fade"
-            onTouchOutside={() => this.setState({tosError: false})}
-            positiveButton={{title: "OK", onPress: () => this.setState({tosError: false})}}
-          />
+          <HVConfirmDialog refer={this} />
 
         </Content>
       </Container>

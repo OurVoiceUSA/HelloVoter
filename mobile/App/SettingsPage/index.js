@@ -1,14 +1,15 @@
 
-import React, { PureComponent } from 'react';
+import React from 'react';
 
 import {
-  Alert,
   View,
   Image,
   TouchableOpacity,
 } from 'react-native';
 
 import { Container, Header, Content, Footer, FooterTab, Text, Button, Spinner } from 'native-base';
+
+import HVComponent, { HVConfirmDialog } from '../HVComponent';
 
 import { StackActions, NavigationActions } from 'react-navigation';
 import RNGooglePlaces from 'react-native-google-places';
@@ -18,8 +19,8 @@ import storage from 'react-native-storage-wrapper';
 import SmLogin from '../SmLogin';
 import { google_api_key } from '../config';
 import {
-  DINFO, _getJWT, _saveJWT, _loginPing, _rmJWT, _saveUser, openURL,
-  _rmUser, _apiCall, _specificAddress, permissionNotify, permissionLocation,
+  DINFO, _getJWT, _saveJWT, _loginPing, _rmJWT, _saveUser, openURL, openGitHub,
+  _rmUser, _apiCall, _specificAddress, permissionNotify, permissionLocation, say,
 } from '../common';
 
 import {
@@ -53,7 +54,7 @@ function _partyKey(name) {
   return '';
 }
 
-export default class App extends PureComponent {
+export default class App extends HVComponent {
 
   constructor(props) {
     super(props);
@@ -162,15 +163,11 @@ export default class App extends PureComponent {
     this.setState({havePermNotification: access});
   }
 
-  sessionExpired() {
-    Alert.alert('Logged Out', 'Your login session has expired. Please login again to update your profile.', [{text: 'OK'}], { cancelable: false });
-  }
-
-  openGitHub = (repo) => openURL('https://github.com/OurVoiceUSA/'+(repo?repo:''));
-
   render() {
-    const { user, havePermLocation, havePermNotification, SmLoginScreen,
-            surveyComplete, surveyPartial, party, myPosition, appVersion } = this.state;
+    const {
+      user, havePermLocation, havePermNotification, SmLoginScreen,
+      surveyComplete, surveyPartial, party, myPosition, appVersion,
+    } = this.state;
 
     // wait for user object to become available
     if (!user) return (
@@ -259,22 +256,25 @@ export default class App extends PureComponent {
             RNGooglePlaces.openAutocompleteModal()
             .then((place) => {
               if (!_specificAddress(place.address)) {
-                setTimeout(() => {
-                  Alert.alert(
-                    'Ambiguous Address',
-                    'Unfortunately we can\'t guarantee accurate district results without a whole address.',
-                    [
-                      {text: 'Continue Anyway', onPress: () => {
-                        this.setState({
-                          profileUpdate: true,
-                          myPositionOld: myPosition,
-                          myPosition: place,
-                        });
-                      }},
-                      {text: 'Cancel'}
-                    ], { cancelable: false }
-                  );
-                }, 500);
+                this.alert(
+                  say("ambiguous_address"),
+                  say("no_guarantee_district"),
+                  {
+                    title: say("continue_anyway"),
+                    onPress: () => {
+                      this.setState({
+                        profileUpdate: true,
+                        myPositionOld: myPosition,
+                        myPosition: place,
+                        confirmDialog: false,
+                      });
+                    },
+                  },
+                  {
+                    title: say("cancel"),
+                    onPress: () => this.setState({confirmDialog: false}),
+                  }
+                );
               } else {
                 this.setState({
                   profileUpdate: true,
@@ -326,8 +326,7 @@ export default class App extends PureComponent {
             <Icon name="check-circle" size={30} color="green" />
           </View>
           ||
-          <TouchableOpacity style={{flexDirection: 'row', alignItems: 'center', marginRight: 20}}
-              onPress={() => {Alert.alert('Location Permissions', 'Enable location permissions for this app in your device ettings.', [{text: 'OK'}], { cancelable: false })}}>
+          <TouchableOpacity style={{flexDirection: 'row', alignItems: 'center', marginRight: 20}}>
             <Text style={{marginRight: 7, fontWeight: 'bold'}}>Off</Text>
             <Icon name="times-circle" size={30} color="red" />
           </TouchableOpacity>
@@ -350,8 +349,7 @@ export default class App extends PureComponent {
             <Icon name="check-circle" size={30} color="green" />
           </View>
           ||
-          <TouchableOpacity style={{flexDirection: 'row', alignItems: 'center', marginRight: 20}}
-              onPress={() => {Alert.alert('Push Notifications', 'Enable push notifications for this app in your device settings.', [{text: 'OK'}], { cancelable: false })}}>
+          <TouchableOpacity style={{flexDirection: 'row', alignItems: 'center', marginRight: 20}}>
             <Text style={{marginRight: 7, fontWeight: 'bold'}}>Off</Text>
             <Icon name="times-circle" size={30} color="red" />
           </TouchableOpacity>
@@ -375,7 +373,7 @@ export default class App extends PureComponent {
           </View>
           <View style={{flexDirection: 'row', alignItems: 'center', marginRight: 20}}>
             <Text style={{marginRight: 7, fontWeight: 'bold'}}>{appVersion}</Text>
-            <Icon name="github" size={30} onPress={() => {this.openGitHub('HelloVoter')}} />
+            <Icon name="github" size={30} onPress={() => openGitHub('HelloVoter')} />
           </View>
         </View>
 
@@ -401,16 +399,21 @@ export default class App extends PureComponent {
         <View style={{flex: 1, alignItems: 'center'}}>
           <View style={{margin: 20, marginTop: 0}}>
             <Button block danger onPress={() => {
-                Alert.alert(
-                  (user.lastsmlogin ? 'Log Out' : 'Clear Data'),
-                  (user.lastsmlogin ? 'Are you sure you wish to log out?' : 'Are you sure you wish to clear your profile data? This action cannot be undone.'),
-                  [
-                    {text: 'Yes', onPress: () => {this._logout()}},
-                    {text: 'No'}
-                  ], { cancelable: false });
+              this.alert(
+                say((user.lastsmlogin?"logout":"cleardata")),
+                say((user.lastsmlogin?"sure_you_wish_logout":"sure_you_clear_data")),
+                {
+                  title: say("yes"),
+                  onPress: () => this._logout(),
+                },
+                {
+                  title: say("cancel"),
+                  onPress: () => this.setState({confirmDialog: false}),
+                }
+              );
             }}>
               <Icon style={{width: 20}} name="sign-out" size={22} color="black" />
-              <Text>{(user.lastsmlogin ? 'Log Out' : 'Clear Data')}</Text>
+              <Text>{say((user.lastsmlogin?"logout":"cleardata"))}</Text>
             </Button>
 
             <Text></Text>
@@ -435,6 +438,8 @@ export default class App extends PureComponent {
         </Dialog>
 
       </Content>
+
+      <HVConfirmDialog refer={this} />
 
       <Footer>
         <FooterTab>

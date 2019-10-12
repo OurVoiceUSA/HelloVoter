@@ -9,10 +9,11 @@ import {
 
 import { Card, CardItem, Content, Text, Body, Button, Spinner } from 'native-base';
 import LocationComponent from '../LocationComponent';
+import { HVConfirmDialog } from '../HVComponent';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 import RNGooglePlaces from 'react-native-google-places';
-import { ConfirmDialog, Dialog } from 'react-native-simple-dialogs';
+import { Dialog } from 'react-native-simple-dialogs';
 import DisplayRep from './DisplayRep';
 import PolProfile from './PolProfile';
 import { wsbase } from '../config'
@@ -190,8 +191,7 @@ export default class App extends LocationComponent {
 
   render() {
     const {
-      user, loading, apiData, myPosition, modalIsOpen, confirmDialog, confirmDialogTitle,
-      confirmDialogMessage, confirmDialogPositiveButton, confirmDialogNegativeButton,
+      user, loading, apiData, myPosition, modalIsOpen,
       polProfile, polProfileOffice, polProfileInfo,
     } = this.state;
 
@@ -370,14 +370,7 @@ export default class App extends LocationComponent {
           <PolProfile office={polProfileOffice} profile={polProfileInfo} />
         </Dialog>
 
-        <ConfirmDialog
-          title={confirmDialogTitle}
-          message={confirmDialogMessage}
-          visible={confirmDialog}
-          onTouchOutside={() => this.setState({confirmDialog: false})}
-          positiveButton={confirmDialogPositiveButton}
-          negativeButton={confirmDialogNegativeButton}
-        />
+        <HVConfirmDialog refer={this} />
 
       </Content>
     );

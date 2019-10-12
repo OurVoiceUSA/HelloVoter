@@ -1,17 +1,18 @@
-import React, { PureComponent } from 'react';
+import React from 'react';
 import {
-  Alert,
+  BackHandler,
   TouchableWithoutFeedback,
   Keyboard,
   View,
 } from 'react-native';
 
 import { Container, Header, Content, Footer, FooterTab, Text, Button } from 'native-base';
+
+import HVComponent, { HVConfirmDialog } from '../HVComponent';
+
+import { say, getEpoch, getPropFromArrObj } from '../common';
+
 import Icon from 'react-native-vector-icons/FontAwesome';
-
-import { getEpoch, getPropFromArrObj } from '../common';
-
-import {BackHandler} from 'react-native';
 import storage from 'react-native-storage-wrapper';
 import t from 'tcomb-form-native';
 import sha1 from 'sha1';
@@ -21,7 +22,7 @@ var Form = t.form.Form;
 var CanvassForm = t.struct({});
 var options = {};
 
-export default class App extends PureComponent {
+export default class App extends HVComponent {
   constructor(props) {
     super(props);
 
@@ -61,14 +62,20 @@ export default class App extends PureComponent {
     this.goBack = this.props.navigation.goBack;
     this.props.navigation.goBack = () => {
       if (this.edits) {
-        Alert.alert(
-          'Unsaved Form',
-          'You have unsaved edits. Do you want to save your changes?',
-          [
-            {text: 'Discard Changes', onPress: () => { this.goBack();
-            }},
-            {text: 'Keep Editing'},
-          ], { cancelable: false }
+        this.alert(
+          say("unsaved_form"),
+          say("you_have_unsaved_edits"),
+          {
+            title: say("keep_editing"),
+            onPress: () => this.setState({confirmDialog: false}),
+          },
+          {
+            title: say("discard_changes"),
+            onPress: () => {
+              this.setState({confirmDialog: false});
+              this.goBack();
+            },
+          }
         );
       } else {
         this.goBack();
@@ -85,7 +92,8 @@ export default class App extends PureComponent {
     BackHandler.removeEventListener('hardwareBackPress', this.props.navigation.goBack);
   }
 
-  onChange(value) {
+  onChange(values) {
+    this.setState({values});
     this.edits = true;
   }
 
@@ -201,6 +209,9 @@ export default class App extends PureComponent {
             />
           </TouchableWithoutFeedback>
         </Content>
+
+        <HVConfirmDialog refer={this} />
+
         <Footer>
           <FooterTab>
             <Button onPress={() => this.props.navigation.goBack()}>
