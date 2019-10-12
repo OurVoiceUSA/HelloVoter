@@ -9,7 +9,7 @@ import {
 import { Container, Header, Content, Footer, FooterTab, Text, Button } from 'native-base';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-import { getEpoch, getPropFromArrObj } from '../../common';
+import { getEpoch, getPropFromArrObj } from '../common';
 
 import {BackHandler} from 'react-native';
 import storage from 'react-native-storage-wrapper';

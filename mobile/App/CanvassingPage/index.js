@@ -23,9 +23,9 @@ import NetInfo from '@react-native-community/netinfo';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps'
 import RNGooglePlaces from 'react-native-google-places';
-import { Divider, DINFO, api_base_uri, _doGeocode, _getApiToken, getEpoch, PersonAttr } from '../../common';
-import KnockPage from '../KnockPage';
-import CanvassingSettingsPage from '../CanvassingSettingsPage';
+import { Divider, DINFO, api_base_uri, _doGeocode, _getApiToken, getEpoch, PersonAttr } from '../common';
+import KnockPage from './KnockPage';
+import CanvassingSettingsPage from './CanvassingSettingsPage';
 import { ConfirmDialog, Dialog } from 'react-native-simple-dialogs';
 import md5 from 'md5';
 import { debounce } from 'throttle-debounce';

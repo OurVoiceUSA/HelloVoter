@@ -13,8 +13,8 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome';
 import SafariView from 'react-native-safari-view';
 import jwt_decode from 'jwt-decode';
-import { wsbase } from '../../config';
-import { _loginPing, _saveJWT } from '../../common';
+import { wsbase } from '../config';
+import { _loginPing, _saveJWT } from '../common';
 
 export default class App extends PureComponent {
 

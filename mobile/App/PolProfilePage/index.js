@@ -11,7 +11,7 @@ import {
 import { Container, Header, Content, Footer, FooterTab, Text, Button, Spinner } from 'native-base';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { _partyNameFromKey } from '../../common';
+import { _partyNameFromKey } from '../common';
 
 export default class App extends PureComponent {
 
@@ -57,13 +57,13 @@ export default class App extends PureComponent {
     } else {
       switch (profile.gender) {
       case 'F':
-        polPic = require('../../../img/nopic_female.png');
+        polPic = require('../../img/nopic_female.png');
         break;
       case 'M':
-        polPic = require('../../../img/nopic_male.png');
+        polPic = require('../../img/nopic_male.png');
         break;
       default:
-        polPic = require('../../../img/nopic.png');
+        polPic = require('../../img/nopic.png');
       }
     }
 

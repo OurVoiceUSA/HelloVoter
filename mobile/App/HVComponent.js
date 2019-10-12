@@ -7,12 +7,12 @@ import {
   I18nManager,
 } from 'react-native';
 
-import { say } from '../common';
+import { say } from './common';
 
 const translationGetters = {
   // lazy requires (metro bundler does not support symlinks)
-  en: () => require("../translations/en.json"),
-  es: () => require("../translations/es.json")
+  en: () => require("./translations/en.json"),
+  es: () => require("./translations/es.json")
 };
 
 const setI18nConfig = () => {

@@ -27,12 +27,12 @@ YellowBox.ignoreWarnings([
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-import HomeScreenPage from '../components/HomeScreenPage';
-import InvitePage from '../components/InvitePage';
-import PolProfilePage from '../components/PolProfilePage';
-import SettingsPage from '../components/SettingsPage';
-import CanvassingPage from '../components/CanvassingPage';
-import SurveyPage from '../components/SurveyPage';
+import HomeScreenPage from './HomeScreenPage';
+import InvitePage from './InvitePage';
+import PolProfilePage from './PolProfilePage';
+import SettingsPage from './SettingsPage';
+import CanvassingPage from './CanvassingPage';
+import SurveyPage from './SurveyPage';
 
 import { createAppContainer } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
@@ -47,7 +47,7 @@ const AppNavigator = createStackNavigator({
         <View style={{flex:1, flexDirection:'row', justifyContent:'center'}}>
           <Text style={{fontSize:20}}>HelloVoter</Text>
           <Image
-            source={require("../../img/HVlogo.png")}
+            source={require("../img/HVlogo.png")}
             style={{width:25, height:25, marginLeft: 15}}
           />
         </View>

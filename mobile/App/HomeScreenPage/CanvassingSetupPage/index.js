@@ -21,7 +21,7 @@ import Prompt from 'react-native-input-prompt';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import SafariView from 'react-native-safari-view';
 import jwt_decode from 'jwt-decode';
-import SmLoginPage from '../SmLoginPage';
+import SmLoginPage from '../../SmLoginPage';
 import { deepCopy, ingeojson } from 'ourvoiceusa-sdk-js';
 import { Divider, say, api_base_uri, DINFO, _loginPing, _saveUser, _fileReaderAsync } from '../../common';
 import { RNCamera } from 'react-native-camera';
@@ -31,7 +31,7 @@ import RBush from 'rbush';
 import rtree from '../../../rtree.json';
 import { geographies } from '../../geographies';
 
-import LocationComponent from '../LocationComponent';
+import LocationComponent from '../../LocationComponent';
 
 var Form = t.form.Form;
 

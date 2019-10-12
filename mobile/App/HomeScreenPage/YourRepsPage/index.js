@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 
 import { Card, CardItem, Content, Text, Body, Button, Spinner } from 'native-base';
-import LocationComponent from '../LocationComponent';
+import LocationComponent from '../../LocationComponent';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 import RNGooglePlaces from 'react-native-google-places';

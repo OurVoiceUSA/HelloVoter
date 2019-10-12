@@ -17,11 +17,11 @@ import { Dialog } from 'react-native-simple-dialogs';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import storage from 'react-native-storage-wrapper';
 import SmLoginPage from '../SmLoginPage';
-import { google_api_key } from '../../config';
+import { google_api_key } from '../config';
 import {
   _getJWT, _loginPing, _rmJWT, _saveUser, DINFO,
   _rmUser, _apiCall, _specificAddress, permissionNotify, permissionLocation,
-} from '../../common';
+} from '../common';
 
 import {
   SettingsDividerShort,

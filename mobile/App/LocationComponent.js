@@ -9,7 +9,7 @@ import {
 
 import RNGLocation from 'react-native-google-location';
 import RNGooglePlaces from 'react-native-google-places';
-import { permissionLocation } from '../common';
+import { permissionLocation } from './common';
 
 if (Platform.OS === 'ios') {
   navigator.geolocation = require('@react-native-community/geolocation');
