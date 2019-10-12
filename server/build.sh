@@ -12,6 +12,8 @@ npm install
 rm -f package-lock.json
 npm install
 
+CI=true npm test
+
 # build client & server via docker
 docker build --pull -t ourvoiceusa/hellovoterapi .
 
