@@ -604,6 +604,9 @@ export default class App extends LocationComponent {
           });
         }
 
+        // stop at 10 streets for performance reasons; lots of Accordion is slow
+        if (listview_order.length >= 10) return;
+
         let street = marker.address.street.replace(/\d+ /, '');
 
         if (!listview[street]) {
