@@ -14,7 +14,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import SafariView from 'react-native-safari-view';
 import jwt_decode from 'jwt-decode';
 import { wsbase } from '../config';
-import { _loginPing, _saveJWT } from '../common';
+import { _loginPing, _saveJWT, openURL } from '../common';
 
 export default class App extends PureComponent {
 
@@ -25,7 +25,7 @@ export default class App extends PureComponent {
 
   _policyUrlHandler() {
     const url = "https://ourvoiceusa.org/wp-content/uploads/2018/10/Privacy-Policy1.pdf";
-    return Linking.openURL(url).catch(() => null);
+    return openURL(url);
   }
 
   _doCheck = async () => {
@@ -74,25 +74,10 @@ export default class App extends PureComponent {
   };
 
   // Handle Login with Facebook button tap
-  loginWithFacebook = () => this.openURL(wsbase+'/auth/fm');
+  loginWithFacebook = () => openURL(wsbase+'/auth/fm');
 
   // Handle Login with Google button tap
-  loginWithGoogle = (hint) => this.openURL(wsbase+'/auth/gm'+(hint?'?loginHint='+hint:''));
-
-  // Open URL in a browser
-  openURL = (url) => {
-    // Use SafariView on iOS
-    if (Platform.OS === 'ios') {
-      SafariView.show({
-        url: url,
-        fromBottom: true,
-      });
-    }
-    // Or Linking.openURL on Android
-    else {
-      Linking.openURL(url);
-    }
-  };
+  loginWithGoogle = (hint) => openURL(wsbase+'/auth/gm'+(hint?'?loginHint='+hint:''));
 
   render() {
     const { user } = this.state;

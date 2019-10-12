@@ -1,13 +1,12 @@
 import React from 'react';
 
 import {
-  Linking,
   View,
   TouchableOpacity,
 } from 'react-native';
 
 import { Text } from 'native-base';
-import { _partyNameFromKey, say } from '../common';
+import { _partyNameFromKey, say, openURL } from '../common';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 export default DisplayRep = (props) => {
@@ -26,9 +25,8 @@ export default DisplayRep = (props) => {
   }
 
   const initiateLink = async (url) => {
-    return Linking.openURL('asdf'+url).catch(() => {
-      refer.alert(say("app_error"), say("unable_to_launch_external"));
-    });
+    let opened = await openURL(url);
+    if (!opened) refer.alert(say("app_error"), say("unable_to_launch_external"));
   }
 
   var items = [];

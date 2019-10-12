@@ -3,6 +3,7 @@ import React, { PureComponent } from 'react';
 
 import {
   Dimensions,
+  Linking,
   Platform,
   View,
 } from 'react-native';
@@ -12,6 +13,7 @@ import { Text } from 'native-base';
 import storage from 'react-native-storage-wrapper';
 import { getLocales, getTimeZone } from 'react-native-localize';
 import jwt_decode from 'jwt-decode';
+import SafariView from 'react-native-safari-view';
 import DeviceInfo from 'react-native-device-info';
 import Permissions from 'react-native-permissions';
 import RNGooglePlaces from 'react-native-google-places';
@@ -34,6 +36,26 @@ export function getEpoch() {
 
 export function api_base_uri(orgId) {
   return '/HelloVoterHQ/'+(orgId?orgId+'/':'')+'api/v1';
+}
+
+export async function openURL(url) {
+  try {
+    // Use SafariView in-line to the app on iOS if it's an http URL
+    if (url.match(/^http/) && Platform.OS === 'ios') {
+      SafariView.show({
+        url: url,
+        fromBottom: true,
+      });
+    } else {
+      await Linking.openURL(url);
+    }
+    return true;
+  } catch (e) {
+    console.warn(e);
+    // TODO
+    // refer.alert(say("app_error"), say("unable_to_launch_external"));
+  }
+  return false;
 }
 
 export function getPropFromArrObj(arr, id, prop) {
@@ -433,4 +455,3 @@ export const PersonAttr = props => {
   }
   return null;
 };
-

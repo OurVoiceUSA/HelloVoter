@@ -4,7 +4,6 @@ import {
   Image,
   View,
   FlatList,
-  Linking,
   TouchableWithoutFeedback,
 } from 'react-native';
 
@@ -185,13 +184,6 @@ export default class App extends LocationComponent {
 
     this.setState({loading: false, myPosition: {icon: 'map-marker', address: say("location_access_denied"), error: true}, apiData: null});
     this.alert(say("current_location"), say("howto_use_current_location"));
-  }
-
-  email = async (email) => {
-    const url = 'mailto:' + email;
-    return Linking.openURL(url).catch(() => {
-      this.alert(say("app_error"), say("unable_to_launch_external"));
-    });
   }
 
   render() {

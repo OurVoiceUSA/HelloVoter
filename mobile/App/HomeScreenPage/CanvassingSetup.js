@@ -3,7 +3,6 @@ import React, { PureComponent } from 'react';
 
 import {
   Alert,
-  Linking,
   View,
   Platform,
   TouchableOpacity,
@@ -20,7 +19,7 @@ import SafariView from 'react-native-safari-view';
 import jwt_decode from 'jwt-decode';
 import SmLoginPage from '../SmLoginPage';
 import { ingeojson } from 'ourvoiceusa-sdk-js';
-import { Divider, say, api_base_uri, DINFO, _loginPing } from '../common';
+import { Divider, say, api_base_uri, DINFO, _loginPing, openURL } from '../common';
 import { RNCamera } from 'react-native-camera';
 import { wsbase } from '../config';
 
@@ -258,12 +257,6 @@ export default class App extends LocationComponent {
   }
 
   componentDidMount() {
-    // Add event listener to handle OAuthLogin:// URLs
-    Linking.addEventListener('url', this.handleOpenURL);
-    // Launched from an external URL
-    Linking.getInitialURL().then((url) => {
-      if (url) this.handleOpenURL({ url });
-    });
     this._doSetup();
     this._loadForms();
   }
@@ -282,11 +275,6 @@ export default class App extends LocationComponent {
     }
   }
 
-  componentWillUnmount() {
-    // Remove event listener
-    Linking.removeEventListener('url', this.handleOpenURL);
-  };
-
   componentDidUpdate(prevProps, prevState) {
     const { SmLoginScreen, server, user, orgId, inviteCode, signupReturn } = this.state;
     if (prevState.SmLoginScreen && !SmLoginScreen && user.loggedin) {
@@ -294,21 +282,6 @@ export default class App extends LocationComponent {
       if (signupReturn) this._signupUrlHandler();
     }
   }
-
-  // Open URL in a browser
-  openURL = (url) => {
-    // Use SafariView on iOS
-    if (Platform.OS === 'ios') {
-      SafariView.show({
-        url: url,
-        fromBottom: true,
-      });
-    }
-    // Or Linking.openURL on Android
-    else {
-      Linking.openURL(url);
-    }
-  };
 
   _loadForms = async () => {
     const { navigate } = this.props.navigation;
@@ -482,17 +455,17 @@ export default class App extends LocationComponent {
 
   _tosUrlHandler() {
     const url = "https://github.com/OurVoiceUSA/HelloVoter/blob/master/docs/Canvassing-Guidelines.md";
-    return Linking.openURL(url).catch(() => null);
+    return openURL(url);
   }
 
   _signupUrlHandler() {
     const url = "https://docs.google.com/forms/d/1YF90nYiem5FeBflrkPTQSdjFEOAm55SVkSf7QtB-nBw/viewform";
-    return Linking.openURL(url).catch(() => null);
+    return openURL(url);
   }
 
   _canvassUrlHandler() {
     const url = "https://github.com/OurVoiceUSA/HelloVoter/blob/master/docs/Canvassing.md";
-    return Linking.openURL(url).catch(() => null);
+    return openURL(url);
   }
 
   parseInvite(url) {

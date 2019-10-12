@@ -2,7 +2,6 @@ import React, { PureComponent } from 'react';
 
 import {
   Dimensions,
-  Linking,
   TouchableOpacity,
   View,
   Image,
@@ -11,7 +10,7 @@ import {
 import { Container, Header, Content, Footer, FooterTab, Text, Button, Spinner } from 'native-base';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { _partyNameFromKey } from '../common';
+import { _partyNameFromKey, openURL } from '../common';
 
 export default class App extends PureComponent {
 
@@ -26,19 +25,15 @@ export default class App extends PureComponent {
     };
   }
 
-  openFacebook = (id) => this.openURL('https://m.facebook.com/'+id);
-  openTwitter = (id) => this.openURL('https://twitter.com/'+id);
-  openWikipedia = (id) => this.openURL('https://wikipedia.org/wiki/'+id);
-  openWebsite = (id) => this.openURL(id);
+  openFacebook = (id) => openURL('https://m.facebook.com/'+id);
+  openTwitter = (id) => openURL('https://twitter.com/'+id);
+  openWikipedia = (id) => openURL('https://wikipedia.org/wiki/'+id);
+  openWebsite = (id) => openURL(id);
   openYoutube = (profile) => {
     if (profile.youtube_id)
-      return this.openURL('https://youtube.com/channel/'+profile.youtube_id);
+      return openURL('https://youtube.com/channel/'+profile.youtube_id);
     if (profile.youtube)
-      return this.openURL('https://youtube.com/user/'+profile.youtube);
-  }
-
-  openURL = (url) => {
-    return Linking.openURL(url).catch(() => null);
+      return openURL('https://youtube.com/user/'+profile.youtube);
   }
 
   render() {

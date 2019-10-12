@@ -3,7 +3,6 @@ import React, { PureComponent } from 'react';
 
 import {
   Alert,
-  Linking,
   View,
   Image,
   TouchableOpacity,
@@ -163,11 +162,7 @@ export default class App extends PureComponent {
     Alert.alert('Logged Out', 'Your login session has expired. Please login again to update your profile.', [{text: 'OK'}], { cancelable: false });
   }
 
-  openGitHub = (repo) => this.openURL('https://github.com/OurVoiceUSA/'+(repo?repo:''));
-
-  openURL = (url) => {
-    return Linking.openURL(url).catch(() => null);
-  }
+  openGitHub = (repo) => openURL('https://github.com/OurVoiceUSA/'+(repo?repo:''));
 
   render() {
     const { user, havePermLocation, havePermNotification, SmLoginScreen,

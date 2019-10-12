@@ -5,7 +5,6 @@ import {
   FlatList,
   Image,
   View,
-  Linking,
   TouchableOpacity,
 } from 'react-native';
 
@@ -15,6 +14,10 @@ import {
   H3,
 } from 'native-base';
 
+import {
+  Divider, DINFO, api_base_uri, _doGeocode, _getApiToken, getEpoch, PersonAttr, openURL
+} from '../common';
+
 import LocationComponent from '../LocationComponent';
 
 import { NavigationActions } from 'react-navigation';
@@ -23,7 +26,6 @@ import NetInfo from '@react-native-community/netinfo';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps'
 import RNGooglePlaces from 'react-native-google-places';
-import { Divider, DINFO, api_base_uri, _doGeocode, _getApiToken, getEpoch, PersonAttr } from '../common';
 import KnockPage from './KnockPage';
 import CanvassingSettingsPage from './CanvassingSettingsPage';
 import { ConfirmDialog, Dialog } from 'react-native-simple-dialogs';
@@ -815,7 +817,7 @@ export default class App extends LocationComponent {
 
   _canvassGuidelinesUrlHandler() {
     const url = "https://github.com/OurVoiceUSA/HelloVoter/blob/master/docs/Canvassing-Guidelines.md";
-    return Linking.openURL(url).catch(() => null);
+    return openURL(url);
   }
 
   updateTurfInfo(pos) {

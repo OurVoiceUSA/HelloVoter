@@ -10,7 +10,6 @@ import { carouselItems } from './CarouselItems';
 
 import {
   View,
-  Linking,
   Platform,
 } from 'react-native';
 
@@ -23,7 +22,7 @@ import storage from 'react-native-storage-wrapper';
 import { sliderWidth, itemWidth } from '../styles/SliderEntry.style';
 import styles, { colors } from '../styles/index.style';
 import SliderEntry from '../SliderEntry';
-import { say, DINFO, permissionNotify } from '../common';
+import { say, DINFO, permissionNotify, openURL } from '../common';
 
 export default class App extends HVComponent {
 
@@ -39,16 +38,12 @@ export default class App extends HVComponent {
     };
   }
 
-  openFacebook = () => this.openURL('https://m.facebook.com/OurVoiceUsa');
-  openTwitter = () => this.openURL('https://twitter.com/OurVoiceUsa');
-  openYouTube = () => this.openURL('https://www.youtube.com/channel/UCw5fpnK-IZVQ4IkYuapIbiw');
-  openWebsite = () => this.openURL('https://ourvoiceusa.org/');
-  openGitHub = (repo) => this.openURL('https://github.com/OurVoiceUSA/'+(repo?repo:''));
-  openDonate = () => this.openURL('https://www.patreon.com/join/hellovoter');
-
-  openURL = (url) => {
-    return Linking.openURL(url).catch(() => null);
-  }
+  openFacebook = () => openURL('https://m.facebook.com/OurVoiceUsa');
+  openTwitter = () => openURL('https://twitter.com/OurVoiceUsa');
+  openYouTube = () => openURL('https://www.youtube.com/channel/UCw5fpnK-IZVQ4IkYuapIbiw');
+  openWebsite = () => openURL('https://ourvoiceusa.org/');
+  openGitHub = (repo) => openURL('https://github.com/OurVoiceUSA/'+(repo?repo:''));
+  openDonate = () => openURL('https://www.patreon.com/join/hellovoter');
 
   componentDidMount() {
     this.loadPatreonNames();
