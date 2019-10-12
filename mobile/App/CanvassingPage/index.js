@@ -969,7 +969,7 @@ export default class App extends LocationComponent {
                 name="refresh"
                 size={50}
                 color={(fetching?"#d3d3d3":"#00a86b")}
-                {...iconStyles} />
+                {...styles.icon} />
             </TouchableOpacity>
             }
 
@@ -982,7 +982,7 @@ export default class App extends LocationComponent {
                 name="location-arrow"
                 size={50}
                 color="#0084b4"
-                {...iconStyles} />
+                {...styles.icon} />
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.iconContainer}
@@ -1007,7 +1007,7 @@ export default class App extends LocationComponent {
                 name="search"
                 size={40}
                 color="#000000"
-                {...iconStyles} />
+                {...styles.icon} />
             </TouchableOpacity>
 
           </View>
@@ -1112,17 +1112,16 @@ export default class App extends LocationComponent {
   }
 }
 
-const iconStyles = {
-  justifyContent: 'center',
-  borderRadius: 10,
-  padding: 10,
-};
-
 const styles = StyleSheet.create({
   content: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  icon: {
+    justifyContent: 'center',
+    borderRadius: 10,
+    padding: 10,
   },
   iconContainer: {
     backgroundColor: '#ffffff', width: 65, height: 65, borderRadius: 65,
