@@ -69,7 +69,7 @@ export default DisplayRep = (props) => {
       <TouchableOpacity
         style={{backgroundColor: '#ffffff', flex: 1, flexDirection: 'row', padding: 0}}
         disabled={!incumbent.name}
-        onPress={() => {navigate('PolProfile', {location: location, office: office, profile: incumbent})}}>
+        onPress={() => refer.setState({polProfile: true, polProfileOffice: office, polProfileInfo: incumbent})}>
         <View style={{flex: 1}}>
           <Text style={{marginLeft: 10, fontSize: 22}}>
             {incumbent.name}

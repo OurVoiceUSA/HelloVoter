@@ -29,7 +29,6 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 
 import HomeScreenPage from './HomeScreenPage';
 import InvitePage from './InvitePage';
-import PolProfilePage from './PolProfilePage';
 import SettingsPage from './SettingsPage';
 import CanvassingPage from './CanvassingPage';
 import SurveyPage from './SurveyPage';
@@ -81,14 +80,6 @@ const AppNavigator = createStackNavigator({
     screen: SurveyPage,
     navigationOptions: ({navigation}) => ({
       title: 'Canvassing Form',
-      headerLeft: null,
-    }),
-  },
-  PolProfile: {
-    screen: PolProfilePage,
-    navigationOptions: ({navigation}) => ({
-      title: 'Politician Profile',
-      headerRight: (<SettingsButton nav={navigation} />),
       headerLeft: null,
     }),
   },

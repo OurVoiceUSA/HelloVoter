@@ -14,6 +14,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import RNGooglePlaces from 'react-native-google-places';
 import { ConfirmDialog, Dialog } from 'react-native-simple-dialogs';
 import DisplayRep from './DisplayRep';
+import PolProfile from './PolProfile';
 import { wsbase } from '../config'
 import { Divider, say, _apiCall, _loginPing, _doGeocode, _saveUser, _specificAddress } from '../common';
 
@@ -36,6 +37,7 @@ export default class App extends LocationComponent {
         error: false,
       },
       modalIsOpen: false,
+      polProfile: false,
     };
   }
 
@@ -190,6 +192,7 @@ export default class App extends LocationComponent {
     const {
       user, loading, apiData, myPosition, modalIsOpen, confirmDialog, confirmDialogTitle,
       confirmDialogMessage, confirmDialogPositiveButton, confirmDialogNegativeButton,
+      polProfile, polProfileOffice, polProfileInfo,
     } = this.state;
 
     if (apiData && !apiData.msg) {
@@ -363,6 +366,13 @@ export default class App extends LocationComponent {
             <Icon name="map-signs" size={20} color="black" />
             <Text>{say("searched_address_cap")}</Text>
           </Button>
+        </Dialog>
+
+        <Dialog
+          visible={polProfile}
+          animationType="fade"
+          onTouchOutside={() => this.setState({polProfile: false})}>
+          <PolProfile office={polProfileOffice} profile={polProfileInfo} />
         </Dialog>
 
         <ConfirmDialog
