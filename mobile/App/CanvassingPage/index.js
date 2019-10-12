@@ -8,9 +8,8 @@ import {
 } from 'react-native';
 
 import {
-  Container, Content, Header, Footer, FooterTab, Tab, Tabs, Text,
-  Button, Segment, Spinner, ListItem, Body, CheckBox, Item, Input, CardItem,
-  H3,
+  Container, Content, Header, Footer, FooterTab, Tab, Tabs, Text, H3,
+  Button, Spinner, ListItem, Body, CheckBox, Item, Input, CardItem,
 } from 'native-base';
 
 import {
@@ -18,10 +17,10 @@ import {
 } from '../common';
 
 import LocationComponent from '../LocationComponent';
+import TermsDisclosure, { loadDisclosure } from './TermsDisclosure';
 import ListTab from './ListTab';
 import TurfTab from './TurfTab';
 
-import { NavigationActions } from 'react-navigation';
 import storage from 'react-native-storage-wrapper';
 import NetInfo from '@react-native-community/netinfo';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -38,6 +37,8 @@ import t from 'tcomb-form-native';
 import _ from 'lodash';
 
 import {deepCopy, geojson2polygons, ingeojson} from 'ourvoiceusa-sdk-js';
+
+const STORAGE_KEY_SETTINGS = 'OV_CANVASS_SETTINGS';
 
 TimeAgo.addLocale(en);
 
@@ -117,13 +118,10 @@ export default class App extends LocationComponent {
       fAddress: {},
       pAddress: {},
       fUnit: {},
-      DisclosureKey : 'OV_DISCLOUSER',
-      settingsStorageKey: 'OV_CANVASS_SETTINGS',
       canvassSettings: {},
       newAddressDialog: false,
       newUnitDialog: false,
-      tosError: false,
-      showDisclosure: "true",
+      showDisclosure: true,
       form: props.navigation.state.params.form,
       orgId: props.navigation.state.params.orgId,
       user: props.navigation.state.params.user,
@@ -166,10 +164,10 @@ export default class App extends LocationComponent {
 
   componentDidMount() {
     DINFO().then(i => this.setState({UniqueID: i.UniqueID})).catch(() => this.setState({deviceError: true}));
+    loadDisclosure(this);
     this._getCanvassSettings();
     this.requestLocationPermission();
     this.setupConnectionListener();
-    this.LoadDisclosure(); //Updates showDisclosure state if the user previously accepted
     this.loadRetryQueue();
   }
 
@@ -215,7 +213,7 @@ export default class App extends LocationComponent {
 
     let canvassSettings = {};
     try {
-      const value = await storage.get(this.state.settingsStorageKey);
+      const value = await storage.get(STORAGE_KEY_SETTINGS);
       if (value !== null) {
         canvassSettings = JSON.parse(value);
       }
@@ -240,7 +238,7 @@ export default class App extends LocationComponent {
     try {
       if (!canvassSettings.limit) canvassSettings.limit = '100';
       let str = JSON.stringify(canvassSettings);
-      await storage.set(this.state.settingsStorageKey, str);
+      await storage.set(STORAGE_KEY_SETTINGS, str);
       this.setState({canvassSettings}, () => this._dataGet(lastFetchPosition, true));
     } catch (e) {}
 
@@ -377,10 +375,6 @@ export default class App extends LocationComponent {
     this.setState({fUnit});
   }
 
-  getEpoch() {
-    return Math.floor(new Date().getTime())
-  }
-
   doConfirmAddress = async () => {
     const { myPosition, form, markers, UniqueID } = this.state;
     let { fAddress } = this.state;
@@ -395,7 +389,7 @@ export default class App extends LocationComponent {
       await this.map.animateToCoordinate({longitude: fAddress.longitude, latitude: fAddress.latitude}, 500)
     } catch (error) {}
 
-    let epoch = this.getEpoch();
+    let epoch = getEpoch();
 
     fAddress.street = jsonStreet.street.trim();
     fAddress.city = jsonCity.city.trim();
@@ -484,22 +478,6 @@ export default class App extends LocationComponent {
     }
 
     return str+(v.end?" "+new TimeAgo('en-US').format(v.end):'');
-  }
-
-  LoadDisclosure = async () => {
-    try {
-      const value = await storage.get(this.state.DisclosureKey);
-      if (value !== null) {
-        this.setState({showDisclosure : value});
-      }
-    } catch (error) {}
-  }
-
-  SaveDisclosure = async () => {
-    this.setState({ showDisclosure: "false"});
-    try {
-      await storage.set(this.state.DisclosureKey, "false");
-    } catch (error) {}
   }
 
   updateLocalMarker(place, input) {
@@ -774,7 +752,7 @@ export default class App extends LocationComponent {
       let input = {
         deviceId: UniqueID,
         formId: form.id,
-        timestamp: this.getEpoch(),
+        timestamp: getEpoch(),
         longitude: myPosition.longitude,
         latitude: myPosition.latitude,
         unit: json.unit,
@@ -818,11 +796,6 @@ export default class App extends LocationComponent {
     }
   }
 
-  _canvassGuidelinesUrlHandler() {
-    const url = "https://github.com/OurVoiceUSA/HelloVoter/blob/master/docs/Canvassing-Guidelines.md";
-    return openURL(url);
-  }
-
   updateTurfInfo(pos) {
     if (this.state.turfs) {
       let selectedTurf = {};
@@ -846,71 +819,11 @@ export default class App extends LocationComponent {
       showDisclosure, myPosition, myNodes, locationAccess, serviceError, deviceError,
       form, user, loading, region, active, segmentList, segmentTurf, fetching, selectedTurf, mapCenter,
       newAddressDialog, newUnitDialog, onlyPhonePeople, confirmDialog, confirmDialogTitle,
-      confirmDialogMessage, confirmDialogPositiveButton, confirmDialogNegativeButton, ack, tosError,
+      confirmDialogMessage, confirmDialogPositiveButton, confirmDialogNegativeButton,
     } = this.state;
 
-    if (showDisclosure === "true") {
-      return (
-        <Container>
-          <Content padder>
-            <Button block transparent onPress={() => {this._canvassGuidelinesUrlHandler()}}>
-              <H3>Terms of Service</H3>
-            </Button>
-
-            <Text></Text>
-
-            <Text>
-              Our Voice USA provides this canvassing tool for free for you to use for your own purposes.
-            </Text>
-
-            <Text></Text>
-
-            <Text>
-              By using this tool you acknowledge that you are acting on your own behalf, do not represent Our Voice USA
-              or its affiliates, and have read our <Text style={{fontSize: 18, fontWeight: 'bold', color: 'blue'}} onPress={() => {this._canvassGuidelinesUrlHandler()}}>
-              Terms of Service</Text>.
-            </Text>
-
-            <Text></Text>
-
-            <Text>Please be courteous to those you meet.</Text>
-
-            <Text></Text>
-
-            <ListItem onPress={() => this.setState({ack: !ack})} error>
-              <CheckBox checked={ack} onPress={() => this.setState({ack: !ack})} />
-              <Body>
-                <Text>I have read & agree to the Terms of Service</Text>
-              </Body>
-            </ListItem>
-
-            <Text></Text>
-
-            <Button block onPress={() => {
-              if (ack) this.SaveDisclosure();
-              else this.setState({tosError: true});
-            }}>
-              <Text>Continue</Text>
-            </Button>
-
-            <Text></Text>
-
-            <Button block danger onPress={() => this.props.navigation.dispatch(NavigationActions.back())}>
-              <Text>Exit</Text>
-            </Button>
-
-            <ConfirmDialog
-              title="Terms of Service"
-              message="You must agree to the terms of service to continue."
-              visible={tosError}
-              animationType="fade"
-              onTouchOutside={() => this.setState({tosError: false})}
-              positiveButton={{title: "OK", onPress: () => this.setState({tosError: false})}}
-            />
-
-          </Content>
-        </Container>
-      );
+    if (showDisclosure) {
+      return (<TermsDisclosure refer={this} />);
     }
 
     var nomap_content = [];
