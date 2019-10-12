@@ -6,6 +6,7 @@ import YourReps from './YourReps';
 import CanvassingSetup from './CanvassingSetup';
 import Supporters from './Supporters';
 import Legal from './Legal';
+import { carouselItems } from './CarouselItems';
 
 import {
   View,
@@ -15,112 +16,24 @@ import {
 
 import { Container, Header, Content, Footer, FooterTab, Text, Button, Spinner } from 'native-base';
 
-import { getLocales } from 'react-native-localize';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import Rate, { AndroidMarket } from 'react-native-rate'
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 import storage from 'react-native-storage-wrapper';
 
 import { sliderWidth, itemWidth } from '../styles/SliderEntry.style';
 import styles, { colors } from '../styles/index.style';
 import SliderEntry from '../SliderEntry';
-import { _loginPing, say, DINFO, permissionNotify } from '../common';
+import { say, DINFO, permissionNotify } from '../common';
 
 export default class App extends HVComponent {
 
   constructor(props) {
     super(props);
 
-    let mainMenu = [];
-    let lang;
-
-    try {
-      lang = getLocales()[0].languageCode;
-    } catch (e) {
-      lang = "en";
-      console.warn(e);
-    };
-
-    // non-english sees translation card first
-    if (lang !== "en")
-    mainMenu.push(
-      {
-        title: say("we_translated_this"),
-        subtitle: say("we_used_google_translate"),
-        illustration: require('../../img/translate.png'),
-        onPress: () => this.openGitHub(),
-      }
-    );
-
-    mainMenu.push(
-      {
-        title: say("contact_your_reps"),
-        subtitle: say("know_who_represents_you"),
-        illustration: require('../../img/phone-your-rep.png'),
-        onPress: () => this.setState({active: 'reps'}),
-      }
-    );
-
-    mainMenu.push(
-      {
-        title: say("canvas_for_any_cause"),
-        subtitle: say("our_zero_cost_tool"),
-        illustration: require('../../img/canvassing.png'),
-        onPress: () => this.setState({active: 'canvassing'}),
-      }
-    );
-
-    // since non-english got an extra card, need to swap one out to keep the count even
-    if (lang === "en")
-    mainMenu.push(
-      {
-        title: say("coming_zoon_desktop_tools"),
-        subtitle: say("canvassing_at_scale"),
-        illustration: require('../../img/phone-banking.png'),
-        onPress: () => this.openDonate(),
-      }
-    );
-
-    mainMenu.push(
-      {
-        title: say("donate"),
-        subtitle: say("we_operate_on_donations"),
-        illustration: require('../../img/donate.png'),
-        onPress: () => this.openDonate(),
-      }
-    );
-
-    mainMenu.push(
-      {
-        title: say("rate_this_app"),
-        subtitle: say("feedback_helps_us"),
-        illustration: require('../../img/rate.png'),
-        onPress: () => {
-          let options = {
-            AppleAppID: "1275301651",
-            GooglePackageName: "org.ourvoiceinitiative.ourvoice",
-            preferredAndroidMarket: AndroidMarket.Google,
-            preferInApp: false,
-            openAppStoreIfInAppFails: true,
-          }
-          Rate.rate(options, (success) => {});
-        },
-      }
-    );
-
-    mainMenu.push(
-      {
-        title: say("open_source_software"),
-        subtitle: say("help_us_out_directly"),
-        illustration: require('../../img/open-source.png'),
-        onPress: () => this.openGitHub(),
-      }
-    );
-
     this.state = {
       active: 'home',
       appVersion: "unknown",
-      mainMenu,
+      mainMenu: carouselItems(this),
       sliderActiveSlide: 0,
       patreonNames: [],
     };
