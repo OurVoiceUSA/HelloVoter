@@ -10,8 +10,6 @@ import { _partyNameFromKey, say, openURL } from '../common';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 export default DisplayRep = (props) => {
-
-  const { navigate } = props.navigation;
   var { office, location, refer } = props;
 
   const call = async (profile) => {

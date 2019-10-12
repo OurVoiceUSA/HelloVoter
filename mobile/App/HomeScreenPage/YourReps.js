@@ -283,7 +283,6 @@ export default class App extends LocationComponent {
             renderItem={({item}) =>
               <DisplayRep
                 refer={this}
-                navigation={this.props.navigation}
                 office={item}
                 location={myPosition}
                 />
@@ -296,7 +295,6 @@ export default class App extends LocationComponent {
             renderItem={({item}) =>
               <DisplayRep
                 refer={this}
-                navigation={this.props.navigation}
                 office={item}
                 location={myPosition}
                 />
@@ -309,7 +307,6 @@ export default class App extends LocationComponent {
             renderItem={({item}) =>
               <DisplayRep
                 refer={this}
-                navigation={this.props.navigation}
                 office={item}
                 location={myPosition}
                 />
@@ -322,7 +319,6 @@ export default class App extends LocationComponent {
             renderItem={({item}) =>
               <DisplayRep
                 refer={this}
-                navigation={this.props.navigation}
                 office={item}
                 location={myPosition}
                 />
@@ -335,7 +331,6 @@ export default class App extends LocationComponent {
             renderItem={({item}) =>
               <DisplayRep
                 refer={this}
-                navigation={this.props.navigation}
                 office={item}
                 location={myPosition}
                 />

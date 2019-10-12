@@ -71,7 +71,7 @@ export default class App extends HVComponent {
             <Home refer={this} items={carouselItems} />
           }
           {active === 'reps' &&
-            <YourReps navigation={this.props.navigation} />
+            <YourReps />
           }
           {active === 'canvassing' &&
             <CanvassingSetup navigation={this.props.navigation} refer={this} />
