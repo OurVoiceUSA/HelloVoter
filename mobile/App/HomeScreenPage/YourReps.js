@@ -9,14 +9,14 @@ import {
 } from 'react-native';
 
 import { Card, CardItem, Content, Text, Body, Button, Spinner } from 'native-base';
-import LocationComponent from '../../LocationComponent';
+import LocationComponent from '../LocationComponent';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 import RNGooglePlaces from 'react-native-google-places';
 import { ConfirmDialog, Dialog } from 'react-native-simple-dialogs';
-import DisplayRep from './display-rep';
-import { wsbase } from '../../config'
-import { Divider, say, _apiCall, _loginPing, _doGeocode, _saveUser, _specificAddress } from '../../common';
+import DisplayRep from './DisplayRep';
+import { wsbase } from '../config'
+import { Divider, say, _apiCall, _loginPing, _doGeocode, _saveUser, _specificAddress } from '../common';
 
 export default class App extends LocationComponent {
 

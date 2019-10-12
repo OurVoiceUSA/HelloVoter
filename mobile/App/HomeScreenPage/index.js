@@ -2,8 +2,10 @@
 import React from 'react';
 import HVComponent from '../HVComponent';
 
-import YourReps from './YourRepsPage';
-import CanvassingSetup from './CanvassingSetupPage';
+import YourReps from './YourReps';
+import CanvassingSetup from './CanvassingSetup';
+import Supporters from './Supporters';
+import Legal from './Legal';
 
 import {
   View,
@@ -11,7 +13,7 @@ import {
   Platform,
 } from 'react-native';
 
-import { H3, Container, Header, Content, Footer, FooterTab, Text, Button, Spinner } from 'native-base';
+import { Container, Header, Content, Footer, FooterTab, Text, Button, Spinner } from 'native-base';
 
 import { getLocales } from 'react-native-localize';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -247,17 +249,7 @@ export default class App extends HVComponent {
           <CanvassingSetup navigation={this.props.navigation} refer={this} />
         }
         {active === 'supporters' &&
-        <View>
-          <H3>{say("our_signature_supporters")}</H3>
-          <Text></Text>
-          <Text>{say("this_app_is_made_possible_by")}</Text>
-          <Text></Text>
-          <Button block onPress={() => this.openDonate()}>
-            <Text>{say("support_us_on_patreon")}</Text>
-          </Button>
-          <Text></Text>
-          <PatreonNames names={patreonNames} />
-        </View>
+          <Supporters refer={this} names={patreonNames} />
         }
         {active === 'legal' &&
           <Legal version={appVersion} refer={this} />
@@ -283,32 +275,3 @@ export default class App extends HVComponent {
     );
   }
 }
-
-const PatreonNames = props => {
-  if (!props.names || props.names.length === 0) return (<View><Spinner /><Text>{say("loading_data")}...</Text></View>);
-  return props.names.map((name, idx) => (
-    <Text key={idx}>{name}</Text>
-  ));
-};
-
-const Legal = props => (
-  <View>
-    <Text>
-      HelloVoter Version {props.version}
-    </Text>
-    <Text></Text>
-    <Text>
-      Copyright (c) 2018, Our Voice USA. {say("all_rights_reserved")}
-    </Text>
-    <Text></Text>
-    <Text>{say("this_program_is_free_software")}</Text>
-    <Text></Text>
-    {Platform.OS === 'ios'&&
-      <Text>{say("note_about_apple_eula")}</Text>
-    }
-    <Text></Text>
-    <Button block primary onPress={() => props.refer.openGitHub('HelloVoter')}>
-      <Text>{say("tap_here_for_source_code")}</Text>
-    </Button>
-  </View>
-);
