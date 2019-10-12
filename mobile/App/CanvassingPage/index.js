@@ -123,7 +123,6 @@ export default class App extends LocationComponent {
       showDisclosure: true,
       form: props.navigation.state.params.form,
       orgId: props.navigation.state.params.orgId,
-      user: props.navigation.state.params.user,
       turfs: props.navigation.state.params.form.turfs,
       retry_queue: [],
       confirmDialog: false,
@@ -816,7 +815,7 @@ export default class App extends LocationComponent {
     const { navigate } = this.props.navigation;
     const {
       showDisclosure, myPosition, myNodes, locationAccess, serviceError, deviceError,
-      form, user, loading, region, active, segmentList, segmentTurf, fetching, selectedTurf, mapCenter,
+      form, loading, region, active, segmentList, segmentTurf, fetching, selectedTurf, mapCenter,
       newAddressDialog, newUnitDialog, onlyPhonePeople, confirmDialog, confirmDialogTitle,
       confirmDialogMessage, confirmDialogPositiveButton, confirmDialogNegativeButton,
     } = this.state;

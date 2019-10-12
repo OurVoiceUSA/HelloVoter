@@ -244,7 +244,7 @@ export default class App extends LocationComponent {
 
         // if there's more than one form in body.data.forms, don't navigate
         if (forms_server.length === 1) {
-          this.navigate_canvassing({server, orgId, form: forms_server[0], user: this.state.user, refer: this});
+          this.navigate_canvassing({server, orgId, form: forms_server[0], refer: this});
         }
         await this._loadForms();
         return {error: false, flag: true};
@@ -418,7 +418,7 @@ export default class App extends LocationComponent {
                 if (json.backend === "server") {
                   // TODO: set loading state as this can take a few seconds
                   let ret = await this.sayHello(json.server, json.orgId);
-                  if (ret.status === 200) this.navigate_canvassing({server: json.server, orgId: json.orgId, form: json, user: user, refer: this});
+                  if (ret.status === 200) this.navigate_canvassing({server: json.server, orgId: json.orgId, form: json, refer: this});
                   else setTimeout(() => this.setState({SmLoginScreen: true}), 500);
                } else {
                  this.setState({showLegacyDialog: true});
