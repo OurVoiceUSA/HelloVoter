@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react';
+import React from 'react';
 
 import {
   StyleSheet,
@@ -13,26 +13,25 @@ import {
 } from 'native-base';
 
 import {
-  Divider, DINFO, api_base_uri, _doGeocode, _getApiToken, getEpoch, openURL
+  Divider, DINFO, api_base_uri, _doGeocode, _getApiToken, getEpoch, openURL,
 } from '../common';
 
 import LocationComponent from '../LocationComponent';
 import TermsDisclosure, { loadDisclosure } from './TermsDisclosure';
 import ListTab from './ListTab';
 import TurfTab from './TurfTab';
+import SettingsTab from './SettingsTab';
 
 import storage from 'react-native-storage-wrapper';
 import NetInfo from '@react-native-community/netinfo';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps'
 import RNGooglePlaces from 'react-native-google-places';
-import Settings from './Settings';
 import { ConfirmDialog, Dialog } from 'react-native-simple-dialogs';
 import md5 from 'md5';
 import { debounce } from 'throttle-debounce';
-import { orderBy } from 'natural-orderby';
-import TimeAgo from 'javascript-time-ago'
-import en from 'javascript-time-ago/locale/en'
+import TimeAgo from 'javascript-time-ago';
+import en from 'javascript-time-ago/locale/en';
 import t from 'tcomb-form-native';
 import _ from 'lodash';
 
@@ -863,6 +862,8 @@ export default class App extends LocationComponent {
       }
     }
 
+    // NOTE: always render the MapView, even if not on the Map View Tab. This keeps the
+    // the component loaded in memory for better performance when switching back and forth
     return (
       <Container>
         <Content>
@@ -873,7 +874,7 @@ export default class App extends LocationComponent {
           <TurfTab refer={this} />
         }
         {active==='settings'&&
-          <Settings refer={this} form={form} />
+          <SettingsTab refer={this} form={form} />
         }
         </Content>
 
@@ -905,8 +906,8 @@ export default class App extends LocationComponent {
           onPress={(e) => e.nativeEvent.coordinate && this.updateTurfInfo(e.nativeEvent.coordinate)}
           onLongPress={(e) => this.add_new && e.nativeEvent.coordinate && this.showConfirmAddress(e.nativeEvent.coordinate)}
           {...this.props}>
-          {geofence.map((g, idx) => <MapView.Polyline key={idx} coordinates={g.polygon} strokeWidth={2} strokeColor={(g.id === selectedTurf.id ? "blue" : "black")} />)}
-          {this.state.markers.map((marker) => (
+          {active==='map'&&geofence.map((g, idx) => <MapView.Polyline key={idx} coordinates={g.polygon} strokeWidth={2} strokeColor={(g.id === selectedTurf.id ? "blue" : "black")} />)}
+          {active==='map'&&this.state.markers.map((marker) => (
               <MapView.Marker
                 key={marker.address.id}
                 coordinate={{longitude: marker.address.longitude, latitude: marker.address.latitude}}
@@ -922,7 +923,7 @@ export default class App extends LocationComponent {
                 </MapView.Callout>
               </MapView.Marker>
           ))}
-          {this.state.searchPins.map((place, idx) => (
+          {active==='map'&&this.state.searchPins.map((place, idx) => (
               <MapView.Marker
                 key={idx}
                 coordinate={place.location}

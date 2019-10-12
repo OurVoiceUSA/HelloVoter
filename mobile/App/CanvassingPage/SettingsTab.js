@@ -1,7 +1,5 @@
 import React, { PureComponent } from 'react';
-
 import { View } from 'react-native';
-
 import { Content, Text, } from 'native-base';
 
 import {
@@ -27,7 +25,7 @@ function limit2size(obj) {
   return arr[0].label;
 }
 
-export default class App extends PureComponent {
+export default class SettingsTab extends PureComponent {
   constructor(props) {
     super(props);
 
