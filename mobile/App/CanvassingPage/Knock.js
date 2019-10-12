@@ -13,7 +13,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import Swipeout from 'react-native-swipeout';
 import uuidv4 from 'uuid/v4';
 
-import { getEpoch, PersonAttr } from '../../common';
+import { getEpoch, PersonAttr } from '../common';
 
 export default class App extends PureComponent {
 

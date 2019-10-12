@@ -26,8 +26,8 @@ import NetInfo from '@react-native-community/netinfo';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps'
 import RNGooglePlaces from 'react-native-google-places';
-import KnockPage from './KnockPage';
-import CanvassingSettingsPage from './CanvassingSettingsPage';
+import Knock from './Knock';
+import Settings from './Settings';
 import { ConfirmDialog, Dialog } from 'react-native-simple-dialogs';
 import md5 from 'md5';
 import { debounce } from 'throttle-debounce';
@@ -999,7 +999,7 @@ export default class App extends LocationComponent {
           </View>
         }
         {active==='settings'&&
-          <CanvassingSettingsPage refer={this} form={form} />
+          <Settings refer={this} form={form} />
         }
         </Content>
 
@@ -1367,7 +1367,7 @@ const SegmentResidence = props => {
               color={props.refer.getPinColor(u)} />
           )}
           renderContent={(u) => (
-            <KnockPage refer={props.refer} funcs={props.refer} marker={rstate.currentMarker} unit={u} form={rstate.form} />
+            <Knock refer={props.refer} funcs={props.refer} marker={rstate.currentMarker} unit={u} form={rstate.form} />
           )}
         />
     </View>
@@ -1375,7 +1375,7 @@ const SegmentResidence = props => {
   }
 
   return (
-    <KnockPage refer={props.refer} funcs={props.refer} marker={rstate.currentMarker} form={rstate.form} />
+    <Knock refer={props.refer} funcs={props.refer} marker={rstate.currentMarker} form={rstate.form} />
   );
 }
 
