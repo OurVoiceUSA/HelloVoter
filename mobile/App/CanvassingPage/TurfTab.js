@@ -16,7 +16,7 @@ export default ListTab = props => {
         <Button first active={(segmentTurf==='list')} onPress={() => props.refer.setState({segmentTurf: 'list'})}><Text>List</Text></Button>
         <Button last active={(segmentTurf==='stats')} onPress={() => props.refer.setState({segmentTurf: 'stats'})}><Text>Stats</Text></Button>
       </Segment>
-      <Content>
+      <Content padder>
         <Text>{JSON.stringify(props.refer.state.turfs.map(t => t.name))}</Text>
         <TurfStats refer={this} loading={props.refer.state.fetchingTurfStats} data={props.refer.state.turfStats} />
       </Content>

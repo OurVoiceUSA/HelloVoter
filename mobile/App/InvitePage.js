@@ -66,7 +66,7 @@ export default class App extends PureComponent {
   render() {
     if (this.state.error) return (
       <Container>
-        <Content>
+        <Content padder>
           <H3>There was a problem</H3>
           <Text></Text>
           <Text>

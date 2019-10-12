@@ -333,7 +333,7 @@ export async function _getJWT(remote) {
 
   let jwt = null;
   try {
-    jwt = await storage.get(JWT);
+    jwt = await storage.get(STORAGE_KEY_JWT);
   } catch (error) {
     console.warn(error);
   }

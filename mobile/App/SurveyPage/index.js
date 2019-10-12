@@ -199,7 +199,7 @@ export default class App extends PureComponent {
 
     return (
       <Container>
-        <Content>
+        <Content padder>
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <Form
               ref="form"

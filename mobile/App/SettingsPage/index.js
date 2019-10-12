@@ -178,7 +178,7 @@ export default class App extends PureComponent {
 
     return (
       <Container>
-        <Content>
+        <Content padder>
       <SettingsCategoryHeader title={"Personal Settings"} />
 
       <SettingsDividerLong />
