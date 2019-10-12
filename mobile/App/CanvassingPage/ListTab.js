@@ -289,3 +289,13 @@ const SegmentHistory = props => {
     </Content>
   );
 };
+
+const Unit = props => (
+  <View key={props.unit.name} style={{padding: 10}}>
+    <View
+      style={{flexDirection: 'row', alignItems: 'center'}}>
+      <Icon name={(props.color === "red" ? "ban" : "address-book")} size={40} color={props.color} style={{margin: 5}} />
+      <Text>Unit {(props.unknown?"Unknown":props.unit.name)} - {props.refer.getLastVisit(props.unit)}</Text>
+    </View>
+  </View>
+);
