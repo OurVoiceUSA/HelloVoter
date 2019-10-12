@@ -260,7 +260,7 @@ export default class App extends HVComponent {
         </View>
         }
         {active === 'legal' &&
-          <Legal version={appVersion} />
+          <Legal version={appVersion} refer={this} />
         }
         </Content>
         <Footer>
@@ -306,8 +306,9 @@ const Legal = props => (
     {Platform.OS === 'ios'&&
       <Text>{say("note_about_apple_eula")}</Text>
     }
-    <View style={{flexDirection: 'row', justifyContent: 'center'}}>
-      <Button raised primary text={say("tap_here_for_source_code")} onPress={() => this.openGitHub('HelloVoter')} />
-    </View>
+    <Text></Text>
+    <Button block primary onPress={() => props.refer.openGitHub('HelloVoter')}>
+      <Text>{say("tap_here_for_source_code")}</Text>
+    </Button>
   </View>
 );
