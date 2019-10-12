@@ -18,14 +18,6 @@ import sha1 from 'sha1';
 
 var Form = t.form.Form;
 
-const SAND = t.enums({
-  'SA': 'Strongly Agree',
-  'A': 'Agree',
-  'N': 'Neutral',
-  'D': 'Disagree',
-  'SD': 'Strongly Disagree',
-}, 'SAND');
-
 var CanvassForm = t.struct({});
 var options = {};
 
@@ -154,7 +146,6 @@ export default class App extends PureComponent {
         case 'textbox': value = t.String; boxflag = true; break;
         case 'number': value = t.Number; break;
         case 'boolean': value = t.Boolean; break;
-        case 'sand': value = SAND; break;
         //case 'date': value = t.Date; mode = 'date'; break;
         case 'string':
           if (a.values) {
