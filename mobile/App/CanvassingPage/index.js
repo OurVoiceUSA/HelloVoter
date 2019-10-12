@@ -2,18 +2,14 @@ import React from 'react';
 
 import {
   StyleSheet,
-  FlatList,
   View,
   TouchableOpacity,
 } from 'react-native';
 
-import {
-  Container, Content, Header, Footer, FooterTab, Tab, Tabs, Text, H3,
-  Button, Spinner, ListItem, Body, CheckBox, Item, Input, CardItem,
-} from 'native-base';
+import { Container, Content, Footer, FooterTab, Text, H3, Button, Spinner } from 'native-base';
 
 import {
-  Divider, DINFO, api_base_uri, _doGeocode, _getApiToken, getEpoch, openURL,
+  DINFO, api_base_uri, _doGeocode, _getApiToken, getEpoch, openURL,
 } from '../common';
 
 import LocationComponent from '../LocationComponent';
@@ -87,13 +83,15 @@ export default class App extends LocationComponent {
     this.state = {
       refer: props.navigation.state.params.refer,
       server: props.navigation.state.params.server,
+      form: props.navigation.state.params.form,
+      orgId: props.navigation.state.params.orgId,
+      turfs: props.navigation.state.params.form.turfs,
       active: 'map',
       segmentList: 'streets',
       segmentTurf: 'list',
       selectedTurf: {},
       listview: {},
       listview_order: [],
-      activeCity: [0],
       last_fetch: 0,
       mapCenter: {},
       loading: false,
@@ -121,9 +119,6 @@ export default class App extends LocationComponent {
       newAddressDialog: false,
       newUnitDialog: false,
       showDisclosure: true,
-      form: props.navigation.state.params.form,
-      orgId: props.navigation.state.params.orgId,
-      turfs: props.navigation.state.params.form.turfs,
       retry_queue: [],
       confirmDialog: false,
     };
@@ -309,7 +304,6 @@ export default class App extends LocationComponent {
     if (this.state.canvassSettings.filter_pins) return false;
     if (this.state.canvassSettings.filter_visited) return false;
     return true;
-
   }
 
   showConfirmAddress = (pos) => {
