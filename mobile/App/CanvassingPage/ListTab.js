@@ -260,16 +260,7 @@ const SegmentHistory = props => {
           <View key={item.id}>
             <Divider />
             <TouchableOpacity style={{marginTop: 10, marginBottom: 10}}
-              onPress={() => {
-                props.refer.setState({active: 'map'});
-                let pos = {
-                  longitude: item.address.position.x,
-                  latitude: item.address.position.y,
-                }
-                if (rstate.canvassSettings.chill_mode)
-                  props.refer._dataGet(pos);
-                props.refer.map.animateToCoordinate(pos, 1000);
-              }}>
+              onPress={() => props.refer.animateToCoordinate({longitude: item.address.position.x, latitude: item.address.position.y}, 1000)}>
               <View style={{flexDirection: 'row'}}>
                 <View style={{width: 100, alignItems: 'center'}}>
                   <Image source={{ uri: item.volunteer.avatar }} style={{height: 50, width: 50, padding: 10, borderRadius: 20}} />

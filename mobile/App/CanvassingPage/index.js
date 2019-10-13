@@ -374,10 +374,6 @@ export default class App extends LocationComponent {
 
     if (jsonStreet === null || jsonCity === null || jsonState === null) return;
 
-    try {
-      await this.map.animateToCoordinate({longitude: fAddress.longitude, latitude: fAddress.latitude}, 500)
-    } catch (error) {}
-
     let epoch = getEpoch();
 
     fAddress.street = jsonStreet.street.trim();
@@ -800,6 +796,13 @@ export default class App extends LocationComponent {
     this.setState({peopleSearch: text})
   }
 
+  animateToCoordinate(pos, time) {
+    if (!time) time = 500;
+    if (this.state.canvassSettings.chill_mode) this._dataGet(pos);
+    this.setState({active: 'map'});
+    this.map.animateToCoordinate(pos, time);
+  }
+
   render() {
     const { navigate } = this.props.navigation;
     const {
@@ -958,10 +961,7 @@ export default class App extends LocationComponent {
             }
 
             <TouchableOpacity style={styles.iconContainer}
-              onPress={() => {
-                if (this.state.canvassSettings.chill_mode) this._dataGet(myPosition);
-                this.map.animateToCoordinate(myPosition, 1000);
-              }}>
+              onPress={() => this.animateToCoordinate(myPosition)}>
               <Icon
                 name="location-arrow"
                 size={50}
@@ -983,7 +983,7 @@ export default class App extends LocationComponent {
                   ['location','address']
                 ).then((place) => {
                   this.dropSearchPin(place);
-                  this.map.animateToCoordinate(place.location, 1000);
+                  this.animateToCoordinate(place.location);
                 })
                 .catch(e => {});
               }}>
