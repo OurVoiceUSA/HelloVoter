@@ -15,7 +15,6 @@ import { say, getEpoch, getPropFromArrObj } from '../common';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import storage from 'react-native-storage-wrapper';
 import t from 'tcomb-form-native';
-import sha1 from 'sha1';
 
 var Form = t.form.Form;
 
