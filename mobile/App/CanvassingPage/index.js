@@ -67,10 +67,8 @@ function bystreet(a,b) {
   let na = parseInt(a.address.street.replace(/(\d+) .*/, '$1'));
   let nb = parseInt(b.address.street.replace(/(\d+) .*/, '$1'));
 
-  if ( na < nb )
-    return -1;
-  if ( na > nb )
-    return 1;
+  if ( na < nb ) return -1;
+  if ( na > nb ) return 1;
   return 0;
 }
 
@@ -480,8 +478,6 @@ export default class App extends LocationComponent {
 
   _loadTurfStats = async () => {
     const { selectedTurf } = this.state;
-
-    return; // TODO: enable turf stats
 
     this.setState({active: 'turf', segmentTurf: 'stats', fetchingTurfStats: true});
 
@@ -941,10 +937,7 @@ export default class App extends LocationComponent {
 
         {active==='map'&&selectedTurf.id&&
         <TouchableOpacity style={{position: 'absolute', left: 0, ...styles.turfInfoContainer}}
-          onPress={() => {
-            this._loadTurfStats();
-            this.setState({active: 'turf', segmentTurf: 'stats'});
-          }}>
+          onPress={() => this._loadTurfStats()}>
           <Text>{selectedTurf.name}</Text>
         </TouchableOpacity>
         }
