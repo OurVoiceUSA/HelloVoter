@@ -15,10 +15,10 @@ export default ListTab = props => {
     <View>
       <Segment>
         <Button first active={(segmentTurf==='list')} onPress={() => props.refer.setState({segmentTurf: 'list'})}><Text>List</Text></Button>
-        <Button last active={(segmentTurf==='stats')} onPress={() => props.refer.setState({segmentTurf: 'stats'})}><Text>Stats</Text></Button>
+        <Button last active={(segmentTurf==='info')} onPress={() => props.refer.setState({segmentTurf: 'info'})}><Text>Info</Text></Button>
       </Segment>
       <SegmentList refer={props.refer} />
-      <SegmentStats refer={props.refer} />
+      <SegmentInfo refer={props.refer} />
     </View>
   );
 }
@@ -39,7 +39,7 @@ const SegmentList = props => {
   return (
     <List>
     {rstate.turfs.sort(byname).map(t => (
-      <ListItem onPress={() => props.refer.setState({selectedTurf: t}, () => props.refer._loadTurfStats())}>
+      <ListItem onPress={() => props.refer.setState({selectedTurf: t}, () => props.refer._loadturfInfo())}>
         <Text>{t.name}</Text>
       </ListItem>
     ))}
@@ -56,28 +56,28 @@ function polygonCenter(obj) {
   return [cx, cy];
 }
 
-const SegmentStats = props => {
+const SegmentInfo = props => {
   let rstate = props.refer.state;
-  if (rstate.segmentTurf!=='stats') return null;
+  if (rstate.segmentTurf!=='info') return null;
 
-  if (!rstate.fetchingTurfStats && Object.keys(rstate.turfStats).length === 0)
+  if (!rstate.fetchingturfInfo && Object.keys(rstate.turfInfo).length === 0)
     return (<Text>No turf selected.</Text>);
 
   return (
     <View>
-      {rstate.fetchingTurfStats&&
+      {rstate.fetchingturfInfo&&
       <Spinner />
       ||
       <List>
         <ListItem itemDivider onPress={() => {
-          let c = polygonCenter(geojson2polygons(JSON.parse(rstate.turfStats.geometry))[0]);
-          props.refer.setState({selectedTurf: rstate.turfStats});
+          let c = polygonCenter(geojson2polygons(JSON.parse(rstate.turfInfo.geometry))[0]);
+          props.refer.setState({selectedTurf: rstate.turfInfo});
           props.refer.animateToCoordinate({longitude: c[0], latitude: c[1]});
         }}>
-          <Text>{rstate.turfStats.name}</Text>
+          <Text>{rstate.turfInfo.name}</Text>
         </ListItem>
-        {Object.keys(rstate.turfStats.stats).map((key) => {
-          val = rstate.turfStats.stats[key];
+        {Object.keys(rstate.turfInfo.stats).map((key) => {
+          val = rstate.turfInfo.stats[key];
           if (!val || typeof val !== 'object')
             return (<ListItem><Text>{key}: {(val?val:'N/A')}</Text></ListItem>);
           else {

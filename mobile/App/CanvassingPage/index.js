@@ -94,10 +94,10 @@ export default class App extends LocationComponent {
       loading: false,
       fetching: false,
       fetchingHistory: false,
-      fetchingTurfStats: false,
+      fetchingturfInfo: false,
       checkHistory: true,
       history: [],
-      turfStats: {},
+      turfInfo: {},
       netInfo: 'none',
       serviceError: null,
       deviceError: null,
@@ -472,10 +472,10 @@ export default class App extends LocationComponent {
     this.forceUpdate();
   }
 
-  _loadTurfStats = async () => {
+  _loadturfInfo = async () => {
     const { selectedTurf } = this.state;
 
-    this.setState({active: 'turf', segmentTurf: 'stats', fetchingTurfStats: true});
+    this.setState({active: 'turf', segmentTurf: 'info', fetchingturfInfo: true});
 
     try {
       let https = true;
@@ -497,12 +497,12 @@ export default class App extends LocationComponent {
         throw "Sync error";
       }
 
-      this.setState({turfStats: json});
+      this.setState({turfInfo: json});
     } catch (e) {
       this.triggerNetworkWarning();
     }
 
-    this.setState({fetchingTurfStats: false});
+    this.setState({fetchingturfInfo: false});
   }
 
   _dataFetch = async (pos, flag) => {
@@ -940,7 +940,7 @@ export default class App extends LocationComponent {
 
         {active==='map'&&selectedTurf.id&&
         <TouchableOpacity style={{position: 'absolute', left: 0, ...styles.turfInfoContainer}}
-          onPress={() => this._loadTurfStats()}>
+          onPress={() => this._loadturfInfo()}>
           <Text>{selectedTurf.name}</Text>
         </TouchableOpacity>
         }
