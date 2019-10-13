@@ -71,7 +71,7 @@ const SegmentStats = props => {
       <List>
         <ListItem itemDivider onPress={() => {
           let c = polygonCenter(geojson2polygons(JSON.parse(rstate.turfStats.geometry))[0]);
-          props.refer.setState({active: 'map'});
+          props.refer.setState({active: 'map', selectedTurf: rstate.turfStats});
           props.refer.map.animateToCoordinate({longitude: c[0], latitude: c[1]}, 500);
         }}>
           <Text>{rstate.turfStats.name}</Text>
