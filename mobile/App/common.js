@@ -20,6 +20,8 @@ import RNGooglePlaces from 'react-native-google-places';
 import Geocoder from 'react-native-geocoder-reborn';
 import memoize from 'lodash.memoize';
 import i18n from 'i18n-js';
+import TimeAgo from 'javascript-time-ago';
+import en from 'javascript-time-ago/locale/en';
 import { wsbase } from './config';
 
 export const STORAGE_KEY_JWT = 'OV_JWT';
@@ -34,6 +36,11 @@ export const say = memoize(
 
 export function getEpoch() {
   return Math.floor(new Date().getTime())
+}
+
+TimeAgo.addLocale(en);
+export function timeAgo(val) {
+  return new TimeAgo('en-US').format(val);
 }
 
 export function api_base_uri(orgId) {

@@ -9,7 +9,8 @@ import {
 import { Container, Content, Footer, FooterTab, Text, H3, Button, Spinner } from 'native-base';
 
 import {
-  DINFO, api_base_uri, _doGeocode, _getApiToken, getEpoch, openURL, STORAGE_KEY_SETTINGS,
+  DINFO, STORAGE_KEY_SETTINGS, api_base_uri, _doGeocode, _getApiToken, openURL,
+  getEpoch, timeAgo,
 } from '../common';
 
 import LocationComponent from '../LocationComponent';
@@ -27,7 +28,6 @@ import RNGooglePlaces from 'react-native-google-places';
 import { Dialog } from 'react-native-simple-dialogs';
 import md5 from 'md5';
 import { debounce } from 'throttle-debounce';
-import TimeAgo from 'javascript-time-ago';
 import t from 'tcomb-form-native';
 import _ from 'lodash';
 
@@ -459,7 +459,7 @@ export default class App extends LocationComponent {
       default: str = "Haven't visited"; break;
     }
 
-    return str+(v.end?" "+new TimeAgo().format(v.end):'');
+    return str+(v.end?" "+timeAgo(v.end):'');
   }
 
   updateLocalMarker(place, input) {

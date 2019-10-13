@@ -3,13 +3,12 @@ import React from 'react';
 import { View } from 'react-native';
 
 import {
-  Content, Body, Right, Text, Button, List, ListItem, Spinner, Segment,
+  Content, Body, Right, Left, Text, Button, List, ListItem, Spinner, Segment,
 } from 'native-base';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { geojson2polygons } from 'ourvoiceusa-sdk-js';
-import TimeAgo from 'javascript-time-ago';
 
-import { say } from '../common';
+import { say, timeAgo } from '../common';
 
 export default ListTab = props => {
   const { segmentTurf } = props.refer.state;
@@ -73,7 +72,10 @@ function polygonCenter(obj) {
 
 function statVal(val) {
   if (!val) return 'N/A';
-  if (Number.isInteger(val) && val > 1000000000000) return new TimeAgo().format(val);
+  if (Number.isInteger(val)) {
+    if (val > 1000000000000) return timeAgo(val);
+    else return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+  }
   return val;
 }
 
@@ -105,7 +107,11 @@ const SegmentInfo = props => {
         {Object.keys(rstate.turfInfo.stats).map((key) => {
           val = rstate.turfInfo.stats[key];
           if (!val || typeof val !== 'object')
-            return (<ListItem><Text>{key}: {statVal(val)}</Text></ListItem>);
+            return (
+              <ListItem>
+                <Left><Text>{key}:</Text></Left>
+                <View><Text>{statVal(val)}</Text></View>
+              </ListItem>);
           else {
             if (val && typeof val === 'object')
               return Object.keys(val).map((i) => (
@@ -115,7 +121,12 @@ const SegmentInfo = props => {
                     </ListItem>
                     {val[i] && typeof val[i] === 'object' && Object.keys(val[i]).map((k) => {
                       v = val[i][k];
-                      return (<ListItem><Text>{k}: {v}</Text></ListItem>);
+                      return (
+                        <ListItem>
+                          <Left><Text>{k}:</Text></Left>
+                          <View><Text>{statVal(v)}</Text></View>
+                        </ListItem>
+                      );
                     })}
                   </View>
               ));
