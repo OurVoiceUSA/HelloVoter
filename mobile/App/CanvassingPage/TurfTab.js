@@ -2,7 +2,9 @@ import React from 'react';
 
 import { View } from 'react-native';
 
-import { Content, Text, Button, List, ListItem, Spinner, Segment } from 'native-base';
+import {
+  Content, Body, Right, Text, Button, List, ListItem, Spinner, Segment,
+} from 'native-base';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { geojson2polygons } from 'ourvoiceusa-sdk-js';
 
@@ -23,13 +25,22 @@ export default ListTab = props => {
   );
 }
 
-function byname(a,b) {
-  let na = a.name;
-  let nb = b.name;
+var reA = /[^a-zA-Z]/g;
+var reN = /[^0-9]/g;
 
-  if ( na < nb ) return -1;
-  if ( na > nb ) return 1;
-  return 0;
+function sortAlphaNum(ao, bo) {
+  let a = ao.name;
+  let b = bo.name;
+
+  let aA = a.replace(reA, "");
+  let bA = b.replace(reA, "");
+  if (aA === bA) {
+    let aN = parseInt(a.replace(reN, ""), 10);
+    let bN = parseInt(b.replace(reN, ""), 10);
+    return aN === bN ? 0 : aN > bN ? 1 : -1;
+  } else {
+    return aA > bA ? 1 : -1;
+  }
 }
 
 const SegmentList = props => {
@@ -38,9 +49,12 @@ const SegmentList = props => {
 
   return (
     <List>
-    {rstate.turfs.sort(byname).map(t => (
-      <ListItem onPress={() => props.refer.setState({selectedTurf: t}, () => props.refer._loadturfInfo())}>
-        <Text>{t.name}</Text>
+    {rstate.turfs.sort(sortAlphaNum).map(t => (
+      <ListItem icon onPress={() => props.refer.setState({selectedTurf: t}, () => props.refer._loadturfInfo())}>
+        <Body><Text>{t.name}</Text></Body>
+        <Right>
+          <Icon name="angle-double-right" size={25} />
+        </Right>
       </ListItem>
     ))}
     </List>
@@ -69,12 +83,17 @@ const SegmentInfo = props => {
       <Spinner />
       ||
       <List>
-        <ListItem itemDivider onPress={() => {
+        <ListItem itemDivider icon onPress={() => {
           let c = polygonCenter(geojson2polygons(JSON.parse(rstate.turfInfo.geometry))[0]);
           props.refer.setState({selectedTurf: rstate.turfInfo});
           props.refer.animateToCoordinate({longitude: c[0], latitude: c[1]});
         }}>
-          <Text>{rstate.turfInfo.name}</Text>
+          <Body>
+            <Text>{rstate.turfInfo.name}</Text>
+          </Body>
+          <Right>
+            <Icon name="compass" size={25} />
+          </Right>
         </ListItem>
         {Object.keys(rstate.turfInfo.stats).map((key) => {
           val = rstate.turfInfo.stats[key];
