@@ -59,9 +59,29 @@ const SegmentStats = props => {
       <Spinner />
       ||
       <List>
-        {Object.keys(rstate.turfStats.stats).map((s) => (
-          <Text>{s}: {JSON.stringify(rstate.turfStats.stats[s])}</Text>
-        ))}
+        <ListItem itemDivider>
+          <Text>{rstate.turfStats.name}</Text>
+        </ListItem>
+        {Object.keys(rstate.turfStats.stats).map((key) => {
+          val = rstate.turfStats.stats[key];
+          if (!val || typeof val !== 'object')
+            return (<ListItem><Text>{key}: {(val?val:'N/A')}</Text></ListItem>);
+          else {
+            if (val && typeof val === 'object')
+              return Object.keys(val).map((i) => (
+                  <View>
+                    <ListItem itemDivider>
+                      <Text>{i}</Text>
+                    </ListItem>
+                    {val[i] && typeof val[i] === 'object' && Object.keys(val[i]).map((k) => {
+                      v = val[i][k];
+                      return (<ListItem><Text>{k}: {v}</Text></ListItem>);
+                    })}
+                  </View>
+              ));
+            else return null;
+          }
+        })}
       </List>
       }
     </View>
