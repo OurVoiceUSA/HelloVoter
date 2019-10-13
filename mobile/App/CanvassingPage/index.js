@@ -28,13 +28,10 @@ import { Dialog } from 'react-native-simple-dialogs';
 import md5 from 'md5';
 import { debounce } from 'throttle-debounce';
 import TimeAgo from 'javascript-time-ago';
-import en from 'javascript-time-ago/locale/en';
 import t from 'tcomb-form-native';
 import _ from 'lodash';
 
 import {deepCopy, geojson2polygons, ingeojson} from 'ourvoiceusa-sdk-js';
-
-TimeAgo.addLocale(en);
 
 var Form = t.form.Form;
 
@@ -462,7 +459,7 @@ export default class App extends LocationComponent {
       default: str = "Haven't visited"; break;
     }
 
-    return str+(v.end?" "+new TimeAgo('en-US').format(v.end):'');
+    return str+(v.end?" "+new TimeAgo().format(v.end):'');
   }
 
   updateLocalMarker(place, input) {

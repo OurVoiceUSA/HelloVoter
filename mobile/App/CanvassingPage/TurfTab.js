@@ -7,6 +7,7 @@ import {
 } from 'native-base';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { geojson2polygons } from 'ourvoiceusa-sdk-js';
+import TimeAgo from 'javascript-time-ago';
 
 import { say } from '../common';
 
@@ -70,6 +71,12 @@ function polygonCenter(obj) {
   return [cx, cy];
 }
 
+function statVal(val) {
+  if (!val) return 'N/A';
+  if (Number.isInteger(val) && val > 1000000000000) return new TimeAgo().format(val);
+  return val;
+}
+
 const SegmentInfo = props => {
   let rstate = props.refer.state;
   if (rstate.segmentTurf!=='info') return null;
@@ -98,7 +105,7 @@ const SegmentInfo = props => {
         {Object.keys(rstate.turfInfo.stats).map((key) => {
           val = rstate.turfInfo.stats[key];
           if (!val || typeof val !== 'object')
-            return (<ListItem><Text>{key}: {(val?val:'N/A')}</Text></ListItem>);
+            return (<ListItem><Text>{key}: {statVal(val)}</Text></ListItem>);
           else {
             if (val && typeof val === 'object')
               return Object.keys(val).map((i) => (
