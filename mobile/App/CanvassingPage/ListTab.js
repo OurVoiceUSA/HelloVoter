@@ -1,25 +1,18 @@
 import React from 'react';
 
 import {
-  FlatList,
-  Image,
   View,
   TouchableOpacity,
 } from 'react-native';
 
 import {
-  Accordion, Header, Body, Content, Text, Button, Spinner, Segment, ListItem,
-  CheckBox, Item, Input,
+  Accordion, Header, Body, Content, Text, Button, Spinner, Segment,
+  CheckBox, Item, Input, Left, Right, List, ListItem, Thumbnail,
 } from 'native-base';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 import Knock from './Knock';
 import { say, Divider, PersonAttr } from '../common';
-
-function timeFormat(epoch) {
-  let date = new Date(epoch);
-  return date.toLocaleDateString('en-us')+" "+date.toLocaleTimeString('en-us');
-}
 
 function statusToText(code) {
   switch (code) {
@@ -238,9 +231,18 @@ const SegmentPeople = props => {
   return arr;
 };
 
+function dateFormat(epoch) {
+  return new Date(epoch).toLocaleDateString(undefined, {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'});
+}
+
+function timeFormat(epoch) {
+  return new Date(epoch).toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'});
+}
+
 const SegmentHistory = props => {
   let rstate = props.refer.state;
   if (rstate.segmentList!=='history') return null;
+  let lastday;
 
   return (
     <Content>
@@ -252,31 +254,38 @@ const SegmentHistory = props => {
         <Text>{(rstate.history.length?'Loaded '+rstate.history.length+' historical actions:':'No history to view')}</Text>
       </View>
       }
-      <FlatList
-        scrollEnabled={false}
-        data={rstate.history}
-        keyExtractor={item => ""+item.id}
-        renderItem={({item}) => (
-          <View key={item.id}>
-            <Divider />
-            <TouchableOpacity style={{marginTop: 10, marginBottom: 10}}
-              onPress={() => props.refer.animateToCoordinate({longitude: item.address.position.x, latitude: item.address.position.y}, 1000)}>
-              <View style={{flexDirection: 'row'}}>
-                <View style={{width: 100, alignItems: 'center'}}>
-                  <Image source={{ uri: item.volunteer.avatar }} style={{height: 50, width: 50, padding: 10, borderRadius: 20}} />
-                  <Text>{item.volunteer.name}</Text>
-                </View>
-                <View>
-                  <Text>Date: {timeFormat(item.datetime)}</Text>
-                  <Text>Address: {item.address.street}</Text>
-                  <Text>Status: {statusToText(item.status)}</Text>
-                  <Text>Contact: {(item.person?item.person.name:'N/A')}</Text>
-                </View>
-              </View>
-            </TouchableOpacity>
-          </View>
-        )}
-      />
+      <List>
+        {rstate.history.map((item) => {
+          let showtoday = false;
+          let today = dateFormat(item.datetime);
+          if (lastday !== today) {
+            lastday = today;
+            showtoday = true;
+          }
+          return (
+            <View>
+              {showtoday &&
+              <ListItem itemDivider>
+                <Text>{today}</Text>
+              </ListItem>
+              }
+              <ListItem avatar onPress={() => props.refer.animateToCoordinate({longitude: item.address.position.x, latitude: item.address.position.y}, 1000)}>
+                <Left>
+                  <Thumbnail source={{ uri: item.volunteer.avatar }} />
+                </Left>
+                <Body>
+                  <Text>{item.address.street}</Text>
+                  <Text>{statusToText(item.status)}</Text>
+                  <Text>{(item.person?item.person.name:'')}</Text>
+                </Body>
+                <Right>
+                  <Text note>{timeFormat(item.datetime)}</Text>
+                </Right>
+              </ListItem>
+            </View>
+          );
+        })}
+      </List>
     </Content>
   );
 };
