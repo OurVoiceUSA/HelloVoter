@@ -4,6 +4,7 @@ import { View } from 'react-native';
 
 import { Content, Text, Button, List, ListItem, Spinner, Segment } from 'native-base';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { geojson2polygons } from 'ourvoiceusa-sdk-js';
 
 import { say } from '../common';
 
@@ -46,6 +47,15 @@ const SegmentList = props => {
   );
 };
 
+function polygonCenter(obj) {
+  let arr = obj.map(o => [o.lng,o.lat]);
+  var x = arr.map (x => x[0]);
+  var y = arr.map (x => x[1]);
+  var cx = (Math.min (...x) + Math.max (...x)) / 2;
+  var cy = (Math.min (...y) + Math.max (...y)) / 2;
+  return [cx, cy];
+}
+
 const SegmentStats = props => {
   let rstate = props.refer.state;
   if (rstate.segmentTurf!=='stats') return null;
@@ -59,7 +69,11 @@ const SegmentStats = props => {
       <Spinner />
       ||
       <List>
-        <ListItem itemDivider>
+        <ListItem itemDivider onPress={() => {
+          let c = polygonCenter(geojson2polygons(JSON.parse(rstate.turfStats.geometry))[0]);
+          props.refer.setState({active: 'map'});
+          props.refer.map.animateToCoordinate({longitude: c[0], latitude: c[1]}, 500);
+        }}>
           <Text>{rstate.turfStats.name}</Text>
         </ListItem>
         {Object.keys(rstate.turfStats.stats).map((key) => {
