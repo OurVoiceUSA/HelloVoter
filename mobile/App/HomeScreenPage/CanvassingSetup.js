@@ -596,7 +596,7 @@ const FormList = props => {
     }
 
     return (
-      <ListItem icon style={{margin: 10}}>
+      <ListItem avatar style={{margin: 10}}>
           <Left>
             <Icon name={icon} size={size} color={color} />
           </Left>
@@ -613,6 +613,8 @@ const FormList = props => {
               }}>
               <Text>{form.name}</Text>
               <Text note>{createdby}</Text>
+              <Text note>{form.attributes.length} Attributes</Text>
+              <Text note>{form.turfs.length} Turf{(form.turfs.length>1?'s':'')}</Text>
             </TouchableOpacity>
           </Body>
           <Right>
