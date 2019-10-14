@@ -7,14 +7,16 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
-import { Container, Header, Content, Footer, FooterTab, Text, Button, Spinner } from 'native-base';
+import {
+  Container, Header, Content, List, ListItem, Left, Right, Body, Footer, FooterTab,
+  Text, Button, Spinner,
+} from 'native-base';
 
 import LocationComponent from '../LocationComponent';
 import { HVConfirmDialog } from '../HVComponent';
 
 import { Dialog } from 'react-native-simple-dialogs';
 import storage from 'react-native-storage-wrapper';
-import Swipeout from 'react-native-swipeout';
 import Prompt from 'react-native-input-prompt';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import SafariView from 'react-native-safari-view';
@@ -296,7 +298,7 @@ export default class App extends LocationComponent {
       forms_local = JSON.parse(await storage.get('OV_CANVASS_FORMS'));
       if (forms_local === null) forms_local = [];
     } catch (e) {
-      console.warn("_loadForms 1: "+e);
+      console.warn("_loadForms 2: "+e);
       return;
     }
 
@@ -313,20 +315,7 @@ export default class App extends LocationComponent {
       let json = forms_local[i];
       if (json === null) continue;
 
-      let icon = "mobile";
-      let color = "black";
-      let size = 30;
-
-      if (json.backend === "dropbox") {
-        icon = "dropbox";
-        color = "#3d9ae8";
-        size = 25;
-      }
-
       if (json.backend === "server") {
-        icon = "cloud-upload";
-        size = 25;
-
         // atempt to re-pull the form to see if it's changed
         try {
           let jwt = await storage.get(STORAGE_KEY_JWT);
@@ -361,74 +350,8 @@ export default class App extends LocationComponent {
         }
       }
 
-      let swipeoutBtns = [
-        {
-          text: say("delete"),
-          type: 'delete',
-          onPress: () => {
-            this.alert(
-              say("delete_form"),
-              say("confirm_delete_form"),
-              {
-                title: say("yes"),
-                onPress: async () => {
-                  try {
-                    delete forms_local[i];
-                    await storage.del('OV_CANVASS_PINS@'+json.id);
-                    await storage.set('OV_CANVASS_FORMS', JSON.stringify(forms_local));
-                    this.setState({confirmDialog: false})
-                    this._loadForms();
-                  } catch (e) {
-                    console.warn("_loadForms 3: "+e);
-                  }
-                },
-              },
-              {
-                title: say("no"),
-                onPress: () => this.setState({confirmDialog: false}),
-              },
-            );
-          },
-        },
-      ];
+      if (!json.deleted) forms.push(json);
 
-      let createdby = say("created_by")+' '+json.author;
-
-      if (json.backend === 'server') {
-        if (json.orgId) createdby = say("org_id")+' '+json.orgId;
-        else createdby = say("hosted_by")+' '+json.server;
-      }
-
-      if (!json.deleted) {
-        forms.push(
-        <View key={i} style={{margin: 5, flexDirection: 'row'}}>
-          <Swipeout
-            style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20, maxWidth: 350}}
-            right={swipeoutBtns}
-            autoClose={true}>
-            <TouchableOpacity
-              onPress={async () => {
-                if (json.backend === "server") {
-                  // TODO: set loading state as this can take a few seconds
-                  let ret = await this.sayHello(json.server, json.orgId);
-                  if (ret.status === 200) this.navigate_canvassing({server: json.server, orgId: json.orgId, form: json, refer: this});
-                  else setTimeout(() => this.setState({SmLoginScreen: true}), 500);
-               } else {
-                 this.setState({showLegacyDialog: true});
-               }
-              }}>
-              <View style={{flexDirection: 'row'}}>
-                <Icon style={{margin: 5, marginRight: 10}} name={icon} size={size} color={color} />
-                <View>
-                  <Text style={{fontWeight: 'bold'}}>{json.name}</Text>
-                  <Text style={{fontSize: 12}}>{createdby}</Text>
-                </View>
-              </View>
-            </TouchableOpacity>
-          </Swipeout>
-        </View>
-        );
-      }
     }
 
     // cache forms locally
@@ -497,14 +420,6 @@ export default class App extends LocationComponent {
         </View>
       );
 
-    if (!loading && !forms.length) {
-      forms.push(
-        <View key={1}>
-          <Text>{say("no_canvas_forms_ask_someone")}</Text>
-        </View>
-      );
-    }
-
     // if camera is open, render just that
     if (showCamera) return (
       <RNCamera
@@ -525,34 +440,32 @@ export default class App extends LocationComponent {
     );
 
     return (
-      <View>
+      <Content>
 
-        <View style={{flexDirection: 'row', margin: 20, marginTop: 0}}>
-            {loading &&
-            <View style={{flex: 1, margin: 20, alignItems: 'center'}}>
-              <Text>{say("loading_data")}...</Text>
-              <Spinner />
-            </View>
-            ||
-            <View style={{flex: 1, alignItems: 'center'}}>
-              <Text style={{margin: 10}}>{say("select_canvassing_campaign")}:</Text>
-              { forms }
-            </View>
-            }
+        {loading &&
+        <View>
+          <Text>{say("loading_data")}...</Text>
+          <Spinner />
         </View>
+        ||
+        <View>
+          <List>
+            <ListItem itemDivider icon>
+              <Text>{say("select_canvassing_campaign")}:</Text>
+            </ListItem>
+            <FormList refer={this} />
+          </List>
+        </View>
+        }
 
         <View>
-          <Divider />
-
-          <View style={{margin: 12, alignItems: 'center'}}>
-            <Icon.Button
-              name="plus-circle"
-              backgroundColor="#d7d7d7"
-              color="black"
-              onPress={() => this.setState({SelectModeScreen: true})}>
-              {say("start_new_canvas_activity")}
-            </Icon.Button>
-          </View>
+          <Icon.Button
+            name="plus-circle"
+            backgroundColor="#d7d7d7"
+            color="black"
+            onPress={() => this.setState({SelectModeScreen: true})}>
+            {say("start_new_canvas_activity")}
+          </Icon.Button>
         </View>
 
         <Divider />
@@ -661,11 +574,82 @@ export default class App extends LocationComponent {
 
         <HVConfirmDialog refer={this} />
 
-      </View>
+      </Content>
     );
   }
 
 }
+
+const FormList = props => {
+  let rstate = props.refer.state;
+  let forms = rstate.forms;
+  if (!rstate.loading && !forms.length)
+    return (<Text>{say("no_canvas_forms_ask_someone")}</Text>);
+
+  return forms.map((form) => {
+    let icon = "cloud-upload";
+    let color = "black";
+    let size = 25;
+
+    if (form.orgId) createdby = say("org_id")+' '+form.orgId;
+    else createdby = say("hosted_by")+' '+form.server;
+
+    if (form.backend === "dropbox") {
+      icon = "dropbox";
+      color = "#3d9ae8";
+      createdby = say("created_by")+' '+form.author;
+    }
+
+    return (
+      <ListItem icon style={{margin: 10}}>
+          <Left>
+            <Icon name={icon} size={size} color={color} />
+          </Left>
+          <Body>
+            <TouchableOpacity onPress={async () => {
+                if (form.backend === "server") {
+                  // TODO: set loading state as this can take a few seconds
+                  let ret = await props.refer.sayHello(form.server, form.orgId);
+                  if (ret.status === 200) props.refer.navigate_canvassing({server: form.server, orgId: form.orgId, form: form, refer: props.refer});
+                  else setTimeout(() => props.refer.setState({SmLoginScreen: true}), 500);
+               } else {
+                 props.refer.setState({showLegacyDialog: true});
+               }
+              }}>
+              <Text>{form.name}</Text>
+              <Text note>{createdby}</Text>
+            </TouchableOpacity>
+          </Body>
+          <Right>
+            <TouchableOpacity onPress={() => {
+              props.refer.alert(
+                say("delete_form"),
+                say("confirm_delete_form"),
+                {
+                  title: say("yes"),
+                  onPress: async () => {
+                    try {
+                      forms.forEach((f,i) => {if (f.id === form.id) delete forms[i]});
+                      await storage.set('OV_CANVASS_FORMS', JSON.stringify(forms));
+                      props.refer.setState({confirmDialog: false})
+                      props.refer._loadForms();
+                    } catch (e) {
+                      console.warn("_loadForms 3: "+e);
+                    }
+                  },
+                },
+                {
+                  title: say("no"),
+                  onPress: () => props.refer.setState({confirmDialog: false}),
+                },
+              );
+            }}>
+              <Icon name="trash" size={size} color="red" />
+            </TouchableOpacity>
+          </Right>
+      </ListItem>
+  )});
+};
 
 const iconStyles = {
   borderRadius: 10,

@@ -424,11 +424,7 @@ export async function _rmUser() {
     await storage.del('OV_CANVASS_SETTINGS');
     try {
       let forms = JSON.parse(await storage.get('OV_CANVASS_FORMS'));
-      for (let i in forms) {
-        await storage.del('OV_CANVASS_PINS@'+forms[i].id);
-      }
     } catch (error) {}
-    await storage.del('OV_CANVASS_PINS@sampleForm');
     await storage.del('OV_CANVASS_FORMS');
   } catch (error) {
     console.warn(error);

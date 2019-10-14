@@ -11,7 +11,6 @@ import {
 import HVComponent, { HVConfirmDialog } from '../HVComponent';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
-import Swipeout from 'react-native-swipeout';
 import uuidv4 from 'uuid/v4';
 
 import { say, getEpoch, PersonAttr } from '../common';
@@ -73,47 +72,41 @@ export default class App extends HVComponent {
               icon = "check-circle";
               color = "green";
             }
+
+/* TODO: Moved to become a button on the new knock dialog
+  this.alert(
+    'No longer lives here',
+    'Are you sure you wish to mark this person as no longer lives here?',
+    {
+      title: say("yes"),
+      onPress: () => {
+        funcs.personMoved(marker.address.id, place, unit, item.id);
+        item.moved = true;
+        this.setState({confirmDialog: false, updated: getEpoch()}); // have to change state to have FlatList re-render
+        refer.setState({updated: getEpoch()});
+      },
+    },
+    {
+      title: say("no"),
+      onPress: () => this.setState({confirmDialog: false}),
+    },
+  );
+*/
+
             return (
               <View key={item.id} style={{padding: 5}}>
-                <Swipeout
-                  style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20, maxWidth: 350}}
-                  right={[{
-                    text: 'Moved',
-                    type: 'delete',
-                    onPress: () => {
-                      this.alert(
-                        'No longer lives here',
-                        'Are you sure you wish to mark this person as no longer lives here?',
-                        {
-                          title: say("yes"),
-                          onPress: () => {
-                            funcs.personMoved(marker.address.id, place, unit, item.id);
-                            item.moved = true;
-                            this.setState({confirmDialog: false, updated: getEpoch()}); // have to change state to have FlatList re-render
-                            refer.setState({updated: getEpoch()});
-                          },
-                        },
-                        {
-                          title: say("no"),
-                          onPress: () => this.setState({confirmDialog: false}),
-                        },
-                      );
-                    },
-                  }]}
-                  autoClose={true}>
-                  <TouchableOpacity
-                    style={{flexDirection: 'row', alignItems: 'center'}}
-                    onPress={() => {
-                      navigate('Survey', {refer: this, funcs: funcs, form: form, marker: marker, unit: unit, person: item});
-                    }}>
-                    <Icon name={icon} color={color} size={40} style={{margin: 5}} />
-                    <View>
-                      <PersonAttr form={form} idx={0} attrs={item.attrs} />
-                      <PersonAttr form={form} idx={1} attrs={item.attrs} />
-                      <PersonAttr form={form} idx={2} attrs={item.attrs} />
-                    </View>
-                  </TouchableOpacity>
-                </Swipeout>
+                <TouchableOpacity
+                  style={{flexDirection: 'row', alignItems: 'center'}}
+                  onPress={() => {
+                    navigate('Survey', {refer: this, funcs: funcs, form: form, marker: marker, unit: unit, person: item});
+                  }}>
+                  <Icon name={icon} color={color} size={40} style={{margin: 5}} />
+                  <View>
+                    <PersonAttr form={form} idx={0} attrs={item.attrs} />
+                    <PersonAttr form={form} idx={1} attrs={item.attrs} />
+                    <PersonAttr form={form} idx={2} attrs={item.attrs} />
+                  </View>
+                </TouchableOpacity>
               </View>
             );
           }}
