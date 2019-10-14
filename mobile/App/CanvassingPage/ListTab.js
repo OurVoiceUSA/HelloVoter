@@ -121,21 +121,17 @@ const SegmentResidence = props => {
 
   if (rstate.currentMarker.units && rstate.currentMarker.units.length) {
     return (
-      <View>
+      <Content padder>
         <Text style={{fontSize: 20, padding: 10}}>{rstate.currentMarker.address.street}, {rstate.currentMarker.address.city}</Text>
 
         {props.refer.add_new &&
-        <Icon.Button
-          name="plus-circle"
-          backgroundColor="#d7d7d7"
-          color="#000000"
-          onPress={() => {
+        <Button block onPress={() => {
             if (!props.refer.addOk()) return props.refer.alert("Active Filter", "You cannot add a new address while a filter is active.");
             props.refer.setState({ newUnitDialog: true });
-          }}
-          {...iconStyles}>
-          Add new unit/apt number
-        </Icon.Button>
+          }}>
+          <Icon name="plus-circle" backgroundColor="#d7d7d7" color="white" size={20} />
+          <Text>Add new unit/apt number</Text>
+        </Button>
         }
 
         {(rstate.currentMarker.people && rstate.currentMarker.people.length !== 0) &&
@@ -155,7 +151,7 @@ const SegmentResidence = props => {
             <Knock refer={props.refer} funcs={props.refer} marker={rstate.currentMarker} unit={u} form={rstate.form} />
           )}
         />
-    </View>
+    </Content>
     );
   }
 
