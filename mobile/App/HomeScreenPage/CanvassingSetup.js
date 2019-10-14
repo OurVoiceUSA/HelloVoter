@@ -458,15 +458,10 @@ export default class App extends LocationComponent {
         </View>
         }
 
-        <View>
-          <Icon.Button
-            name="plus-circle"
-            backgroundColor="#d7d7d7"
-            color="black"
-            onPress={() => this.setState({SelectModeScreen: true})}>
-            {say("start_new_canvas_activity")}
-          </Icon.Button>
-        </View>
+        <Button block onPress={() => this.setState({SelectModeScreen: true})}>
+            <Icon name="plus-circle" backgroundColor="#d7d7d7" color="white" size={30} />
+            <Text>{say("start_new_canvas_activity")}</Text>
+        </Button>
 
         <Divider />
 

@@ -76,7 +76,7 @@
   "request_to_canvas_rejected": "We're sorry, but your request to canvas with this server has been rejected.",
   "awaiting_assignment": "Awaiting assignment.",
   "delete_form": "Delete Form",
-  "confirm_delete_form": "Are you sure you wish to delete this form? All related canvassing data will be lost.",
+  "confirm_delete_form": "Are you sure you wish to delete this form?",
   "yes": "Yes",
   "no": "No",
   "edit": "Edit",

@@ -76,7 +76,7 @@
   "request_to_canvas_rejected": "Lo sentimos, pero su solicitud para realizar un sondeo con este servidor ha sido rechazada.",
   "awaiting_assignment": "En espera de la asignación.",
   "delete_form": "Eliminar formulario",
-  "confirm_delete_form": "¿Estás seguro de que deseas eliminar este formulario? Todos los datos relacionados con el sondeo se perderán.",
+  "confirm_delete_form": "¿Estás seguro de que deseas eliminar este formulario?",
   "yes": "Sí",
   "no": "No",
   "edit": "Editar",
