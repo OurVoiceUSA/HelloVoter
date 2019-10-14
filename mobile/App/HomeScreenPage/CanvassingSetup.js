@@ -596,7 +596,7 @@ const FormList = props => {
     }
 
     return (
-      <ListItem avatar style={{margin: 10}}>
+      <ListItem avatar key={form.id}>
           <Left>
             <Icon name={icon} size={size} color={color} />
           </Left>

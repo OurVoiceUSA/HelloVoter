@@ -50,7 +50,7 @@ const SegmentList = props => {
   return (
     <List>
     {rstate.turfs.sort(sortAlphaNum).map(t => (
-      <ListItem icon onPress={() => props.refer.setState({selectedTurf: t}, () => props.refer._loadturfInfo())}>
+      <ListItem icon key={t.id} onPress={() => props.refer.setState({selectedTurf: t}, () => props.refer._loadturfInfo())}>
         <Body><Text>{t.name}</Text></Body>
         <Right>
           <Icon name="angle-double-right" size={25} />
