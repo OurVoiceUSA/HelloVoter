@@ -1,23 +1,21 @@
 import React, { PureComponent } from 'react';
-
 import {
-  Image,
   View,
   FlatList,
-  TouchableWithoutFeedback,
+  TouchableOpacity,
 } from 'react-native';
-
 import { Card, CardItem, Content, Text, Body, Button, Spinner } from 'native-base';
-import LocationComponent from '../LocationComponent';
-import { HVConfirmDialog } from '../HVComponent';
+
+import LocationComponent from '../../LocationComponent';
+import { HVConfirmDialog } from '../../HVComponent';
+import DisplayRep from './DisplayRep';
+import PolProfile from './PolProfile';
+import { wsbase } from '../../config'
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 import RNGooglePlaces from 'react-native-google-places';
 import { Dialog } from 'react-native-simple-dialogs';
-import DisplayRep from './DisplayRep';
-import PolProfile from './PolProfile';
-import { wsbase } from '../config'
-import { Divider, say, _apiCall, _loginPing, _doGeocode, _saveUser, _specificAddress } from '../common';
+import { Divider, say, _apiCall, _loginPing, _doGeocode, _saveUser, _specificAddress } from '../../common';
 
 export default class App extends LocationComponent {
 
@@ -234,9 +232,7 @@ export default class App extends LocationComponent {
     return (
       <Content>
         {myPosition.icon &&
-          <TouchableWithoutFeedback
-            style={{backgroundColor: '#d7d7d7', padding: 10}}
-            onPress={() => {this.setState({modalIsOpen: true})}}>
+          <TouchableOpacity onPress={() => {this.setState({modalIsOpen: true})}}>
               <Card>
                 <CardItem header bordered>
                   <Icon style={{marginRight: 10}} name={myPosition.icon} size={20} color="black" />
@@ -255,7 +251,7 @@ export default class App extends LocationComponent {
                   </Body>
                 </CardItem>
               </Card>
-          </TouchableWithoutFeedback>
+          </TouchableOpacity>
         }
 
         {loading &&

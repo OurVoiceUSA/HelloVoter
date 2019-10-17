@@ -1,20 +1,14 @@
-
 import React from 'react';
-import HVComponent from '../HVComponent';
+import { View } from 'react-native';
+import { Container, Header, Content, Footer, FooterTab, Text, Button, Spinner } from 'native-base';
 
-import Home from './Home';
-import YourReps from './YourReps';
-import CanvassingSetup from './CanvassingSetup';
+import HVComponent from '../HVComponent';
+import Home from './HomeTab';
+import YourReps from './YourRepsTab';
+import CanvassingSetup from './CanvassingTab';
 import Supporters from './Supporters';
 import Legal from './Legal';
-import { carouselItems } from './CarouselItems';
-
-import {
-  View,
-  Platform,
-} from 'react-native';
-
-import { Container, Header, Content, Footer, FooterTab, Text, Button, Spinner } from 'native-base';
+import { carouselItems } from './HomeTab/CarouselItems';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 import storage from 'react-native-storage-wrapper';

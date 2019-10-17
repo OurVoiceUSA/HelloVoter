@@ -1,10 +1,7 @@
 import React from 'react';
-
-import {
-  View,
-} from 'react-native';
-
+import { View } from 'react-native';
 import { Text, Button, Spinner } from 'native-base';
+
 import { say, openDonate } from '../common';
 
 export default Supporters = props => (

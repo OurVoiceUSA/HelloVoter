@@ -1,10 +1,8 @@
 import React from 'react';
-
 import {
   View,
   Platform,
 } from 'react-native';
-
 import { Text, Button, Spinner } from 'native-base';
 import { say, openGitHub } from '../common';
 

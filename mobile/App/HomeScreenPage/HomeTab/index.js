@@ -1,17 +1,14 @@
 import React from 'react';
-
-import {
-  View,
-} from 'react-native';
+import { View } from 'react-native';
+import { Text, Button, Spinner } from 'native-base';
 
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 import SliderEntry from './SliderEntry';
-import { sliderWidth, itemWidth } from '../styles/SliderEntry.style';
-import styles, { colors } from '../styles/index.style';
+import { sliderWidth, itemWidth } from './SliderEntry.style';
+import styles, { colors } from '../../styles/index.style';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-import { Text, Button, Spinner } from 'native-base';
-import { say, openURL, openGitHub } from '../common';
+import { say, openURL, openGitHub } from '../../common';
 
 function _renderItemWithParallax ({item, index}, parallaxProps) {
   return (

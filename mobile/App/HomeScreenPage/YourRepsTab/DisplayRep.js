@@ -6,7 +6,7 @@ import {
 } from 'react-native';
 
 import { Text } from 'native-base';
-import { _partyNameFromKey, say, openURL } from '../common';
+import { _partyNameFromKey, say, openURL } from '../../common';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 export default DisplayRep = (props) => {

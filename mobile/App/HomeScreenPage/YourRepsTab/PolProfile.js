@@ -10,7 +10,7 @@ import {
 import { Text, Button } from 'native-base';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { _partyNameFromKey, openURL } from '../common';
+import { _partyNameFromKey, openURL } from '../../common';
 
 function openYoutube(profile) {
   if (profile.youtube_id)

@@ -1,65 +1,11 @@
 import React from 'react';
-
 import { View } from 'react-native';
+import { Body, Right, Left, Text, List, ListItem, Spinner } from 'native-base';
 
-import {
-  Content, Body, Right, Left, Text, Button, List, ListItem, Spinner, Segment,
-} from 'native-base';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { geojson2polygons } from 'ourvoiceusa-sdk-js';
 
-import { say, timeAgo } from '../common';
-
-export default ListTab = props => {
-  const { segmentTurf } = props.refer.state;
-
-  return (
-    <View>
-      <Segment>
-        <Button first active={(segmentTurf==='list')} onPress={() => props.refer.setState({segmentTurf: 'list'})}><Text>List</Text></Button>
-        <Button last active={(segmentTurf==='info')} onPress={() => props.refer.setState({segmentTurf: 'info'})}><Text>Info</Text></Button>
-      </Segment>
-      <SegmentList refer={props.refer} />
-      <SegmentInfo refer={props.refer} />
-    </View>
-  );
-}
-
-var reA = /[^a-zA-Z]/g;
-var reN = /[^0-9]/g;
-
-function sortAlphaNum(ao, bo) {
-  let a = ao.name;
-  let b = bo.name;
-
-  let aA = a.replace(reA, "");
-  let bA = b.replace(reA, "");
-  if (aA === bA) {
-    let aN = parseInt(a.replace(reN, ""), 10);
-    let bN = parseInt(b.replace(reN, ""), 10);
-    return aN === bN ? 0 : aN > bN ? 1 : -1;
-  } else {
-    return aA > bA ? 1 : -1;
-  }
-}
-
-const SegmentList = props => {
-  let rstate = props.refer.state;
-  if (rstate.segmentTurf!=='list') return null;
-
-  return (
-    <List>
-    {rstate.turfs.sort(sortAlphaNum).map(t => (
-      <ListItem icon key={t.id} onPress={() => props.refer.setState({selectedTurf: t}, () => props.refer._loadturfInfo())}>
-        <Body><Text>{t.name}</Text></Body>
-        <Right>
-          <Icon name="angle-double-right" size={25} />
-        </Right>
-      </ListItem>
-    ))}
-    </List>
-  );
-};
+import { say, timeAgo } from '../../common';
 
 function polygonCenter(obj) {
   let arr = obj.map(o => [o.lng,o.lat]);
@@ -79,7 +25,7 @@ function statVal(val) {
   return val;
 }
 
-const SegmentInfo = props => {
+export default SegmentInfo = props => {
   let rstate = props.refer.state;
   if (rstate.segmentTurf!=='info') return null;
 

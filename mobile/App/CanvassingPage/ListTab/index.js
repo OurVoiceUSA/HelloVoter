@@ -12,7 +12,7 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 import Knock from './Knock';
-import { say, Divider, PersonAttr } from '../common';
+import { say, Divider, PersonAttr } from '../../common';
 
 function statusToText(code) {
   switch (code) {

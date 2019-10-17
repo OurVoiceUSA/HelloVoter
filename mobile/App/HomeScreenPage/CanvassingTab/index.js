@@ -1,19 +1,17 @@
-
 import React, { PureComponent } from 'react';
-
 import {
   View,
   Platform,
   TouchableOpacity,
 } from 'react-native';
-
 import {
   Container, Header, Content, List, ListItem, Left, Right, Body, Footer, FooterTab,
   Text, Button, Spinner,
 } from 'native-base';
 
-import LocationComponent from '../LocationComponent';
-import { HVConfirmDialog } from '../HVComponent';
+import LocationComponent from '../../LocationComponent';
+import { HVConfirmDialog } from '../../HVComponent';
+import SmLogin from '../../SmLogin';
 
 import { Dialog } from 'react-native-simple-dialogs';
 import storage from 'react-native-storage-wrapper';
@@ -21,15 +19,14 @@ import Prompt from 'react-native-input-prompt';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import SafariView from 'react-native-safari-view';
 import jwt_decode from 'jwt-decode';
-import SmLogin from '../SmLogin';
 import { ingeojson } from 'ourvoiceusa-sdk-js';
-import { Divider, say, api_base_uri, DINFO, _loginPing, openURL, STORAGE_KEY_JWT } from '../common';
 import { RNCamera } from 'react-native-camera';
-import { wsbase } from '../config';
+import { Divider, say, api_base_uri, DINFO, _loginPing, openURL, STORAGE_KEY_JWT } from '../../common';
+import { wsbase } from '../../config';
 
 import RBush from 'rbush';
-import rtree from '../../rtree.json';
-import { geographies } from '../geographies';
+import rtree from '../../../rtree.json';
+import { geographies } from '../../geographies';
 
 export default class App extends LocationComponent {
 

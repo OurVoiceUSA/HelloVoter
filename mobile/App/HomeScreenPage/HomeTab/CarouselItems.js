@@ -2,7 +2,7 @@ import React from 'react';
 
 import Rate, { AndroidMarket } from 'react-native-rate'
 import { getLocales } from 'react-native-localize';
-import { say, openGitHub, openDonate } from '../common';
+import { say, openGitHub, openDonate } from '../../common';
 
 export function carouselItems(refer) {
   let items = [];
@@ -21,7 +21,7 @@ export function carouselItems(refer) {
       {
         title: say("we_translated_this"),
         subtitle: say("we_used_google_translate"),
-        illustration: require('../../img/translate.png'),
+        illustration: require('../../../img/translate.png'),
         onPress: () => openGitHub(),
       }
     );
@@ -30,7 +30,7 @@ export function carouselItems(refer) {
     {
       title: say("contact_your_reps"),
       subtitle: say("know_who_represents_you"),
-      illustration: require('../../img/phone-your-rep.png'),
+      illustration: require('../../../img/phone-your-rep.png'),
       onPress: () => refer.setState({active: 'reps'}),
     }
   );
@@ -39,7 +39,7 @@ export function carouselItems(refer) {
     {
       title: say("canvas_for_any_cause"),
       subtitle: say("our_zero_cost_tool"),
-      illustration: require('../../img/canvassing.png'),
+      illustration: require('../../../img/canvassing.png'),
       onPress: () => refer.setState({active: 'canvassing'}),
     }
   );
@@ -50,7 +50,7 @@ export function carouselItems(refer) {
       {
         title: say("coming_zoon_desktop_tools"),
         subtitle: say("canvassing_at_scale"),
-        illustration: require('../../img/phone-banking.png'),
+        illustration: require('../../../img/phone-banking.png'),
         onPress: () => openDonate(),
       }
     );
@@ -59,7 +59,7 @@ export function carouselItems(refer) {
     {
       title: say("donate"),
       subtitle: say("we_operate_on_donations"),
-      illustration: require('../../img/donate.png'),
+      illustration: require('../../../img/donate.png'),
       onPress: () => openDonate(),
     }
   );
@@ -68,7 +68,7 @@ export function carouselItems(refer) {
     {
       title: say("rate_this_app"),
       subtitle: say("feedback_helps_us"),
-      illustration: require('../../img/rate.png'),
+      illustration: require('../../../img/rate.png'),
       onPress: () => {
         let options = {
           AppleAppID: "1275301651",
@@ -86,7 +86,7 @@ export function carouselItems(refer) {
     {
       title: say("open_source_software"),
       subtitle: say("help_us_out_directly"),
-      illustration: require('../../img/open-source.png'),
+      illustration: require('../../../img/open-source.png'),
       onPress: () => openGitHub(),
     }
   );

@@ -1,19 +1,17 @@
-
 import React from 'react';
-
 import {
-  Text,
   View,
   TouchableOpacity,
   FlatList,
 } from 'react-native';
+import { Text } from 'native-base';
 
-import HVComponent, { HVConfirmDialog } from '../HVComponent';
+import HVComponent, { HVConfirmDialog } from '../../HVComponent';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 import uuidv4 from 'uuid/v4';
 
-import { say, getEpoch, PersonAttr } from '../common';
+import { say, getEpoch, PersonAttr } from '../../common';
 
 export default class App extends HVComponent {
 
