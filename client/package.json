@@ -40,7 +40,7 @@
     "react-sortable-hoc": "^1.10.1",
     "react-test-renderer": "^16.10.2",
     "react-tooltip": "^3.11.1",
-    "recharts": "^1.7.1",
+    "recharts": "^1.8.3",
     "simple-format-number": "^0.1.2",
     "tcomb-form": "^0.9.21",
     "typeface-roboto": "0.0.75",
