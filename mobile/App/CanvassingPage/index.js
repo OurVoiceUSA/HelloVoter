@@ -112,7 +112,6 @@ export default class App extends LocationComponent {
       newUnitDialog: false,
       showDisclosure: null,
       retry_queue: [],
-      confirmDialog: false,
     };
 
     if (this.state.form.add_new) this.add_new = true;
@@ -823,27 +822,27 @@ export default class App extends LocationComponent {
 
     if (locationAccess === false) {
       nomap_content.push(
-        <View key={1} style={styles.content}>
+        <View>
           <Text>Unable to determine your location.</Text>
           <Text>To view the map, enable location permissions in your device settings.</Text>
         </View>
       );
     } else if (serviceError === true) {
       nomap_content.push(
-        <View key={1} style={styles.content}>
+        <View>
           <Text>Unable to load location services from your device.</Text>
         </View>
       );
     } else if (deviceError === true) {
       nomap_content.push(
-        <View key={1} style={styles.content}>
+        <View>
           <Text>Device Error.</Text>
         </View>
       );
     } else if (myPosition.latitude === null || myPosition.longitude === null) {
       nomap_content.push(
-        <View key={1} style={styles.content}>
-          <Text>Waiting on location data from your device...</Text>
+        <View>
+          <Text>Waiting on location data from your device.</Text>
           <Spinner />
         </View>
       );
@@ -861,22 +860,26 @@ export default class App extends LocationComponent {
     return (
       <Container>
         <Content>
-        {active==='list'&&
-          <ListTab refer={this} />
-        }
-        {active==='turf'&&
-          <TurfTab refer={this} />
-        }
-        {active==='settings'&&
-          <SettingsTab refer={this} form={form} />
-        }
-        </Content>
-
         {nomap_content.length &&
-          <View>
+          <View style={{alignSelf: 'center'}}>
             { nomap_content }
           </View>
         ||
+        <View>
+          {active==='list'&&
+            <ListTab refer={this} />
+          }
+          {active==='turf'&&
+            <TurfTab refer={this} />
+          }
+          {active==='settings'&&
+            <SettingsTab refer={this} form={form} />
+          }
+          </View>
+        }
+        </Content>
+
+        {nomap_content.length===0&&
         <MapView
           ref={component => this.map = component}
           initialRegion={{latitude: myPosition.latitude, longitude: myPosition.longitude, latitudeDelta: region.latitudeDelta, longitudeDelta: region.longitudeDelta}}
@@ -1094,11 +1097,6 @@ export default class App extends LocationComponent {
 }
 
 const styles = StyleSheet.create({
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   icon: {
     justifyContent: 'center',
     borderRadius: 10,
