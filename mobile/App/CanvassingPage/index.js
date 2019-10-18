@@ -1,17 +1,10 @@
 import React from 'react';
-
 import {
   StyleSheet,
   View,
   TouchableOpacity,
 } from 'react-native';
-
 import { Container, Content, Footer, FooterTab, Text, H3, Button, Spinner } from 'native-base';
-
-import {
-  DINFO, STORAGE_KEY_SETTINGS, api_base_uri, _doGeocode, _getApiToken, openURL,
-  getEpoch, timeAgo,
-} from '../common';
 
 import LocationComponent from '../LocationComponent';
 import { HVConfirmDialog } from '../HVComponent';
@@ -32,6 +25,11 @@ import t from 'tcomb-form-native';
 import _ from 'lodash';
 
 import {deepCopy, geojson2polygons, ingeojson} from 'ourvoiceusa-sdk-js';
+
+import {
+  DINFO, STORAGE_KEY_SETTINGS, api_base_uri, _doGeocode, _getApiToken, openURL,
+  getEpoch, timeAgo,
+} from '../common';
 
 var Form = t.form.Form;
 
@@ -112,7 +110,7 @@ export default class App extends LocationComponent {
       canvassSettings: {},
       newAddressDialog: false,
       newUnitDialog: false,
-      showDisclosure: true,
+      showDisclosure: null,
       retry_queue: [],
       confirmDialog: false,
     };
@@ -808,7 +806,16 @@ export default class App extends LocationComponent {
       newAddressDialog, newUnitDialog, onlyPhonePeople,
     } = this.state;
 
-    if (showDisclosure) {
+    // initial render
+    if (showDisclosure === null) {
+      return (
+        <Container>
+          <Content>
+            <Spinner />
+          </Content>
+        </Container>
+      );
+    } else if (showDisclosure) {
       return (<TermsDisclosure refer={this} />);
     }
 

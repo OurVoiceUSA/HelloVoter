@@ -1,20 +1,21 @@
 import React from 'react';
-
 import { View } from 'react-native';
-import {
-  Container, Content, Body, Text, H3, Button, Spinner, Segment, ListItem, CheckBox
-} from 'native-base';
+import { Container, Content, Body, Text, H3, Button, ListItem, CheckBox } from 'native-base';
+
+import HVComponent, { HVConfirmDialog } from '../HVComponent';
+
 import { NavigationActions } from 'react-navigation';
 import storage from 'react-native-storage-wrapper';
 
 import { say, getEpoch, openURL, STORAGE_KEY_DISCLOSURE } from '../common';
-import HVComponent, { HVConfirmDialog } from '../HVComponent';
 
 export async function loadDisclosure(refer) {
   try {
     const value = await storage.get(STORAGE_KEY_DISCLOSURE);
     if (value !== null) {
       refer.setState({showDisclosure: false});
+    } else {
+      refer.setState({showDisclosure: true});
     }
   } catch (error) {}
 }
