@@ -794,7 +794,13 @@ export default class App extends LocationComponent {
     if (!time) time = 500;
     if (this.state.canvassSettings.chill_mode) this._dataGet(pos);
     this.setState({active: 'map'});
-    this.map.animateToCoordinate(pos, time);
+    this.map.animateCamera({
+        center: pos,
+        pitch: 0,
+        heading: 0,
+      },
+      time
+    );
   }
 
   render() {

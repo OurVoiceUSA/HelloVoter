@@ -12,17 +12,6 @@ YellowBox.ignoreWarnings([
   'VirtualizedLists should never',
   'positiveButton',
   'perform a React state update on an unmounted component',
-  'componentWillReceiveProps', 'componentWillMount',
-  'animateCamera',
-  'RNCNetInfo - You are', // my fire, my one desire! (not)
-  'Warning: isMounted(...) is deprecated',
-  'componentWillReceiveProps is deprecated',
-  'componentWillMount is deprecated',
-  'Module RCTImageLoader',
-  'The StackNavigator function',
-  'Class RCTCxxModule was not exported',
-  'Require cycle:',
-  'Task orphaned for request <NSMutableURLRequest: ',
 ]);
 
 import Icon from 'react-native-vector-icons/FontAwesome';
