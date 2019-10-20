@@ -211,13 +211,13 @@ PODS:
     - React-cxxreact (= 0.61.2)
     - React-jsi (= 0.61.2)
   - React-jsinspector (0.61.2)
-  - react-native-camera (3.7.2):
+  - react-native-camera (3.8.0):
     - React
-    - react-native-camera/RCT (= 3.7.2)
-    - react-native-camera/RN (= 3.7.2)
-  - react-native-camera/RCT (3.7.2):
+    - react-native-camera/RCT (= 3.8.0)
+    - react-native-camera/RN (= 3.8.0)
+  - react-native-camera/RCT (3.8.0):
     - React
-  - react-native-camera/RN (3.7.2):
+  - react-native-camera/RN (3.8.0):
     - React
   - react-native-config (0.11.7):
     - React
@@ -458,7 +458,7 @@ SPEC CHECKSUMS:
   React-jsi: 32285a21b1b24c36060493ed3057a34677d58d09
   React-jsiexecutor: 8909917ff7d8f21a57e443a866fd8d4560e50c65
   React-jsinspector: 111d7d342b07a904c400592e02a2b958f1098b60
-  react-native-camera: 2815acff3b2c3bf8b5c78a80aad62398a91051f4
+  react-native-camera: 3e52a28e4f437b566302e574bed0f77eeab3f737
   react-native-config: 55548054279d92e0e4566ea15a8b9b81028ec342
   react-native-geocoder-reborn: 2fc7d5eb30cc85e00c8505121b66549f0468ad5a
   react-native-geolocation: cbd9d6bd06bac411eed2671810f454d4908484a8
@@ -488,4 +488,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: a21d404dfbbd0f37350f700018566e6c7281de3d
 
-COCOAPODS: 1.8.3
+COCOAPODS: 1.8.4
