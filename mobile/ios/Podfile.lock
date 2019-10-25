@@ -42,11 +42,11 @@ PODS:
     - GoogleMaps/Base
   - GooglePlaces (3.2.0):
     - GoogleMaps/Base (= 3.2.0)
-  - Permission-Camera (2.0.2):
+  - Permission-Camera (2.0.3):
     - RNPermissions
-  - Permission-LocationWhenInUse (2.0.2):
+  - Permission-LocationWhenInUse (2.0.3):
     - RNPermissions
-  - Permission-Notifications (2.0.2):
+  - Permission-Notifications (2.0.3):
     - RNPermissions
   - RCTRequired (0.61.2)
   - RCTTypeSafety (0.61.2):
@@ -276,13 +276,13 @@ PODS:
     - ReactCommon/jscallinvoker (= 0.61.2)
   - RNCAsyncStorage (1.6.2):
     - React
-  - RNDeviceInfo (4.0.1):
+  - RNDeviceInfo (5.0.1):
     - React
   - RNGestureHandler (1.4.1):
     - React
-  - RNLocalize (1.3.0):
+  - RNLocalize (1.3.1):
     - React
-  - RNPermissions (2.0.2):
+  - RNPermissions (2.0.3):
     - React
   - RNRate (1.1.10):
     - React
@@ -446,9 +446,9 @@ SPEC CHECKSUMS:
   Google-Maps-iOS-Utils: c32891ff472eaaa1fca032beedafa1a013af7875
   GoogleMaps: 5046d7edfe381c1a0b20fdaf293915a375c3122b
   GooglePlaces: 41bc2e480816b1234a48f4bec92e1c886f37cfe1
-  Permission-Camera: c483d4636407d7e6c13c2dad5bc83c6b258e0df6
-  Permission-LocationWhenInUse: 1482ab86e9a058e963fa51955a0124b6ce458667
-  Permission-Notifications: 239d88f23915b360b596da931dfdb91f0b3b6d8f
+  Permission-Camera: 019cd09a9b6fa90f7e5b2f7a4a9e32c54027f123
+  Permission-LocationWhenInUse: 2d4bac5d1a08ca50c47a848aed9a31fb02e0b614
+  Permission-Notifications: 2fa276816cb192e6c0f36f258df89ab409c9c291
   RCTRequired: c639d59ed389cfb1f1203f65c2ea946d8ec586e2
   RCTTypeSafety: dc23fb655d6c77667c78e327bf661bc11e3b8aec
   React: 7e586e5d7bec12b91c1a096826b0fc9ab1da7865
@@ -478,10 +478,10 @@ SPEC CHECKSUMS:
   React-RCTVibration: fb54c732fd20405a76598e431aa2f8c2bf527de9
   ReactCommon: 5848032ed2f274fcb40f6b9ec24067787c42d479
   RNCAsyncStorage: 5ae4d57458804e99f73d427214442a6b10a53856
-  RNDeviceInfo: 12faae605ba42a1a5041c3c41a77834bc23f049d
+  RNDeviceInfo: abb9b4a1815e120d80429a07f68179b3dd42dc58
   RNGestureHandler: 4cb47a93019c1a201df2644413a0a1569a51c8aa
-  RNLocalize: 6e4a6b8582dfbb50b452464d208c30a7a20516f4
-  RNPermissions: 76d6d5a65496b33378afe4b90ae5b30629ddd900
+  RNLocalize: c117094a6c5a955c94e65520ad4c726e3a0f4ed6
+  RNPermissions: 332fd0d0c33ba71d83a22f584fce7b2270488ae0
   RNRate: d44a8bca6ee08f5d890ecccddaec2810955ffbb3
   RNVectorIcons: 0bb4def82230be1333ddaeee9fcba45f0b288ed4
   Yoga: 14927e37bd25376d216b150ab2a561773d57911f
