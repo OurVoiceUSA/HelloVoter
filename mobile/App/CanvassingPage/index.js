@@ -258,6 +258,7 @@ export default class App extends LocationComponent {
     let { searchPins } = this.state;
     searchPins.push(place);
     this.setState({searchPins});
+    this.selectSelectedSearchPin = true;
   }
 
   _pollHistory = async () => {
@@ -299,7 +300,7 @@ export default class App extends LocationComponent {
   }
 
   showConfirmAddress = (pos) => {
-    const { myPosition } = this.state;
+    const { mapCenter, myPosition } = this.state;
 
     if (!this.addOk()) return this.alert("Active Filter", "You cannot add a new address while a filter is active.");
 
@@ -815,7 +816,7 @@ export default class App extends LocationComponent {
     const {
       showDisclosure, myPosition, myNodes, locationAccess, serviceError, deviceError,
       form, loading, region, active, segmentList, segmentTurf, fetching, selectedTurf, mapCenter,
-      newAddressDialog, newUnitDialog, onlyPhonePeople,
+      newAddressDialog, newUnitDialog, onlyPhonePeople, searchPins,
     } = this.state;
 
     // initial render
@@ -914,9 +915,30 @@ export default class App extends LocationComponent {
           showsIndoors={false}
           showsTraffic={false}
           onPress={(e) => e.nativeEvent.coordinate && this.updateTurfInfo(e.nativeEvent.coordinate)}
-          onLongPress={(e) => this.add_new && e.nativeEvent.coordinate && this.showConfirmAddress(e.nativeEvent.coordinate)}
+          onLongPress={(e) => this.add_new && e.nativeEvent.coordinate && mapCenter.longitudeDelta < 0.005 && this.dropSearchPin({location: e.nativeEvent.coordinate})}
           {...this.props}>
           {active==='map'&&geofence.map((g, idx) => <MapView.Polyline key={idx} coordinates={g.polygon} strokeWidth={2} strokeColor={(g.id === selectedTurf.id ? "blue" : "black")} />)}
+          {active==='map'&&searchPins.map((place, idx) => (
+              <MapView.Marker
+                key={idx}
+                ref={(idx===(searchPins.length-1)?(component) => {
+                  this.selectedSearchPin = component;
+                  if (this.selectSelectedSearchPin) {
+                    this.selectSelectedSearchPin = false;
+                    setTimeout(() => this.selectedSearchPin.showCallout(), 50);
+                  }
+                }:undefined)}
+                coordinate={place.location}
+                onPress={(e) => e.nativeEvent.coordinate && this.updateTurfInfo(e.nativeEvent.coordinate)}
+                pinColor={"purple"}>
+                <MapView.Callout onPress={() => this.add_new && this.showConfirmAddress(place.location)}>
+                  <View style={{backgroundColor: '#FFFFFF', padding: 5, width: 175}}>
+                    {place.address&&<Text style={{fontWeight: 'bold'}}>{place.address}</Text>}
+                    {this.add_new&&<Text>Tap to add this address.</Text>}
+                  </View>
+                </MapView.Callout>
+              </MapView.Marker>
+          ))}
           {active==='map'&&this.state.markers.map((marker) => (
               <MapView.Marker
                 key={marker.address.id}
@@ -929,22 +951,6 @@ export default class App extends LocationComponent {
                       {marker.address.street}, {marker.address.city}, {marker.address.state}, {marker.address.zip}
                     </Text>
                     <Text>{(marker.units.length ? 'Multi-unit address' : this.getLastVisit(marker))}</Text>
-                  </View>
-                </MapView.Callout>
-              </MapView.Marker>
-          ))}
-          {active==='map'&&this.state.searchPins.map((place, idx) => (
-              <MapView.Marker
-                key={idx}
-                coordinate={place.location}
-                onPress={(e) => e.nativeEvent.coordinate && this.updateTurfInfo(e.nativeEvent.coordinate)}
-                pinColor={"purple"}>
-                <MapView.Callout onPress={() => this.add_new && this.showConfirmAddress(place.location)}>
-                  <View style={{backgroundColor: '#FFFFFF', padding: 5, width: 175}}>
-                    <Text style={{fontWeight: 'bold'}}>
-                      {place.address}
-                    </Text>
-                    {this.add_new&&<Text>Tap to add this address.</Text>}
                   </View>
                 </MapView.Callout>
               </MapView.Marker>
