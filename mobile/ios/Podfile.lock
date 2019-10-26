@@ -221,7 +221,7 @@ PODS:
     - React
   - react-native-config (0.11.7):
     - React
-  - react-native-geocoder-reborn (0.8.0):
+  - react-native-geocoder-reborn (0.8.3):
     - React
   - react-native-geolocation (2.0.2):
     - React
@@ -460,7 +460,7 @@ SPEC CHECKSUMS:
   React-jsinspector: 111d7d342b07a904c400592e02a2b958f1098b60
   react-native-camera: 3e52a28e4f437b566302e574bed0f77eeab3f737
   react-native-config: 55548054279d92e0e4566ea15a8b9b81028ec342
-  react-native-geocoder-reborn: 2fc7d5eb30cc85e00c8505121b66549f0468ad5a
+  react-native-geocoder-reborn: db0438c3e1e057791951aaa7013013bfa7fee3fa
   react-native-geolocation: cbd9d6bd06bac411eed2671810f454d4908484a8
   react-native-google-maps: 2e2e697dab576abd5809d78cd74e775865b62bf7
   react-native-google-places: 1531c5b40622f71b6dacfb476e30be9e08e857b8
