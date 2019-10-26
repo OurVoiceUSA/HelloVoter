@@ -4,7 +4,7 @@ import {
   View,
   TouchableOpacity,
 } from 'react-native';
-import { Container, Content, Footer, FooterTab, Text, H3, Button, Spinner } from 'native-base';
+import { Toast, Container, Content, Footer, FooterTab, Text, H3, Button, Spinner } from 'native-base';
 
 import LocationComponent from '../LocationComponent';
 import { HVConfirmDialog } from '../HVComponent';
@@ -153,6 +153,7 @@ export default class App extends LocationComponent {
     this.requestLocationPermission();
     this.setupConnectionListener();
     this.loadRetryQueue();
+    this._dataGet();
   }
 
   onRegionChange(region) {
@@ -285,7 +286,7 @@ export default class App extends LocationComponent {
 
       this.setState({history: json, checkHistory: false});
     } catch (e) {
-      this.triggerNetworkWarning();
+      this.triggerNetworkWarning(e);
     }
 
     this.setState({fetchingHistory: false});
@@ -493,14 +494,14 @@ export default class App extends LocationComponent {
 
       this.setState({turfInfo: json});
     } catch (e) {
-      this.triggerNetworkWarning();
+      this.triggerNetworkWarning(e);
     }
 
     this.setState({fetchingturfInfo: false});
   }
 
   _dataFetch = async (pos, flag) => {
-    const { canvassSettings, myPosition, lastFetchPosition, fetching } = this.state;
+    const { canvassSettings, myPosition, lastFetchPosition, fetching, retry_queue } = this.state;
     let ret = {error: false};
 
     if (!pos) pos = myPosition;
@@ -510,6 +511,8 @@ export default class App extends LocationComponent {
     if (fetching) return;
 
     this.setState({fetching: true});
+
+    if (retry_queue.length) await this.doRetry();
 
     try {
       let https = true;
@@ -576,9 +579,8 @@ export default class App extends LocationComponent {
 
       this.setState({lastFetchPosition: pos, markers: json, listview, listview_order, people, last_fetch: getEpoch()});
     } catch (e) {
-      console.warn("Error: "+e);
       ret.error = true;
-      this.triggerNetworkWarning();
+      this.triggerNetworkWarning(e);
     }
 
     this.setState({fetching: false});
@@ -665,7 +667,7 @@ export default class App extends LocationComponent {
       this.setState({checkHistory: true});
 
     } catch (e) {
-      this.triggerNetworkWarning();
+      console.log({error: e})
       await this.queueRetry(uri, input);
     }
   }
@@ -695,9 +697,8 @@ export default class App extends LocationComponent {
 
     try {
       await storage.del('OV_RETRY');
-      this._dataGet();
     } catch (e) {
-      console.warn(e);
+      this.triggerNetworkWarning(e);
     }
 
     this.setState({retry_running: false});
@@ -756,7 +757,13 @@ export default class App extends LocationComponent {
   }
 
   triggerNetworkWarning() {
-    // TODO: bar that appears at the top and a tap retries
+    Toast.show({
+      text: 'Network Error',
+      buttonText: 'OK',
+      position: 'bottom',
+      type: 'warning',
+      duration: 5000,
+    });
   }
 
   getPinColor(place) {

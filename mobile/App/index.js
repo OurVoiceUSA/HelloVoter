@@ -8,6 +8,8 @@ import {
   YellowBox,
 } from 'react-native';
 
+import { Root } from 'native-base';
+
 YellowBox.ignoreWarnings([
   'VirtualizedLists should never',
   'positiveButton',
@@ -81,4 +83,9 @@ const GoBack = (props) => (
   </TouchableOpacity>
 );
 
-export default createAppContainer(AppNavigator);
+const App = createAppContainer(AppNavigator);
+
+export default () =>
+  <Root>
+    <App />
+  </Root>;
