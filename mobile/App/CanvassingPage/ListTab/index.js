@@ -29,12 +29,14 @@ export default ListTab = props => {
 
   return (
     <View>
-      <Segment>
-        <Button first active={(segmentList==='streets')} onPress={() => props.refer.setState({segmentList: 'streets'})}><Text>Streets</Text></Button>
-        <Button active={(segmentList==='residence')} onPress={() => props.refer.setState({segmentList: 'residence'})}><Text>Residence</Text></Button>
-        <Button active={(segmentList==='people')} onPress={() => props.refer.setState({segmentList: 'people'})}><Text>People</Text></Button>
-        <Button last active={(segmentList==='history')} onPress={() => props.refer.setState({segmentList: 'history'})}><Text>History</Text></Button>
-      </Segment>
+      <Header hasSegment style={{paddingTop: 0}}>
+        <Segment>
+          <Button first active={(segmentList==='streets')} onPress={() => props.refer.setState({segmentList: 'streets'})}><Text>Streets</Text></Button>
+          <Button active={(segmentList==='residence')} onPress={() => props.refer.setState({segmentList: 'residence'})}><Text>Residence</Text></Button>
+          <Button active={(segmentList==='people')} onPress={() => props.refer.setState({segmentList: 'people'})}><Text>People</Text></Button>
+          <Button last active={(segmentList==='history')} onPress={() => props.refer.setState({segmentList: 'history'})}><Text>History</Text></Button>
+        </Segment>
+      </Header>
       {segmentList==='people'&&
       <View>
         <Header searchBar rounded>
