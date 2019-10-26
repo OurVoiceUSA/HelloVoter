@@ -157,9 +157,11 @@ export default class App extends LocationComponent {
     this._dataGet();
   }
 
-  onRegionChange(region) {
-    this.setState({mapCenter: region})
-    if (this.state.canvassSettings.pin_auto_refresh === true) this._dataGet(region);
+  onRegionChange = async () => {
+    let cam = await this.map.getCamera();
+
+    this.setState({mapCenter: cam.center})
+    if (this.state.canvassSettings.pin_auto_refresh === true) this._dataGet(cam.center);
   }
 
   setupConnectionListener = async () => {
@@ -803,17 +805,29 @@ export default class App extends LocationComponent {
     this.setState({peopleSearch: text})
   }
 
-  animateToCoordinate(pos) {
+  animateToCoordinate = async (pos, pan) => {
+    const { lastCam } = this.state;
+
+    let cam = await this.map.getCamera();
+    let pitch = cam.pitch;
+
+    if (pan && lastCam && cam.center.longitude === lastCam.center.longitude) {
+      if (pitch === 65) pitch = 0;
+      else pitch = 65;
+    }
+
     if (!this.state.canvassSettings.pin_auto_refresh) this._dataGet(pos);
     this.setState({active: 'map'});
     this.map.animateCamera({
+        pitch,
         center: pos,
-        pitch: 0,
         heading: 0,
         zoom: 18,
       },
       500
     );
+
+    setTimeout(async () => this.setState({lastCam: (pan?await this.map.getCamera():null)}), 550);
   }
 
   render() {
@@ -1015,7 +1029,7 @@ export default class App extends LocationComponent {
             }
 
             <TouchableOpacity style={styles.iconContainer}
-              onPress={() => this.animateToCoordinate(myPosition)}>
+              onPress={() => this.animateToCoordinate(myPosition, true)}>
               <Icon
                 name="location-arrow"
                 size={50}
