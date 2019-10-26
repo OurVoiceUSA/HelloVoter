@@ -1,11 +1,9 @@
 import React, { PureComponent } from 'react';
+import { I18nManager } from 'react-native';
+import { Toast } from 'native-base';
 
 import * as RNLocalize from "react-native-localize";
 import i18n from "i18n-js";
-
-import {
-  I18nManager,
-} from 'react-native';
 
 import { ConfirmDialog } from 'react-native-simple-dialogs';
 
@@ -43,7 +41,8 @@ export default class HVComponent extends PureComponent {
 
   alert(title, message, pos, neg) {
     if (!pos) pos = {title: "OK", onPress: () => this.setState({confirmDialog: false})};
-    setTimeout(() =>
+    setTimeout(() => {
+      Toast.hide();
       this.setState({
         confirmDialog: true,
         confirmDialogTitle: title,
@@ -51,7 +50,7 @@ export default class HVComponent extends PureComponent {
         confirmDialogPositiveButton: pos,
         confirmDialogNegativeButton: neg,
       })
-    , 250);
+    }, 250);
   }
 
 }

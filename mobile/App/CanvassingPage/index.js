@@ -1023,7 +1023,7 @@ export default class App extends LocationComponent {
                   text: 'Tap on map where to add a marker.',
                   position: 'bottom',
                   type: 'success',
-                  duration: 5000,
+                  duration: 1000000,
                 });
               }}>
               <Icon
