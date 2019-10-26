@@ -1008,8 +1008,13 @@ export default class App extends LocationComponent {
             }
 
             {this.add_new &&
-            <TouchableOpacity style={styles.iconContainer} disabled={pressAddsSearchPin}
+            <TouchableOpacity style={styles.iconContainer}
               onPress={() => {
+                if (pressAddsSearchPin) {
+                  Toast.hide();
+                  this.setState({pressAddsSearchPin: false});
+                  return;
+                }
                 if (mapCenter.longitudeDelta > 0.0045) this.animateToCoordinate(mapCenter);
                 this.setState({pressAddsSearchPin: true, searchPins: []});
                 Toast.show({
