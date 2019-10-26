@@ -85,7 +85,7 @@ export default class App extends LocationComponent {
       listview: {},
       listview_order: [],
       last_fetch: 0,
-      mapCenter: {},
+      mapCamera: {},
       loading: false,
       fetching: false,
       fetchingHistory: false,
@@ -160,7 +160,7 @@ export default class App extends LocationComponent {
   onRegionChange = async () => {
     let cam = await this.map.getCamera();
 
-    this.setState({mapCenter: cam.center})
+    this.setState({mapCamera: cam})
     if (this.state.canvassSettings.pin_auto_refresh === true) this._dataGet(cam.center);
   }
 
@@ -305,7 +305,7 @@ export default class App extends LocationComponent {
   }
 
   showConfirmAddress = (pos) => {
-    const { mapCenter, myPosition } = this.state;
+    const { mapCamera, myPosition } = this.state;
 
     if (!this.addOk()) return this.alert("Active Filter", "You cannot add a new address while a filter is active.");
 
@@ -836,7 +836,7 @@ export default class App extends LocationComponent {
     const { navigate } = this.props.navigation;
     const {
       showDisclosure, myPosition, myNodes, locationAccess, serviceError, deviceError,
-      form, loading, region, active, segmentList, segmentTurf, fetching, selectedTurf, mapCenter,
+      form, loading, region, active, segmentList, segmentTurf, fetching, selectedTurf, mapCamera,
       newAddressDialog, newUnitDialog, onlyPhonePeople, searchPins, pressAddsSearchPin,
     } = this.state;
 
@@ -918,15 +918,7 @@ export default class App extends LocationComponent {
         <MapView
           ref={component => this.map = component}
           initialRegion={{latitude: myPosition.latitude, longitude: myPosition.longitude, latitudeDelta: region.latitudeDelta, longitudeDelta: region.longitudeDelta}}
-          onMapReady={() => {
-            this.setState({mapCenter: myPosition});
-            this.map.animateToRegion({
-              latitude: myPosition.latitude,
-              longitude: myPosition.longitude,
-              latitudeDelta: region.latitudeDelta,
-              longitudeDelta: region.longitudeDelta,
-            });
-          }}
+          onMapReady={() => this.animateToCoordinate(myPosition)}
           provider={PROVIDER_GOOGLE}
           style={(active==='map'?styles.map:null)}
           showsUserLocation={true}
@@ -1000,7 +992,7 @@ export default class App extends LocationComponent {
 
             {!this.state.canvassSettings.pin_auto_refresh &&
             <TouchableOpacity style={styles.iconContainer} disabled={fetching}
-              onPress={() => this._dataGet(mapCenter)}>
+              onPress={() => this._dataGet(mapCamera.center)}>
               <Icon
                 name="refresh"
                 size={50}
@@ -1017,7 +1009,7 @@ export default class App extends LocationComponent {
                   this.setState({pressAddsSearchPin: false});
                   return;
                 }
-                if (mapCenter.longitudeDelta > 0.0045) this.animateToCoordinate(mapCenter);
+                if (mapCamera.zoom < 18) this.animateToCoordinate(mapCamera.center);
                 this.setState({pressAddsSearchPin: true, searchPins: []});
                 Toast.show({
                   text: 'Tap on map where to add a marker.',
@@ -1049,10 +1041,10 @@ export default class App extends LocationComponent {
                 RNGooglePlaces.openAutocompleteModal(
                   {
                     locationBias: {
-                      latitudeNE: mapCenter.latitude+0.1,
-                      longitudeNE: mapCenter.longitude+0.1,
-                      latitudeSW: mapCenter.latitude-0.1,
-                      longitudeSW: mapCenter.longitude-0.1,
+                      latitudeNE: mapCamera.center.latitude+0.1,
+                      longitudeNE: mapCamera.center.longitude+0.1,
+                      latitudeSW: mapCamera.center.latitude-0.1,
+                      longitudeSW: mapCamera.center.longitude-0.1,
                     }
                   },
                   ['location','address']
