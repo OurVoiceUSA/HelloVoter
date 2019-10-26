@@ -157,7 +157,7 @@ export default class App extends LocationComponent {
 
   onRegionChange(region) {
     this.setState({mapCenter: region})
-    if (this.state.canvassSettings.chill_mode !== true) this._dataGet(region);
+    if (this.state.canvassSettings.pin_auto_refresh === true) this._dataGet(region);
   }
 
   setupConnectionListener = async () => {
@@ -792,7 +792,7 @@ export default class App extends LocationComponent {
 
   animateToCoordinate(pos, time) {
     if (!time) time = 500;
-    if (this.state.canvassSettings.chill_mode) this._dataGet(pos);
+    if (!this.state.canvassSettings.pin_auto_refresh) this._dataGet(pos);
     this.setState({active: 'map'});
     this.map.animateCamera({
         center: pos,
@@ -962,7 +962,7 @@ export default class App extends LocationComponent {
         <View style={{alignItems: 'center', justifyContent: 'flex-end'}}>
           <View style={{flexDirection: 'row', marginVertical: 5, backgroundColor: 'transparent',}}>
 
-            {this.state.canvassSettings.chill_mode &&
+            {!this.state.canvassSettings.pin_auto_refresh &&
             <TouchableOpacity style={styles.iconContainer} disabled={fetching}
               onPress={() => this._dataGet(mapCenter)}>
               <Icon
