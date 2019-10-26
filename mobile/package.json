@@ -62,7 +62,6 @@
     "metro-react-native-babel-preset": "^0.56.3",
     "mock-async-storage": "^2.2.0",
     "patch-package": "^6.2.0",
-    "react-native-cli": "^2.0.1",
     "react-test-renderer": "16.11.0",
     "ws": "^7.2.0"
   },
