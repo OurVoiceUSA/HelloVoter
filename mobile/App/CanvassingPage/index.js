@@ -307,6 +307,8 @@ export default class App extends LocationComponent {
 
     if (!this.addOk()) return this.alert("Active Filter", "You cannot add a new address while a filter is active.");
 
+    this.setState({searchPins: []});
+
     if (this.state.netInfo === 'none') {
       this.setState({ newAddressDialog: true });
       return;
@@ -424,7 +426,7 @@ export default class App extends LocationComponent {
       markers.push(marker);
     }
 
-    this.setState({ markers, fAddress, pAddress: fAddress, searchPins: [], newAddressDialog: false });
+    this.setState({ markers, fAddress, pAddress: fAddress, newAddressDialog: false });
     this.doMarkerPress(marker);
   }
 
@@ -808,6 +810,7 @@ export default class App extends LocationComponent {
         center: pos,
         pitch: 0,
         heading: 0,
+        zoom: 18,
       },
       500
     );
@@ -993,11 +996,11 @@ export default class App extends LocationComponent {
             {this.add_new &&
             <TouchableOpacity style={styles.iconContainer} disabled={pressAddsSearchPin}
               onPress={() => {
-                if (mapCenter.longitudeDelta > 0.005) return this.alert("Zoom", "Please zoom in");
-                this.setState({pressAddsSearchPin: true});
+                if (mapCenter.longitudeDelta > 0.0045) this.animateToCoordinate(mapCenter);
+                this.setState({pressAddsSearchPin: true, searchPins: []});
                 Toast.show({
-                  text: 'Tap on map where to add a marker',
-                  position: 'top',
+                  text: 'Tap on map where to add a marker.',
+                  position: 'bottom',
                   type: 'success',
                   duration: 5000,
                 });
