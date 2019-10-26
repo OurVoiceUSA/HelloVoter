@@ -807,6 +807,7 @@ export default class App extends LocationComponent {
 
   animateToCoordinate = async (pos, pan) => {
     const { lastCam } = this.state;
+    let toggle = false;
 
     let cam = await this.map.getCamera();
     let pitch = cam.pitch;
@@ -814,9 +815,10 @@ export default class App extends LocationComponent {
     if (pan && lastCam && cam.center.longitude === lastCam.center.longitude) {
       if (pitch === 65) pitch = 0;
       else pitch = 65;
+      toggle = true;
     }
 
-    if (!this.state.canvassSettings.pin_auto_refresh) this._dataGet(pos);
+    if (!this.state.canvassSettings.pin_auto_refresh && !toggle) this._dataGet(pos);
     this.setState({active: 'map'});
     this.map.animateCamera({
         pitch,
