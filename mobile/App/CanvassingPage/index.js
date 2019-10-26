@@ -1022,7 +1022,7 @@ export default class App extends LocationComponent {
                 name="map-marker"
                 testID="map-marker"
                 size={50}
-                color={(pressAddsSearchPin?"#d3d3d3":"#8b4513")}
+                color={(pressAddsSearchPin?"purple":"#8b4513")}
                 {...styles.icon} />
             </TouchableOpacity>
             }
