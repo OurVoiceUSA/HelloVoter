@@ -91,6 +91,7 @@ export default class App extends LocationComponent {
       fetchingHistory: false,
       fetchingturfInfo: false,
       checkHistory: true,
+      pressAddsSearchPin: false,
       history: [],
       turfInfo: {},
       netInfo: 'none',
@@ -257,8 +258,10 @@ export default class App extends LocationComponent {
   dropSearchPin(place) {
     let { searchPins } = this.state;
     searchPins.push(place);
-    this.setState({searchPins});
+    this.setState({searchPins, pressAddsSearchPin: false});
+    Toast.hide();
     this.selectSelectedSearchPin = true;
+    this.animateToCoordinate(place.location);
   }
 
   _pollHistory = async () => {
@@ -798,8 +801,7 @@ export default class App extends LocationComponent {
     this.setState({peopleSearch: text})
   }
 
-  animateToCoordinate(pos, time) {
-    if (!time) time = 500;
+  animateToCoordinate(pos) {
     if (!this.state.canvassSettings.pin_auto_refresh) this._dataGet(pos);
     this.setState({active: 'map'});
     this.map.animateCamera({
@@ -807,7 +809,7 @@ export default class App extends LocationComponent {
         pitch: 0,
         heading: 0,
       },
-      time
+      500
     );
   }
 
@@ -816,7 +818,7 @@ export default class App extends LocationComponent {
     const {
       showDisclosure, myPosition, myNodes, locationAccess, serviceError, deviceError,
       form, loading, region, active, segmentList, segmentTurf, fetching, selectedTurf, mapCenter,
-      newAddressDialog, newUnitDialog, onlyPhonePeople, searchPins,
+      newAddressDialog, newUnitDialog, onlyPhonePeople, searchPins, pressAddsSearchPin,
     } = this.state;
 
     // initial render
@@ -914,10 +916,28 @@ export default class App extends LocationComponent {
           onRegionChangeComplete={this.onRegionChange}
           showsIndoors={false}
           showsTraffic={false}
-          onPress={(e) => e.nativeEvent.coordinate && this.updateTurfInfo(e.nativeEvent.coordinate)}
-          onLongPress={(e) => this.add_new && e.nativeEvent.coordinate && mapCenter.longitudeDelta < 0.005 && this.dropSearchPin({location: e.nativeEvent.coordinate})}
+          onPress={(e) => {
+            if (e.nativeEvent.coordinate) this.updateTurfInfo(e.nativeEvent.coordinate);
+            if (pressAddsSearchPin && e.nativeEvent.coordinate) this.dropSearchPin({location: e.nativeEvent.coordinate});
+          }}
           {...this.props}>
           {active==='map'&&geofence.map((g, idx) => <MapView.Polyline key={idx} coordinates={g.polygon} strokeWidth={2} strokeColor={(g.id === selectedTurf.id ? "blue" : "black")} />)}
+          {active==='map'&&this.state.markers.map((marker) => (
+              <MapView.Marker
+                key={marker.address.id}
+                coordinate={{longitude: marker.address.longitude, latitude: marker.address.latitude}}
+                onPress={(e) => e.nativeEvent.coordinate && this.updateTurfInfo(e.nativeEvent.coordinate)}
+                pinColor={this.getPinColor(marker)}>
+                <MapView.Callout onPress={() => this.doMarkerPress(marker)}>
+                  <View style={{backgroundColor: '#FFFFFF', padding: 5, width: 175}}>
+                    <Text style={{fontWeight: 'bold'}}>
+                      {marker.address.street}, {marker.address.city}, {marker.address.state}, {marker.address.zip}
+                    </Text>
+                    <Text>{(marker.units.length ? 'Multi-unit address' : this.getLastVisit(marker))}</Text>
+                  </View>
+                </MapView.Callout>
+              </MapView.Marker>
+          ))}
           {active==='map'&&searchPins.map((place, idx) => (
               <MapView.Marker
                 key={idx}
@@ -935,22 +955,6 @@ export default class App extends LocationComponent {
                   <View style={{backgroundColor: '#FFFFFF', padding: 5, width: 175}}>
                     {place.address&&<Text style={{fontWeight: 'bold'}}>{place.address}</Text>}
                     {this.add_new&&<Text>Tap to add this address.</Text>}
-                  </View>
-                </MapView.Callout>
-              </MapView.Marker>
-          ))}
-          {active==='map'&&this.state.markers.map((marker) => (
-              <MapView.Marker
-                key={marker.address.id}
-                coordinate={{longitude: marker.address.longitude, latitude: marker.address.latitude}}
-                onPress={(e) => e.nativeEvent.coordinate && this.updateTurfInfo(e.nativeEvent.coordinate)}
-                pinColor={this.getPinColor(marker)}>
-                <MapView.Callout onPress={() => this.doMarkerPress(marker)}>
-                  <View style={{backgroundColor: '#FFFFFF', padding: 5, width: 175}}>
-                    <Text style={{fontWeight: 'bold'}}>
-                      {marker.address.street}, {marker.address.city}, {marker.address.state}, {marker.address.zip}
-                    </Text>
-                    <Text>{(marker.units.length ? 'Multi-unit address' : this.getLastVisit(marker))}</Text>
                   </View>
                 </MapView.Callout>
               </MapView.Marker>
@@ -986,6 +990,27 @@ export default class App extends LocationComponent {
             </TouchableOpacity>
             }
 
+            {this.add_new &&
+            <TouchableOpacity style={styles.iconContainer} disabled={pressAddsSearchPin}
+              onPress={() => {
+                if (mapCenter.longitudeDelta > 0.005) return this.alert("Zoom", "Please zoom in");
+                this.setState({pressAddsSearchPin: true});
+                Toast.show({
+                  text: 'Tap on map where to add a marker',
+                  position: 'top',
+                  type: 'success',
+                  duration: 5000,
+                });
+              }}>
+              <Icon
+                name="map-marker"
+                testID="map-marker"
+                size={50}
+                color={(pressAddsSearchPin?"#d3d3d3":"#8b4513")}
+                {...styles.icon} />
+            </TouchableOpacity>
+            }
+
             <TouchableOpacity style={styles.iconContainer}
               onPress={() => this.animateToCoordinate(myPosition)}>
               <Icon
@@ -1009,7 +1034,6 @@ export default class App extends LocationComponent {
                   ['location','address']
                 ).then((place) => {
                   this.dropSearchPin(place);
-                  this.animateToCoordinate(place.location);
                 })
                 .catch(e => {});
               }}>
