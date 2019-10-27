@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
-import { Text } from 'native-base';
+import { Text, Header, Body, ListItem, Item, Input, CheckBox } from 'native-base';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 
@@ -29,6 +29,7 @@ function pnumber(person) {
 export default SegmentPeople = props => {
   const { navigate } = props.refer.props.navigation;
   let rstate = props.refer.state;
+  const { onlyPhonePeople } = rstate;
 
   if (rstate.segmentList!=='people') return null;
 
@@ -44,6 +45,18 @@ export default SegmentPeople = props => {
 
   let arr = [(
     <View key="first">
+      <View searchBar rounded style={{paddingTop: 0}}>
+        <Item>
+          <Icon name="search" size={20} />
+          <Input placeholder="Search" onChangeText={text => props.refer.peopleSearchDebounce(text)} />
+        </Item>
+      </View>
+      <ListItem onPress={() => props.refer.setState({onlyPhonePeople: !onlyPhonePeople})}>
+        <CheckBox checked={onlyPhonePeople} onPress={() => props.refer.setState({onlyPhonePeople: !onlyPhonePeople})} />
+        <Body>
+          <Text>{say("Only show those with a Phone Number")}</Text>
+        </Body>
+      </ListItem>
       <Text>Showing {(people.length>=10?10:people.length)} of {people.length} in this area.</Text>
     </View>
   )];
