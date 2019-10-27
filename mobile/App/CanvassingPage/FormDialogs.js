@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { View } from 'react-native';
 import { Text, H3, Button, Spinner } from 'native-base';
 
+import { getEpoch } from '../common';
+
 import { Dialog } from 'react-native-simple-dialogs';
 import t from 'tcomb-form-native';
 import _ from 'lodash';
@@ -34,26 +36,28 @@ const formOptRow = {
   stylesheet: formStyleRow,
 };
 
-export const NewAddressDialog = (props) => (<Text>FOO</Text>);
-
-export class NewAddressDialogTODO extends Component {
+export class NewAddressDialog extends Component {
 
  constructor(props) {
    super(props);
 
-   this.state = {}
+   this.state = {
+     refer: props.refer,
+   }
 
    this.onChange = this.onChange.bind(this);
    //this.onUnitChange = this.onUnitChange.bind(this);
  }
 
   onChange(fAddress) {
-    this.setState({fAddress});
+    const { refer } = this.state;
+    refer.setState({fAddress});
   }
 
   doConfirmAddress = async () => {
-    const { myPosition, form, markers, UniqueID } = this.state;
-    let { fAddress } = this.state;
+    const { refer } = this.state;
+    const { myPosition, form, markers, UniqueID } = refer.state;
+    let { fAddress } = refer.state;
 
     let jsonStreet = this.refs.formStreet.getValue();
     let jsonCity = this.refs.formCity.getValue();
@@ -107,61 +111,63 @@ export class NewAddressDialogTODO extends Component {
         zip: marker.address.zip,
       };
 
-      this.sendData('/address/add/location', input);
+      refer.sendData('/address/add/location', input);
 
       markers.push(marker);
     }
 
-    this.setState({ markers, fAddress, pAddress: fAddress, newAddressDialog: false });
-    this.doMarkerPress(marker);
+    refer.setState({ markers, fAddress, pAddress: fAddress, newAddressDialog: false });
+    refer.doMarkerPress(marker);
   }
 
   render() {
+    const { refer } = this.state;
+    const { loading, newAddressDialog } = refer.state;
 
-  return (
-  <Dialog
-  visible={newAddressDialog}
-  animationType="fade"
-  onTouchOutside={() => this.setState({newAddressDialog: false})}>
-  <View>
-    {loading &&
-    <View>
-      <H3>Loading Address</H3>
-      <Spinner />
-    </View>
-    ||
-    <View>
-      <Button block dark transparent>
-        <H3>Confirm the Address</H3>
-      </Button>
-      <Form
-       ref="formStreet"
-       type={formStreet}
-       onChange={this.onChange}
-       value={this.state.fAddress}
-      />
-      <Form
-       ref="formCity"
-       type={formCity}
-       onChange={this.onChange}
-       options={formOptRow}
-       value={this.state.fAddress}
-      />
-      <Form
-       ref="formState"
-       type={formState}
-       onChange={this.onChange}
-       options={formOptRow}
-       value={this.state.fAddress}
-      />
-      <Button block onPress={this.doConfirmAddress}>
-        <Text>Add Address</Text>
-      </Button>
-    </View>
-    }
-  </View>
-</Dialog>
-  );
+    return (
+      <Dialog
+      visible={newAddressDialog}
+      animationType="fade"
+      onTouchOutside={() => refer.setState({newAddressDialog: false})}>
+        <View>
+          {loading&&
+          <View>
+            <H3>Loading Address</H3>
+            <Spinner />
+          </View>
+          ||
+          <View>
+            <Button block dark transparent>
+              <H3>Confirm the Address</H3>
+            </Button>
+            <Form
+             ref="formStreet"
+             type={formStreet}
+             onChange={this.onChange}
+             value={refer.state.fAddress}
+            />
+            <Form
+             ref="formCity"
+             type={formCity}
+             onChange={this.onChange}
+             options={formOptRow}
+             value={refer.state.fAddress}
+            />
+            <Form
+             ref="formState"
+             type={formState}
+             onChange={this.onChange}
+             options={formOptRow}
+             value={refer.state.fAddress}
+            />
+            <Button block onPress={this.doConfirmAddress}>
+              <Text>Add Address</Text>
+            </Button>
+          </View>
+          }
+        </View>
+      </Dialog>
+    );
   }
 }
 
