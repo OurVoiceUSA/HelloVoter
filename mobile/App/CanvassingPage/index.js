@@ -161,7 +161,7 @@ export default class App extends LocationComponent {
     let cam = await this.map.getCamera();
 
     this.setState({mapCamera: cam})
-    if (this.state.canvassSettings.pin_auto_refresh === true) this._dataGet(cam.center);
+    if (this.state.canvassSettings.pin_auto_reload === true) this._dataGet(cam.center);
   }
 
   setupConnectionListener = async () => {
@@ -818,7 +818,7 @@ export default class App extends LocationComponent {
       toggle = true;
     }
 
-    if (!this.state.canvassSettings.pin_auto_refresh && !toggle) this._dataGet(pos);
+    if (!this.state.canvassSettings.pin_auto_reload && !toggle) this._dataGet(pos);
     this.setState({active: 'map'});
     this.map.animateCamera({
         pitch,
@@ -990,7 +990,7 @@ export default class App extends LocationComponent {
         <View style={{alignItems: 'center', justifyContent: 'flex-end'}}>
           <View style={{flexDirection: 'row', marginVertical: 5, backgroundColor: 'transparent',}}>
 
-            {!this.state.canvassSettings.pin_auto_refresh &&
+            {!this.state.canvassSettings.pin_auto_reload &&
             <TouchableOpacity style={styles.iconContainer} disabled={fetching}
               onPress={() => this._dataGet(mapCamera.center)}>
               <Icon

@@ -42,7 +42,7 @@ export default class SettingsTab extends PureComponent {
 
     canvassSettings[name] = value;
 
-    if (name === 'pin_auto_refresh' && value === true) this.changeSetting('limit', 100);
+    if (name === 'pin_auto_reload' && value === true) this.changeSetting('limit', 100);
 
     refer.setState({canvassSettings});
     this.forceUpdate();
@@ -71,23 +71,23 @@ export default class SettingsTab extends PureComponent {
       <SettingsDividerLong />
 
       <SettingsSwitch
-        title="Pin Auto Refresh"
-        onValueChange={pin_auto_refresh => this.changeSetting('pin_auto_refresh', pin_auto_refresh)}
-        value={refer.state.canvassSettings.pin_auto_refresh}
+        title="Auto Reload"
+        onValueChange={pin_auto_reload => this.changeSetting('pin_auto_reload', pin_auto_reload)}
+        value={refer.state.canvassSettings.pin_auto_reload}
         trackColor={{
           true: colors.switchEnabled,
           false: colors.switchDisabled,
         }}
       />
 
-      <SettingsTextLabel title={"Automatically refresh the pins each time you move the map. WARNING: This reduces your device battery life and causes you to use more cellular data!"} />
+      <SettingsTextLabel title={"Automatically refresh the pins each time you move the map. WARNING: Enabling this increases your cellular data and battery power consumption!"} />
 
       <SettingsDividerShort />
 
       <SettingsPicker
         title="Limit Addresses"
         options={size_matters}
-        disabled={(refer.state.canvassSettings.pin_auto_refresh?true:false)}
+        disabled={(refer.state.canvassSettings.pin_auto_reload?true:false)}
         onValueChange={limit => this.changeSetting('limit', size_matters.filter(m => m.label === limit)[0].size)}
         value={limit2size(refer.state.canvassSettings)}
         styleModalButtonsText={{ color: colors.monza }}
