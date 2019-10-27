@@ -857,26 +857,26 @@ export default class App extends LocationComponent {
 
     if (locationAccess === false) {
       nomap_content.push(
-        <View>
+        <View key={1}>
           <Text>Unable to determine your location.</Text>
           <Text>To view the map, enable location permissions in your device settings.</Text>
         </View>
       );
     } else if (serviceError === true) {
       nomap_content.push(
-        <View>
+        <View key={1}>
           <Text>Unable to load location services from your device.</Text>
         </View>
       );
     } else if (deviceError === true) {
       nomap_content.push(
-        <View>
+        <View key={1}>
           <Text>Device Error.</Text>
         </View>
       );
     } else if (myPosition.latitude === null || myPosition.longitude === null) {
       nomap_content.push(
-        <View>
+        <View key={1}>
           <Text>Waiting on location data from your device.</Text>
           <Spinner />
         </View>

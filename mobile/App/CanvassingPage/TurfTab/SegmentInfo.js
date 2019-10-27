@@ -38,7 +38,7 @@ export default SegmentInfo = props => {
       <Spinner />
       ||
       <List>
-        <ListItem itemDivider icon onPress={() => {
+        <ListItem key="first" itemDivider icon onPress={() => {
           let c = polygonCenter(geojson2polygons(JSON.parse(rstate.turfInfo.geometry))[0]);
           props.refer.setState({selectedTurf: rstate.turfInfo});
           props.refer.animateToCoordinate({longitude: c[0], latitude: c[1]});
@@ -54,21 +54,21 @@ export default SegmentInfo = props => {
           val = rstate.turfInfo.stats[key];
           if (!val || typeof val !== 'object')
             return (
-              <ListItem>
+              <ListItem key={"statval"+key}>
                 <Left><Text>{key}:</Text></Left>
                 <View><Text>{statVal(val)}</Text></View>
               </ListItem>);
           else {
             if (val && typeof val === 'object')
               return Object.keys(val).map((i) => (
-                  <View>
+                  <View key={i}>
                     <ListItem itemDivider>
                       <Text>{i}</Text>
                     </ListItem>
                     {val[i] && typeof val[i] === 'object' && Object.keys(val[i]).map((k) => {
                       v = val[i][k];
                       return (
-                        <ListItem>
+                        <ListItem key={k}>
                           <Left><Text>{k}:</Text></Left>
                           <View><Text>{statVal(v)}</Text></View>
                         </ListItem>

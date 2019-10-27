@@ -199,13 +199,13 @@ const SegmentPeople = props => {
   if (rstate.onlyPhonePeople) people = people.filter(p => pnumber(p.person));
 
   let arr = [(
-    <View>
+    <View key="first">
       <Text>Showing {(people.length>=10?10:people.length)} of {people.length} in this area.</Text>
     </View>
   )];
 
-  people.filter((p, i) => (i < 10)).map(p => arr.push((
-    <View key={p.id} style={{padding: 5}}>
+  people.filter((p, i) => (i < 10)).map((p, idx) => arr.push((
+    <View key={idx}>
       <View style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20, maxWidth: 350}}>
                   <TouchableOpacity
                     style={{flexDirection: 'row', alignItems: 'center'}}
@@ -253,7 +253,7 @@ const SegmentHistory = props => {
       </View>
       }
       <List>
-        {rstate.history.map((item) => {
+        {rstate.history.map((item, idx) => {
           let showtoday = false;
           let today = dateFormat(item.datetime);
           if (lastday !== today) {
@@ -261,7 +261,7 @@ const SegmentHistory = props => {
             showtoday = true;
           }
           return (
-            <View>
+            <View key={idx}>
               {showtoday &&
               <ListItem itemDivider>
                 <Text>{today}</Text>
