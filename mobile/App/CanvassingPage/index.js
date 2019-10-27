@@ -1,58 +1,27 @@
 import React from 'react';
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
-import { Toast, Container, Content, Footer, FooterTab, Text, H3, Button, Spinner } from 'native-base';
+import { Toast, Container, Content, Footer, FooterTab, Text, Button, Spinner } from 'native-base';
 
 import LocationComponent from '../LocationComponent';
 import { HVConfirmDialog } from '../HVComponent';
 import TermsDisclosure, { loadDisclosure } from './TermsDisclosure';
+import { NewAddressDialog } from './FormDialogs';
 import ListTab from './ListTab';
 import TurfTab from './TurfTab';
 import SettingsTab from './SettingsTab';
-
-import storage from 'react-native-storage-wrapper';
-import NetInfo from '@react-native-community/netinfo';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import MapView, { PROVIDER_GOOGLE } from 'react-native-maps'
-import RNGooglePlaces from 'react-native-google-places';
-import { Dialog } from 'react-native-simple-dialogs';
-import md5 from 'md5';
-import { debounce } from 'throttle-debounce';
-import t from 'tcomb-form-native';
-import _ from 'lodash';
-
-import {deepCopy, geojson2polygons, ingeojson} from 'ourvoiceusa-sdk-js';
 
 import {
   DINFO, STORAGE_KEY_SETTINGS, api_base_uri, _doGeocode, _getApiToken, openURL,
   getEpoch, getLastVisit, getPinColor,
 } from '../common';
 
-var Form = t.form.Form;
-
-var formStreet = t.struct({
-  'street': t.String,
-});
-var formCity = t.struct({
-  'city': t.String,
-});
-var formState = t.struct({
-  'state': t.String,
-  'zip': t.String,
-});
-var unitForm = t.struct({
-  'unit': t.String,
-});
-
-const formStyleRow = _.cloneDeep(t.form.Form.stylesheet);
-formStyleRow.fieldset = {
-  flexDirection: 'row'
-};
-formStyleRow.formGroup.normal.flex = 1;
-formStyleRow.formGroup.error.flex = 1;
-
-const formOptRow = {
-  stylesheet: formStyleRow,
-};
+import { deepCopy, geojson2polygons, ingeojson } from 'ourvoiceusa-sdk-js';
+import MapView, { PROVIDER_GOOGLE } from 'react-native-maps'
+import Icon from 'react-native-vector-icons/FontAwesome';
+import RNGooglePlaces from 'react-native-google-places';
+import NetInfo from '@react-native-community/netinfo';
+import storage from 'react-native-storage-wrapper';
+import { debounce } from 'throttle-debounce';
 
 function bystreet(a,b) {
   let na = parseInt(a.address.street.replace(/(\d+) .*/, '$1'));
@@ -123,8 +92,6 @@ export default class App extends LocationComponent {
 
     if (this.state.form.add_new) this.add_new = true;
 
-    this.onChange = this.onChange.bind(this);
-    this.onUnitChange = this.onUnitChange.bind(this);
     this.onRegionChange = this.onRegionChange.bind(this);
     this.handleConnectivityChange = this.handleConnectivityChange.bind(this);
 
@@ -363,79 +330,6 @@ export default class App extends LocationComponent {
       } catch (error) {}
       this.setState({loading: false})
     }, 550);
-  }
-
-  onChange(fAddress) {
-    this.setState({fAddress});
-  }
-
-  onUnitChange(fUnit) {
-    this.setState({fUnit});
-  }
-
-  doConfirmAddress = async () => {
-    const { myPosition, form, markers, UniqueID } = this.state;
-    let { fAddress } = this.state;
-
-    let jsonStreet = this.refs.formStreet.getValue();
-    let jsonCity = this.refs.formCity.getValue();
-    let jsonState = this.refs.formState.getValue();
-
-    if (jsonStreet === null || jsonCity === null || jsonState === null) return;
-
-    let epoch = getEpoch();
-
-    fAddress.street = jsonStreet.street.trim();
-    fAddress.city = jsonCity.city.trim();
-    fAddress.state = jsonState.state.trim();
-    fAddress.zip = jsonState.zip.trim();
-
-    // search for dupes
-    let marker;
-    markers.forEach(m => {
-      // change nulls to empty string
-      ["street", "city", "state", "zip"].forEach(i => {if (!m.address[i]) m.address[i] = "";});
-
-      if (m.address.street.toLowerCase() === fAddress.street.toLowerCase() &&
-          m.address.city.toLowerCase() === fAddress.city.toLowerCase() &&
-          m.address.state.toLowerCase() === fAddress.state.toLowerCase() &&
-          m.address.zip.substring(0, 5) === fAddress.zip.substring(0, 5)) marker = m;
-    });
-
-    if (!marker) {
-      marker = {
-        people: [],
-        units: [],
-        address: {
-          id: md5(fAddress.street.toLowerCase()+fAddress.city.toLowerCase()+fAddress.state.toLowerCase()+fAddress.zip.substring(0, 5)),
-          longitude: fAddress.longitude,
-          latitude: fAddress.latitude,
-          street: fAddress.street,
-          city: fAddress.city,
-          state: fAddress.state,
-          zip: fAddress.zip,
-        },
-      };
-
-      let input = {
-        deviceId: UniqueID,
-        formId: form.id,
-        timestamp: getEpoch(),
-        longitude: fAddress.longitude,
-        latitude: fAddress.latitude,
-        street: marker.address.street,
-        city: marker.address.city,
-        state: marker.address.state,
-        zip: marker.address.zip,
-      };
-
-      this.sendData('/address/add/location', input);
-
-      markers.push(marker);
-    }
-
-    this.setState({ markers, fAddress, pAddress: fAddress, newAddressDialog: false });
-    this.doMarkerPress(marker);
   }
 
   doMarkerPress = (marker) => {
@@ -701,36 +595,6 @@ export default class App extends LocationComponent {
     }
   }
 
-  addUnit = async () => {
-    let { form, myPosition, UniqueID } = this.state;
-
-    let json = this.refs.unitForm.getValue();
-    if (json == null) return;
-
-    // search for dupes
-    let dupe = false;
-    this.state.currentMarker.units.forEach(u => {
-      if (u.name.toLowerCase() === json.unit.toLowerCase()) dupe = true;
-    });
-
-    if (!dupe) {
-      let input = {
-        deviceId: UniqueID,
-        formId: form.id,
-        timestamp: getEpoch(),
-        longitude: myPosition.longitude,
-        latitude: myPosition.latitude,
-        unit: json.unit,
-        addressId: this.state.currentMarker.address.id,
-      };
-
-      this.sendData('/address/add/unit', input);
-      this.state.currentMarker.units.push({name: json.unit, people: []});
-    }
-
-    this.setState({newUnitDialog: false, fUnit: {}});
-  }
-
   notHome = async (id, place, unit) => {
     this.sendStatus(0, id, place, unit);
   }
@@ -838,6 +702,17 @@ export default class App extends LocationComponent {
       );
     }
 
+    if (nomap_content.length) return (
+      <Container>
+        <Content>
+          <View style={{alignSelf: 'center'}}>
+            { nomap_content }
+          </View>
+        </Content>
+        <HVConfirmDialog refer={this} />
+      </Container>
+    );
+
     let geofence = [];
     if (this.state.turfs) {
       for (let i in this.state.turfs) {
@@ -850,12 +725,7 @@ export default class App extends LocationComponent {
     return (
       <Container>
         <Content>
-        {nomap_content.length &&
-          <View style={{alignSelf: 'center'}}>
-            { nomap_content }
-          </View>
-        ||
-        <View>
+          <View>
           {active==='list'&&
             <ListTab refer={this} />
           }
@@ -866,10 +736,8 @@ export default class App extends LocationComponent {
             <SettingsTab refer={this} form={form} />
           }
           </View>
-        }
         </Content>
 
-        {nomap_content.length===0&&
         <MapView
           ref={component => this.map = component}
           initialRegion={{latitude: myPosition.latitude, longitude: myPosition.longitude, latitudeDelta: region.latitudeDelta, longitudeDelta: region.longitudeDelta}}
@@ -926,7 +794,6 @@ export default class App extends LocationComponent {
               </MapView.Marker>
           ))}
         </MapView>
-        }
 
         {fetching&&
         <View style={{position: 'absolute', right: 0, ...styles.iconContainer}}>
@@ -941,7 +808,7 @@ export default class App extends LocationComponent {
         </TouchableOpacity>
         }
 
-        {active==='map' && nomap_content.length === 0 &&
+        {active==='map' &&
         <View style={{alignItems: 'center', justifyContent: 'flex-end'}}>
           <View style={{flexDirection: 'row', marginVertical: 5, backgroundColor: 'transparent',}}>
 
@@ -1019,70 +886,7 @@ export default class App extends LocationComponent {
         </View>
         }
 
-        <Dialog
-          visible={newAddressDialog}
-          animationType="fade"
-          onTouchOutside={() => this.setState({newAddressDialog: false})}>
-          <View>
-            {loading &&
-            <View>
-              <H3>Loading Address</H3>
-              <Spinner />
-            </View>
-            ||
-            <View>
-              <Button block dark transparent>
-                <H3>Confirm the Address</H3>
-              </Button>
-              <Form
-               ref="formStreet"
-               type={formStreet}
-               onChange={this.onChange}
-               value={this.state.fAddress}
-              />
-              <Form
-               ref="formCity"
-               type={formCity}
-               onChange={this.onChange}
-               options={formOptRow}
-               value={this.state.fAddress}
-              />
-              <Form
-               ref="formState"
-               type={formState}
-               onChange={this.onChange}
-               options={formOptRow}
-               value={this.state.fAddress}
-              />
-              <Button block onPress={this.doConfirmAddress}>
-                <Text>Add Address</Text>
-              </Button>
-            </View>
-            }
-          </View>
-        </Dialog>
-
-        <Dialog
-          visible={newUnitDialog}
-          animationType="fade"
-          onTouchOutside={() => this.setState({newUnitDialog: false})}>
-          <View>
-            <View style={{flex: 1, flexDirection: 'row', margin: 20, alignItems: 'center'}}>
-              <Text>Recording a new unit for this address:</Text>
-            </View>
-            <Form
-              ref="unitForm"
-              type={unitForm}
-              options={{fields: {unit: {autoFocus: true}}}}
-              onChange={this.onUnitChange}
-              value={this.state.fUnit}
-            />
-            <Button block onPress={this.addUnit}>
-              <Text>Add Unit</Text>
-            </Button>
-          </View>
-        </Dialog>
-
+        <NewAddressDialog refer={this} />
         <HVConfirmDialog refer={this} />
 
         <Footer>
