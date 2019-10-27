@@ -4,7 +4,7 @@ import { Accordion, Header, Content, Text } from 'native-base';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-import { say, Divider } from '../../common';
+import { say, getPinColor, getLastVisit, Divider } from '../../common';
 
 export default SegmentStreets = props => {
   let rstate = props.refer.state;
@@ -35,7 +35,7 @@ export default SegmentStreets = props => {
       )}
       renderContent={(street) => {
         return rstate.listview[street].map((marker, idx) => {
-          let color = props.refer.getPinColor(marker);
+          let color = getPinColor(marker);
           let icon = (color === "red" ? "ban" : "home");
           let num_people = marker.people.length;
           marker.units.forEach((u) => num_people+=u.people.length);
@@ -46,7 +46,7 @@ export default SegmentStreets = props => {
                 style={{flexDirection: 'row', alignItems: 'center'}}
                 onPress={() => props.refer.doMarkerPress(marker)}>
                 <Icon name={icon} size={40} color={color} style={{margin: 5}} />
-                <Text>{marker.address.street} - {props.refer.getLastVisit(marker)} ({num_people})</Text>
+                <Text>{marker.address.street} - {getLastVisit(marker)} ({num_people})</Text>
                 </TouchableOpacity>
                 <Divider />
               </View>

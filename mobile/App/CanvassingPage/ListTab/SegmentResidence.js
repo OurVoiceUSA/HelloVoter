@@ -5,7 +5,7 @@ import { Accordion, Content, Text, Button } from 'native-base';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 import Knock from './Knock';
-import { say } from '../../common';
+import { say, getPinColor, getLastVisit } from '../../common';
 
 export default SegmentResidence = props => {
   let rstate = props.refer.state;
@@ -32,14 +32,14 @@ export default SegmentResidence = props => {
         <Unit unit={rstate.currentMarker}
           unknown={true}
           refer={props.refer}
-          color={props.refer.getPinColor(rstate.currentMarker)} />
+          color={getPinColor(rstate.currentMarker)} />
         }
 
         <Accordion dataArray={rstate.currentMarker.units}
           renderHeader={(u) => (
             <Unit unit={u}
               refer={props.refer}
-              color={props.refer.getPinColor(u)} />
+              color={getPinColor(u)} />
           )}
           renderContent={(u) => (
             <Knock refer={props.refer} funcs={props.refer} marker={rstate.currentMarker} unit={u} form={rstate.form} />
@@ -59,7 +59,7 @@ const Unit = props => (
     <View
       style={{flexDirection: 'row', alignItems: 'center'}}>
       <Icon name={(props.color === "red" ? "ban" : "address-book")} size={40} color={props.color} style={{margin: 5}} />
-      <Text>Unit {(props.unknown?"Unknown":props.unit.name)} - {props.refer.getLastVisit(props.unit)}</Text>
+      <Text>Unit {(props.unknown?"Unknown":props.unit.name)} - {getLastVisit(props.unit)}</Text>
     </View>
   </View>
 );

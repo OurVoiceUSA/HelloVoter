@@ -135,6 +135,47 @@ export function _partyNameFromKey(party) {
   }
 }
 
+function getLastVisitObj(place) {
+  let latest = {status:-1,end:0};
+
+  if (!place.visits || place.visits.length === 0)
+    return latest;
+
+  for (let i in place.visits) {
+    if (place.visits[i].status !== 3 && place.visits[i].end > latest.end) latest = place.visits[i];
+  }
+
+  return latest;
+}
+
+export function getLastVisit(place) {
+  let str;
+  let v = getLastVisitObj(place);
+
+  switch (v.status) {
+    case 0: str = "Not home"; break;
+    case 1: str = "Home"; break;
+    case 2: str = "Not interested"; break;
+    default: str = "Haven't visited"; break;
+  }
+
+  return str+(v.end?" "+timeAgo(v.end):'');
+}
+
+export function getPinColor(place) {
+  if (place.units && place.units.length) return "cyan";
+
+  let str;
+  let v = getLastVisitObj(place);
+
+  switch (v.status) {
+    case 0: return 'yellow';
+    case 1: return 'green';
+    case 2: return 'red';
+    default: return '#8b4513';
+  }
+}
+
 export async function _doGeocode(lng, lat) {
   let position = {
     longitude: lng,

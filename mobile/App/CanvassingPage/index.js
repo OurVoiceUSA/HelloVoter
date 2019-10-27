@@ -1,9 +1,5 @@
 import React from 'react';
-import {
-  StyleSheet,
-  View,
-  TouchableOpacity,
-} from 'react-native';
+import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { Toast, Container, Content, Footer, FooterTab, Text, H3, Button, Spinner } from 'native-base';
 
 import LocationComponent from '../LocationComponent';
@@ -28,7 +24,7 @@ import {deepCopy, geojson2polygons, ingeojson} from 'ourvoiceusa-sdk-js';
 
 import {
   DINFO, STORAGE_KEY_SETTINGS, api_base_uri, _doGeocode, _getApiToken, openURL,
-  getEpoch, timeAgo,
+  getEpoch, getLastVisit, getPinColor,
 } from '../common';
 
 var Form = t.form.Form;
@@ -65,6 +61,16 @@ function bystreet(a,b) {
   if ( na < nb ) return -1;
   if ( na > nb ) return 1;
   return 0;
+}
+
+function triggerNetworkWarning() {
+  Toast.show({
+    text: 'Network Error',
+    buttonText: 'OK',
+    position: 'bottom',
+    type: 'warning',
+    duration: 5000,
+  });
 }
 
 export default class App extends LocationComponent {
@@ -292,7 +298,7 @@ export default class App extends LocationComponent {
 
       this.setState({history: json, checkHistory: false});
     } catch (e) {
-      this.triggerNetworkWarning(e);
+      triggerNetworkWarning(e);
     }
 
     this.setState({fetchingHistory: false});
@@ -441,33 +447,6 @@ export default class App extends LocationComponent {
     this.setState({active: 'list', segmentList: 'residence'});
   }
 
-  getLastVisitObj(place) {
-    let latest = {status:-1,end:0};
-
-    if (!place.visits || place.visits.length === 0)
-      return latest;
-
-    for (let i in place.visits) {
-      if (place.visits[i].status !== 3 && place.visits[i].end > latest.end) latest = place.visits[i];
-    }
-
-    return latest;
-  }
-
-  getLastVisit(place) {
-    let str;
-    let v = this.getLastVisitObj(place);
-
-    switch (v.status) {
-      case 0: str = "Not home"; break;
-      case 1: str = "Home"; break;
-      case 2: str = "Not interested"; break;
-      default: str = "Haven't visited"; break;
-    }
-
-    return str+(v.end?" "+timeAgo(v.end):'');
-  }
-
   updateLocalMarker(place, input) {
     // add interaction locally so app updates color
     if (!place.visits) place.visits = [];
@@ -502,7 +481,7 @@ export default class App extends LocationComponent {
 
       this.setState({turfInfo: json});
     } catch (e) {
-      this.triggerNetworkWarning(e);
+      triggerNetworkWarning(e);
     }
 
     this.setState({fetchingturfInfo: false});
@@ -588,7 +567,7 @@ export default class App extends LocationComponent {
       this.setState({lastFetchPosition: pos, markers: json, listview, listview_order, people, last_fetch: getEpoch()});
     } catch (e) {
       ret.error = true;
-      this.triggerNetworkWarning(e);
+      triggerNetworkWarning(e);
     }
 
     this.setState({fetching: false});
@@ -706,7 +685,7 @@ export default class App extends LocationComponent {
     try {
       await storage.del('OV_RETRY');
     } catch (e) {
-      this.triggerNetworkWarning(e);
+      triggerNetworkWarning(e);
     }
 
     this.setState({retry_running: false});
@@ -762,30 +741,6 @@ export default class App extends LocationComponent {
 
   personMoved = async (id, place, unit, personId) => {
     this.sendStatus(3, id, place, unit, personId);
-  }
-
-  triggerNetworkWarning() {
-    Toast.show({
-      text: 'Network Error',
-      buttonText: 'OK',
-      position: 'bottom',
-      type: 'warning',
-      duration: 5000,
-    });
-  }
-
-  getPinColor(place) {
-    if (place.units && place.units.length) return "cyan";
-
-    let str;
-    let v = this.getLastVisitObj(place);
-
-    switch (v.status) {
-      case 0: return 'yellow';
-      case 1: return 'green';
-      case 2: return 'red';
-      default: return '#8b4513';
-    }
   }
 
   updateTurfInfo(pos) {
@@ -938,13 +893,13 @@ export default class App extends LocationComponent {
                 key={marker.address.id}
                 coordinate={{longitude: marker.address.longitude, latitude: marker.address.latitude}}
                 onPress={(e) => e.nativeEvent.coordinate && this.updateTurfInfo(e.nativeEvent.coordinate)}
-                pinColor={this.getPinColor(marker)}>
+                pinColor={getPinColor(marker)}>
                 <MapView.Callout onPress={() => this.doMarkerPress(marker)}>
                   <View style={{backgroundColor: '#FFFFFF', padding: 5, width: 175}}>
                     <Text style={{fontWeight: 'bold'}}>
                       {marker.address.street}, {marker.address.city}, {marker.address.state}, {marker.address.zip}
                     </Text>
-                    <Text>{(marker.units.length ? 'Multi-unit address' : this.getLastVisit(marker))}</Text>
+                    <Text>{(marker.units.length ? 'Multi-unit address' : getLastVisit(marker))}</Text>
                   </View>
                 </MapView.Callout>
               </MapView.Marker>

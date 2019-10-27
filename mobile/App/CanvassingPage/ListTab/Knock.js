@@ -11,7 +11,7 @@ import HVComponent, { HVConfirmDialog } from '../../HVComponent';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import uuidv4 from 'uuid/v4';
 
-import { say, getEpoch, PersonAttr } from '../../common';
+import { say, getEpoch, getLastVisit, PersonAttr } from '../../common';
 
 export default class App extends HVComponent {
 
@@ -32,7 +32,7 @@ export default class App extends HVComponent {
 
     const place = (unit?unit:marker);
 
-    let LastInteraction = funcs.getLastVisit(place);
+    let LastInteraction = getLastVisit(place);
 
     return (
       <View>
