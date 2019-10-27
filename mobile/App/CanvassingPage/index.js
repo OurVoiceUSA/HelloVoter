@@ -965,7 +965,7 @@ export default class App extends LocationComponent {
                 <MapView.Callout onPress={() => this.add_new && this.showConfirmAddress(place.location)}>
                   <View style={{backgroundColor: '#FFFFFF', padding: 5, width: 175}}>
                     {place.address&&<Text style={{fontWeight: 'bold'}}>{place.address}</Text>}
-                    {this.add_new&&<Text>Tap to add this address.</Text>}
+                    {this.add_new&&<Button><Text>Add this location</Text></Button>}
                   </View>
                 </MapView.Callout>
               </MapView.Marker>
