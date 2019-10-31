@@ -21,7 +21,7 @@ function _renderItemWithParallax ({item, index}, parallaxProps) {
   );
 }
 
-export default Legal = props => (
+export default HomeTab = props => (
   <View>
     <Carousel
       ref={c => props.refer._sliderRef = c}

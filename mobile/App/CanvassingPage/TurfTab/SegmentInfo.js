@@ -26,32 +26,33 @@ function statVal(val) {
 }
 
 export default SegmentInfo = props => {
-  let rstate = props.refer.state;
-  if (rstate.segmentTurf!=='info') return null;
+  const { refer } = props;
+  const { segmentTurf, fetchingturfInfo, turfInfo } = refer.state;
+  if (segmentTurf!=='info') return null;
 
-  if (!rstate.fetchingturfInfo && Object.keys(rstate.turfInfo).length === 0)
+  if (!fetchingturfInfo && Object.keys(turfInfo).length === 0)
     return (<Text>No turf selected.</Text>);
 
   return (
     <View>
-      {rstate.fetchingturfInfo&&
+      {fetchingturfInfo&&
       <Spinner />
       ||
       <List>
         <ListItem key="first" itemDivider icon onPress={() => {
-          let c = polygonCenter(geojson2polygons(JSON.parse(rstate.turfInfo.geometry))[0]);
-          props.refer.setState({selectedTurf: rstate.turfInfo});
-          props.refer.animateToCoordinate({longitude: c[0], latitude: c[1]});
+          let c = polygonCenter(geojson2polygons(JSON.parse(turfInfo.geometry))[0]);
+          refer.setState({selectedTurf: turfInfo});
+          refer.animateToCoordinate({longitude: c[0], latitude: c[1]});
         }}>
           <Body>
-            <Text>{rstate.turfInfo.name}</Text>
+            <Text>{turfInfo.name}</Text>
           </Body>
           <Right>
             <Icon name="compass" size={25} />
           </Right>
         </ListItem>
-        {Object.keys(rstate.turfInfo.stats).map((key) => {
-          val = rstate.turfInfo.stats[key];
+        {Object.keys(turfInfo.stats).map((key) => {
+          val = turfInfo.stats[key];
           if (!val || typeof val !== 'object')
             return (
               <ListItem key={"statval"+key}>

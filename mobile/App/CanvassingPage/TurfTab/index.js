@@ -8,18 +8,19 @@ import SegmentInfo from './SegmentInfo';
 import { say } from '../../common';
 
 export default ListTab = props => {
-  const { segmentTurf } = props.refer.state;
+  const { refer } = props;
+  const { segmentTurf } = refer.state;
 
   return (
     <View>
       <Header hasSegment style={{paddingTop: 0}}>
         <Segment>
-          <Button first active={(segmentTurf==='list')} onPress={() => props.refer.setState({segmentTurf: 'list'})}><Text>List</Text></Button>
-          <Button last active={(segmentTurf==='info')} onPress={() => props.refer.setState({segmentTurf: 'info'})}><Text>Info</Text></Button>
+          <Button first active={(segmentTurf==='list')} onPress={() => refer.setState({segmentTurf: 'list'})}><Text>List</Text></Button>
+          <Button last active={(segmentTurf==='info')} onPress={() => refer.setState({segmentTurf: 'info'})}><Text>Info</Text></Button>
         </Segment>
       </Header>
-      <SegmentList refer={props.refer} />
-      <SegmentInfo refer={props.refer} />
+      <SegmentList refer={refer} />
+      <SegmentInfo refer={refer} />
     </View>
   );
 }

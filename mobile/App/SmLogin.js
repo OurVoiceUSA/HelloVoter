@@ -29,9 +29,12 @@ export default class App extends PureComponent {
   }
 
   _doCheck = async () => {
+    const { refer } = this.props;
+
     var user = await _loginPing(this, true);
+
     if (user.loggedin) {
-      this.props.refer.setState({user: user, SmLoginScreen: false});
+      refer.setState({user: user, SmLoginScreen: false});
     } else if (user.id) {
       let type = user.id.split(":")[0];
       switch(type) {
@@ -81,6 +84,7 @@ export default class App extends PureComponent {
 
   render() {
     const { user } = this.state;
+    const { refer } = this.props;
 
     return (
       <View>
@@ -117,9 +121,7 @@ export default class App extends PureComponent {
             name="ban"
             backgroundColor="#d7d7d7"
             color="#000000"
-            onPress={() => {
-              this.props.refer.setState({SmLoginScreen: false, signupReturn: false});
-            }}
+            onPress={() => refer.setState({SmLoginScreen: false, signupReturn: false})}
             {...iconStyles}>
             No Thanks
           </Icon.Button>

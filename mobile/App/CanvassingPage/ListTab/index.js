@@ -10,22 +10,23 @@ import SegmentHistory from './SegmentHistory';
 import { say } from '../../common';
 
 export default ListTab = props => {
-  const { segmentList } = props.refer.state;
+  const { refer } = props;
+  const { segmentList } = refer.state;
 
   return (
     <View>
       <Header hasSegment style={{paddingTop: 0}}>
         <Segment>
-          <Button first active={(segmentList==='streets')} onPress={() => props.refer.setState({segmentList: 'streets'})}><Text>Streets</Text></Button>
-          <Button active={(segmentList==='residence')} onPress={() => props.refer.setState({segmentList: 'residence'})}><Text>Residence</Text></Button>
-          <Button active={(segmentList==='people')} onPress={() => props.refer.setState({segmentList: 'people'})}><Text>People</Text></Button>
-          <Button last active={(segmentList==='history')} onPress={() => props.refer.setState({segmentList: 'history'})}><Text>History</Text></Button>
+          <Button first active={(segmentList==='streets')} onPress={() => refer.setState({segmentList: 'streets'})}><Text>Streets</Text></Button>
+          <Button active={(segmentList==='residence')} onPress={() => refer.setState({segmentList: 'residence'})}><Text>Residence</Text></Button>
+          <Button active={(segmentList==='people')} onPress={() => refer.setState({segmentList: 'people'})}><Text>People</Text></Button>
+          <Button last active={(segmentList==='history')} onPress={() => refer.setState({segmentList: 'history'})}><Text>History</Text></Button>
         </Segment>
       </Header>
-      <SegmentStreets refer={props.refer} />
-      <SegmentResidence refer={props.refer} />
-      <SegmentPeople refer={props.refer} />
-      <SegmentHistory refer={props.refer} />
+      <SegmentStreets refer={refer} />
+      <SegmentResidence refer={refer} />
+      <SegmentPeople refer={refer} />
+      <SegmentHistory refer={refer} />
     </View>
   );
 }

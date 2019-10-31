@@ -573,9 +573,10 @@ export default class App extends LocationComponent {
 }
 
 const FormList = props => {
-  let rstate = props.refer.state;
-  let forms = rstate.forms;
-  if (!rstate.loading && !forms.length)
+  const { refer } = props;
+  const { loading, forms } = refer.state;
+
+  if (!loading && !forms.length)
     return (<Text>{say("no_canvas_forms_ask_someone")}</Text>);
 
   return forms.map((form) => {
@@ -601,11 +602,11 @@ const FormList = props => {
             <TouchableOpacity onPress={async () => {
                 if (form.backend === "server") {
                   // TODO: set loading state as this can take a few seconds
-                  let ret = await props.refer.sayHello(form.server, form.orgId);
-                  if (ret.status === 200) props.refer.navigate_canvassing({server: form.server, orgId: form.orgId, form: form, refer: props.refer});
-                  else setTimeout(() => props.refer.setState({SmLoginScreen: true}), 500);
+                  let ret = await refer.sayHello(form.server, form.orgId);
+                  if (ret.status === 200) refer.navigate_canvassing({server: form.server, orgId: form.orgId, form: form, refer: refer});
+                  else setTimeout(() => refer.setState({SmLoginScreen: true}), 500);
                } else {
-                 props.refer.setState({showLegacyDialog: true});
+                 refer.setState({showLegacyDialog: true});
                }
               }}>
               <Text>{form.name}</Text>
@@ -616,7 +617,7 @@ const FormList = props => {
           </Body>
           <Right>
             <TouchableOpacity onPress={() => {
-              props.refer.alert(
+              refer.alert(
                 say("delete_form"),
                 say("confirm_delete_form"),
                 {
@@ -625,8 +626,8 @@ const FormList = props => {
                     try {
                       forms.forEach((f,i) => {if (f.id === form.id) delete forms[i]});
                       await storage.set('OV_CANVASS_FORMS', JSON.stringify(forms));
-                      props.refer.setState({confirmDialog: false})
-                      props.refer._loadForms();
+                      refer.setState({confirmDialog: false})
+                      refer._loadForms();
                     } catch (e) {
                       console.warn("_loadForms 3: "+e);
                     }
@@ -634,7 +635,7 @@ const FormList = props => {
                 },
                 {
                   title: say("no"),
-                  onPress: () => props.refer.setState({confirmDialog: false}),
+                  onPress: () => refer.setState({confirmDialog: false}),
                 },
               );
             }}>

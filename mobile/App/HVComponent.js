@@ -56,17 +56,18 @@ export default class HVComponent extends PureComponent {
 }
 
 export const HVConfirmDialog = props => {
+  const { refer } = props;
   const {
     confirmDialog, confirmDialogTitle, confirmDialogMessage,
     confirmDialogPositiveButton, confirmDialogNegativeButton,
-  } = props.refer.state;
+  } = refer.state;
 
   return (
     <ConfirmDialog
       title={confirmDialogTitle}
       message={confirmDialogMessage}
       visible={confirmDialog}
-      onTouchOutside={() => props.refer.setState({confirmDialog: false})}
+      onTouchOutside={() => refer.setState({confirmDialog: false})}
       positiveButton={confirmDialogPositiveButton}
       negativeButton={confirmDialogNegativeButton}
     />

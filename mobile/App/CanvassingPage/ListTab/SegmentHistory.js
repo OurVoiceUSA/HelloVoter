@@ -23,22 +23,23 @@ function timeFormat(epoch) {
 }
 
 export default SegmentHistory = props => {
-  let rstate = props.refer.state;
-  if (rstate.segmentList!=='history') return null;
+  const { refer } = props;
+  const { segmentList, fetchingHistory, history } = refer.state;
+  if (segmentList!=='history') return null;
   let lastday;
 
   return (
     <Content>
-      {rstate.fetchingHistory&&
+      {fetchingHistory&&
       <Spinner />
       }
-      {!rstate.fetchingHistory&&
+      {!fetchingHistory&&
       <View style={{padding: 10}}>
-        <Text>{(rstate.history.length?'Loaded '+rstate.history.length+' historical actions:':'No history to view')}</Text>
+        <Text>{(history.length?'Loaded '+history.length+' historical actions:':'No history to view')}</Text>
       </View>
       }
       <List>
-        {rstate.history.map((item, idx) => {
+        {history.map((item, idx) => {
           let showtoday = false;
           let today = dateFormat(item.datetime);
           if (lastday !== today) {
@@ -52,7 +53,7 @@ export default SegmentHistory = props => {
                 <Text>{today}</Text>
               </ListItem>
               }
-              <ListItem avatar onPress={() => props.refer.animateToCoordinate({longitude: item.address.position.x, latitude: item.address.position.y}, 1000)}>
+              <ListItem avatar onPress={() => refer.animateToCoordinate({longitude: item.address.position.x, latitude: item.address.position.y}, 1000)}>
                 <Left>
                   <Thumbnail source={{ uri: item.volunteer.avatar }} />
                 </Left>

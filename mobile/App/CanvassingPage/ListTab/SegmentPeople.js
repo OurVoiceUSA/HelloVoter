@@ -27,49 +27,48 @@ function pnumber(person) {
 }
 
 export default SegmentPeople = props => {
-  const { navigate } = props.refer.props.navigation;
-  let rstate = props.refer.state;
-  const { onlyPhonePeople } = rstate;
+  const { refer } = props;
+  const { navigate } = refer.props.navigation;
+  const { segmentList, people, onlyPhonePeople, peopleSearch, form, markers } = refer.state;
 
-  if (rstate.segmentList!=='people') return null;
+  if (segmentList!=='people') return null;
 
-  if (!rstate.people.length) return (<Text style={{margin: 10}}>No people data for this area. Try widening your view on the map or adjusting your filter settings.</Text>);
+  if (!people.length) return (<Text style={{margin: 10}}>No people data for this area. Try widening your view on the map or adjusting your filter settings.</Text>);
 
-  let form = rstate.form;
-  let people;
+  let ppl;
 
-  if (rstate.peopleSearch) people = rstate.people.filter(p => pname(p.person).match(rstate.peopleSearch.toLowerCase()));
-  else people = rstate.people;
+  if (peopleSearch) ppl = people.filter(p => pname(p.person).match(peopleSearch.toLowerCase()));
+  else ppl = people;
 
-  if (rstate.onlyPhonePeople) people = people.filter(p => pnumber(p.person));
+  if (onlyPhonePeople) ppl = people.filter(p => pnumber(p.person));
 
   let arr = [(
     <View key="first">
       <View searchBar rounded style={{paddingTop: 0}}>
         <Item>
           <Icon name="search" size={20} />
-          <Input placeholder="Search" onChangeText={text => props.refer.peopleSearchDebounce(text)} />
+          <Input placeholder="Search" onChangeText={text => refer.peopleSearchDebounce(text)} />
         </Item>
       </View>
-      <ListItem onPress={() => props.refer.setState({onlyPhonePeople: !onlyPhonePeople})}>
-        <CheckBox checked={onlyPhonePeople} onPress={() => props.refer.setState({onlyPhonePeople: !onlyPhonePeople})} />
+      <ListItem onPress={() => refer.setState({onlyPhonePeople: !onlyPhonePeople})}>
+        <CheckBox checked={onlyPhonePeople} onPress={() => refer.setState({onlyPhonePeople: !onlyPhonePeople})} />
         <Body>
           <Text>{say("Only show those with a Phone Number")}</Text>
         </Body>
       </ListItem>
-      <Text>Showing {(people.length>=10?10:people.length)} of {people.length} in this area.</Text>
+      <Text>Showing {(ppl.length>=10?10:ppl.length)} of {ppl.length} in this area.</Text>
     </View>
   )];
 
-  people.filter((p, i) => (i < 10)).map((p, idx) => arr.push((
+  ppl.filter((p, i) => (i < 10)).map((p, idx) => arr.push((
     <View key={idx}>
       <View style={{backgroundColor: '#d7d7d7', flex: 1, padding: 10, borderRadius: 20, maxWidth: 350}}>
                   <TouchableOpacity
                     style={{flexDirection: 'row', alignItems: 'center'}}
                     onPress={() => {
                       // find marker & unit by person
-                      let marker = rstate.markers.find(m => m.address.id === p.address_id)
-                      navigate('Survey', {refer: props.refer, funcs: props.refer, form: form, marker: marker, unit: p.unit, person: p.person});
+                      let marker = markers.find(m => m.address.id === p.address_id)
+                      navigate('Survey', {refer: refer, funcs: refer, form: form, marker: marker, unit: p.unit, person: p.person});
                     }}>
                     <Icon name="user" color="black" size={40} style={{margin: 5}} />
                     <View>
