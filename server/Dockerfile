@@ -1,13 +1,10 @@
-FROM openjdk:alpine as jdk
 FROM node:dubnium-alpine as build
 
+RUN mkdir -p /run && \
+    apk update && apk upgrade && \
+    apk add --no-cache git bash make python g++ openjdk8
+
 ENV JAVA_HOME=/usr/lib/jvm/default-jvm
-COPY --from=jdk /usr/lib/jvm /usr/lib/jvm
-
-RUN mkdir -p /run
-
-RUN apk update && apk upgrade && \
-    apk add --no-cache git bash make python g++
 
 WORKDIR /run
 
@@ -20,7 +17,7 @@ RUN npm --unsafe-perm install
 
 FROM node:dubnium-alpine
 
-COPY --from=jdk /usr/lib/jvm /usr/lib/jvm
+COPY --from=build /usr/lib/jvm /usr/lib/jvm
 COPY --from=build /run /run
 
 WORKDIR /run
@@ -29,7 +26,6 @@ ENV JAVA_HOME=/usr/lib/jvm/default-jvm
 ENV NODE_ENV=production
 ENV BABEL_CACHE_PATH=/tmp/.babel_cache
 ENV NO_UPDATE_NOTIFIER=1
-ENV DISABLE_JMX=1
 
 HEALTHCHECK --interval=15s --timeout=5s --start-period=5s CMD node /run/app/poke.js
 
