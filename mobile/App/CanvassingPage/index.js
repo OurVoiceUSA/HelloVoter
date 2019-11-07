@@ -458,6 +458,17 @@ export default class App extends LocationComponent {
 
       Object.keys(listview).forEach((street) => listview[street].sort(bystreet));
 
+      if (listview_order.length === 0)
+        Toast.show({
+          text: 'No data for this area.',
+          buttonText: 'OK',
+          position: 'bottom',
+          type: 'warning',
+          duration: 4000,
+        });
+      else
+        Toast.hide();
+
       this.setState({lastFetchPosition: pos, markers: json, listview, listview_order, people, last_fetch: getEpoch()});
     } catch (e) {
       ret.error = true;
