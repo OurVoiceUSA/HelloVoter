@@ -1,6 +1,10 @@
 {
   "name": "HelloVoterSuite",
   "version": "1.8.5",
+  "funding": {
+    "type": "patreon",
+    "url": "https://www.patreon.com/hellovoter"
+  },
   "description": "",
   "main": "index.js",
   "scripts": {
