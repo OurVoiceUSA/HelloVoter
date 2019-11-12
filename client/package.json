@@ -13,7 +13,7 @@
     "circle-to-polygon": "^1.0.2",
     "enzyme": "^3.10.0",
     "enzyme-adapter-react-16": "^1.15.1",
-    "filesize": "^6.0.0",
+    "filesize": "^6.0.1",
     "google-maps-react": "^2.0.2",
     "javascript-time-ago": "^2.0.4",
     "jsonwebtoken": "^8.5.1",
