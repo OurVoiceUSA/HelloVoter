@@ -305,7 +305,7 @@ export default class App extends HVComponent {
           styleModalButtonsText={{ color: colors.monza }}
         />
 
-        <SettingsTextLabel title={"We use your party affiliation to better categorize information for you. If not set, we assume you are an Independent."} />
+        <SettingsTextLabel title={"We use your party affiliation to better categorize information for you. If not set, we assume you have no party preference."} />
 
         <SettingsDividerLong />
 
