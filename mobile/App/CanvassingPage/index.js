@@ -655,7 +655,7 @@ export default class App extends LocationComponent {
         pitch,
         center: pos,
         heading: 0,
-        zoom: 18,
+        zoom: 20,
       },
       500
     );
@@ -843,7 +843,7 @@ export default class App extends LocationComponent {
                   this.setState({pressAddsSearchPin: false});
                   return;
                 }
-                if (mapCamera.zoom < 18) this.animateToCoordinate(mapCamera.center);
+                if (mapCamera.zoom < 20) this.animateToCoordinate(mapCamera.center);
                 this.setState({pressAddsSearchPin: true, searchPins: []});
                 Toast.show({
                   text: 'Tap on map where to add a marker.',
