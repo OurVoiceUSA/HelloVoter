@@ -21,6 +21,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import RNGooglePlaces from 'react-native-google-places';
 import NetInfo from '@react-native-community/netinfo';
 import storage from 'react-native-storage-wrapper';
+import KeepAwake from 'react-native-keep-awake';
 import { debounce } from 'throttle-debounce';
 
 function bystreet(a,b) {
@@ -920,6 +921,7 @@ export default class App extends LocationComponent {
             </Button>
           </FooterTab>
         </Footer>
+        <KeepAwake />
       </Container>
     );
   }

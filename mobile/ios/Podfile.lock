@@ -233,6 +233,8 @@ PODS:
     - GoogleMaps (~> 3.2.0)
     - GooglePlaces (~> 3.2.0)
     - React
+  - react-native-keep-awake (4.0.0):
+    - React
   - react-native-maps (0.26.1):
     - React
   - react-native-netinfo (4.6.0):
@@ -316,6 +318,7 @@ DEPENDENCIES:
   - "react-native-geolocation (from `../node_modules/@react-native-community/geolocation`)"
   - react-native-google-maps (from `../node_modules/react-native-maps`)
   - react-native-google-places (from `../node_modules/react-native-google-places`)
+  - react-native-keep-awake (from `../node_modules/react-native-keep-awake`)
   - react-native-maps (from `../node_modules/react-native-maps`)
   - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
   - react-native-safari-view (from `../node_modules/react-native-safari-view`)
@@ -393,6 +396,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-maps"
   react-native-google-places:
     :path: "../node_modules/react-native-google-places"
+  react-native-keep-awake:
+    :path: "../node_modules/react-native-keep-awake"
   react-native-maps:
     :path: "../node_modules/react-native-maps"
   react-native-netinfo:
@@ -464,6 +469,7 @@ SPEC CHECKSUMS:
   react-native-geolocation: cbd9d6bd06bac411eed2671810f454d4908484a8
   react-native-google-maps: 2e2e697dab576abd5809d78cd74e775865b62bf7
   react-native-google-places: 1531c5b40622f71b6dacfb476e30be9e08e857b8
+  react-native-keep-awake: eba3137546b10003361b37c761f6c429b59814ae
   react-native-maps: 6e499eee4eabf422ba8b6f94e993cc768bf35153
   react-native-netinfo: bd4c115afdf0821b8ddb6c59ef3ddc5f0a7e8ad0
   react-native-safari-view: 955d7160d159241b8e9395d12d10ea0ef863dcdd
