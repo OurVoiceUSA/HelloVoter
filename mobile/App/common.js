@@ -1,4 +1,3 @@
-
 import React, { PureComponent } from 'react';
 
 import {
@@ -526,7 +525,7 @@ export function getUSState(myPosition) {
     let geo = geographies[bb.state];
     if (geo.geography) geo = geo.geography;
     if (ingeojson(geo, myPosition.longitude, myPosition.latitude))
-      state = bb.state;
+      state = bb.state.toUpperCase();
   });
   return state;
 }
