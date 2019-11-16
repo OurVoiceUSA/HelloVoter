@@ -383,7 +383,10 @@ export default class App extends LocationComponent {
   }
 
   _dataFetch = async (pos, flag) => {
-    const { canvassSettings, myPosition, lastFetchPosition, fetching, retry_queue } = this.state;
+    const {
+      canvassSettings, myPosition, lastFetchPosition, fetching, retry_queue,
+      showDisclosure,
+    } = this.state;
     let ret = {error: false};
 
     if (!pos) pos = myPosition;
@@ -459,7 +462,7 @@ export default class App extends LocationComponent {
 
       Object.keys(listview).forEach((street) => listview[street].sort(bystreet));
 
-      if (listview_order.length === 0)
+      if (listview_order.length === 0 && showDisclosure === false)
         Toast.show({
           text: 'No data for this area.',
           buttonText: 'OK',
