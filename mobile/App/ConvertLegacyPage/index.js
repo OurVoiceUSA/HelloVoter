@@ -2,7 +2,6 @@ import React from 'react';
 import { View } from 'react-native';
 import { Container, Content, Text, Spinner } from 'native-base';
 
-import LocationComponent from '../LocationComponent';
 import HVComponent from '../HVComponent';
 import TermsDisclosure, { loadDisclosure } from '../TermsDisclosure';
 
@@ -10,6 +9,7 @@ import { api_base_uri, _getApiToken } from '../common';
 
 import storage from 'react-native-storage-wrapper';
 import KeepAwake from 'react-native-keep-awake';
+import { sleep } from 'ourvoiceusa-sdk-js';
 
 export default class App extends HVComponent {
 
@@ -43,13 +43,51 @@ export default class App extends HVComponent {
   doLegacyConversion = async () => {
     const { state } = this.state;
 
-    // TODO:
-    // get OrgID
-    // loop until res.status is 200 or not 418
-    // for each form, loop through data & post it
-    // remove forms & re-add forms
-    // navigate back
-    // this.goBack();
+    try {
+      // get OrgID
+      let res = await fetch('https://gotv-'+state+'.ourvoiceusa.org/orgid/v1/new', {
+        method: 'POST',
+        body: JSON.stringify({state}),
+        headers: {
+          'Authorization': 'Bearer '+await _getApiToken(),
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (res.status !== 200) throw "OrgID error";
+
+      let json = await res.json();
+
+      let orgId = json.orgid;
+
+      // loop until res.status is not 418
+      let retry = true;
+      for (let retries = 0; (retries < 12 && retry === true); retries++) {
+        let res = await fetch('https://gotv-'+state+'.ourvoiceusa.org'+api_base_uri(orgId)+'/uncle', {
+          headers: {
+            'Authorization': 'Bearer '+await _getApiToken(),
+            'Content-Type': 'application/json',
+          },
+        });
+        let uncle = res.json();
+        if (res.status === 418) {
+          // try again in 10 seconds
+          await sleep(10000);
+        } else {
+          retry = false;
+          if (res.status !== 200) throw "unexpected http code returned";
+        }
+      }
+
+      if (retry) throw "tried too many times"
+
+      // for each form, loop through data & post it
+      // remove forms & re-add forms
+      // navigate back
+      // this.goBack();
+    } catch (e) {
+      this.setState({error: true});
+    }
   }
 
   render() {
@@ -76,7 +114,7 @@ export default class App extends HVComponent {
             <Text>There was an error. Please try again later.</Text>
           ||
           <View>
-            <Text>Converting data format, this may take several minutes.</Text>
+            <Text>Converting data format, this may take several minutes. Please do not close the app while this processes runs. You only need to do this conversion once.</Text>
             <Spinner />
           </View>
           }
