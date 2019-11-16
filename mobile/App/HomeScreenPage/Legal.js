@@ -13,7 +13,7 @@ export default Legal = props => (
     </Text>
     <Text></Text>
     <Text>
-      Copyright (c) 2018, Our Voice USA. {say("all_rights_reserved")}
+      Copyright (c) 2019, Our Voice USA. {say("all_rights_reserved")}
     </Text>
     <Text></Text>
     <Text>{say("this_program_is_free_software")}</Text>
