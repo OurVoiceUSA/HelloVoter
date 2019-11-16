@@ -14,6 +14,7 @@ import { say, getEpoch, getPropFromArrObj } from '../common';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 import storage from 'react-native-storage-wrapper';
+import KeepAwake from 'react-native-keep-awake';
 import t from 'tcomb-form-native';
 
 var Form = t.form.Form;
@@ -223,6 +224,7 @@ export default class App extends HVComponent {
             </Button>
           </FooterTab>
         </Footer>
+        <KeepAwake />
       </Container>
     );
   }
