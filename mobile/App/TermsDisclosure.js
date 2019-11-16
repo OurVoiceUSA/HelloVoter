@@ -2,12 +2,12 @@ import React from 'react';
 import { View } from 'react-native';
 import { Container, Content, Body, Text, H3, Button, ListItem, CheckBox } from 'native-base';
 
-import HVComponent, { HVConfirmDialog } from '../HVComponent';
+import HVComponent, { HVConfirmDialog } from './HVComponent';
 
 import { NavigationActions } from 'react-navigation';
 import storage from 'react-native-storage-wrapper';
 
-import { say, getEpoch, openURL, STORAGE_KEY_DISCLOSURE } from '../common';
+import { say, getEpoch, openURL, STORAGE_KEY_DISCLOSURE } from './common';
 
 export async function loadDisclosure(refer) {
   try {

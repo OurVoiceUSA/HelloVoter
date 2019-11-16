@@ -2,9 +2,9 @@ import React from 'react';
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { Toast, Container, Content, Footer, FooterTab, Text, Button, Spinner } from 'native-base';
 
+import TermsDisclosure, { loadDisclosure } from '../TermsDisclosure';
 import LocationComponent from '../LocationComponent';
 import { HVConfirmDialog } from '../HVComponent';
-import TermsDisclosure, { loadDisclosure } from './TermsDisclosure';
 import { NewAddressDialog } from './FormDialogs';
 import ListTab from './ListTab';
 import TurfTab from './TurfTab';
@@ -666,7 +666,7 @@ export default class App extends LocationComponent {
   render() {
     const { navigate } = this.props.navigation;
     const {
-      showDisclosure, myPosition, myNodes, locationAccess, serviceError, deviceError,
+      showDisclosure, myPosition, locationAccess, serviceError, deviceError,
       form, loading, region, active, segmentList, segmentTurf, fetching, selectedTurf, mapCamera,
       newAddressDialog, newUnitDialog, onlyPhonePeople, searchPins, pressAddsSearchPin,
     } = this.state;

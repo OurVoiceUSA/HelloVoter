@@ -23,6 +23,7 @@ import InvitePage from './InvitePage';
 import SettingsPage from './SettingsPage';
 import CanvassingPage from './CanvassingPage';
 import SurveyPage from './SurveyPage';
+import ConvertLegacyPage from './ConvertLegacyPage';
 
 import { createAppContainer } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
@@ -74,6 +75,13 @@ const AppNavigator = createStackNavigator({
       headerLeft: null,
     }),
   },
+  ConvertLegacy: {
+    screen: ConvertLegacyPage,
+    navigationOptions: ({navigation}) => ({
+      title: 'Converting Data',
+      headerLeft: null,
+    }),
+  }
 });
 
 const GoBack = (props) => (

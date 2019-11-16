@@ -19,14 +19,12 @@ import Prompt from 'react-native-input-prompt';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import SafariView from 'react-native-safari-view';
 import jwt_decode from 'jwt-decode';
-import { ingeojson } from 'ourvoiceusa-sdk-js';
 import { RNCamera } from 'react-native-camera';
-import { Divider, say, api_base_uri, DINFO, _loginPing, openURL, STORAGE_KEY_JWT } from '../../common';
+import {
+  DINFO, STORAGE_KEY_JWT, Divider,
+  say, api_base_uri, _loginPing, openURL, getUSState,
+} from '../../common';
 import { wsbase } from '../../config';
-
-import RBush from 'rbush';
-import rtree from '../../../rtree.json';
-import { geographies } from '../../geographies';
 
 export default class App extends LocationComponent {
 
@@ -41,7 +39,6 @@ export default class App extends LocationComponent {
       forms: [],
       SelectModeScreen: false,
       SmLoginScreen: false,
-      showLegacyDialog: false,
       server: null,
       serverLoading: false,
       myPosition: {latitude: null, longitude: null},
@@ -70,24 +67,25 @@ export default class App extends LocationComponent {
     navigate('Canvassing', args);
   }
 
+  navigate_legacy() {
+    const { navigate } = this.props.navigation;
+    const { myPosition } = this.state;
+
+    if (!this.checkLocationAccess()) return;
+
+    let state = getUSState(myPosition);
+
+    if (!state) return this.alert(say("out_of_bounds"), say("not_located_within_us_bounds"));
+
+    navigate('ConvertLegacy', {refer: this, state});
+  }
+
   connectToGOTV = async() => {
     const { myPosition, orgId, inviteCode } = this.state;
 
     if (!this.checkLocationAccess()) return;
 
-    let state;
-
-    new RBush(9).fromJSON(rtree).search({
-      minX: myPosition.longitude,
-      minY: myPosition.latitude,
-      maxX: myPosition.longitude,
-      maxY: myPosition.latitude,
-    }).forEach(bb => {
-      let geo = geographies[bb.state];
-      if (geo.geography) geo = geo.geography;
-      if (ingeojson(geo, myPosition.longitude, myPosition.latitude))
-        state = bb.state;
-    });
+    let state = getUSState(myPosition);
 
     if (!state) return this.alert(say("out of bounds"), say("not_located_within_us_bounds"));
 
@@ -405,7 +403,7 @@ export default class App extends LocationComponent {
   render() {
     const {
       showCamera, dinfo, loading, user, forms,
-      askOrgId, SelectModeScreen, SmLoginScreen, showLegacyDialog,
+      askOrgId, SelectModeScreen, SmLoginScreen,
     } = this.state;
     const { navigate } = this.props.navigation;
 
@@ -535,23 +533,6 @@ export default class App extends LocationComponent {
           <SmLogin refer={this} />
         </Dialog>
 
-        <Dialog
-          visible={showLegacyDialog}
-          animationType="fade"
-          onTouchOutside={() => this.setState({showLegacyDialog: false})}>
-          <Text>
-            Thanks for using this tool to canvas! Due to unforeseen circumstances, we are no
-            longer able to integrate with Dropbox. To continue canvassing with this tool, you
-            need to sign up for an Organization ID.
-          </Text>
-          <Button block style={{margin: 10}}><Text>Sign up for an Organization ID</Text></Button>
-          <Text>
-            If you'd like to transfer your canvassing data from your Dropbox account into
-            your new Org account, share the Dropbox folder you used for canvassing with
-            tech@ourvoiceusa.org and we will take care of that for you.
-          </Text>
-        </Dialog>
-
         <Prompt
           autoCorrect={false}
           autoCapitalize={"characters"}
@@ -587,6 +568,14 @@ const FormList = props => {
     if (form.orgId) createdby = say("org_id")+' '+form.orgId;
     else createdby = say("hosted_by")+' '+form.server;
 
+    // fix up and redirect to legacy conversion
+    if (form.backend !== "server") {
+      form.attributes = [];
+      form.turfs = [];
+      icon = "mobile";
+      createdby = say("created_by")+' '+"You";
+    }
+
     if (form.backend === "dropbox") {
       icon = "dropbox";
       color = "#3d9ae8";
@@ -606,7 +595,7 @@ const FormList = props => {
                   if (ret.status === 200) refer.navigate_canvassing({server: form.server, orgId: form.orgId, form: form, refer: refer});
                   else setTimeout(() => refer.setState({SmLoginScreen: true}), 500);
                } else {
-                 refer.setState({showLegacyDialog: true});
+                 refer.navigate_legacy();
                }
               }}>
               <Text>{form.name}</Text>
