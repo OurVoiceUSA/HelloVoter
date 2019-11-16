@@ -38,7 +38,6 @@ export default class App extends LocationComponent {
       user: null,
       forms: [],
       SelectModeScreen: false,
-      SmLoginScreen: false,
       server: null,
       serverLoading: false,
       myPosition: {latitude: null, longitude: null},
@@ -180,7 +179,7 @@ export default class App extends LocationComponent {
         case 400:
           return {error: true, msg: say("server_didnt_understand_request")};
         case 401:
-          setTimeout(() => this.setState({SmLoginScreen: true}), 500);
+          this.setState({user: null});
           return {error: false, flag: true};
         case 403:
           return {error: true, msg: say("request_to_canvas_rejected")};
@@ -273,8 +272,8 @@ export default class App extends LocationComponent {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const { SmLoginScreen, server, user, orgId, inviteCode, signupReturn } = this.state;
-    if (prevState.SmLoginScreen && !SmLoginScreen && user.loggedin) {
+    const { server, user, orgId, inviteCode, signupReturn } = this.state;
+    if (prevState.user === null && user && user.loggedin) {
       if (server || inviteCode) this.connectToServer(server, orgId, inviteCode);
       if (signupReturn) this._signupUrlHandler();
     }
@@ -302,7 +301,7 @@ export default class App extends LocationComponent {
 
     // look for canvassing forms
     try {
-      user = await _loginPing(this, false);
+      user = await _loginPing(this, true);
     } catch (e) {
     }
 
@@ -403,7 +402,7 @@ export default class App extends LocationComponent {
   render() {
     const {
       showCamera, dinfo, loading, user, forms,
-      askOrgId, SelectModeScreen, SmLoginScreen,
+      askOrgId, SelectModeScreen,
     } = this.state;
     const { navigate } = this.props.navigation;
 
@@ -413,6 +412,12 @@ export default class App extends LocationComponent {
           <Text style={{fontSize: 20}}>{say("loading_user_data")}...</Text>
           <Spinner />
         </View>
+      );
+
+    if (!user.loggedin) return (
+      <View style={{flex: 1, backgroundColor: 'white', alignItems: 'center', justifyContent: 'center'}}>
+        <SmLogin refer={this} />
+      </View>
       );
 
     // if camera is open, render just that
@@ -436,7 +441,6 @@ export default class App extends LocationComponent {
 
     return (
       <Content>
-
         {loading &&
         <View>
           <Text>{say("loading_data")}...</Text>
@@ -495,13 +499,7 @@ export default class App extends LocationComponent {
             </Button>
             <Text style={{fontSize: 12, marginBottom: 10, textAlign: 'justify'}}>{say("didnt_receive_qr_code")}</Text>
 
-            <Button block bordered dark onPress={() => {
-              if (!user.id) {
-                this.setState({SelectModeScreen: false, SmLoginScreen: true, signupReturn: true});
-              } else {
-                this._signupUrlHandler();
-              }
-            }}>
+            <Button block bordered dark onPress={() => this._signupUrlHandler()}>
               <Icon name="clipboard" {...iconStyles} />
               <Text>{say("org_id_signup")}</Text>
             </Button>
@@ -524,13 +522,6 @@ export default class App extends LocationComponent {
 
           </View>
 
-        </Dialog>
-
-        <Dialog
-          visible={SmLoginScreen}
-          animationType="fade"
-          onTouchOutside={() => this.setState({SmLoginScreen: false})}>
-          <SmLogin refer={this} />
         </Dialog>
 
         <Prompt
@@ -593,7 +584,7 @@ const FormList = props => {
                   // TODO: set loading state as this can take a few seconds
                   let ret = await refer.sayHello(form.server, form.orgId);
                   if (ret.status === 200) refer.navigate_canvassing({server: form.server, orgId: form.orgId, form: form, refer: refer});
-                  else setTimeout(() => refer.setState({SmLoginScreen: true}), 500);
+                  else refer.setState({user: null});
                } else {
                  refer.navigate_legacy();
                }

@@ -1,20 +1,12 @@
-
 import React, { PureComponent } from 'react';
-
-import {
-  Image,
-  Linking,
-  Platform,
-  Text,
-  View,
-  TouchableOpacity,
-} from 'react-native';
+import { Linking, Platform, View } from 'react-native';
+import { Text } from  'native-base';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 import SafariView from 'react-native-safari-view';
 import jwt_decode from 'jwt-decode';
 import { wsbase } from './config';
-import { _loginPing, _saveJWT, openURL } from './common';
+import { say, _loginPing, _saveJWT, openURL } from './common';
 
 export default class App extends PureComponent {
 
@@ -116,22 +108,11 @@ export default class App extends PureComponent {
             Login with Google
           </Icon.Button>
         </View>
-        <View style={{margin: 5}}>
-          <Icon.Button
-            name="ban"
-            backgroundColor="#d7d7d7"
-            color="#000000"
-            onPress={() => refer.setState({SmLoginScreen: false, signupReturn: false})}
-            {...iconStyles}>
-            No Thanks
-          </Icon.Button>
-        </View>
 
         <View style={{marginTop: 30}}>
-          <Text style={{fontSize: 10, textAlign: 'justify'}}>
+          <Text note>
             For a better overall experience for everyone, certain application functions require a login.
-            We value your privacy, any information you give us, stays with us.
-            Read our <Text style={{fontSize: 10, fontWeight: 'bold', color: 'blue'}} onPress={() => {this._policyUrlHandler()}}>privacy policy</Text> for details.
+            We value your privacy! Read our <Text style={{fontSize: 10, fontWeight: 'bold', color: 'blue'}} onPress={() => {this._policyUrlHandler()}}>privacy policy</Text> for details.
           </Text>
         </View>
       </View>
