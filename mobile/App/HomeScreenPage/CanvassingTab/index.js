@@ -87,7 +87,7 @@ export default class App extends LocationComponent {
 
     let state = getUSState(myPosition);
 
-    if (!state) return this.alert(say("out of bounds"), say("not_located_within_us_bounds"));
+    if (!state) return this.alert(say("out_of_bounds"), say("not_located_within_us_bounds"));
 
     if (orgId && orgId.match(/^[0-9A-Z]*$/)) {
       // first two characters are the state code
