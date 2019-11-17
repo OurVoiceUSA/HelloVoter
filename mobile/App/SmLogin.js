@@ -26,7 +26,10 @@ export default class App extends PureComponent {
     var user = await _loginPing(this, true);
 
     if (user.loggedin) {
-      refer.setState({user: user, SmLoginScreen: false});
+      refer.setState({user, SmLoginScreen: false});
+      try {
+        refer._loadForms();
+      } catch (e) {}
     } else if (user.id) {
       let type = user.id.split(":")[0];
       switch(type) {
