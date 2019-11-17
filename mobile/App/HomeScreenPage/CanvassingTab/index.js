@@ -589,7 +589,7 @@ export default class App extends LocationComponent {
 
 const FormList = props => {
   const { refer } = props;
-  const { loading, forms } = refer.state;
+  const { loading, forms, myOrgID } = refer.state;
 
   if (!loading && !forms.length)
     return (<Text>{say("no_canvas_forms_ask_someone")}</Text>);
@@ -639,6 +639,7 @@ const FormList = props => {
               <Text note>{form.turfs.length} Turf{(form.turfs.length>1?'s':'')}</Text>
             </TouchableOpacity>
           </Body>
+          {form.orgId !== myOrgID &&
           <Right>
             <TouchableOpacity onPress={() => {
               refer.alert(
@@ -666,6 +667,7 @@ const FormList = props => {
               <Icon name="trash" size={size} color="red" />
             </TouchableOpacity>
           </Right>
+          }
       </ListItem>
   )});
 };
