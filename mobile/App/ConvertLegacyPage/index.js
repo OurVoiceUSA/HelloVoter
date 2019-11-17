@@ -273,21 +273,21 @@ export default class App extends HVComponent {
 
           // if not "home", send the status and bail
           if (status === 0 || status === 2) {
-              let input = {
-                deviceId,
-                addressId,
-                formId,
-                status,
-                start: node.created,
-                end: node.updated,
-                longitude: myPosition.longitude,
-                latitude: myPosition.latitude,
-              };
+            let input = {
+              deviceId,
+              addressId,
+              formId,
+              status,
+              start: node.created,
+              end: node.updated,
+              longitude: myPosition.longitude,
+              latitude: myPosition.latitude,
+            };
 
-              if (unit) input.unit = unit;
+            if (unit) input.unit = unit;
 
-              await this.sendData(orgId, '/people/visit/update', input);
-              return;
+            await this.sendData(orgId, '/people/visit/update', input);
+            return;
           }
 
           let attrs = [];
