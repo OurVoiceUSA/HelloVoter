@@ -40,6 +40,10 @@ export const say = memoize(
 
 export const bbox_usa = {"type":"MultiPolygon","coordinates":[[[[-179,14],[-50,14],[-50,71],[-179,71],[-179,14]]]]};
 
+export function localaddress() {
+  return (Platform.OS === 'ios'?'localhost':'10.0.2.2');
+}
+
 export function getEpoch() {
   return Math.floor(new Date().getTime())
 }

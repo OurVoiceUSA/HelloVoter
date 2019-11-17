@@ -1,9 +1,5 @@
 import React, { PureComponent } from 'react';
-import {
-  View,
-  Platform,
-  TouchableOpacity,
-} from 'react-native';
+import { View, TouchableOpacity } from 'react-native';
 import {
   Container, Header, Content, List, ListItem, Left, Right, Body, Footer, FooterTab,
   Text, Button, Spinner,
@@ -22,7 +18,7 @@ import jwt_decode from 'jwt-decode';
 import { RNCamera } from 'react-native-camera';
 import {
   DINFO, STORAGE_KEY_JWT, Divider,
-  say, api_base_uri, _loginPing, openURL, getUSState,
+  say, api_base_uri, _loginPing, openURL, getUSState, localaddress,
 } from '../../common';
 import { wsbase } from '../../config';
 
@@ -552,7 +548,7 @@ export default class App extends LocationComponent {
             <View>
               <Button block bordered dark onPress={() => {
                 this.setState({SelectModeScreen: false});
-                this.connectToServer((Platform.OS === 'ios'?'localhost':'10.0.2.2')+':8080')}
+                this.connectToServer(localaddress()+':8080')}
               }>
                 <Icon name="code" {...iconStyles} />
                 <Text>Local Dev</Text>
