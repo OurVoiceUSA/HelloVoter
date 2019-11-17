@@ -73,7 +73,7 @@ export default class App extends LocationComponent {
 
     if (!state) return this.alert(say("out_of_bounds"), say("not_located_within_us_bounds"));
 
-    navigate('ConvertLegacy', {refer: this, state, user});
+    navigate('ConvertLegacy', {refer: this, state, user, myPosition});
   }
 
   connectToGOTV = async() => {
@@ -326,7 +326,7 @@ export default class App extends LocationComponent {
           },
         });
 
-        forms_myorg = (await res.json()).data;
+        forms_myorg = await res.json();
       }
 
     } catch (e) {

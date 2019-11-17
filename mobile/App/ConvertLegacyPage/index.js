@@ -38,6 +38,7 @@ export default class App extends HVComponent {
 
     this.state = {
       refer: props.navigation.state.params.refer,
+      myPosition: props.navigation.state.params.myPosition,
       state: props.navigation.state.params.state,
       user: props.navigation.state.params.user,
       showDisclosure: null,
@@ -53,7 +54,7 @@ export default class App extends HVComponent {
 
   componentDidMount() {
     DINFO()
-      .then(i => this.setState({UniqueID: i.UniqueID}, () => loadDisclosure(this)))
+      .then(i => this.setState({dinfo: i, UniqueID: i.UniqueID}, () => loadDisclosure(this)))
       .catch(() => this.setState({error: true}));
   }
 
@@ -90,7 +91,7 @@ export default class App extends HVComponent {
   }
 
   doLegacyConversion = async () => {
-    const { state, user, UniqueID } = this.state;
+    const { state, user, dinfo, UniqueID, myPosition } = this.state;
 
     try {
       // get OrgID
@@ -130,6 +131,13 @@ export default class App extends HVComponent {
 
       if (retry) throw "tried too many times"
 
+      // say hello!
+      await this.sendData(orgId, '/hello', {
+        longitude: myPosition.longitude,
+        latitude: myPosition.latitude,
+        dinfo,
+      });
+
       // create turf
       let turf = await this.sendData(orgId, '/turf/create', {
         name: "Unrestricted",
@@ -145,29 +153,52 @@ export default class App extends HVComponent {
       // create forms
       let forms_local = JSON.parse(await storage.get('OV_CANVASS_FORMS'));
 
+      // default attribute ID mapping
+      let aim = {
+        "FullName": "013a31db-fe24-4fad-ab6a-dd9d831e72f9",
+        "Phone": "7d3466e5-2cee-491e-b3f4-bfea3a4b010a",
+        "Email": "b687b86e-8fe3-4235-bb78-1919bcca00db",
+        "RegisteredToVote": "dcfc1fbb-4609-4900-bbb3-1c4afb2a5127",
+        "PartyAffiliation": "4a320f76-ef7b-4d73-ae2a-8f4ccf5de344",
+      };
+
       forms_local.forEach(async (f) => {
         // sometimes this is null
         if (!f) return;
 
-        // TODO: create attributes
+        // attribute order
+        let ato = [];
+
+        // create attributes
         f.questions_order.forEach(async (qk) => {
           let q = f.questions[qk];
 
-          // TODO: label, type
-          // map a few defaults to a few defaults
+          // don't create duplicates
+          if (aim[qk]) {
+            ato.push(aim[qk]);
+            return;
+          }
 
-          await this.sendData(orgId, '/attribute/create', {});
+          let d = await this.sendData(orgId, '/attribute/create', {
+            name: q.label,
+            type: q.type.toLowerCase(),
+          });
+
+          aim[qk] = d.attributeId;
+          ato.push(d.attributeId);
         });
 
         // create form
         let rform = await this.sendData(orgId, '/form/create', {
           name: f.name,
-          attributes: [],
+          attributes: ato,
         });
+
+        let formId = rform.formId;
 
         // assign form to self
         await this.sendData(orgId, '/form/assigned/volunteer/add', {
-          formId: rform.formId,
+          formId: formId,
           vId: user.id,
         });
 
@@ -180,10 +211,9 @@ export default class App extends HVComponent {
 
         address_ids.forEach(id => {
           let node = nodes[id];
-
-          let input = {
+          this.sendData(orgId, '/address/add/location', {
             deviceId: UniqueID,
-            formId: f.id,
+            formId,
             timestamp: node.created,
             longitude: node.latlng.longitude,
             latitude: node.latlng.latitude,
@@ -191,25 +221,20 @@ export default class App extends HVComponent {
             city: node.address[1],
             state: node.address[2],
             zip: node.address[3],
-          };
-
-          this.sendData(orgId, '/address/add/location', input);
+          });
         });
 
         unit_ids.forEach(id => {
           let node = nodes[id];
-
-          let input = {
+          this.sendData(orgId, '/address/add/unit', {
             deviceId: UniqueID,
-            formId: f.id,
+            formId,
             timestamp: node.created,
             longitude: nodes[node.parent_id].latlng.longitude,
             latitude: nodes[node.parent_id].latlng.latitude,
             unit: node.unit,
             addressId: node.parent_id,
-          };
-
-          this.sendData(orgId, '/address/add/unit', input);
+          });
         });
 
         survey_ids.forEach(id => {
