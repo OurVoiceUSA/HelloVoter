@@ -240,7 +240,7 @@ export default class App extends HVComponent {
           </View>
         </View>
         ||
-        <SettingsTextLabel title={"For the best user experience, login with a social media account. However, it is not required for most app functions."} />
+        <SettingsTextLabel title={"For the best user experience, login with a social media account."} />
         }
 
         <SettingsDividerShort />
