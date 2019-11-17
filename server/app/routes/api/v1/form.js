@@ -52,11 +52,22 @@ module.exports = Router({mergeParams: true})
 
   return res.json(form);
 })
-.get('/form/list', (req, res) => {
-  if (req.user.admin)
-    return cqdo(req, res, 'match (a:Form) return a');
-  else
-    return cqdo(req, res, 'match (a:Volunteer {id:{id}})-[:ASSIGNED]-(b:Team)-[:ASSIGNED]-(c:Form) return c UNION match (a:Volunteer {id:{id}})-[:ASSIGNED]-(c:Form) return c', req.user)
+.get('/form/list', async (req, res) => {
+  let ref;
+  let list = [];
+
+  try {
+    if (req.user.admin)
+      ref = await req.db.query('match (a:Form) return a');
+    else
+      ref = await req.db.query('match (a:Volunteer {id:{id}})-[:ASSIGNED]-(b:Team)-[:ASSIGNED]-(c:Form) return c UNION match (a:Volunteer {id:{id}})-[:ASSIGNED]-(c:Form) return c', req.user);
+
+    list = ref.data;
+  } catch (e) {
+    return _500(res, e);
+  }
+
+  return res.json(list);
 })
 .post('/form/create', async (req, res) => {
   if (req.user.admin !== true) return _403(res, "Permission denied.");

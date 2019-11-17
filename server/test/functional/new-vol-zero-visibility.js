@@ -59,6 +59,6 @@ describe('New Volunteer Zero Visibility', function () {
     let r = await api.get(base_uri+'/form/list')
       .set('Authorization', 'Bearer '+c.mike.jwt)
     expect(r.statusCode).to.equal(200);
-    expect(r.body.data.length).to.equal(0);
+    expect(r.body.length).to.equal(0);
   });
 });
