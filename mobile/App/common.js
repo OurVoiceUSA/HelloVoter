@@ -377,7 +377,7 @@ export async function DINFO() {
 export async function _getJWT(remote) {
 
   let user = null;
-  var localuser = await _getSTORAGE_KEY_USERLOCAL();
+  var localuser = await _get_userlocal();
 
   // just use locally cached data
   if (!remote) {
@@ -435,7 +435,7 @@ export async function _getJWT(remote) {
     user.loggedin = true;
     _saveUser(user, remote);
   } else {
-    user = await _getSTORAGE_KEY_USERLOCAL();
+    user = await _get_userlocal();
   }
 
   if (user == null) user = { profile: {} };
@@ -451,7 +451,7 @@ export async function _saveJWT(jwt) {
   }
 }
 
-export async function _getSTORAGE_KEY_USERLOCAL() {
+export async function _get_userlocal() {
   let user = null;
   try {
     let str = await storage.get(STORAGE_KEY_USERLOCAL);
