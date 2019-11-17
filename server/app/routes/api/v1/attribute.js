@@ -1,12 +1,13 @@
 
 import {
-  cqdo, valid, _400,
+  cqdo, valid, _400, _500,
 } from '../../../lib/utils';
 
 import { Router } from 'express';
 
 module.exports = Router({mergeParams: true})
-.post('/attribute/create', (req, res) => {
+.post('/attribute/create', async (req, res) => {
+  if (!req.user.admin) return _403(res, "Permission denied.");
   if (!valid(req.body.name)) return _400(res, "Invalid value to parameter 'name'.");
   req.body.author_id = req.user.id;
 
@@ -16,12 +17,22 @@ module.exports = Router({mergeParams: true})
     case 'number':
     case 'boolean':
     case 'date':
+    case 'sand':
     case 'SAND':
       break;
     default: return _400(res, "Invalid value to parameter 'type'.");
   }
 
-  return cqdo(req, res, 'match (v:Volunteer {id:{author_id}}) create (a:Attribute {id:randomUUID(), created: timestamp(), name:{name}, type:{type}})-[:AUTHOR]->(v) return a.id', req.body, true);
+  let attributeId;
+
+  try {
+    let ref = await req.db.query('match (v:Volunteer {id:{author_id}}) create (a:Attribute {id:randomUUID(), created: timestamp(), name:{name}, type:{type}})-[:AUTHOR]->(v) return a.id', req.body);
+    attributeId = ref.data[0];
+  } catch(e) {
+    return _500(res, e);
+  }
+
+  return res.json({attributeId});
 })
 .post('/attribute/update', (req, res) => {
   if (!valid(req.body.id)) return _400(res, "Invalid value to parameter 'id'.");
