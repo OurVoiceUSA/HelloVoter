@@ -36,6 +36,7 @@ export default class App extends LocationComponent {
       dinfo: {},
       loading: true,
       user: null,
+      myOrgID: null,
       forms: [],
       SelectModeScreen: false,
       server: null,
@@ -281,13 +282,22 @@ export default class App extends LocationComponent {
 
   _loadForms = async () => {
     const { navigate } = this.props.navigation;
-    const { refer } = this.state;
+    const { refer, myPosition } = this.state;
 
-    let folders = [];
-    let forms_local = [];
+    let user;
+    let jwt;
+    let myOrgID;
+    let forms = [], forms_myorg = [], forms_local = [];
 
     this.setState({loading: true});
 
+    // look for canvassing forms
+    try {
+      user = await _loginPing(this, true);
+    } catch (e) {
+    }
+
+    // get locally saved forms
     try {
       forms_local = JSON.parse(await storage.get('OV_CANVASS_FORMS'));
       if (forms_local === null) forms_local = [];
@@ -296,14 +306,45 @@ export default class App extends LocationComponent {
       return;
     }
 
-    let user;
-    let forms = [];
-
-    // look for canvassing forms
+    // get forms from myorg, if any
     try {
-      user = await _loginPing(this, true);
+      jwt = await storage.get(STORAGE_KEY_JWT);
+
+      // TODO: make use of getUSState(myPosition) here
+      let res = await fetch('https://gotv.ourvoiceusa.org/orgid/v1/status', {
+        headers: {
+          'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
+          'Content-Type': 'application/json',
+        },
+      });
+      let json = await res.json();
+      myOrgID = json.orgid;
+
+      if (myOrgID && myOrgID.length) {
+        this.setState({myOrgID});
+
+        let res = await fetch('https://gotv-'+myOrgID.substr(0, 2)+'.ourvoiceusa.org'+api_base_uri(myOrgID)+'/form/list', {
+          headers: {
+            'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
+            'Content-Type': 'application/json',
+          },
+        });
+
+        forms_myorg = (await res.json()).data;
+      }
+
     } catch (e) {
+      console.error(e);
     }
+
+    // populate forms_local with items from forms_myorg it doesn't have
+    forms_myorg.filter(f => forms_local.map(fl => fl.id).indexOf(f.id) === -1).forEach(f => {
+      let form = f;
+      form.server = 'gotv-'+myOrgID.substr(0, 2)+'.ourvoiceusa.org';
+      form.backend = 'server';
+      form.orgId = myOrgID;
+      forms_local.push(form);
+    });
 
     for (let i in forms_local) {
       let json = forms_local[i];
@@ -318,7 +359,6 @@ export default class App extends LocationComponent {
       if (json.backend === "server") {
         // atempt to re-pull the form to see if it's changed
         try {
-          let jwt = await storage.get(STORAGE_KEY_JWT);
           let https = true;
           if (json.server.match(/:8080/)) https = false;
           let res = await fetch('http'+(https?'s':'')+'://'+json.server+api_base_uri(json.orgId)+'/form/get?formId='+json.id, {
@@ -408,12 +448,12 @@ export default class App extends LocationComponent {
   render() {
     const {
       showCamera, dinfo, loading, user, forms,
-      askOrgId, SelectModeScreen,
+      askOrgId, SelectModeScreen, myOrgID,
     } = this.state;
     const { navigate } = this.props.navigation;
 
     // wait for user object to become available
-    if (!user) return (
+    if (!user || loading) return (
         <View style={{flex: 1, backgroundColor: 'white', alignItems: 'center', justifyContent: 'center'}}>
           <Text style={{fontSize: 20}}>{say("loading_user_data")}...</Text>
           <Spinner />
@@ -447,12 +487,6 @@ export default class App extends LocationComponent {
 
     return (
       <Content>
-        {loading &&
-        <View>
-          <Text>{say("loading_data")}...</Text>
-          <Spinner />
-        </View>
-        ||
         <View>
           <List>
             <ListItem itemDivider icon>
@@ -461,7 +495,6 @@ export default class App extends LocationComponent {
             <FormList refer={this} />
           </List>
         </View>
-        }
 
         <Button block onPress={() => this.setState({SelectModeScreen: true})}>
             <Icon name="plus-circle" backgroundColor="#d7d7d7" color="white" size={30} />
@@ -505,11 +538,15 @@ export default class App extends LocationComponent {
             </Button>
             <Text style={{fontSize: 12, marginBottom: 10, textAlign: 'justify'}}>{say("didnt_receive_qr_code")}</Text>
 
-            <Button block bordered dark onPress={() => this._signupUrlHandler()}>
-              <Icon name="clipboard" {...iconStyles} />
-              <Text>{say("org_id_signup")}</Text>
-            </Button>
-            <Text style={{fontSize: 12, marginBottom: 10, textAlign: 'justify'}}>{say("org_id_signup_subtext")}</Text>
+            {myOrgID === null &&
+            <View>
+              <Button block bordered dark onPress={() => this._signupUrlHandler()}>
+                <Icon name="clipboard" {...iconStyles} />
+                <Text>{say("org_id_signup")}</Text>
+              </Button>
+              <Text style={{fontSize: 12, marginBottom: 10, textAlign: 'justify'}}>{say("org_id_signup_subtext")}</Text>
+            </View>
+            }
 
             {(__DEV__&&dinfo.Emulator)&&
             <View>
@@ -566,9 +603,10 @@ const FormList = props => {
     else createdby = say("hosted_by")+' '+form.server;
 
     // fix up and redirect to legacy conversion
+    if (!form.attributes) form.attributes = [];
+    if (!form.turfs) form.turfs = [];
+
     if (form.backend !== "server") {
-      form.attributes = [];
-      form.turfs = [];
       icon = "mobile";
       createdby = say("created_by")+' '+"You";
     }
