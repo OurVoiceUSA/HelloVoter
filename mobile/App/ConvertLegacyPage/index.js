@@ -9,9 +9,11 @@ import { DINFO, api_base_uri, _getApiToken, bbox_usa } from '../common';
 
 import storage from 'react-native-storage-wrapper';
 import KeepAwake from 'react-native-keep-awake';
-import { sleep } from 'ourvoiceusa-sdk-js';
+import { asyncForEach, sleep } from 'ourvoiceusa-sdk-js';
 import base64 from 'base64-js';
+import uuidv4 from 'uuid/v4';
 import pako from 'pako';
+import md5 from 'md5';
 
 function _nodesFromJtxt(str) {
   let store;
@@ -54,7 +56,7 @@ export default class App extends HVComponent {
 
   componentDidMount() {
     DINFO()
-      .then(i => this.setState({dinfo: i, UniqueID: i.UniqueID}, () => loadDisclosure(this)))
+      .then(i => this.setState({dinfo: i, deviceId: i.UniqueID}, () => loadDisclosure(this)))
       .catch(() => this.setState({error: true}));
   }
 
@@ -91,7 +93,7 @@ export default class App extends HVComponent {
   }
 
   doLegacyConversion = async () => {
-    const { state, user, dinfo, UniqueID, myPosition } = this.state;
+    const { state, user, dinfo, deviceId, myPosition } = this.state;
 
     try {
       // get OrgID
@@ -162,15 +164,15 @@ export default class App extends HVComponent {
         "PartyAffiliation": "4a320f76-ef7b-4d73-ae2a-8f4ccf5de344",
       };
 
-      forms_local.forEach(async (f) => {
+      await asyncForEach(forms_local, async (f) => {
         // sometimes this is null
         if (!f) return;
 
-        // attribute order
         let ato = [];
+        // attribute order
 
         // create attributes
-        f.questions_order.forEach(async (qk) => {
+        await asyncForEach(f.questions_order, async (qk) => {
           let q = f.questions[qk];
 
           // don't create duplicates
@@ -209,10 +211,19 @@ export default class App extends HVComponent {
         let unit_ids = Object.keys(nodes).filter(id => nodes[id].type === "unit");
         let survey_ids = Object.keys(nodes).filter(id => nodes[id].type === "survey");
 
-        address_ids.forEach(id => {
+        await asyncForEach(address_ids, async (id) => {
           let node = nodes[id];
-          this.sendData(orgId, '/address/add/location', {
-            deviceId: UniqueID,
+
+          if (!node.address) return;
+          if (!node.address[0]) node.address[0] = "";
+          if (!node.address[1]) node.address[1] = "";
+          if (!node.address[2]) node.address[2] = "";
+          if (!node.address[3]) node.address[3] = "";
+
+          node.rid = md5(node.address[0].toLowerCase()+node.address[1].toLowerCase()+node.address[2].toLowerCase()+node.address[3].substr(0, 5));
+
+          await this.sendData(orgId, '/address/add/location', {
+            deviceId,
             formId,
             timestamp: node.created,
             longitude: node.latlng.longitude,
@@ -224,24 +235,88 @@ export default class App extends HVComponent {
           });
         });
 
-        unit_ids.forEach(id => {
+        await asyncForEach(unit_ids, async (id) => {
           let node = nodes[id];
-          this.sendData(orgId, '/address/add/unit', {
-            deviceId: UniqueID,
+          await this.sendData(orgId, '/address/add/unit', {
+            deviceId,
             formId,
             timestamp: node.created,
             longitude: nodes[node.parent_id].latlng.longitude,
             latitude: nodes[node.parent_id].latlng.latitude,
             unit: node.unit,
-            addressId: node.parent_id,
+            addressId: nodes[node.parent_id].rid,
           });
         });
 
-        survey_ids.forEach(id => {
+        await asyncForEach(survey_ids, async (id) => {
           let node = nodes[id];
+          let status;
+          let addressId;
 
-          // TODO: use mapped attributes to send survey data as visits
+          // if unit, get the unit's parent_id
+          let unit;
+          try {
+            if (nodes[node.parent_id].rid) addressId = nodes[node.parent_id].rid;
+            else {
+              addressId = nodes[nodes[node.parent_id].parent_id].rid;
+              unit = nodes[node.parent_id].unit;
+            }
+          } catch (e) {
+            addressId = node.id;
+          }
 
+          switch (node.status) {
+            case 'home': status = 1; break;
+            case 'not interested': status = 2; break;
+            default: status = 0; break;
+          }
+
+          // if not "home", send the status and bail
+          if (status === 0 || status === 2) {
+              let input = {
+                deviceId,
+                addressId,
+                formId,
+                status,
+                start: node.created,
+                end: node.updated,
+                longitude: myPosition.longitude,
+                latitude: myPosition.latitude,
+              };
+
+              if (unit) input.unit = unit;
+
+              await this.sendData(orgId, '/people/visit/update', input);
+              return;
+          }
+
+          let attrs = [];
+
+          Object.keys(aim).forEach(qk => {
+            if (node.survey[qk]) {
+              attrs.push({
+                id: aim[qk],
+                value: node.survey[qk],
+              });
+            }
+          });
+
+          let input = {
+            deviceId,
+            addressId,
+            formId,
+            status,
+            start: node.created,
+            end: node.updated,
+            longitude: myPosition.longitude,
+            latitude: myPosition.latitude,
+            personId: uuidv4(),
+            attrs,
+          };
+
+          if (unit) input.unit = unit;
+
+          await this.sendData(orgId, '/people/visit/add', input);
         });
 
         // TODO: remove forms_local & add orgId forms
@@ -250,7 +325,7 @@ export default class App extends HVComponent {
       });
 
       // we're done - go back
-      // this.goBack();
+      this.goBack();
     } catch (e) {
       this.setState({error: true});
     }
