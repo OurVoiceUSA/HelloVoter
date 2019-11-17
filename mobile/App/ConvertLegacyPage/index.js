@@ -5,11 +5,31 @@ import { Container, Content, Text, Spinner } from 'native-base';
 import HVComponent from '../HVComponent';
 import TermsDisclosure, { loadDisclosure } from '../TermsDisclosure';
 
-import { api_base_uri, _getApiToken } from '../common';
+import { DINFO, api_base_uri, _getApiToken, bbox_usa } from '../common';
 
 import storage from 'react-native-storage-wrapper';
 import KeepAwake from 'react-native-keep-awake';
 import { sleep } from 'ourvoiceusa-sdk-js';
+import base64 from 'base64-js';
+import pako from 'pako';
+
+function _nodesFromJtxt(str) {
+  let store;
+
+  try {
+    store = JSON.parse(pako.ungzip(base64.toByteArray(str), { to: 'string' }));
+  } catch (e) {
+    try {
+      store = JSON.parse(str);
+    } catch (e) {
+      return {};
+    }
+  }
+
+  if (!store.nodes) store.nodes = {};
+
+  return store.nodes;
+}
 
 export default class App extends HVComponent {
 
@@ -19,6 +39,7 @@ export default class App extends HVComponent {
     this.state = {
       refer: props.navigation.state.params.refer,
       state: props.navigation.state.params.state,
+      user: props.navigation.state.params.user,
       showDisclosure: null,
     };
 
@@ -31,7 +52,9 @@ export default class App extends HVComponent {
   }
 
   componentDidMount() {
-    loadDisclosure(this);
+    DINFO()
+      .then(i => this.setState({UniqueID: i.UniqueID}, () => loadDisclosure(this)))
+      .catch(() => this.setState({error: true}));
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -40,8 +63,34 @@ export default class App extends HVComponent {
     }
   }
 
-  doLegacyConversion = async () => {
+  sendData = async (orgId, uri, input) => {
     const { state } = this.state;
+    let ret = {};
+
+    try {
+      let res = await fetch('https://gotv-'+state+'.ourvoiceusa.org'+api_base_uri(orgId)+uri, {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer '+await _getApiToken(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(input),
+      });
+
+      if (res.status !== 200) {
+        throw "sendData error: "+res.status;
+      }
+
+      ret = await res.json();
+    } catch (e) {
+      console.warn(e);
+    }
+
+    return ret;
+  }
+
+  doLegacyConversion = async () => {
+    const { state, user, UniqueID } = this.state;
 
     try {
       // get OrgID
@@ -81,9 +130,101 @@ export default class App extends HVComponent {
 
       if (retry) throw "tried too many times"
 
-      // for each form, loop through data & post it
-      // remove forms & re-add forms
-      // navigate back
+      // create turf
+      let turf = await this.sendData(orgId, '/turf/create', {
+        name: "Unrestricted",
+        geometry: bbox_usa,
+      });
+
+      // assign self to turf
+      await this.sendData(orgId, '/turf/assigned/volunteer/add', {
+        turfId: turf.turfId,
+        vId: user.id,
+      });
+
+      // create forms
+      let forms_local = JSON.parse(await storage.get('OV_CANVASS_FORMS'));
+
+      forms_local.forEach(async (f) => {
+        // sometimes this is null
+        if (!f) return;
+
+        // TODO: create attributes
+        f.questions_order.forEach(async (qk) => {
+          let q = f.questions[qk];
+
+          // TODO: label, type
+          // map a few defaults to a few defaults
+
+          await this.sendData(orgId, '/attribute/create', {});
+        });
+
+        // create form
+        let rform = await this.sendData(orgId, '/form/create', {
+          name: f.name,
+          attributes: [],
+        });
+
+        // assign form to self
+        await this.sendData(orgId, '/form/assigned/volunteer/add', {
+          formId: rform.formId,
+          vId: user.id,
+        });
+
+        // convert form data to address & people data
+        let nodes = _nodesFromJtxt(await storage.get('OV_CANVASS_PINS@'+f.id));
+
+        let address_ids = Object.keys(nodes).filter(id => nodes[id].type === "address");
+        let unit_ids = Object.keys(nodes).filter(id => nodes[id].type === "unit");
+        let survey_ids = Object.keys(nodes).filter(id => nodes[id].type === "survey");
+
+        address_ids.forEach(id => {
+          let node = nodes[id];
+
+          let input = {
+            deviceId: UniqueID,
+            formId: f.id,
+            timestamp: node.created,
+            longitude: node.latlng.longitude,
+            latitude: node.latlng.latitude,
+            street: node.address[0],
+            city: node.address[1],
+            state: node.address[2],
+            zip: node.address[3],
+          };
+
+          this.sendData(orgId, '/address/add/location', input);
+        });
+
+        unit_ids.forEach(id => {
+          let node = nodes[id];
+
+          let input = {
+            deviceId: UniqueID,
+            formId: f.id,
+            timestamp: node.created,
+            longitude: nodes[node.parent_id].latlng.longitude,
+            latitude: nodes[node.parent_id].latlng.latitude,
+            unit: node.unit,
+            addressId: node.parent_id,
+          };
+
+          this.sendData(orgId, '/address/add/unit', input);
+        });
+
+        survey_ids.forEach(id => {
+          let node = nodes[id];
+
+          // TODO: use mapped attributes to send survey data as visits
+
+        });
+
+        // TODO: remove forms_local & add orgId forms
+        // storage.del('OV_CANVASS_PINS@'+f.id);
+
+      });
+
+      // we're done - go back
       // this.goBack();
     } catch (e) {
       this.setState({error: true});
@@ -114,7 +255,7 @@ export default class App extends HVComponent {
             <Text>There was an error. Please try again later.</Text>
           ||
           <View>
-            <Text>Converting data format, this may take several minutes. Please do not close the app while this processes runs. You only need to do this conversion once.</Text>
+            <Text>Converting data format, this may take a few minutes. Please do not close the app while this loads. This conversion only needs to happen one time.</Text>
             <Spinner />
           </View>
           }

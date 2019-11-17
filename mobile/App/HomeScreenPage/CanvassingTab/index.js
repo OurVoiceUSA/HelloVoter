@@ -68,7 +68,7 @@ export default class App extends LocationComponent {
 
   navigate_legacy() {
     const { navigate } = this.props.navigation;
-    const { myPosition } = this.state;
+    const { myPosition, user } = this.state;
 
     if (!this.checkLocationAccess()) return;
 
@@ -76,7 +76,7 @@ export default class App extends LocationComponent {
 
     if (!state) return this.alert(say("out_of_bounds"), say("not_located_within_us_bounds"));
 
-    navigate('ConvertLegacy', {refer: this, state});
+    navigate('ConvertLegacy', {refer: this, state, user});
   }
 
   connectToGOTV = async() => {
@@ -308,6 +308,12 @@ export default class App extends LocationComponent {
     for (let i in forms_local) {
       let json = forms_local[i];
       if (json === null) continue;
+
+      // if dropbox and not signed in, ignore it
+      if (json.backend === "dropbox" && !user.dropbox) continue;
+
+      // if dropbox and not the author, ignore it
+      if (json.backend === "dropbox" && user.dropbox.account_id !== json.author_id) continue;
 
       if (json.backend === "server") {
         // atempt to re-pull the form to see if it's changed

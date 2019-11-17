@@ -38,6 +38,8 @@ export const say = memoize(
   (key, config) => (config ? key + JSON.stringify(config) : key)
 );
 
+export const bbox_usa = {"type":"MultiPolygon","coordinates":[[[[-179,14],[-50,14],[-50,71],[-179,71],[-179,14]]]]};
+
 export function getEpoch() {
   return Math.floor(new Date().getTime())
 }
@@ -420,6 +422,7 @@ export async function _getJWT(remote) {
     if (localuser) {
       // copy local objects
       user.lastsearchpos = localuser.lastsearchpos;
+      user.dropbox = localuser.dropbox;
       // merge localuser with user where user profile item is null
       if (localuser.profile) {
         if (!user.profile.party && localuser.profile.party) { user.profile.party = localuser.profile.party; remote = true; }

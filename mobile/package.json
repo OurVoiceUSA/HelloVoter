@@ -2,6 +2,10 @@
   "name": "HelloVoter",
   "version": "1.8.5",
   "private": true,
+  "funding": {
+    "type": "patreon",
+    "url": "https://www.patreon.com/hellovoter"
+  },
   "scripts": {
     "postinstall": "patch-package; npx jetify; node node_modules/@babel/node/lib/_babel-node scripts/postinstall.js",
     "android": "react-native run-android",
@@ -13,6 +17,7 @@
     "@react-native-community/async-storage": "^1.6.3",
     "@react-native-community/geolocation": "^2.0.2",
     "@react-native-community/netinfo": "^4.6.0",
+    "base64-js": "^1.3.1",
     "i18n-js": "^3.5.0",
     "javascript-time-ago": "^2.0.4",
     "jwt-decode": "^2.2.0",
@@ -22,6 +27,7 @@
     "native-base": "^2.13.8",
     "natural-orderby": "^2.0.3",
     "ourvoiceusa-sdk-js": "github:OurVoiceUSA/ourvoiceusa-sdk-js",
+    "pako": "^1.0.10",
     "rbush": "^3.0.1",
     "react": "16.12.0",
     "react-native": "0.61.4",
