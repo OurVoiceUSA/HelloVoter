@@ -7,13 +7,19 @@ import TermsDisclosure, { loadDisclosure } from '../TermsDisclosure';
 
 import { DINFO, api_base_uri, _getApiToken, bbox_usa } from '../common';
 
+import { asyncForEach, sleep } from 'ourvoiceusa-sdk-js';
+import * as Progress from 'react-native-progress';
 import storage from 'react-native-storage-wrapper';
 import KeepAwake from 'react-native-keep-awake';
-import { asyncForEach, sleep } from 'ourvoiceusa-sdk-js';
+import promiseLimit from 'promise-limit';
 import base64 from 'base64-js';
 import uuidv4 from 'uuid/v4';
 import pako from 'pako';
 import md5 from 'md5';
+
+var limit = promiseLimit(30);
+
+var prog = 0;
 
 function _nodesFromJtxt(str) {
   let store;
@@ -45,6 +51,8 @@ export default class App extends HVComponent {
       state: props.navigation.state.params.state,
       user: props.navigation.state.params.user,
       showDisclosure: null,
+      progress: 0,
+      total: null,
     };
 
     // reload forms when they go back
@@ -91,6 +99,11 @@ export default class App extends HVComponent {
     }
 
     return ret;
+  }
+
+  progup() {
+    prog++;
+    if (!(prog%30)) this.setState({progress: prog});
   }
 
   doLegacyConversion = async () => {
@@ -254,6 +267,7 @@ export default class App extends HVComponent {
         }
 
         // convert form data to address & people data
+        this.setState({total: Object.keys(nodes).length});
 
         Object.keys(nodes).forEach((id) => {
           let node = nodes[id];
@@ -267,7 +281,7 @@ export default class App extends HVComponent {
         let unit_ids = Object.keys(nodes).filter(id => nodes[id].type === "unit");
         let survey_ids = Object.keys(nodes).filter(id => nodes[id].type === "survey");
 
-        await asyncForEach(address_ids, async (id) => {
+        await limit.map(address_ids, async (id) => {
           let node = nodes[id];
 
           if (!node.address) return;
@@ -290,9 +304,10 @@ export default class App extends HVComponent {
             state: node.address[2],
             zip: node.address[3],
           });
+          this.progup();
         });
 
-        await asyncForEach(unit_ids, async (id) => {
+        await limit.map(unit_ids, async (id) => {
           let node = nodes[id];
           if (!nodes[node.parent_id]) return;
           if (!nodes[node.parent_id].latlng) return;
@@ -305,9 +320,10 @@ export default class App extends HVComponent {
             unit: node.unit,
             addressId: nodes[node.parent_id].rid,
           });
+          this.progup();
         });
 
-        await asyncForEach(survey_ids, async (id) => {
+        await limit.map(survey_ids, async (id) => {
           let node = nodes[id];
           let status;
           let addressId;
@@ -346,6 +362,7 @@ export default class App extends HVComponent {
             if (unit) input.unit = unit;
 
             await this.sendData(orgId, '/people/visit/update', input);
+            this.progup();
             return;
           }
 
@@ -376,6 +393,7 @@ export default class App extends HVComponent {
           if (unit) input.unit = unit;
 
           await this.sendData(orgId, '/people/visit/add', input);
+          this.progup();
         });
 
         // TODO: remove forms_local & add orgId forms
@@ -393,7 +411,7 @@ export default class App extends HVComponent {
 
   render() {
     const { navigate } = this.props.navigation;
-    const { showDisclosure, error } = this.state;
+    const { showDisclosure, error, progress, total } = this.state;
 
     // initial render
     if (showDisclosure === null) {
@@ -415,8 +433,8 @@ export default class App extends HVComponent {
             <Text>There was an error. Please try again later.</Text>
           ||
           <View>
-            <Text>Converting data format, this may take a few minutes. Please do not close the app while this loads. This conversion only needs to happen one time.</Text>
-            <Spinner />
+            <Text>Converting data format, this may take a few minutes to complete. Please do not close the app while this loads. This conversion only needs to happen one time.</Text>
+            <Progress.Circle progress={(total?progress/total:0)} showsText={true} size={200} indeterminate={(total?false:true)} />
           </View>
           }
         </Content>
