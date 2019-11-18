@@ -28,6 +28,7 @@ function _nodesFromJtxt(str) {
     }
   }
 
+  if (store === null) return {};
   if (!store.nodes) store.nodes = {};
 
   return store.nodes;
@@ -204,8 +205,62 @@ export default class App extends HVComponent {
           vId: user.id,
         });
 
+        let nodes = {};
+
+        if (f.author_id && f.author_id.match(/^dbid:/)) {
+          let res = await fetch("https://api.dropboxapi.com/2/files/list_folder", {
+            method: 'POST',
+            headers: {
+              "Authorization": "Bearer "+user.dropbox.accessToken,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              "path": f.folder_path,
+              "recursive": false,
+              "include_media_info": false,
+              "include_deleted": false,
+              "include_has_explicit_shared_members": false,
+              "include_mounted_folders": true,
+              "include_non_downloadable_files": true
+            }),
+          });
+
+          let list = await res.json();
+          let jtxts = list.entries.filter(f => f.name.match(/\.jtxt$/));
+          let dn = [];
+
+          await asyncForEach(jtxts, async (j) => {
+
+            res = await fetch("https://content.dropboxapi.com/2/files/download", {
+              method: 'POST',
+              headers: {
+                "Authorization": "Bearer "+user.dropbox.accessToken,
+                "Dropbox-API-Arg": JSON.stringify({
+                  path: f.folder_path+'/'+j.name,
+                }),
+              },
+            });
+
+            dn.push(_nodesFromJtxt(await res.text()));
+          });
+
+          dn.forEach(n => {
+            Object.keys(n).forEach(k => {
+              nodes[k] = n[k];
+            });
+          });
+        } else {
+          nodes = _nodesFromJtxt(await storage.get('OV_CANVASS_PINS@'+f.id));
+        }
+
         // convert form data to address & people data
-        let nodes = _nodesFromJtxt(await storage.get('OV_CANVASS_PINS@'+f.id));
+
+        nodes.forEach(node => {
+          // App was released in early 2018 with timestamps in seconds
+          // If the timestamp is earlier than that, assume it's in seconds and convert to milliseconds
+          if (node.created < 1514764801000) node.created *= 1000;
+          if (node.updated < 1514764801000) node.updated *= 1000;
+        });
 
         let address_ids = Object.keys(nodes).filter(id => nodes[id].type === "address");
         let unit_ids = Object.keys(nodes).filter(id => nodes[id].type === "unit");
@@ -215,6 +270,7 @@ export default class App extends HVComponent {
           let node = nodes[id];
 
           if (!node.address) return;
+          if (!node.latlng) return;
           if (!node.address[0]) node.address[0] = "";
           if (!node.address[1]) node.address[1] = "";
           if (!node.address[2]) node.address[2] = "";
@@ -225,7 +281,7 @@ export default class App extends HVComponent {
           await this.sendData(orgId, '/address/add/location', {
             deviceId,
             formId,
-            timestamp: node.created,
+            timestamp: (node.created?node.created:node.updated),
             longitude: node.latlng.longitude,
             latitude: node.latlng.latitude,
             street: node.address[0],
@@ -237,10 +293,12 @@ export default class App extends HVComponent {
 
         await asyncForEach(unit_ids, async (id) => {
           let node = nodes[id];
+          if (!nodes[node.parent_id]) return;
+          if (!nodes[node.parent_id].latlng) return;
           await this.sendData(orgId, '/address/add/unit', {
             deviceId,
             formId,
-            timestamp: node.created,
+            timestamp: (node.created?node.created:node.updated),
             longitude: nodes[node.parent_id].latlng.longitude,
             latitude: nodes[node.parent_id].latlng.latitude,
             unit: node.unit,
@@ -293,7 +351,7 @@ export default class App extends HVComponent {
           let attrs = [];
 
           Object.keys(aim).forEach(qk => {
-            if (node.survey[qk]) {
+            if (node.survey && node.survey[qk]) {
               attrs.push({
                 id: aim[qk],
                 value: node.survey[qk],
@@ -327,6 +385,7 @@ export default class App extends HVComponent {
       // we're done - go back
       this.goBack();
     } catch (e) {
+      console.warn(e);
       this.setState({error: true});
     }
   }
