@@ -255,7 +255,8 @@ export default class App extends HVComponent {
 
         // convert form data to address & people data
 
-        nodes.forEach(node => {
+        Object.keys(nodes).forEach((id) => {
+          let node = nodes[id];
           // App was released in early 2018 with timestamps in seconds
           // If the timestamp is earlier than that, assume it's in seconds and convert to milliseconds
           if (node.created < 1514764801000) node.created *= 1000;
