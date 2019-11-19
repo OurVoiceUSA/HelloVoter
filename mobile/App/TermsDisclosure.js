@@ -1,13 +1,16 @@
 import React from 'react';
 import { View } from 'react-native';
-import { Container, Content, Body, Text, H3, Button, ListItem, CheckBox } from 'native-base';
+import { Container, Content, Body, Text, H1, Button, ListItem, CheckBox } from 'native-base';
 
 import HVComponent, { HVConfirmDialog } from './HVComponent';
 
 import { NavigationActions } from 'react-navigation';
 import storage from 'react-native-storage-wrapper';
 
-import { say, getEpoch, openURL, STORAGE_KEY_DISCLOSURE } from './common';
+import {
+  STORAGE_KEY_DISCLOSURE, URL_TERMS_OF_SERVICE,
+  say, getEpoch, openURL,
+} from './common';
 
 export async function loadDisclosure(refer) {
   try {
@@ -18,10 +21,6 @@ export async function loadDisclosure(refer) {
       refer.setState({showDisclosure: true});
     }
   } catch (error) {}
-}
-
-function openCanvassGuidelines() {
-  openURL("https://github.com/OurVoiceUSA/HelloVoter/blob/master/docs/Canvassing-Guidelines.md");
 }
 
 export default class ListTab extends HVComponent {
@@ -44,9 +43,9 @@ export default class ListTab extends HVComponent {
     return (
       <Container>
         <Content padder>
-          <Button block transparent onPress={() => openCanvassGuidelines()}>
-            <H3>{say("termsofservice")}</H3>
-          </Button>
+          <View style={{flex: 1, alignItems: 'center'}}>
+            <H1>{say("termsofservice")}</H1>
+          </View>
 
           <Text></Text>
 
@@ -58,7 +57,7 @@ export default class ListTab extends HVComponent {
 
           <Text>
             By using this tool you acknowledge that you are acting on your own behalf, do not represent Our Voice USA
-            or its affiliates, and have read our <Text style={{fontSize: 18, fontWeight: 'bold', color: 'blue'}} onPress={() => openCanvassGuidelines()}>
+            or its affiliates, and have read our <Text style={{fontWeight: 'bold', color: 'blue'}} onPress={() => openURL(URL_TERMS_OF_SERVICE)}>
             Terms of Service</Text>.
           </Text>
 

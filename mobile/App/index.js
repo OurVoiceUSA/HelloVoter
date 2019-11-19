@@ -78,7 +78,6 @@ const AppNavigator = createStackNavigator({
   ConvertLegacy: {
     screen: ConvertLegacyPage,
     navigationOptions: ({navigation}) => ({
-      title: 'Converting Data',
       headerLeft: null,
     }),
   }

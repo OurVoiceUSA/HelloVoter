@@ -6,18 +6,13 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import SafariView from 'react-native-safari-view';
 import jwt_decode from 'jwt-decode';
 import { wsbase } from './config';
-import { say, _loginPing, _saveJWT, openURL } from './common';
+import { URL_PRIVACY_POLICY, say, _loginPing, _saveJWT, openURL } from './common';
 
 export default class App extends PureComponent {
 
   constructor(props) {
     super(props);
     this.state = { user: null };
-  }
-
-  _policyUrlHandler() {
-    const url = "https://ourvoiceusa.org/wp-content/uploads/2018/10/Privacy-Policy1.pdf";
-    return openURL(url);
   }
 
   _doCheck = async () => {
@@ -115,7 +110,7 @@ export default class App extends PureComponent {
         <View style={{marginTop: 30}}>
           <Text note>
             For a better overall experience for everyone, certain application functions require a login.
-            We value your privacy! Read our <Text style={{fontSize: 10, fontWeight: 'bold', color: 'blue'}} onPress={() => {this._policyUrlHandler()}}>privacy policy</Text> for details.
+            We value your privacy! Read our <Text note style={{fontWeight: 'bold', color: 'blue'}} onPress={() => openURL(URL_PRIVACY_POLICY)}>privacy policy</Text> for details.
           </Text>
         </View>
       </View>
