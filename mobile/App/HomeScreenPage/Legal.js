@@ -18,12 +18,19 @@ export default Legal = props => (
     <Text></Text>
     <Text>{say("this_program_is_free_software")}</Text>
     <Text></Text>
-    {Platform.OS === 'ios'&&
-      <Text>{say("note_about_apple_eula")}</Text>
-    }
+    <View style={{flex: 1, width: 300, alignSelf: 'center', alignItems: 'center'}}>
+      <View style={{flexDirection: 'row', justifyContent: 'center', marginBottom: 15}}>
+        <Button primary><Text>{say("termsofservice")}</Text></Button>
+        <Text>{'  '}</Text>
+        <Button primary><Text>{say("privacypolicy")}</Text></Button>
+      </View>
+      <Button block danger onPress={() => openGitHub('HelloVoter')}>
+      <Text>{say("app_source_code")}</Text>
+      </Button>
+    </View>
     <Text></Text>
-    <Button block primary onPress={() => openGitHub('HelloVoter')}>
-      <Text>{say("tap_here_for_source_code")}</Text>
-    </Button>
+    {Platform.OS === 'ios'&&
+    <Text>{say("note_about_apple_eula")}</Text>
+    }
   </View>
 );

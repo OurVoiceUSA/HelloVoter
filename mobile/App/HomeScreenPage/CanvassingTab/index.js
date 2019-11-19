@@ -17,7 +17,7 @@ import SafariView from 'react-native-safari-view';
 import jwt_decode from 'jwt-decode';
 import { RNCamera } from 'react-native-camera';
 import {
-  DINFO, STORAGE_KEY_JWT, Divider,
+  DINFO, STORAGE_KEY_JWT, URL_TERMS_OF_SERVICE, URL_HELP, Divider,
   say, api_base_uri, _loginPing, openURL, getUSState, localaddress,
 } from '../../common';
 import { wsbase } from '../../config';
@@ -333,6 +333,7 @@ export default class App extends LocationComponent {
       console.error(e);
     }
 
+/*
     // populate forms_local with items from forms_myorg it doesn't have
     forms_myorg.filter(f => forms_local.map(fl => fl.id).indexOf(f.id) === -1).forEach(f => {
       let form = f;
@@ -341,6 +342,7 @@ export default class App extends LocationComponent {
       form.orgId = myOrgID;
       forms_local.push(form);
     });
+*/
 
     for (let i in forms_local) {
       let json = forms_local[i];
@@ -406,8 +408,7 @@ export default class App extends LocationComponent {
   }
 
   _tosUrlHandler() {
-    const url = "https://github.com/OurVoiceUSA/HelloVoter/blob/master/docs/Canvassing-Guidelines.md";
-    return openURL(url);
+    return openURL(URL_TERMS_OF_SERVICE);
   }
 
   _signupUrlHandler() {
@@ -416,8 +417,7 @@ export default class App extends LocationComponent {
   }
 
   _canvassUrlHandler() {
-    const url = "https://github.com/OurVoiceUSA/HelloVoter/blob/master/docs/Canvassing.md";
-    return openURL(url);
+    return openURL(URL_HELP);
   }
 
   parseInvite(url) {
@@ -635,7 +635,6 @@ const FormList = props => {
               <Text note>{form.turfs.length} Turf{(form.turfs.length>1?'s':'')}</Text>
             </TouchableOpacity>
           </Body>
-          {form.orgId !== myOrgID &&
           <Right>
             <TouchableOpacity onPress={() => {
               refer.alert(
@@ -663,7 +662,6 @@ const FormList = props => {
               <Icon name="trash" size={size} color="red" />
             </TouchableOpacity>
           </Right>
-          }
       </ListItem>
   )});
 };

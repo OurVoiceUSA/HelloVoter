@@ -1,6 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
-import { Container, Content, Text, Spinner } from 'native-base';
+import { Container, Content, Text, Spinner, Button, H1, H3 } from 'native-base';
 
 import HVComponent from '../HVComponent';
 import TermsDisclosure, { loadDisclosure } from '../TermsDisclosure';
@@ -17,8 +17,7 @@ import uuidv4 from 'uuid/v4';
 import pako from 'pako';
 import md5 from 'md5';
 
-var limit = promiseLimit(30);
-
+var limit = promiseLimit(15);
 var prog = 0;
 
 function _nodesFromJtxt(str) {
@@ -53,6 +52,8 @@ export default class App extends HVComponent {
       showDisclosure: null,
       progress: 0,
       total: null,
+      rprogress: 0,
+      rtotal: 100,
     };
 
     // reload forms when they go back
@@ -108,6 +109,9 @@ export default class App extends HVComponent {
 
   doLegacyConversion = async () => {
     const { state, user, dinfo, deviceId, myPosition } = this.state;
+
+    for (let i = 0; i <= 100; i++)
+      setTimeout(() => this.setState({rprogress: i}), 500*i)
 
     try {
       // get OrgID
@@ -411,7 +415,7 @@ export default class App extends HVComponent {
 
   render() {
     const { navigate } = this.props.navigation;
-    const { showDisclosure, error, progress, total } = this.state;
+    const { showDisclosure, error, progress, total, rprogress, rtotal } = this.state;
 
     // initial render
     if (showDisclosure === null) {
@@ -430,11 +434,24 @@ export default class App extends HVComponent {
       <Container>
         <Content padder>
           {error&&
-            <Text>There was an error. Please try again later.</Text>
+            <Text>There was an error. Please close the app and try again later.</Text>
           ||
           <View>
-            <Text>Converting data format, this may take a few minutes to complete. Please do not close the app while this loads. This conversion only needs to happen one time.</Text>
-            <Progress.Circle progress={(total?progress/total:0)} showsText={true} size={200} indeterminate={(total?false:true)} />
+            <View style={{flex: 1, alignItems: 'center'}}>
+              <H1>Update in Progress</H1>
+            </View>
+            <Text></Text>
+            <Text>Thanks for using our App! This update brings a ton of new features that we hope you will find useful. Please do not close the app while this loads. This only needs to happen one time.</Text>
+            <Text></Text>
+            <View style={{flex: 1, alignItems: 'center'}}>
+              <H3>Update {(total?"Received":"Requested")}</H3>
+              <Text></Text>
+              <Progress.Circle progress={(total?1:(rtotal?rprogress/rtotal:0))} showsText={true} size={180} thickness={3} indeterminate={(rprogress===rtotal?(total?false:true):false)} borderWidth={3} color={'red'} />
+              <Text></Text>
+              <H3>Update Progress</H3>
+              <Text></Text>
+              <Progress.Circle progress={(total?progress/total:0)} showsText={true} size={180} thickness={4} indeterminate={false} borderWidth={4} />
+            </View>
           </View>
           }
         </Content>
