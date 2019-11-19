@@ -237,7 +237,7 @@ PODS:
     - React
   - react-native-maps (0.26.1):
     - React
-  - react-native-netinfo (4.6.0):
+  - react-native-netinfo (4.6.1):
     - React
   - react-native-safari-view (1.0.0):
     - React
@@ -476,7 +476,7 @@ SPEC CHECKSUMS:
   react-native-google-places: 1531c5b40622f71b6dacfb476e30be9e08e857b8
   react-native-keep-awake: eba3137546b10003361b37c761f6c429b59814ae
   react-native-maps: 6e499eee4eabf422ba8b6f94e993cc768bf35153
-  react-native-netinfo: bd4c115afdf0821b8ddb6c59ef3ddc5f0a7e8ad0
+  react-native-netinfo: 16c6408c311572f17f9ffc3fa12614489307b6cf
   react-native-safari-view: 955d7160d159241b8e9395d12d10ea0ef863dcdd
   React-RCTActionSheet: 7369b7c85f99b6299491333affd9f01f5a130c22
   React-RCTAnimation: d07be15b2bd1d06d89417eb0343f98ffd2b099a7
