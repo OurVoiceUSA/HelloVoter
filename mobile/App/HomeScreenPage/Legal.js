@@ -4,7 +4,7 @@ import {
   Platform,
 } from 'react-native';
 import { Text, Button, Spinner } from 'native-base';
-import { say, openGitHub } from '../common';
+import { URL_TERMS_OF_SERVICE, URL_PRIVACY_POLICY, say, openGitHub, openURL } from '../common';
 
 export default Legal = props => (
   <View>
@@ -20,9 +20,9 @@ export default Legal = props => (
     <Text></Text>
     <View style={{flex: 1, width: 300, alignSelf: 'center', alignItems: 'center'}}>
       <View style={{flexDirection: 'row', justifyContent: 'center', marginBottom: 15}}>
-        <Button primary><Text>{say("termsofservice")}</Text></Button>
+        <Button primary onPress={() => openURL(URL_TERMS_OF_SERVICE)}><Text>{say("termsofservice")}</Text></Button>
         <Text>{'  '}</Text>
-        <Button primary><Text>{say("privacypolicy")}</Text></Button>
+        <Button primary onPress={() => openURL(URL_PRIVACY_POLICY)}><Text>{say("privacypolicy")}</Text></Button>
       </View>
       <Button block danger onPress={() => openGitHub('HelloVoter')}>
       <Text>{say("app_source_code")}</Text>
