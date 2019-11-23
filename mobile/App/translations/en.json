@@ -121,6 +121,8 @@
   "no_qr_code_please_ask": "If you don’t have a QR Code or Organization ID yet, please ask your organization to provide you with one.",
   "org_id_signup": "New Organization",
   "org_id_signup_subtext": "Sign up for an Organization ID, and based on available resources, we may be able to host your data.",
+  "incomplete_form": "Incomplete Form",
+  "all_required": "All items are required",
   "enter_org_id_example": "Enter Org ID. Example",
   "lets_do_this": "Let's do this!"
 }

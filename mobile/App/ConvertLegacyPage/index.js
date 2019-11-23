@@ -5,7 +5,7 @@ import { Container, Content, Text, Spinner, Button, H1, H3 } from 'native-base';
 import HVComponent from '../HVComponent';
 import TermsDisclosure, { loadDisclosure } from '../TermsDisclosure';
 
-import { DINFO, api_base_uri, _getApiToken, bbox_usa } from '../common';
+import { DINFO, api_base_uri, _getApiToken, bbox_usa, createOrgID } from '../common';
 
 import { asyncForEach, sleep } from 'ourvoiceusa-sdk-js';
 import * as Progress from 'react-native-progress';
@@ -114,15 +114,7 @@ export default class App extends HVComponent {
       setTimeout(() => this.setState({rprogress: i}), 500*i)
 
     try {
-      // get OrgID
-      let res = await fetch('https://gotv-'+state+'.ourvoiceusa.org/orgid/v1/new', {
-        method: 'POST',
-        body: JSON.stringify({state}),
-        headers: {
-          'Authorization': 'Bearer '+await _getApiToken(),
-          'Content-Type': 'application/json',
-        },
-      });
+      let res = await createOrgID({state, action: "legacy", who: (user.dropbox?"dropbox":"local")});
 
       if (res.status !== 200) throw "OrgID error";
 

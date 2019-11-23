@@ -8,6 +8,7 @@ import {
 import LocationComponent from '../../LocationComponent';
 import { HVConfirmDialog } from '../../HVComponent';
 import SmLogin from '../../SmLogin';
+import NewOrg from './NewOrg';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Dialog } from 'react-native-simple-dialogs';
@@ -46,6 +47,7 @@ export default class App extends LocationComponent {
       server: null,
       myPosition: {latitude: null, longitude: null},
       showCamera: false,
+      newOrg: false,
     };
   }
 
@@ -362,7 +364,7 @@ export default class App extends LocationComponent {
       }
 
     } catch (e) {
-      console.error(e);
+      console.warn(e);
     }
 
 /*
@@ -455,7 +457,7 @@ export default class App extends LocationComponent {
   parseInvite(url) {
     let obj = {};
 
-    this.setState({showCamera: false, SelectModeScreen: false, askOrgId: false});
+    this.setState({showCamera: false, newOrg: false, SelectModeScreen: false, askOrgId: false});
 
     try {
       // Why oh why is the "new URL()" object not implemented in RN?!? gah
@@ -475,7 +477,7 @@ export default class App extends LocationComponent {
 
   render() {
     const {
-      showCamera, dinfo, loading, user, forms, error,
+      showCamera, newOrg, dinfo, loading, user, forms, error,
       askOrgId, SelectModeScreen, myOrgID, waitmode, waitprogress,
     } = this.state;
     const { navigate } = this.props.navigation;
@@ -518,6 +520,8 @@ export default class App extends LocationComponent {
         barCodeTypes={[RNCamera.Constants.BarCodeType.qr]}
       />
     );
+
+    if (newOrg) return (<NewOrg refer={this} />);
 
     return (
       <Content>
@@ -572,15 +576,21 @@ export default class App extends LocationComponent {
             </Button>
             <Text style={{fontSize: 12, marginBottom: 10, textAlign: 'justify'}}>{say("didnt_receive_qr_code")}</Text>
 
-            {myOrgID === null &&
             <View>
-              <Button block bordered dark onPress={() => this._signupUrlHandler()}>
+              <Button block bordered dark onPress={() => {
+                if (!this.checkLocationAccess()) return;
+
+                let state = getUSState(this.state.myPosition);
+
+                if (!state) return this.alert(say("out_of_bounds"), say("not_located_within_us_bounds"));
+
+                this.setState({SelectModeScreen: false, newOrg: true, state})}
+              }>
                 <Icon name="clipboard" {...iconStyles} />
                 <Text>{say("org_id_signup")}</Text>
               </Button>
               <Text style={{fontSize: 12, marginBottom: 10, textAlign: 'justify'}}>{say("org_id_signup_subtext")}</Text>
             </View>
-            }
 
             {(__DEV__&&dinfo.Emulator)&&
             <View>

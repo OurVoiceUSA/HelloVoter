@@ -61,6 +61,17 @@ export function api_base_uri(orgId) {
   return '/HelloVoterHQ/'+(orgId?orgId+'/':'')+'api/v1';
 }
 
+export async function createOrgID(data) {
+  return fetch('https://gotv-'+data.state+'.ourvoiceusa.org/orgid/v1/new', {
+    method: 'POST',
+    body: JSON.stringify(data),
+    headers: {
+      'Authorization': 'Bearer '+await _getApiToken(),
+      'Content-Type': 'application/json',
+    },
+  });
+}
+
 export async function openURL(url) {
   try {
     // Use SafariView in-line to the app on iOS if it's an http URL
