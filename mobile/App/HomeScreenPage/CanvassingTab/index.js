@@ -9,18 +9,23 @@ import LocationComponent from '../../LocationComponent';
 import { HVConfirmDialog } from '../../HVComponent';
 import SmLogin from '../../SmLogin';
 
+import Icon from 'react-native-vector-icons/FontAwesome';
 import { Dialog } from 'react-native-simple-dialogs';
 import storage from 'react-native-storage-wrapper';
+import * as Progress from 'react-native-progress';
+import KeepAwake from 'react-native-keep-awake';
 import Prompt from 'react-native-input-prompt';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import SafariView from 'react-native-safari-view';
-import jwt_decode from 'jwt-decode';
 import { RNCamera } from 'react-native-camera';
+import { sleep } from 'ourvoiceusa-sdk-js';
+import jwt_decode from 'jwt-decode';
+
 import {
   DINFO, STORAGE_KEY_JWT, URL_TERMS_OF_SERVICE, URL_HELP, Divider,
   say, api_base_uri, _loginPing, openURL, getUSState, localaddress,
 } from '../../common';
 import { wsbase } from '../../config';
+
+const PROCESS_MAX_WAIT = 150;
 
 export default class App extends LocationComponent {
 
@@ -31,12 +36,14 @@ export default class App extends LocationComponent {
       refer: props.refer,
       dinfo: {},
       loading: true,
+      waitmode: false,
+      waitprogress: 0,
+      error: false,
       user: null,
       myOrgID: null,
       forms: [],
       SelectModeScreen: false,
       server: null,
-      serverLoading: false,
       myPosition: {latitude: null, longitude: null},
       showCamera: false,
     };
@@ -98,14 +105,14 @@ export default class App extends LocationComponent {
   connectToServer = async(server, orgId, inviteCode) => {
     if (!this.checkLocationAccess()) return;
 
-    this.setState({serverLoading: true, server});
+    this.setState({loading: true, server});
 
     let ret = await this.singHello(server, orgId, inviteCode);
 
     if (ret.flag !== true) this.alert((ret.error?say("error"):say("connection_successful")), ret.msg);
     if (ret.error !== true) server = null;
 
-    this.setState({serverLoading: false});
+    this.setState({loading: false});
   }
 
   sayHello = async (server, orgId, inviteCode) => {
@@ -113,41 +120,64 @@ export default class App extends LocationComponent {
 
     if (!this.checkLocationAccess()) return;
 
-    // mock a fetch object
-    let res = {headers: {get: () => wsbase+'/auth'}, status: 404};
+    let res;
+    let jwt;
+
     try {
-      let jwt = await storage.get(STORAGE_KEY_JWT);
+      jwt = await storage.get(STORAGE_KEY_JWT);
+      // if the jwt doesn't have an id, discard it
+      let obj = jwt_decode(jwt);
+      if (!obj.id) throw "not a full user object";
+    } catch (e) {
+      await storage.del(STORAGE_KEY_JWT);
+      this.setState({error: true});
+      return;
+    }
+
+    this.setState({waitmode: true, waitprogress: 0});
+
+    for (let i = 1; i <= PROCESS_MAX_WAIT; i++)
+      setTimeout(() => this.setState({waitprogress: i}), 750*i)
+
+    let retry = true;
+    for (let retrycount = 0; (retrycount < (PROCESS_MAX_WAIT/10) && retry); retrycount++) {
 
       try {
-        // if the jwt doesn't have an id, discard it
-        let obj = jwt_decode(jwt);
-        if (!obj.id) throw "not a full user object";
+        let https = true;
+        if (server.match(/:8080/)) https = false;
+
+        res = await fetch('http'+(https?'s':'')+'://'+server+api_base_uri(orgId)+'/hello', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            longitude: myPosition.longitude,
+            latitude: myPosition.latitude,
+            dinfo,
+            inviteCode,
+          }),
+        });
+        switch (res.status) {
+          case 200: retry = false; break;
+          case 418: await sleep(12345); break;
+          default: break;
+        }
       } catch (e) {
-        await storage.del(STORAGE_KEY_JWT);
-        jwt = null;
+        console.warn("sayHello error: "+e);
       }
-
-      let https = true;
-      if (server.match(/:8080/)) https = false;
-
-      res = await fetch('http'+(https?'s':'')+'://'+server+api_base_uri(orgId)+'/hello', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          longitude: myPosition.longitude,
-          latitude: myPosition.latitude,
-          dinfo,
-          inviteCode,
-        }),
-      });
-      if (res.status === 400 || res.status === 401) await storage.del(STORAGE_KEY_JWT);
-    } catch (e) {
-      if (orgId) res = {headers: {get: () => ''}, status: 404};
-      console.warn("sayHello error: "+e);
     }
+
+    this.setState({waitmode: false});
+
+    if (retry) {
+      // mock a fetch object
+      res = {headers: {get: () => wsbase+'/auth'}, status: 404};
+      this.setState({error: true});
+      console.warn("Timeout");
+    }
+
     return res;
   }
 
@@ -260,6 +290,15 @@ export default class App extends LocationComponent {
 
     let access = await this.requestLocationPermission();
 
+    try {
+      let user = await _loginPing(this, true);
+      this.setState({user});
+    } catch (e) {
+      console.warn(e);
+      this.setState({error: true});
+      return;
+    }
+
     let inviteUrl = await storage.get('HV_INVITE_URL');
 
     if (access && inviteUrl) {
@@ -278,20 +317,13 @@ export default class App extends LocationComponent {
 
   _loadForms = async () => {
     const { navigate } = this.props.navigation;
-    const { refer, myPosition } = this.state;
+    const { user, refer, myPosition } = this.state;
 
-    let user;
     let jwt;
     let myOrgID;
     let forms = [], forms_myorg = [], forms_local = [];
 
     this.setState({loading: true});
-
-    // look for canvassing forms
-    try {
-      user = await _loginPing(this, true);
-    } catch (e) {
-    }
 
     // get locally saved forms
     try {
@@ -443,10 +475,16 @@ export default class App extends LocationComponent {
 
   render() {
     const {
-      showCamera, dinfo, loading, user, forms,
-      askOrgId, SelectModeScreen, myOrgID,
+      showCamera, dinfo, loading, user, forms, error,
+      askOrgId, SelectModeScreen, myOrgID, waitmode, waitprogress,
     } = this.state;
     const { navigate } = this.props.navigation;
+
+    if (error) return (
+        <View style={{flex: 1, backgroundColor: 'white', alignItems: 'center', justifyContent: 'center'}}>
+          <Text style={{fontSize: 20}}>{say("unexpected_error_try_again")}</Text>
+        </View>
+      );
 
     // wait for user object to become available
     if (!user || loading) return (
@@ -563,6 +601,22 @@ export default class App extends LocationComponent {
 
         </Dialog>
 
+        <Dialog
+          title={(waitprogress<10?"Connecting":"Getting Things Ready")}
+          visible={waitmode}>
+          <View style={{alignItems: 'center'}}>
+            <Progress.Circle
+              progress={(waitprogress-10)/(PROCESS_MAX_WAIT-10)}
+              color={(waitprogress<10?"blue":"red")}
+              showsText={true}
+              size={180}
+              thickness={4}
+              indeterminate={((waitprogress<10||waitprogress>=PROCESS_MAX_WAIT)?true:false)}
+              borderWidth={4} />
+            <KeepAwake />
+          </View>
+        </Dialog>
+
         <Prompt
           autoCorrect={false}
           autoCapitalize={"characters"}
@@ -621,10 +675,9 @@ const FormList = props => {
           <Body>
             <TouchableOpacity onPress={async () => {
                 if (form.backend === "server") {
-                  // TODO: set loading state as this can take a few seconds
                   let ret = await refer.sayHello(form.server, form.orgId);
-                  if (ret.status === 200) refer.navigate_canvassing({server: form.server, orgId: form.orgId, form: form, refer: refer});
-                  else refer.setState({user: null});
+                  if (ret.status === 200) refer.navigate_canvassing({server: form.server, orgId: form.orgId, form, refer});
+                  else refer.setState({error: true});
                } else {
                  refer.navigate_legacy();
                }
