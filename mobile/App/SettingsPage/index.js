@@ -19,8 +19,8 @@ import storage from 'react-native-storage-wrapper';
 import SmLogin from '../SmLogin';
 import { google_api_key } from '../config';
 import {
-  DINFO, _getJWT, _saveJWT, _loginPing, _rmJWT, _saveUser, openURL, openGitHub,
-  _rmUser, _apiCall, _specificAddress, permissionNotify, permissionLocation, say,
+  DINFO, _getJWT, _saveJWT, _loginPing, _logout, _saveUser, openURL, openGitHub,
+  _apiCall, _specificAddress, permissionNotify, permissionLocation, say,
 } from '../common';
 
 import {
@@ -75,9 +75,7 @@ export default class App extends HVComponent {
   }
 
   _logout() {
-    const { user } = this.state;
-    _rmJWT();
-    _rmUser();
+    _logout();
     this.goHome();
   }
 

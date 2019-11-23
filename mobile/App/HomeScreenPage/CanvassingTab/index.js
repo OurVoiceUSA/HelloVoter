@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import {
-  Container, Header, Content, List, ListItem, Left, Right, Body, Footer, FooterTab,
+  Content, List, ListItem, Left, Right, Body, Footer, FooterTab,
   Text, Button, Spinner,
 } from 'native-base';
 

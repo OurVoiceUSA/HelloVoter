@@ -1,18 +1,16 @@
 import React, { PureComponent } from 'react';
 import { View } from 'react-native';
-import { Content, Body, Button, ListItem, CheckBox, Text, } from 'native-base';
+import { H1, Content, Body, Button, ListItem, CheckBox, Text, } from 'native-base';
 
 import HVComponent, { HVConfirmDialog } from '../../HVComponent';
 
 import {
   SettingsDividerShort,
-  SettingsDividerLong,
-  SettingsCategoryHeader,
   SettingsPicker,
   SettingsTextLabel,
 } from 'react-native-settings-components';
 
-import { say, createOrgID } from '../../common';
+import { say, _logout, createOrgID } from '../../common';
 
 export default class NewOrg extends HVComponent {
   constructor(props) {
@@ -20,7 +18,6 @@ export default class NewOrg extends HVComponent {
 
     this.state = {
       refer: props.refer,
-      form: props.form,
       ack: false,
       action: "",
       who: "",
@@ -30,15 +27,34 @@ export default class NewOrg extends HVComponent {
 
   render() {
     const { refer, action, who, ack } = this.state;
+    const { user } = refer.state;
 
     let canAddFilter = false;
+
+    if (!user.email) return (
+      <Content>
+        <Text>To sign up for an OrgID, you must allow us access to your email address from your social media preferences.</Text>
+        <Text></Text>
+        <Text>Please sign out here, correct your email setting on your social media account, and try again.</Text>
+        <Text></Text>
+        <Button danger onPress={() => {
+          refer.setState({newOrg: false, user: {profile: {}}});
+          _logout();
+        }}>
+          <Text>{say("logout")}</Text>
+        </Button>
+      </Content>
+    );
 
     return (
     <Content>
 
-      <SettingsCategoryHeader title={say("org_id_signup")} />
+      <H1>{say("org_id_signup")}</H1>
+      <Text></Text>
+      <Text>Hello {user.name}!</Text>
+      <Text></Text>
 
-      <SettingsDividerLong />
+      <SettingsDividerShort />
 
       <SettingsPicker
         title="What best describes your activities?"

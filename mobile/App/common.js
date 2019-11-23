@@ -72,6 +72,11 @@ export async function createOrgID(data) {
   });
 }
 
+export function _logout() {
+  _rmJWT();
+  _rmUser();
+}
+
 export async function openURL(url) {
   try {
     // Use SafariView in-line to the app on iOS if it's an http URL
