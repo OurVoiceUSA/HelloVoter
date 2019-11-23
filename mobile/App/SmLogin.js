@@ -12,11 +12,14 @@ export default class App extends PureComponent {
 
   constructor(props) {
     super(props);
-    this.state = { user: null };
+    this.state = {
+      refer: props.refer,
+      user: null,
+    };
   }
 
   _doCheck = async () => {
-    const { refer } = this.props;
+    const { refer } = this.state;
 
     var user = await _loginPing(this, true);
 
@@ -74,7 +77,6 @@ export default class App extends PureComponent {
 
   render() {
     const { user } = this.state;
-    const { refer } = this.props;
 
     return (
       <View>
