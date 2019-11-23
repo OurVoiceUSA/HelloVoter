@@ -1,8 +1,8 @@
 import React, { PureComponent } from 'react';
-import { View, TouchableOpacity } from 'react-native';
+import { View, TouchableOpacity, Dimensions, Image } from 'react-native';
 import {
   Content, List, ListItem, Left, Right, Body, Footer, FooterTab,
-  Text, Button, Spinner,
+  Text, Button, Spinner, H1,
 } from 'native-base';
 
 import LocationComponent from '../../LocationComponent';
@@ -282,15 +282,23 @@ export default class App extends LocationComponent {
   }
 
   componentDidMount() {
-    this._doSetup();
-    this._loadForms();
+    DINFO()
+    .then(dinfo => this.setState({dinfo}, () => this._doSetup()))
+    .catch(e => {
+      this.setState({error: true})
+      console.warn(e);
+    });
   }
 
   _doSetup = async () => {
-    let dinfo = await DINFO();
-    this.setState({dinfo});
+    const { dinfo } = this.state;
 
-    let access = await this.requestLocationPermission();
+    await this.requestLocationPermission();
+
+    if (!this.checkLocationAccess()) {
+      this.setState({locationDenied: true});
+      return;
+    }
 
     try {
       let user = await _loginPing(this, true);
@@ -307,6 +315,8 @@ export default class App extends LocationComponent {
       await storage.del('HV_INVITE_URL');
       this.parseInvite(inviteUrl);
     }
+
+    this._loadForms();
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -477,7 +487,7 @@ export default class App extends LocationComponent {
 
   render() {
     const {
-      showCamera, newOrg, dinfo, loading, user, forms, error,
+      showCamera, newOrg, dinfo, loading, user, forms, error, locationDenied,
       askOrgId, SelectModeScreen, myOrgID, waitmode, waitprogress,
     } = this.state;
     const { navigate } = this.props.navigation;
@@ -485,6 +495,19 @@ export default class App extends LocationComponent {
     if (error) return (
         <View style={{flex: 1, backgroundColor: 'white', alignItems: 'center', justifyContent: 'center'}}>
           <Text style={{fontSize: 20}}>{say("unexpected_error_try_again")}</Text>
+        </View>
+      );
+
+    if (locationDenied) return (
+        <View style={{position: 'absolute', left: 0, right: 0, alignItems: 'center'}}>
+          <Image source={require('../../../img/whereami.png')} style={{
+            position: 'absolute', left: 0,
+            width: Dimensions.get('window').width,
+            height: Dimensions.get('window').height*.8,
+            resizeMode: 'stretch',
+          }} />
+          <H1 style={{margin: 35, alignSelf: 'center'}}>Location Unknown</H1>
+          <HVConfirmDialog refer={this} />
         </View>
       );
 
