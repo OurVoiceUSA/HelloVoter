@@ -26,6 +26,12 @@ import {
 } from '../../common';
 import { wsbase } from '../../config';
 
+var darkoutside = require('../../../img/darkoutside.png');
+var usaonly = require('../../../img/usaonly.png');
+var lost = require('../../../img/whereami.png');
+var crowd = require('../../../img/crowd.png')
+var stop = require('../../../img/stop.png');
+
 const PROCESS_MAX_WAIT = 150;
 
 export default class App extends LocationComponent {
@@ -344,18 +350,7 @@ export default class App extends LocationComponent {
         </View>
       );
 
-    if (locationDenied) return (
-        <View style={{position: 'absolute', left: 0, right: 0, alignItems: 'center'}}>
-          <Image source={require('../../../img/whereami.png')} style={{
-            position: 'absolute', left: 0,
-            width: Dimensions.get('window').width,
-            height: Dimensions.get('window').height*.8,
-            resizeMode: 'stretch',
-          }} />
-          <H1 style={{margin: 35, alignSelf: 'center'}}>Location Unknown</H1>
-          <HVConfirmDialog refer={this} />
-        </View>
-      );
+    if (locationDenied) return (<NotRightNow image={lost} title="Location Unknown" message="" />);
 
     // wait for user object to become available
     if (!user || loading) return (
@@ -371,9 +366,14 @@ export default class App extends LocationComponent {
       </View>
       );
 
-    if (canvaslater) return (
-        <H1>{canvaslater}</H1>
-      );
+    if (canvaslater) {
+      switch (canvaslater) {
+        case 409: return (<NotRightNow image={darkoutside} title="It's Dark Outside" message="Whoa there! The sun's not up. Relax and try again later." />);
+        case 410: return (<NotRightNow image={stop} title="Suspended" message="This organization has been suspended due to a Terms of Service violation. Please contact your organization administrator." />);
+        case 451: return (<NotRightNow image={usaonly} title="Geography Error" message="This app is only intended to be used in the USA." />);
+        default: return (<NotRightNow image={crowd} title="At Capacity" message="It's getting crowded up in here! Our systems are at capacity. Please try back at another time." />);
+      }
+    }
 
     // if camera is open, render just that
     if (showCamera) return (
@@ -566,7 +566,20 @@ const ServerList = props => {
       <Text>{(s.orgId?s.orgId:s.server)}</Text>
     </Button>
   ));
-}
+};
+
+const NotRightNow = props => (
+  <View style={{position: 'absolute', left: 0, right: 0, alignItems: 'center'}}>
+    <Image source={props.image} style={{
+      position: 'absolute', left: 0,
+      width: Dimensions.get('window').width,
+      height: Dimensions.get('window').height*.8,
+      resizeMode: 'stretch',
+    }} />
+    <H1 style={{margin: 15, alignSelf: 'center'}}>{props.title}</H1>
+    <Text style={{padding: 10}}>{props.message}</Text>
+  </View>
+);
 
 const iconStyles = {
   borderRadius: 10,
