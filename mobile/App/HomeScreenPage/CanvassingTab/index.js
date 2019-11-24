@@ -84,7 +84,10 @@ export default class App extends LocationComponent {
 
     if (!this.checkLocationAccess()) return;
 
-    if (!state) return this.alert(say("out_of_bounds"), say("not_located_within_us_bounds"));
+    if (!state) {
+      this.setState({canvaslater: 451});
+      return this.alert(say("out_of_bounds"), say("not_located_within_us_bounds"));
+    }
 
     if (orgId && orgId.match(/^[0-9A-Z]*$/)) {
       // first two characters are the state code
@@ -350,7 +353,7 @@ export default class App extends LocationComponent {
         </View>
       );
 
-    if (locationDenied) return (<NotRightNow image={lost} title="Location Unknown" message="" />);
+    if (locationDenied) return (<NotRightNow refer={this} image={lost} title="Location Unknown" message="" />);
 
     // wait for user object to become available
     if (!user || loading) return (
@@ -368,10 +371,10 @@ export default class App extends LocationComponent {
 
     if (canvaslater) {
       switch (canvaslater) {
-        case 409: return (<NotRightNow image={darkoutside} title="It's Dark Outside" message="Whoa there! The sun's not up. Relax and try again later." />);
-        case 410: return (<NotRightNow image={stop} title="Suspended" message="This organization has been suspended due to a Terms of Service violation. Please contact your organization administrator." />);
-        case 451: return (<NotRightNow image={usaonly} title="Geography Error" message="This app is only intended to be used in the USA." />);
-        default: return (<NotRightNow image={crowd} title="At Capacity" message="It's getting crowded up in here! Our systems are at capacity. Please try back at another time." />);
+        case 409: return (<NotRightNow refer={this} image={darkoutside} title="It's Dark Outside" message="Whoa there! The sun's not up. Relax and try again later." />);
+        case 410: return (<NotRightNow refer={this} image={stop} title="Suspended" message="This organization has been suspended due to a Terms of Service violation. Please contact your organization administrator." />);
+        case 451: return (<NotRightNow refer={this} image={usaonly} title="Geography Error" message="This app is only intended to be used in the USA." />);
+        default: return (<NotRightNow refer={this} image={crowd} title="At Capacity" message="It's getting crowded up in here! Our systems are at capacity. Please try back at another time." />);
       }
     }
 
@@ -454,7 +457,10 @@ export default class App extends LocationComponent {
                 const { state } = this.state;
 
                 if (!this.checkLocationAccess()) return;
-                if (!state) return this.alert(say("out_of_bounds"), say("not_located_within_us_bounds"));
+                if (!state) {
+                  this.setState({canvaslater: 451});
+                  return this.alert(say("out_of_bounds"), say("not_located_within_us_bounds"));
+                }
 
                 this.setState({SelectModeScreen: false, newOrg: true, state})}
               }>
@@ -578,6 +584,7 @@ const NotRightNow = props => (
     }} />
     <H1 style={{margin: 15, alignSelf: 'center'}}>{props.title}</H1>
     <Text style={{padding: 10}}>{props.message}</Text>
+    <HVConfirmDialog refer={props.refer} />
   </View>
 );
 
