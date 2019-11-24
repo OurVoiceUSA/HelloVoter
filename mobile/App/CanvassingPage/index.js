@@ -11,8 +11,8 @@ import TurfTab from './TurfTab';
 import SettingsTab from './SettingsTab';
 
 import {
-  DINFO, STORAGE_KEY_SETTINGS, api_base_uri, _doGeocode, _getApiToken, openURL,
-  getEpoch, getLastVisit, getPinColor,
+  DINFO, STORAGE_KEY_SETTINGS, STORAGE_KEY_RETRY,
+  api_base_uri, _doGeocode, _getApiToken, openURL, getEpoch, getLastVisit, getPinColor,
 } from '../common';
 
 import { deepCopy, geojson2polygons, ingeojson } from 'ourvoiceusa-sdk-js';
@@ -51,9 +51,10 @@ export default class App extends LocationComponent {
     this.state = {
       refer: props.navigation.state.params.refer,
       server: props.navigation.state.params.server,
-      form: props.navigation.state.params.form,
       orgId: props.navigation.state.params.orgId,
-      turfs: props.navigation.state.params.form.turfs,
+      forms: props.navigation.state.params.forms,
+      form: {},
+      turfs: [],
       active: 'map',
       segmentList: 'streets',
       segmentTurf: 'list',
@@ -90,6 +91,10 @@ export default class App extends LocationComponent {
       showDisclosure: null,
       retry_queue: [],
     };
+
+    // TODO: support multi-forms
+    this.state.form = this.state.forms[0];
+    this.state.turfs = this.state.form.turfs;
 
     if (this.state.form.add_new) this.add_new = true;
 
@@ -573,7 +578,7 @@ export default class App extends LocationComponent {
     retry_queue.push({uri: uri, input: input});
     this.setState({retry_queue});
     try {
-      await storage.set('OV_RETRY', JSON.stringify(retry_queue));
+      await storage.set(STORAGE_KEY_RETRY, JSON.stringify(retry_queue));
     } catch(e) {
       console.warn(e);
     }
@@ -592,7 +597,7 @@ export default class App extends LocationComponent {
     }
 
     try {
-      await storage.del('OV_RETRY');
+      await storage.del(STORAGE_KEY_RETRY);
     } catch (e) {
       triggerNetworkWarning(e);
     }
@@ -602,7 +607,7 @@ export default class App extends LocationComponent {
 
   loadRetryQueue = async () => {
     try {
-      const value = await storage.get('OV_RETRY');
+      const value = await storage.get(STORAGE_KEY_RETRY);
       if (value !== null)
         this.setState({retry_queue: JSON.parse(value)}, () => this.doRetry());
     } catch(e) {

@@ -55,11 +55,11 @@ export default class App extends PureComponent {
     Linking.removeEventListener('url', this.handleOpenURL);
   };
 
-  handleOpenURL = ({ url }) => {
+  handleOpenURL = async ({ url }) => {
     // Extract jwt token out of the URL
     const m = url.match(/jwt=([^#]+)/);
 
-    if (m) _saveJWT(m[1]);
+    if (m) await _saveJWT(m[1]);
 
     this._doCheck();
 

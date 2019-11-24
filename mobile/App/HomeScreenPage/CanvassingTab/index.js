@@ -17,12 +17,12 @@ import * as Progress from 'react-native-progress';
 import KeepAwake from 'react-native-keep-awake';
 import Prompt from 'react-native-input-prompt';
 import { RNCamera } from 'react-native-camera';
-import { sleep } from 'ourvoiceusa-sdk-js';
+import { sleep, asyncForEach } from 'ourvoiceusa-sdk-js';
 import jwt_decode from 'jwt-decode';
 
 import {
-  DINFO, STORAGE_KEY_JWT, URL_TERMS_OF_SERVICE, URL_HELP, Divider,
-  say, api_base_uri, _loginPing, openURL, getUSState, localaddress,
+  DINFO, STORAGE_KEY_JWT, STORAGE_KEY_OLDFORMS, URL_GUIDELINES, URL_HELP,
+  Divider, say, _getApiToken, api_base_uri, _loginPing, openURL, getUSState, localaddress,
 } from '../../common';
 import { wsbase } from '../../config';
 
@@ -39,10 +39,11 @@ export default class App extends LocationComponent {
       loading: true,
       waitmode: false,
       waitprogress: 0,
+      canvaslater: null,
       error: false,
       user: null,
       myOrgID: null,
-      forms: [],
+      servers: [],
       SelectModeScreen: false,
       server: null,
       myPosition: {latitude: null, longitude: null},
@@ -72,25 +73,10 @@ export default class App extends LocationComponent {
     navigate('Canvassing', args);
   }
 
-  navigate_legacy() {
-    const { navigate } = this.props.navigation;
-    const { myPosition, user } = this.state;
-
-    if (!this.checkLocationAccess()) return;
-
-    let state = getUSState(myPosition);
-
-    if (!state) return this.alert(say("out_of_bounds"), say("not_located_within_us_bounds"));
-
-    navigate('ConvertLegacy', {refer: this, state, user, myPosition});
-  }
-
   connectToGOTV = async() => {
-    const { myPosition, orgId, inviteCode } = this.state;
+    const { state, orgId, inviteCode } = this.state;
 
     if (!this.checkLocationAccess()) return;
-
-    let state = getUSState(myPosition);
 
     if (!state) return this.alert(say("out_of_bounds"), say("not_located_within_us_bounds"));
 
@@ -107,26 +93,25 @@ export default class App extends LocationComponent {
   connectToServer = async(server, orgId, inviteCode) => {
     if (!this.checkLocationAccess()) return;
 
-    this.setState({loading: true, server});
+    this.setState({server});
 
-    let ret = await this.singHello(server, orgId, inviteCode);
-
-    if (ret.flag !== true) this.alert((ret.error?say("error"):say("connection_successful")), ret.msg);
-    if (ret.error !== true) server = null;
-
-    this.setState({loading: false});
+    await this.sayHello(server, orgId, inviteCode);
   }
 
   sayHello = async (server, orgId, inviteCode) => {
     const { dinfo, myPosition } = this.state;
+    let { servers } = this.state;
+    let canvaslater;
 
     if (!this.checkLocationAccess()) return;
+
+    this.setState({waitmode: true, waitprogress: 0});
 
     let res;
     let jwt;
 
     try {
-      jwt = await storage.get(STORAGE_KEY_JWT);
+      jwt = await _getApiToken();
       // if the jwt doesn't have an id, discard it
       let obj = jwt_decode(jwt);
       if (!obj.id) throw "not a full user object";
@@ -136,8 +121,7 @@ export default class App extends LocationComponent {
       return;
     }
 
-    this.setState({waitmode: true, waitprogress: 0});
-
+    // TODO: convert to a recursive setTimeout that stops at waitmode false, or PROCESS_MAX_WAIT
     for (let i = 1; i <= PROCESS_MAX_WAIT; i++)
       setTimeout(() => this.setState({waitprogress: i}), 750*i)
 
@@ -162,123 +146,45 @@ export default class App extends LocationComponent {
           }),
         });
         switch (res.status) {
-          case 200: retry = false; break;
+          case 200:
+            retry = false;
+            await this.addServer(server, orgId);
+            break;
           case 418: await sleep(12345); break;
-          default: break;
+          default:
+            canvaslater = res.status;
+            break;
         }
       } catch (e) {
         console.warn("sayHello error: "+e);
       }
     }
 
-    this.setState({waitmode: false});
+    setTimeout(() => this.setState({waitmode: false, canvaslater}), 500);
 
-    if (retry) {
-      // mock a fetch object
-      res = {headers: {get: () => wsbase+'/auth'}, status: 404};
-      this.setState({error: true});
-      console.warn("Timeout");
-    }
+    if (retry && !canvaslater) this.setState({error: true});
 
     return res;
   }
 
-  singHello = async (server, orgId, inviteCode) => {
-    const { navigate } = this.props.navigation;
-    let ret;
+  addServer = async (server, orgId) => {
+    let add = true;
 
-    try {
-      let res = await this.sayHello(server, orgId, inviteCode);
-      let auth_location = res.headers.get('x-sm-oauth-url');
+    let servers = await this.getServers();
 
-      if (!auth_location || !auth_location.match(/^https:.*auth$/)) {
-        // Invalid x-sm-oauth-url header means it's not a validy configured canvass-broker
-        if (orgId) return {error: true, msg: say("not_a_vlid_qr_code")}
-        return {error: true, msg: say("not_running_compatible_software")};
-      }
+    servers.forEach(s => {
+      if (s.orgId && orgId) {
+        if (s.orgId === orgId) add = false;
+      } else if (s.server === server) add = false;
+    });
 
-      if (auth_location !== wsbase+'/auth') {
-        return {error: true, msg: say("custom_auth_not_supported")};
-      }
-
-      switch (res.status) {
-        case 200:
-          // valid - break to proceed
-          break;
-        case 400:
-          return {error: true, msg: say("server_didnt_understand_request")};
-        case 401:
-          this.setState({user: null});
-          return {error: false, flag: true};
-        case 403:
-          return {error: true, msg: say("request_to_canvas_rejected")};
-        default:
-          return {error: true, msg: say("problem_connecting_try_again")};
-      }
-
-      let body = await res.json();
-
-      if (body.data.ready !== true) return {error: false, msg: (body.msg?body.msg:say("awaiting_assignment"))};
-      else {
-        let forms = this.state.forms;
-        let forms_server = [];
-        let forms_local;
-
-        this.setState({loading: true});
-
-        try {
-          forms_local = JSON.parse(await storage.get('OV_CANVASS_FORMS'));
-          if (forms_local === null) forms_local = [];
-        } catch (e) {
-          console.warn("_loadForms 1: "+e);
-          return;
-        }
-
-        let jwt = await storage.get(STORAGE_KEY_JWT);
-        for (let i = 0; i < body.data.forms.length; i++) {
-          let https = true;
-          if (server.match(/:8080/)) https = false;
-
-          res = await fetch('http'+(https?'s':'')+'://'+server+api_base_uri(orgId)+'/form/get?formId='+body.data.forms[i].id, {
-            headers: {
-              'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
-              'Content-Type': 'application/json',
-            },
-          });
-
-          // don't store a form error
-          if (res.status !== 200) continue;
-
-          let form = await res.json();
-          form.server = server;
-          form.backend = 'server';
-          form.orgId = orgId,
-
-          forms_server.push(form);
-
-          // prevent duplicates
-          if (forms_local.map(f => (f?f.id:null)).indexOf(form.id) === -1) forms_local.push(form);
-        }
-
-        try {
-          await storage.set('OV_CANVASS_FORMS', JSON.stringify(forms_local));
-        } catch (error) {
-        }
-
-        this.setState({forms, loading: false});
-
-        // if there's more than one form in body.data.forms, don't navigate
-        if (forms_server.length === 1) {
-          this.navigate_canvassing({server, orgId, form: forms_server[0], refer: this});
-        }
-        await this._loadForms();
-        return {error: false, flag: true};
-      }
-    } catch (e) {
-      console.warn("singHello: "+e);
-      return {error: true, msg: say("unexpected_error_try_again")};
+    if (add) {
+      servers.push({server, orgId});
+      this.setState({servers});
+      await storage.set('HV_SERVERS', JSON.stringify(servers));
     }
 
+    this.setState({servers});
   }
 
   componentDidMount() {
@@ -292,6 +198,7 @@ export default class App extends LocationComponent {
 
   _doSetup = async () => {
     const { dinfo } = this.state;
+    let user;
 
     await this.requestLocationPermission();
 
@@ -301,7 +208,7 @@ export default class App extends LocationComponent {
     }
 
     try {
-      let user = await _loginPing(this, true);
+      user = await _loginPing(this, true);
       this.setState({user});
     } catch (e) {
       console.warn(e);
@@ -316,152 +223,91 @@ export default class App extends LocationComponent {
       this.parseInvite(inviteUrl);
     }
 
-    this._loadForms();
+    this.setState({state: getUSState(this.state.myPosition)}, () => {
+      if (user.loggedin) this._loadForms();
+      else this.setState({loading: false});
+    });
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const { server, user, orgId, inviteCode, signupReturn } = this.state;
+    const { server, user, orgId, inviteCode } = this.state;
     if (prevState.user === null && user && user.loggedin) {
       if (server || inviteCode) this.connectToServer(server, orgId, inviteCode);
-      if (signupReturn) this._signupUrlHandler();
     }
+  }
+
+  getServers = async () => {
+    let servers = [];
+
+    try {
+      servers = JSON.parse(await storage.get('HV_SERVERS'));
+      if (servers === null) servers = [];
+    } catch (e) {
+      console.warn("_loadForms 1: "+e);
+      return;
+    }
+    return servers;
   }
 
   _loadForms = async () => {
     const { navigate } = this.props.navigation;
-    const { user, refer, myPosition } = this.state;
+    const { user, refer, state } = this.state;
 
     let jwt;
     let myOrgID;
-    let forms = [], forms_myorg = [], forms_local = [];
+    let forms_local = [];
 
     this.setState({loading: true});
 
-    // get locally saved forms
+    // get legacy forms
     try {
-      forms_local = JSON.parse(await storage.get('OV_CANVASS_FORMS'));
-      if (forms_local === null) forms_local = [];
+      forms_local = JSON.parse(await storage.get(STORAGE_KEY_OLDFORMS));
+      if (forms_local !== null) {
+        for (let i in forms_local) {
+          let json = forms_local[i];
+          if (json === null) continue;
+
+          // if dropbox and not signed in, or not the author, ignore it
+          if (json.backend === "dropbox" && !user.dropbox) continue;
+          if (json.backend === "dropbox" && user.dropbox.account_id !== json.author_id) continue;
+          // auto-convert legacy forms
+          if (json.backend !== "server") return navigate('ConvertLegacy', {refer: this, state, user, myPosition});
+
+          await this.addServer(json.server, json.orgId);
+        }
+      }
     } catch (e) {
       console.warn("_loadForms 2: "+e);
       return;
     }
 
-    // get forms from myorg, if any
+    // poll for myOrgID
     try {
-      jwt = await storage.get(STORAGE_KEY_JWT);
+      jwt = await _getApiToken();
 
-      // TODO: make use of getUSState(myPosition) here
-      let res = await fetch('https://gotv.ourvoiceusa.org/orgid/v1/status', {
+      let res = await fetch('https://gotv-'+state+'.ourvoiceusa.org/orgid/v1/status', {
         headers: {
           'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
           'Content-Type': 'application/json',
         },
       });
+
+      if (res.status !== 200) this.setState({canvaslater: res.status});
+
       let json = await res.json();
       myOrgID = json.orgid;
 
       if (myOrgID && myOrgID.length) {
+        await this.addServer('gotv-'+state.toLowerCase()+'.ourvoiceusa.org', myOrgID);
         this.setState({myOrgID});
-
-        let res = await fetch('https://gotv-'+myOrgID.substr(0, 2)+'.ourvoiceusa.org'+api_base_uri(myOrgID)+'/form/list', {
-          headers: {
-            'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
-            'Content-Type': 'application/json',
-          },
-        });
-
-        forms_myorg = await res.json();
       }
-
     } catch (e) {
       console.warn(e);
     }
 
-/*
-    // populate forms_local with items from forms_myorg it doesn't have
-    forms_myorg.filter(f => forms_local.map(fl => fl.id).indexOf(f.id) === -1).forEach(f => {
-      let form = f;
-      form.server = 'gotv-'+myOrgID.substr(0, 2)+'.ourvoiceusa.org';
-      form.backend = 'server';
-      form.orgId = myOrgID;
-      forms_local.push(form);
-    });
-*/
+    let servers = await this.getServers();
 
-    for (let i in forms_local) {
-      let json = forms_local[i];
-      if (json === null) continue;
-
-      // if dropbox and not signed in, ignore it
-      if (json.backend === "dropbox" && !user.dropbox) continue;
-
-      // if dropbox and not the author, ignore it
-      if (json.backend === "dropbox" && user.dropbox.account_id !== json.author_id) continue;
-
-      if (json.backend === "server") {
-        // atempt to re-pull the form to see if it's changed
-        try {
-          let https = true;
-          if (json.server.match(/:8080/)) https = false;
-          let res = await fetch('http'+(https?'s':'')+'://'+json.server+api_base_uri(json.orgId)+'/form/get?formId='+json.id, {
-            headers: {
-              'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
-              'Content-Type': 'application/json',
-            },
-          });
-
-          // don't store a form error
-          if (res.status === 200) {
-            let server = json.server;
-            let orgId = json.orgId;
-            json = await res.json();
-            json.server = server;
-            json.backend = 'server';
-            json.orgId = orgId;
-
-            forms_local[i] = json;
-          }
-
-          // user cannot see this form
-          if (res.status === 403) {
-            json = {deleted:true};
-            forms_local[i] = json;
-          }
-        } catch (e) {
-          console.warn(""+e);
-        }
-      }
-
-      if (!json.deleted) forms.push(json);
-
-    }
-
-    // cache forms locally
-    try {
-      forms_local = forms_local.filter((f) => {
-        // don't store non-objects
-        if (f === null || typeof f !== "object") return false;
-        // don't store deleted forms
-        return !f.deleted;
-      });
-      await storage.set('OV_CANVASS_FORMS', JSON.stringify(forms_local));
-    } catch (error) {
-    }
-
-    this.setState({forms, loading: false, SelectModeScreen: (forms.length === 0)});
-  }
-
-  _tosUrlHandler() {
-    return openURL(URL_TERMS_OF_SERVICE);
-  }
-
-  _signupUrlHandler() {
-    const url = "https://docs.google.com/forms/d/1YF90nYiem5FeBflrkPTQSdjFEOAm55SVkSf7QtB-nBw/viewform";
-    return openURL(url);
-  }
-
-  _canvassUrlHandler() {
-    return openURL(URL_HELP);
+    this.setState({loading: false, SelectModeScreen: (servers.length === 0)});
   }
 
   parseInvite(url) {
@@ -488,7 +334,7 @@ export default class App extends LocationComponent {
   render() {
     const {
       showCamera, newOrg, dinfo, loading, user, forms, error, locationDenied,
-      askOrgId, SelectModeScreen, myOrgID, waitmode, waitprogress,
+      askOrgId, SelectModeScreen, myOrgID, waitmode, waitprogress, canvaslater,
     } = this.state;
     const { navigate } = this.props.navigation;
 
@@ -525,6 +371,10 @@ export default class App extends LocationComponent {
       </View>
       );
 
+    if (canvaslater) return (
+        <H1>{canvaslater}</H1>
+      );
+
     // if camera is open, render just that
     if (showCamera) return (
       <RNCamera
@@ -553,7 +403,7 @@ export default class App extends LocationComponent {
             <ListItem itemDivider icon>
               <Text>{say("select_canvassing_campaign")}:</Text>
             </ListItem>
-            <FormList refer={this} />
+            <ServerList refer={this} />
           </List>
         </View>
 
@@ -566,7 +416,7 @@ export default class App extends LocationComponent {
 
         <View style={{margin: 12}}>
           <Text>
-            {say("need_help_using_tool")} <Text style={{fontWeight: 'bold', color: 'blue'}} onPress={() => {this._canvassUrlHandler()}}>
+            {say("need_help_using_tool")} <Text style={{fontWeight: 'bold', color: 'blue'}} onPress={() => openURL(URL_HELP)}>
             {say("canvassing_documentation")}</Text> {say("with_useful_articles")}
           </Text>
         </View>
@@ -575,7 +425,7 @@ export default class App extends LocationComponent {
 
         <View style={{margin: 12}}>
           <Text>
-            {say("using_tool_you_acknowledge")} <Text style={{fontWeight: 'bold', color: 'blue'}} onPress={() => {this._tosUrlHandler()}}>
+            {say("using_tool_you_acknowledge")} <Text style={{fontWeight: 'bold', color: 'blue'}} onPress={() => openURL(URL_GUIDELINES)}>
             {say("canvassing_guidelines")}</Text>. {say("be_courteous_to_those")}
           </Text>
         </View>
@@ -586,7 +436,6 @@ export default class App extends LocationComponent {
           animationType="fade"
           onTouchOutside={() => this.setState({SelectModeScreen: false})}>
           <View>
-
             <Button block bordered dark onPress={() => this.setState({showCamera: true})}>
               <Icon name="qrcode" {...iconStyles} />
               <Text>{say("scan_qr_code")}</Text>
@@ -599,12 +448,12 @@ export default class App extends LocationComponent {
             </Button>
             <Text style={{fontSize: 12, marginBottom: 10, textAlign: 'justify'}}>{say("didnt_receive_qr_code")}</Text>
 
+            {myOrgID === null &&
             <View>
               <Button block bordered dark onPress={() => {
+                const { state } = this.state;
+
                 if (!this.checkLocationAccess()) return;
-
-                let state = getUSState(this.state.myPosition);
-
                 if (!state) return this.alert(say("out_of_bounds"), say("not_located_within_us_bounds"));
 
                 this.setState({SelectModeScreen: false, newOrg: true, state})}
@@ -614,6 +463,7 @@ export default class App extends LocationComponent {
               </Button>
               <Text style={{fontSize: 12, marginBottom: 10, textAlign: 'justify'}}>{say("org_id_signup_subtext")}</Text>
             </View>
+            }
 
             {(__DEV__&&dinfo.Emulator)&&
             <View>
@@ -629,9 +479,7 @@ export default class App extends LocationComponent {
               </Text>
             </View>
             }
-
           </View>
-
         </Dialog>
 
         <Dialog
@@ -670,87 +518,55 @@ export default class App extends LocationComponent {
 
 }
 
-const FormList = props => {
+const ServerList = props => {
   const { refer } = props;
-  const { loading, forms, myOrgID } = refer.state;
+  const { jwt, myOrgID, servers } = refer.state;
 
-  if (!loading && !forms.length)
-    return (<Text>{say("no_canvas_forms_ask_someone")}</Text>);
+  return servers.map((s,idx) => (
+    <Button key={idx} style={{margin: 20}} onPress={async () => {
+      try {
+        await refer.sayHello(s.server, s.orgId);
 
-  return forms.map((form) => {
-    let icon = "cloud-upload";
-    let color = "black";
-    let size = 25;
+        let jwt = await _getApiToken();
+        let https = true;
+        if (s.server.match(/:8080/)) https = false;
 
-    if (form.orgId) createdby = say("org_id")+' '+form.orgId;
-    else createdby = say("hosted_by")+' '+form.server;
+        let res = await fetch('http'+(https?'s':'')+'://'+s.server+api_base_uri(s.orgId)+'/form/list', {
+          headers: {
+            'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
+            'Content-Type': 'application/json',
+          },
+        });
 
-    // fix up and redirect to legacy conversion
-    if (!form.attributes) form.attributes = [];
-    if (!form.turfs) form.turfs = [];
+        let list = await res.json();
 
-    if (form.backend !== "server") {
-      icon = "mobile";
-      createdby = say("created_by")+' '+"You";
-    }
+        if (list.length) {
+          let forms = [];
 
-    if (form.backend === "dropbox") {
-      icon = "dropbox";
-      color = "#3d9ae8";
-      createdby = say("created_by")+' '+form.author;
-    }
+          await asyncForEach(list, async (f) => {
+            res = await fetch('http'+(https?'s':'')+'://'+s.server+api_base_uri(s.orgId)+'/form/get?formId='+f.id, {
+              headers: {
+                'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
+                'Content-Type': 'application/json',
+              },
+            });
 
-    return (
-      <ListItem avatar key={form.id}>
-          <Left>
-            <Icon name={icon} size={size} color={color} />
-          </Left>
-          <Body>
-            <TouchableOpacity onPress={async () => {
-                if (form.backend === "server") {
-                  let ret = await refer.sayHello(form.server, form.orgId);
-                  if (ret.status === 200) refer.navigate_canvassing({server: form.server, orgId: form.orgId, form, refer});
-                  else refer.setState({error: true});
-               } else {
-                 refer.navigate_legacy();
-               }
-              }}>
-              <Text>{form.name}</Text>
-              <Text note>{createdby}</Text>
-              <Text note>{form.attributes.length} Attributes</Text>
-              <Text note>{form.turfs.length} Turf{(form.turfs.length>1?'s':'')}</Text>
-            </TouchableOpacity>
-          </Body>
-          <Right>
-            <TouchableOpacity onPress={() => {
-              refer.alert(
-                say("delete_form"),
-                say("confirm_delete_form"),
-                {
-                  title: say("yes"),
-                  onPress: async () => {
-                    try {
-                      forms.forEach((f,i) => {if (f.id === form.id) delete forms[i]});
-                      await storage.set('OV_CANVASS_FORMS', JSON.stringify(forms));
-                      refer.setState({confirmDialog: false})
-                      refer._loadForms();
-                    } catch (e) {
-                      console.warn("_loadForms 3: "+e);
-                    }
-                  },
-                },
-                {
-                  title: say("no"),
-                  onPress: () => refer.setState({confirmDialog: false}),
-                },
-              );
-            }}>
-              <Icon name="trash" size={size} color="red" />
-            </TouchableOpacity>
-          </Right>
-      </ListItem>
-  )});
-};
+            forms.push(await res.json());
+          });
+
+          refer.navigate_canvassing({server: s.server, orgId: s.orgId, forms, refer})
+        } else {
+          refer.setState({error: true}); // TODO: could be an "awaiting assignment" and not an "error"
+        }
+      } catch (e) {
+        console.warn(e);
+        refer.setState({error: true});
+      }
+    }}>
+      <Text>{(s.orgId?s.orgId:s.server)}</Text>
+    </Button>
+  ));
+}
 
 const iconStyles = {
   borderRadius: 10,

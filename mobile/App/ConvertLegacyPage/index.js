@@ -5,7 +5,7 @@ import { Container, Content, Text, Spinner, Button, H1, H3 } from 'native-base';
 import HVComponent from '../HVComponent';
 import TermsDisclosure, { loadDisclosure } from '../TermsDisclosure';
 
-import { DINFO, api_base_uri, _getApiToken, bbox_usa, createOrgID } from '../common';
+import { DINFO, STORAGE_KEY_OLDFORMS, api_base_uri, _getApiToken, bbox_usa, createOrgID } from '../common';
 
 import { asyncForEach, sleep } from 'ourvoiceusa-sdk-js';
 import * as Progress from 'react-native-progress';
@@ -163,7 +163,7 @@ export default class App extends HVComponent {
       });
 
       // create forms
-      let forms_local = JSON.parse(await storage.get('OV_CANVASS_FORMS'));
+      let forms_local = JSON.parse(await storage.get(STORAGE_KEY_OLDFORMS));
 
       // default attribute ID mapping
       let aim = {
@@ -392,10 +392,12 @@ export default class App extends HVComponent {
           this.progup();
         });
 
-        // TODO: remove forms_local & add orgId forms
-        // storage.del('OV_CANVASS_PINS@'+f.id);
-
+        // delete local pin data
+        await storage.del('OV_CANVASS_PINS@'+f.id);
       });
+
+      // remove forms_local
+      await storage.del(STORAGE_KEY_OLDFORMS);
 
       // we're done - go back
       this.goBack();

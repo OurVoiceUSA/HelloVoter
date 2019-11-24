@@ -32,10 +32,13 @@ export const STORAGE_KEY_JWT = 'OV_JWT';
 export const STORAGE_KEY_USERLOCAL = 'OV_USER';
 export const STORAGE_KEY_DISCLOSURE = 'OV_TERMS_2019_11_20';
 export const STORAGE_KEY_SETTINGS = 'OV_CANVASS_SETTINGS';
+export const STORAGE_KEY_OLDFORMS = 'OV_CANVASS_FORMS';
+export const STORAGE_KEY_RETRY = 'HV_RETRY_QUEUE';
+export const STORAGE_KEY_SERVERS = 'HV_SERVERS';
 export const URL_TERMS_OF_SERVICE = 'https://raw.githubusercontent.com/OurVoiceUSA/HelloVoter/master/docs/Terms-of-Service.md';
 export const URL_PRIVACY_POLICY = 'https://raw.githubusercontent.com/OurVoiceUSA/HelloVoter/master/docs/Privacy-Policy.md';
 export const URL_GUIDELINES = 'https://raw.githubusercontent.com/OurVoiceUSA/HelloVoter/master/docs/Canvassing-Guidelines.md';
-export const URL_HELP = 'https://raw.githubusercontent.com/OurVoiceUSA/HelloVoter/master/docs/Canvassing.md';
+export const URL_HELP = 'https://github.com/OurVoiceUSA/HelloVoter/blob/master/docs/Canvassing.md';
 
 export const say = memoize(
   (key, config) => i18n.t(key, config),
@@ -259,7 +262,7 @@ export async function _getApiToken() {
       body: JSON.stringify({apiKey: await DeviceInfo.getUniqueId()})
     });
     jwt = JSON.parse(await res.text()).jwt;
-    _saveJWT(jwt);
+    await _saveJWT(jwt);
   }
   return jwt;
 }
@@ -493,11 +496,12 @@ export async function _rmUser() {
   try {
     await storage.del(STORAGE_KEY_USERLOCAL);
     await storage.del(STORAGE_KEY_DISCLOSURE);
-    await storage.del('OV_CANVASS_SETTINGS');
+    await storage.del(STORAGE_KEY_SETTINGS);
+    await storage.del(STORAGE_KEY_SERVERS);
     try {
-      let forms = JSON.parse(await storage.get('OV_CANVASS_FORMS'));
+      let forms = JSON.parse(await storage.get(STORAGE_KEY_OLDFORMS));
     } catch (error) {}
-    await storage.del('OV_CANVASS_FORMS');
+    await storage.del(STORAGE_KEY_OLDFORMS);
   } catch (error) {
     console.warn(error);
   }

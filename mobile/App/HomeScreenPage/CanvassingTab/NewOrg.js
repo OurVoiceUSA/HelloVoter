@@ -1,5 +1,4 @@
-import React, { PureComponent } from 'react';
-import { View } from 'react-native';
+import React from 'react';
 import { H1, Content, Body, Button, ListItem, CheckBox, Text, } from 'native-base';
 
 import HVComponent, { HVConfirmDialog } from '../../HVComponent';
@@ -10,7 +9,7 @@ import {
   SettingsTextLabel,
 } from 'react-native-settings-components';
 
-import { say, _logout, createOrgID } from '../../common';
+import { URL_TERMS_OF_SERVICE, openURL, say, _logout, createOrgID } from '../../common';
 
 export default class NewOrg extends HVComponent {
   constructor(props) {
@@ -51,7 +50,11 @@ export default class NewOrg extends HVComponent {
 
       <H1>{say("org_id_signup")}</H1>
       <Text></Text>
-      <Text>Hello {user.name}!</Text>
+      <Text>Hello {user.name}! Before you get started, please answer a few questions about you and/or your group so HelloVoter can create an environment that best suits your organizational needs.</Text>
+      <Text></Text>
+      <Text>You acknowledge that as the creator of the organizational account, you'll be its administrator, and agree to our <Text style={{fontWeight: 'bold', color: 'blue'}} onPress={() => openURL(URL_TERMS_OF_SERVICE)}>
+Terms of Service</Text>.
+      </Text>
       <Text></Text>
 
       <SettingsDividerShort />
@@ -125,6 +128,7 @@ export default class NewOrg extends HVComponent {
         let myOrgID = json.orgid;
 
         refer.setState({ myOrgID, newOrg: false, loading: false });
+        refer._loadForms();
       }}>
         <Text>Create Organization</Text>
       </Button>
