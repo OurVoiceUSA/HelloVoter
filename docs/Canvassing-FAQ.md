@@ -1,4 +1,4 @@
-# CANVASSING APP FAQ
+# CANVASSING APP FAQdrop
 
 Here we answer the most frequently asked questions that we get.
 
@@ -16,29 +16,14 @@ Talk to your County or State Clerk/Secretary for information on how to obtain vo
 
 You can also just start knocking on doors! Not having any data to start with doesn't prevent you from recording data as you go. The app allows you to add pins and edit the address yourself.
 
-### Why do you integrate with Dropbox?
+### Does Our Voice USA see my data?
 
-As Our Voice USA is a non-profit charity, we have limited ability to host data for three reasons:
+If you create an account through the app, you are using services provided by Our Voice USA, and we have access to your data. Be assured that your privacy is very important to us. Read our [Privacy Policy](Privacy-Policy.md) and [Terms of Service](Terms-of-Service.md) documents for details.
 
-1) non-profits and political parties/candidates don't mix well, legally
-2) hosting services can get expensive
-3) we value your privacy
+### Can I use cloud storage other than is provided by Our Voice USA?
 
-Dropbox is a cloud-storage solution which meets our criteria for ease of use and availability, friendly Terms of Service, and built-in data sharing functionality. They offer a decent amount of storage on a free account, so you can truly use our canvassing app at no monetary cost.
-
-### Does Our Voice USA see my DropBox data?
-
-No. Your data goes directly from your device to your Dropbox account. You have full control over your data and with whom you choose to share it.
-
-### Can I use cloud storage other than Dropbox?
-
-Yes! HelloVoterHQ is a server-side application that you can host anywhere. If you know someone with technical expertise, they can set it up for you.
-
-### Who can use your "Organization ID" HelloVoterHQ hosted solution?
-
-For the time being, we offer a cloud HelloVoterHQ solution to other non-partisan, community-driven organizations that otherwise would not have access to the expertise required to run a canvassing server on their own. Our main goal here is to support Get-Out-The-Vote efforts.
+Yes! Our open source software includes a server-side application that you can host anywhere. If you know someone with technical expertise, they can set it up for you.
 
 ### How many people can be on a canvassing team?
 
-With Dropbox, we recommend having no more than 20 people. With HelloVoterHQ you can have thousands of volunteers canvassing for you across the country.
-
+There are no restrictions on the number of people who can be on your canvassing team.

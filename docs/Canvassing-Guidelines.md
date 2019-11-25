@@ -28,7 +28,7 @@ In many areas, there are laws specific to who receive monetary or other compensa
 
 ### Data gathering laws
 
-By using the canvassing tool, you are collecting data about the people who live in the area. That data is uploaded to your Dropbox account. From there, it is accessible to other users of the app which you’ve chosen to share it with. Laws in the area may prohibit sharing of data collected in this way. As such, don’t use the canvassing tool where this is prohibited.  
+By using the canvassing tool, you are collecting data about the people who live in the area. That data is uploaded to the server you are connected to. From there, it is accessible to other users of the app which you’ve chosen to share it with. Laws in the area may prohibit sharing of data collected in this way. As such, don’t use the canvassing tool where this is prohibited.  
 
 ### Data import and sharing
 
