@@ -27,6 +27,7 @@ import {
 import { wsbase } from '../../config';
 
 var darkoutside = require('../../../img/darkoutside.png');
+var genericerror = require('../../../img/error.png');
 var usaonly = require('../../../img/usaonly.png');
 var lost = require('../../../img/whereami.png');
 var crowd = require('../../../img/crowd.png')
@@ -347,11 +348,7 @@ export default class App extends LocationComponent {
     } = this.state;
     const { navigate } = this.props.navigation;
 
-    if (error) return (
-        <View style={{flex: 1, backgroundColor: 'white', alignItems: 'center', justifyContent: 'center'}}>
-          <Text style={{fontSize: 20}}>{say("unexpected_error_try_again")}</Text>
-        </View>
-      );
+    if (error) return (<NotRightNow refer={this} image={genericerror} title="Error" message={say("unexpected_error_try_again")} />);
 
     if (locationDenied) return (<NotRightNow refer={this} image={lost} title="Location Unknown" message="" />);
 
@@ -371,10 +368,11 @@ export default class App extends LocationComponent {
 
     if (canvaslater) {
       switch (canvaslater) {
+        case 402: return (<NotRightNow refer={this} image={crowd} title="At Capacity" message="It's getting crowded up in here! Our systems are at capacity. Please try back at another time." />);
         case 409: return (<NotRightNow refer={this} image={darkoutside} title="It's Dark Outside" message="Whoa there! The sun's not up. Relax and try again later." />);
         case 410: return (<NotRightNow refer={this} image={stop} title="Suspended" message="This organization has been suspended due to a Terms of Service violation. Please contact your organization administrator." />);
         case 451: return (<NotRightNow refer={this} image={usaonly} title="Geography Error" message="This app is only intended to be used in the USA." />);
-        default: return (<NotRightNow refer={this} image={crowd} title="At Capacity" message="It's getting crowded up in here! Our systems are at capacity. Please try back at another time." />);
+        default: return (<NotRightNow refer={this} image={genericerror} title="Error" message={say("unexpected_error_try_again")} />);
       }
     }
 
