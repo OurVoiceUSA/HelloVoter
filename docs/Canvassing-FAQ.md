@@ -1,4 +1,4 @@
-# CANVASSING APP FAQdrop
+# CANVASSING APP FAQ
 
 Here we answer the most frequently asked questions that we get.
 
