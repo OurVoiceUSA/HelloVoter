@@ -108,6 +108,15 @@ export default class App extends LocationComponent {
     await this.sayHello(server, orgId, inviteCode);
   }
 
+  recursiveProgress(i) {
+    const { waitmode } = this.state;
+    if (waitmode && i <= PROCESS_MAX_WAIT) {
+      let n = i+1;
+      this.setState({waitprogress: n});
+      setTimeout(() => this.recursiveProgress(n), 750);
+    }
+  }
+
   sayHello = async (server, orgId, inviteCode) => {
     const { dinfo, myPosition } = this.state;
     let { servers } = this.state;
@@ -115,7 +124,7 @@ export default class App extends LocationComponent {
 
     if (!this.checkLocationAccess()) return;
 
-    this.setState({waitmode: true, waitprogress: 0});
+    this.setState({waitmode: true, waitprogress: 0}, () => this.recursiveProgress(0));
 
     let res;
     let jwt;
@@ -131,9 +140,6 @@ export default class App extends LocationComponent {
       return;
     }
 
-    // TODO: convert to a recursive setTimeout that stops at waitmode false, or PROCESS_MAX_WAIT
-    for (let i = 1; i <= PROCESS_MAX_WAIT; i++)
-      setTimeout(() => this.setState({waitprogress: i}), 750*i)
 
     let retry = true;
     for (let retrycount = 0; (retrycount < (PROCESS_MAX_WAIT/10) && retry); retrycount++) {
@@ -158,9 +164,13 @@ export default class App extends LocationComponent {
         switch (res.status) {
           case 200:
             retry = false;
+            canvaslater = null;
             await this.addServer(server, orgId);
             break;
-          case 418: await sleep(12345); break;
+          case 418:
+            canvaslater = null;
+            await sleep(12345);
+            break;
           default:
             canvaslater = res.status;
             break;
