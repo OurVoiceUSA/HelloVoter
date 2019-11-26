@@ -140,7 +140,10 @@ TODO: constrain update to a turf their assigned to, but without creating multipl
 
   // if nothing was returned, they had all the right params but it didn't match up with the dataset somehow
   // return the "Unprocessable Entity" http error code
-  if (!ref.data[0]) return _422(res, "Query returned no data. Something went wrong with your request.");
+  if (!ref.data[0]) {
+    console.warn({body: req.body});
+    return _422(res, "Query returned no data. Something went wrong with your request.");
+  }
 
   return res.json(ref.data);
 }

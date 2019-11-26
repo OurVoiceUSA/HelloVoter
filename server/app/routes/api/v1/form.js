@@ -60,7 +60,7 @@ module.exports = Router({mergeParams: true})
     if (req.user.admin)
       ref = await req.db.query('match (a:Form) return a');
     else
-      ref = await req.db.query('match (a:Volunteer {id:{id}})-[:ASSIGNED]-(b:Team)-[:ASSIGNED]-(c:Form) return c UNION match (a:Volunteer {id:{id}})-[:ASSIGNED]-(c:Form) return c', req.user);
+      ref = await req.db.query('match (a:Volunteer {id:{id}})-[:MEMBERS]-(b:Team)-[:ASSIGNED]-(c:Form) return c UNION match (a:Volunteer {id:{id}})-[:ASSIGNED]-(c:Form) return c', req.user);
 
     list = ref.data;
   } catch (e) {
