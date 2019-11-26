@@ -22,7 +22,7 @@ function _renderItemWithParallax ({item, index}, parallaxProps) {
 }
 
 export default HomeTab = props => (
-  <View>
+  <View style={{padding: 15}}>
     <Carousel
       ref={c => props.refer._sliderRef = c}
       data={props.items}

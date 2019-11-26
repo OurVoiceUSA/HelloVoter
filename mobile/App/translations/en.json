@@ -67,7 +67,7 @@
   "location_access": "Location Access",
   "device_settings_deny_location": "Your device settings deny this app access to your location, please enable location access for this app in your device settings to continue.",
   "location_services": "Location Services",
-  "location_services_unavailable": "Location Services is unavailable, please turn on Location Seervices in your device settings and restart this app to continue.",
+  "location_services_unavailable": "Location Services is unavailable, please turn on Location Services in your device settings and restart this app to continue.",
   "out_of_bounds": "Out of bounds",
   "not_located_within_us_bounds": "You are not located within the United States of America. Unable to continue.",
   "must_enter_valid_qr_code": "You must enter a valid QR Code or Organization ID to continue.",

@@ -66,10 +66,12 @@ export default class App extends LocationComponent {
       this.alert(say("location_access"), say("device_settings_deny_location"));
       return false;
     }
+/* TODO: this fails on android
     if (!myPosition.longitude || !myPosition.latitude) {
       this.alert(say("location_service"), say("location_services_unavailable"));
       return false;
     }
+*/
     return true;
   }
 
@@ -102,11 +104,13 @@ export default class App extends LocationComponent {
   }
 
   connectToServer = async(server, orgId, inviteCode) => {
+    const { user } = this.state;
+
     if (!this.checkLocationAccess()) return;
 
-    this.setState({server});
+    this.setState({server, inviteCode});
 
-    await this.sayHello(server, orgId, inviteCode);
+    if (user && user.loggedin) await this.sayHello(server, orgId, inviteCode);
   }
 
   recursiveProgress(i) {
@@ -130,6 +134,9 @@ export default class App extends LocationComponent {
     let res;
     let jwt;
 
+    let https = true;
+    if (server.match(/:8080/)) https = false;
+
     try {
       jwt = await _getApiToken();
       // if the jwt doesn't have an id, discard it
@@ -137,18 +144,13 @@ export default class App extends LocationComponent {
       if (!obj.id) throw "not a full user object";
     } catch (e) {
       await storage.del(STORAGE_KEY_JWT);
-      this.setState({error: true});
+      this.setState({user: {profile:{}}, waitmode: false});
       return;
     }
 
-
     let retry = true;
     for (let retrycount = 0; (retrycount < (PROCESS_MAX_WAIT/10) && retry); retrycount++) {
-
       try {
-        let https = true;
-        if (server.match(/:8080/)) https = false;
-
         res = await fetch('http'+(https?'s':'')+'://'+server+api_base_uri(orgId)+'/hello', {
           method: 'POST',
           headers: {
@@ -168,6 +170,9 @@ export default class App extends LocationComponent {
             canvaslater = null;
             await this.addServer(server, orgId);
             break;
+          case 401:
+            this.setState({user: {profile:{}}, waitmode: false});
+            return;
           case 418:
             canvaslater = null;
             await sleep(12345);
@@ -183,9 +188,40 @@ export default class App extends LocationComponent {
 
     setTimeout(() => this.setState({waitmode: false, canvaslater}), 500);
 
-    if (retry && !canvaslater) this.setState({error: true});
+    if (retry) {
+      this.setState({error: true});
+      console.warn("retry failed");
+    }
+    if (retry || canvaslater) return;
 
-    return res;
+    res = await fetch('http'+(https?'s':'')+'://'+server+api_base_uri(orgId)+'/form/list', {
+      headers: {
+        'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
+        'Content-Type': 'application/json',
+      },
+    });
+
+    let list = await res.json();
+
+    if (list.length) {
+      let forms = [];
+
+      // TODO: use Promise.all
+      await asyncForEach(list, async (f) => {
+        res = await fetch('http'+(https?'s':'')+'://'+server+api_base_uri(orgId)+'/form/get?formId='+f.id, {
+          headers: {
+            'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
+            'Content-Type': 'application/json',
+          },
+        });
+
+        forms.push(await res.json());
+      });
+
+      this.navigate_canvassing({server, orgId, forms, refer: this});
+    } else {
+      this.alert("Awaiting Assignment","You are not assigned to a form for this organization. Please contact your administrator.");
+    }
   }
 
   addServer = async (server, orgId) => {
@@ -252,7 +288,7 @@ export default class App extends LocationComponent {
 
   componentDidUpdate(prevProps, prevState) {
     const { server, user, orgId, inviteCode } = this.state;
-    if (prevState.user === null && user && user.loggedin) {
+    if ((prevState.user === null || (prevState.user && !prevState.user.loggedin)) && user && user.loggedin) {
       if (server || inviteCode) this.connectToServer(server, orgId, inviteCode);
     }
   }
@@ -313,7 +349,8 @@ export default class App extends LocationComponent {
         },
       });
 
-      if (res.status !== 200) this.setState({canvaslater: res.status});
+      if (res.status === 400 || res.status === 401) this.setState({user: {profile:{}}});
+      else if (res.status !== 200) this.setState({canvaslater: res.status});
 
       let json = await res.json();
       myOrgID = json.orgid;
@@ -328,7 +365,7 @@ export default class App extends LocationComponent {
 
     let servers = await this.getServers();
 
-    this.setState({loading: false, SelectModeScreen: (servers.length === 0)});
+    this.setState({servers, loading: false, SelectModeScreen: (servers.length === 0)});
   }
 
   parseInvite(url) {
@@ -359,9 +396,18 @@ export default class App extends LocationComponent {
     } = this.state;
     const { navigate } = this.props.navigation;
 
-    if (error) return (<NotRightNow refer={this} image={genericerror} title="Error" message={say("unexpected_error_try_again")} />);
-
     if (locationDenied) return (<NotRightNow refer={this} image={lost} title="Location Unknown" message="" />);
+
+    if (canvaslater || error) {
+      switch (canvaslater) {
+        case 402: return (<NotRightNow refer={this} image={crowd} title="At Capacity" message="It's getting crowded up in here! Our systems are at capacity. Please try back at another time." />);
+        case 403: return (<NotRightNow refer={this} image={lockedout} title="Locked Out" message="You have been locked out of this organization. Please contact your organization administrator." />);
+        case 409: return (<NotRightNow refer={this} image={darkoutside} title="It's Dark Outside" message="Whoa there! The sun's not up. Relax and try again later." />);
+        case 410: return (<NotRightNow refer={this} image={stop} title="Suspended" message="This organization has been suspended due to a Terms of Service violation. Please contact your organization administrator." />);
+        case 451: return (<NotRightNow refer={this} image={usaonly} title="Geography Error" message="This app is only intended to be used in the USA." />);
+        default: return (<NotRightNow refer={this} image={genericerror} title="Error" message={say("unexpected_error_try_again")} />);
+      }
+    }
 
     // wait for user object to become available
     if (!user || loading) return (
@@ -376,17 +422,6 @@ export default class App extends LocationComponent {
         <SmLogin refer={this} />
       </View>
       );
-
-    if (canvaslater) {
-      switch (canvaslater) {
-        case 402: return (<NotRightNow refer={this} image={crowd} title="At Capacity" message="It's getting crowded up in here! Our systems are at capacity. Please try back at another time." />);
-        case 403: return (<NotRightNow refer={this} image={lockedout} title="Locked Out" message="Your administrator has locked out your account." />);
-        case 409: return (<NotRightNow refer={this} image={darkoutside} title="It's Dark Outside" message="Whoa there! The sun's not up. Relax and try again later." />);
-        case 410: return (<NotRightNow refer={this} image={stop} title="Suspended" message="This organization has been suspended due to a Terms of Service violation. Please contact your organization administrator." />);
-        case 451: return (<NotRightNow refer={this} image={usaonly} title="Geography Error" message="This app is only intended to be used in the USA." />);
-        default: return (<NotRightNow refer={this} image={genericerror} title="Error" message={say("unexpected_error_try_again")} />);
-      }
-    }
 
     // if camera is open, render just that
     if (showCamera) return (
@@ -539,62 +574,27 @@ const ServerList = props => {
   const { jwt, myOrgID, servers } = refer.state;
 
   return servers.map((s,idx) => (
-    <Button key={idx} style={{margin: 20}} onPress={async () => {
-      try {
-        await refer.sayHello(s.server, s.orgId);
-
-        let jwt = await _getApiToken();
-        let https = true;
-        if (s.server.match(/:8080/)) https = false;
-
-        let res = await fetch('http'+(https?'s':'')+'://'+s.server+api_base_uri(s.orgId)+'/form/list', {
-          headers: {
-            'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
-            'Content-Type': 'application/json',
-          },
-        });
-
-        let list = await res.json();
-
-        if (list.length) {
-          let forms = [];
-
-          await asyncForEach(list, async (f) => {
-            res = await fetch('http'+(https?'s':'')+'://'+s.server+api_base_uri(s.orgId)+'/form/get?formId='+f.id, {
-              headers: {
-                'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
-                'Content-Type': 'application/json',
-              },
-            });
-
-            forms.push(await res.json());
-          });
-
-          refer.navigate_canvassing({server: s.server, orgId: s.orgId, forms, refer})
-        } else {
-          refer.setState({error: true}); // TODO: could be an "awaiting assignment" and not an "error"
-        }
-      } catch (e) {
-        console.warn(e);
-        refer.setState({error: true});
-      }
-    }}>
+    <Button key={idx} style={{margin: 20}} onPress={() => refer.sayHello(s.server, s.orgId)}>
       <Text>{(s.orgId?s.orgId:s.server)}</Text>
     </Button>
   ));
 };
 
 const NotRightNow = props => (
-  <View style={{position: 'absolute', left: 0, right: 0, alignItems: 'center'}}>
+  <View>
     <Image source={props.image} style={{
-      position: 'absolute', left: 0,
       width: Dimensions.get('window').width,
       height: Dimensions.get('window').height*.8,
       resizeMode: 'stretch',
     }} />
-    <H1 style={{margin: 15, alignSelf: 'center'}}>{props.title}</H1>
-    <Text style={{padding: 10}}>{props.message}</Text>
-    <HVConfirmDialog refer={props.refer} />
+    <View style={{position: 'absolute', left: 0, top: 0, alignItems: 'center'}}>
+      <H1 style={{margin: 15, alignSelf: 'center'}}>{props.title}</H1>
+      <Text style={{padding: 10}}>{props.message}</Text>
+      {__DEV__&&
+      <Text>{props.refer.state.canvaslater}</Text>
+      }
+      <HVConfirmDialog refer={props.refer} />
+    </View>
   </View>
 );
 

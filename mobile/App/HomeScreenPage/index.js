@@ -60,7 +60,7 @@ export default class App extends HVComponent {
 
     return (
       <Container>
-        <Content padder>
+        <Content>
           {active === 'home' &&
             <Home refer={this} items={carouselItems} />
           }
