@@ -9,16 +9,16 @@ module.exports = Router({mergeParams: true})
 .post('/attribute/create', async (req, res) => {
   if (!req.user.admin) return _403(res, "Permission denied.");
   if (!valid(req.body.name)) return _400(res, "Invalid value to parameter 'name'.");
+  if (!valid(req.body.type)) return _400(res, "Invalid value to parameter 'type'.");
   req.body.author_id = req.user.id;
 
-  switch (req.body.type) {
+  switch (req.body.type.toLowerCase()) {
     case 'string':
     case 'textbox':
     case 'number':
     case 'boolean':
     case 'date':
     case 'sand':
-    case 'SAND':
       break;
     default: return _400(res, "Invalid value to parameter 'type'.");
   }
@@ -28,6 +28,9 @@ module.exports = Router({mergeParams: true})
   try {
     let ref = await req.db.query('match (v:Volunteer {id:{author_id}}) create (a:Attribute {id:randomUUID(), created: timestamp(), name:{name}, type:{type}})-[:AUTHOR]->(v) return a.id', req.body);
     attributeId = ref.data[0];
+
+    if (req.body.type.toLowerCase() === 'sand')
+      await req.db.query('match (at:Attribute {id:{id}}) set at.type = {type}, at.value = {values}', {id: attributeId, type: 'string', values: ["SA","A","N","D","SD"]});
   } catch(e) {
     return _500(res, e);
   }

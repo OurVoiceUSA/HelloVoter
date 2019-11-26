@@ -163,7 +163,7 @@ describe('Attributes', function () {
     r = await api.get(base_uri+'/attribute/get?id='+id)
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
-    expect(r.body.data[0].type).to.equal(type);
+    expect(r.body.data[0].type).to.equal('string');
   });
 
   // get
