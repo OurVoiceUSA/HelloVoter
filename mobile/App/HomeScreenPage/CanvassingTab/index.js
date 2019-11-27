@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import { View, TouchableOpacity, Dimensions, Image } from 'react-native';
+import { View, Dimensions, Image } from 'react-native';
 import {
   Content, List, ListItem, Left, Right, Body, Footer, FooterTab,
   Text, Button, Spinner, H1,
@@ -194,14 +194,8 @@ export default class App extends LocationComponent {
     }
     if (retry || canvaslater) return;
 
-    res = await fetch('http'+(https?'s':'')+'://'+server+api_base_uri(orgId)+'/form/list', {
-      headers: {
-        'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
-        'Content-Type': 'application/json',
-      },
-    });
-
-    let list = await res.json();
+    let json = await res.json();
+    let list = json.data.forms;
 
     if (list.length) {
       let forms = [];
@@ -574,9 +568,19 @@ const ServerList = props => {
   const { jwt, myOrgID, servers } = refer.state;
 
   return servers.map((s,idx) => (
-    <Button key={idx} style={{margin: 20}} onPress={() => refer.sayHello(s.server, s.orgId)}>
-      <Text>{(s.orgId?s.orgId:s.server)}</Text>
-    </Button>
+    <ListItem avatar key={idx} style={{padding: 10}}>
+      <Left>
+        <Icon name={(s.orgId?"id-badge":"cloud-upload")} size={25} color="black" />
+      </Left>
+      <Body>
+        <Text>{(s.orgId?s.orgId:s.server)}</Text>
+      </Body>
+      <Right>
+        <Button onPress={() => refer.sayHello(s.server, s.orgId)}>
+          <Text>Enter Map</Text>
+        </Button>
+      </Right>
+    </ListItem>
   ));
 };
 
