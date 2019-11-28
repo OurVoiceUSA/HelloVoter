@@ -194,18 +194,18 @@ export async function doDbInit(db) {
   // common attributes that should be interchangeable between systems
   let defaultAttributes = [
     {id: "013a31db-fe24-4fad-ab6a-dd9d831e72f9", name: "Name", order: 0, type: "string", multi: false},
-    {id: "a0e622d2-db0a-410e-a315-52c65f678ffa", name: "Gender", order: 1, type: "string", multi: false, values: ["Male","Female"]},
+    {id: "a0e622d2-db0a-410e-a315-52c65f678ffa", name: "Gender", order: 1, type: "string", multi: false, values: ["Male","Female","Non-Binary"]},
     {id: "4a320f76-ef7b-4d73-ae2a-8f4ccf5de344", name: "Party Affiliation", order: 2, type: "string", multi: false, values: ["No Party Preference","Democratic","Republican","Green","Libertarian"]},
     {id: "dcfc1fbb-4609-4900-bbb3-1c4afb2a5127", name: "Registered to Vote", order: 3, type: "boolean", multi: false},
-    {id: "432634fd-dc28-457d-ae1f-d6fa8d242d30", name: "Subscribe to Carpool Vote", order: 4, type: "boolean", multi: false},
-    {id: "134095d5-c1c8-46ad-9952-cc66e2934f9e", name: "Receive Notifications", order: 5, type: "string", multi: true, values: ["Phone","Text","Email"]},
-    {id: "7d3466e5-2cee-491e-b3f4-bfea3a4b010a", name: "Phone Number", order: 6, type: "string", multi: true},
-    {id: "b687b86e-8fe3-4235-bb78-1919bcca00db", name: "Email Address", order: 7, type: "string", multi: true},
-    {id: "9a903e4f-66ea-4625-bacf-43abb53c6cfc", name: "Date of Birth", order: 8, type: "date", multi: false},
-    {id: "f6a41b03-0dc8-4d59-90bf-033db6a96214", name: "US Military Veteran", order: 9, type: "boolean", multi: false},
-    {id: "689dc96a-a1db-4b20-9443-e69185675d28", name: "Health Insurance", order: 10, type: "boolean", multi: false},
-    {id: "2ad269f5-2712-4a0e-a3d4-be3074a695b6", name: "Race and Ethnicity", order: 11, type: "string", multi: true, values: ["Prefer not to say","African American","Asian","Hispanic","Latino","Native American","Pacific Islander","White"]},
-    {id: "59f09d32-b782-4a32-b7f1-4ffe81975167", name: "Spoken Languages", order: 12, type: "string", multi: true, values: ["English","Spanish","Chinese","Arabic","French","German"]},
+    {id: "134095d5-c1c8-46ad-9952-cc66e2934f9e", name: "Receive Notifications", order: 4, type: "string", multi: true, values: ["Phone","Text","Email"]},
+    {id: "7d3466e5-2cee-491e-b3f4-bfea3a4b010a", name: "Phone Number", order: 5, type: "string", multi: true},
+    {id: "b687b86e-8fe3-4235-bb78-1919bcca00db", name: "Email Address", order: 6, type: "string", multi: true},
+    {id: "9a903e4f-66ea-4625-bacf-43abb53c6cfc", name: "Date of Birth", order: 7, type: "date", multi: false},
+    {id: "f6a41b03-0dc8-4d59-90bf-033db6a96214", name: "US Military Veteran", order: 8, type: "boolean", multi: false},
+    {id: "689dc96a-a1db-4b20-9443-e69185675d28", name: "Health Insurance", order: 9, type: "boolean", multi: false},
+    {id: "2ad269f5-2712-4a0e-a3d4-be3074a695b6", name: "Race and Ethnicity", order: 10, type: "string", multi: true, values: ["Prefer not to say","African American","Asian","Hispanic","Latino","Native American","Pacific Islander","White"]},
+    {id: "59f09d32-b782-4a32-b7f1-4ffe81975167", name: "Spoken Languages", order: 11, type: "string", multi: true, values: ["English","Spanish","Chinese","Arabic","French","German"]},
+    {id: "6d895d04-94b8-4df9-af12-7e5b08c624d5", name: "Notes", order: 12, type: "textbox", multi: false},
   ];
 
   await asyncForEach(defaultAttributes, async (attribute) => {

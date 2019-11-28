@@ -168,7 +168,6 @@ export default class App extends LocationComponent {
           case 200:
             retry = false;
             canvaslater = null;
-            await this.addServer(server, orgId);
             break;
           case 401:
             this.setState({user: {profile:{}}, waitmode: false});
@@ -195,7 +194,11 @@ export default class App extends LocationComponent {
     if (retry || canvaslater) return;
 
     let json = await res.json();
-    let list = json.data.forms;
+    if (json.data) json = json.data;
+
+    let list = json.forms;
+
+    await this.addServer(server, orgId, list);
 
     if (list.length) {
       let forms = [];
@@ -218,23 +221,26 @@ export default class App extends LocationComponent {
     }
   }
 
-  addServer = async (server, orgId) => {
+  addServer = async (server, orgId, forms) => {
     let add = true;
 
     let servers = await this.getServers();
 
     servers.forEach(s => {
       if (s.orgId && orgId) {
-        if (s.orgId === orgId) add = false;
-      } else if (s.server === server) add = false;
+        if (s.orgId === orgId) {
+          add = false;
+          if (forms) s.forms = forms;
+        }
+      } else if (s.server === server) {
+        add = false;
+        if (forms) s.forms = forms;
+      }
     });
 
-    if (add) {
-      servers.push({server, orgId});
-      this.setState({servers});
-      await storage.set('HV_SERVERS', JSON.stringify(servers));
-    }
+    if (add) servers.push({server, orgId, forms});
 
+    await storage.set('HV_SERVERS', JSON.stringify(servers));
     this.setState({servers});
   }
 
@@ -440,18 +446,16 @@ export default class App extends LocationComponent {
 
     return (
       <Content>
-        <View>
-          <List>
-            <ListItem itemDivider icon>
-              <Text>{say("select_canvassing_campaign")}:</Text>
-            </ListItem>
-            <ServerList refer={this} />
-          </List>
-        </View>
-
-        <Button block onPress={() => this.setState({SelectModeScreen: true})}>
-            <Icon name="plus-circle" backgroundColor="#d7d7d7" color="white" size={30} />
-            <Text>{say("start_new_canvas_activity")}</Text>
+        <List>
+          <ListItem itemDivider icon>
+            <Text>{say("select_canvassing_campaign")}:</Text>
+          </ListItem>
+          <ServerList refer={this} />
+        </List>
+        
+        <Button block danger onPress={() => this.setState({SelectModeScreen: true})}>
+          <Icon name="plus-circle" backgroundColor="#d7d7d7" color="white" size={30} />
+          <Text>{say("start_new_canvas_activity")}</Text>
         </Button>
 
         <Divider />
@@ -573,7 +577,8 @@ const ServerList = props => {
         <Icon name={(s.orgId?"id-badge":"cloud-upload")} size={25} color="black" />
       </Left>
       <Body>
-        <Text>{(s.orgId?s.orgId:s.server)}</Text>
+        <Text>{(s.forms&&s.forms.length?(s.forms.length>1?"Multiple Forms":s.forms[0].name):"")}</Text>
+        <Text note>{(s.orgId?s.orgId:s.server)}</Text>
       </Body>
       <Right>
         <Button onPress={() => refer.sayHello(s.server, s.orgId)}>
