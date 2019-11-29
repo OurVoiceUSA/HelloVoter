@@ -11,14 +11,15 @@ import SmLogin from '../../SmLogin';
 import NewOrg from './NewOrg';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { sleep, asyncForEach } from 'ourvoiceusa-sdk-js';
 import { Dialog } from 'react-native-simple-dialogs';
 import storage from 'react-native-storage-wrapper';
 import * as Progress from 'react-native-progress';
 import KeepAwake from 'react-native-keep-awake';
 import Prompt from 'react-native-input-prompt';
 import { RNCamera } from 'react-native-camera';
-import { sleep, asyncForEach } from 'ourvoiceusa-sdk-js';
 import jwt_decode from 'jwt-decode';
+import SunCalc from 'suncalc';
 
 import {
   DINFO, STORAGE_KEY_JWT, STORAGE_KEY_OLDFORMS, URL_GUIDELINES, URL_HELP,
@@ -128,6 +129,14 @@ export default class App extends LocationComponent {
     let canvaslater;
 
     if (!this.checkLocationAccess()) return;
+
+    /* TODO: verify myPosition exists, had issues with it inside checkLocationAccess() */
+    let now = new Date();
+    let times = SunCalc.getTimes(now, myPosition.latitude, myPosition.longitude);
+    if (!__DEV__ && (now < times.sunrise || now > times.sunset)) {
+      this.setState({canvaslater: 409});
+      return;
+    }
 
     this.setState({waitmode: true, waitprogress: 0}, () => this.recursiveProgress(0));
 
