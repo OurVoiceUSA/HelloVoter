@@ -82,22 +82,6 @@ const MenuItems = ({ assignments, handleClickLogout }) => (
           <ListItemText primary="Attributes" />
         </ListItem>
       </Link>
-      <Link to={'/map/'}>
-        <ListItem button>
-          <ListItemIcon>
-            <NavigationIcon />
-          </ListItemIcon>
-          <ListItemText primary="Map" />
-        </ListItem>
-      </Link>
-      <Link to={'/import/'}>
-        <ListItem button>
-          <ListItemIcon>
-            <PresentToAllIcon />
-          </ListItemIcon>
-          <ListItemText primary="Import Data" />
-        </ListItem>
-      </Link>
       <Link to={'/queue/'}>
         <ListItem button>
           <ListItemIcon>

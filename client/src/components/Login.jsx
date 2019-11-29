@@ -74,16 +74,16 @@ class Login extends Component {
             Sign in to HelloVoterHQ
           </Typography>
           <form className={classes.form} onSubmit={(e) => { e.preventDefault(); global.doSave(e, this.state.target); }} >
-            <div>
-              <a target="_blank" rel="noopener noreferrer" href="https://raw.githubusercontent.com/OurVoiceUSA/HelloVoter/master/docs/Privacy-Policy.md">Privacy Policy</a>
-              ||
-              <a target="_blank" rel="noopener noreferrer" href="https://raw.githubusercontent.com/OurVoiceUSA/HelloVoter/master/docs/Terms-of-Service.md">Terms of Service</a>
-            </div>
             <Select
               value={selectedLoginOption}
               options={loginOptions}
               onChange={selectedLoginOption => this.setState({selectedLoginOption})}
             />
+            <div>
+              <a target="_blank" rel="noopener noreferrer" href="https://raw.githubusercontent.com/OurVoiceUSA/HelloVoter/master/docs/Privacy-Policy.md">Privacy Policy</a>
+              ||
+              <a target="_blank" rel="noopener noreferrer" href="https://raw.githubusercontent.com/OurVoiceUSA/HelloVoter/master/docs/Terms-of-Service.md">Terms of Service</a>
+            </div>
             <LoginOption global={global} refer={this} />
             <Button
               type="submit"
