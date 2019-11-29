@@ -14,7 +14,7 @@ const NoMatch = ({ location }) => (
       <a
         target="_blank"
         rel="noopener noreferrer"
-        href="https://github.com/OurVoiceUSA/HelloVoterHQ/issues/new"
+        href="https://github.com/OurVoiceUSA/HelloVoter/issues/new"
       >
         report an issue
       </a>{' '}
