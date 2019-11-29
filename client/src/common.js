@@ -312,8 +312,7 @@ export async function _loadForms(global, teamId) {
     if (teamId) uri = 'team/form/list?teamId=' + teamId;
     else uri = 'form/list';
 
-    let data = await _fetch(global, '/' + uri);
-    forms = data.data ? data.data : [];
+    forms = await _fetch(global, '/' + uri);
   } catch (e) {
     notify_error(e, 'Unable to load form data.');
   }
