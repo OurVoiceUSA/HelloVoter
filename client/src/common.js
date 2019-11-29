@@ -156,7 +156,7 @@ export async function _loadQRCode(global, id) {
   try {
     qrcode = await _fetch(
       global,
-      '/qrcodes/get?id=' + id
+      '/qrcode/get?id=' + id
     );
     qrcode.img = await QRCode.toDataURL(_inviteLink(id, global.state.server, global.state.orgId));
   } catch (e) {
@@ -169,7 +169,7 @@ export async function _loadQRCodes(global, id) {
   let qrcodes = [];
 
   try {
-    qrcodes = await _fetch(global, '/qrcodes/list');
+    qrcodes = await _fetch(global, '/qrcode/list');
   } catch (e) {
     notify_error(e, 'Unable to load QRCode data.');
   }

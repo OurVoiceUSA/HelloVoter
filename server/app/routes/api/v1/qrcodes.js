@@ -8,7 +8,7 @@ import crypto from 'crypto';
 import { Router } from 'express';
 
 module.exports = Router({mergeParams: true})
-.post('/qrcodes/create', async (req, res) => {
+.post('/qrcode/create', async (req, res) => {
   if (!req.user.admin) return _403(res, "Permission denied.");
 
   let ref;
@@ -23,7 +23,7 @@ module.exports = Router({mergeParams: true})
 
   return res.json(ref.data[0]);
 })
-.get('/qrcodes/list',  async (req, res) => {
+.get('/qrcode/list',  async (req, res) => {
   if (!req.user.admin) return _403(res, "Permission denied.");
   let qrcodes = {data:[]};
 
@@ -35,7 +35,7 @@ module.exports = Router({mergeParams: true})
 
   return res.json(qrcodes.data);
 })
-.get('/qrcodes/get', async (req, res) => {
+.get('/qrcode/get', async (req, res) => {
   if (!req.user.admin) return _403(res, "Permission denied.");
 
   let qrcode = {};
@@ -50,7 +50,7 @@ module.exports = Router({mergeParams: true})
 
   return res.json(qrcode);
 })
-.post('/qrcodes/update', async (req, res) => {
+.post('/qrcode/update', async (req, res) => {
   if (!req.user.admin) return _403(res, "Permission denied.");
   if (!req.body.id || !req.body.name) return _400(res, "Invalid value to parameter 'id' or 'name'");
 
@@ -62,31 +62,31 @@ module.exports = Router({mergeParams: true})
 
   return res.json({});
 })
-.post('/qrcodes/turf/add', async (req, res) => {
+.post('/qrcode/turf/add', async (req, res) => {
   if (!valid(req.body.turfId) || !valid(req.body.qId)) return _400(res, "Invalid value to parameter 'turfId' or 'qId'.");
   return cqdo(req, res, 'match (t:Turf {id:{turfId}}) match (qr:QRCode {id:{qId}}) merge (qr)-[:AUTOASSIGN_TO]->(t)', req.body);
 })
-.post('/qrcodes/turf/remove', async (req, res) => {
+.post('/qrcode/turf/remove', async (req, res) => {
   if (!valid(req.body.turfId) || !valid(req.body.qId)) return _400(res, "Invalid value to parameter 'turfId' or 'qId'.");
   return cqdo(req, res, 'match (t:Turf {id:{turfId}})<-[r:AUTOASSIGN_TO]-(:QRCode {id:{qId}}) delete r', req.body, true);
 })
-.post('/qrcodes/team/add', async (req, res) => {
+.post('/qrcode/team/add', async (req, res) => {
   if (!valid(req.body.teamId) || !valid(req.body.qId)) return _400(res, "Invalid value to parameter 'teamId' or 'qId'.");
   return cqdo(req, res, 'match (t:Team {id:{teamId}}) match (qr:QRCode {id:{qId}}) merge (qr)-[:AUTOASSIGN_TO]->(t)', req.body);
 })
-.post('/qrcodes/team/remove', async (req, res) => {
+.post('/qrcode/team/remove', async (req, res) => {
   if (!valid(req.body.teamId) || !valid(req.body.qId)) return _400(res, "Invalid value to parameter 'teamId' or 'qId'.");
   return cqdo(req, res, 'match (t:Team {id:{teamId}})<-[r:AUTOASSIGN_TO]-(:QRCode {id:{qId}}) delete r', req.body, true);
 })
-.post('/qrcodes/form/add', async (req, res) => {
+.post('/qrcode/form/add', async (req, res) => {
   if (!valid(req.body.formId) || !valid(req.body.qId)) return _400(res, "Invalid value to parameter 'formId' or 'qId'.");
   return cqdo(req, res, 'match (f:Form {id:{formId}}) match (qr:QRCode {id:{qId}}) merge (qr)-[:AUTOASSIGN_TO]->(f)', req.body);
 })
-.post('/qrcodes/form/remove', async (req, res) => {
+.post('/qrcode/form/remove', async (req, res) => {
   if (!valid(req.body.formId) || !valid(req.body.qId)) return _400(res, "Invalid value to parameter 'formId' or 'qId'.");
   return cqdo(req, res, 'match (f:Form {id:{formId}})<-[r:AUTOASSIGN_TO]-(:QRCode {id:{qId}}) delete r', req.body, true);
 })
-.post('/qrcodes/disable', async (req, res) => {
+.post('/qrcode/disable', async (req, res) => {
   if (!req.user.admin) return _403(res, "Permission denied.");
 
   try {

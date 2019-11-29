@@ -72,11 +72,16 @@ export default class App extends Component {
           <a
             target="_blank"
             rel="noopener noreferrer"
-            href="https://github.com/OurVoiceUSA/HelloVoterHQ/blob/master/LICENSE"
+            href="https://github.com/OurVoiceUSA/HelloVoter/blob/master/LICENSE"
           >
             License
           </a>{' '}
           for more details.
+        </div>
+        <div>
+          <a target="_blank" rel="noopener noreferrer" href="https://raw.githubusercontent.com/OurVoiceUSA/HelloVoter/master/docs/Privacy-Policy.md">Privacy Policy</a>
+          ||
+          <a target="_blank" rel="noopener noreferrer" href="https://raw.githubusercontent.com/OurVoiceUSA/HelloVoter/master/docs/Terms-of-Service.md">Terms of Service</a>
         </div>
         <div>
           <a

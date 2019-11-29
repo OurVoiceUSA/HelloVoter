@@ -66,7 +66,7 @@ const MenuItems = ({ assignments, handleClickLogout }) => (
       </Link>
       {assignments.admin&&
       <div>
-      <Link to={'/qrcodes/'}>
+      <Link to={'/qrcode/'}>
         <ListItem button>
           <ListItemIcon>
             <AspectRatioIcon />

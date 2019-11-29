@@ -33,13 +33,8 @@ export const Routes = ({ global }) => (
     <Route path="/teams/" render={() => <Teams global={global} />} />
     <Route path="/turf/" render={() => <Turf global={global} />} />
     <Route path="/forms/" render={() => <Forms global={global} />} />
-    <Route path="/qrcodes/" render={() => <QRCodes global={global} />} />
+    <Route path="/qrcode/" render={() => <QRCodes global={global} />} />
     <Route path="/attributes/" render={() => <Attributes global={global} />} />
-    <Route
-      path="/map/"
-      render={() => <Map global={global} apiKey={global.state.google_maps_key} />}
-    />
-    <Route path="/import/" render={() => <ImportData global={global} />} />
     <Route path="/queue/" render={() => <Queue global={global} />} />
     <Route path="/analytics/" render={() => <Analytics global={global} />} />
     <Route path="/settings/" render={() => <Settings global={global} />} />

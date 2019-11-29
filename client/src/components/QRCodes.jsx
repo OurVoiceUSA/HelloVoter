@@ -119,11 +119,11 @@ export default class QRCodes extends Component {
             <br />
             <Route
               exact={true}
-              path="/qrcodes/"
+              path="/qrcode/"
               render={() => <ListQRCodes global={global} refer={this} qrcodes={qrcodes} />}
             />
             <Route
-              path="/qrcodes/view/:id"
+              path="/qrcode/view/:id"
               render={props => (
                 <CardQRCode
                   global={global}
@@ -221,7 +221,7 @@ const ListQRCodes = props => {
       <Button onClick={async () => {
         let obj = await _fetch(
           props.global,
-          '/qrcodes/create',
+          '/qrcode/create',
           'POST'
         );
         if (obj && obj.id) {
@@ -277,7 +277,7 @@ export class CardQRCode extends Component {
       obj.add.forEach(add => {
         adrm.push(_fetch(
           global,
-          '/qrcodes/team/add',
+          '/qrcode/team/add',
           'POST',
           { teamId: add, qId: this.props.id }
         ));
@@ -286,7 +286,7 @@ export class CardQRCode extends Component {
       obj.rm.forEach(rm => {
         adrm.push(_fetch(
           global,
-          '/qrcodes/team/remove',
+          '/qrcode/team/remove',
           'POST',
           { teamId: rm, qId: this.props.id }
         ));
@@ -323,7 +323,7 @@ export class CardQRCode extends Component {
       obj.add.forEach(add => {
         adrm.push(_fetch(
           global,
-          '/qrcodes/form/add',
+          '/qrcode/form/add',
           'POST',
           { formId: add, qId: this.props.id }
         ));
@@ -332,7 +332,7 @@ export class CardQRCode extends Component {
       obj.rm.forEach(rm => {
         adrm.push(_fetch(
           global,
-          '/qrcodes/form/remove',
+          '/qrcode/form/remove',
           'POST',
           { formId: rm, qId: this.props.id }
         ));
@@ -366,7 +366,7 @@ export class CardQRCode extends Component {
       obj.add.forEach(add => {
         adrm.push(_fetch(
           global,
-          '/qrcodes/turf/add',
+          '/qrcode/turf/add',
           'POST',
           { turfId: add, qId: this.props.id }
         ));
@@ -375,7 +375,7 @@ export class CardQRCode extends Component {
       obj.rm.forEach(rm => {
         adrm.push(_fetch(
           global,
-          '/qrcodes/turf/remove',
+          '/qrcode/turf/remove',
           'POST',
           { turfId: rm, qId: this.props.id }
         ));
@@ -512,7 +512,7 @@ export class CardQRCode extends Component {
     try {
       await _fetch(
         global,
-        '/qrcodes/disable',
+        '/qrcode/disable',
         'POST',
         { id: qrcode.id }
       );
@@ -532,7 +532,7 @@ export class CardQRCode extends Component {
     try {
       await _fetch(
         global,
-        '/qrcodes/update',
+        '/qrcode/update',
         'POST',
         { id: qrcode.id, name: val }
       );
