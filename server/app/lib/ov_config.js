@@ -25,7 +25,7 @@ export const ov_config = {
   jwt_iss: getConfig("jwt_iss", false, "ourvoiceusa.org"),
   google_maps_key: getConfig("google_maps_key", false, null),
   sm_oauth_url: getConfig("sm_oauth_url", false, 'https://ws.ourvoiceusa.org/auth'),
-  autoenroll_formid: getConfig("autoenroll_formid", false, null),
+  no_auth: getConfig("react_app_no_auth", false, false),
   volunteer_add_new: getConfig("volunteer_add_new", false, null),
   purge_import_records: getConfig("purge_import_records", false, null),
   wabase: getConfig("wabase", false, 'https://apps.ourvoiceusa.org'),

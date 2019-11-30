@@ -34,7 +34,9 @@ export function doExpressInit(log, db, qq) {
   app.use(cors({exposedHeaders: ['x-sm-oauth-url']}));
   app.use(helmet());
 
-  if (ov_config.jwt_pub_key) {
+  if (ov_config.no_auth) {
+    console.warn("Starting up without authentication!");
+  } else if (ov_config.jwt_pub_key) {
     public_key = fs.readFileSync(ov_config.jwt_pub_key, "utf8");
   } else {
     console.log("JWT_PUB_KEY not defined, attempting to fetch from "+ov_config.sm_oauth_url+'/pubkey');
@@ -76,7 +78,7 @@ export function doExpressInit(log, db, qq) {
 
     res.set('x-sm-oauth-url', ov_config.sm_oauth_url);
 
-    if (!public_key) {
+    if (!public_key && !ov_config.no_auth) {
       return _503(res, "Server is starting up.");
     }
 
@@ -93,7 +95,10 @@ export function doExpressInit(log, db, qq) {
     try {
       let u;
       if (!req.header('authorization')) return _400(res, "Missing required header.");
-      u = jwt.verify(req.header('authorization').split(' ')[1], public_key);
+      let token = req.header('authorization').split(' ')[1];
+
+      if (ov_config.no_auth) u = jwt.decode(req.header('authorization').split(' ')[1]);
+      else u = jwt.verify(req.header('authorization').split(' ')[1], public_key);
 
       // verify props
       if (!u.id) return _400(res, "Your token is missing a required parameter.");

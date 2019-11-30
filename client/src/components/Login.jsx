@@ -24,7 +24,8 @@ class Login extends Component {
   constructor(props) {
     super(props);
 
-    let loginOptions = [{label: 'Organization ID', value: 'org'}, {label: '3rd Party Server', value: 'server'}];
+    let loginOptions = [];
+    if (!process.env.REACT_APP_NO_AUTH) loginOptions = [{label: 'Organization ID', value: 'org'}, {label: '3rd Party Server', value: 'server'}];
     if (process.env.NODE_ENV === 'development') loginOptions.unshift({label: 'LOCAL DEVELOPMENT', value: 'dev'});
 
     let token;
@@ -85,26 +86,41 @@ class Login extends Component {
               <a target="_blank" rel="noopener noreferrer" href="https://raw.githubusercontent.com/OurVoiceUSA/HelloVoter/master/docs/Terms-of-Service.md">Terms of Service</a>
             </div>
             <LoginOption global={global} refer={this} />
+            {(process.env.REACT_APP_NO_AUTH)&&
             <Button
               type="submit"
               fullWidth
               variant="contained"
               color="primary"
               className={classes.submit}
-              onClick={() => this.setState({target: 'google'})}
+              onClick={() => this.setState({target: 'none'})}
             >
-              Google Sign In
+              Sign In
             </Button>
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              color="secondary"
-              onClick={() => this.setState({target: 'facebook'})}
-              className={classes.submit}
-            >
-              Facebook Sign In
-            </Button>
+            ||
+            <div>
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                color="primary"
+                className={classes.submit}
+                onClick={() => this.setState({target: 'google'})}
+              >
+                Google Sign In
+              </Button>
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                color="secondary"
+                onClick={() => this.setState({target: 'facebook'})}
+                className={classes.submit}
+              >
+                Facebook Sign In
+              </Button>
+            </div>
+            }
           </form>
         </Paper>
         <br />
