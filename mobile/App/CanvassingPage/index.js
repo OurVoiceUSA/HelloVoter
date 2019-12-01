@@ -7,7 +7,7 @@ import LocationComponent from '../LocationComponent';
 import { HVConfirmDialog } from '../HVComponent';
 import { NewAddressDialog } from './FormDialogs';
 import ListTab from './ListTab';
-import TurfTab from './TurfTab';
+import DispatchTab from './DispatchTab';
 import SettingsTab from './SettingsTab';
 
 import {
@@ -750,7 +750,7 @@ export default class App extends LocationComponent {
             <ListTab refer={this} />
           }
           {active==='turf'&&
-            <TurfTab refer={this} />
+            <DispatchTab refer={this} />
           }
           {active==='settings'&&
             <SettingsTab refer={this} form={form} />
@@ -920,8 +920,8 @@ export default class App extends LocationComponent {
               <Text>List View</Text>
             </Button>
             <Button active={(active === 'turf'?true:false)} onPress={() => this.setState({active: 'turf'})}>
-              <Icon name="compass" size={25} />
-              <Text>Turf</Text>
+              <Icon name="user-plus" size={25} />
+              <Text>Dispatch</Text>
             </Button>
             <Button active={(active === 'settings'?true:false)} onPress={() => this.setState({active: 'settings'})}>
               <Icon name="cog" size={25} />
