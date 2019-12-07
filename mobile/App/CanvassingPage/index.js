@@ -112,11 +112,7 @@ export default class App extends LocationComponent {
         "Are you sure you wish to exit the canvassing tool?",
         {
           title: "Yes",
-          onPress: () => {
-            this.setState({confirmDialog: false});
-            this.state.refer._loadForms();
-            this.goBack();
-          },
+          onPress: () => this.byeFelicia(),
         },
         {
           title: "No",
@@ -134,6 +130,12 @@ export default class App extends LocationComponent {
     this.setupConnectionListener();
     this.loadRetryQueue();
     this._dataGet();
+  }
+
+  byeFelicia() {
+    this.setState({confirmDialog: false});
+    this.state.refer._loadForms();
+    this.goBack();
   }
 
   onRegionChange = async () => {
@@ -426,6 +428,7 @@ export default class App extends LocationComponent {
       let json = await res.json();
 
       if (res.status !== 200 || json.error === true) {
+        if (res.status >= 400 && res.status < 500) return this.byeFelicia();
         if (json.msg) ret.msg = json.msg;
         throw "Sync error";
       }
@@ -560,6 +563,8 @@ export default class App extends LocationComponent {
         },
         body: JSON.stringify(input),
       });
+
+      if (res.status >= 400 && res.status < 500) return this.byeFelicia();
 
       if (res.status !== 200) {
         throw "sendData error";
