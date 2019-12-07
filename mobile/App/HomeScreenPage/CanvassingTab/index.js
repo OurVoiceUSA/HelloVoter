@@ -67,12 +67,6 @@ export default class App extends LocationComponent {
       this.alert(say("location_access"), say("device_settings_deny_location"));
       return false;
     }
-/* TODO: this fails on android
-    if (!myPosition.longitude || !myPosition.latitude) {
-      this.alert(say("location_service"), say("location_services_unavailable"));
-      return false;
-    }
-*/
     return true;
   }
 
@@ -130,7 +124,6 @@ export default class App extends LocationComponent {
 
     if (!this.checkLocationAccess()) return;
 
-    /* TODO: verify myPosition exists, had issues with it inside checkLocationAccess() */
     let now = new Date();
     let times = SunCalc.getTimes(now, myPosition.latitude, myPosition.longitude);
     if (!__DEV__ && (now < times.sunrise || now > times.sunset)) {

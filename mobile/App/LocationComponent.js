@@ -1,13 +1,10 @@
 import React from 'react';
+import { Platform, DeviceEventEmitter } from 'react-native';
 import HVComponent from './HVComponent';
 
-import {
-  Platform,
-  DeviceEventEmitter,
-} from 'react-native';
-
 import RNGLocation from 'react-native-google-location';
-import RNGooglePlaces from 'react-native-google-places';
+import { sleep } from 'ourvoiceusa-sdk-js';
+
 import { permissionLocation } from './common';
 
 if (Platform.OS === 'ios') {
@@ -22,6 +19,14 @@ export default class LocationComponent extends HVComponent {
     this.state = {
       myPosition: {latitude: null, longitude: null},
     }
+  }
+
+  wait4pos = async () => {
+    for (let i = 0; i < 100; i++) {
+      if (this.state.myPosition.longitude && this.state.myPosition.latitude) return true;
+      else await sleep(100);
+    }
+    return false;
   }
 
   onLocationChange (e: Event) {
@@ -57,6 +62,8 @@ export default class LocationComponent extends HVComponent {
     }
 
     this.setState({ locationAccess: access });
+
+    if (access) await this.wait4pos();
 
     return access;
   }
