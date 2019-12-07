@@ -9,5 +9,7 @@ if [ ! -f /data/dbms/auth ]; then
   export NEO4J_AUTH=neo4j/$NEO4J_PASS
 fi
 
+[ -n "$DISABLE_JMX" ] && unset NEO4J_dbms_jvm_additional
+
 node node_modules/@babel/node/lib/_babel-node app/server.js & disown
 exec /docker-entrypoint.sh neo4j
