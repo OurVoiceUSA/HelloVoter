@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import { View, Dimensions, Image, TouchableOpacity } from 'react-native';
+import { View, Dimensions, Image } from 'react-native';
 import {
   Content, List, ListItem, Left, Right, Body, Footer, FooterTab,
   Text, Button, Spinner, H1,
@@ -27,7 +27,6 @@ import {
 } from '../../common';
 import { wsbase } from '../../config';
 
-var patreonImage = require('../../../img/supportonpatreon.png');
 var darkoutside = require('../../../img/darkoutside.png');
 var lockedout = require('../../../img/lockedout.png');
 var genericerror = require('../../../img/error.png');
@@ -493,10 +492,7 @@ export default class App extends LocationComponent {
         <Divider />
 
         <View style={{margin: 12}}>
-          <TouchableOpacity style={{alignItems: 'center'}} onPress={() => openDonate()}>
-            <Text>While this app is free to use, it is not free to create & maintain! Become a patron to help ensure continued development work.</Text>
-            <Image source={patreonImage} style={{width: 250, height: 100, resizeMode: 'contain'}} />
-          </TouchableOpacity>
+          <PatreonButton text="While this app is free to use, it is not free to create & maintain! Become a patron to help ensure continued development work." />
         </View>
 
         <Dialog
@@ -566,12 +562,7 @@ export default class App extends LocationComponent {
               thickness={4}
               indeterminate={((waitprogress<10||waitprogress>=PROCESS_MAX_WAIT)?true:false)}
               borderWidth={4} />
-              {(waitprogress>=10)&&
-              <TouchableOpacity style={{alignItems: 'center'}} onPress={() => openDonate()}>
-                <Text style={{margin: 10}}>Avoid app startup times! Become a patron for faster entry into canvassing.</Text>
-                <Image source={patreonImage} style={{width: 250, height: 100, resizeMode: 'contain'}} />
-              </TouchableOpacity>
-              }
+              {(waitprogress>=10)&&<PatreonButton text="Avoid app startup times! Become a patron for faster entry into canvassing." />}
             <KeepAwake />
           </View>
         </Dialog>
@@ -642,11 +633,7 @@ const NotRightNow = props => (
         </ListItem>
       </Content>
       }
-      {props.patreon&&
-        <ListItem avatar onPress={() => openDonate()}>
-          <Image source={patreonImage} style={{width: 250, height: 100, resizeMode: 'contain'}} />
-        </ListItem>
-      }
+      {props.patreon&&<PatreonButton />}
       <HVConfirmDialog refer={props.refer} />
     </View>
   </View>
