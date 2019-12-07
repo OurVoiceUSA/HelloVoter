@@ -52,7 +52,7 @@ export default class LocationComponent extends HVComponent {
         }
       } else {
         await this.getLocation();
-        this.timerID = setInterval(() => this.getLocation(), 5000);
+        this.timerID = setInterval(() => this.getLocation(), 60000);
       }
     }
 
