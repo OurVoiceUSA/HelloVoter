@@ -556,6 +556,12 @@ export default class App extends LocationComponent {
               thickness={4}
               indeterminate={((waitprogress<10||waitprogress>=PROCESS_MAX_WAIT)?true:false)}
               borderWidth={4} />
+              {(waitprogress>=10)&&
+              <TouchableOpacity style={{alignItems: 'center'}} onPress={() => openDonate()}>
+                <Text style={{margin: 10}}>Avoid app startup times! Become a patron for faster entry into canvassing.</Text>
+                <Image source={patreonImage} style={{width: 250, height: 100, resizeMode: 'contain'}} />
+              </TouchableOpacity>
+              }
             <KeepAwake />
           </View>
         </Dialog>
