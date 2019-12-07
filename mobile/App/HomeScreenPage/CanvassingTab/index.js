@@ -187,6 +187,7 @@ export default class App extends LocationComponent {
             await sleep(12345);
             break;
           default:
+            retry = false;
             canvaslater = res.status;
             break;
         }
