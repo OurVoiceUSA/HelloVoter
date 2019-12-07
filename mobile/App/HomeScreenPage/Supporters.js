@@ -1,20 +1,22 @@
 import React from 'react';
-import { View } from 'react-native';
-import { Text, Button, Spinner } from 'native-base';
+import { View, Image, TouchableOpacity } from 'react-native';
+import { Content, Text, Button, Spinner } from 'native-base';
 
 import { say, openDonate } from '../common';
 
+var patreonImage = require('../../img/supportonpatreon.png');
+
 export default Supporters = props => (
-  <View>
+  <Content padder>
     <Button block dark transparent onPress={() => openDonate()}>
       <Text>{say("our_signature_supporters")}</Text>
     </Button>
     <Text></Text>
     <Text>{say("this_app_is_made_possible_by")}</Text>
     <Text></Text>
-    <Button block onPress={() => openDonate()}>
-      <Text>{say("support_us_on_patreon")}</Text>
-    </Button>
+    <TouchableOpacity style={{alignItems: 'center'}} onPress={() => openDonate()}>
+      <Image source={patreonImage} style={{width: 250, height: 100, resizeMode: 'contain'}} />
+    </TouchableOpacity>
     <Text></Text>
     {(!props.names || props.names.length === 0)&&
       <View>
@@ -26,5 +28,5 @@ export default Supporters = props => (
         {props.names.map((name, idx) => (<Text key={idx}>{name}</Text>))}
       </View>
     }
-  </View>
+  </Content>
 )

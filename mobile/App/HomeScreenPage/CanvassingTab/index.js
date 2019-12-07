@@ -489,6 +489,15 @@ export default class App extends LocationComponent {
           </Text>
         </View>
 
+        <Divider />
+
+        <View style={{margin: 12}}>
+          <TouchableOpacity style={{alignItems: 'center'}} onPress={() => openDonate()}>
+            <Text>While this app is free to use, it is not free to create & maintain! Become a patron to help ensure continued development work.</Text>
+            <Image source={patreonImage} style={{width: 250, height: 100, resizeMode: 'contain'}} />
+          </TouchableOpacity>
+        </View>
+
         <Dialog
           title={say("start_new_canvas_activity")}
           visible={SelectModeScreen}
