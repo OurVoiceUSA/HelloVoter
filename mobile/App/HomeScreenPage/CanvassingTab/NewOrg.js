@@ -127,8 +127,10 @@ Terms of Service</Text>.
         let json = await res.json();
         let myOrgID = json.orgid;
 
-        refer.setState({ myOrgID, newOrg: false, loading: false });
-        refer._loadForms();
+        refer.setState({ myOrgID, newOrg: false, loading: false }, () => {
+          refer._loadForms();
+          refer.sayHello('gotv-'+state.toLowerCase()+'.ourvoiceusa.org', myOrgID);
+        });
       }}>
         <Text>Create Organization</Text>
       </Button>

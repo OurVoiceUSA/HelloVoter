@@ -345,7 +345,7 @@ export default class App extends LocationComponent {
     try {
       jwt = await _getApiToken();
 
-      let res = await fetch('https://gotv-'+state+'.ourvoiceusa.org/orgid/v1/status', {
+      let res = await fetch('https://gotv-'+state.toLowerCase()+'.ourvoiceusa.org/orgid/v1/status', {
         headers: {
           'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),
           'Content-Type': 'application/json',
