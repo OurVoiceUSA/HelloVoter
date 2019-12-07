@@ -152,7 +152,7 @@ export default class App extends LocationComponent {
     }
 
     let retry = true;
-    let e502 = false;
+    let skiperr = true;
     for (let retrycount = 0; (retrycount < (PROCESS_MAX_WAIT/10) && retry); retrycount++) {
       try {
         res = await fetch('http'+(https?'s':'')+'://'+server+api_base_uri(orgId)+'/hello', {
@@ -182,8 +182,15 @@ export default class App extends LocationComponent {
             await sleep(12345);
             break;
           default:
-            retry = false;
-            canvaslater = res.status;
+            // allow for one error to happen without bombing
+            if (skiperr) {
+              skiperr = false;
+              canvaslater = null;
+              await sleep(12345);
+            } else {
+              retry = false;
+              canvaslater = res.status;
+            }
             break;
         }
       } catch (e) {
