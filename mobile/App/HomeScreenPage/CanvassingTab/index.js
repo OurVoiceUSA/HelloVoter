@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import { View, Dimensions, Image } from 'react-native';
+import { View, Dimensions, Image, TouchableOpacity } from 'react-native';
 import {
   Content, List, ListItem, Left, Right, Body, Footer, FooterTab,
   Text, Button, Spinner, H1,
@@ -23,10 +23,11 @@ import SunCalc from 'suncalc';
 
 import {
   DINFO, STORAGE_KEY_JWT, STORAGE_KEY_OLDFORMS, URL_GUIDELINES, URL_HELP,
-  Divider, say, _getApiToken, api_base_uri, _loginPing, openURL, getUSState, localaddress,
+  Divider, say, _getApiToken, api_base_uri, _loginPing, openURL, openDonate, getUSState, localaddress,
 } from '../../common';
 import { wsbase } from '../../config';
 
+var patreonImage = require('../../../img/supportonpatreon.png');
 var darkoutside = require('../../../img/darkoutside.png');
 var lockedout = require('../../../img/lockedout.png');
 var genericerror = require('../../../img/error.png');
@@ -358,16 +359,18 @@ export default class App extends LocationComponent {
         },
       });
 
-      if (res.status === 400 || res.status === 401) this.setState({user: {profile:{}}});
-      else if (res.status !== 200) this.setState({canvaslater: res.status});
+      if (res.status === 200) {
+        let json = await res.json();
+        myOrgID = json.orgid;
 
-      let json = await res.json();
-      myOrgID = json.orgid;
-
-      if (myOrgID && myOrgID.length) {
-        await this.addServer('gotv-'+state.toLowerCase()+'.ourvoiceusa.org', myOrgID);
-        this.setState({myOrgID});
+        if (myOrgID && myOrgID.length) {
+          await this.addServer('gotv-'+state.toLowerCase()+'.ourvoiceusa.org', myOrgID);
+          this.setState({myOrgID});
+        }
       }
+      else if (res.status === 400 || res.status === 401) this.setState({user: {profile:{}}});
+      else if (res.status < 500) this.setState({canvaslater: res.status});
+
     } catch (e) {
       console.warn(e);
     }
@@ -409,12 +412,13 @@ export default class App extends LocationComponent {
 
     if (canvaslater || error) {
       switch (canvaslater) {
-        case 402: return (<NotRightNow refer={this} image={crowd} title="At Capacity" message="It's getting crowded up in here! Our systems are at capacity. Please try back at another time." />);
+        case 402: return (<NotRightNow refer={this} image={crowd} title="Quota Exceeded" message="Your organization has used our services so heavily that we cannot offer it to you for free anymore. Become a patron to continue to use our services." patreon={true} />);
         case 403: return (<NotRightNow refer={this} image={lockedout} title="Locked Out" message="You have been locked out of this organization. Please contact your organization administrator." />);
-        case 409: return (<NotRightNow refer={this} image={darkoutside} title="It's Dark Outside" message="Whoa there! The sun's not up. Relax and try again later." />);
+        case 409: return (<NotRightNow refer={this} image={darkoutside} title="It's Dark Outside" message="Whoa there! The sun's not up. Relax and try again later." youtube={true} />);
         case 410: return (<NotRightNow refer={this} image={stop} title="Suspended" message="This organization has been suspended due to a Terms of Service violation. Please contact your organization administrator." />);
+        case 420: return (<NotRightNow refer={this} image={crowd} title="At Capacity" message="It's getting crowded up in here! Our systems are at capacity. Please try back at another time, or become a patron and our systems will prioritize your activities over others." patreon={true} />);
         case 451: return (<NotRightNow refer={this} image={usaonly} title="Geography Error" message="This app is only intended to be used in the USA." />);
-        default: return (<NotRightNow refer={this} image={genericerror} title="Error" message={say("unexpected_error_try_again")} />);
+        default: return (<NotRightNow refer={this} image={genericerror} title="Error" message={say("unexpected_error_try_again")+" Becoming a patron will help us reduce these errors."} patreon={true} />);
       }
     }
 
@@ -461,7 +465,7 @@ export default class App extends LocationComponent {
           </ListItem>
           <ServerList refer={this} />
         </List>
-        
+
         <Button block danger onPress={() => this.setState({SelectModeScreen: true})}>
           <Icon name="plus-circle" backgroundColor="#d7d7d7" color="white" size={30} />
           <Text>{say("start_new_canvas_activity")}</Text>
@@ -586,8 +590,10 @@ const ServerList = props => {
         <Icon name={(s.orgId?"id-badge":"cloud-upload")} size={25} color="black" />
       </Left>
       <Body>
-        <Text>{(s.forms&&s.forms.length?(s.forms.length>1?"Multiple Forms":s.forms[0].name):"")}</Text>
-        <Text note>{(s.orgId?s.orgId:s.server)}</Text>
+        {(s.forms&&s.forms.length===1)&&
+          <Text>{s.forms[0].name}</Text>
+        }
+        <Text>{(s.orgId?say("org_id")+": "+s.orgId:"Server: "+s.server)}</Text>
       </Body>
       <Right>
         <Button onPress={() => refer.sayHello(s.server, s.orgId)}>
@@ -606,10 +612,24 @@ const NotRightNow = props => (
       resizeMode: 'stretch',
     }} />
     <View style={{position: 'absolute', left: 0, top: 0, alignItems: 'center'}}>
-      <H1 style={{margin: 15, alignSelf: 'center'}}>{props.title}</H1>
+      <H1 style={{margin: 5, alignSelf: 'center'}}>{props.title}{(__DEV__?" ("+props.refer.state.canvaslater+")":"")}</H1>
       <Text style={{padding: 10}}>{props.message}</Text>
-      {__DEV__&&
-      <Text>{props.refer.state.canvaslater}</Text>
+      {props.youtube&&
+      <Content>
+        <ListItem avatar onPress={() => openURL('https://www.youtube.com/channel/UCw5fpnK-IZVQ4IkYuapIbiw')}>
+          <Left>
+            <Icon name="youtube-play" size={40} color="#ff0000" style={{marginRight: 25}} />
+          </Left>
+          <Right>
+            <Text>Want to show the app to someone? Check out our Youtube channel.</Text>
+          </Right>
+        </ListItem>
+      </Content>
+      }
+      {props.patreon&&
+        <ListItem avatar onPress={() => openDonate()}>
+          <Image source={patreonImage} style={{width: 250, height: 100, resizeMode: 'contain'}} />
+        </ListItem>
       }
       <HVConfirmDialog refer={props.refer} />
     </View>
