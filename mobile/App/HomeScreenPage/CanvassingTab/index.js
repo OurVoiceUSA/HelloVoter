@@ -216,8 +216,11 @@ export default class App extends LocationComponent {
     if (list.length) {
       let forms = [];
 
-      // TODO: use Promise.all
+      // TODO: use Promise.all (will need to dedupe list form.id first)
       await asyncForEach(list, async (f) => {
+        // if this formId is already in forms, bail
+        if (forms.find(ff => ff.id === f.id)) return;
+
         res = await fetch('http'+(https?'s':'')+'://'+server+api_base_uri(orgId)+'/form/get?formId='+f.id, {
           headers: {
             'Authorization': 'Bearer '+(jwt?jwt:"of the one ring"),

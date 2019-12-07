@@ -5,7 +5,7 @@ import { Toast, Container, Content, Footer, FooterTab, Text, Button, Spinner } f
 import TermsDisclosure, { loadDisclosure } from '../TermsDisclosure';
 import LocationComponent from '../LocationComponent';
 import { HVConfirmDialog } from '../HVComponent';
-import { NewAddressDialog } from './FormDialogs';
+import { SelectFormDialog, NewAddressDialog } from './FormDialogs';
 import ListTab from './ListTab';
 import DispatchTab from './DispatchTab';
 import SettingsTab from './SettingsTab';
@@ -86,17 +86,12 @@ export default class App extends LocationComponent {
       pAddress: {},
       fUnit: {},
       canvassSettings: {},
+      selectFormDialog: (props.navigation.state.params.forms.length===1?false:true),
       newAddressDialog: false,
       newUnitDialog: false,
       showDisclosure: null,
       retry_queue: [],
     };
-
-    // TODO: support multi-forms
-    this.state.form = this.state.forms[0];
-    this.state.turfs = this.state.form.turfs;
-
-    if (this.state.form.add_new) this.add_new = true;
 
     this.onRegionChange = this.onRegionChange.bind(this);
     this.handleConnectivityChange = this.handleConnectivityChange.bind(this);
@@ -123,13 +118,23 @@ export default class App extends LocationComponent {
   }
 
   componentDidMount() {
+    const { forms } = this.state;
+
     DINFO().then(i => this.setState({UniqueID: i.UniqueID})).catch(() => this.setState({deviceError: true}));
     loadDisclosure(this);
     this._getCanvassSettings();
     this.requestLocationPermission();
     this.setupConnectionListener();
     this.loadRetryQueue();
-    this._dataGet();
+    // auto-select form if there's only one
+    if (forms.length === 1) this.selectForm(forms[0]);
+  }
+
+  selectForm(form) {
+    this.setState({form, turfs: form.turfs, selectFormDialog: false});
+    if (form.add_new) this.add_new = true;
+    else this.add_new = false;
+    this._dataGet()
   }
 
   byeFelicia() {
@@ -392,10 +397,9 @@ export default class App extends LocationComponent {
   _dataFetch = async (pos, flag) => {
     const {
       canvassSettings, myPosition, lastFetchPosition, fetching, retry_queue,
-      showDisclosure,
+      showDisclosure, form,
     } = this.state;
-    let ret = {error: false};
-
+    if (!form.id) return;
     if (!pos) pos = myPosition;
 
     if (!pos.longitude || !pos.latitude) return;
@@ -412,7 +416,7 @@ export default class App extends LocationComponent {
       let res = await fetch('http'+(https?'s':'')+'://'+this.state.server+api_base_uri(this.state.orgId)+'/people/get/byposition', {
         method: 'POST',
         body: JSON.stringify({
-          formId: this.state.form.id,
+          formId: form.id,
           longitude: pos.longitude,
           latitude: pos.latitude,
           limit: (canvassSettings.limit?canvassSettings.limit:100),
@@ -429,7 +433,6 @@ export default class App extends LocationComponent {
 
       if (res.status !== 200 || json.error === true) {
         if (res.status >= 400 && res.status < 500) return this.byeFelicia();
-        if (json.msg) ret.msg = json.msg;
         throw "Sync error";
       }
 
@@ -483,13 +486,10 @@ export default class App extends LocationComponent {
 
       this.setState({lastFetchPosition: pos, markers: json, listview, listview_order, people, last_fetch: getEpoch()});
     } catch (e) {
-      ret.error = true;
       triggerNetworkWarning(e);
     }
 
     this.setState({fetching: false});
-
-    return ret;
   }
 
   sendVisit(id, place, unit, person, start, json) {
@@ -911,6 +911,7 @@ export default class App extends LocationComponent {
         </View>
         }
 
+        <SelectFormDialog refer={this} />
         <NewAddressDialog refer={this} />
         <HVConfirmDialog refer={this} />
 

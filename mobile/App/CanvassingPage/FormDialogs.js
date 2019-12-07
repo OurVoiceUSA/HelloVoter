@@ -230,3 +230,21 @@ export const NewUnitDialog = (props) => (
 );
 
 */
+
+export const SelectFormDialog = props => (
+  <Dialog
+  visible={props.refer.state.selectFormDialog}
+  animationType="fade"
+  onTouchOutside={() => props.refer.selectForm(props.refer.state.forms[0])}>
+    <H3>Select Canvassing Form</H3>
+    <Text></Text>
+    {props.refer.state.forms.map(f => (
+      <View key={f.id}>
+        <Button block onPress={() => props.refer.selectForm(f)}>
+          <Text>{f.name}</Text>
+        </Button>
+        <Text></Text>
+      </View>
+    ))}
+  </Dialog>
+);
