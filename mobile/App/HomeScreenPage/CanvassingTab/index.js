@@ -35,7 +35,7 @@ var lost = require('../../../img/whereami.png');
 var crowd = require('../../../img/crowd.png')
 var stop = require('../../../img/stop.png');
 
-const PROCESS_MAX_WAIT = 150;
+const PROCESS_MAX_WAIT = 100;
 
 export default class App extends LocationComponent {
 
@@ -114,7 +114,7 @@ export default class App extends LocationComponent {
     if (waitmode && i <= PROCESS_MAX_WAIT) {
       let n = i+1;
       this.setState({waitprogress: n});
-      setTimeout(() => this.recursiveProgress(n), 750);
+      setTimeout(() => this.recursiveProgress(n), 666);
     }
   }
 
