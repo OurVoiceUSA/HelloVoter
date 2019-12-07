@@ -61,7 +61,7 @@ export function doExpressInit(log, db, qq) {
     app.use(function (req, res, next) {
       if (!req.header(ov_config.ip_header)) {
         console.log('Connection without '+ov_config.ip_header+' header');
-       _400(res, "Missing required header.");
+       return _400(res, "Missing required header.");
       }
       else next();
     });
