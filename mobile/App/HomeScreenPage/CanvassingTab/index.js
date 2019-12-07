@@ -46,6 +46,7 @@ export default class App extends LocationComponent {
       refer: props.refer,
       dinfo: {},
       loading: true,
+      connectmode: false,
       waitmode: false,
       waitprogress: 0,
       canvaslater: null,
@@ -131,7 +132,7 @@ export default class App extends LocationComponent {
       return;
     }
 
-    this.setState({waitmode: true, waitprogress: 0}, () => this.recursiveProgress(0));
+    this.setState({connectmode: true});
 
     let res;
     let jwt;
@@ -151,6 +152,7 @@ export default class App extends LocationComponent {
     }
 
     let retry = true;
+    let e502 = false;
     for (let retrycount = 0; (retrycount < (PROCESS_MAX_WAIT/10) && retry); retrycount++) {
       try {
         res = await fetch('http'+(https?'s':'')+'://'+server+api_base_uri(orgId)+'/hello', {
@@ -172,9 +174,10 @@ export default class App extends LocationComponent {
             canvaslater = null;
             break;
           case 401:
-            this.setState({user: {profile:{}}, waitmode: false});
+            this.setState({user: {profile:{}}, connectmode: false, waitmode: false});
             return;
           case 418:
+            if (retrycount === 0) this.setState({connectmode: false, waitmode: true, waitprogress: 0}, () => this.recursiveProgress(0));
             canvaslater = null;
             await sleep(12345);
             break;
@@ -188,7 +191,7 @@ export default class App extends LocationComponent {
       }
     }
 
-    setTimeout(() => this.setState({waitmode: false, canvaslater}), 500);
+    setTimeout(() => this.setState({connectmode: false, waitmode: false, canvaslater}), 500);
 
     if (retry) {
       this.setState({error: true});
@@ -397,7 +400,8 @@ export default class App extends LocationComponent {
   render() {
     const {
       showCamera, newOrg, dinfo, loading, user, forms, error, locationDenied,
-      askOrgId, SelectModeScreen, myOrgID, waitmode, waitprogress, canvaslater,
+      askOrgId, SelectModeScreen, myOrgID, connectmode, waitmode, waitprogress,
+      canvaslater,
     } = this.state;
     const { navigate } = this.props.navigation;
 
@@ -544,18 +548,18 @@ export default class App extends LocationComponent {
         </Dialog>
 
         <Dialog
-          title={(waitprogress<10?"Connecting":"Getting Things Ready")}
-          visible={waitmode}>
+          title={(connectmode?"Connecting":"Getting Things Ready")}
+          visible={(connectmode||waitmode)}>
           <View style={{alignItems: 'center'}}>
             <Progress.Circle
-              progress={(waitprogress-10)/(PROCESS_MAX_WAIT-10)}
-              color={(waitprogress<10?"blue":"red")}
+              progress={(waitprogress/PROCESS_MAX_WAIT)}
+              color={(connectmode?"blue":"red")}
               showsText={true}
               size={180}
               thickness={4}
-              indeterminate={((waitprogress<10||waitprogress>=PROCESS_MAX_WAIT)?true:false)}
+              indeterminate={((connectmode||waitprogress>=PROCESS_MAX_WAIT)?true:false)}
               borderWidth={4} />
-              {(waitprogress>=10)&&<PatreonButton text="Avoid app startup times! Become a patron for faster entry into canvassing." />}
+              {(waitmode)&&<PatreonButton text="Avoid app startup times! Become a patron for faster entry into canvassing." />}
             <KeepAwake />
           </View>
         </Dialog>
