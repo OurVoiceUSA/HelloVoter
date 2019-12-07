@@ -27,8 +27,8 @@ function statVal(val) {
 
 export default SegmentTurf = props => {
   const { refer } = props;
-  const { segmentTurf, fetchingturfInfo, turfInfo } = refer.state;
-  if (segmentTurf!=='turf') return null;
+  const { segmentDispatch, fetchingturfInfo, turfInfo } = refer.state;
+  if (segmentDispatch!=='turf') return null;
 
   if (!fetchingturfInfo && Object.keys(turfInfo).length === 0)
     return (<Text>No turf selected.</Text>);
@@ -39,11 +39,6 @@ export default SegmentTurf = props => {
       <Spinner />
       ||
       <List>
-        <ListItem itemHeader first>
-          <Body>
-            <Text>Turfs</Text>
-          </Body>
-        </ListItem>
         <ListItem key="first" itemDivider icon onPress={() => {
           let c = polygonCenter(geojson2polygons(JSON.parse(turfInfo.geometry))[0]);
           refer.setState({selectedTurf: turfInfo});

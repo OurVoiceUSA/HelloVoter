@@ -26,11 +26,16 @@ function sortAlphaNum(ao, bo) {
 
 export default SegmentList = props => {
   const { refer } = props;
-  const { segmentTurf, turfs } = refer.state;
-  if (segmentTurf!=='list') return null;
+  const { segmentDispatch, turfs } = refer.state;
+  if (segmentDispatch!=='list') return null;
 
   return (
     <List>
+    <ListItem itemHeader first>
+      <Body>
+        <Text>Turfs</Text>
+      </Body>
+    </ListItem>
     {turfs.sort(sortAlphaNum).map(t => (
       <ListItem icon key={t.id} onPress={() => refer.setState({selectedTurf: t}, () => refer._loadturfInfo())}>
         <Body><Text>{t.name}</Text></Body>

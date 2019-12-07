@@ -57,7 +57,7 @@ export default class App extends LocationComponent {
       turfs: [],
       active: 'map',
       segmentList: 'streets',
-      segmentTurf: 'list',
+      segmentDispatch: 'list',
       selectedTurf: {},
       listview: {},
       listview_order: [],
@@ -359,7 +359,7 @@ export default class App extends LocationComponent {
   _loadturfInfo = async () => {
     const { selectedTurf } = this.state;
 
-    this.setState({active: 'turf', segmentTurf: 'info', fetchingturfInfo: true});
+    this.setState({active: 'dispatch', segmentDispatch: 'turf', fetchingturfInfo: true});
 
     try {
       let https = true;
@@ -680,7 +680,7 @@ export default class App extends LocationComponent {
     const { navigate } = this.props.navigation;
     const {
       showDisclosure, myPosition, locationAccess, serviceError, deviceError,
-      form, loading, region, active, segmentList, segmentTurf, fetching, selectedTurf, mapCamera,
+      form, loading, region, active, segmentList, segmentDispatch, fetching, selectedTurf, mapCamera,
       newAddressDialog, newUnitDialog, onlyPhonePeople, searchPins, pressAddsSearchPin,
     } = this.state;
 
@@ -754,7 +754,7 @@ export default class App extends LocationComponent {
           {active==='list'&&
             <ListTab refer={this} />
           }
-          {active==='turf'&&
+          {active==='dispatch'&&
             <DispatchTab refer={this} />
           }
           {active==='settings'&&
@@ -924,7 +924,7 @@ export default class App extends LocationComponent {
               <Icon name="list" size={25} />
               <Text>List View</Text>
             </Button>
-            <Button active={(active === 'turf'?true:false)} onPress={() => this.setState({active: 'turf'})}>
+            <Button active={(active === 'turf'?true:false)} onPress={() => this.setState({active: 'dispatch'})}>
               <Icon name="user-plus" size={25} />
               <Text>Dispatch</Text>
             </Button>
