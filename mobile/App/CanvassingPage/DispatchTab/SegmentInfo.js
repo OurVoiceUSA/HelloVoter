@@ -26,21 +26,16 @@ function sortAlphaNum(ao, bo) {
 
 export default SegmentInfo = props => {
   const { refer } = props;
-  const { admin, segmentDispatch, turfs, forms, orgId  } = refer.state;
+  const { admin, segmentDispatch, turfs, forms, orgId, server  } = refer.state;
   if (segmentDispatch!=='info') return null;
-/*
-  * add QR code in turf info segment
-  * if admin, show blurb:
-    Turf, Volunteers, and Forms can be managed in a web browser. From a computer, login to apps.ourvoiceusa.org/HelloVoterHQ/
-*/
   return (
     <List>
       <ListItem>
         <Body>
-          <Text>Organization ID:</Text>
+          <Text>{(orgId?"Organization ID:":"Server:")}</Text>
         </Body>
         <Right>
-          <Text>{orgId}</Text>
+          <Text>{(orgId?orgId:server)}</Text>
         </Right>
       </ListItem>
       <ListItem>
