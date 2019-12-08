@@ -2,7 +2,7 @@ import React from 'react';
 import { View } from 'react-native';
 import { Header, Text, Button, Segment } from 'native-base';
 
-import SegmentList from './SegmentList';
+import SegmentInfo from './SegmentInfo';
 import SegmentTurf from './SegmentTurf';
 
 import { say } from '../../common';
@@ -15,11 +15,11 @@ export default DispatchTab = props => {
     <View>
       <Header hasSegment style={{paddingTop: 0}}>
         <Segment>
-          <Button first active={(segmentDispatch==='list')} onPress={() => refer.setState({segmentDispatch: 'list'})}><Text>List</Text></Button>
+          <Button first active={(segmentDispatch==='info')} onPress={() => refer.setState({segmentDispatch: 'info'})}><Text>Info</Text></Button>
           <Button last active={(segmentDispatch==='turf')} onPress={() => refer.setState({segmentDispatch: 'turf'})}><Text>Turf</Text></Button>
         </Segment>
       </Header>
-      <SegmentList refer={refer} />
+      <SegmentInfo refer={refer} />
       <SegmentTurf refer={refer} />
     </View>
   );

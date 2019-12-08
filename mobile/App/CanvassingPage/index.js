@@ -58,7 +58,7 @@ export default class App extends LocationComponent {
       turfs: [],
       active: 'map',
       segmentList: 'streets',
-      segmentDispatch: 'list',
+      segmentDispatch: 'info',
       selectedTurf: {},
       listview: {},
       listview_order: [],
