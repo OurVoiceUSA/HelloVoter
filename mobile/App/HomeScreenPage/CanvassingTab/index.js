@@ -325,7 +325,7 @@ export default class App extends LocationComponent {
 
   _loadForms = async () => {
     const { navigate } = this.props.navigation;
-    const { user, refer, state } = this.state;
+    const { user, refer, state, myPosition } = this.state;
 
     let jwt;
     let myOrgID;
