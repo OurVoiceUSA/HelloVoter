@@ -46,7 +46,6 @@ export class NewAddressDialog extends Component {
    }
 
    this.onChange = this.onChange.bind(this);
-   //this.onUnitChange = this.onUnitChange.bind(this);
  }
 
   onChange(fAddress) {
@@ -171,65 +170,81 @@ export class NewAddressDialog extends Component {
   }
 }
 
-/*
+export class NewUnitDialog extends Component {
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+     refer: props.refer,
+     currentMarker: props.refer.state.currentMarker,
+    }
+
+    this.onUnitChange = this.onUnitChange.bind(this);
+  }
+  
+  onUnitChange(fUnit) {
+    this.setState({fUnit});
+  }
+
   addUnit = async () => {
-    let { form, myPosition, UniqueID } = this.state;
+    const { refer } = this.state;
+    let { form, myPosition, UniqueID, currentMarker } = refer.state;
 
     let json = this.refs.unitForm.getValue();
     if (json == null) return;
 
     // search for dupes
     let dupe = false;
-    this.state.currentMarker.units.forEach(u => {
+    currentMarker.units.forEach(u => {
       if (u.name.toLowerCase() === json.unit.toLowerCase()) dupe = true;
     });
 
     if (!dupe) {
       let input = {
-        deviceId: UniqueID,
-        formId: form.id,
-        timestamp: getEpoch(),
-        longitude: myPosition.longitude,
-        latitude: myPosition.latitude,
-        unit: json.unit,
-        addressId: this.state.currentMarker.address.id,
+       deviceId: UniqueID,
+       formId: form.id,
+       timestamp: getEpoch(),
+       longitude: myPosition.longitude,
+       latitude: myPosition.latitude,
+       unit: json.unit,
+       addressId: currentMarker.address.id,
       };
 
-      this.sendData('/address/add/unit', input);
-      this.state.currentMarker.units.push({name: json.unit, people: []});
+      refer.sendData('/address/add/unit', input);
+      currentMarker.units.push({name: json.unit, people: []});
     }
 
-    this.setState({newUnitDialog: false, fUnit: {}});
+    refer.setState({newUnitDialog: false, fUnit: {}});
   }
 
-    onUnitChange(fUnit) {
-      this.setState({fUnit});
-    }
+  render() {
+    const { refer, fUnit } = this.state;
 
-export const NewUnitDialog = (props) => (
-  <Dialog
-    visible={props.refer.state.newUnitDialog}
-    animationType="fade"
-    onTouchOutside={() => props.refer.setState({newUnitDialog: false})}>
-    <View>
-      <View style={{flex: 1, flexDirection: 'row', margin: 20, alignItems: 'center'}}>
-        <Text>Recording a new unit for this address:</Text>
-      </View>
-      <Form
-        ref="unitForm"
-        type={unitForm}
-        options={{fields: {unit: {autoFocus: true}}}}
-        onChange={this.onUnitChange}
-        value={this.state.fUnit}
-      />
-      <Button block onPress={this.addUnit}>
-        <Text>Add Unit</Text>
-      </Button>
-    </View>
-  </Dialog>
-);
-
-*/
+    return (
+      <Dialog
+        visible={refer.state.newUnitDialog}
+        animationType="fade"
+        onTouchOutside={() => refer.setState({newUnitDialog: false})}>
+        <View>
+          <View style={{flex: 1, flexDirection: 'row', margin: 20, alignItems: 'center'}}>
+            <Text>Recording a new unit for this address:</Text>
+          </View>
+          <Form
+            ref="unitForm"
+            type={unitForm}
+            options={{fields: {unit: {autoFocus: true}}}}
+            onChange={this.onUnitChange}
+            value={fUnit}
+          />
+          <Button block onPress={this.addUnit}>
+            <Text>Add Unit</Text>
+          </Button>
+        </View>
+      </Dialog>
+    );
+  }
+}
 
 export const SelectFormDialog = props => (
   <Dialog

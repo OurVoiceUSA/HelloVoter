@@ -2,9 +2,11 @@ import React from 'react';
 import { View } from 'react-native';
 import { Accordion, Content, Text, Button } from 'native-base';
 
+import { NewUnitDialog } from '../FormDialogs';
+import Knock from './Knock';
+
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-import Knock from './Knock';
 import { say, getPinColor, getLastVisit } from '../../common';
 
 export default SegmentResidence = props => {
@@ -39,6 +41,7 @@ export default SegmentResidence = props => {
             <Knock refer={refer} funcs={refer} marker={currentMarker} unit={u} form={form} />
           )}
         />
+        <NewUnitDialog refer={refer} />
     </Content>
     );
   }
@@ -47,6 +50,7 @@ export default SegmentResidence = props => {
     <View>
       <NewUnitButton refer={refer} place={currentMarker} />
       <Knock refer={refer} funcs={refer} marker={currentMarker} form={form} />
+      <NewUnitDialog refer={refer} />
     </View>
   );
 }
