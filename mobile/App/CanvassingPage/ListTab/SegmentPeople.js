@@ -53,7 +53,7 @@ export default SegmentPeople = props => {
       <ListItem onPress={() => refer.setState({onlyPhonePeople: !onlyPhonePeople})}>
         <CheckBox checked={onlyPhonePeople} onPress={() => refer.setState({onlyPhonePeople: !onlyPhonePeople})} />
         <Body>
-          <Text>{say("Only show those with a Phone Number")}</Text>
+          <Text>Only show those with a Phone Number</Text>
         </Body>
       </ListItem>
       <Text>Showing {(ppl.length>=10?10:ppl.length)} of {ppl.length} in this area.</Text>
