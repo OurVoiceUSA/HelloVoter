@@ -52,6 +52,7 @@ export default class App extends LocationComponent {
       refer: props.navigation.state.params.refer,
       server: props.navigation.state.params.server,
       orgId: props.navigation.state.params.orgId,
+      admin: props.navigation.state.params.admin,
       forms: props.navigation.state.params.forms,
       form: {},
       turfs: [],

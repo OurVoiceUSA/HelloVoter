@@ -210,6 +210,7 @@ export default class App extends LocationComponent {
     if (json.data) json = json.data;
 
     let list = json.forms;
+    let admin = json.admin;
 
     await this.addServer(server, orgId, list);
 
@@ -231,7 +232,7 @@ export default class App extends LocationComponent {
         forms.push(await res.json());
       });
 
-      this.navigate_canvassing({server, orgId, forms, refer: this});
+      this.navigate_canvassing({server, orgId, forms, admin, refer: this});
     } else {
       this.alert("Awaiting Assignment","You are not assigned to a form for this organization. Please contact your administrator.");
     }
