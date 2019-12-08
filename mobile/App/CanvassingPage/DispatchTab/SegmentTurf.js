@@ -55,6 +55,7 @@ export default SegmentTurf = props => {
         {(turfInfo.qrcode_img)&&
         <ListItem>
           <Body>
+            <Text>To give someone access to this turf, have them scan this QR code.</Text>
             <SvgXml xml={turfInfo.qrcode_img} width="350" height="350" />
           </Body>
         </ListItem>
