@@ -123,6 +123,11 @@ return last_touch, active_name, total_active, total_assigned`,
     });
   }
 
+  if (req.user.admin && req.query.formId) {
+    ref = await req.db.query('match (t:Turf {id:{turfId}}) match (f:Form {id:{formId}}) match (t)--(qr:QRCode)--(f) return qr.id limit 1', req.query);
+    turf.qrcode = ref.data[0];
+  }
+
   return res.json(turf);
 })
 .get('/turf/list/byposition', (req, res) => {

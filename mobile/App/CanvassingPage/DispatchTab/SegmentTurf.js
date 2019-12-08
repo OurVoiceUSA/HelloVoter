@@ -4,6 +4,7 @@ import { Body, Right, Left, Text, List, ListItem, Spinner } from 'native-base';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { geojson2polygons } from 'ourvoiceusa-sdk-js';
+import { SvgXml } from 'react-native-svg';
 
 import { say, timeAgo } from '../../common';
 
@@ -51,6 +52,13 @@ export default SegmentTurf = props => {
             <Icon name="compass" size={25} />
           </Right>
         </ListItem>
+        {(turfInfo.qrcode_img)&&
+        <ListItem>
+          <Body>
+            <SvgXml xml={turfInfo.qrcode_img} width="350" height="350" />
+          </Body>
+        </ListItem>
+        }
         {Object.keys(turfInfo.stats).map((key) => {
           val = turfInfo.stats[key];
           if (!val || typeof val !== 'object')

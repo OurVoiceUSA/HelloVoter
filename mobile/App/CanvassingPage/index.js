@@ -23,6 +23,7 @@ import NetInfo from '@react-native-community/netinfo';
 import storage from 'react-native-storage-wrapper';
 import KeepAwake from 'react-native-keep-awake';
 import { debounce } from 'throttle-debounce';
+import QRCode from 'qrcode';
 
 function bystreet(a,b) {
   let na = parseInt(a.address.street.replace(/(\d+) .*/, '$1'));
@@ -363,15 +364,15 @@ export default class App extends LocationComponent {
   }
 
   _loadturfInfo = async () => {
-    const { selectedTurf } = this.state;
+    const { form, server, orgId, selectedTurf } = this.state;
 
     this.setState({active: 'dispatch', segmentDispatch: 'turf', fetchingturfInfo: true});
 
     try {
       let https = true;
-      if (this.state.server.match(/:8080/)) https = false;
+      if (server.match(/:8080/)) https = false;
       let res = await fetch(
-        'http'+(https?'s':'')+'://'+this.state.server+api_base_uri(this.state.orgId)+'/turf/get?turfId='+selectedTurf.id,
+        'http'+(https?'s':'')+'://'+server+api_base_uri(orgId)+'/turf/get?turfId='+selectedTurf.id+'&formId='+form.id,
       {
         method: 'GET',
         headers: {
@@ -386,6 +387,8 @@ export default class App extends LocationComponent {
         if (json.msg) ret.msg = json.msg;
         throw "Sync error";
       }
+
+      if (json.qrcode) json.qrcode_img = await QRCode.toString('http'+(https?'s':'')+'://'+server+api_base_uri(orgId)+'mobile/invite?inviteCode='+json.qrcode+'&'+(orgId?'orgId='+orgId:'server='+server));
 
       this.setState({turfInfo: json});
     } catch (e) {
