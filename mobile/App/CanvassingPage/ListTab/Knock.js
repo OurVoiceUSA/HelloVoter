@@ -122,7 +122,7 @@ export default class App extends HVComponent {
             color="#000000"
             onPress={() => {
               funcs.notHome(marker.address.id, place, unit);
-              refer.setState({ active: activePrev, segmentList: 'streets' });
+              if (!unit) refer.setState({ active: activePrev, segmentList: 'streets' });
             }}
             {...iconStyles}>
             Not Home
@@ -136,7 +136,7 @@ export default class App extends HVComponent {
             color="#000000"
             onPress={() => {
               funcs.notInterested(marker.address.id, place, unit);
-              refer.setState({ active: activePrev, segmentList: 'streets' });
+              if (!unit) refer.setState({ active: activePrev, segmentList: 'streets' });
             }}
             {...iconStyles}>
             Not Interested
