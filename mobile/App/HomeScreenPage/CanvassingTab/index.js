@@ -446,21 +446,28 @@ export default class App extends LocationComponent {
 
     // if camera is open, render just that
     if (showCamera) return (
-      <RNCamera
-        ref={ref => {this.camera = ref;}}
-        style={{
-          flex: 1,
-          justifyContent: 'space-between',
-        }}
-        androidCameraPermissionOptions={{
-         title: say("permission_use_camera"),
-          message: say("we_need_permission_use_camera"),
-          buttonPositive: say("ok"),
-          buttonNegative: say("cancel"),
-        }}
-        onBarCodeRead={(b) => this.parseInvite(b.data)}
-        barCodeTypes={[RNCamera.Constants.BarCodeType.qr]}
-      />
+      <View style={{
+          width: Dimensions.get('window').width,
+          height: Dimensions.get('window').height*.8,
+      }}>
+        <RNCamera
+          ref={ref => {this.camera = ref;}}
+          style={{
+            flex: 1,
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+          }}
+          captureAudio={false}
+          androidCameraPermissionOptions={{
+           title: say("permission_use_camera"),
+            message: say("we_need_permission_use_camera"),
+            buttonPositive: say("ok"),
+            buttonNegative: say("cancel"),
+          }}
+          onBarCodeRead={(b) => this.parseInvite(b.data)}
+          barCodeTypes={[RNCamera.Constants.BarCodeType.qr]}
+        />
+      </View>
     );
 
     if (newOrg) return (<NewOrg refer={this} />);
