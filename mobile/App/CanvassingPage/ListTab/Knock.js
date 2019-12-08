@@ -112,18 +112,6 @@ export default class App extends HVComponent {
         />
         :
         <View style={{margin: 5, flexDirection: 'row'}}>
-          {(!unit && funcs.add_new) &&
-          <Icon.Button
-            name="plus-circle"
-            backgroundColor="#d7d7d7"
-            color="#000000"
-            onPress={() => {
-              refer.setState({ isKnockMenuVisible: false });
-            }}
-            {...iconStyles}>
-            Add Unit/Apt
-          </Icon.Button>
-          }
         </View>
         }
 

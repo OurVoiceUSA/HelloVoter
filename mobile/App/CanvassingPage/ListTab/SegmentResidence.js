@@ -20,15 +20,7 @@ export default SegmentResidence = props => {
       <Content padder>
         <Text style={{fontSize: 20, padding: 10}}>{currentMarker.address.street}, {currentMarker.address.city}</Text>
 
-        {refer.add_new &&
-        <Button block onPress={() => {
-            if (!refer.addOk()) return refer.alert("Active Filter", "You cannot add a new address while a filter is active.");
-            refer.setState({ newUnitDialog: true });
-          }}>
-          <Icon name="plus-circle" backgroundColor="#d7d7d7" color="white" size={20} />
-          <Text>Add new unit/apt number</Text>
-        </Button>
-        }
+        <NewUnitButton refer={refer} place={currentMarker} />
 
         {(currentMarker.people && currentMarker.people.length !== 0) &&
         <Unit unit={currentMarker}
@@ -52,9 +44,26 @@ export default SegmentResidence = props => {
   }
 
   return (
-    <Knock refer={refer} funcs={refer} marker={currentMarker} form={form} />
+    <View>
+      <NewUnitButton refer={refer} place={currentMarker} />
+      <Knock refer={refer} funcs={refer} marker={currentMarker} form={form} />
+    </View>
   );
 }
+
+const NewUnitButton = props => {
+  const { refer, place } = props;
+  if (!refer.add_new || (place.people && place.people.length)) return null;
+  return (
+    <Button block onPress={() => {
+        if (!refer.addOk()) return refer.alert("Active Filter", "You cannot add a new address while a filter is active.");
+        refer.setState({ newUnitDialog: true });
+      }}>
+      <Icon name="plus-circle" backgroundColor="#d7d7d7" color="white" size={20} />
+      <Text>Add new unit/apt number</Text>
+    </Button>
+  );
+};
 
 const Unit = props => (
   <View key={props.unit.name} style={{padding: 10}}>
