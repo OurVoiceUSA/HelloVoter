@@ -125,13 +125,6 @@ export default class App extends LocationComponent {
 
     if (!this.checkLocationAccess()) return;
 
-    let now = new Date();
-    let times = SunCalc.getTimes(now, myPosition.latitude, myPosition.longitude);
-    if (!__DEV__ && (now < times.sunrise || now > times.sunset)) {
-      this.setState({canvaslater: 409});
-      return;
-    }
-
     this.setState({connectmode: true});
 
     let res;
@@ -213,6 +206,13 @@ export default class App extends LocationComponent {
     let admin = json.admin;
 
     await this.addServer(server, orgId, list);
+
+    let now = new Date();
+    let times = SunCalc.getTimes(now, myPosition.latitude, myPosition.longitude);
+    if (!__DEV__ && !admin && (now < times.sunrise || now > times.sunset)) {
+      setTimeout(() => this.setState({canvaslater: 409}), 600);
+      return;
+    }
 
     if (list.length) {
       let forms = [];
