@@ -58,6 +58,7 @@ export default class App extends LocationComponent {
       form: {},
       turfs: [],
       active: 'map',
+      activePrev: 'map',
       segmentList: 'streets',
       segmentDispatch: 'info',
       selectedTurf: {},
@@ -349,11 +350,11 @@ export default class App extends LocationComponent {
 
   doMarkerPress = (marker) => {
     const { navigate } = this.props.navigation;
-    const { form } = this.state;
+    const { active, form } = this.state;
 
     this.setState({currentMarker: marker});
 
-    this.setState({active: 'list', segmentList: 'residence'});
+    this.setState({active: 'list', activePrev: active, segmentList: 'residence'});
   }
 
   updateLocalMarker(place, input) {
@@ -364,9 +365,9 @@ export default class App extends LocationComponent {
   }
 
   _loadturfInfo = async () => {
-    const { form, server, orgId, selectedTurf } = this.state;
+    const { active, form, server, orgId, selectedTurf } = this.state;
 
-    this.setState({active: 'dispatch', segmentDispatch: 'turf', fetchingturfInfo: true});
+    this.setState({active: 'dispatch', activePrev: active, segmentDispatch: 'turf', fetchingturfInfo: true});
 
     try {
       let https = true;
@@ -654,7 +655,7 @@ export default class App extends LocationComponent {
   }
 
   animateToCoordinate = async (pos, pan) => {
-    const { lastCam } = this.state;
+    const { active, lastCam } = this.state;
     let toggle = false;
 
     let cam = await this.map.getCamera();
@@ -667,7 +668,7 @@ export default class App extends LocationComponent {
     }
 
     if (!this.state.canvassSettings.pin_auto_reload && !toggle) this._dataGet(pos);
-    this.setState({active: 'map'});
+    this.setState({active: 'map', activePrev: active});
     this.map.animateCamera({
         pitch,
         center: pos,
@@ -921,19 +922,19 @@ export default class App extends LocationComponent {
 
         <Footer>
           <FooterTab>
-            <Button active={(active === 'map'?true:false)} onPress={() => this.setState({active: 'map'})}>
+            <Button active={(active === 'map'?true:false)} onPress={() => this.setState({active: 'map', activePrev: active})}>
               <Icon name="map" size={25} />
               <Text>Map View</Text>
             </Button>
-            <Button active={(active === 'list'?true:false)} onPress={() => this.setState({active: 'list'})}>
+            <Button active={(active === 'list'?true:false)} onPress={() => this.setState({active: 'list', activePrev: active})}>
               <Icon name="list" size={25} />
               <Text>List View</Text>
             </Button>
-            <Button active={(active === 'turf'?true:false)} onPress={() => this.setState({active: 'dispatch'})}>
+            <Button active={(active === 'turf'?true:false)} onPress={() => this.setState({active: 'dispatch', activePrev: active})}>
               <Icon name="user-plus" size={25} />
               <Text>Dispatch</Text>
             </Button>
-            <Button active={(active === 'settings'?true:false)} onPress={() => this.setState({active: 'settings'})}>
+            <Button active={(active === 'settings'?true:false)} onPress={() => this.setState({active: 'settings', activePrev: active})}>
               <Icon name="cog" size={25} />
               <Text>Settings</Text>
             </Button>

@@ -28,6 +28,7 @@ export default class App extends HVComponent {
 
   render() {
     const { refer, funcs, marker, unit, form } = this.state;
+    const { activePrev } = refer.state;
     const { navigate } = refer.props.navigation;
 
     const place = (unit?unit:marker);
@@ -118,7 +119,6 @@ export default class App extends HVComponent {
             color="#000000"
             onPress={() => {
               refer.setState({ isKnockMenuVisible: false });
-              navigate('ListMultiUnit', {refer: refer, form: form, addUnit: true});
             }}
             {...iconStyles}>
             Add Unit/Apt
@@ -134,7 +134,7 @@ export default class App extends HVComponent {
             color="#000000"
             onPress={() => {
               funcs.notHome(marker.address.id, place, unit);
-              refer.setState({ isKnockMenuVisible: false });
+              refer.setState({ active: activePrev, segmentList: 'streets' });
             }}
             {...iconStyles}>
             Not Home
@@ -148,7 +148,7 @@ export default class App extends HVComponent {
             color="#000000"
             onPress={() => {
               funcs.notInterested(marker.address.id, place, unit);
-              refer.setState({ isKnockMenuVisible: false });
+              refer.setState({ active: activePrev, segmentList: 'streets' });
             }}
             {...iconStyles}>
             Not Interested
