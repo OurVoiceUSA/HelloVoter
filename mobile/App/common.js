@@ -105,7 +105,7 @@ export function openGitHub(repo) {
 }
 
 export function openDonate() {
-  openURL('https://www.patreon.com/join/hellovoter');
+  Linking.openURL('https://www.patreon.com/join/hellovoter');
 }
 
 export function getPropFromArrObj(arr, id, prop) {
