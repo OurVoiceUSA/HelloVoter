@@ -1,0 +1,5 @@
+{
+  "reject": [
+    "neo4j-driver"
+  ]
+}
