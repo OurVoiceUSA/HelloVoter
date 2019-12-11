@@ -20,6 +20,6 @@
   "author": "Our Voice USA",
   "license": "AGPL-3.0",
   "devDependencies": {
-    "concurrently": "^5.0.0"
+    "concurrently": "^5.0.1"
   }
 }
