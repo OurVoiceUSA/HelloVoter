@@ -94,6 +94,7 @@ export default class App extends LocationComponent {
       newUnitDialog: false,
       showDisclosure: null,
       retry_queue: [],
+      removeConnectionListener: () => {},
     };
 
     this.onRegionChange = this.onRegionChange.bind(this);
@@ -155,17 +156,16 @@ export default class App extends LocationComponent {
 
   setupConnectionListener = async () => {
     try {
-      let ci = await NetInfo.getConnectionInfo();
+      let ci = await NetInfo.fetch();
       this.handleConnectivityChange(ci);
-    } catch (e) {}
-
-    NetInfo.addEventListener(
-     'connectionChange',
-     this.handleConnectivityChange
-    );
+      this.setState({removeConnectionListener: NetInfo.addEventListener(this.handleConnectivityChange)});
+    } catch (e) {
+      console.warn(e);
+    }
   }
 
   handleConnectivityChange(ci) {
+    const { netInfo } = this.state;
     let state = 'none';
     try {
       switch (ci.type) {
@@ -180,9 +180,11 @@ export default class App extends LocationComponent {
           break;
       }
     } catch (e) {}
-    this.setState({netInfo: state});
 
-    if (state === 'wifi' || state === 'cellular') this.doRetry();
+    if (netInfo !== state && (state === 'wifi' || state === 'cellular')) {
+      this.setState({netInfo: state});
+      this.doRetry();
+    }
   }
 
   _getCanvassSettings = async () => {
@@ -239,11 +241,9 @@ export default class App extends LocationComponent {
   }
 
   componentWillUnmount() {
+    const { removeConnectionListener } = this.state;
     this.cleanupLocation();
-    NetInfo.removeEventListener(
-      'connectionChange',
-      this.handleConnectivityChange
-    );
+    removeConnectionListener();
   }
 
   dropSearchPin(place) {
@@ -389,7 +389,7 @@ export default class App extends LocationComponent {
         throw "Sync error";
       }
 
-      if (json.qrcode) json.qrcode_img = await QRCode.toString('http'+(https?'s':'')+'://'+server+api_base_uri(orgId)+'mobile/invite?inviteCode='+json.qrcode+'&'+(orgId?'orgId='+orgId:'server='+server));
+      if (json.qrcode) json.qrcode_img = await QRCode.toString('http'+(https?'s':'')+'://'+server+api_base_uri(orgId)+'/mobile/invite?inviteCode='+json.qrcode+'&'+(orgId?'orgId='+orgId:'server='+server));
 
       this.setState({turfInfo: json});
     } catch (e) {
