@@ -184,12 +184,9 @@ export default class App extends Component {
                 />
               )}
             />
-            <Modal
-              aria-labelledby="simple-modal-title"
-              aria-describedby="simple-modal-description"
-              open={this.state.thisVolunteer.id ? true : false}
-              onClose={() => this.setState({ thisVolunteer: {} })}
-            >
+            <Route
+              path="/volunteers/view/:id"
+              render={props => (
               <div
                 style={{
                   position: 'absolute',
@@ -200,15 +197,15 @@ export default class App extends Component {
                   padding: 40
                 }}
               >
-                <CardVolunteer
-                  global={global}
-                  key={this.state.thisVolunteer.id}
-                  id={this.state.thisVolunteer.id}
-                  edit={true}
-                  refer={this}
-                />
-              </div>
-            </Modal>
+              <CardVolunteer
+                global={global}
+                key={props.match.params.id}
+                id={props.match.params.id}
+                edit={true}
+                refer={this}
+              />
+              </div>)}
+            />
             <DialogSaving flag={this.state.saving} />
           </div>
         </Router>
@@ -264,7 +261,7 @@ const ListVolunteers = props => {
   return (
     <div>
       <h3>
-        {props.type}Volunteers ({props.volunteers.length})
+        {props.type} Volunteers ({props.volunteers.length})
       </h3>
       {paginate}
       <List component="nav">{list}</List>

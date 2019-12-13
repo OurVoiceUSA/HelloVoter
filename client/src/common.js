@@ -187,6 +187,7 @@ export async function _loadVolunteer(global, id) {
   } catch (e) {
     notify_error(e, 'Unable to load volunteer info.');
   }
+  if (!volunteer.ass) volunteer.ass = {forms:[],teams:[],turfs:[]};
   return volunteer;
 }
 

@@ -77,16 +77,6 @@ export const CardVolunteerFull = props => (
         isSearchable={true}
         placeholder="None"
       />
-      <br />
-      Teams this volunteer is a leader of:
-      <Select
-        value={props.refer.state.selectedLeaderOption}
-        onChange={props.refer.handleLeaderChange}
-        options={props.refer.state.selectedTeamsOption}
-        isMulti={true}
-        isSearchable={true}
-        placeholder="None"
-      />
     </div>
 
     <br />

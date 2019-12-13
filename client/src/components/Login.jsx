@@ -80,11 +80,14 @@ class Login extends Component {
               options={loginOptions}
               onChange={selectedLoginOption => this.setState({selectedLoginOption})}
             />
-            <div>
+            <center>
+              <br />
+              &nbsp; || &nbsp;
               <a target="_blank" rel="noopener noreferrer" href="https://raw.githubusercontent.com/OurVoiceUSA/HelloVoter/master/docs/Privacy-Policy.md">Privacy Policy</a>
-              ||
+              &nbsp; || &nbsp;
               <a target="_blank" rel="noopener noreferrer" href="https://raw.githubusercontent.com/OurVoiceUSA/HelloVoter/master/docs/Terms-of-Service.md">Terms of Service</a>
-            </div>
+              &nbsp; || &nbsp;
+            </center>
             <LoginOption global={global} refer={this} />
             {(process.env.REACT_APP_NO_AUTH)&&
             <Button
@@ -152,7 +155,7 @@ const LoginOption = props => {
           </FormControl>
           <FormControlLabel
             control={<Checkbox value="ack" color="primary" required />}
-            label="By checking this box you acknowledge that you have read and agreed to our terms of use."
+            label="By checking this box you acknowledge that you have read and agreed to our Terms of Service."
           />
         </div>
       );
@@ -165,7 +168,7 @@ const LoginOption = props => {
           </FormControl>
           <FormControlLabel
             control={<Checkbox value="ack" color="primary" required />}
-            label="By checking this box you acknowledge that the server to which you are connecting is not affiliated with Our Voice USA and the data you send and receive is governed by that server's terms of use."
+            label="By checking this box you acknowledge that the server to which you are connecting is not affiliated with Our Voice USA and the data you send and receive is governed by that server's Terms of Service."
           />
         </div>
       );

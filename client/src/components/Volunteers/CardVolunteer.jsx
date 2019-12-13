@@ -288,23 +288,7 @@ export class CardVolunteer extends Component {
     let formOptions = [{ value: '', label: 'None' }];
 
     let turfOptions = [
-      { value: '', label: 'None' },
-      {
-        value: 'auto',
-        id: 'auto',
-        label: (
-          <CardTurf
-            global={global}
-            key="auto"
-            turf={{
-              id: 'auto',
-              name: 'Area surrounnding this volunteer\'s home address'
-            }}
-            refer={this}
-            icon={faHome}
-          />
-        )
-      }
+      { value: '', label: 'None' }
     ];
 
     teams.forEach(t => {
@@ -450,8 +434,10 @@ export class CardVolunteer extends Component {
         button
         style={{ width: 350 }}
         alignItems="flex-start"
-        onClick={() => this.props.refer.setState({ thisVolunteer: volunteer })}
-      >
+        onClick={() => {
+          this.props.refer.setState({ thisVolunteer: volunteer });
+          window.location.href = "/HelloVoterHQ/#/volunteers/view/"+volunteer.id;
+        }}>
         <ListItemAvatar>
           <Avatar alt={volunteer.name} src={volunteer.avatar} />
         </ListItemAvatar>
@@ -505,7 +491,7 @@ const VolunteerBadges = props => {
           icon={faCheckCircle}
           color="green"
           key={id + 'ready'}
-          data-tip="Ready to Canvass"
+          data-tip="Ready to Canvas"
         />
       );
     else
