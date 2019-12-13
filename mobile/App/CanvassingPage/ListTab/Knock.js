@@ -46,7 +46,8 @@ export default class App extends HVComponent {
             backgroundColor="#d7d7d7"
             color="#000000"
             onPress={() => {
-              navigate('Survey', {refer: this, funcs: funcs, form: form, marker: marker, unit: unit, person: {id: uuidv4(), new: true, attrs:[]}});
+              if (!refer.addOk()) return refer.alert("Active Filter", "You cannot add a new person while a filter is active.");
+              else navigate('Survey', {refer: this, funcs: funcs, form: form, marker: marker, unit: unit, person: {id: uuidv4(), new: true, attrs:[]}});
             }}
             {...iconStyles}>
             Add Person

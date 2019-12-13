@@ -930,7 +930,7 @@ export default class App extends LocationComponent {
               <Icon name="list" size={25} />
               <Text>List View</Text>
             </Button>
-            <Button active={(active === 'turf'?true:false)} onPress={() => this.setState({active: 'dispatch', activePrev: active})}>
+            <Button active={(active === 'dispatch'?true:false)} onPress={() => this.setState({active: 'dispatch', activePrev: active})}>
               <Icon name="user-plus" size={25} />
               <Text>Dispatch</Text>
             </Button>

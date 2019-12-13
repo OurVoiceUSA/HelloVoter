@@ -191,7 +191,7 @@ export default class App extends LocationComponent {
       }
     }
 
-    setTimeout(() => this.setState({connectmode: false, waitmode: false, canvaslater}), 500);
+    setTimeout(() => this.setState({connectmode: false, waitmode: false, canvaslater}), 250);
 
     if (retry) {
       this.setState({error: true});
