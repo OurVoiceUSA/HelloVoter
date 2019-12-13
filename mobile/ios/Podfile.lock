@@ -280,7 +280,7 @@ PODS:
     - React
   - RNCAsyncStorage (1.7.0):
     - React
-  - RNDeviceInfo (5.3.1):
+  - RNDeviceInfo (5.4.0):
     - React
   - RNGestureHandler (1.5.2):
     - React
@@ -495,7 +495,7 @@ SPEC CHECKSUMS:
   ReactCommon: 198c7c8d3591f975e5431bec1b0b3b581aa1c5dd
   ReactNativeART: a92af9950584db890cb8b1e544d786516a635e70
   RNCAsyncStorage: e9f3eb4fbd5d0d1713051ffbd60968110172d6e9
-  RNDeviceInfo: e5976ab5c3bed0b5c78f188e0b8abb139b33a9da
+  RNDeviceInfo: d0fff8432ccdf276cb342a52e665ea6dd311472e
   RNGestureHandler: 946a7691e41df61e2c4b1884deab41a4cdc3afff
   RNLocalize: c117094a6c5a955c94e65520ad4c726e3a0f4ed6
   RNPermissions: 409e55ed060f7e35d4a3dfc3a336f94a5811dec1
