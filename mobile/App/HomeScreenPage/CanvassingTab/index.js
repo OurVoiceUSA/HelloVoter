@@ -176,7 +176,7 @@ export default class App extends LocationComponent {
             break;
           default:
             // allow for one error to happen without bombing
-            if (skiperr) {
+            if (res.status >= 500 && skiperr) {
               skiperr = false;
               canvaslater = null;
               await sleep(12345);
@@ -234,7 +234,7 @@ export default class App extends LocationComponent {
 
       this.navigate_canvassing({server, orgId, forms, admin, refer: this});
     } else {
-      this.alert("Awaiting Assignment","You are not assigned to a form for this organization. Please contact your administrator.");
+      this.alert("Awaiting Assignment","You are not assigned to a form and/or a turf for this organization. Please contact your administrator.");
     }
   }
 
