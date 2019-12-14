@@ -341,7 +341,6 @@ export default class App extends LocationComponent {
         <Dialog
           title={say("show_representatives_by")+":"}
           visible={modalIsOpen}
-          animationType="fade"
           onTouchOutside={() => this.setState({modalIsOpen: false})}>
           <Button block bordered primary onPress={this.doCurrentLocation}>
             <Icon name="map-marker" size={25} color="black" />
@@ -361,7 +360,6 @@ export default class App extends LocationComponent {
 
         <Dialog
           visible={polProfile}
-          animationType="fade"
           onTouchOutside={() => this.setState({polProfile: false})}>
           <PolProfile office={polProfileOffice} profile={polProfileInfo} />
         </Dialog>

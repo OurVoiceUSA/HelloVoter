@@ -126,7 +126,6 @@ export class NewAddressDialog extends Component {
     return (
       <Dialog
       visible={newAddressDialog}
-      animationType="fade"
       onTouchOutside={() => refer.setState({newAddressDialog: false})}>
         <View>
           {loading&&
@@ -224,7 +223,6 @@ export class NewUnitDialog extends Component {
     return (
       <Dialog
         visible={refer.state.newUnitDialog}
-        animationType="fade"
         onTouchOutside={() => refer.setState({newUnitDialog: false})}>
         <View>
           <View style={{flex: 1, flexDirection: 'row', margin: 20, alignItems: 'center'}}>
@@ -249,7 +247,6 @@ export class NewUnitDialog extends Component {
 export const SelectFormDialog = props => (
   <Dialog
   visible={props.refer.state.selectFormDialog}
-  animationType="fade"
   onTouchOutside={() => props.refer.selectForm(props.refer.state.forms[0])}>
     <H3>Select Canvassing Form</H3>
     <Text></Text>

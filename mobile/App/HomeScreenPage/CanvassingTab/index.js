@@ -513,7 +513,6 @@ export default class App extends LocationComponent {
         <Dialog
           title={say("start_new_canvas_activity")}
           visible={SelectModeScreen}
-          animationType="fade"
           onTouchOutside={() => this.setState({SelectModeScreen: false})}>
           <View>
             <Button block bordered dark onPress={() => this.setState({showCamera: true})}>

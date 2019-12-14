@@ -430,7 +430,6 @@ export default class App extends HVComponent {
 
         <Dialog
           visible={SmLoginScreen}
-          animationType="fade"
           onTouchOutside={() => this.setState({SmLoginScreen: false})}>
           <SmLogin refer={this} />
         </Dialog>
