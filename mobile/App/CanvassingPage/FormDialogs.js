@@ -249,8 +249,7 @@ export class NewUnitDialog extends Component {
 
 export const SelectFormDialog = props => (
   <Dialog
-  visible={props.refer.state.selectFormDialog}
-  onTouchOutside={() => props.refer.selectForm(props.refer.state.forms[0])}>
+  visible={props.refer.state.selectFormDialog}>
     <H3>Select Canvassing Form</H3>
     <Text></Text>
     {props.refer.state.forms.map(f => (
