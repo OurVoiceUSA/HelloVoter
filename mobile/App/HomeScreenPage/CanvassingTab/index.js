@@ -400,11 +400,13 @@ export default class App extends LocationComponent {
         obj[p1] = p2;
       });
 
+      if (!obj.orgId && !obj.server) throw "invalid qr code";
+
       // orgId means GOTV
       if (obj.orgId) this.setState({orgId: obj.orgId, inviteCode: obj.inviteCode}, () => this.connectToGOTV());
       else this.setState({server: obj.server, inviteCode: obj.inviteCode}, () => this.connectToServer(obj.server, null, obj.inviteCode));
     } catch (e) {
-      console.warn(""+e);
+      this.alert('Invalid Code', 'There was a problem with the scanned QR Code. Please confirm it is a valid HelloVoter QR Code and try again.');
     }
   }
 
