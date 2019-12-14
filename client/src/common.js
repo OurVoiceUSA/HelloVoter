@@ -9,8 +9,9 @@ import formatNumber from 'simple-format-number';
 import prettyMs from 'pretty-ms';
 import QRCode from 'qrcode';
 
-import Modal from '@material-ui/core/Modal';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import Button from '@material-ui/core/Button';
+import Modal from '@material-ui/core/Modal';
 
 export function jobRuntime(start, end) {
   if (end)
@@ -421,5 +422,33 @@ const addressSearch = ({
         </div>
       ))}
     </div>
+  </div>
+);
+
+export const InviteSomeone = props => (
+  <div>
+    <Button onClick={() => props.refer.setState({ModalInvite: true})} color="primary">
+      Invite Someone
+    </Button>
+    <Modal
+    aria-labelledby="simple-modal-title"
+    aria-describedby="simple-modal-description"
+    open={props.refer.state.ModalInvite ? true : false}
+    onClose={() => props.refer.setState({ ModalInvite: false })}
+    >
+      <div
+        style={{
+          position: 'absolute',
+          top: 100,
+          left: 200,
+          right: 200,
+          backgroundColor: 'white',
+          padding: 40
+        }}>
+        To invite someone, have them use the HelloVoter mobile app to scan a QR Code
+        (created in the "QR Codes" menu) and they will recieve the same assignments
+        that QR Code has.
+      </div>
+    </Modal>
   </div>
 );

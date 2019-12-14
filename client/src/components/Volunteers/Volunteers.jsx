@@ -14,7 +14,8 @@ import {
   _searchStringify,
   _loadVolunteers,
   RootLoader,
-  DialogSaving
+  DialogSaving,
+  InviteSomeone,
 } from '../../common.js';
 
 import { CardVolunteer } from './CardVolunteer'
@@ -99,6 +100,8 @@ export default class App extends Component {
       <RootLoader flag={this.state.loading} func={() => this._loadData()}>
         <Router>
           <div>
+          <InviteSomeone refer={this} />
+
             Search:{' '}
             <input
               type="text"

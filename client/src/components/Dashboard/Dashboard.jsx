@@ -19,7 +19,8 @@ import { arrayMove } from 'react-sortable-hoc';
 import {
   _fetch,
   notify_error,
-  RootLoader
+  RootLoader,
+  InviteSomeone,
 } from '../../common.js';
 
 import { Cards } from './Cards';
@@ -132,6 +133,8 @@ export default class App extends Component {
           cards={this.state.cards}
           dash={this.state.dash}
         />
+
+        <InviteSomeone refer={this} />
 
         <Modal
           aria-labelledby="simple-modal-title"
