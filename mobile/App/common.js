@@ -539,6 +539,8 @@ export const PersonAttr = props => {
         if (value) value = "Yes";
         else value = "No";
       }
+      if (name.length > 35) name = name.substr(0, 35)+'...';
+      if (value.length > 35) value = value.substr(0, 35)+'...';
       return (
         <Text>
           {name}: {value}
