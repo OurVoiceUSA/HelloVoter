@@ -1,5 +1,5 @@
 import Forms from './Forms';
-import { FormEditor } from './FormEditor';
+import FormEditor from './FormEditor';
 import CardForm from './CardForm';
 import { CardFormFull } from './CardFormFull';
 

@@ -1,6 +1,8 @@
 import React from 'react';
 import Select from 'react-select';
 
+import { FormEditor } from '.';
+
 export const CardFormFull = props => (
   <div>
     <div>
@@ -25,5 +27,10 @@ export const CardFormFull = props => (
         placeholder="None"
       />
     </div>
+    <br />
+    <FormEditor
+      onChange={props.refer.handleAttributeChange}
+      attributes={props.attributes} selected={props.selected}
+    />
   </div>
 );

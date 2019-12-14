@@ -42,17 +42,112 @@ function inputTypeToReadable(type) {
   }
 }
 
-export const FormEditor = props => (
-  <div style={{display: 'flex', flexDirection: 'row'}}>
-    <DragDropContext onDragEnd={props.refer.onDragEnd}>
-      <AttributeDroppable refer={props.refer} label="Available Attributes" droppableId="droppable" attributes={props.refer.state.attributes} />
-      &nbsp;
-      Drag to assign
-      &nbsp;
-      <AttributeDroppable refer={props.refer} label="Attributes on this Form" droppableId="droppable2" attributes={props.refer.state.attributes_selected} />
-    </DragDropContext>
-  </div>
-);
+// a little function to help us with reordering the result
+const reorder = (list, startIndex, endIndex) => {
+  const result = Array.from(list);
+  const [removed] = result.splice(startIndex, 1);
+  result.splice(endIndex, 0, removed);
+
+  return result;
+};
+
+/**
+ * Moves an item from one list to another list.
+ */
+const move = (source, destination, droppableSource, droppableDestination) => {
+  const sourceClone = Array.from(source);
+  const destClone = Array.from(destination);
+  const [removed] = sourceClone.splice(droppableSource.index, 1);
+
+  destClone.splice(droppableDestination.index, 0, removed);
+
+  const result = {};
+  result[droppableSource.droppableId] = sourceClone;
+  result[droppableDestination.droppableId] = destClone;
+
+  return result;
+};
+
+export default class FormEditor extends Component {
+  constructor(props) {
+    super(props);
+
+    let perPage = localStorage.getItem('formsperpage');
+    if (!perPage) perPage = 5;
+
+    // TODO: this is only for brand new forms
+    let fields = {};
+    let order = Object.keys(fields);
+
+    this.state = {
+      onChange: props.onChange,
+      attributes: props.attributes,
+      attributes_selected: props.selected,
+    };
+
+    this.id2List = {
+      droppable: 'attributes',
+      droppable2: 'attributes_selected',
+    };
+
+  }
+
+  getList = id => this.state[this.id2List[id]];
+
+  onDragEnd = result => {
+    const { onChange } = this.state;
+    const { source, destination } = result;
+
+    // dropped outside the list
+    if (!destination) {
+      return;
+    }
+
+    if (source.droppableId === destination.droppableId) {
+      const attributes = reorder(
+        this.getList(source.droppableId),
+        source.index,
+        destination.index
+      );
+
+      let state = { attributes };
+
+      if (source.droppableId === 'droppable2') {
+        state = { attributes_selected: attributes };
+      }
+
+      this.setState(state, () => onChange(this.state));
+    } else {
+      const result = move(
+        this.getList(source.droppableId),
+        this.getList(destination.droppableId),
+        source,
+        destination
+      );
+
+      this.setState({
+        attributes: result.droppable,
+        attributes_selected: result.droppable2
+      }, () => onChange(this.state));
+    }
+  };
+
+  render() {
+    const { refer, attributes, attributes_selected } = this.state;
+
+    return (
+      <div style={{display: 'flex', flexDirection: 'row'}}>
+        <DragDropContext onDragEnd={this.onDragEnd}>
+          <AttributeDroppable label="Available Attributes" droppableId="droppable" attributes={attributes} />
+          &nbsp;
+          Drag to assign
+          &nbsp;
+          <AttributeDroppable label="Attributes on this Form" droppableId="droppable2" attributes={attributes_selected} />
+        </DragDropContext>
+      </div>
+    );
+  }
+}
 
 const AttributeDroppable = props => (
   <Droppable droppableId={props.droppableId}>
@@ -81,6 +176,7 @@ const AttributeDroppable = props => (
                       )}
                   </Draggable>
               ))}
+              {provided.placeholder}
           </div>
       )}
   </Droppable>

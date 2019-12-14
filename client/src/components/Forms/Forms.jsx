@@ -23,32 +23,6 @@ import {
   DialogSaving,
 } from '../../common.js';
 
-// a little function to help us with reordering the result
-const reorder = (list, startIndex, endIndex) => {
-    const result = Array.from(list);
-    const [removed] = result.splice(startIndex, 1);
-    result.splice(endIndex, 0, removed);
-
-    return result;
-};
-
-/**
- * Moves an item from one list to another list.
- */
-const move = (source, destination, droppableSource, droppableDestination) => {
-    const sourceClone = Array.from(source);
-    const destClone = Array.from(destination);
-    const [removed] = sourceClone.splice(droppableSource.index, 1);
-
-    destClone.splice(droppableDestination.index, 0, removed);
-
-    const result = {};
-    result[droppableSource.droppableId] = sourceClone;
-    result[droppableDestination.droppableId] = destClone;
-
-    return result;
-};
-
 export default class Forms extends Component {
   constructor(props) {
     super(props);
@@ -74,11 +48,6 @@ export default class Forms extends Component {
       menuDelete: false
     };
 
-    this.id2List = {
-        droppable: 'attributes',
-        droppable2: 'attributes_selected',
-    };
-
     this.formServerItems = t.struct({
       name: t.String
     });
@@ -95,45 +64,6 @@ export default class Forms extends Component {
     this.onTypeSearch = this.onTypeSearch.bind(this);
     this.handlePageNumChange = this.handlePageNumChange.bind(this);
   }
-
-  getList = id => this.state[this.id2List[id]];
-
-  onDragEnd = result => {
-      const { source, destination } = result;
-
-      // dropped outside the list
-      if (!destination) {
-          return;
-      }
-
-      if (source.droppableId === destination.droppableId) {
-          const attributes = reorder(
-              this.getList(source.droppableId),
-              source.index,
-              destination.index
-          );
-
-          let state = { attributes };
-
-          if (source.droppableId === 'droppable2') {
-              state = { attributes_selected: attributes };
-          }
-
-          this.setState(state);
-      } else {
-          const result = move(
-              this.getList(source.droppableId),
-              this.getList(destination.droppableId),
-              source,
-              destination
-          );
-
-          this.setState({
-              attributes: result.droppable,
-              attributes_selected: result.droppable2
-          });
-      }
-  };
 
   handleClickDelete = () => {
     this.setState({ menuDelete: true });
@@ -253,6 +183,11 @@ export default class Forms extends Component {
     this._loadData();
   };
 
+  atupdate = props => {
+    const { attributes_selected } = props;
+    this.setState({attributes_selected});
+  }
+
   render() {
     const { global } = this.state;
 
@@ -299,7 +234,7 @@ export default class Forms extends Component {
                   value={this.state.addFormForm}
                 />
 
-                <FormEditor refer={this} />
+                <FormEditor onChange={this.atupdate} attributes={this.state.attributes} selected={this.state.attributes_selected} />
 
                 <button
                   style={{ margin: 25 }}
@@ -324,7 +259,6 @@ export default class Forms extends Component {
                 />
                 <br />
                 <br />
-                <FormEditor refer={this} id={props.match.params.id} />
                 <br />
                 <br />
                 <Button onClick={this.handleClickDelete} color="primary">

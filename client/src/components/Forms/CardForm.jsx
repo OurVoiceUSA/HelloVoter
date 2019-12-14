@@ -17,6 +17,7 @@ import {
   _loadForm,
   _loadVolunteers,
   _loadTeams,
+  _loadAttributes,
   Icon,
 } from '../../common.js';
 
@@ -28,7 +29,9 @@ export default class CardForm extends Component {
       global: props.global,
       form: this.props.form,
       selectedTeamsOption: [],
-      selectedMembersOption: []
+      selectedMembersOption: [],
+      attributes: [],
+      attributes_selected: [],
     };
   }
 
@@ -76,6 +79,10 @@ export default class CardForm extends Component {
     }
     this.props.refer.setState({ saving: false });
   };
+
+  handleAttributeChange = async selectedAttributes => {
+    console.warn({selectedAttributes});
+  }
 
   handleMembersChange = async selectedMembersOption => {
     const { global } = this.state;
@@ -125,17 +132,19 @@ export default class CardForm extends Component {
       volunteers = [],
       members = [],
       teams = [],
-      teamsSelected = [];
+      teamsSelected = [],
+      attributes = [];
 
     this.setState({ loading: true });
 
     try {
-      [form, volunteers, members, teams, teamsSelected] = await Promise.all([
+      [form, volunteers, members, teams, teamsSelected, attributes] = await Promise.all([
         _loadForm(global, this.props.id, true),
         _loadVolunteers(global),
         _loadVolunteers(global, 'form', this.props.id),
         _loadTeams(global),
-        _loadTeams(global, 'form', this.props.id)
+        _loadTeams(global, 'form', this.props.id),
+        _loadAttributes(global)
       ]);
     } catch (e) {
       notify_error(e, 'Unable to load form info.');
@@ -181,17 +190,20 @@ export default class CardForm extends Component {
 
     this.setState({
       form,
+      attributes,
+      attributes_selected: form.attributes,
       volunteers,
       teamOptions,
       membersOption,
       selectedTeamsOption,
       selectedMembersOption,
-      loading: false
+      loading: false,
     });
+
   };
 
   render() {
-    const { global, form } = this.state;
+    const { global, form, attributes, attributes_selected } = this.state;
 
     if (!form || this.state.loading) {
       return <CircularProgress />;
@@ -213,7 +225,7 @@ export default class CardForm extends Component {
             )}
           </div>
         </div>
-        {this.props.edit ? <CardFormFull global={global} form={form} refer={this} /> : ''}
+        {this.props.edit ? <CardFormFull global={global} form={form} refer={this} attributes={attributes} selected={attributes_selected} /> : ''}
       </div>
     );
   }
