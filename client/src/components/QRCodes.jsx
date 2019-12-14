@@ -7,7 +7,6 @@ import Select from 'react-select';
 import EdiText from 'react-editext';
 import { faQrcode } from '@fortawesome/free-solid-svg-icons';
 
-import Modal from '@material-ui/core/Modal';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -130,34 +129,10 @@ export default class QRCodes extends Component {
                   key={props.match.params.id}
                   id={props.match.params.id}
                   edit={true}
+                  refer={this}
                 />
               )}
             />
-            <Modal
-              aria-labelledby="simple-modal-title"
-              aria-describedby="simple-modal-description"
-              open={this.state.thisQRCode.id ? true : false}
-              onClose={() => this.setState({ thisQRCode: {} })}
-            >
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 100,
-                  left: 200,
-                  right: 200,
-                  backgroundColor: 'white',
-                  padding: 40
-                }}
-              >
-                <CardQRCode
-                  global={global}
-                  key={this.state.thisQRCode.id}
-                  id={this.state.thisQRCode.id}
-                  edit={true}
-                  refer={this}
-                />
-              </div>
-            </Modal>
             <DialogSaving flag={this.state.saving} />
           </div>
         </Router>
@@ -569,8 +544,10 @@ export class CardQRCode extends Component {
         button
         style={{ width: 350 }}
         alignItems="flex-start"
-        onClick={() => this.props.refer.setState({ thisQRCode: qrcode })}
-      >
+        onClick={() => {
+          this.props.refer.setState({ thisQRCode: qrcode });
+          window.location.href = "/HelloVoterHQ/#/qrcode/view/"+qrcode.id;
+        }}>
         <ListItemAvatar>
           <Icon icon={faQrcode} size={"large"} />
         </ListItemAvatar>
