@@ -38,7 +38,9 @@ export default SegmentInfo = props => {
           <Text>{(orgId?orgId:server)}</Text>
         </Right>
       </ListItem>
-      <ListItem>
+      <ListItem onPress={() => {
+        if (forms.length > 1) refer.setState({selectFormDialog: true});
+      }}>
         <Body>
           <Text>{(admin?"Number of":"Associated")} Forms:</Text>
         </Body>
