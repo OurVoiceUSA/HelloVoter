@@ -113,10 +113,13 @@ export class NewAddressDialog extends Component {
       refer.sendData('/address/add/location', input);
 
       markers.push(marker);
+
+      refer.setState({ markers, fAddress, pAddress: fAddress, newAddressDialog: false });
+      refer.doMarkerPress(marker);
+    } else {
+      refer.setState({newAddressDialog: false}, () => refer.alert('Duplicate Address', 'The address you entered is already being used by another addresss marker. Please confirm the address you want to add and try again.'));
     }
 
-    refer.setState({ markers, fAddress, pAddress: fAddress, newAddressDialog: false });
-    refer.doMarkerPress(marker);
   }
 
   render() {
@@ -181,7 +184,7 @@ export class NewUnitDialog extends Component {
 
     this.onUnitChange = this.onUnitChange.bind(this);
   }
-  
+
   onUnitChange(fUnit) {
     this.setState({fUnit});
   }
