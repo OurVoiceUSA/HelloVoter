@@ -84,13 +84,12 @@ export default class CardForm extends Component {
     const { global } = this.state;
 
     try {
-      let blah = await _fetch(
+      await _fetch(
         global,
         '/form/update',
         'POST',
         { formId: this.props.id, attributes: attributes_selected.map(a => a.id) }
       );
-      console.warn({blah})
       notify_success('Attributes assignments saved.');
     } catch (e) {
       notify_error(e, 'Unable to add/remove attribute.');
