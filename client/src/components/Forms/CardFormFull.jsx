@@ -28,6 +28,9 @@ export const CardFormFull = props => (
       />
     </div>
     <br />
+    <p>
+    NOTE: After any changes here, users will see these updates the next time they enter the map
+    </p>
     <FormEditor
       onChange={props.refer.handleAttributeChange}
       attributes={props.attributes} selected={props.selected}
