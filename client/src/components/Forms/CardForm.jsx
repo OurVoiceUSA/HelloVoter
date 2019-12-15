@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { faClipboard } from '@fortawesome/free-solid-svg-icons';
+import EdiText from 'react-editext';
 
 import { CardVolunteer } from '../Volunteers';
 import { CardTeam } from '../Teams';
@@ -79,6 +80,23 @@ export default class CardForm extends Component {
     }
     this.props.refer.setState({ saving: false });
   };
+
+  handleNameChange = async (name) => {
+    const { global } = this.state;
+console.warn({name})
+
+    try {
+      await _fetch(
+        global,
+        '/form/update',
+        'POST',
+        { formId: this.props.id, name: name }
+      );
+      notify_success('Form name saved.');
+    } catch (e) {
+      notify_error(e, 'Unable to save form name.');
+    }
+  }
 
   handleAttributeChange = async ({attributes_selected}) => {
     const { global } = this.state;
@@ -232,7 +250,12 @@ export default class CardForm extends Component {
               icon={faClipboard}
               style={{ width: 20, height: 20, color: 'gray' }}
             />{' '}
-            {form.name}{' '}
+            {this.props.edit ? (
+              <EdiText type="text" value={form.name} onSave={this.handleNameChange} />
+            ) :
+              form.name
+            }
+            &nbsp;
             {this.props.edit ? (
               ''
             ) : (

@@ -89,15 +89,21 @@ module.exports = Router({mergeParams: true})
 })
 .post('/form/update', async (req, res) => {
   if (req.user.admin !== true) return _403(res, "Permission denied.");
-  if (!valid(req.body.formId) || typeof req.body.attributes !== "object")
-    return _400(res, "Invalid value to parameter 'formId' or 'attributes'.");
+  if (!valid(req.body.formId))
+    return _400(res, "Invalid value to parameter 'formId'.");
+
+  if (req.body.name && !valid(req.body.name))
+    return _400(res, "Invalid value to parameter 'name'.");
+
+  if (req.body.attributes && typeof req.body.attributes !== "object")
+    return _400(res, "Invalid value to parameter 'attributes'.");
 
   // TODO: validate every attributes exists
   let ref;
 
   try {
-    // attributes property stores which order they come in as
-    ref = await req.db.query('match (f:Form {id: {formId}}) set f.updated = timestamp(), f.attributes = {attributes} with f optional match (f)<-[r:COMPILED_ON]-(:Attribute) delete r with f unwind {attributes} as attr match (at:Attribute {id:attr}) merge (at)-[:COMPILED_ON]->(f)', req.body);
+    if (req.body.name) await req.db.query('match (f:Form {id: {formId}}) set f.updated = timestamp(), f.name = {name}', req.body);
+    if (req.body.attributes) await req.db.query('match (f:Form {id: {formId}}) set f.updated = timestamp(), f.attributes = {attributes} with f optional match (f)<-[r:COMPILED_ON]-(:Attribute) delete r with f unwind {attributes} as attr match (at:Attribute {id:attr}) merge (at)-[:COMPILED_ON]->(f)', req.body);
   } catch (e) {
     return _500(res, e);
   }
