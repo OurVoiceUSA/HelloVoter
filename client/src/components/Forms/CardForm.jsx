@@ -80,8 +80,21 @@ export default class CardForm extends Component {
     this.props.refer.setState({ saving: false });
   };
 
-  handleAttributeChange = async selectedAttributes => {
-    console.warn({selectedAttributes});
+  handleAttributeChange = async ({attributes_selected}) => {
+    const { global } = this.state;
+
+    try {
+      let blah = await _fetch(
+        global,
+        '/form/update',
+        'POST',
+        { formId: this.props.id, attributes: attributes_selected.map(a => a.id) }
+      );
+      console.warn({blah})
+      notify_success('Attributes assignments saved.');
+    } catch (e) {
+      notify_error(e, 'Unable to add/remove attribute.');
+    }
   }
 
   handleMembersChange = async selectedMembersOption => {
@@ -191,7 +204,10 @@ export default class CardForm extends Component {
     this.setState({
       form,
       attributes,
-      attributes_selected: form.attributes,
+      attributes_selected: form.attributes.map(a => {
+        if (!a.label) a.label = a.name;
+        return a;
+      }),
       volunteers,
       teamOptions,
       membersOption,

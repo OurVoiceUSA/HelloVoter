@@ -87,6 +87,23 @@ module.exports = Router({mergeParams: true})
 
   return res.json({formId: ref.data[0]});
 })
+.post('/form/update', async (req, res) => {
+  if (req.user.admin !== true) return _403(res, "Permission denied.");
+  if (!valid(req.body.formId) || typeof req.body.attributes !== "object")
+    return _400(res, "Invalid value to parameter 'formId' or 'attributes'.");
+
+  // TODO: validate every attributes exists
+  let ref;
+
+  try {
+    // attributes property stores which order they come in as
+    ref = await req.db.query('match (f:Form {id: {formId}}) set f.updated = timestamp(), f.attributes = {attributes} with f optional match (f)<-[r:COMPILED_ON]-(:Attribute) delete r with f unwind {attributes} as attr match (at:Attribute {id:attr}) merge (at)-[:COMPILED_ON]->(f)', req.body);
+  } catch (e) {
+    return _500(res, e);
+  }
+
+  return res.json({});
+})
 .post('/form/delete', (req, res) => {
   if (req.user.admin !== true) return _403(res, "Permission denied.");
   if (!valid(req.body.formId)) return _400(res, "Invalid value to parameter 'formId'.");

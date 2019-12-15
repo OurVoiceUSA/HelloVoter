@@ -81,9 +81,14 @@ export default class FormEditor extends Component {
 
     this.state = {
       onChange: props.onChange,
-      attributes: props.attributes,
+      attributes: [],
       attributes_selected: props.selected,
     };
+
+    // any attributes not selected go in attributes
+    props.attributes.forEach(attribute => {
+      if (this.state.attributes_selected.map(a => a.id).indexOf(attribute.id) === -1) this.state.attributes.push(attribute);
+    });
 
     this.id2List = {
       droppable: 'attributes',
