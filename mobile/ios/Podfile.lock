@@ -276,7 +276,7 @@ PODS:
     - React-cxxreact (= 0.61.5)
     - React-jsi (= 0.61.5)
     - ReactCommon/jscallinvoker (= 0.61.5)
-  - ReactNativeART (1.0.3):
+  - ReactNativeART (1.1.2):
     - React
   - RNCAsyncStorage (1.7.1):
     - React
@@ -493,7 +493,7 @@ SPEC CHECKSUMS:
   React-RCTText: 9ccc88273e9a3aacff5094d2175a605efa854dbe
   React-RCTVibration: a49a1f42bf8f5acf1c3e297097517c6b3af377ad
   ReactCommon: 198c7c8d3591f975e5431bec1b0b3b581aa1c5dd
-  ReactNativeART: a92af9950584db890cb8b1e544d786516a635e70
+  ReactNativeART: c496c53089b3149663215d74d6f1adb3a62e07eb
   RNCAsyncStorage: 8539fc80a0075fcc9c8e2dff84cd22dc5bf1dacf
   RNDeviceInfo: d0fff8432ccdf276cb342a52e665ea6dd311472e
   RNGestureHandler: 946a7691e41df61e2c4b1884deab41a4cdc3afff
