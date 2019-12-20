@@ -1,8 +1,11 @@
 FROM neo4j:3.5
 
-RUN curl -Lo /opt/jmxterm.jar https://github.com/jiaqi/jmxterm/releases/download/v1.0.1/jmxterm-1.0.1-uber.jar
-RUN curl -Lo /var/lib/neo4j/plugins/spatial.jar https://github.com/neo4j-contrib/spatial/releases/download/0.26.2-neo4j-3.5.2/neo4j-spatial-0.26.2-neo4j-3.5.2-server-plugin.jar
-RUN curl -Lo /var/lib/neo4j/plugins/apoc.jar https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases/download/3.5.0.6/apoc-3.5.0.6-all.jar
+RUN apt-get update && apt-get install -y curl \
+  && curl -Lo /opt/jmxterm.jar https://github.com/jiaqi/jmxterm/releases/download/v1.0.1/jmxterm-1.0.1-uber.jar \
+  && curl -Lo /var/lib/neo4j/plugins/spatial.jar https://github.com/neo4j-contrib/spatial/releases/download/0.26.2-neo4j-3.5.2/neo4j-spatial-0.26.2-neo4j-3.5.2-server-plugin.jar \
+  && curl -Lo /var/lib/neo4j/plugins/apoc.jar https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases/download/3.5.0.6/apoc-3.5.0.6-all.jar \
+  && apt-get remove -y curl \
+  && apt-get clean
 
 RUN mkdir -p /jmx \
   && echo "monitor readonly" > /jmx/access \
