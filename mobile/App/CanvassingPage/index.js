@@ -218,7 +218,7 @@ export default class App extends LocationComponent {
       if (!canvassSettings.limit) canvassSettings.limit = '100';
       let str = JSON.stringify(canvassSettings);
       await storage.set(STORAGE_KEY_SETTINGS, str);
-      this.setState({canvassSettings}, () => this._dataGet(lastFetchPosition, true));
+      this.setState({canvassSettings}, () => this._dataGet(lastFetchPosition));
     } catch (e) {}
 
   }
@@ -399,7 +399,7 @@ export default class App extends LocationComponent {
     this.setState({fetchingturfInfo: false});
   }
 
-  _dataFetch = async (pos, flag) => {
+  _dataFetch = async (pos) => {
     const {
       canvassSettings, myPosition, lastFetchPosition, fetching, retry_queue,
       showDisclosure, form, pressAddsSearchPin, searchPins,
@@ -530,7 +530,7 @@ export default class App extends LocationComponent {
 
     if (person.new) place.people.push(person);
 
-    this.sendData('/people/visit/'+(person.new?'add':'update'), input);
+    this.sendData('/people/visit/'+(person.new?'add':'update'), input, true);
   }
 
   sendStatus(status, id, place, unit, personId) {
@@ -554,10 +554,11 @@ export default class App extends LocationComponent {
 
     this.updateLocalMarker(place, input);
 
-    this.sendData('/people/visit/update', input);
+    this.sendData('/people/visit/update', input, true);
   }
 
-  sendData = async (uri, input) => {
+  sendData = async (uri, input, refetch) => {
+    const { lastFetchPosition } = this.state;
     try {
       let https = true;
       if (this.state.server.match(/:8080/)) https = false;
@@ -577,6 +578,7 @@ export default class App extends LocationComponent {
       }
 
       this.setState({checkHistory: true});
+      if (refetch) this._dataGet(lastFetchPosition);
 
     } catch (e) {
       console.log({error: e})
@@ -604,7 +606,7 @@ export default class App extends LocationComponent {
     for (let i in queue) {
       let input = queue[i].input;
       let uri = queue[i].uri;
-      await this.sendData(uri, input);
+      await this.sendData(uri, input, false);
     }
 
     try {
