@@ -15,6 +15,7 @@ import {
   api_base_uri, _doGeocode, _getApiToken, openURL, getEpoch, getLastVisit, getPinColor,
 } from '../common';
 
+import { WalkthroughProvider, WalkthroughElement, startWalkthrough } from 'react-native-walkthrough';
 import { deepCopy, geojson2polygons, ingeojson } from 'ourvoiceusa-sdk-js';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps'
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -24,6 +25,35 @@ import storage from 'react-native-storage-wrapper';
 import KeepAwake from 'react-native-keep-awake';
 import { debounce } from 'throttle-debounce';
 import QRCode from 'qrcode';
+
+const styles = StyleSheet.create({
+  icon: {
+    justifyContent: 'center',
+    borderRadius: 10,
+    padding: 10,
+  },
+  iconContainer: {
+    backgroundColor: '#ffffff', width: 65, height: 65, borderRadius: 65,
+    borderWidth: 2, borderColor: '#000000',
+    alignItems: 'center', justifyContent: 'center', margin: 2.5,
+  },
+  turfInfoContainer: {
+    backgroundColor: '#ffffff', width: 125, height: 45,
+    borderWidth: 2, borderColor: '#000000',
+    alignItems: 'center', justifyContent: 'center', margin: 2.5,
+  },
+  map: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  tooltipView: {
+    paddingHorizontal: 24,
+    paddingVertical: 8,
+  },
+  tooltipText: {
+    color: 'black',
+    fontSize: 18,
+  },
+});
 
 function bystreet(a,b) {
   let na = parseInt(a.address.street.replace(/(\d+) .*/, '$1'));
@@ -43,6 +73,27 @@ function triggerNetworkWarning() {
     duration: 5000,
   });
 }
+
+const makeTooltipContent = text => (
+  <View style={styles.tooltipView}>
+    <Text style={styles.tooltipText}>{text}</Text>
+  </View>
+);
+
+const profileWalkthrough = [
+  {
+    id: 'refresh-button',
+    content: makeTooltipContent("Tap here to load data in this area."),
+  },
+  {
+    id: 'new-address-button',
+    content: makeTooltipContent("Tap here to drop a new adress pin."),
+  },
+  {
+    id: 'map2me-button',
+    content: makeTooltipContent("Tap to center the map at your location."),
+  },
+];
 
 export default class App extends LocationComponent {
 
@@ -756,6 +807,7 @@ export default class App extends LocationComponent {
     // NOTE: always render the MapView, even if not on the Map View Tab. This keeps the
     // the component loaded in memory for better performance when switching back and forth
     return (
+    <WalkthroughProvider>
       <Container>
         <Content>
           <View>
@@ -845,51 +897,65 @@ export default class App extends LocationComponent {
         <View style={{alignItems: 'center', justifyContent: 'flex-end'}}>
           <View style={{flexDirection: 'row', marginVertical: 5, backgroundColor: 'transparent',}}>
 
-            {!this.state.canvassSettings.pin_auto_reload &&
-            <TouchableOpacity style={styles.iconContainer} disabled={fetching}
-              onPress={() => this._dataGet(mapCamera.center)}>
+            <TouchableOpacity style={styles.iconContainer} onPress={() => startWalkthrough(profileWalkthrough)}>
               <Icon
-                name="refresh"
+                name="help"
                 size={50}
-                color={(fetching?"#d3d3d3":"#00a86b")}
+                color="black"
                 {...styles.icon} />
             </TouchableOpacity>
+
+            {!this.state.canvassSettings.pin_auto_reload &&
+            <WalkthroughElement id="refresh-button">
+              <TouchableOpacity style={styles.iconContainer} disabled={fetching}
+                onPress={() => this._dataGet(mapCamera.center)}>
+                <Icon
+                  name="refresh"
+                  size={50}
+                  color={(fetching?"#d3d3d3":"#00a86b")}
+                  {...styles.icon} />
+              </TouchableOpacity>
+            </WalkthroughElement>
             }
 
             {this.add_new &&
-            <TouchableOpacity style={styles.iconContainer}
-              onPress={() => {
-                if (pressAddsSearchPin) {
-                  Toast.hide();
-                  this.setState({pressAddsSearchPin: false});
-                  return;
-                }
-                if (mapCamera.zoom < 20) this.animateToCoordinate(mapCamera.center);
-                this.setState({pressAddsSearchPin: true, searchPins: []});
-                Toast.show({
-                  text: 'Tap on map where to add a marker.',
-                  position: 'bottom',
-                  type: 'success',
-                  duration: 60000,
-                });
-              }}>
-              <Icon
-                name="map-marker"
-                testID="map-marker"
-                size={50}
-                color={(pressAddsSearchPin?"purple":"#8b4513")}
-                {...styles.icon} />
-            </TouchableOpacity>
+            <WalkthroughElement id="new-address-button">
+              <TouchableOpacity style={styles.iconContainer}
+                onPress={() => {
+                  if (pressAddsSearchPin) {
+                    Toast.hide();
+                    this.setState({pressAddsSearchPin: false});
+                    return;
+                  }
+                  if (mapCamera.zoom < 20) this.animateToCoordinate(mapCamera.center);
+                  this.setState({pressAddsSearchPin: true, searchPins: []});
+                  Toast.show({
+                    text: 'Tap on map where to add a marker.',
+                    position: 'bottom',
+                    type: 'success',
+                    duration: 60000,
+                  });
+                }}>
+                <Icon
+                  name="map-marker"
+                  testID="map-marker"
+                  size={50}
+                  color={(pressAddsSearchPin?"purple":"#8b4513")}
+                  {...styles.icon} />
+              </TouchableOpacity>
+            </WalkthroughElement>
             }
 
-            <TouchableOpacity style={styles.iconContainer}
-              onPress={() => this.animateToCoordinate(myPosition, true)}>
-              <Icon
-                name="location-arrow"
-                size={50}
-                color="#0084b4"
-                {...styles.icon} />
-            </TouchableOpacity>
+            <WalkthroughElement id="map2me-button">
+              <TouchableOpacity style={styles.iconContainer}
+                onPress={() => this.animateToCoordinate(myPosition, true)}>
+                <Icon
+                  name="location-arrow"
+                  size={50}
+                  color="#0084b4"
+                  {...styles.icon} />
+              </TouchableOpacity>
+            </WalkthroughElement>
 
             <TouchableOpacity style={styles.iconContainer}
               onPress={() => {
@@ -945,27 +1011,7 @@ export default class App extends LocationComponent {
         </Footer>
         <KeepAwake />
       </Container>
+    </WalkthroughProvider>
     );
   }
 }
-
-const styles = StyleSheet.create({
-  icon: {
-    justifyContent: 'center',
-    borderRadius: 10,
-    padding: 10,
-  },
-  iconContainer: {
-    backgroundColor: '#ffffff', width: 65, height: 65, borderRadius: 65,
-    borderWidth: 2, borderColor: '#000000',
-    alignItems: 'center', justifyContent: 'center', margin: 2.5,
-  },
-  turfInfoContainer: {
-    backgroundColor: '#ffffff', width: 125, height: 45,
-    borderWidth: 2, borderColor: '#000000',
-    alignItems: 'center', justifyContent: 'center', margin: 2.5,
-  },
-  map: {
-    ...StyleSheet.absoluteFillObject,
-  },
-});
