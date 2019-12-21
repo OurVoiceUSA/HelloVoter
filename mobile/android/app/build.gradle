@@ -138,8 +138,8 @@ android {
         applicationId "org.ourvoiceinitiative.ourvoice"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionName "2.0.0"
-        versionCode 48
+        versionName "2.0.1"
+        versionCode 50
         renderscriptTargetApi 26
         renderscriptSupportModeEnabled true
         testBuildType System.getProperty('testBuildType', 'debug')  //this will later be used to control the test apk build type
