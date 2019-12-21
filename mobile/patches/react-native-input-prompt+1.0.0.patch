@@ -24,6 +24,14 @@ index 1f9353d..c9f57a9 100644
  		visible: false,
  		placeholder: "Placeholder",
  		cancelText: "Cancel",
+@@ -77,7 +77,6 @@
+ 		return (
+ 			<Modal
+ 				transparent={true}
+-				animationType="fade"
+ 				visible={this.props.visible}
+ 				onRequestClose={this._onCancel.bind(this)}>
+ 				<View style={styles.screenOverlay}>
 @@ -77,13 +85,18 @@ export default class Prompt extends Component {
  						<Text style={[styles.title, this.props.titleStyle]}>
  							{this.props.title}
