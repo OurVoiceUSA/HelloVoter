@@ -290,13 +290,6 @@ export default class App extends LocationComponent {
       return;
     }
 
-    let inviteUrl = await storage.get('HV_INVITE_URL');
-
-    if (access && inviteUrl) {
-      await storage.del('HV_INVITE_URL');
-      this.parseInvite(inviteUrl);
-    }
-
     this.setState({state: getUSState(this.state.myPosition)}, () => {
       if (user.loggedin) this._loadForms();
       else this.setState({loading: false});
@@ -385,6 +378,13 @@ export default class App extends LocationComponent {
     let servers = await this.getServers();
 
     this.setState({servers, loading: false, SelectModeScreen: (servers.length === 0)});
+
+    let inviteUrl = await storage.get('HV_INVITE_URL');
+
+    if (inviteUrl) {
+      await storage.del('HV_INVITE_URL');
+      this.parseInvite(inviteUrl);
+    }
   }
 
   parseInvite(url) {
