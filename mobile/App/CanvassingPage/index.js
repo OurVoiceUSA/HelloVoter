@@ -80,18 +80,34 @@ const makeTooltipContent = text => (
   </View>
 );
 
-const profileWalkthrough = [
-  {
-    id: 'refresh-button',
-    content: makeTooltipContent("Tap here to load data in this area."),
-  },
+const basicWalkthrough = [
   {
     id: 'new-address-button',
-    content: makeTooltipContent("Tap here to drop a new adress pin."),
+    content: makeTooltipContent("If there are no addresses in the area, tap here to drop a new address pin so you can get started!"),
   },
   {
     id: 'map2me-button',
-    content: makeTooltipContent("Tap to center the map at your location."),
+    content: makeTooltipContent("If you ever get lost on the map, tap here to center the map back to your location."),
+  },
+  {
+    id: 'address-search-button',
+    content: makeTooltipContent("Tap here to search for and zoom to a specific address on the map."),
+  },
+  {
+    id: 'refresh-button',
+    content: makeTooltipContent("Only so many address pins load at once. Tapping here will reload the pins for this area of the map, if there are any."),
+  },
+  {
+    id: 'listview',
+    content: makeTooltipContent("List View tab allows you to view addresses by street, as well as a list of people, and canvassing history."),
+  },
+  {
+    id: 'dispatch',
+    content: makeTooltipContent("Dispatch tab has some managemnt functions such as invite via QR Code, and shows some canvassing stats as well."),
+  },
+  {
+    id: 'settings',
+    content: makeTooltipContent("Settings tab allows you to change the behavior of how certain people and address data load for you."),
   },
 ];
 
@@ -150,6 +166,7 @@ export default class App extends LocationComponent {
 
     this.onRegionChange = this.onRegionChange.bind(this);
     this.handleConnectivityChange = this.handleConnectivityChange.bind(this);
+    this.onMapReady = this.onMapReady.bind(this);
 
     this._dataGet = debounce(500, this._dataFetch)
     this.peopleSearchDebounce = debounce(500, this.peopleSearch);
@@ -189,7 +206,7 @@ export default class App extends LocationComponent {
     this.setState({form, turfs: form.turfs, selectFormDialog: false});
     if (form.add_new) this.add_new = true;
     else this.add_new = false;
-    this._dataGet()
+    this._dataGet();
   }
 
   byeFelicia() {
@@ -735,6 +752,12 @@ export default class App extends LocationComponent {
     setTimeout(async () => this.setState({lastCam: (pan?await this.map.getCamera():null)}), 550);
   }
 
+  onMapReady() {
+    const { myPosition } = this.state;
+    this.animateToCoordinate(myPosition);
+    startWalkthrough(basicWalkthrough)
+  }
+
   render() {
     const { navigate } = this.props.navigation;
     const {
@@ -826,7 +849,7 @@ export default class App extends LocationComponent {
         <MapView
           ref={component => this.map = component}
           initialRegion={{latitude: myPosition.latitude, longitude: myPosition.longitude, latitudeDelta: region.latitudeDelta, longitudeDelta: region.longitudeDelta}}
-          onMapReady={() => this.animateToCoordinate(myPosition)}
+          onMapReady={this.onMapReady}
           provider={PROVIDER_GOOGLE}
           style={(active==='map'?styles.map:null)}
           showsUserLocation={true}
@@ -896,15 +919,6 @@ export default class App extends LocationComponent {
         {active==='map' &&
         <View style={{alignItems: 'center', justifyContent: 'flex-end'}}>
           <View style={{flexDirection: 'row', marginVertical: 5, backgroundColor: 'transparent',}}>
-
-            <TouchableOpacity style={styles.iconContainer} onPress={() => startWalkthrough(profileWalkthrough)}>
-              <Icon
-                name="help"
-                size={50}
-                color="black"
-                {...styles.icon} />
-            </TouchableOpacity>
-
             {!this.state.canvassSettings.pin_auto_reload &&
             <WalkthroughElement id="refresh-button">
               <TouchableOpacity style={styles.iconContainer} disabled={fetching}
@@ -957,30 +971,31 @@ export default class App extends LocationComponent {
               </TouchableOpacity>
             </WalkthroughElement>
 
-            <TouchableOpacity style={styles.iconContainer}
-              onPress={() => {
-                RNGooglePlaces.openAutocompleteModal(
-                  {
-                    locationBias: {
-                      latitudeNE: mapCamera.center.latitude+0.1,
-                      longitudeNE: mapCamera.center.longitude+0.1,
-                      latitudeSW: mapCamera.center.latitude-0.1,
-                      longitudeSW: mapCamera.center.longitude-0.1,
-                    }
-                  },
-                  ['location','address']
-                ).then((place) => {
-                  this.dropSearchPin(place);
-                })
-                .catch(e => {});
-              }}>
-              <Icon
-                name="search"
-                size={40}
-                color="#000000"
-                {...styles.icon} />
-            </TouchableOpacity>
-
+            <WalkthroughElement id="address-search-button">
+              <TouchableOpacity style={styles.iconContainer}
+                onPress={() => {
+                  RNGooglePlaces.openAutocompleteModal(
+                    {
+                      locationBias: {
+                        latitudeNE: mapCamera.center.latitude+0.1,
+                        longitudeNE: mapCamera.center.longitude+0.1,
+                        latitudeSW: mapCamera.center.latitude-0.1,
+                        longitudeSW: mapCamera.center.longitude-0.1,
+                      }
+                    },
+                    ['location','address']
+                  ).then((place) => {
+                    this.dropSearchPin(place);
+                  })
+                  .catch(e => {});
+                }}>
+                <Icon
+                  name="search"
+                  size={40}
+                  color="#000000"
+                  {...styles.icon} />
+              </TouchableOpacity>
+            </WalkthroughElement>
           </View>
         </View>
         }
@@ -991,22 +1006,30 @@ export default class App extends LocationComponent {
 
         <Footer>
           <FooterTab>
-            <Button active={(active === 'map'?true:false)} onPress={() => this.setState({active: 'map', activePrev: active})}>
-              <Icon name="map" size={25} />
-              <Text>Map View</Text>
-            </Button>
-            <Button active={(active === 'list'?true:false)} onPress={() => this.setState({active: 'list', activePrev: active})}>
-              <Icon name="list" size={25} />
-              <Text>List View</Text>
-            </Button>
-            <Button active={(active === 'dispatch'?true:false)} onPress={() => this.setState({active: 'dispatch', activePrev: active})}>
-              <Icon name="user-plus" size={25} />
-              <Text>Dispatch</Text>
-            </Button>
-            <Button active={(active === 'settings'?true:false)} onPress={() => this.setState({active: 'settings', activePrev: active})}>
-              <Icon name="cog" size={25} />
-              <Text>Settings</Text>
-            </Button>
+            <WalkthroughElement id="mapview">
+              <Button active={(active === 'map'?true:false)} onPress={() => this.setState({active: 'map', activePrev: active})}>
+                <Icon name="map" size={25} />
+                <Text>Map View</Text>
+              </Button>
+            </WalkthroughElement>
+            <WalkthroughElement id="listview">
+              <Button active={(active === 'list'?true:false)} onPress={() => this.setState({active: 'list', activePrev: active})}>
+                <Icon name="list" size={25} />
+                <Text>List View</Text>
+              </Button>
+            </WalkthroughElement>
+            <WalkthroughElement id="dispatch">
+              <Button active={(active === 'dispatch'?true:false)} onPress={() => this.setState({active: 'dispatch', activePrev: active})}>
+                <Icon name="user-plus" size={25} />
+                <Text>Dispatch</Text>
+              </Button>
+            </WalkthroughElement>
+            <WalkthroughElement id="settings">
+              <Button active={(active === 'settings'?true:false)} onPress={() => this.setState({active: 'settings', activePrev: active})}>
+                <Icon name="cog" size={25} />
+                <Text>Settings</Text>
+              </Button>
+            </WalkthroughElement>
           </FooterTab>
         </Footer>
         <KeepAwake />
