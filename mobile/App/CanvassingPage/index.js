@@ -84,30 +84,37 @@ const basicWalkthrough = [
   {
     id: 'new-address-button',
     content: makeTooltipContent("If there are no addresses in the area, tap here to drop a new address pin so you can get started!"),
+    tooltipProps: {allowChildInteraction: false},
   },
   {
     id: 'map2me-button',
     content: makeTooltipContent("If you ever get lost on the map, tap here to center the map back to your location."),
+    tooltipProps: {allowChildInteraction: false},
   },
   {
     id: 'address-search-button',
     content: makeTooltipContent("Tap here to search for and zoom to a specific address on the map."),
+    tooltipProps: {allowChildInteraction: false},
   },
   {
     id: 'refresh-button',
     content: makeTooltipContent("Only so many address pins load at once. Tapping here will reload the pins for this area of the map, if there are any."),
+    tooltipProps: {allowChildInteraction: false},
   },
   {
     id: 'listview',
     content: makeTooltipContent("List View tab allows you to view addresses by street, as well as a list of people, and canvassing history."),
+    tooltipProps: {allowChildInteraction: false},
   },
   {
     id: 'dispatch',
     content: makeTooltipContent("Dispatch tab has some managemnt functions such as invite via QR Code, and shows some canvassing stats as well."),
+    tooltipProps: {allowChildInteraction: false},
   },
   {
     id: 'settings',
     content: makeTooltipContent("Settings tab allows you to change the behavior of how certain people and address data load for you."),
+    tooltipProps: {allowChildInteraction: false},
   },
 ];
 
