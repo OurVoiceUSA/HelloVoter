@@ -101,8 +101,8 @@ const WalkthroughHeader = (props) => (
 const App = createAppContainer(AppNavigator);
 
 export default () =>
-  <Root>
-    <WalkthroughProvider>
+  <WalkthroughProvider>
+    <Root>
       <App />
-    </WalkthroughProvider>
-  </Root>;
+    </Root>
+  </WalkthroughProvider>;
