@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { Content, Text, Button, Spinner } from 'native-base';
 import PatreonButton from '../PatreonButton';
 
-import { say } from '../common';
+import { say, openDonate } from '../common';
 
 export default Supporters = props => (
   <Content padder>

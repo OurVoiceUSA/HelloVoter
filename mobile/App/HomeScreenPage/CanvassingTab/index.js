@@ -23,7 +23,7 @@ import SunCalc from 'suncalc';
 
 import {
   DINFO, STORAGE_KEY_JWT, STORAGE_KEY_OLDFORMS, URL_GUIDELINES, URL_HELP,
-  Divider, say, _getApiToken, api_base_uri, _loginPing, openURL, openDonate, getUSState, localaddress,
+  Divider, say, _getApiToken, api_base_uri, _loginPing, openURL, getUSState, localaddress,
 } from '../../common';
 import { wsbase } from '../../config';
 
