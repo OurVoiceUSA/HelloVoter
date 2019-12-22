@@ -6,16 +6,17 @@ import TermsDisclosure, { loadDisclosure } from '../TermsDisclosure';
 import LocationComponent from '../LocationComponent';
 import { HVConfirmDialog } from '../HVComponent';
 import { SelectFormDialog, NewAddressDialog } from './FormDialogs';
-import ListTab from './ListTab';
-import DispatchTab from './DispatchTab';
-import SettingsTab from './SettingsTab';
+import ListTab, { walkthroughListView } from './ListTab';
+import DispatchTab, { walkthroughDispatch } from './DispatchTab';
+import SettingsTab, { walkthroughSettings } from './SettingsTab';
 
 import {
   DINFO, STORAGE_KEY_SETTINGS, STORAGE_KEY_RETRY,
   api_base_uri, _doGeocode, _getApiToken, openURL, getEpoch, getLastVisit, getPinColor,
+  makeTooltipContent,
 } from '../common';
 
-import { WalkthroughProvider, WalkthroughElement, startWalkthrough } from 'react-native-walkthrough';
+import { WalkthroughElement, startWalkthrough } from 'react-native-walkthrough';
 import { deepCopy, geojson2polygons, ingeojson } from 'ourvoiceusa-sdk-js';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps'
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -25,35 +26,6 @@ import storage from 'react-native-storage-wrapper';
 import KeepAwake from 'react-native-keep-awake';
 import { debounce } from 'throttle-debounce';
 import QRCode from 'qrcode';
-
-const styles = StyleSheet.create({
-  icon: {
-    justifyContent: 'center',
-    borderRadius: 10,
-    padding: 10,
-  },
-  iconContainer: {
-    backgroundColor: '#ffffff', width: 65, height: 65, borderRadius: 65,
-    borderWidth: 2, borderColor: '#000000',
-    alignItems: 'center', justifyContent: 'center', margin: 2.5,
-  },
-  turfInfoContainer: {
-    backgroundColor: '#ffffff', width: 125, height: 45,
-    borderWidth: 2, borderColor: '#000000',
-    alignItems: 'center', justifyContent: 'center', margin: 2.5,
-  },
-  map: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  tooltipView: {
-    paddingHorizontal: 24,
-    paddingVertical: 8,
-  },
-  tooltipText: {
-    color: 'black',
-    fontSize: 18,
-  },
-});
 
 function bystreet(a,b) {
   let na = parseInt(a.address.street.replace(/(\d+) .*/, '$1'));
@@ -74,13 +46,12 @@ function triggerNetworkWarning() {
   });
 }
 
-const makeTooltipContent = text => (
-  <View style={styles.tooltipView}>
-    <Text style={styles.tooltipText}>{text}</Text>
-  </View>
-);
-
-const basicWalkthrough = [
+const walkthroughMapView = [
+  {
+    id: 'start-map-walkthrough',
+    content: makeTooltipContent("Welcome! This is the Map View. Tap the screen to move onto the next tooltip of this brief walkthrough."),
+    tooltipProps: {allowChildInteraction: false},
+  },
   {
     id: 'new-address-button',
     content: makeTooltipContent("If there are no addresses in the area, tap here to drop a new address pin so you can get started!"),
@@ -114,6 +85,11 @@ const basicWalkthrough = [
   {
     id: 'settings',
     content: makeTooltipContent("Settings tab allows you to change the behavior of how certain people and address data load for you."),
+    tooltipProps: {allowChildInteraction: false},
+  },
+  {
+    id: 'all-set',
+    content: makeTooltipContent("You're all set! To get help with what the buttons on any screen do, tap the question mark icon on the top right of the screen to start a walkthrough like this one."),
     tooltipProps: {allowChildInteraction: false},
   },
 ];
@@ -177,6 +153,27 @@ export default class App extends LocationComponent {
 
     this._dataGet = debounce(500, this._dataFetch)
     this.peopleSearchDebounce = debounce(500, this.peopleSearch);
+
+    // trigger walkthrough
+    this.props.navigation.startWalkthrough = () => {
+      const { active } = this.state;
+      let list = [];
+      switch (active) {
+        case 'map':
+          list = walkthroughMapView;
+          break;
+        case 'list':
+          list = walkthroughListView;
+          break;
+        case 'dispatch':
+          list = walkthroughDispatch;
+          break;
+        case 'settings':
+          list = walkthroughSettings;
+          break;
+      }
+      startWalkthrough(list);
+    };
 
     // confirm exit, and reload forms when they do
     this.goBack = this.props.navigation.goBack;
@@ -762,7 +759,7 @@ export default class App extends LocationComponent {
   onMapReady() {
     const { myPosition } = this.state;
     this.animateToCoordinate(myPosition);
-    startWalkthrough(basicWalkthrough)
+    //startWalkthrough(walkthroughMapView)
   }
 
   render() {
@@ -837,7 +834,6 @@ export default class App extends LocationComponent {
     // NOTE: always render the MapView, even if not on the Map View Tab. This keeps the
     // the component loaded in memory for better performance when switching back and forth
     return (
-    <WalkthroughProvider>
       <Container>
         <Content>
           <View>
@@ -1010,6 +1006,11 @@ export default class App extends LocationComponent {
         <SelectFormDialog refer={this} />
         <NewAddressDialog refer={this} />
         <HVConfirmDialog refer={this} />
+        <WalkthroughElement id="start-map-walkthrough" />
+        <WalkthroughElement id="start-list-walkthrough" />
+        <WalkthroughElement id="start-dispatch-walkthrough" />
+        <WalkthroughElement id="start-settings-walkthrough" />
+        <WalkthroughElement id="all-set" />
 
         <Footer>
           <FooterTab>
@@ -1041,7 +1042,27 @@ export default class App extends LocationComponent {
         </Footer>
         <KeepAwake />
       </Container>
-    </WalkthroughProvider>
     );
   }
 }
+
+const styles = StyleSheet.create({
+  icon: {
+    justifyContent: 'center',
+    borderRadius: 10,
+    padding: 10,
+  },
+  iconContainer: {
+    backgroundColor: '#ffffff', width: 65, height: 65, borderRadius: 65,
+    borderWidth: 2, borderColor: '#000000',
+    alignItems: 'center', justifyContent: 'center', margin: 2.5,
+  },
+  turfInfoContainer: {
+    backgroundColor: '#ffffff', width: 125, height: 45,
+    borderWidth: 2, borderColor: '#000000',
+    alignItems: 'center', justifyContent: 'center', margin: 2.5,
+  },
+  map: {
+    ...StyleSheet.absoluteFillObject,
+  },
+});

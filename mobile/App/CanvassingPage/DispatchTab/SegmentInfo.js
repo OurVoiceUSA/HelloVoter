@@ -2,6 +2,7 @@ import React from 'react';
 import { View } from 'react-native';
 import { Body, Right, Text, List, ListItem } from 'native-base';
 
+import { WalkthroughElement } from 'react-native-walkthrough';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 import { say } from '../../common';
@@ -56,11 +57,13 @@ export default SegmentInfo = props => {
           <Text>{(admin?"N/A":"1")}</Text>
         </Right>
       </ListItem>
-      <ListItem itemDivider>
-        <Body>
-          <Text>Turf List</Text>
-        </Body>
-      </ListItem>
+        <ListItem itemDivider>
+          <WalkthroughElement id="turf-list">
+            <Body>
+              <Text>Turf List</Text>
+            </Body>
+          </WalkthroughElement>
+        </ListItem>
       {turfs.sort(sortAlphaNum).map(t => (
         <ListItem key={t.id} onPress={() => refer.setState({selectedTurf: t}, () => refer._loadturfInfo())}>
           <Body><Text>{t.name}</Text></Body>

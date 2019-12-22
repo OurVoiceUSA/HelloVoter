@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 
 import { Root } from 'native-base';
+import { WalkthroughProvider } from 'react-native-walkthrough';
 
 YellowBox.ignoreWarnings([
   'VirtualizedLists should never',
@@ -65,6 +66,7 @@ const AppNavigator = createStackNavigator({
     navigationOptions: ({navigation}) => ({
       title: 'Canvassing',
       headerLeft: (<GoBack nav={navigation} />),
+      headerRight: (<WalkthroughHeader nav={navigation} />),
       gesturesEnabled: false,
     }),
   },
@@ -90,9 +92,17 @@ const GoBack = (props) => (
   </TouchableOpacity>
 );
 
+const WalkthroughHeader = (props) => (
+    <TouchableOpacity style={{flexDirection: 'row', alignItems: 'center'}} onPress={() => props.nav.startWalkthrough()}>
+      <Icon name="question" size={30} style={{marginRight: 10, margin: 5}} />
+    </TouchableOpacity>
+);
+
 const App = createAppContainer(AppNavigator);
 
 export default () =>
   <Root>
-    <App />
+    <WalkthroughProvider>
+      <App />
+    </WalkthroughProvider>
   </Root>;

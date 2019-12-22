@@ -9,8 +9,11 @@ import {
   SettingsButton,
   SettingsSwitch,
   SettingsPicker,
-  SettingsTextLabel,
 } from "react-native-settings-components";
+
+import { WalkthroughElement } from 'react-native-walkthrough';
+
+import { say, makeTooltipContent } from '../../common';
 
 var size_matters = [
   { size: 100, label: "small", value: "small" },
@@ -25,6 +28,34 @@ function limit2size(obj) {
   return arr[0].label;
 }
 
+export const walkthroughSettings = [
+  {
+    id: 'start-settings-walkthrough',
+    content: makeTooltipContent("Welcome! This is Settings. Tap the screen to move onto the next tooltip of this brief walkthrough."),
+    tooltipProps: {allowChildInteraction: false},
+  },
+  {
+    id: 'auto-reload',
+    content: makeTooltipContent("Automatically refresh the pins each time you move the map. WARNING: Enabling this increases your cellular data and battery power consumption!"),
+    tooltipProps: {allowChildInteraction: false, placement: 'bottom'},
+  },
+  {
+    id: 'limit-addresses',
+    content: makeTooltipContent("The volume of address pins that load at a given time. The more that load at once, the slower the app will get."),
+    tooltipProps: {allowChildInteraction: false},
+  },
+  {
+    id: 'hide-already-contacted',
+    content: makeTooltipContent("Don't show people who have already been visisted by someone for this form."),
+    tooltipProps: {allowChildInteraction: false},
+  },
+  {
+    id: 'filter-by-attributes',
+    content: makeTooltipContent("To help you further target your canvassing, enabling this will make the map only show addresses with people who match your selected criteria below."),
+    tooltipProps: {allowChildInteraction: false},
+  },
+];
+
 export default class SettingsTab extends PureComponent {
   constructor(props) {
     super(props);
@@ -33,7 +64,6 @@ export default class SettingsTab extends PureComponent {
       refer: props.refer,
       form: props.form,
     };
-
   }
 
   changeSetting(name, value) {
@@ -70,58 +100,58 @@ export default class SettingsTab extends PureComponent {
 
       <SettingsDividerLong />
 
-      <SettingsSwitch
-        title="Auto Reload"
-        onValueChange={pin_auto_reload => this.changeSetting('pin_auto_reload', pin_auto_reload)}
-        value={refer.state.canvassSettings.pin_auto_reload}
-        trackColor={{
-          true: colors.switchEnabled,
-          false: colors.switchDisabled,
-        }}
-      />
-
-      <SettingsTextLabel title={"Automatically refresh the pins each time you move the map. WARNING: Enabling this increases your cellular data and battery power consumption!"} />
-
-      <SettingsDividerShort />
-
-      <SettingsPicker
-        title="Limit Addresses"
-        options={size_matters}
-        disabled={(refer.state.canvassSettings.pin_auto_reload?true:false)}
-        onValueChange={limit => this.changeSetting('limit', size_matters.filter(m => m.label === limit)[0].size)}
-        value={limit2size(refer.state.canvassSettings)}
-        styleModalButtonsText={{ color: colors.monza }}
-      />
-
-      <SettingsTextLabel title={"The volume of address pins that load at a given time. The more that load at once, the slower the app will get."} />
+      <WalkthroughElement id="auto-reload">
+        <SettingsSwitch
+          title="Auto Reload"
+          onValueChange={pin_auto_reload => this.changeSetting('pin_auto_reload', pin_auto_reload)}
+          value={refer.state.canvassSettings.pin_auto_reload}
+          trackColor={{
+            true: colors.switchEnabled,
+            false: colors.switchDisabled,
+          }}
+        />
+      </WalkthroughElement>
 
       <SettingsDividerShort />
 
-      <SettingsSwitch
-        title={"Hide already contacted"}
-        onValueChange={filter_visited => this.changeSetting('filter_visited', filter_visited)}
-        value={refer.state.canvassSettings.filter_visited}
-        trackColor={{
-          true: colors.switchEnabled,
-          false: colors.switchDisabled,
-        }}
-      />
-
-      <SettingsTextLabel title={"Don't show people who have already been visisted by someone for this form."} />
+      <WalkthroughElement id="limit-addresses">
+        <SettingsPicker
+          title="Limit Addresses"
+          options={size_matters}
+          disabled={(refer.state.canvassSettings.pin_auto_reload?true:false)}
+          onValueChange={limit => this.changeSetting('limit', size_matters.filter(m => m.label === limit)[0].size)}
+          value={limit2size(refer.state.canvassSettings)}
+          styleModalButtonsText={{ color: colors.monza }}
+        />
+      </WalkthroughElement>
 
       <SettingsDividerShort />
 
-      <SettingsSwitch
-        title={"Filter Results by attribute value"}
-        onValueChange={filter_pins => this.changeSetting('filter_pins', filter_pins)}
-        value={refer.state.canvassSettings.filter_pins}
-        trackColor={{
-          true: colors.switchEnabled,
-          false: colors.switchDisabled,
-        }}
-      />
+      <WalkthroughElement id="hide-already-contacted">
+        <SettingsSwitch
+          title={"Hide already contacted"}
+          onValueChange={filter_visited => this.changeSetting('filter_visited', filter_visited)}
+          value={refer.state.canvassSettings.filter_visited}
+          trackColor={{
+            true: colors.switchEnabled,
+            false: colors.switchDisabled,
+          }}
+        />
+      </WalkthroughElement>
 
-      <SettingsTextLabel title={"To help you further target your canvassing, enabling this will make the map only show addresses with people who match your selected criteria below."} />
+      <SettingsDividerShort />
+
+      <WalkthroughElement id="filter-by-attributes">
+        <SettingsSwitch
+          title={"Filter Results by attribute value"}
+          onValueChange={filter_pins => this.changeSetting('filter_pins', filter_pins)}
+          value={refer.state.canvassSettings.filter_pins}
+          trackColor={{
+            true: colors.switchEnabled,
+            false: colors.switchDisabled,
+          }}
+        />
+      </WalkthroughElement>
 
       {refer.state.canvassSettings.filter_pins&&
       <View>

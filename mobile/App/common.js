@@ -40,6 +40,12 @@ export const URL_PRIVACY_POLICY = 'https://raw.githubusercontent.com/OurVoiceUSA
 export const URL_GUIDELINES = 'https://raw.githubusercontent.com/OurVoiceUSA/HelloVoter/master/docs/Canvassing-Guidelines.md';
 export const URL_HELP = 'https://github.com/OurVoiceUSA/HelloVoter/blob/master/docs/Canvassing.md';
 
+export const makeTooltipContent = text => (
+  <View style={{paddingHorizontal: 24, paddingVertical: 8}}>
+    <Text>{text}</Text>
+  </View>
+);
+
 export const say = memoize(
   (key, config) => i18n.t(key, config),
   (key, config) => (config ? key + JSON.stringify(config) : key)
