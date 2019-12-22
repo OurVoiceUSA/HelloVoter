@@ -172,6 +172,7 @@ export default class App extends LocationComponent {
           list = walkthroughSettings;
           break;
       }
+      Toast.hide();
       startWalkthrough(list);
     };
 
