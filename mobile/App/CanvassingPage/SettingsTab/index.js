@@ -1,6 +1,7 @@
-import React, { PureComponent } from 'react';
+import React from 'react';
 import { View } from 'react-native';
 import { Content, Text, } from 'native-base';
+import HVComponent, { HVConfirmDialog } from '../../HVComponent';
 
 import {
   SettingsDividerShort,
@@ -56,7 +57,7 @@ export const walkthroughSettings = [
   },
 ];
 
-export default class SettingsTab extends PureComponent {
+export default class SettingsTab extends HVComponent {
   constructor(props) {
     super(props);
 
@@ -103,7 +104,25 @@ export default class SettingsTab extends PureComponent {
       <WalkthroughElement id="auto-reload">
         <SettingsSwitch
           title="Auto Reload"
-          onValueChange={pin_auto_reload => this.changeSetting('pin_auto_reload', pin_auto_reload)}
+          onValueChange={pin_auto_reload => {
+            if (pin_auto_reload) {
+              this.alert(
+                "Warning!",
+                "Enabling this increases your cellular data and battery power consumption! Are you sure you want to enable this?",
+                {
+                  title: "Yes", onPress: () => {
+                    this.changeSetting('pin_auto_reload', pin_auto_reload);
+                    this.setState({confirmDialog: false});
+                  }
+                },
+                {
+                  title: "No", onPress: () => this.setState({confirmDialog: false}),
+                }
+              );
+            } else {
+              this.changeSetting('pin_auto_reload', pin_auto_reload);
+            }
+          }}
           value={refer.state.canvassSettings.pin_auto_reload}
           trackColor={{
             true: colors.switchEnabled,
@@ -171,6 +190,7 @@ export default class SettingsTab extends PureComponent {
       </View>
       }
 
+      <HVConfirmDialog refer={this} />
     </Content>
     );
   }
