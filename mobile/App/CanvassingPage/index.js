@@ -758,9 +758,12 @@ export default class App extends LocationComponent {
   }
 
   onMapReady() {
-    const { myPosition } = this.state;
+    const { disclosureWasShown, myPosition } = this.state;
     this.animateToCoordinate(myPosition);
-    //startWalkthrough(walkthroughMapView)
+    if (disclosureWasShown) {
+      this.props.navigation.startWalkthrough();
+      this.setState({disclosureWasShown: false})
+    }
   }
 
   render() {

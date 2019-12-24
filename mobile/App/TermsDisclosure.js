@@ -80,7 +80,7 @@ export default class ListTab extends HVComponent {
             if (ack) {
               try {
                 storage.set(STORAGE_KEY_DISCLOSURE, getEpoch().toString());
-                refer.setState({ showDisclosure: false});
+                refer.setState({ showDisclosure: false, disclosureWasShown: true });
               } catch (error) {}
             } else {
               this.alert(say("termsofservice"), say("must_agree_to_tos"));
