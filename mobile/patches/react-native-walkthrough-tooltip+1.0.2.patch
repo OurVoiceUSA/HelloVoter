@@ -1,0 +1,17 @@
+diff --git a/node_modules/react-native-walkthrough-tooltip/src/.tooltip.js.swp b/node_modules/react-native-walkthrough-tooltip/src/.tooltip.js.swp
+new file mode 100644
+index 0000000..f1432fd
+Binary files /dev/null and b/node_modules/react-native-walkthrough-tooltip/src/.tooltip.js.swp differ
+diff --git a/node_modules/react-native-walkthrough-tooltip/src/tooltip.js b/node_modules/react-native-walkthrough-tooltip/src/tooltip.js
+index 5c6f60e..b4b046e 100644
+--- a/node_modules/react-native-walkthrough-tooltip/src/tooltip.js
++++ b/node_modules/react-native-walkthrough-tooltip/src/tooltip.js
+@@ -149,7 +149,7 @@ class Tooltip extends Component {
+     if (contentChanged || placementChanged || becameVisible || insetsChanged) {
+       setTimeout(() => {
+         this.measureChildRect();
+-      });
++      }, 100);
+     }
+   }
+ 
