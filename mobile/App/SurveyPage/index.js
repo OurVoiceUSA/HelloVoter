@@ -55,9 +55,6 @@ export default class App extends HVComponent {
       start: getEpoch(),
     };
 
-    this.onChange = this.onChange.bind(this);
-    this.doSave = this.doSave.bind(this);
-
     this.edits = false;
     this.goBack = this.props.navigation.goBack;
     this.props.navigation.goBack = () => {
@@ -93,7 +90,7 @@ export default class App extends HVComponent {
     BackHandler.removeEventListener('hardwareBackPress', this.props.navigation.goBack);
   }
 
-  onChange(values) {
+  onChange = (values) => {
     this.setState({values});
     this.edits = true;
   }

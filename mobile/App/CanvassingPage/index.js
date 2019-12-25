@@ -147,12 +147,6 @@ export default class App extends LocationComponent {
       removeConnectionListener: () => {},
     };
 
-    this.onRegionChange = this.onRegionChange.bind(this);
-    this.handleConnectivityChange = this.handleConnectivityChange.bind(this);
-    this.onMarkerPress = this.onMarkerPress.bind(this);
-    this.onMapReady = this.onMapReady.bind(this);
-    this.onMapPress = this.onMapPress.bind(this);
-
     this._dataGet = debounce(500, this._dataFetch);
     this.peopleSearchDebounce = debounce(500, this.peopleSearch);
 
@@ -240,7 +234,7 @@ export default class App extends LocationComponent {
     }
   }
 
-  handleConnectivityChange(ci) {
+  handleConnectivityChange = (ci) => {
     const { netInfo } = this.state;
     let state = 'none';
     try {
@@ -761,7 +755,7 @@ export default class App extends LocationComponent {
     setTimeout(async () => this.setState({lastCam: (pan?await this.map.getCamera():null)}), 550);
   }
 
-  onMapReady() {
+  onMapReady = () => {
     const { disclosureWasShown, myPosition } = this.state;
     this.animateToCoordinate(myPosition);
     if (disclosureWasShown) {
@@ -770,13 +764,13 @@ export default class App extends LocationComponent {
     }
   }
 
-  onMapPress(e) {
+  onMapPress = (e) => {
     const { pressAddsSearchPin } = this.state;
     if (e.nativeEvent.coordinate) this.updateTurfInfo(e.nativeEvent.coordinate);
     if (pressAddsSearchPin && e.nativeEvent.coordinate) this.dropSearchPin({location: e.nativeEvent.coordinate});
-  }
 
-  onMarkerPress(e) {
+  }
+  onMarkerPress = (e) => {
     if (e.nativeEvent.coordinate) this.updateTurfInfo(e.nativeEvent.coordinate);
   }
 

@@ -45,10 +45,9 @@ export class NewAddressDialog extends Component {
      refer: props.refer,
    }
 
-   this.onChange = this.onChange.bind(this);
  }
 
-  onChange(fAddress) {
+  onChange = (fAddress) => {
     const { refer } = this.state;
     refer.setState({fAddress});
   }
@@ -181,13 +180,9 @@ export class NewUnitDialog extends Component {
      refer: props.refer,
      currentMarker: props.refer.state.currentMarker,
     }
-
-    this.onUnitChange = this.onUnitChange.bind(this);
   }
 
-  onUnitChange(fUnit) {
-    this.setState({fUnit});
-  }
+  onUnitChange = (fUnit) => this.setState({fUnit});
 
   addUnit = async () => {
     const { refer } = this.state;
