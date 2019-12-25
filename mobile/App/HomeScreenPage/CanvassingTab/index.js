@@ -191,13 +191,16 @@ export default class App extends LocationComponent {
       }
     }
 
-    this.setState({connectmode: false, waitmode: false, canvaslater});
+    this.setState({waitmode: false, canvaslater});
 
     if (retry) {
       this.setState({error: true});
       console.warn("retry failed");
     }
-    if (retry || canvaslater) return;
+    if (retry || canvaslater) {
+      this.setState({connectmode: false});
+      return;
+    }
 
     let json = await res.json();
     if (json.data) json = json.data;
@@ -236,6 +239,8 @@ export default class App extends LocationComponent {
     } else {
       this.alert("Awaiting Assignment","You are not assigned to a form and/or a turf for this organization. Please contact your administrator.");
     }
+
+    this.setState({connectmode: false});
   }
 
   addServer = async (server, orgId, forms) => {
