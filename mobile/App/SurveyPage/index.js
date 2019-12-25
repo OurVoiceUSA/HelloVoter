@@ -80,6 +80,7 @@ export default class App extends HVComponent {
       } else {
         this.goBack();
       }
+      return true;
     };
 
   }

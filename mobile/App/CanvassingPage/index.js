@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
+import { BackHandler, StyleSheet, View, TouchableOpacity } from 'react-native';
 import { Toast, Container, Content, Footer, FooterTab, Text, Button, Spinner } from 'native-base';
 
 import TermsDisclosure, { loadDisclosure } from '../TermsDisclosure';
@@ -192,12 +192,13 @@ export default class App extends LocationComponent {
           onPress: () => this.setState({confirmDialog: false}),
         }
       );
+      return true;
     };
   }
 
   componentDidMount() {
     const { forms } = this.state;
-
+    BackHandler.addEventListener('hardwareBackPress', this.props.navigation.goBack);
     DINFO().then(i => this.setState({UniqueID: i.UniqueID})).catch(() => this.setState({deviceError: true}));
     loadDisclosure(this);
     this._getCanvassSettings();
@@ -318,6 +319,7 @@ export default class App extends LocationComponent {
     const { removeConnectionListener } = this.state;
     this.cleanupLocation();
     removeConnectionListener();
+    BackHandler.removeEventListener('hardwareBackPress', this.props.navigation.goBack);
   }
 
   dropSearchPin(place) {

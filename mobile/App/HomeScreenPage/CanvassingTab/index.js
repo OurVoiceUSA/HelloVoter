@@ -1,5 +1,5 @@
-import React, { PureComponent } from 'react';
-import { View, Dimensions, Image } from 'react-native';
+import React from 'react';
+import { Dimensions, Image, View } from 'react-native';
 import {
   Content, List, ListItem, Left, Right, Body, Footer, FooterTab,
   Text, Button, Spinner, H1,
