@@ -14,7 +14,7 @@ import { say, makeTooltipContent } from '../../common';
 export const walkthroughListView = [
   {
     id: 'start-list-walkthrough',
-    content: makeTooltipContent("Welcome! This is the List View. Tap the screen to move onto the next tooltip of this brief walkthrough."),
+    content: makeTooltipContent("This is the List View. Tap the screen to move onto the next tooltip of this brief walkthrough."),
     tooltipProps: {allowChildInteraction: false},
   },
   {

@@ -32,7 +32,7 @@ function limit2size(obj) {
 export const walkthroughSettings = [
   {
     id: 'start-settings-walkthrough',
-    content: makeTooltipContent("Welcome! This is Settings. Tap the screen to move onto the next tooltip of this brief walkthrough."),
+    content: makeTooltipContent("This is Settings. Tap the screen to move onto the next tooltip of this brief walkthrough."),
     tooltipProps: {allowChildInteraction: false},
   },
   {
