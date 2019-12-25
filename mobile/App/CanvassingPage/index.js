@@ -149,10 +149,11 @@ export default class App extends LocationComponent {
 
     this.onRegionChange = this.onRegionChange.bind(this);
     this.handleConnectivityChange = this.handleConnectivityChange.bind(this);
+    this.onMarkerPress = this.onMarkerPress.bind(this);
     this.onMapReady = this.onMapReady.bind(this);
     this.onMapPress = this.onMapPress.bind(this);
 
-    this._dataGet = debounce(500, this._dataFetch)
+    this._dataGet = debounce(500, this._dataFetch);
     this.peopleSearchDebounce = debounce(500, this.peopleSearch);
 
     // trigger walkthrough
@@ -775,10 +776,14 @@ export default class App extends LocationComponent {
     if (pressAddsSearchPin && e.nativeEvent.coordinate) this.dropSearchPin({location: e.nativeEvent.coordinate});
   }
 
+  onMarkerPress(e) {
+    if (e.nativeEvent.coordinate) this.updateTurfInfo(e.nativeEvent.coordinate);
+  }
+
   render() {
     const { navigate } = this.props.navigation;
     const {
-      showDisclosure, myPosition, locationAccess, serviceError, deviceError,
+      showDisclosure, myPosition, locationAccess, serviceError, deviceError, markers,
       form, loading, region, active, segmentList, segmentDispatch, fetching, selectedTurf, mapCamera,
       newAddressDialog, newUnitDialog, onlyPhonePeople, searchPins, pressAddsSearchPin,
     } = this.state;
@@ -878,13 +883,13 @@ export default class App extends LocationComponent {
           onPoiClick={this.onMapPress}
           {...this.props}>
           {active==='map'&&geofence.map((g, idx) => <MapView.Polyline key={idx} coordinates={g.polygon} strokeWidth={2} strokeColor={(g.id === selectedTurf.id ? "blue" : "black")} />)}
-          {active==='map'&&this.state.markers.map((marker) => (
+          {active==='map'&&markers.map((marker) => (
               <MapView.Marker
                 key={marker.address.id}
                 coordinate={{longitude: marker.address.longitude, latitude: marker.address.latitude}}
-                onPress={(e) => e.nativeEvent.coordinate && this.updateTurfInfo(e.nativeEvent.coordinate)}
+                onPress={this.onMarkerPress}
                 pinColor={getPinColor(marker)}>
-                <MapView.Callout onPress={() => this.doMarkerPress(marker)}>
+                <MapView.Callout onPress={this.doMarkerPress.bind(this,marker)}>
                   <View style={{backgroundColor: '#FFFFFF', padding: 5, width: 175}}>
                     <Text style={{fontWeight: 'bold'}}>
                       {marker.address.street}, {marker.address.city}, {marker.address.state}, {marker.address.zip}
