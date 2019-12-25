@@ -150,6 +150,7 @@ export default class App extends LocationComponent {
     this.onRegionChange = this.onRegionChange.bind(this);
     this.handleConnectivityChange = this.handleConnectivityChange.bind(this);
     this.onMapReady = this.onMapReady.bind(this);
+    this.onMapPress = this.onMapPress.bind(this);
 
     this._dataGet = debounce(500, this._dataFetch)
     this.peopleSearchDebounce = debounce(500, this.peopleSearch);
@@ -766,6 +767,12 @@ export default class App extends LocationComponent {
     }
   }
 
+  onMapPress(e) {
+    const { pressAddsSearchPin } = this.state;
+    if (e.nativeEvent.coordinate) this.updateTurfInfo(e.nativeEvent.coordinate);
+    if (pressAddsSearchPin && e.nativeEvent.coordinate) this.dropSearchPin({location: e.nativeEvent.coordinate});
+  }
+
   render() {
     const { navigate } = this.props.navigation;
     const {
@@ -865,10 +872,8 @@ export default class App extends LocationComponent {
           onRegionChangeComplete={this.onRegionChange}
           showsIndoors={false}
           showsTraffic={false}
-          onPress={(e) => {
-            if (e.nativeEvent.coordinate) this.updateTurfInfo(e.nativeEvent.coordinate);
-            if (pressAddsSearchPin && e.nativeEvent.coordinate) this.dropSearchPin({location: e.nativeEvent.coordinate});
-          }}
+          onPress={this.onMapPress}
+          onPoiClick={this.onMapPress}
           {...this.props}>
           {active==='map'&&geofence.map((g, idx) => <MapView.Polyline key={idx} coordinates={g.polygon} strokeWidth={2} strokeColor={(g.id === selectedTurf.id ? "blue" : "black")} />)}
           {active==='map'&&this.state.markers.map((marker) => (
