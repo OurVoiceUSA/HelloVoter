@@ -13,6 +13,9 @@ import DialogActions from '@material-ui/core/DialogActions';
 
 import { CardTurf, ListTurf, TurfOptions } from './index';
 
+
+import TurfVerticalStepper from './TurfVerticalStepper/TurfVerticalStepper.jsx';
+
 import {
   _fetch,
   notify_error,
@@ -68,6 +71,7 @@ export default class App extends Component {
       perPage: perPage,
       pageNum: 1,
       menuDelete: false,
+      turfName: ''
     };
   }
 
@@ -107,8 +111,14 @@ export default class App extends Component {
     this.setState({ saving: false });
   }
 
-  onChangeTurf(addTurfForm) {
-    this.setState({ addTurfForm });
+  /* Removing the tcomb form and just using material-ui input
+      which requires state handling changes.
+  */
+  //onChangeTurf(addTurfForm) {
+    //this.setState({ addTurfForm });
+  //}
+  turfNameHandler= (event) => {
+    this.setState({turfName : event.target.value});
   }
 
   handleDrawChange = selectedDrawOption => {
@@ -421,14 +431,23 @@ export default class App extends Component {
             path="/turf/add"
             render={() => (
               <div>
-                <t.form.Form
+                {/* <t.form.Form
                   ref={ref => (this.addTurfForm = ref)}
                   type={this.formServerItems}
                   options={this.formServerOptions}
                   onChange={e => this.onChangeTurf(e)}
                   value={this.state.addTurfForm}
                 />
-                <br />
+                <br /> */}
+                <TurfVerticalStepper 
+                  changed={this.turfNameHandler}
+                  inputRef={this.state.turfName}
+                  selectedDrawOption={this.state.selectedDrawOption}
+                  handleDrawChange={this.handleDrawChange}
+                  drawOptions={drawOptions}
+                  handleStateChange={this.handleStateChange}
+                />
+                {/* <br />
                 Method of generating turf:
                 <Select
                   value={this.state.selectedDrawOption}
@@ -436,7 +455,7 @@ export default class App extends Component {
                   options={drawOptions}
                   isSearchable={false}
                   placeholder="Select method"
-                />
+                /> */}
                 <TurfOptions refer={this} />
                 {this._showSubmitButton() ? (
                   <div>
