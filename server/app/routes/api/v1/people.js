@@ -155,7 +155,6 @@ async function visitsAndPeople(req, res) {
   if (req.query.limit) req.query.limit = parseInt(req.query.limit);
 
   req.query.id = req.user.id;
-  req.query.visit_status = [0,1,2,3];
 
   // TODO: set to false if the canvassing mode is avoid places we've been
   let empty_addrs = (req.query.filter_visited?false:true);
@@ -250,8 +249,7 @@ async function visitsAndPeople(req, res) {
 
     q += `
   optional match (r)<-[:VISIT_AT]-(v:Visit)-[:VISIT_FORM]->(:Form {id:{formId}})
-    where v.status in {visit_status}
-    with aid, r, people, collect(v) as visits, collect(v.status) as status `+(req.user.admin?``:`where not 2 in status or status is null`)+`
+    with aid, r, people, collect(v) as visits, collect(v.status) as status
     with aid, r{.*, visits: visits, people: people} as r
     with aid, CASE WHEN (r.street is null) THEN null ELSE r END as r, collect(CASE WHEN (r.street is null) THEN r ELSE null END) as units
     with aid, collect({address: r, units: units}) as addrs
