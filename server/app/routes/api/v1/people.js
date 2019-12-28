@@ -1,3 +1,4 @@
+import { Router } from 'express';
 
 import {
   volunteerAssignments,
@@ -5,8 +6,6 @@ import {
 } from '../../../lib/utils';
 
 import { ov_config } from '../../../lib/ov_config';
-
-import { Router } from 'express';
 
 module.exports = Router({mergeParams: true})
 .get('/people/get/byposition', async (req, res) => {
@@ -147,23 +146,12 @@ TODO: constrain update to a turf their assigned to, but without creating multipl
 
   return res.json(ref.data);
 }
-async function visitsAndPeople(req, res) {
-  let ref = {};
 
+async function visitsAndPeople(req, res) {
   if (!req.query.formId) return _400(res, "Invalid value to parameter 'formId'.");
 
   if (req.query.limit) req.query.limit = parseInt(req.query.limit);
-
   req.query.id = req.user.id;
-
-  // TODO: set to false if the canvassing mode is avoid places we've been
-  let empty_addrs = (req.query.filter_visited?false:true);
-
-  // no value? no key
-  if (!req.query.filter_val) req.query.filter_key = null;
-
-  // convert old single filter to multi-filter with single value
-  if (req.query.filter_key) req.query.filters = [{id: req.query.filter_key, value: req.query.filter_val}];
 
   // initialize empty filters if not defined so we can check length below
   if (!req.query.filters) req.query.filters = [];
@@ -180,98 +168,114 @@ async function visitsAndPeople(req, res) {
     });
   }
 
-  if (req.query.filters.length) {
-    // even if empty_addrs, a filter removes this
-    empty_addrs = false;
-  }
-
   // default & cap on limit
   if (!req.query.limit || req.query.limit > 1000) req.query.limit = 1000;
 
   try {
-
-    // get area density to optimize main query with a sane distance limit, based on given node limit & filter count
-    req.query.dist = 250;
-    let enough = false;
-
-    while (enough === false) {
-      // scale up distance
-      req.query.dist *= 2;
-      let ref = await req.db.query(`match (a:Address) using index a:Address(position) where distance(a.position, point({longitude: {longitude}, latitude: {latitude}})) < {dist} return count(a)`, req.query);
-      if (ref.data[0] >= (req.query.limit*(req.query.filters.length+1))) enough = true;
-      if (req.query.dist >= 16000) enough = true;
+    let ret = await visitsAndPeopleFromPoint(req, req.query.longitude, req.query.latitude);
+    if (ret.length === 0) {
+      // find center(ish) of nearest assigned turf and use that as the query point
+      let ref = await req.db.query(`match (v:Volunteer {id:{id}})
+    optional match (t:Turf)-[:ASSIGNED]->(:Team)-[:MEMBERS]->(v)
+      with v, collect(t.id) as tt
+    optional match (t:Turf)-[:ASSIGNED]->(v)
+      with tt + collect(t.id) as turfIds
+    call spatial.withinDistance("turf", {longitude: {longitude}, latitude: {latitude}}, 10000) yield node
+      where node.id in turfIds return (node.bbox[0]+node.bbox[2])/2, (node.bbox[1]+node.bbox[3])/2 limit 1`, req.query);
+      ret = await visitsAndPeopleFromPoint(req, ref.data[0][0], ref.data[0][1]);
     }
-
-    let q = '';
-
-    if (ov_config.disable_spatial === false) q = `match (v:Volunteer {id:{id}})
-  optional match (t:Turf)-[:ASSIGNED]->(:Team)-[:MEMBERS]->(v)
-    with v, collect(t.id) as tt
-  optional match (t:Turf)-[:ASSIGNED]->(v)
-    with tt + collect(t.id) as turfIds
-  call spatial.withinDistance("turf", {longitude: {longitude}, latitude: {latitude}}, {dist}) yield node
-    where node.id in turfIds
-    with node as t limit 4 `;
-
-    // either target an address, or use the address index
-    if (req.query.aId) q += `match (a:Address {id:{aId}}) `;
-    else q += `match (a:Address) using index a:Address(position) `;
-
-    q += `where `+(ov_config.disable_spatial === false?`(a)-[:WITHIN]->(t) `:``);
-
-    if (!req.query.aId) q += (ov_config.disable_spatial === false?`and `:``)+`distance(a.position, point({longitude: {longitude}, latitude: {latitude}})) < {dist}
-  with a, distance(a.position, point({longitude: {longitude}, latitude: {latitude}})) as dist
-  order by dist limit {limit} `;
-
-    q += `with distinct(a) as a
-  optional match (u:Unit)-[:AT]->(a)
-    with a.id as aid, collect(distinct(a))+collect(u) as rs
-    unwind rs as r `;
-
-    q += `optional match (p:Person)-[:RESIDENCE {current:true}]->(r) `;
-
-    if (req.query.filters.length)
-      q += `where `+req.query.filters.map((f, idx) => {
-        req.query['faid'+idx] = f.id;
-        return '('+f.value.map((v, vdx) => {
-          req.query['faval'+idx+''+vdx] = v;
-          return `(r)<-[:RESIDENCE {current:true}]-(:Person)<-[:ATTRIBUTE_OF {current:true}]-(:PersonAttribute {value:{faval`+idx+''+vdx+`}})-[:ATTRIBUTE_TYPE]->(:Attribute {id:{faid`+idx+`}}) `;
-        }).join('or ')+') ';
-      }).join('and ');
-
-    if (req.query.filter_visited) q += (req.query.filters.length?`and`:`where`)+` not (p)<-[:VISIT_PERSON]-(:Visit)-[:VISIT_FORM]->(:Form {id:{formId}}) `;
-
-    q += `optional match (p)<-[:ATTRIBUTE_OF {current:true}]-(pa:PersonAttribute)-[:ATTRIBUTE_TYPE]->(at:Attribute)
-  with aid, r, p, collect({id:at.id, name:at.name, value:pa.value}) as attrs
-  with aid, r, collect(p{.*, attrs: attrs}) as people `;
-
-    if (!empty_addrs) q += `where size(people) > 0 or (r)<-[:AT]-(:Unit)`;
-
-    q += `
-  optional match (r)<-[:VISIT_AT]-(v:Visit)-[:VISIT_FORM]->(:Form {id:{formId}})
-    with aid, r, people, collect(v) as visits, collect(v.status) as status
-    with aid, r{.*, visits: visits, people: people} as r
-    with aid, CASE WHEN (r.street is null) THEN null ELSE r END as r, collect(CASE WHEN (r.street is null) THEN r ELSE null END) as units
-    with aid, collect({address: r, units: units}) as addrs
-    with addrs[0].address as a, addrs[1].units as units
-    `;
-
-    if (!empty_addrs) q += `where size(a.people) > 0 or size(units) > 0 `;
-
-    q += `return collect({
-      address: a{longitude:a.position.x,latitude:a.position.y,.id,.street,.city,.state,.zip,.updated},
-      units: CASE WHEN (units is null) THEN [] ELSE units END,
-      people: a.people,
-      visits: a.visits
-    }) as data`;
-
-    ref = await req.db.query(q, req.query);
-
-    if (ref.data[0].length) return res.json(ref.data[0]);
-
+    if (ret.length !== 0) return res.json(ret);
   } catch (e) {
     return _500(res, e);
   }
 
   return res.json([]);
+}
+
+async function visitsAndPeopleFromPoint(req, longitude, latitude) {
+  req.query.longitude = longitude;
+  req.query.latitude = latitude;
+
+  let empty_addrs = (req.query.filter_visited?false:true);
+  // even if empty_addrs, a filter removes this
+  if (req.query.filters.length) empty_addrs = false;
+
+  // get area density to optimize main query with a sane distance limit, based on given node limit & filter count
+  req.query.dist = 250;
+  let enough = false;
+
+  while (enough === false) {
+    // scale up distance
+    req.query.dist *= 2;
+    let ref = await req.db.query(`match (a:Address) using index a:Address(position) where distance(a.position, point({longitude: {longitude}, latitude: {latitude}})) < {dist} return count(a)`, req.query);
+    if (ref.data[0] >= (req.query.limit*(req.query.filters.length+1))) enough = true;
+    if (req.query.dist >= 16000) enough = true;
+  }
+
+  let q = '';
+
+  if (ov_config.disable_spatial === false) q = `match (v:Volunteer {id:{id}})
+optional match (t:Turf)-[:ASSIGNED]->(:Team)-[:MEMBERS]->(v)
+  with v, collect(t.id) as tt
+optional match (t:Turf)-[:ASSIGNED]->(v)
+  with tt + collect(t.id) as turfIds
+call spatial.withinDistance("turf", {longitude: {longitude}, latitude: {latitude}}, {dist}) yield node
+  where node.id in turfIds
+  with node as t limit 4 `;
+
+  // either target an address, or use the address index
+  if (req.query.aId) q += `match (a:Address {id:{aId}}) `;
+  else q += `match (a:Address) using index a:Address(position) `;
+
+  q += `where `+(ov_config.disable_spatial === false?`(a)-[:WITHIN]->(t) `:``);
+
+  if (!req.query.aId) q += (ov_config.disable_spatial === false?`and `:``)+`distance(a.position, point({longitude: {longitude}, latitude: {latitude}})) < {dist}
+with a, distance(a.position, point({longitude: {longitude}, latitude: {latitude}})) as dist
+order by dist limit {limit} `;
+
+  q += `with distinct(a) as a
+optional match (u:Unit)-[:AT]->(a)
+  with a.id as aid, collect(distinct(a))+collect(u) as rs
+  unwind rs as r `;
+
+  q += `optional match (p:Person)-[:RESIDENCE {current:true}]->(r) `;
+
+  if (req.query.filters.length)
+    q += `where `+req.query.filters.map((f, idx) => {
+      req.query['faid'+idx] = f.id;
+      return '('+f.value.map((v, vdx) => {
+        req.query['faval'+idx+''+vdx] = v;
+        return `(r)<-[:RESIDENCE {current:true}]-(:Person)<-[:ATTRIBUTE_OF {current:true}]-(:PersonAttribute {value:{faval`+idx+''+vdx+`}})-[:ATTRIBUTE_TYPE]->(:Attribute {id:{faid`+idx+`}}) `;
+      }).join('or ')+') ';
+    }).join('and ');
+
+  if (req.query.filter_visited) q += (req.query.filters.length?`and`:`where`)+` not (p)<-[:VISIT_PERSON]-(:Visit)-[:VISIT_FORM]->(:Form {id:{formId}}) `;
+
+  q += `optional match (p)<-[:ATTRIBUTE_OF {current:true}]-(pa:PersonAttribute)-[:ATTRIBUTE_TYPE]->(at:Attribute)
+with aid, r, p, collect({id:at.id, name:at.name, value:pa.value}) as attrs
+with aid, r, collect(p{.*, attrs: attrs}) as people `;
+
+  if (!empty_addrs) q += `where size(people) > 0 or (r)<-[:AT]-(:Unit)`;
+
+  q += `
+optional match (r)<-[:VISIT_AT]-(v:Visit)-[:VISIT_FORM]->(:Form {id:{formId}})
+  with aid, r, people, collect(v) as visits, collect(v.status) as status
+  with aid, r{.*, visits: visits, people: people} as r
+  with aid, CASE WHEN (r.street is null) THEN null ELSE r END as r, collect(CASE WHEN (r.street is null) THEN r ELSE null END) as units
+  with aid, collect({address: r, units: units}) as addrs
+  with addrs[0].address as a, addrs[1].units as units
+  `;
+
+  if (!empty_addrs) q += `where size(a.people) > 0 or size(units) > 0 `;
+
+  q += `return collect({
+    address: a{longitude:a.position.x,latitude:a.position.y,.id,.street,.city,.state,.zip,.updated},
+    units: CASE WHEN (units is null) THEN [] ELSE units END,
+    people: a.people,
+    visits: a.visits
+  }) as data`;
+
+  let ref = await req.db.query(q, req.query);
+
+  return ref.data[0];
 }
