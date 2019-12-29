@@ -15,6 +15,7 @@ import { CardTurf, ListTurf, TurfOptions } from './index';
 
 
 import TurfVerticalStepper from './TurfVerticalStepper/TurfVerticalStepper.jsx';
+import AddControl from './AddControl/AddControl';
 
 import {
   _fetch,
@@ -439,14 +440,15 @@ export default class App extends Component {
                   value={this.state.addTurfForm}
                 />
                 <br /> */}
-                <TurfVerticalStepper 
+                <AddControl />
+                {/* <TurfVerticalStepper 
                   changed={this.turfNameHandler}
                   inputRef={this.state.turfName}
                   selectedDrawOption={this.state.selectedDrawOption}
                   handleDrawChange={this.handleDrawChange}
                   drawOptions={drawOptions}
                   handleStateChange={this.handleStateChange}
-                />
+                /> */}
                 {/* <br />
                 Method of generating turf:
                 <Select
