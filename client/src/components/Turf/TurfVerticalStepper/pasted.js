@@ -105,3 +105,60 @@ export default function VerticalLinearStepper() {
     </div>
   );
 }
+
+
+/**
+ * 
+  //This will setup the JSX for the dropdowns in selects on the happy path
+  initializeSelectConfigs = () => {
+    //console.log(this.methodSteps(this.state.method));
+    const drawOptions = [
+        { value: 'select', label: 'Select from legislative boundary' },
+        { value: 'import', label: 'Import GeoJSON shape file' },
+        { value: 'radius', label: 'Area surrounding an address' },
+        { value: 'draw', label: 'Manually draw with your mouse' },
+      ];
+
+    const stateOptions = [];
+    Object.keys(us_states).map(k =>
+        stateOptions.push({ value: k, label: us_states[k].name })
+    );
+
+    const configs = [];
+    configs.push({
+        id: 'select',
+        label: 'Confirm turf adding method.',
+        value: this.state.method,
+        change: this.methodChangeHandler,
+        options: drawOptions,
+    });
+
+    configs.push({
+        id: 'region',
+        label: 'Select state or region containing turf.',
+        value: this.state.turfRegion,
+        change: this.regionChangeHandler,
+        options: stateOptions,
+    });
+
+    configs.push({
+        id: 'type',
+        label: 'District type of state or region.',
+        value: this.state.turfDistrictType,
+        change: this.turfDistrictTypeHandler,
+        options: this.state.typeOptions
+    });
+
+    configs.push({
+        id: 'number',
+        label: 'District number.',
+        value: this.state.turfDistrictNumber,
+        change: this.turfDistrictNumberHandler,
+        options: this.state.districtOptions
+    });
+
+      return configs;
+    };
+
+    
+ */

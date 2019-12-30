@@ -3,7 +3,6 @@ import React, { Component } from 'react';
 import { HashRouter as Router, Route } from 'react-router-dom';
 import { geocodeByAddress, getLatLng } from 'react-places-autocomplete';
 import circleToPolygon from 'circle-to-polygon';
-import Select from 'react-select';
 import t from 'tcomb-form';
 
 import Button from '@material-ui/core/Button';
@@ -13,8 +12,6 @@ import DialogActions from '@material-ui/core/DialogActions';
 
 import { CardTurf, ListTurf, TurfOptions } from './index';
 
-
-import TurfVerticalStepper from './TurfVerticalStepper/TurfVerticalStepper.jsx';
 import AddControl from './AddControl/AddControl';
 
 import {

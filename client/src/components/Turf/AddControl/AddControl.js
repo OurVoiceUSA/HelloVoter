@@ -2,23 +2,12 @@ import React, { Component } from 'react';
 
 //packages
 import { TextField } from '@material-ui/core';
-import { Select, MenuItem} from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import FormControl from '@material-ui/core/FormControl';
 import { us_states } from 'ourvoiceusa-sdk-js';
+import { PlacesAutocomplete } from '../../../common';
 
 //Custom Components
 import TurfVerticalStepper from '../TurfVerticalStepper/TurfVerticalStepper';
-
-const useStyles = makeStyles(theme => ({
-    formControl: {
-      margin: theme.spacing(1),
-      minWidth: 120,
-    },
-    selectEmpty: {
-      marginTop: theme.spacing(2),
-    },
-  }));
+import StepSelect from '../StepSelect/StepSelect';
   
 /**
  * This will be an overall control of the stepper possible layouts.  A middle state
@@ -28,12 +17,15 @@ class AddControl extends Component {
   constructor(props) {
     super(props);
 
-    //console.log('[Constructor]');
-    //this.state.configs = [];
-    this.state.configs = this.initializeSelectConfigs();
-    //console.log('[constructor] - config',this.state.configs);
+    //load in the state data from ourvoice package
+    this.state.stateOptions = [];
+    Object.keys(us_states).map(k =>
+        this.state.stateOptions.push({ value: k, label: us_states[k].name })
+    );
+
   }
 
+  //state setup.  steps and method determine the default common path
   state = {
     turfName: '',
     turfDistrictType: '', 
@@ -45,6 +37,12 @@ class AddControl extends Component {
     districtOptions: [],
     districtOptionsType: '',
     districtOptionsRegion: '',
+    drawOptions : [
+      { value: 'select', label: 'Select from legislative boundary' },
+      { value: 'import', label: 'Import GeoJSON shape file' },
+      { value: 'radius', label: 'Area surrounding an address' },
+      { value: 'draw', label: 'Manually draw with your mouse' },
+    ]
   }
 
   //All handlers
@@ -58,7 +56,7 @@ class AddControl extends Component {
   //need to change the content sent to the stepper.
   methodChangeHandler = (event) => {
     this.setState({method: event.target.value});
-   // this.setState({steps : this.methodSteps(event.target.value)});
+    this.setState({steps : this.methodSteps(event.target.value)});
   };
 
   //React hook
@@ -70,8 +68,7 @@ class AddControl extends Component {
           this.state.turfRegion !== this.state.districtOptionsRegion)) {
         this.districtNumberFetchHandler();
 
-        console.log("Updated");
-        console.log(this.state.districtOptions);
+        console.log("Updated", this.state.districtOptions);
       }
     }
   }
@@ -84,18 +81,16 @@ class AddControl extends Component {
   //   console.log('[ComponentWillMount]');
   // }
 
-  componentDidMount() {
+  // componentDidMount() {
     //console.log('[ComponentDidMount]')
    // console.log('The state: ', this.state.configs);
-  }
+  // }
 
   //Handle change of the State or Region dropdown
   //also, needs to setup district type options after region selection
   regionChangeHandler = (event) => {
     this.setState({turfRegion : event.target.value});
     this.typeOptionsHandler(event.target.value);
-    //this.setState({configs: this.initializeSelectConfigs()});
-    //console.log(this.state.configs);
   };
 
   //handler to setup district type options
@@ -179,123 +174,159 @@ class AddControl extends Component {
   };
 
 
-  //This will setup the JSX for the dropdowns in selects on the happy path
-  initializeSelectConfigs = () => {
-    //console.log(this.methodSteps(this.state.method));
-    const drawOptions = [
-        { value: 'select', label: 'Select from legislative boundary' },
-        { value: 'import', label: 'Import GeoJSON shape file' },
-        { value: 'radius', label: 'Area surrounding an address' },
-        { value: 'draw', label: 'Manually draw with your mouse' },
-      ];
-
-    const stateOptions = [];
-    Object.keys(us_states).map(k =>
-        stateOptions.push({ value: k, label: us_states[k].name })
-    );
-
-    const configs = [];
-    configs.push({
-        id: 'select',
-        label: 'Confirm turf adding method.',
-        value: this.state.method,
-        change: this.methodChangeHandler,
-        options: drawOptions,
-    });
-
-    configs.push({
-        id: 'region',
-        label: 'Select state or region containing turf.',
-        value: this.state.turfRegion,
-        change: this.regionChangeHandler,
-        options: stateOptions,
-    });
-
-    configs.push({
-        id: 'type',
-        label: 'District type of state or region.',
-        value: this.state.turfDistrictType,
-        change: this.turfDistrictTypeHandler,
-        options: this.state.typeOptions
-    });
-
-    configs.push({
-        id: 'number',
-        label: 'District number.',
-        value: this.state.turfDistrictNumber,
-        change: this.turfDistrictNumberHandler,
-        options: this.state.districtOptions
-    });
-
-      return configs;
-    };
-
-    //used for material-ui select
-    renderOptions(options) {
-      return options.map((item, i) => {
-          return (
-                <MenuItem
-                value={item.value}
-                key={i} name={item.label}>{item.label}</MenuItem>
-          );
-      });
-    }
-
-    //generate a material-ui select for the stepper
-    setupSelect = (config) => {
-      return (
-          <div>
-          <p>{config.label}</p>
-            <FormControl className={useStyles().formControl}>
-              <Select 
-                  value={config.value ? config.value : config.defaultValue} 
-                  onChange={config.change}
-              >{this.renderOptions(config.options)}
-              </Select>    
-            </FormControl>  
-          </div>
-      );
-    };
-
-    stepContent = (step) => {
-      //console.log('[stepContent] Configs:',this.state.configs);
-
+  stepContent = (step, id) => {
+    //console.log('[stepContent] Configs:',this.state.configs);
+    console.log('[stepContent]',id)
+    if('select' === id) {
       switch (step) {
-
         case 0:
-            return this.setupSelect(this.state.configs.find(
-                o => o.id === 'select'
-            ));
+            return <StepSelect 
+                    id='select'
+                    label= 'Confirm turf adding method.'
+                    value= {this.state.method}
+                    change= {this.methodChangeHandler}
+                    options= {this.state.drawOptions}
+                  />
         case 1:
           return <TextField 
                     onChange={e => {this.turfNameHandler(e.target.value)}}
                     value={this.state.turfName}
                 />
         case 2: 
-          return this.setupSelect(this.state.configs.find(
-            o => o.id === 'region'
-        ));
+            return <StepSelect 
+                    id='region'
+                    label= 'Select state or region containing turf.'
+                    value= {this.state.turfRegion}
+                    change= {this.regionChangeHandler}
+                    options= {this.state.stateOptions}
+                  />
         case 3:
-          return this.setupSelect(this.initializeSelectConfigs().find(
-            o => o.id === 'type'
-        ));
+            return <StepSelect 
+                    id='type'
+                    label= 'District type of state or region.'
+                    value= {this.state.turfDistrictType}
+                    change= {this.turfDistrictTypeHandler}
+                    options= {this.state.typeOptions}
+                  />
         case 4:
-          return this.setupSelect(this.initializeSelectConfigs().find(
-            o => o.id === 'number'
-        ));
+            return <StepSelect 
+                    id='number'
+                    label= 'District number.'
+                    value= {this.state.turfDistrictNumber}
+                    change= {this.turfDistrictNumberHandler}
+                    options= {this.state.districtOptions}
+                  />
         default:
           return 'Unknown step';
       }
-    }
-
-    render() {
-        return (
-            <TurfVerticalStepper 
-                steps={this.state.steps} 
-                stepContent={this.stepContent}
-            />
+    }  //end of if('select')
+    else if(id === 'import') {
+      switch (step) {
+        case 0:
+            return <StepSelect 
+                    id='select'
+                    label= 'Confirm turf adding method.'
+                    value= {this.state.method}
+                    change= {this.methodChangeHandler}
+                    options= {this.state.drawOptions}
+                  />
+        case 1:
+          return <TextField 
+                    onChange={e => {this.turfNameHandler(e.target.value)}}
+                    value={this.state.turfName}
+                />
+        case 2: 
+            return (
+              <div>
+                <br />
+                <input
+                  type="file"
+                  accept=".geojson,.json"
+                  //onChange={e => this.props.refer.handleImportFiles(e.target.files)}
+                />
+              </div>
+            );
+        default:
+          return 'Unknown step';
+      }
+    } //end of else if (import)
+    else if(id === 'radius') {
+      switch (step) {
+        case 0:
+            return <StepSelect 
+                    id='select'
+                    label= 'Confirm turf adding method.'
+                    value= {this.state.method}
+                    change= {this.methodChangeHandler}
+                    options= {this.state.drawOptions}
+                  />
+        case 1:
+          return <TextField 
+                    onChange={e => {this.turfNameHandler(e.target.value)}}
+                    value={this.state.turfName}
+                />
+        case 2: 
+            return (
+              <div>
+                <br />
+                  Type the address:
+                <PlacesAutocomplete
+                  debounce={500}
+                  value={this.props.refer.state.address}
+                  onChange={this.props.refer.onTypeAddress}
+                  onSelect={this.props.refer.submitAddress}
+                />
+              </div>
+            );
+        default:
+          return 'Unknown step';
+      }
+    }  //end of else if(radius)
+    else if(id === 'draw') {
+      switch (step) {
+        case 0:
+            return <StepSelect 
+                    id='select'
+                    label= 'Confirm turf adding method.'
+                    value= {this.state.method}
+                    change= {this.methodChangeHandler}
+                    options= {this.state.drawOptions}
+                  />
+        case 1:
+          return <TextField 
+                    onChange={e => {this.turfNameHandler(e.target.value)}}
+                    value={this.state.turfName}
+                />
+        case 2: 
+            return (<div>
+            <br />
+              Use a{' '}
+            <a
+              target="_blank"
+              rel="noopener noreferrer"
+              href="https://google-developers.appspot.com/maps/documentation/utils/geojson/"
+            >
+                GeoJSON Draw Tool
+            </a>
+              , save the file, and then select the "Import GeoJSON shape file"
+              option.
+          </div>
         );
-    }
+        default:
+          return 'Unknown step';
+      }
+    }//end of else if(draw)
+  }
+
+  render() {
+      return (
+          <TurfVerticalStepper 
+              id={this.state.method}
+              steps={this.state.steps} 
+              stepContent={this.stepContent}
+          />
+      );
+  }
 }
 
 export default AddControl;

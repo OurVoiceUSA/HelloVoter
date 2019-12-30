@@ -53,7 +53,7 @@ export default function TurfVerticalStepper(props) {
           <Step key={label}>
             <StepLabel>{label}</StepLabel>
             <StepContent>
-              <Typography>{props.stepContent(index)}</Typography>
+              <Typography>{props.stepContent(index,props.id)}</Typography>
               <div className={classes.actionsContainer}>
                 <div>
                   <Button
