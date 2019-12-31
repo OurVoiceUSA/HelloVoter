@@ -3,7 +3,11 @@ import React, { Component } from 'react';
 //packages
 import { TextField } from '@material-ui/core';
 import { us_states } from 'ourvoiceusa-sdk-js';
-import { PlacesAutocomplete } from '../../../common';
+import circleToPolygon from 'circle-to-polygon';
+import { _fetch,
+  notify_error,
+  notify_success,
+  PlacesAutocomplete } from '../../../common';
 
 //Custom Components
 import TurfVerticalStepper from '../TurfVerticalStepper/TurfVerticalStepper';
@@ -40,8 +44,8 @@ class AddControl extends Component {
     drawOptions : [
       { value: 'select', label: 'Select from legislative boundary' },
       { value: 'import', label: 'Import GeoJSON shape file' },
-      { value: 'radius', label: 'Area surrounding an address' },
-      { value: 'draw', label: 'Manually draw with your mouse' },
+      //{ value: 'radius', label: 'Area surrounding an address' },
+      { value: 'draw', label: 'Manually draw with your mouse' }
     ]
   }
 
@@ -165,7 +169,7 @@ class AddControl extends Component {
     const stepsByMethod = {
       select : ['Confirm Turf Method','Enter Turf Name','Select State or Region','Select District Type','Select District Number'],
       import : ['Confirm Turf Method','Enter Turf Name','Import GeoJSON'],
-      radius : ['Confirm Turf Method','Enter Turf Name','Select Radius'],
+      //radius : ['Confirm Turf Method','Enter Turf Name','Select Radius'],
       draw : ['Confirm Turf Method','Enter Turf Name','Draw Boundary Manually']
     };
 
@@ -173,10 +177,186 @@ class AddControl extends Component {
     return stepsByMethod[method];
   };
 
+  urlFromDist(state, type, value) {
+    let uri;
 
+    switch (type) {
+    case 'state':
+      uri = 'states/' + state + '/shape.geojson';
+      break;
+    case 'cd':
+      // TODO: handle the fact there are new years with less in them
+      uri = 'cds/2016/' + value + '/shape.geojson';
+      break;
+    case 'sldu':
+      uri = 'states/' + state + '/sldu/' + value + '.geojson';
+      break;
+    case 'sldl':
+      uri = 'states/' + state + '/sldl/' + value + '.geojson';
+      break;
+    default:
+      throw new Error('unknown selectedTypeOption');
+    }
+
+    return (
+      'https://raw.githubusercontent.com/OurVoiceUSA/districts/gh-pages/' + uri
+    );
+  }
+
+  //method to setup data needed for calling the turf
+  createTurf = () => {
+    console.log('[Create Turf]');
+    console.log('[URL Gen: ]',
+      this.urlFromDist(this.state.turfRegion,this.state.turfDistrictType,this.state.turfDistrictNumber));
+    
+      //looks like object needed from top level.
+      const { global } = this.props.global;
+
+      //let json = this.addTurfForm.getValue();
+      //if (json === null) return;
+  
+      //this.setState({ saving: true });
+  
+      let objs = [];
+  
+      if (this.state.method === 'import' && this.state.importFileData !== null) {
+        try {
+          objs.push(JSON.parse(this.state.importFileData));
+        } catch (e) {
+          notify_error(e, 'Unable to parse import data file.');
+          return this.setState({ saving: false });
+        }
+      } else if (this.state.method === 'radius') {
+        objs.push(
+          circleToPolygon(
+            [this.state.addressCoords.lng, this.state.addressCoords.lat],
+            1000
+          )
+        );
+      } else {
+        
+        try {
+         
+          if (
+            this.state.turfDistrictNumber &&
+            this.state.turfDistrictNumber === 'all'
+          ) {
+            
+            for (let i in this.state.districtOptions) {
+              if (this.state.districtOptions[i].value === 'all') continue;
+              fetch(
+                this.urlFromDist(this.state.turfRegion,
+                    this.state.turfDistrictType,
+                    this.state.turfDistrictNumber
+                  )
+              ).then(res => res.json())
+              .then(response => {
+                let obj = response;
+                obj.name = this.state.districtOptions[i].value;
+                objs.push(obj);
+              })
+              //.catch(error => console.log(error))
+            }
+          } else {
+            //this.loadData().then(data => objs.push(data));
+            this.loadData().then(async (res,rej) => {
+              objs.push(res);
+              console.log('[Res] - ',res);
+              //console.log('This is where the code should go.');
+              for (let i in objs) {
+                console.log('[Inside for i in objs]',objs[i]);
+                let obj = objs[i];
+                let geometry;
+                let name;
+        
+                if (obj.geometry) geometry = obj.geometry;
+                else geometry = obj;
+        
+                if (this.state.turfDistrictNumber &&
+                    this.state.turfDistrictNumber === 'all'
+                  )
+                  name = this.state.turfName + ' ' + obj.name;
+                else name = this.state.turfName;
+        
+                console.log('[Post turf]',name, geometry);
+      
+                await _fetch(global, '/turf/create', 'POST', {
+                  name: name,
+                  geometry: geometry,
+                });
+              }
+              notify_success('Turf has been created.');
+            // } catch (e) {
+            //   notify_error(e, 'Unable to create turf.');
+            // }
+      
+            //this.setState({ saving: false });
+        
+            window.location.href = '/HelloVoterHQ/#/turf/';
+            this.props.loadData();
+            
+            console.log('[Added turf]',this.state.turfName);
+            });
+
+          }
+        } catch (e) {
+          notify_error(e, 'Unable to fetch district info data.');
+          return this.setState({ saving: false });
+        }
+      }  
+  };
+
+  loadData = async () => {
+    let resp = await fetch(this.urlFromDist(this.state.turfRegion,
+          this.state.turfDistrictType,
+          this.state.turfDistrictNumber ? this.state.turfDistrictNumber : null
+        )
+    );
+
+    let data = await resp.json();
+    
+    return data;
+    // .then(res => res.json())
+    // .then(response => {
+    //   objs.push(response);
+    // })
+    //.catch(error => console.log(error))
+  };
+
+  postData = async () => {
+    
+  };
+
+  //this validates the current step and if the Next button should be disabled
+  //currently doesn't validate third step of import or draw
+  disableNextButton = (activeStep) => {
+
+    if(this.state.method === 'select') {
+      if (activeStep === 1 && (this.state.turfName === null || this.state.turfName === '')) {
+        return true;
+      } else if (activeStep === 2 && this.state.turfRegion === '') {
+        return true;
+      } else if (activeStep === 3 && this.state.turfDistrictType === '') {
+        return true;
+      } else if (activeStep === 4 && this.state.turfDistrictNumber === '') {
+        return true;
+      } else {
+        return false;
+      }
+    } else if(this.state.method === 'import') {
+      if (activeStep === 1 && (this.state.turfName === null || this.state.turfName === ''))
+        return true;
+    } else if(this.state.method === 'draw') {
+      if (activeStep === 1 && (this.state.turfName === null || this.state.turfName === ''))
+        return true;
+    } else {
+      return false;
+    }
+  }
+
+  //this method setups the rendering in each step depending on the method selected
   stepContent = (step, id) => {
-    //console.log('[stepContent] Configs:',this.state.configs);
-    console.log('[stepContent]',id)
+
     if('select' === id) {
       switch (step) {
         case 0:
@@ -324,6 +504,8 @@ class AddControl extends Component {
               id={this.state.method}
               steps={this.state.steps} 
               stepContent={this.stepContent}
+              createTurf={this.createTurf}
+              disableBtn={this.disableNextButton}
           />
       );
   }

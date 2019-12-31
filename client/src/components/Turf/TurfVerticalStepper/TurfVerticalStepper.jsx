@@ -36,6 +36,11 @@ export default function TurfVerticalStepper(props) {
 
   const handleNext = () => {
     setActiveStep(prevActiveStep => prevActiveStep + 1);
+    //console.log('[VerticalStepper step:',activeStep,props.steps.length);
+    if (activeStep === props.steps.length-1) {
+      //console.log('[VerticalStepper - Finshed',props.steps.length);
+      props.createTurf();
+    }
   };
 
   const handleBack = () => {
@@ -68,6 +73,7 @@ export default function TurfVerticalStepper(props) {
                     color="primary"
                     onClick={handleNext}
                     className={classes.button}
+                    disabled={props.disableBtn(activeStep)}
                   >
                     {activeStep === props.steps.length - 1 ? 'Finish' : 'Next'}
                   </Button>

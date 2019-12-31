@@ -437,7 +437,10 @@ export default class App extends Component {
                   value={this.state.addTurfForm}
                 />
                 <br /> */}
-                <AddControl />
+                <AddControl 
+                    global={this.state.global}
+                    loadData={this._loadData}
+                />
                 {/* <TurfVerticalStepper 
                   changed={this.turfNameHandler}
                   inputRef={this.state.turfName}
