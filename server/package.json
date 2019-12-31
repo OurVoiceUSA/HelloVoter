@@ -22,7 +22,7 @@
     "mocha": "^6.2.2",
     "mocha-jenkins-reporter": "^0.4.2",
     "nodemon": "^2.0.2",
-    "nyc": "^14.1.1",
+    "nyc": "^15.0.0",
     "supertest": "^4.0.2"
   },
   "nodemonConfig": {
