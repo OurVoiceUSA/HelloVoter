@@ -132,7 +132,7 @@ class Login extends Component {
           <p />
           Not for any candidate or political party.
           <p />
-          Copyright (c) 2019, Our Voice USA. All rights reserved.
+          Copyright (c) 2020, Our Voice USA. All rights reserved.
           <p />
           This program is free software; you can redistribute it and/or
           modify it under the terms of the GNU Affero General Public License

@@ -64,7 +64,7 @@ export default class App extends Component {
         <h3 style={{color: "red"}}>WARNING: API version doesn't match HQ version.</h3>
         }
         <div>
-          &copy; 2019, Our Voice USA, a 501(c)(3) Non-Profit Organization. Not
+          &copy; 2020, Our Voice USA, a 501(c)(3) Non-Profit Organization. Not
           for any candidate or political party.
         </div>
         <div>
