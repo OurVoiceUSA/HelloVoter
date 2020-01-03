@@ -35,7 +35,7 @@ const AppNavigator = createStackNavigator({
   HomeScreen: {
     screen: HomeScreenPage,
     navigationOptions: ({navigation}) => ({
-      headerTitle: (
+      headerTitle: () => (
         <View style={{flex:1, flexDirection:'row', justifyContent:'center'}}>
           <Text style={{fontSize:20}}>HelloVoter</Text>
           <Image
@@ -44,43 +44,43 @@ const AppNavigator = createStackNavigator({
           />
         </View>
       ),
-      headerRight: (<SettingsButton nav={navigation} />),
+      headerRight: () => (<SettingsButton nav={navigation} />),
     }),
   },
   Invite: {
     screen: InvitePage,
     navigationOptions: ({navigation}) => ({
       title: 'Invited',
-      headerLeft: null,
+      headerLeft: () => null,
     }),
   },
   Settings: {
     screen: SettingsPage,
     navigationOptions: ({navigation}) => ({
       title: 'Settings',
-      headerLeft: null,
+      headerLeft: () => null,
     }),
   },
   Canvassing: {
     screen: CanvassingPage,
     navigationOptions: ({navigation}) => ({
       title: 'Canvassing',
-      headerLeft: (<GoBack nav={navigation} />),
-      headerRight: (<WalkthroughHeader nav={navigation} />),
-      gesturesEnabled: false,
+      headerLeft: () => (<GoBack nav={navigation} />),
+      headerRight: () => (<WalkthroughHeader nav={navigation} />),
+      gestureEnabled: false,
     }),
   },
   Survey: {
     screen: SurveyPage,
     navigationOptions: ({navigation}) => ({
       title: 'Canvassing Form',
-      headerLeft: null,
+      headerLeft: () => null,
     }),
   },
   ConvertLegacy: {
     screen: ConvertLegacyPage,
     navigationOptions: ({navigation}) => ({
-      headerLeft: null,
+      headerLeft: () => null,
     }),
   }
 });
