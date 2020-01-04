@@ -110,7 +110,7 @@ export default class App extends HVComponent {
         </View>
         }
 
-        <NewUnitButton refer={refer} place={marker} />
+        <NewUnitButton refer={refer} place={marker} fromKnock={true} />
 
         <View style={{margin: 15, flexDirection: 'row'}}>
           <Button block warning onPress={() => {

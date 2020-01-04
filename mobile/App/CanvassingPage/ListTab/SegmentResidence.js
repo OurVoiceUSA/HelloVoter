@@ -55,8 +55,8 @@ export default SegmentResidence = props => {
 }
 
 export const NewUnitButton = props => {
-  const { refer, place } = props;
-  if (!refer.add_new || (place.people && place.people.length)) return null;
+  const { refer, place, fromKnock } = props;
+  if (!refer.add_new || (place.people && place.people.length) || (fromKnock && place.units && place.units.length)) return null;
   return (
     <View style={{margin: 15, flexDirection: 'row'}}>
       <Button block onPress={() => {
