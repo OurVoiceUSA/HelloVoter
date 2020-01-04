@@ -48,24 +48,25 @@ export default SegmentResidence = props => {
 
   return (
     <View>
-      <NewUnitButton refer={refer} place={currentMarker} />
       <Knock refer={refer} funcs={refer} marker={currentMarker} form={form} />
       <NewUnitDialog refer={refer} />
     </View>
   );
 }
 
-const NewUnitButton = props => {
+export const NewUnitButton = props => {
   const { refer, place } = props;
   if (!refer.add_new || (place.people && place.people.length)) return null;
   return (
-    <Button block onPress={() => {
-        if (!refer.addOk()) return refer.alert("Active Filter", "You cannot add a new address while a filter is active.");
-        refer.setState({ newUnitDialog: true });
-      }}>
-      <Icon name="plus-circle" backgroundColor="#d7d7d7" color="white" size={20} />
-      <Text>Add new unit/apt number</Text>
-    </Button>
+    <View style={{margin: 15, flexDirection: 'row'}}>
+      <Button block onPress={() => {
+          if (!refer.addOk()) return refer.alert("Active Filter", "You cannot add a new address while a filter is active.");
+          refer.setState({ newUnitDialog: true });
+        }}>
+        <Icon name="plus-circle" backgroundColor="#d7d7d7" color="white" size={20} style={{marginLeft: 10}} />
+        <Text>Add new unit/apt number</Text>
+      </Button>
+    </View>
   );
 };
 

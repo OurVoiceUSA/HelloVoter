@@ -1,12 +1,9 @@
 import React from 'react';
-import {
-  View,
-  TouchableOpacity,
-  FlatList,
-} from 'react-native';
-import { Text } from 'native-base';
+import { View, TouchableOpacity, FlatList } from 'react-native';
+import { Button, Text } from 'native-base';
 
 import HVComponent, { HVConfirmDialog } from '../../HVComponent';
+import { NewUnitButton } from './SegmentResidence';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 import uuidv4 from 'uuid/v4';
@@ -38,22 +35,6 @@ export default class App extends HVComponent {
     return (
       <View>
         <Text>{(unit?'Unit '+unit.name:marker.address.street+', '+marker.address.city)}</Text>
-
-        {funcs.add_new &&
-        <View style={{margin: 5, flexDirection: 'row'}}>
-          <Icon.Button
-            name="user-plus"
-            backgroundColor="#d7d7d7"
-            color="#000000"
-            onPress={() => {
-              if (!refer.addOk()) return refer.alert("Active Filter", "You cannot add a new person while a filter is active.");
-              else navigate('Survey', {refer: this, funcs: funcs, form: form, marker: marker, unit: unit, person: {id: uuidv4(), new: true, attrs:[]}});
-            }}
-            {...iconStyles}>
-            Add Person
-          </Icon.Button>
-        </View>
-        }
 
         {place.people.length?
         <FlatList
@@ -100,7 +81,7 @@ export default class App extends HVComponent {
                   onPress={() => {
                     navigate('Survey', {refer: this, funcs: funcs, form: form, marker: marker, unit: unit, person: item});
                   }}>
-                  <Icon name={icon} color={color} size={40} style={{margin: 5}} />
+                  <Icon name={icon} color={color} size={40} style={{margin: 15}} />
                   <View>
                     <PersonAttr form={form} idx={0} attrs={item.attrs} />
                     <PersonAttr form={form} idx={1} attrs={item.attrs} />
@@ -112,36 +93,43 @@ export default class App extends HVComponent {
           }}
         />
         :
-        <View style={{margin: 5, flexDirection: 'row'}}>
+        <View style={{margin: 15, flexDirection: 'row'}}>
+          <Text>No persons or units have been added to this address. Use the buttons below to add one.</Text>
         </View>
         }
 
-        <View style={{margin: 5, flexDirection: 'row'}}>
-          <Icon.Button
-            name="circle-o"
-            backgroundColor="#d7d7d7"
-            color="#000000"
-            onPress={() => {
-              funcs.notHome(marker.address.id, place, unit);
-              if (!unit) refer.setState({ active: activePrev, segmentList: 'streets' });
-            }}
-            {...iconStyles}>
-            Not Home
-          </Icon.Button>
+        {funcs.add_new &&
+        <View style={{margin: 15, flexDirection: 'row'}}>
+          <Button block onPress={() => {
+            if (!refer.addOk()) return refer.alert("Active Filter", "You cannot add a new person while a filter is active.");
+            else navigate('Survey', {refer: this, funcs: funcs, form: form, marker: marker, unit: unit, person: {id: uuidv4(), new: true, attrs:[]}});
+          }}>
+            <Icon name="user-plus" backgroundColor="#d7d7d7" color="white" size={20} style={{marginLeft: 10}} />
+            <Text>Add new Person</Text>
+          </Button>
+        </View>
+        }
+
+        <NewUnitButton refer={refer} place={marker} />
+
+        <View style={{margin: 15, flexDirection: 'row'}}>
+          <Button block warning onPress={() => {
+            funcs.notHome(marker.address.id, place, unit);
+            if (!unit) refer.setState({ active: activePrev, segmentList: 'streets' });
+          }}>
+            <Icon name="circle-o" backgroundColor="#d7d7d7" color="white" size={20} style={{marginLeft: 10}} />
+            <Text>Not Home</Text>
+          </Button>
         </View>
 
-        <View style={{margin: 5, flexDirection: 'row'}}>
-          <Icon.Button
-            name="ban"
-            backgroundColor="#d7d7d7"
-            color="#000000"
-            onPress={() => {
-              funcs.notInterested(marker.address.id, place, unit);
-              if (!unit) refer.setState({ active: activePrev, segmentList: 'streets' });
-            }}
-            {...iconStyles}>
-            Not Interested
-          </Icon.Button>
+        <View style={{margin: 15, flexDirection: 'row'}}>
+          <Button block danger onPress={() => {
+            funcs.notInterested(marker.address.id, place, unit);
+            if (!unit) refer.setState({ active: activePrev, segmentList: 'streets' });
+          }}>
+            <Icon name="ban" backgroundColor="#d7d7d7" color="white" size={20} style={{marginLeft: 10}} />
+            <Text>Not Interested</Text>
+          </Button>
         </View>
 
         <HVConfirmDialog refer={this} />
