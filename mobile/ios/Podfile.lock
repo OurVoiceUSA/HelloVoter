@@ -237,7 +237,7 @@ PODS:
     - React
   - react-native-maps (0.26.1):
     - React
-  - react-native-netinfo (5.2.0):
+  - react-native-netinfo (5.3.1):
     - React
   - react-native-safari-view (1.0.0):
     - React
@@ -294,7 +294,7 @@ PODS:
     - React
   - RNRate (1.1.10):
     - React
-  - RNSVG (9.13.6):
+  - RNSVG (10.0.0):
     - React
   - RNVectorIcons (6.6.0):
     - React
@@ -491,7 +491,7 @@ SPEC CHECKSUMS:
   react-native-google-places: 1531c5b40622f71b6dacfb476e30be9e08e857b8
   react-native-keep-awake: eba3137546b10003361b37c761f6c429b59814ae
   react-native-maps: 6e499eee4eabf422ba8b6f94e993cc768bf35153
-  react-native-netinfo: 9376bcd9e66cc6f1fe86f6ce893655668a98e8ed
+  react-native-netinfo: 6b536ece82317b0313cbee732f2f9950fc0e9c4c
   react-native-safari-view: 955d7160d159241b8e9395d12d10ea0ef863dcdd
   react-native-safe-area-context: a1d322930b8c5d04ebeb77cc47cc97575ad27203
   React-RCTActionSheet: 600b4d10e3aea0913b5a92256d2719c0cdd26d76
@@ -512,7 +512,7 @@ SPEC CHECKSUMS:
   RNLocalize: c117094a6c5a955c94e65520ad4c726e3a0f4ed6
   RNPermissions: 409e55ed060f7e35d4a3dfc3a336f94a5811dec1
   RNRate: d44a8bca6ee08f5d890ecccddaec2810955ffbb3
-  RNSVG: 8ba35cbeb385a52fd960fd28db9d7d18b4c2974f
+  RNSVG: 9d45f03136ecc9b5497e12f6f20838b568acb9f4
   RNVectorIcons: 0bb4def82230be1333ddaeee9fcba45f0b288ed4
   Yoga: f2a7cd4280bfe2cca5a7aed98ba0eb3d1310f18b
 
