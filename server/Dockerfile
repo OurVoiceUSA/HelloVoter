@@ -1,4 +1,4 @@
-FROM node:dubnium as node
+FROM node:erbium as node
 FROM ourvoiceusa/neo4j-hv
 COPY --from=node /usr/local/ /usr/local/
 RUN apt-get update && apt-get install -y git && apt-get clean
