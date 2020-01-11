@@ -133,6 +133,7 @@ export default class App extends LocationComponent {
       markers: [],
       people: [],
       peopleSearch: null,
+      unitSearch: null,
       onlyPhonePeople: false,
       searchPins: [],
       fAddress: {},
@@ -148,7 +149,6 @@ export default class App extends LocationComponent {
     };
 
     this._dataGet = debounce(500, this._dataFetch);
-    this.peopleSearchDebounce = debounce(500, this.peopleSearch);
 
     // trigger walkthrough
     this.props.navigation.startWalkthrough = () => {
@@ -724,8 +724,12 @@ export default class App extends LocationComponent {
     }
   }
 
-  peopleSearch(text) {
-    this.setState({peopleSearch: text})
+  peopleSearch(peopleSearch) {
+    this.setState({peopleSearch})
+  }
+
+  unitSearch(unitSearch) {
+    this.setState({unitSearch})
   }
 
   animateToCoordinate = async (pos, pan) => {

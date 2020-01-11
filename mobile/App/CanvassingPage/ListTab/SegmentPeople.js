@@ -47,7 +47,7 @@ export default SegmentPeople = props => {
       <View searchBar rounded style={{paddingTop: 0}}>
         <Item>
           <Icon name="search" size={20} />
-          <Input placeholder="Search" onChangeText={text => refer.peopleSearchDebounce(text)} />
+          <Input placeholder="Search Person Name" onChangeText={text => refer.peopleSearch(text)} value={peopleSearch} />
         </Item>
       </View>
       <ListItem onPress={() => refer.setState({onlyPhonePeople: !onlyPhonePeople})}>

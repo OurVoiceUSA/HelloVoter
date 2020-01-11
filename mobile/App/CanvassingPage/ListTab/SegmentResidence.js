@@ -1,6 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
-import { Accordion, Content, Text, Button } from 'native-base';
+import { Accordion, Content, Text, Button, Item, Input } from 'native-base';
 
 import { NewUnitDialog } from '../FormDialogs';
 import Knock from './Knock';
@@ -11,16 +11,30 @@ import { say, getPinColor, getLastVisit, sortAlphaNum } from '../../common';
 
 export default SegmentResidence = props => {
   const { refer } = props;
-  const { segmentList, currentMarker, form } = refer.state;
+  const { segmentList, currentMarker, unitSearch, form } = refer.state;
 
   if (segmentList!=='residence') return null;
 
   if (!currentMarker) return (<Text>No residence is selected.</Text>);
 
   if (currentMarker.units && currentMarker.units.length) {
+    let units;
+    let showSearch = (currentMarker.units.length > 20?true:false);
+    currentMarker.units.sort(sortAlphaNum);
+
+    if (unitSearch) units = currentMarker.units.filter(u => u.name.toLowerCase().match(unitSearch.toLowerCase()));
+    else units = currentMarker.units;
+
     return (
       <Content padder>
         <Text style={{fontSize: 20, padding: 10}}>{currentMarker.address.street}, {currentMarker.address.city}</Text>
+
+        {showSearch&&
+        <Item>
+          <Icon name="search" size={20} />
+          <Input placeholder="Search Unit Name" onChangeText={text => refer.unitSearch(text)} value={unitSearch} />
+        </Item>
+        }
 
         <NewUnitButton refer={refer} place={currentMarker} />
 
@@ -31,7 +45,7 @@ export default SegmentResidence = props => {
           color={getPinColor(currentMarker)} />
         }
 
-        <Accordion dataArray={currentMarker.units.sort(sortAlphaNum)}
+        <Accordion dataArray={units}
           renderHeader={(u) => (
             <Unit unit={u}
               refer={refer}
