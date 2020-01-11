@@ -51,6 +51,24 @@ export const say = memoize(
   (key, config) => (config ? key + JSON.stringify(config) : key)
 );
 
+var reA = /[^a-zA-Z]/g;
+var reN = /[^0-9]/g;
+
+export function sortAlphaNum(ao, bo) {
+  let a = ao.name;
+  let b = bo.name;
+
+  let aA = a.replace(reA, "");
+  let bA = b.replace(reA, "");
+  if (aA === bA) {
+    let aN = parseInt(a.replace(reN, ""), 10);
+    let bN = parseInt(b.replace(reN, ""), 10);
+    return aN === bN ? 0 : aN > bN ? 1 : -1;
+  } else {
+    return aA > bA ? 1 : -1;
+  }
+}
+
 export const bbox_usa = {"type":"MultiPolygon","coordinates":[[[[-179,14],[-50,14],[-50,71],[-179,71],[-179,14]]]]};
 
 export function localaddress() {

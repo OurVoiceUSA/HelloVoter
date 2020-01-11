@@ -7,7 +7,7 @@ import Knock from './Knock';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-import { say, getPinColor, getLastVisit } from '../../common';
+import { say, getPinColor, getLastVisit, sortAlphaNum } from '../../common';
 
 export default SegmentResidence = props => {
   const { refer } = props;
@@ -31,7 +31,7 @@ export default SegmentResidence = props => {
           color={getPinColor(currentMarker)} />
         }
 
-        <Accordion dataArray={currentMarker.units}
+        <Accordion dataArray={currentMarker.units.sort(sortAlphaNum)}
           renderHeader={(u) => (
             <Unit unit={u}
               refer={refer}

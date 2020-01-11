@@ -5,25 +5,8 @@ import { Body, Right, Text, List, ListItem } from 'native-base';
 import { WalkthroughElement } from 'react-native-walkthrough';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-import { say } from '../../common';
+import { say, sortAlphaNum } from '../../common';
 
-var reA = /[^a-zA-Z]/g;
-var reN = /[^0-9]/g;
-
-function sortAlphaNum(ao, bo) {
-  let a = ao.name;
-  let b = bo.name;
-
-  let aA = a.replace(reA, "");
-  let bA = b.replace(reA, "");
-  if (aA === bA) {
-    let aN = parseInt(a.replace(reN, ""), 10);
-    let bN = parseInt(b.replace(reN, ""), 10);
-    return aN === bN ? 0 : aN > bN ? 1 : -1;
-  } else {
-    return aA > bA ? 1 : -1;
-  }
-}
 
 export default SegmentInfo = props => {
   const { refer } = props;
