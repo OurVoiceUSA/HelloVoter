@@ -22,7 +22,7 @@ export default SegmentResidence = props => {
     let showSearch = (currentMarker.units.length > 20?true:false);
     currentMarker.units.sort(sortAlphaNum);
 
-    if (unitSearch) units = currentMarker.units.filter(u => u.name.toLowerCase().match(unitSearch.toLowerCase()));
+    if (showSearch && unitSearch) units = currentMarker.units.filter(u => u.name.toLowerCase().match(unitSearch.toLowerCase()));
     else units = currentMarker.units;
 
     return (
