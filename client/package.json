@@ -21,7 +21,7 @@
     "ourvoiceusa-sdk-js": "github:OurVoiceUSA/ourvoiceusa-sdk-js",
     "pretty-ms": "^5.1.0",
     "qrcode": "^1.4.4",
-    "query-string": "^6.9.0",
+    "query-string": "^6.10.1",
     "react": "^16.12.0",
     "react-beautiful-dnd": "^12.2.0",
     "react-csv-reader": "^2.0.2",
@@ -44,7 +44,7 @@
     "simple-format-number": "^0.1.2",
     "tcomb-form": "^0.9.21",
     "typeface-roboto": "0.0.75",
-    "uuid": "^3.3.3"
+    "uuid": "^3.4.0"
   },
   "scripts": {
     "start": "react-scripts start",
