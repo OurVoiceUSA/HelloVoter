@@ -13,6 +13,7 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogActions from '@material-ui/core/DialogActions';
 import PaperclipIcon from '@material-ui/icons/AttachFile';
+import AddAttribute from './Attribute/AddAttribute';
 
 import {
   _loadAttribute,
@@ -71,6 +72,7 @@ export default class App extends Component {
   }
 
   componentDidMount() {
+    console.log(this.addattributeForm);
     this._loadData();
   }
 
@@ -83,7 +85,9 @@ export default class App extends Component {
   };
 
   onChangeAttribute(addAttributeForm) {
-    this.setState({ addAttributeForm });
+    console.log("Changing attributeState: ",addAttributeForm);
+    //this.setState({ addAttributeForm });
+    this.setState({name: addAttributeForm.name});
   }
 
   handlePageNumChange(obj) {
@@ -116,10 +120,12 @@ export default class App extends Component {
     this._loadData();
   };
 
-  _createAttribute = async () => {
+  _createAttribute = async (attr) => {
+    //console.log(attr);
     const { global } = this.state;
 
-    let json = this.addAttributeForm.getValue();
+    //let json = this.addAttributeForm.getValue();
+    let json = attr;
     if (json === null) return;
 
     this.setState({ saving: true });
@@ -191,16 +197,17 @@ export default class App extends Component {
             exact={true}
             path="/attributes/add"
             render={() => (
-              <div>
-                <t.form.Form
-                  ref={ref => (this.addattributeForm = ref)}
-                  type={this.formServerItems}
-                  options={this.formServerOptions}
-                  onChange={e => this.onChangeAttribute(e)}
-                  value={this.state.addattributeForm}
-                />
-                <button onClick={() => this._createAttribute()}>Submit</button>
-              </div>
+              // <div>
+              //   <t.form.Form
+              //     // ref={ref => (this.addattributeForm = ref)}
+              //     type={this.formServerItems}
+              //     options={this.formServerOptions}
+              //     onChange={e => this.onChangeAttribute(e)}
+              //     value={this.state.name}
+              //   />
+              //   <button onClick={() => this._createAttribute()}>Submit</button>
+              // </div>
+              <AddAttribute create={(data) => this._createAttribute(data)}/>
             )}
           />
           <Route
