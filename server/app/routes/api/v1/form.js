@@ -1,5 +1,4 @@
 
-import circleToPolygon from 'circle-to-polygon';
 import { deepCopy } from 'ourvoiceusa-sdk-js';
 
 import {
