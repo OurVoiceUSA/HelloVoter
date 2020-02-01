@@ -241,7 +241,7 @@ PODS:
     - React
   - react-native-safari-view (1.0.0):
     - React
-  - react-native-safe-area-context (0.6.2):
+  - react-native-safe-area-context (0.6.4):
     - React
   - React-RCTActionSheet (0.61.5):
     - React-Core/RCTActionSheetHeaders (= 0.61.5)
@@ -284,7 +284,7 @@ PODS:
     - React
   - RNCMaskedView (0.1.6):
     - React
-  - RNDeviceInfo (5.4.1):
+  - RNDeviceInfo (5.4.4):
     - React
   - RNGestureHandler (1.5.3):
     - React
@@ -293,6 +293,8 @@ PODS:
   - RNPermissions (2.0.9):
     - React
   - RNRate (1.1.10):
+    - React
+  - RNScreens (2.0.0-alpha.32):
     - React
   - RNSVG (11.0.1):
     - React
@@ -350,6 +352,7 @@ DEPENDENCIES:
   - RNLocalize (from `../node_modules/react-native-localize`)
   - RNPermissions (from `../node_modules/react-native-permissions`)
   - RNRate (from `../node_modules/react-native-rate`)
+  - RNScreens (from `../node_modules/react-native-screens`)
   - RNSVG (from `../node_modules/react-native-svg`)
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
@@ -454,6 +457,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-permissions"
   RNRate:
     :path: "../node_modules/react-native-rate"
+  RNScreens:
+    :path: "../node_modules/react-native-screens"
   RNSVG:
     :path: "../node_modules/react-native-svg"
   RNVectorIcons:
@@ -493,7 +498,7 @@ SPEC CHECKSUMS:
   react-native-maps: 6e499eee4eabf422ba8b6f94e993cc768bf35153
   react-native-netinfo: 75711548b53a527515d9226e6370249f75083e63
   react-native-safari-view: 955d7160d159241b8e9395d12d10ea0ef863dcdd
-  react-native-safe-area-context: a1d322930b8c5d04ebeb77cc47cc97575ad27203
+  react-native-safe-area-context: 042dfc9d4db17196841df962ba9497f6e7a5bd02
   React-RCTActionSheet: 600b4d10e3aea0913b5a92256d2719c0cdd26d76
   React-RCTAnimation: 791a87558389c80908ed06cc5dfc5e7920dfa360
   React-RCTBlob: d89293cc0236d9cb0933d85e430b0bbe81ad1d72
@@ -507,11 +512,12 @@ SPEC CHECKSUMS:
   ReactNativeART: c496c53089b3149663215d74d6f1adb3a62e07eb
   RNCAsyncStorage: 8539fc80a0075fcc9c8e2dff84cd22dc5bf1dacf
   RNCMaskedView: e5b99bc191945f157adeede68da9d424462de177
-  RNDeviceInfo: 54556486cd02538dbef727f39292d096abe0cf0e
+  RNDeviceInfo: d390c040be2e59e2f23c83995bf1cd2f66658b06
   RNGestureHandler: 02905abe54e1f6e59c081a10b4bd689721e17aa6
   RNLocalize: 7ea191e47e1755d2ad48614a2e9d07d290abc58e
   RNPermissions: 6db7e0a4d94c9c02390d11020b1d3d187aaf77e5
   RNRate: d44a8bca6ee08f5d890ecccddaec2810955ffbb3
+  RNScreens: a55364dc1833101f836cee70975ce1fea615a12f
   RNSVG: 67f1f12dae2cef6ed59a42cae74a6b8f5a9e7b46
   RNVectorIcons: 0bb4def82230be1333ddaeee9fcba45f0b288ed4
   Yoga: f2a7cd4280bfe2cca5a7aed98ba0eb3d1310f18b
