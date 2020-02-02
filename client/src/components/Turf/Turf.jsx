@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import { HashRouter as Router, Route } from 'react-router-dom';
 import { geocodeByAddress, getLatLng } from 'react-places-autocomplete';
 import circleToPolygon from 'circle-to-polygon';
+import Select from 'react-select';
 import t from 'tcomb-form';
 
 import Button from '@material-ui/core/Button';
@@ -11,8 +12,6 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogActions from '@material-ui/core/DialogActions';
 
 import { CardTurf, ListTurf, TurfOptions } from './index';
-
-import AddControl from './AddControl/AddControl';
 
 import {
   _fetch,
@@ -69,7 +68,6 @@ export default class App extends Component {
       perPage: perPage,
       pageNum: 1,
       menuDelete: false,
-      turfName: ''
     };
   }
 
@@ -109,14 +107,8 @@ export default class App extends Component {
     this.setState({ saving: false });
   }
 
-  /* Removing the tcomb form and just using material-ui input
-      which requires state handling changes.
-  */
-  //onChangeTurf(addTurfForm) {
-    //this.setState({ addTurfForm });
-  //}
-  turfNameHandler= (event) => {
-    this.setState({turfName : event.target.value});
+  onChangeTurf(addTurfForm) {
+    this.setState({ addTurfForm });
   }
 
   handleDrawChange = selectedDrawOption => {
@@ -429,27 +421,14 @@ export default class App extends Component {
             path="/turf/add"
             render={() => (
               <div>
-                {/* <t.form.Form
+                <t.form.Form
                   ref={ref => (this.addTurfForm = ref)}
                   type={this.formServerItems}
                   options={this.formServerOptions}
                   onChange={e => this.onChangeTurf(e)}
                   value={this.state.addTurfForm}
                 />
-                <br /> */}
-                <AddControl 
-                    global={this.state.global}
-                    loadData={this._loadData}
-                />
-                {/* <TurfVerticalStepper 
-                  changed={this.turfNameHandler}
-                  inputRef={this.state.turfName}
-                  selectedDrawOption={this.state.selectedDrawOption}
-                  handleDrawChange={this.handleDrawChange}
-                  drawOptions={drawOptions}
-                  handleStateChange={this.handleStateChange}
-                /> */}
-                {/* <br />
+                <br />
                 Method of generating turf:
                 <Select
                   value={this.state.selectedDrawOption}
@@ -457,7 +436,7 @@ export default class App extends Component {
                   options={drawOptions}
                   isSearchable={false}
                   placeholder="Select method"
-                /> */}
+                />
                 <TurfOptions refer={this} />
                 {this._showSubmitButton() ? (
                   <div>

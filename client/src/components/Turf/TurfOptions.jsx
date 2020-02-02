@@ -10,7 +10,6 @@ import {
   PlacesAutocomplete,
 } from '../../common.js';
 
-
 export class TurfOptions extends Component {
   handleStateChange = selectedStateOption => {
     if (!selectedStateOption) selectedStateOption = [];
@@ -36,7 +35,6 @@ export class TurfOptions extends Component {
     switch (this.props.refer.state.selectedDrawOption.value) {
     case 'select':
       return (
-        
         <div>
           <div>
             <br />
