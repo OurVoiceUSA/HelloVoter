@@ -35,6 +35,9 @@ export const Routes = ({ global }) => (
     <Route path="/forms/" render={() => <Forms global={global} />} />
     <Route path="/qrcode/" render={() => <QRCodes global={global} />} />
     <Route path="/attributes/" render={() => <Attributes global={global} />} />
+    {(process.env.NODE_ENV === 'development')&&
+    <Route path="/import/" render={() => <ImportData global={global} />} />
+    }
     <Route path="/queue/" render={() => <Queue global={global} />} />
     <Route path="/analytics/" render={() => <Analytics global={global} />} />
     <Route path="/settings/" render={() => <Settings global={global} />} />
