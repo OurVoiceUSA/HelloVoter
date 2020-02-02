@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 
 import { HashRouter as Router, Route } from 'react-router-dom';
 import { NotificationContainer } from 'react-notifications';
+import { asyncForEach, sleep } from 'ourvoiceusa-sdk-js';
 import 'react-notifications/lib/notifications.css';
 import jwt from 'jsonwebtoken';
 import queryString from 'query-string';
@@ -180,15 +181,22 @@ class App extends Component {
     if (server.match(/:8080$/)) https = false;
 
     try {
-      res = await fetch('http'+(https?'s':'')+'://' + server + '/HelloVoterHQ/'+(orgId?orgId+'/':'')+'api/v1/hello', {
-        method: 'POST',
-        headers: {
-          Authorization:
-            'Bearer ' +
-            (token ? token : (this.state.token ? this.state.token : 'of the one ring')),
-          'Content-Type': 'application/json'
-        },
-      });
+      let retry = true;
+
+      while (retry) {
+        res = await fetch('http'+(https?'s':'')+'://' + server + '/HelloVoterHQ/'+(orgId?orgId+'/':'')+'api/v1/hello', {
+          method: 'POST',
+          headers: {
+            Authorization:
+              'Bearer ' +
+              (token ? token : (this.state.token ? this.state.token : 'of the one ring')),
+            'Content-Type': 'application/json'
+          },
+        });
+
+        if (res.status === 418) await sleep(12345);
+        else retry = false;
+      }
 
       let sm_oauth_url = res.headers.get('x-sm-oauth-url');
 
