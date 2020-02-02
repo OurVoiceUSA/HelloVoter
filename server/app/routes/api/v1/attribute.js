@@ -30,7 +30,9 @@ module.exports = Router({mergeParams: true})
     attributeId = ref.data[0];
 
     if (req.body.type.toLowerCase() === 'sand')
-      await req.db.query('match (at:Attribute {id:{id}}) set at.type = {type}, at.value = {values}', {id: attributeId, type: 'string', values: ["SA","A","N","D","SD"]});
+      await req.db.query('match (at:Attribute {id:{id}}) set at.type = {type}, at.values = {values}', {id: attributeId, type: 'string', values: ["SA","A","N","D","SD"]});
+    if (req.body.options && typeof req.body.options === "object" && req.body.options.length)
+      await req.db.query('match (at:Attribute {id:{id}}) set at.values = {values}', {id: attributeId, values: req.body.options});
   } catch(e) {
     return _500(res, e);
   }

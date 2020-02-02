@@ -20,7 +20,7 @@ const useStyles = makeStyles(theme => ({
  * based on the type of attribute selected in the dropdown.  The only property
  * needed is the callback function to send back the attribute object.
  * Uses material-ui for the form elements.
- * @param {*} props 
+ * @param {*} props
  */
 const AddAttribute = (props) => {
 
@@ -107,7 +107,7 @@ const AddAttribute = (props) => {
                 return (
                 <React.Fragment key={index}>
                 <FormControl key={index} className={useStyles.formControl}>
-                    <TextField id={"option-"+(index+1)} 
+                    <TextField id={"option-"+(index+1)}
                             label={"Option "+(index+1)}
                             onChange={(event) => handleOptionChange(event,index)}
                             value={data} />
@@ -123,7 +123,7 @@ const AddAttribute = (props) => {
         addAnotherBtn = (
             <Button variant="contained" color="primary" onClick={handleAddOption} >Add Option</Button>
         );
-        
+
     }
 
     let showMultiCheck = null;
@@ -158,9 +158,9 @@ const AddAttribute = (props) => {
         <div>
             <h3>Enter Attribute Details</h3>
             <FormControl className={useStyles.formControl}>
-                <TextField required 
-                    id="standard-required" 
-                    label="Name" 
+                <TextField required
+                    id="standard-required"
+                    label="Name"
                     value={name}
                     onChange={handleNameChange} />
             </FormControl>
@@ -176,19 +176,20 @@ const AddAttribute = (props) => {
                 >
                 <MenuItem value='string'>Text</MenuItem>
                 <MenuItem value='textbox'>Textbox</MenuItem>
-                <MenuItem value='integer'>Integer</MenuItem>
+                <MenuItem value='number'>Number</MenuItem>
                 <MenuItem value='boolean'>Boolean</MenuItem>
-                <MenuItem value='date'>Date</MenuItem>
+                {/* TODO: <MenuItem value='date'>Date</MenuItem> */}
+                {/* TODO: <MenuItem value='sand'>Agree/Disagree</MenuItem> */}
                 </Select>
             </FormControl>
             &emsp;&emsp;{addOpsCheck}
             <br/>
             <br/>
             {additionalOps}
-            {showMultiCheck}
+            {/* TODO: showMultiCheck */}
             <br/>
             {addAnotherBtn}&emsp;
-            <Button variant="contained" 
+            <Button variant="contained"
                 color="primary"
                 onClick={() => props.create(buildAttr())} >
                 Create Attribute

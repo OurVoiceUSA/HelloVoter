@@ -131,9 +131,7 @@ export default class App extends Component {
     this.setState({ saving: true });
 
     try {
-      await _fetch(global, '/attribute/create', 'POST', {
-        name: json.name,
-      });
+      await _fetch(global, '/attribute/create', 'POST', json);
       notify_success('Attribute has been created.');
     } catch (e) {
       notify_error(e, 'Unable to create Attribute.');
