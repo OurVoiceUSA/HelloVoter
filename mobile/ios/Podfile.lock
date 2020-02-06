@@ -211,13 +211,13 @@ PODS:
     - React-cxxreact (= 0.61.5)
     - React-jsi (= 0.61.5)
   - React-jsinspector (0.61.5)
-  - react-native-camera (3.16.0):
+  - react-native-camera (3.17.0):
     - React
-    - react-native-camera/RCT (= 3.16.0)
-    - react-native-camera/RN (= 3.16.0)
-  - react-native-camera/RCT (3.16.0):
+    - react-native-camera/RCT (= 3.17.0)
+    - react-native-camera/RN (= 3.17.0)
+  - react-native-camera/RCT (3.17.0):
     - React
-  - react-native-camera/RN (3.16.0):
+  - react-native-camera/RN (3.17.0):
     - React
   - react-native-config (0.12.0):
     - React
@@ -241,7 +241,7 @@ PODS:
     - React
   - react-native-safari-view (1.0.0):
     - React
-  - react-native-safe-area-context (0.6.4):
+  - react-native-safe-area-context (0.7.0):
     - React
   - React-RCTActionSheet (0.61.5):
     - React-Core/RCTActionSheetHeaders (= 0.61.5)
@@ -284,9 +284,9 @@ PODS:
     - React
   - RNCMaskedView (0.1.6):
     - React
-  - RNDeviceInfo (5.4.4):
+  - RNDeviceInfo (5.5.1):
     - React
-  - RNGestureHandler (1.5.3):
+  - RNGestureHandler (1.5.6):
     - React
   - RNLocalize (1.3.3):
     - React
@@ -294,7 +294,7 @@ PODS:
     - React
   - RNRate (1.1.10):
     - React
-  - RNScreens (2.0.0-alpha.32):
+  - RNScreens (2.0.0-beta.2):
     - React
   - RNSVG (11.0.1):
     - React
@@ -488,7 +488,7 @@ SPEC CHECKSUMS:
   React-jsi: cb2cd74d7ccf4cffb071a46833613edc79cdf8f7
   React-jsiexecutor: d5525f9ed5f782fdbacb64b9b01a43a9323d2386
   React-jsinspector: fa0ecc501688c3c4c34f28834a76302233e29dc0
-  react-native-camera: 72d27f64745bfca589cd265041f4f09cc46ed155
+  react-native-camera: 4ead7a30a89f275f531d80aa720cc69363c38135
   react-native-config: f2c2ae45625a068c35681a16b9bfb1ca58b0adc7
   react-native-geocoder-reborn: db0438c3e1e057791951aaa7013013bfa7fee3fa
   react-native-geolocation: cbd9d6bd06bac411eed2671810f454d4908484a8
@@ -498,7 +498,7 @@ SPEC CHECKSUMS:
   react-native-maps: 6e499eee4eabf422ba8b6f94e993cc768bf35153
   react-native-netinfo: 75711548b53a527515d9226e6370249f75083e63
   react-native-safari-view: 955d7160d159241b8e9395d12d10ea0ef863dcdd
-  react-native-safe-area-context: 042dfc9d4db17196841df962ba9497f6e7a5bd02
+  react-native-safe-area-context: 190923f87d4842c908d869ac144ad395fe63a4da
   React-RCTActionSheet: 600b4d10e3aea0913b5a92256d2719c0cdd26d76
   React-RCTAnimation: 791a87558389c80908ed06cc5dfc5e7920dfa360
   React-RCTBlob: d89293cc0236d9cb0933d85e430b0bbe81ad1d72
@@ -512,12 +512,12 @@ SPEC CHECKSUMS:
   ReactNativeART: c496c53089b3149663215d74d6f1adb3a62e07eb
   RNCAsyncStorage: 8539fc80a0075fcc9c8e2dff84cd22dc5bf1dacf
   RNCMaskedView: e5b99bc191945f157adeede68da9d424462de177
-  RNDeviceInfo: d390c040be2e59e2f23c83995bf1cd2f66658b06
-  RNGestureHandler: 02905abe54e1f6e59c081a10b4bd689721e17aa6
+  RNDeviceInfo: 6812ed7e578d4344bf4e77102f014b5adf0b5c28
+  RNGestureHandler: 911d3b110a7a233a34c4f800e7188a84b75319c6
   RNLocalize: 7ea191e47e1755d2ad48614a2e9d07d290abc58e
   RNPermissions: 6db7e0a4d94c9c02390d11020b1d3d187aaf77e5
   RNRate: d44a8bca6ee08f5d890ecccddaec2810955ffbb3
-  RNScreens: a55364dc1833101f836cee70975ce1fea615a12f
+  RNScreens: 5e4758109c6d35f9a009ce72af873df907548020
   RNSVG: 67f1f12dae2cef6ed59a42cae74a6b8f5a9e7b46
   RNVectorIcons: 0bb4def82230be1333ddaeee9fcba45f0b288ed4
   Yoga: f2a7cd4280bfe2cca5a7aed98ba0eb3d1310f18b
