@@ -221,7 +221,7 @@ PODS:
     - React
   - react-native-config (0.12.0):
     - React
-  - react-native-geocoder-reborn (0.8.3):
+  - react-native-geocoder-reborn (0.9.0):
     - React
   - react-native-geolocation (2.0.2):
     - React
@@ -241,7 +241,7 @@ PODS:
     - React
   - react-native-safari-view (1.0.0):
     - React
-  - react-native-safe-area-context (0.7.0):
+  - react-native-safe-area-context (0.7.2):
     - React
   - React-RCTActionSheet (0.61.5):
     - React-Core/RCTActionSheetHeaders (= 0.61.5)
@@ -490,7 +490,7 @@ SPEC CHECKSUMS:
   React-jsinspector: fa0ecc501688c3c4c34f28834a76302233e29dc0
   react-native-camera: 4ead7a30a89f275f531d80aa720cc69363c38135
   react-native-config: f2c2ae45625a068c35681a16b9bfb1ca58b0adc7
-  react-native-geocoder-reborn: db0438c3e1e057791951aaa7013013bfa7fee3fa
+  react-native-geocoder-reborn: c31cbc630d9307ebbceea1dea2746d0054be35c4
   react-native-geolocation: cbd9d6bd06bac411eed2671810f454d4908484a8
   react-native-google-maps: 2e2e697dab576abd5809d78cd74e775865b62bf7
   react-native-google-places: 1531c5b40622f71b6dacfb476e30be9e08e857b8
@@ -498,7 +498,7 @@ SPEC CHECKSUMS:
   react-native-maps: 6e499eee4eabf422ba8b6f94e993cc768bf35153
   react-native-netinfo: 75711548b53a527515d9226e6370249f75083e63
   react-native-safari-view: 955d7160d159241b8e9395d12d10ea0ef863dcdd
-  react-native-safe-area-context: 190923f87d4842c908d869ac144ad395fe63a4da
+  react-native-safe-area-context: d227bd5ef6776683c330f44187351dc138b2a4cb
   React-RCTActionSheet: 600b4d10e3aea0913b5a92256d2719c0cdd26d76
   React-RCTAnimation: 791a87558389c80908ed06cc5dfc5e7920dfa360
   React-RCTBlob: d89293cc0236d9cb0933d85e430b0bbe81ad1d72
