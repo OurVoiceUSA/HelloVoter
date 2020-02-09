@@ -174,14 +174,14 @@ async function visitsAndPeople(req, res) {
   try {
     let ret = await visitsAndPeopleFromPoint(req, req.query.longitude, req.query.latitude);
     if (ret.length === 0) {
-      // find center(ish) of nearest assigned turf and use that as the query point
+      // find center(ish) of an assigned turf and use that as the query point
       let ref = await req.db.query(`match (v:Volunteer {id:{id}})
-    optional match (t:Turf)-[:ASSIGNED]->(:Team)-[:MEMBERS]->(v)
-      with v, collect(t.id) as tt
-    optional match (t:Turf)-[:ASSIGNED]->(v)
-      with tt + collect(t.id) as turfIds
-    call spatial.withinDistance("turf", {longitude: {longitude}, latitude: {latitude}}, 10000) yield node
-      where node.id in turfIds return (node.bbox[0]+node.bbox[2])/2, (node.bbox[1]+node.bbox[3])/2 limit 1`, req.query);
+      optional match (t:Turf)-[:ASSIGNED]->(:Team)-[:MEMBERS]->(v)
+        with v, collect(t) as tt
+      optional match (t:Turf)-[:ASSIGNED]->(v)
+        with tt + collect(t) as turfs
+      unwind turfs as t
+      return (t.bbox[0]+t.bbox[2])/2, (t.bbox[1]+t.bbox[3])/2 limit 1`, req.query);
       ret = await visitsAndPeopleFromPoint(req, ref.data[0][0], ref.data[0][1]);
     }
     if (ret.length !== 0) return res.json(ret);
@@ -219,7 +219,7 @@ optional match (t:Turf)-[:ASSIGNED]->(:Team)-[:MEMBERS]->(v)
   with v, collect(t.id) as tt
 optional match (t:Turf)-[:ASSIGNED]->(v)
   with tt + collect(t.id) as turfIds
-call spatial.withinDistance("turf", {longitude: {longitude}, latitude: {latitude}}, {dist}) yield node
+call spatial.withinDistance("turf", {longitude: {longitude}, latitude: {latitude}}, {dist}/1000) yield node
   where node.id in turfIds
   with node as t limit 4 `;
 
