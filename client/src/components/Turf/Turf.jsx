@@ -263,6 +263,8 @@ export default class App extends Component {
     }
 
     try {
+      let failed = 0;
+      let success = 0;
       await asyncForEach(objs, async (obj) => {
         let geometry;
         let name;
@@ -275,9 +277,13 @@ export default class App extends Component {
 
         try {
           await _fetch(global, '/turf/create', 'POST', {name, geometry});
-        } catch (e) {}
+          success++;
+        } catch (e) {
+          failed++;
+        }
       });
-      notify_success('Turf has been created.');
+      notify_success('Created '+success+' Turf.');
+      if (failed > 0) notify_error({success, failed}, 'Failed to create '+failed+' Turf.');
     } catch (e) {
       notify_error(e, 'Unable to create turf.');
     }
