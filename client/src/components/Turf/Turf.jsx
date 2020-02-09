@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 
 import { HashRouter as Router, Route } from 'react-router-dom';
 import { geocodeByAddress, getLatLng } from 'react-places-autocomplete';
+import { asyncForEach } from 'ourvoiceusa-sdk-js';
 import circleToPolygon from 'circle-to-polygon';
 import Select from 'react-select';
 import t from 'tcomb-form';
@@ -202,7 +203,15 @@ export default class App extends Component {
 
     if (this.state.importFileData !== null) {
       try {
-        objs.push(JSON.parse(this.state.importFileData));
+        let geoData = JSON.parse(this.state.importFileData);
+        if (geoData.type === "FeatureCollection") {
+          geoData.features.forEach(g => {
+            g.name = g.properties.precinctid + (g.properties.subprecinc?" "+g.properties.subprecinc:"");
+            objs.push(g);
+          });
+        } else {
+          objs.push(geoData);
+        }
       } catch (e) {
         notify_error(e, 'Unable to parse import data file.');
         return this.setState({ saving: false });
@@ -254,26 +263,20 @@ export default class App extends Component {
     }
 
     try {
-      for (let i in objs) {
-        let obj = objs[i];
+      await asyncForEach(objs, async (obj) => {
         let geometry;
         let name;
 
         if (obj.geometry) geometry = obj.geometry;
         else geometry = obj;
 
-        if (
-          this.state.selectedDistrictOption &&
-          this.state.selectedDistrictOption.value === 'all'
-        )
-          name = json.name + ' ' + obj.name;
+        if (obj.name) name = json.name + ' ' + obj.name;
         else name = json.name;
 
-        await _fetch(global, '/turf/create', 'POST', {
-          name: name,
-          geometry: geometry,
-        });
-      }
+        try {
+          await _fetch(global, '/turf/create', 'POST', {name, geometry});
+        } catch (e) {}
+      });
       notify_success('Turf has been created.');
     } catch (e) {
       notify_error(e, 'Unable to create turf.');
