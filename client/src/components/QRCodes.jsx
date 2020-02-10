@@ -9,6 +9,7 @@ import { faQrcode } from '@fortawesome/free-solid-svg-icons';
 
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
+import Checkbox from '@material-ui/core/Checkbox';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import CircularProgress from '@material-ui/core/CircularProgress';
@@ -500,6 +501,26 @@ export class CardQRCode extends Component {
     this.props.refer._loadData();
   };
 
+  onAutoTurfToggle = async (x,val) => {
+    const { global, qrcode } = this.state;
+
+    this.props.refer.setState({ saving: true });
+    try {
+      await _fetch(
+        global,
+        '/qrcode/update',
+        'POST',
+        { id: qrcode.id, autoturf: val }
+      );
+      notify_success('QRCode has been updated.');
+    } catch (e) {
+      notify_error(e, 'Unable to update QRCode.');
+    }
+    this.props.refer.setState({ saving: false });
+
+    this.props.refer._loadData();
+  }
+
   onSave = async (val) => {
     const { global, qrcode } = this.state;
 
@@ -535,7 +556,7 @@ export class CardQRCode extends Component {
               <img alt="QR Code" src={qrcode.img} />
             </ListItemAvatar>
           </ListItem>
-          <CardQRCodeFull global={global} qrcode={qrcode} refer={this} link={_inviteLink(qrcode.id, global.state.server, global.state.orgId)} onSave={this.onSave} />
+          <CardQRCodeFull global={global} qrcode={qrcode} refer={this} link={_inviteLink(qrcode.id, global.state.server, global.state.orgId)} onSave={this.onSave} onAutoTurfToggle={this.onAutoTurfToggle} />
         </div>
       );
 
@@ -611,6 +632,10 @@ export const CardQRCodeFull = props => (
         placeholder="None"
       />
       <br />
+      Auto-assign nearest turf: <Checkbox color="primary" checked={(props.qrcode.autoturf?true:false)} onChange={props.onAutoTurfToggle} />
+      <br />
+      {!props.qrcode.autoturf&&
+      <div>
       Turf this QRCode gives access to:
       <Select
         value={props.refer.state.selectedTurfOption}
@@ -620,6 +645,8 @@ export const CardQRCodeFull = props => (
         isSearchable={true}
         placeholder="None"
       />
+      </div>
+      }
     </div>
     <br />
     {props.qrcode.disabled&&

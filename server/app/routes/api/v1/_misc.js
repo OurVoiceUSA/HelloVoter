@@ -16,35 +16,6 @@ module.exports = Router({mergeParams: true})
 .post('/hello', async (req, res) => {
   // they say that time's supposed to heal ya but i ain't done much healin'
 
-  // if they have an invite code, check it
-  if (req.body.inviteCode) {
-    /* TODO: direct invite
-    let code = 'invite:'+req.body.invite;
-    // ensure valid invite
-    let ref = await req.db.query('match (v:Volunteer {id:{invite}}) return count(v)', {invite: code});
-    if (ref.data[0] === 0) return _403(res, "Invalid invite code.");
-
-    // we have a valid code, do the property swap & delete the invite
-    await req.db.query('match (s:Volunteer {id:{id}}) match (v:Volunteer {id:{invite}}) set s.tid = s.id set s.id = null set v = s delete s set v.id = v.tid set v.tid = null, v.invited = null', {id: req.user.id, invite: code});
-    */
-
-    try {
-      // check inviteCode against QRCode objects and copy assignments to this volunteer
-      let params = {id: req.user.id, inviteCode: req.body.inviteCode};
-      await req.db.query('match (v:Volunteer {id:{id}}) match (qr:QRCode {id:{inviteCode}}) where qr.disable is null match (qr)-[:AUTOASSIGN_TO]->(t:Turf) merge (t)-[:ASSIGNED]->(v) set qr.last_used = timestamp()', params);
-      await req.db.query('match (v:Volunteer {id:{id}}) match (qr:QRCode {id:{inviteCode}}) where qr.disable is null match (qr)-[:AUTOASSIGN_TO]->(f:Form) merge (f)-[:ASSIGNED]->(v) set qr.last_used = timestamp()', params);
-      await req.db.query('match (v:Volunteer {id:{id}}) match (qr:QRCode {id:{inviteCode}}) where qr.disable is null match (qr)-[:AUTOASSIGN_TO]->(t:Team) merge (t)-[:MEMBERS]->(v) set qr.last_used = timestamp()', params);
-      await req.db.query('match (v:Volunteer {id:{id}}) match (qr:QRCode {id:{inviteCode}}) where qr.disable is null create (v)-[:SCANNED {created: timestamp()}]->(qr)', params);
-    } catch (e) {
-      return _500(res, e);
-    }
-  }
-
-  let msg = "Thanks for your request to join us! You are currently awaiting an assignment.";
-  let ass = await volunteerAssignments(req, 'Volunteer', req.user);
-  if (ass.ready)
-    msg = "You are assigned turf and ready to volunteer!";
-
   // if this is coming from the mobile app
   if (typeof req.body.dinfo === 'object') {
     try {
@@ -79,10 +50,28 @@ module.exports = Router({mergeParams: true})
           console.warn(e);
         }
       }
+
+      // if they have an invite code, check it
+      if (req.body.inviteCode) {
+        let params = {id: req.user.id, inviteCode: req.body.inviteCode};
+
+        // check inviteCode against QRCode objects and copy assignments to this volunteer
+        await req.db.query('match (v:Volunteer {id:{id}}) match (qr:QRCode {id:{inviteCode}}) where qr.disable is null match (qr)-[:AUTOASSIGN_TO]->(f:Form) merge (f)-[:ASSIGNED]->(v) set qr.last_used = timestamp()', params);
+        await req.db.query('match (v:Volunteer {id:{id}}) match (qr:QRCode {id:{inviteCode}}) where qr.disable is null match (qr)-[:AUTOASSIGN_TO]->(t:Team) merge (t)-[:MEMBERS]->(v) set qr.last_used = timestamp()', params);
+        await req.db.query('match (v:Volunteer {id:{id}}) match (qr:QRCode {id:{inviteCode}}) where qr.disable is null create (v)-[:SCANNED {created: timestamp()}]->(qr) set qr.last_used = timestamp()', params);
+        // turf is either autoturf or direct assignment
+        await req.db.query('match (v:Volunteer {id:{id}}) match (qr:QRCode {id:{inviteCode}}) where qr.disable is null and qr.autoturf is null match (qr)-[:AUTOASSIGN_TO]->(t:Turf) merge (t)-[:ASSIGNED]->(v)', params);
+        await req.db.query('match (v:Volunteer {id:{id}}) match (qr:QRCode {id:{inviteCode}}) where qr.disable is null and qr.autoturf = true call spatial.withinDistance("turf", {longitude: v.location.longitude, latitude: v.location.latitude}, 10) yield node as t where t.noautoturf is null with v,t limit 1 merge (t)-[:ASSIGNED]->(v)', params);
+      }
     } catch (e) {
       return _500(res, e);
     }
   }
+
+  let msg = "Thanks for your request to join us! You are currently awaiting an assignment.";
+  let ass = await volunteerAssignments(req, 'Volunteer', req.user);
+  if (ass.ready)
+    msg = "You are assigned turf and ready to volunteer!";
 
   return res.json({msg: msg, data: ass});
 })
