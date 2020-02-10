@@ -206,7 +206,9 @@ export default class App extends Component {
         let geoData = JSON.parse(this.state.importFileData);
         if (geoData.type === "FeatureCollection") {
           geoData.features.forEach(g => {
-            g.name = g.properties.precinctid + (g.properties.subprecinc?" "+g.properties.subprecinc:"");
+            if (g.properties.name) g.name = g.properties.name;
+            else if (g.properties.NAME) g.name = g.properties.NAME;
+            else g.name = g.properties.precinctid + (g.properties.subprecinc?" "+g.properties.subprecinc:"");
             objs.push(g);
           });
         } else {
