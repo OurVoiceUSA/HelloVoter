@@ -182,6 +182,7 @@ async function visitsAndPeople(req, res) {
         with tt + collect(t) as turfs
       unwind turfs as t
       return (t.bbox[0]+t.bbox[2])/2, (t.bbox[1]+t.bbox[3])/2 limit 1`, req.query);
+      if (!ref.data || !ref.data[0]) return _403(res, "No Turf assignments.");
       ret = await visitsAndPeopleFromPoint(req, ref.data[0][0], ref.data[0][1]);
     }
     if (ret.length !== 0) return res.json(ret);
