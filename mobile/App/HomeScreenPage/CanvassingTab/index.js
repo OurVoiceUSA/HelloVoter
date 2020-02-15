@@ -83,10 +83,8 @@ export default class App extends LocationComponent {
     navigate('Canvassing', args);
   }
 
-  connectToGOTV = async() => {
+  connectToGOTV = () => {
     const { state, orgId, inviteCode } = this.state;
-
-    if (!this.checkLocationAccess()) return;
 
     if (!state) {
       this.setState({canvaslater: 451});
@@ -95,7 +93,7 @@ export default class App extends LocationComponent {
 
     if (orgId && orgId.match(/^[0-9A-Z]*$/)) {
       // first two characters are the state code
-      let place = this.state.orgId.substring(0,2).toLowerCase();
+      let place = orgId.substring(0,2).toLowerCase();
 
       this.connectToServer('gotv-'+place+'.ourvoiceusa.org', orgId, inviteCode);
     } else {
@@ -103,14 +101,14 @@ export default class App extends LocationComponent {
     }
   }
 
-  connectToServer = async(server, orgId, inviteCode) => {
+  connectToServer = (server, orgId, inviteCode) => {
     const { user } = this.state;
 
     if (!this.checkLocationAccess()) return;
 
     this.setState({server, inviteCode});
 
-    if (user && user.loggedin) await this.sayHello(server, orgId, inviteCode);
+    if (user && user.loggedin) this.sayHello(server, orgId, inviteCode);
   }
 
   recursiveProgress(i) {
@@ -425,25 +423,13 @@ export default class App extends LocationComponent {
   _useCustomAddress = () => {
     RNGooglePlaces.openAutocompleteModal()
     .then((place) => {
-      if (!_specificAddress(place.address)) {
-        this.setState({TellThemYourAddress: false});
-        this.alert(
-          say("ambiguous_address"),
-          say("no_guarantee_district"),
-          {
-            title: say("continue_anyway"),
-            onPress: () => {
-              this.finishInvite(place.location);
-            },
-          },
-          {
-            title: say("cancel"),
-            onPress: () => this.setState({confirmDialog: false, TellThemYourAddress: true}),
-          }
-        );
-      } else {
-        this.finishInvite(place.location);
-      }
+      setTimeout(() => {
+        if (!_specificAddress(place.address)) {
+          this.setState({TellThemYourAddressError: say("ambiguous_address")+", you need to enter a full address."});
+        } else {
+          this.finishInvite(place.location);
+        }
+      }, 500);
     })
     .catch(error => console.warn(error.message));
   }
@@ -455,7 +441,7 @@ export default class App extends LocationComponent {
 
   finishInvite(pos) {
     const { orgId, server, inviteCode } = this.state;
-    this.setState({startPosition: pos, TellThemYourAddress: false}, () => {
+    this.setState({startPosition: pos, TellThemYourAddress: false, TellThemYourAddressError: null}, () => {
       if (orgId) this.connectToGOTV();
       else this.connectToServer(server, null, inviteCode);
     });
@@ -476,7 +462,7 @@ export default class App extends LocationComponent {
     const {
       showCamera, newOrg, dinfo, loading, user, forms, error, locationDenied,
       askOrgId, SelectModeScreen, myOrgID, connectmode, waitmode, waitprogress,
-      canvaslater, TellThemYourAddress,
+      canvaslater, TellThemYourAddress, TellThemYourAddressError,
     } = this.state;
     const { navigate } = this.props.navigation;
 
@@ -633,6 +619,12 @@ export default class App extends LocationComponent {
         <Dialog
           title={"In what area will you be canvassing?"}
           visible={TellThemYourAddress}>
+          {(TellThemYourAddressError)&&
+            <View>
+              <Text style={{color: "red"}}>{TellThemYourAddressError}</Text>
+              <Text>{'  '}</Text>
+            </View>
+          }
           <Button block bordered primary onPress={this._useCustomAddress}>
             <Icon name="map-signs" size={20} color="black" />
             <Text>{say("searched_address_cap")}</Text>

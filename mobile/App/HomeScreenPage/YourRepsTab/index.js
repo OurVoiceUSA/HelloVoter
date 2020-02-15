@@ -141,27 +141,30 @@ export default class App extends LocationComponent {
   openAddressModal() {
     RNGooglePlaces.openAutocompleteModal()
     .then((place) => {
-      if (!_specificAddress(place.address)) {
-        this.setState({modalIsOpen: false});
-        this.alert(
-          say("ambiguous_address"),
-          say("no_guarantee_district"),
-          {
-            title: say("continue_anyway"),
-            onPress: () => {
-              place.icon = this.locationIcon;
-              this._whorepme(place);
+      setTimeout(() => {
+        if (!_specificAddress(place.address)) {
+          this.setState({modalIsOpen: false});
+          this.alert(
+            say("ambiguous_address"),
+            say("no_guarantee_district"),
+            {
+              title: say("continue_anyway"),
+              onPress: () => {
+                this.setState({confirmDialog: false});
+                place.icon = this.locationIcon;
+                this._whorepme(place);
+              },
             },
-          },
-          {
-            title: say("cancel"),
-            onPress: () => this.setState({confirmDialog: false}),
-          }
-        );
-      } else {
-        place.icon = this.locationIcon;
-        this._whorepme(place);
-      }
+            {
+              title: say("cancel"),
+              onPress: () => this.setState({confirmDialog: false}),
+            }
+          );
+        } else {
+          place.icon = this.locationIcon;
+          this._whorepme(place);
+        }
+      }, 500);
     })
     .catch(error => console.log(error.message));
   }
