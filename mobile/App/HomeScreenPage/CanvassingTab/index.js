@@ -220,7 +220,7 @@ export default class App extends LocationComponent {
       return;
     }
 
-    if (list.length) {
+    if (json.ready && list.length) {
       let forms = [];
 
       // TODO: use Promise.all (will need to dedupe list form.id first)
