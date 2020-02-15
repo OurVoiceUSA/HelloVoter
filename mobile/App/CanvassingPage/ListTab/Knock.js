@@ -94,7 +94,7 @@ export default class App extends HVComponent {
         />
         :
         <View style={{margin: 15, flexDirection: 'row'}}>
-          <Text>No persons or units have been added to this address. Use the buttons below to add one.</Text>
+          <Text>No persons {!unit?'or units ':''}have been added to this {unit?'unit':'address'}. Use the buttons below to add someone.</Text>
         </View>
         }
 
