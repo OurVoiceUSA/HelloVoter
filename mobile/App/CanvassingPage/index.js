@@ -366,6 +366,7 @@ export default class App extends LocationComponent {
 
   showConfirmAddress = (pos) => {
     const { mapCamera, myPosition } = this.state;
+    let { fAddress } = this.state;
 
     if (!this.addOk()) return this.alert("Active Filter", "You cannot add a new address while a filter is active.");
 
@@ -403,17 +404,16 @@ export default class App extends LocationComponent {
           let arr = res.address.split(", ");
           let country = arr[arr.length-1]; // unused
           let state_zip = arr[arr.length-2];
-          let fAddress = {
-            state: (state_zip?state_zip.split(" ")[0]:null),
-            zip: (state_zip?state_zip.split(" ")[1]:null),
-            city: arr[arr.length-3],
-            street: arr[arr.length-4],
-            longitude: pos.longitude,
-            latitude: pos.latitude,
-          };
-
-          this.setState({fAddress});
+          fAddress.state = (state_zip?state_zip.split(" ")[0]:null);
+          fAddress.zip = (state_zip?state_zip.split(" ")[1]:null);
+          fAddress.city = arr[arr.length-3];
+          fAddress.street = arr[arr.length-4];
         }
+
+        fAddress.longitude = pos.longitude;
+        fAddress.latitude = pos.latitude;
+
+        this.setState({fAddress});
       } catch (error) {}
       this.setState({loading: false})
     }, 550);
