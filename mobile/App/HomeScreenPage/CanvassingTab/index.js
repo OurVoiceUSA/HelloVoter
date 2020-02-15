@@ -12,6 +12,7 @@ import NewOrg from './NewOrg';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { sleep, asyncForEach } from 'ourvoiceusa-sdk-js';
+import RNGooglePlaces from 'react-native-google-places';
 import { Dialog } from 'react-native-simple-dialogs';
 import storage from 'react-native-storage-wrapper';
 import * as Progress from 'react-native-progress';
@@ -24,6 +25,7 @@ import SunCalc from 'suncalc';
 import {
   DINFO, STORAGE_KEY_JWT, STORAGE_KEY_OLDFORMS, URL_GUIDELINES, URL_HELP,
   Divider, say, _getApiToken, api_base_uri, _loginPing, openURL, getUSState, localaddress,
+  _specificAddress,
 } from '../../common';
 import { wsbase } from '../../config';
 
@@ -55,8 +57,10 @@ export default class App extends LocationComponent {
       myOrgID: null,
       servers: [],
       SelectModeScreen: false,
+      TellThemYourAddress: false,
       server: null,
       myPosition: {latitude: null, longitude: null},
+      startPosition: {latitude: null, longitude: null},
       showCamera: false,
       newOrg: false,
     };
@@ -120,10 +124,11 @@ export default class App extends LocationComponent {
 
   sayHello = async (server, orgId, inviteCode) => {
     const { dinfo, myPosition } = this.state;
-    let { servers } = this.state;
+    let { servers, startPosition } = this.state;
     let canvaslater;
 
     if (!this.checkLocationAccess()) return;
+    if (!startPosition.longitude || !startPosition.latitude) startPosition = myPosition;
 
     this.setState({connectmode: true});
 
@@ -155,8 +160,8 @@ export default class App extends LocationComponent {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            longitude: myPosition.longitude,
-            latitude: myPosition.latitude,
+            longitude: startPosition.longitude,
+            latitude: startPosition.latitude,
             dinfo,
             inviteCode,
           }),
@@ -211,7 +216,7 @@ export default class App extends LocationComponent {
     await this.addServer(server, orgId, list);
 
     let now = new Date();
-    let times = SunCalc.getTimes(now, myPosition.latitude, myPosition.longitude);
+    let times = SunCalc.getTimes(now, startPosition.latitude, startPosition.longitude);
     if (!admin && !json.sundownok && (now < times.sunrise || now > times.sunset)) {
       setTimeout(() => this.setState({canvaslater: 409}), 600);
       return;
@@ -408,10 +413,62 @@ export default class App extends LocationComponent {
       if (!obj.orgId && !obj.server) throw "invalid qr code";
 
       // orgId means GOTV
-      if (obj.orgId) this.setState({orgId: obj.orgId, inviteCode: obj.inviteCode}, () => this.connectToGOTV());
-      else this.setState({server: obj.server, inviteCode: obj.inviteCode}, () => this.connectToServer(obj.server, null, obj.inviteCode));
+      if (obj.orgId) this.setState({orgId: obj.orgId, inviteCode: obj.inviteCode});
+      else this.setState({server: obj.server, inviteCode: obj.inviteCode});
+
+      this.setState({TellThemYourAddress: true});
     } catch (e) {
       this.alert('Invalid Code', 'There was a problem with the scanned QR Code. Please confirm it is a valid HelloVoter QR Code and try again.');
+    }
+  }
+
+  _useCustomAddress = () => {
+    RNGooglePlaces.openAutocompleteModal()
+    .then((place) => {
+      if (!_specificAddress(place.address)) {
+        this.setState({TellThemYourAddress: false});
+        this.alert(
+          say("ambiguous_address"),
+          say("no_guarantee_district"),
+          {
+            title: say("continue_anyway"),
+            onPress: () => {
+              this.finishInvite(place.location);
+            },
+          },
+          {
+            title: say("cancel"),
+            onPress: () => this.setState({confirmDialog: false, TellThemYourAddress: true}),
+          }
+        );
+      } else {
+        this.finishInvite(place.location);
+      }
+    })
+    .catch(error => console.warn(error.message));
+  }
+
+  doCurrentLocation = () => {
+    const { myPosition } = this.state;
+    this.finishInvite(myPosition);
+  }
+
+  finishInvite(pos) {
+    const { orgId, server, inviteCode } = this.state;
+    this.setState({startPosition: pos, TellThemYourAddress: false}, () => {
+      if (orgId) this.connectToGOTV();
+      else this.connectToServer(server, null, inviteCode);
+    });
+  }
+
+  showCamera() {
+    const { dinfo } = this.state;
+
+    // camera doesn't work in the emulator, just use local instance for connection
+    if (dinfo.Emulator) {
+      this.parseInvite('http://localhost/?server='+localaddress()+':8080');
+    } else {
+      this.setState({showCamera: true});
     }
   }
 
@@ -419,7 +476,7 @@ export default class App extends LocationComponent {
     const {
       showCamera, newOrg, dinfo, loading, user, forms, error, locationDenied,
       askOrgId, SelectModeScreen, myOrgID, connectmode, waitmode, waitprogress,
-      canvaslater,
+      canvaslater, TellThemYourAddress,
     } = this.state;
     const { navigate } = this.props.navigation;
 
@@ -522,7 +579,7 @@ export default class App extends LocationComponent {
           visible={SelectModeScreen}
           onTouchOutside={() => this.setState({SelectModeScreen: false})}>
           <View>
-            <Button block bordered dark onPress={() => this.setState({showCamera: true})}>
+            <Button block bordered dark onPress={() => this.showCamera()}>
               <Icon name="qrcode" {...iconStyles} />
               <Text>{say("scan_qr_code")}</Text>
             </Button>
@@ -553,21 +610,6 @@ export default class App extends LocationComponent {
               <Text style={{fontSize: 12, marginBottom: 10, textAlign: 'justify'}}>{say("org_id_signup_subtext")}</Text>
             </View>
             }
-
-            {(__DEV__&&dinfo.Emulator)&&
-            <View>
-              <Button block bordered dark onPress={() => {
-                this.setState({SelectModeScreen: false});
-                this.connectToServer(localaddress()+':8080')}
-              }>
-                <Icon name="code" {...iconStyles} />
-                <Text>Local Dev</Text>
-              </Button>
-              <Text style={{fontSize: 12, marginBottom: 10, textAlign: 'justify'}}>
-                Connect to your localhost development instance of HelloVoterAPI
-              </Text>
-            </View>
-            }
           </View>
         </Dialog>
 
@@ -586,6 +628,20 @@ export default class App extends LocationComponent {
               {(waitmode)&&<PatreonButton text="Avoid app startup times! Become a patron for faster entry into canvassing." />}
             <KeepAwake />
           </View>
+        </Dialog>
+
+        <Dialog
+          title={"In what area will you be canvassing?"}
+          visible={TellThemYourAddress}>
+          <Button block bordered primary onPress={this._useCustomAddress}>
+            <Icon name="map-signs" size={20} color="black" />
+            <Text>{say("searched_address_cap")}</Text>
+          </Button>
+          <Text>{'  '}</Text>
+          <Button block bordered primary onPress={this.doCurrentLocation}>
+            <Icon name="map-marker" size={25} color="black" />
+            <Text>{say("current_location")}</Text>
+          </Button>
         </Dialog>
 
         <Prompt
