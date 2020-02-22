@@ -104,10 +104,10 @@ export function _logout() {
   _rmUser();
 }
 
-export async function openURL(url) {
+export async function openURL(url, external) {
   try {
     // Use SafariView in-line to the app on iOS if it's an http URL
-    if (url.match(/^http/) && Platform.OS === 'ios') {
+    if (url.match(/^http/) && Platform.OS === 'ios' && !external) {
       SafariView.show({
         url: url,
         fromBottom: true,
