@@ -10,6 +10,7 @@ module.exports = Router({mergeParams: true})
   if (!req.user.admin) return _403(res, "Permission denied.");
   if (!valid(req.body.name)) return _400(res, "Invalid value to parameter 'name'.");
   if (!valid(req.body.type)) return _400(res, "Invalid value to parameter 'type'.");
+  if (req.body.value && !valid(req.body.value)) return _400(res, "Invalid value to parameter 'value'.");
   req.body.author_id = req.user.id;
 
   switch (req.body.type.toLowerCase()) {
@@ -19,6 +20,7 @@ module.exports = Router({mergeParams: true})
     case 'boolean':
     case 'date':
     case 'sand':
+    case 'hyperlink':
       break;
     default: return _400(res, "Invalid value to parameter 'type'.");
   }
@@ -31,6 +33,8 @@ module.exports = Router({mergeParams: true})
 
     if (req.body.type.toLowerCase() === 'sand')
       await req.db.query('match (at:Attribute {id:{id}}) set at.type = {type}, at.values = {values}', {id: attributeId, type: 'string', values: ["SA","A","N","D","SD"]});
+    if (req.body.type.toLowerCase() === 'hyperlink')
+      await req.db.query('match (at:Attribute {id:{id}}) set at.value = {value}', {id: attributeId, value: req.body.value});
     if (req.body.options && typeof req.body.options === "object" && req.body.options.length)
       await req.db.query('match (at:Attribute {id:{id}}) set at.values = {values}', {id: attributeId, values: req.body.options});
   } catch(e) {

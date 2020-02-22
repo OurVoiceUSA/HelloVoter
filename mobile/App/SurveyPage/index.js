@@ -10,7 +10,7 @@ import { Container, Header, Content, Footer, FooterTab, Text, Button } from 'nat
 
 import HVComponent, { HVConfirmDialog } from '../HVComponent';
 
-import { say, getEpoch, getPropFromArrObj } from '../common';
+import { say, getEpoch, getPropFromArrObj, openURL } from '../common';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 import storage from 'react-native-storage-wrapper';
@@ -171,6 +171,17 @@ export default class App extends HVComponent {
       if (a.readonly) {
         newOptions.fields[a.id].disabled = true;
         newOptions.fields[a.id].editable = false;
+      }
+      if (a.type === 'hyperlink') {
+        newOptions.fields[a.id].factory = () => (
+          <View>
+            <Text style={{fontSize: 18}}>{a.name}</Text>
+            <Button info onPress={() => openURL(a.value, true)}>
+              <Text>{a.value}</Text>
+            </Button>
+            <Text />
+          </View>
+        );
       }
       if (boxflag === true) {
         newOptions.fields[a.id].multiline = true;

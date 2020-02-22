@@ -29,12 +29,15 @@ const AddAttribute = (props) => {
     const [name, setName] = useState('');
 
     //type - string
+    const [value, setValue] = useState('string');
+
+    //type - string
     const [type, setType] = useState('string');
 
     const [showAddOps, setShowAddOps] = useState(false);
 
     //additionalOptions - array of strings
-    const [additionalOptions, setAdditionalOptions] = useState(['']);
+    const [additionalOptions, setAdditionalOptions] = useState([]);
 
     //multi-select flag - bool only on additional options.
     const [multi, setMulti] = useState(false);
@@ -67,6 +70,10 @@ const AddAttribute = (props) => {
         setMulti(event.target.checked);
     }
 
+    const handleValueChange = (event) => {
+        setValue(event.target.value);
+    }
+
     const handleOptionChange = (event, index) => {
         const tempArray = [];
         for ( let key in additionalOptions) {
@@ -95,6 +102,18 @@ const AddAttribute = (props) => {
             }
             label="Additional Options"
           />
+        );
+    }
+
+    if(type === 'hyperlink') {
+        addOpsCheck = (
+          <FormControl className={useStyles.formControl}>
+              <TextField
+                id="value"
+                label="URL"
+                onChange={(event) => handleValueChange(event)}
+              />
+          </FormControl>
         );
     }
 
@@ -148,8 +167,9 @@ const AddAttribute = (props) => {
     const buildAttr = () => {
         return {
             name: name,
+            value: value,
             type: type,
-            options: additionalOptions,
+            options: (additionalOptions.length?additionalOptions:undefined),
             multi: multi
         };
     }
@@ -178,6 +198,7 @@ const AddAttribute = (props) => {
                 <MenuItem value='textbox'>Textbox</MenuItem>
                 <MenuItem value='number'>Number</MenuItem>
                 <MenuItem value='boolean'>Boolean</MenuItem>
+                <MenuItem value='hyperlink'>Hyperlink</MenuItem>
                 {/* TODO: <MenuItem value='date'>Date</MenuItem> */}
                 {/* TODO: <MenuItem value='sand'>Agree/Disagree</MenuItem> */}
                 </Select>
