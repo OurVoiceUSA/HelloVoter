@@ -242,6 +242,7 @@ export default class ImportData extends Component {
           color="primary"
           onClick={() => {
             let { fields, selectedAttribute } = this.state;
+            if (!selectedAttribute) return;
             fields.push(selectedAttribute.label);
             this.setState({fields, selectedAttribute: null})
           }}
