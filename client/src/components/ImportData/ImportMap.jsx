@@ -1,17 +1,21 @@
 import React from 'react';
 import map from 'lodash/map';
 import { MapSelect } from '../Elements';
-import { fields } from './constants';
 import { pipe } from './utilities';
 
 export class ImportMap extends React.Component {
-  state = {
-    data: this.props.data || [],
-    headers: this.props.headers || [],
-    fields: fields,
-    formats: {},
-    mapped: [],
-  };
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      data: this.props.data || [],
+      headers: this.props.headers || [],
+      fields: props.fields,
+      formats: {},
+      mapped: [],
+    };
+  }
 
   formatHeaders = headers =>
     headers.map(i => ({

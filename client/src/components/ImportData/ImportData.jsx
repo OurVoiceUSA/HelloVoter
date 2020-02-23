@@ -3,18 +3,21 @@ import CSVReader from 'react-csv-reader';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Button from '@material-ui/core/Button/Button';
 import Divider from '@material-ui/core/Divider';
-import { faFileCsv } from '@fortawesome/free-solid-svg-icons';
 import { ImportPreview, ImportMap } from './';
 import { PaperTable, ProgressBar } from '../Elements';
-import { fields } from './constants';
 import { PAPER_TABLE_SPEC } from './utilities';
+import PaperclipIcon from '@material-ui/icons/AttachFile';
+import AddIcon from '@material-ui/icons/Add';
+import Select from 'react-select';
+
+import {ucFirst} from 'ourvoiceusa-sdk-js';
 
 import {
   notify_error,
   notify_success,
   _fetch,
   _loadImports,
-  Icon,
+  _loadAttributes,
   RootLoader,
 } from '../../common';
 
@@ -30,6 +33,10 @@ const defaultState = {
   completed: 0,
 };
 
+function value2select(val) {
+  return {value: val, label: ucFirst(val)};
+}
+
 export default class ImportData extends Component {
 
   constructor(props) {
@@ -38,6 +45,17 @@ export default class ImportData extends Component {
     this.state = {
       global: props.global,
       imports: [],
+      attributes: [],
+      fields: [
+        'Unique Record ID',
+        'Street Address',
+        'Unit',
+        'City',
+        'State',
+        'Zip',
+        'Longitude',
+        'Latitude',
+      ],
       ...defaultState,
     };
   }
@@ -59,13 +77,13 @@ export default class ImportData extends Component {
   };
 
   sendData = async () => {
-    const { global, mapped: data, filename } = this.state;
+    const { global, fields, mapped: data, filename } = this.state;
     const total = data.length;
 
     this.setState({sending: true, completed: 1});
     await _fetch(global, '/import/begin', 'POST', {
       filename: filename,
-      attributes: ['Name', 'Party Affiliation'],
+      attributes: fields.filter((meh,idx) => idx >= 8),
     });
 
     let seps = ['#', 'apt', 'unit', 'ste', 'spc'];
@@ -116,13 +134,16 @@ export default class ImportData extends Component {
     const { global } = this.state;
 
     let imports = [];
+    let attributes = [];
+
     this.setState({ loading: true });
     try {
+      attributes = await _loadAttributes(global);
       imports = await _loadImports(global);
     } catch (e) {
       notify_error(e, 'Unable to load import data.');
     }
-    this.setState({ loading: false, imports }, () => {
+    this.setState({ loading: false, imports, attributes }, () => {
       this._resetState();
     });
   };
@@ -153,6 +174,8 @@ export default class ImportData extends Component {
       mapped = [],
       data = [],
       headers = [],
+      attributes,
+      fields,
       perPage,
       pageNum,
       imports,
@@ -190,8 +213,8 @@ export default class ImportData extends Component {
       <div>
         <ProgressBar title="Uploading import file..." completed={completed} />
         <div style={{ display: 'flex' }}>
+          <PaperclipIcon />
           <h3>Import Data</h3> &nbsp;&nbsp;&nbsp;
-          <Icon icon={faFileCsv} size="3x" />
         </div>
         <ImportMap
           headers={headers}
@@ -199,6 +222,35 @@ export default class ImportData extends Component {
           data={data}
           getMapped={this.getMapped}
         />
+        <Divider variant="middle" />
+        <br />
+        <Select
+          value={this.state.selectedAttribute}
+          options={attributes.filter(a => fields.indexOf(a.label) === -1).map(a => {
+            return {
+              value: a.id,
+              label: a.name,
+            };
+          })}
+          onChange={(selectedAttribute) => this.setState({selectedAttribute})}
+          isMulti={false}
+          isSearchable={true}
+          placeholder="Select an attribute"
+        />
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => {
+            let { fields, selectedAttribute } = this.state;
+            fields.push(selectedAttribute.label);
+            this.setState({fields, selectedAttribute: null})
+          }}
+        >
+          <AddIcon /> Add Attribute
+          <Divider variant="middle" />
+        </Button>
+        <br />
+        <br />
         <Divider variant="middle" />
         <br />
         <Button
