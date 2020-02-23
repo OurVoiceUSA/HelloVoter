@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@react-native-community/art": "^1.1.2",
-    "@react-native-community/async-storage": "^1.7.1",
+    "@react-native-community/async-storage": "^1.8.0",
     "@react-native-community/geolocation": "^2.0.2",
     "@react-native-community/masked-view": "^0.1.6",
     "@react-native-community/netinfo": "^5.5.0",
@@ -51,7 +51,7 @@
     "react-native-rate": "^1.1.10",
     "react-native-safari-view": "^2.1.0",
     "react-native-safe-area-context": "^0.7.3",
-    "react-native-screens": "^2.0.0-beta.4",
+    "react-native-screens": "^2.0.0-beta.10",
     "react-native-settings-components": "0.0.2",
     "react-native-simple-dialogs": "^1.2.1",
     "react-native-snap-carousel": "^3.8.4",
