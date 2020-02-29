@@ -10,7 +10,7 @@ import LocationComponent from '../../LocationComponent';
 import { HVConfirmDialog } from '../../HVComponent';
 import DisplayRep from './DisplayRep';
 import PolProfile from './PolProfile';
-import { wsbase } from '../../config'
+import { wsbase, google_api_key } from '../../config'
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 import RNGooglePlaces from 'react-native-google-places';
@@ -82,6 +82,7 @@ export default class App extends LocationComponent {
 
   _whorepme = async (position) => {
     let { user } = this.state;
+    let res;
 
     this.setState({
       loading: true,
@@ -101,8 +102,19 @@ export default class App extends LocationComponent {
         _saveUser(user, true);
       }
 
-      let res = await _apiCall('/api/v1/whorepme?lng='+position.longitude+'&lat='+position.latitude, {address: position.address});
-      body = await res.json();
+      let lng = position.longitude;
+      let lat = position.latitude;
+      let address = position.address;
+
+      let url = "https://www.googleapis.com/civicinfo/v2/representatives"+
+        "?key="+google_api_key+
+        "&address="+(address?address:lat+","+lng);
+
+        res = await fetch(url, {compress: true});
+        body = await res.json();
+        if (body.error) {
+          throw "API returned an error";
+        }
 
     } catch (error) {
       this._genericServiceError(error, "There was an error fetching data for this request.");
@@ -196,35 +208,6 @@ export default class App extends LocationComponent {
       polProfile, polProfileOffice, polProfileInfo,
     } = this.state;
 
-    if (apiData && !apiData.msg) {
-
-      if (apiData.cd.length == 0) {
-        var nodata = {key: 1, title: say("us_house_of_reps")};
-        apiData.cd.push(nodata);
-      }
-
-      if (apiData.sen.length == 0) {
-        var nodata = {key: 1, title: say("us_senate")};
-        apiData.sen.push(nodata);
-      }
-
-      if (apiData.sldl.length == 0) {
-        var nodata = {key: 1, title: say("sldl")};
-        apiData.sldl.push(nodata);
-      }
-
-      if (apiData.sldu.length == 0) {
-        var nodata = {key: 1, title: say("sldu")};
-        apiData.sldu.push(nodata);
-      }
-
-      if (apiData.other.length == 0) {
-        var nodata = {key: 1, title: say("state_local_offials")};
-        apiData.other.push(nodata);
-      }
-
-    }
-
     switch(myPosition.icon) {
       case 'map-marker': basedOnYour = say("approximate_address"); break;
       case 'home': basedOnYour = say("home_address"); break;
@@ -266,80 +249,35 @@ export default class App extends LocationComponent {
         </View>
         }
 
-        {apiData && apiData.msg && !loading &&
-        <View style={{flex: 1}}>
-          <View style={{flex: 1, margin: 10, justifyContent: 'center', alignItems: 'center'}}>
-            <Text style={{fontSize: 20, textAlign: 'center', margin: 10}}>{apiData.msg}</Text>
-          </View>
-        </View>
-        }
+        {apiData && !loading && Object.keys(apiData.divisions).sort((a,b) => a.length>b.length).map(d => {
+          // skip divisions with no offices
+          if (!apiData.divisions[d].officeIndices) return null;
+          // skip top level
+          if (d === "ocd-division/country:us") return null;
 
-        {apiData && !apiData.msg && !loading &&
-        <View>
-          <FlatList
-            scrollEnabled={false}
-            data={apiData.cd}
-            renderItem={({item}) =>
-              <DisplayRep
-                refer={this}
-                office={item}
-                location={myPosition}
-                />
-            }
-          />
-
-          <FlatList
-            scrollEnabled={false}
-            data={apiData.sen}
-            renderItem={({item}) =>
-              <DisplayRep
-                refer={this}
-                office={item}
-                location={myPosition}
-                />
-            }
-          />
-
-          <FlatList
-            scrollEnabled={false}
-            data={apiData.sldl}
-            renderItem={({item}) =>
-              <DisplayRep
-                refer={this}
-                office={item}
-                location={myPosition}
-                />
-            }
-          />
-
-          <FlatList
-            scrollEnabled={false}
-            data={apiData.sldu}
-            renderItem={({item}) =>
-              <DisplayRep
-                refer={this}
-                office={item}
-                location={myPosition}
-                />
-            }
-          />
-
-          <FlatList
-            scrollEnabled={false}
-            data={apiData.other}
-            renderItem={({item}) =>
-              <DisplayRep
-                refer={this}
-                office={item}
-                location={myPosition}
-                />
-            }
-          />
-
-          <View style={{paddingBottom: 35}}>
-          </View>
-        </View>
-        }
+          return (
+            <View>
+              {apiData.divisions[d].officeIndices.map(n => {
+                // skip officies with no officials
+                if (!apiData.offices[n].officialIndices) return null;
+                return (
+                  <View>
+                    <Text style={{marginLeft: 10, fontSize: 20}}>{apiData.offices[n].name}</Text>
+                    {apiData.offices[n].officialIndices.map(o => {
+                      return (
+                        <DisplayRep
+                          refer={this}
+                          office={apiData.offices[n].name}
+                          info={apiData.officials[o]}
+                          />
+                      );
+                    })}
+                  </View>
+                );
+              })}
+            </View>
+          );
+        })}
 
         <Dialog
           title={say("show_representatives_by")+":"}
