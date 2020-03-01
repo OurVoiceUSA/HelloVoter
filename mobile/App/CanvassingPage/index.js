@@ -599,9 +599,12 @@ export default class App extends LocationComponent {
 
     this.updateLocalMarker(place, input);
 
-    if (person.new) place.people.push(person);
-
     this.sendData('/people/visit/'+(person.new?'add':'update'), input, true);
+
+    if (person.new) {
+      person.new = undefined;
+      place.people.push(person);
+    }
   }
 
   sendStatus(status, id, place, unit, personId) {
