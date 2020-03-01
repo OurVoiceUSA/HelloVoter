@@ -189,8 +189,6 @@ export default class App extends HVComponent {
       if (a.type === 'note') {
         newOptions.fields[a.id].factory = () => (
           <View>
-            <Text style={{fontSize: 18}}>{a.name}</Text>
-            <Text />
             <Text>{a.value}</Text>
             <Text />
           </View>
