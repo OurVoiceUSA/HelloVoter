@@ -186,6 +186,16 @@ export default class App extends HVComponent {
           </View>
         );
       }
+      if (a.type === 'note') {
+        newOptions.fields[a.id].factory = () => (
+          <View>
+            <Text style={{fontSize: 18}}>{a.name}</Text>
+            <Text />
+            <Text>{a.value}</Text>
+            <Text />
+          </View>
+        );
+      }
       if (boxflag === true) {
         newOptions.fields[a.id].multiline = true;
         newOptions.fields[a.id].stylesheet = {

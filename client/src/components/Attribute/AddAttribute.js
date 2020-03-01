@@ -105,12 +105,24 @@ const AddAttribute = (props) => {
         );
     }
 
-    if(type === 'hyperlink') {
+    if (type === 'hyperlink') {
         addOpsCheck = (
           <FormControl className={useStyles.formControl}>
               <TextField
                 id="value"
                 label="URL"
+                onChange={(event) => handleValueChange(event)}
+              />
+          </FormControl>
+        );
+    }
+
+    if (type === 'note') {
+        addOpsCheck = (
+          <FormControl className={useStyles.formControl}>
+              <TextField
+                id="value"
+                label="Note text"
                 onChange={(event) => handleValueChange(event)}
               />
           </FormControl>
@@ -199,6 +211,7 @@ const AddAttribute = (props) => {
                 <MenuItem value='number'>Number</MenuItem>
                 <MenuItem value='boolean'>Boolean</MenuItem>
                 <MenuItem value='hyperlink'>Hyperlink</MenuItem>
+                <MenuItem value='note'>Note</MenuItem>
                 {/* TODO: <MenuItem value='date'>Date</MenuItem> */}
                 {/* TODO: <MenuItem value='sand'>Agree/Disagree</MenuItem> */}
                 </Select>

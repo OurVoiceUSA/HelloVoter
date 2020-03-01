@@ -21,6 +21,7 @@ module.exports = Router({mergeParams: true})
     case 'date':
     case 'sand':
     case 'hyperlink':
+    case 'note':
       break;
     default: return _400(res, "Invalid value to parameter 'type'.");
   }
@@ -33,7 +34,7 @@ module.exports = Router({mergeParams: true})
 
     if (req.body.type.toLowerCase() === 'sand')
       await req.db.query('match (at:Attribute {id:{id}}) set at.type = {type}, at.values = {values}', {id: attributeId, type: 'string', values: ["SA","A","N","D","SD"]});
-    if (req.body.type.toLowerCase() === 'hyperlink')
+    if (req.body.type.toLowerCase() === 'hyperlink' || req.body.type.toLowerCase() === 'note')
       await req.db.query('match (at:Attribute {id:{id}}) set at.value = {value}', {id: attributeId, value: req.body.value});
     if (req.body.options && typeof req.body.options === "object" && req.body.options.length)
       await req.db.query('match (at:Attribute {id:{id}}) set at.values = {values}', {id: attributeId, values: req.body.options});
