@@ -280,6 +280,12 @@ export default class App extends LocationComponent {
           );
         })}
 
+        <Divider />
+
+        <View style={{margin: 12}}>
+          <PatreonButton text="While this app is free to use, it is not free to create & maintain! Become a patron to help ensure continued development work." />
+        </View>
+
         <Dialog
           title={say("show_representatives_by")+":"}
           visible={modalIsOpen}
