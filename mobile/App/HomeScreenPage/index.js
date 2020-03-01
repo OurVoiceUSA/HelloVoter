@@ -27,6 +27,7 @@ export default class App extends HVComponent {
       sliderActiveSlide: 0,
       patreonNames: [],
       ctidx: 0,
+      yridx: 0,
     };
   }
 
@@ -57,7 +58,7 @@ export default class App extends HVComponent {
   }
 
   render() {
-    const { active, appVersion, carouselItems, sliderActiveSlide, patreonNames, ctidx } = this.state;
+    const { active, appVersion, carouselItems, sliderActiveSlide, patreonNames, ctidx, yridx } = this.state;
 
     return (
       <Container>
@@ -66,7 +67,7 @@ export default class App extends HVComponent {
             <Home refer={this} items={carouselItems} />
           }
           {active === 'reps' &&
-            <YourReps />
+            <YourReps key={yridx} />
           }
           {active === 'canvassing' &&
             <CanvassingSetup navigation={this.props.navigation} refer={this} key={ctidx} />
@@ -84,7 +85,7 @@ export default class App extends HVComponent {
               <Icon name="home" size={25} />
               <Text>{say("home")}</Text>
             </Button>
-            <Button active={(active === 'reps'?true:false)} onPress={() => this.setState({active: 'reps'})}>
+            <Button active={(active === 'reps'?true:false)} onPress={() => this.setState({active: 'reps', yridx: yridx+1})}>
               <Icon name="group" size={25} />
               <Text>{say("your_reps")}</Text>
             </Button>
