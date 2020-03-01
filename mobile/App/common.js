@@ -552,14 +552,23 @@ export const Divider = props => (
   />
 );
 
-export const PersonAttr = props => {
-  if (props.form.attributes[props.idx]) {
-    let id = props.form.attributes[props.idx].id;
-    let name = props.form.attributes[props.idx].name;
-    let attr = (props.attrs.filter(a => a.id === id))[0];
+export const PersonAttr = ({form, attrs, idx}) => {
+  // skip certain attributes
+  let fattrs = form.attributes.filter(a => {
+    switch (a.type) {
+      case 'hyperlink':
+      case 'note':
+        return false;
+    }
+    return true;
+  })
+  if (fattrs[idx]) {
+    let id = fattrs[idx].id;
+    let name = fattrs[idx].name;
+    let attr = (attrs.filter(a => a.id === id))[0];
     if (attr) {
       let value = attr.value;
-      if (props.form.attributes[props.idx].type === 'boolean') {
+      if (fattrs[idx].type === 'boolean') {
         if (value) value = "Yes";
         else value = "No";
       }
