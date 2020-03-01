@@ -133,7 +133,7 @@ export default class App extends HVComponent {
   }
 
   render() {
-    const { form } = this.state;
+    const { form, person } = this.state;
 
     let newStruct = {};
     let newOptions = {
@@ -148,6 +148,9 @@ export default class App extends HVComponent {
       let value;
       let mode;
       let boxflag = false;
+
+      if (a.readonly && person.new) return;
+
       switch (a.type) {
         case 'textbox': value = t.String; boxflag = true; break;
         case 'number': value = t.Number; break;
@@ -155,7 +158,7 @@ export default class App extends HVComponent {
         //case 'date': value = t.Date; mode = 'date'; break;
         case 'string':
           if (a.values) {
-            let matching = this.state.person.attrs.filter(i => i.id === a.id);
+            let matching = person.attrs.filter(i => i.id === a.id);
             value = this.valueToEnums(a.values.concat(matching.map(i => i.value)));
           } else {
             value = t.String;
