@@ -524,6 +524,16 @@ export default class App extends LocationComponent {
 
     return (
       <Content>
+
+      <View style={{flexDirection: 'row', margin: 20, marginTop: 0, marginBottom: 10, alignItems: 'center'}}>
+        <View style={{marginRight: 20, marginTop: 20}}>
+          <Image source={{ uri: user.avatar }} style={{height: 50, width: 50, borderRadius: 20}} />
+        </View>
+        <View style={{flex: 1}}>
+          <Text>Logged in as {user.name}</Text>
+        </View>
+      </View>
+
         <List>
           <ListItem itemDivider icon>
             <Text>{say("select_canvassing_campaign")}:</Text>
