@@ -256,16 +256,17 @@ export default class App extends LocationComponent {
           if (d === "ocd-division/country:us") return null;
 
           return (
-            <View>
+            <View key={d}>
               {apiData.divisions[d].officeIndices.map(n => {
                 // skip officies with no officials
                 if (!apiData.offices[n].officialIndices) return null;
                 return (
-                  <View>
+                  <View key={n}>
                     <Text style={{marginLeft: 10, fontSize: 20}}>{apiData.offices[n].name}</Text>
-                    {apiData.offices[n].officialIndices.map(o => {
+                    {apiData.offices[n].officialIndices.map((o,i) => {
                       return (
                         <DisplayRep
+                          key={i}
                           refer={this}
                           office={apiData.offices[n].name}
                           info={apiData.officials[o]}
