@@ -539,6 +539,12 @@ export default class App extends LocationComponent {
         <Divider />
 
         <View style={{margin: 12}}>
+          <PatreonButton text="While this app is free to use, it is not free to create & maintain! Become a patron to help ensure continued development work." />
+        </View>
+
+        <Divider />
+
+        <View style={{margin: 12}}>
           <Text>
             {say("need_help_using_tool")} <Text style={{fontWeight: 'bold', color: 'blue'}} onPress={() => openURL(URL_HELP)}>
             {say("canvassing_documentation")}</Text> {say("with_useful_articles")}
@@ -552,12 +558,6 @@ export default class App extends LocationComponent {
             {say("using_tool_you_acknowledge")} <Text style={{fontWeight: 'bold', color: 'blue'}} onPress={() => openURL(URL_GUIDELINES)}>
             {say("canvassing_guidelines")}</Text>. {say("be_courteous_to_those")}
           </Text>
-        </View>
-
-        <Divider />
-
-        <View style={{margin: 12}}>
-          <PatreonButton text="While this app is free to use, it is not free to create & maintain! Become a patron to help ensure continued development work." />
         </View>
 
         <Dialog
