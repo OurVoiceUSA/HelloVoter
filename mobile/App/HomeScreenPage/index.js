@@ -23,6 +23,7 @@ export default class App extends HVComponent {
     this.state = {
       active: 'home',
       appVersion: "unknown",
+      BundleId: "unknown",
       carouselItems: carouselItems(this),
       sliderActiveSlide: 0,
       patreonNames: [],
@@ -35,7 +36,7 @@ export default class App extends HVComponent {
     this.loadPatreonNames();
     permissionNotify();
     this.checkForInvite();
-    DINFO().then(i => this.setState({appVersion: i.Version})).catch(e => console.warn(e));
+    DINFO().then(i => this.setState({appVersion: i.Version, BundleId: i.BundleId})).catch(e => console.warn(e));
   }
 
   loadPatreonNames = async () => {
@@ -58,7 +59,7 @@ export default class App extends HVComponent {
   }
 
   render() {
-    const { active, appVersion, carouselItems, sliderActiveSlide, patreonNames, ctidx, yridx } = this.state;
+    const { active, appVersion, BundleId, carouselItems, sliderActiveSlide, patreonNames, ctidx, yridx } = this.state;
 
     return (
       <Container>
@@ -67,7 +68,7 @@ export default class App extends HVComponent {
             <Home refer={this} items={carouselItems} />
           }
           {active === 'reps' &&
-            <YourReps key={yridx} />
+            <YourReps BundleId={BundleId} key={yridx} />
           }
           {active === 'canvassing' &&
             <CanvassingSetup navigation={this.props.navigation} refer={this} key={ctidx} />

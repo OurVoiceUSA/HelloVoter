@@ -1,16 +1,12 @@
 import React, { PureComponent } from 'react';
-import {
-  View,
-  FlatList,
-  TouchableOpacity,
-} from 'react-native';
+import { View, FlatList, TouchableOpacity, Platform } from 'react-native';
 import { Card, CardItem, Content, Text, Body, Button, Spinner } from 'native-base';
 
 import LocationComponent from '../../LocationComponent';
 import { HVConfirmDialog } from '../../HVComponent';
 import DisplayRep from './DisplayRep';
 import PolProfile from './PolProfile';
-import { wsbase, google_api_key } from '../../config'
+import { wsbase, google_api_key, android_cert } from '../../config';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 import RNGooglePlaces from 'react-native-google-places';
@@ -24,6 +20,7 @@ export default class App extends LocationComponent {
   constructor(props) {
     super(props);
     this.state = {
+      BundleId: props.BundleId,
       awaitPosition: false,
       loading: true,
       user: null,
@@ -81,8 +78,7 @@ export default class App extends LocationComponent {
   }
 
   _whorepme = async (position) => {
-    let { user } = this.state;
-    let res;
+    let { user, BundleId } = this.state;
 
     this.setState({
       loading: true,
@@ -110,11 +106,23 @@ export default class App extends LocationComponent {
         "?key="+google_api_key+
         "&address="+(address?address:lat+","+lng);
 
-        res = await fetch(url, {compress: true});
-        body = await res.json();
-        if (body.error) {
-          throw "API returned an error";
+      let headers = (Platform.OS === 'ios' ?
+        {
+          'x-ios-bundle-identifier': BundleId,
         }
+      :
+        {
+          'x-android-package': BundleId,
+          'x-android-cert': android_cert,
+        }
+      );
+
+      let res = await fetch(url, {compress: true, headers});
+      body = await res.json();
+      if (body.error) {
+        console.warn({body})
+        throw "API returned an error";
+      }
 
     } catch (error) {
       this._genericServiceError(error, "There was an error fetching data for this request.");
@@ -208,11 +216,12 @@ export default class App extends LocationComponent {
       polProfile, polProfileOffice, polProfileInfo,
     } = this.state;
 
+    let basedOnYour = "..";
+
     switch(myPosition.icon) {
       case 'map-marker': basedOnYour = say("approximate_address"); break;
       case 'home': basedOnYour = say("home_address"); break;
       case 'map-signs': basedOnYour = say("searched_address"); break;
-      default: basedOnYour = "..";
     }
 
     return (
@@ -249,7 +258,7 @@ export default class App extends LocationComponent {
         </View>
         }
 
-        {apiData && !loading && Object.keys(apiData.divisions).sort((a,b) => a.length>b.length).map(d => {
+        {apiData && !loading && typeof apiData.divisions === 'object' && Object.keys(apiData.divisions).sort((a,b) => a.length>b.length).map(d => {
           // skip divisions with no offices
           if (!apiData.divisions[d].officeIndices) return null;
           // skip top level
