@@ -6,7 +6,8 @@ import HVComponent, { HVConfirmDialog } from '../../HVComponent';
 import { NewUnitButton } from './SegmentResidence';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
-import uuidv4 from 'uuid/v4';
+import 'react-native-get-random-values';
+import { v4 as uuidv4 } from 'uuid';
 
 import { say, getEpoch, getLastVisit, PersonAttr } from '../../common';
 

@@ -13,7 +13,8 @@ import storage from 'react-native-storage-wrapper';
 import KeepAwake from 'react-native-keep-awake';
 import promiseLimit from 'promise-limit';
 import base64 from 'base64-js';
-import uuidv4 from 'uuid/v4';
+import 'react-native-get-random-values';
+import { v4 as uuidv4 } from 'uuid';
 import pako from 'pako';
 import md5 from 'md5';
 
@@ -152,7 +153,7 @@ export default class App extends HVComponent {
 
       // create turf
       let turf = await this.sendData(orgId, '/turf/create', {
-        name: "Unrestricted",
+        name: "USA",
         geometry: bbox_usa,
       });
 
