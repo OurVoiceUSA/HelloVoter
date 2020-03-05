@@ -225,6 +225,8 @@ PODS:
     - React
   - react-native-geolocation (2.0.2):
     - React
+  - react-native-get-random-values (1.2.0):
+    - React
   - react-native-google-maps (0.26.1):
     - Google-Maps-iOS-Utils (= 2.1.0)
     - GoogleMaps (= 3.2.0)
@@ -282,7 +284,7 @@ PODS:
     - React
   - RNCAsyncStorage (1.8.1):
     - React
-  - RNCMaskedView (0.1.6):
+  - RNCMaskedView (0.1.7):
     - React
   - RNDeviceInfo (5.5.3):
     - React
@@ -296,8 +298,9 @@ PODS:
     - React
   - RNScreens (2.2.0):
     - React
-  - RNSVG (11.0.1):
+  - RNSVG (12.0.0):
     - React
+    - React-RCTImage
   - RNVectorIcons (6.6.0):
     - React
   - Yoga (1.14.0)
@@ -326,6 +329,7 @@ DEPENDENCIES:
   - react-native-config (from `../node_modules/react-native-config`)
   - react-native-geocoder-reborn (from `../node_modules/react-native-geocoder-reborn`)
   - "react-native-geolocation (from `../node_modules/@react-native-community/geolocation`)"
+  - react-native-get-random-values (from `../node_modules/react-native-get-random-values`)
   - react-native-google-maps (from `../node_modules/react-native-maps`)
   - react-native-google-places (from `../node_modules/react-native-google-places`)
   - react-native-keep-awake (from `../node_modules/react-native-keep-awake`)
@@ -407,6 +411,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-geocoder-reborn"
   react-native-geolocation:
     :path: "../node_modules/@react-native-community/geolocation"
+  react-native-get-random-values:
+    :path: "../node_modules/react-native-get-random-values"
   react-native-google-maps:
     :path: "../node_modules/react-native-maps"
   react-native-google-places:
@@ -492,6 +498,7 @@ SPEC CHECKSUMS:
   react-native-config: f2c2ae45625a068c35681a16b9bfb1ca58b0adc7
   react-native-geocoder-reborn: c31cbc630d9307ebbceea1dea2746d0054be35c4
   react-native-geolocation: cbd9d6bd06bac411eed2671810f454d4908484a8
+  react-native-get-random-values: 34ff720b6ad484b14d2190edf9074c443b564e4e
   react-native-google-maps: 2e2e697dab576abd5809d78cd74e775865b62bf7
   react-native-google-places: 1531c5b40622f71b6dacfb476e30be9e08e857b8
   react-native-keep-awake: eba3137546b10003361b37c761f6c429b59814ae
@@ -511,14 +518,14 @@ SPEC CHECKSUMS:
   ReactCommon: 198c7c8d3591f975e5431bec1b0b3b581aa1c5dd
   ReactNativeART: c496c53089b3149663215d74d6f1adb3a62e07eb
   RNCAsyncStorage: 00bdf63f7f1e0f11d3323533dba4f222e58bf092
-  RNCMaskedView: e5b99bc191945f157adeede68da9d424462de177
+  RNCMaskedView: 90dd32f5b786bd562e876e1421ea77c700cbf71e
   RNDeviceInfo: 67607dfe9cfbed105838144c40187a8392aa404d
   RNGestureHandler: dde546180bf24af0b5f737c8ad04b6f3fa51609a
   RNLocalize: 7ea191e47e1755d2ad48614a2e9d07d290abc58e
   RNPermissions: 6db7e0a4d94c9c02390d11020b1d3d187aaf77e5
   RNRate: d44a8bca6ee08f5d890ecccddaec2810955ffbb3
   RNScreens: 812b79d384e2bea7eebc4ec981469160d4948fd5
-  RNSVG: 67f1f12dae2cef6ed59a42cae74a6b8f5a9e7b46
+  RNSVG: e06eb87ed992232097735185d3d148e8b4e8e1a9
   RNVectorIcons: 0bb4def82230be1333ddaeee9fcba45f0b288ed4
   Yoga: f2a7cd4280bfe2cca5a7aed98ba0eb3d1310f18b
 
