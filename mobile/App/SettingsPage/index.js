@@ -33,27 +33,6 @@ import {
   SettingsTextLabel,
 } from 'react-native-settings-components';
 
-const party_data = [
-  { key: 'I', label: 'No Party Preference', value: 'No Party Preference' },
-  { key: 'D', label: 'Democrat', value: 'Democrat' },
-  { key: 'R', label: 'Republican', value: 'Republican' },
-  { key: 'G', label: 'Green', value: 'Green' },
-  { key: 'L', label: 'Libertarian', value: 'Libertarian' },
-  { key: 'O', label: 'Other', value: 'Other' },
-];
-
-function _partyName(party) {
-  let p = party_data.filter(d => party === d.key);
-  if (p[0] && p[0].key) return p[0].value;
-  return '';
-}
-
-function _partyKey(name) {
-  let p = party_data.filter(d => name === d.value);
-  if (p[0] && p[0].value) return p[0].key;
-  return '';
-}
-
 export default class App extends HVComponent {
 
   constructor(props) {
@@ -65,7 +44,6 @@ export default class App extends HVComponent {
       surveyComplete: false,
       surveyPartial: false,
       user: null,
-      party: null,
       myPosition: { address: null, longitude: null, latitude: null },
       havePermLocation: false,
       havePermNotification: false,
@@ -94,7 +72,6 @@ export default class App extends HVComponent {
     if (user) {
       this.setState({
         user: user,
-        party: user.profile.party,
         myPosition: {
           address: user.profile.home_address,
           longitude: user.profile.home_lng,
@@ -107,10 +84,9 @@ export default class App extends HVComponent {
   }
 
   _updateProfile = async () => {
-    const { party, partyOld, myPosition, myPositionOld } = this.state;
+    const { myPosition, myPositionOld } = this.state;
     let { user } = this.state;
-    if (party !== partyOld || (myPositionOld && myPosition.address !== myPositionOld.address)) {
-      user.profile.party = party;
+    if (myPositionOld && myPosition.address !== myPositionOld.address) {
       user.profile.home_address = myPosition.address;
       user.profile.home_lng = myPosition.longitude;
       user.profile.home_lat = myPosition.latitude;
@@ -118,7 +94,7 @@ export default class App extends HVComponent {
         user.lastsearchpos = myPosition;
         user.lastsearchpos.icon = 'home';
       }
-      _saveUser(user, true);
+      _saveUser(user);
       this.setState({user: user});
     }
     this.setState({profileUpdate: false});
@@ -132,7 +108,7 @@ export default class App extends HVComponent {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const { profileUpdate, SmLoginScreen, party, myPosition, user } = this.state;
+    const { profileUpdate, SmLoginScreen, myPosition, user } = this.state;
 
     if (profileUpdate)
       this._updateProfile();
@@ -164,7 +140,7 @@ export default class App extends HVComponent {
   render() {
     const {
       user, havePermLocation, havePermNotification, SmLoginScreen,
-      surveyComplete, surveyPartial, party, myPosition, appVersion,
+      surveyComplete, surveyPartial, myPosition, appVersion,
     } = this.state;
 
     // wait for user object to become available
@@ -233,77 +209,13 @@ export default class App extends HVComponent {
           </View>
           <View style={{flex: 1}}>
             <Text>
-              Welcome back! You are signed out; for the best user experience, please login again.
+              Welcome back! You are signed out, please login again.
             </Text>
           </View>
         </View>
         ||
-        <SettingsTextLabel title={"For the best user experience, login with a social media account."} />
+        <SettingsTextLabel title={"Login with a social media account."} />
         }
-
-        <SettingsDividerShort />
-
-        <SettingsPicker
-          title={"Home Address"}
-          options={[{label: '', value: ''}]}
-          value={myPosition.address}
-          valuePlaceholder={"Not Set"}
-          onValueChange={() => {}}
-          onPressOverride={true}
-          onPress={() => {
-            RNGooglePlaces.openAutocompleteModal()
-            .then((place) => {
-              if (!_specificAddress(place.address)) {
-                this.alert(
-                  say("ambiguous_address"),
-                  say("no_guarantee_district"),
-                  {
-                    title: say("continue_anyway"),
-                    onPress: () => {
-                      this.setState({
-                        profileUpdate: true,
-                        myPositionOld: myPosition,
-                        myPosition: place,
-                        confirmDialog: false,
-                      });
-                    },
-                  },
-                  {
-                    title: say("cancel"),
-                    onPress: () => this.setState({confirmDialog: false}),
-                  }
-                );
-              } else {
-                this.setState({
-                  profileUpdate: true,
-                  myPositionOld: myPosition,
-                  myPosition: place,
-                });
-              }
-            })
-            .catch(error => console.log(error.message));
-          }}
-        />
-
-        <SettingsTextLabel title={"We use your home address to give you information most relevant to you. You may simply enter a city or a state, but we cannot guarantee accurate district results without a whole address."} />
-
-        <SettingsDividerShort />
-
-        <SettingsPicker
-          title={"Party Affiliation"}
-          dialogDescription={"Select the political party you belong to."}
-          options={party_data}
-          onValueChange={value => this.setState({
-            profileUpdate: true,
-            partyOld: party,
-            party: _partyKey(value),
-          })}
-          value={_partyName(party)}
-          valuePlaceholder={"Not Set"}
-          styleModalButtonsText={{ color: colors.monza }}
-        />
-
-        <SettingsTextLabel title={"We use your party affiliation to better categorize information for you. If not set, we assume you have no party preference."} />
 
         <SettingsDividerLong />
 
@@ -354,7 +266,7 @@ export default class App extends HVComponent {
           }
         </View>
 
-        <SettingsTextLabel title={"Based on your home address and party settings, we may push notifications to your device when there is an upcoming caucus or election that may be relevant to you."} />
+        <SettingsTextLabel title={"We may push notifications to your device."} />
 
         <SettingsDividerLong />
 

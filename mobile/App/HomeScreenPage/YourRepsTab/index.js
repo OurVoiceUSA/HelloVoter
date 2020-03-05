@@ -95,7 +95,7 @@ export default class App extends LocationComponent {
           user.profile.home_lng = position.longitude;
           user.profile.home_lat = position.latitude;
         }
-        _saveUser(user, true);
+        _saveUser(user);
       }
 
       let lng = position.longitude;

@@ -278,35 +278,20 @@ async function _UserAgent() {
 }
 
 export async function _getApiToken() {
-  var jwt = await storage.get(STORAGE_KEY_JWT);
-
-  if (!jwt) {
-    res = await fetch(wsbase+'/auth/jwt', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': await _UserAgent(),
-      },
-      body: JSON.stringify({apiKey: await DeviceInfo.getUniqueId()})
-    });
-    jwt = JSON.parse(await res.text()).jwt;
-    await _saveJWT(jwt);
-  }
+  let jwt = await storage.get(STORAGE_KEY_JWT);
+  if (!jwt) return "of the one ring";
   return jwt;
 }
 
 export async function _apiCall(uri, input) {
   var res;
-  var jwt;
   var retry = false;
 
   do {
-    jwt = await _getApiToken();
-
     res = await fetch(wsbase+uri, {
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer '+jwt,
+        'Authorization': 'Bearer '+await _getApiToken(),
         'Content-Type': 'application/json',
         'User-Agent': await _UserAgent(),
       },
@@ -326,22 +311,7 @@ export async function _apiCall(uri, input) {
   return res;
 }
 
-export async function _saveUser(user, remote) {
-  try {
-    if (remote) {
-      if(user.loggedin) {
-        _apiCall('/api/v1/dprofile', {
-          party: user.profile.party,
-          address: user.profile.home_address,
-          lng: user.profile.home_lng,
-          lat: user.profile.home_lat,
-        });
-      }
-    }
-  } catch (error) {
-    console.warn(error);
-  }
-
+export async function _saveUser(user) {
   try {
     await storage.set(STORAGE_KEY_USERLOCAL, JSON.stringify(user));
   } catch (error) {
@@ -452,43 +422,37 @@ export async function _getJWT(remote) {
 
   // if it's a user JWT, bounce the token off the API to see if it's still valid
   if (user && user.id) {
-    let dinfo_resp = null;
     try {
-      let res = await fetch(wsbase+'/api/v1/dinfo', {
-        method: 'POST',
+      let res = await fetch(wsbase+'/orgid/v1/ping', {
         headers: {
           'Authorization': 'Bearer '+jwt,
           'Content-Type': 'application/json',
           'User-Agent': await _UserAgent(),
         },
-        body: JSON.stringify(DINFO),
       });
       if (res.status != 200) {
         _rmJWT();
         jwt = null;
-      } else {
-        dinfo_resp = await res.json();
       }
     } catch (error) {
       console.warn(error);
     }
 
-    user.profile = (dinfo_resp?dinfo_resp:{});
+    user.profile = {};
     if (localuser) {
       // copy local objects
       user.lastsearchpos = localuser.lastsearchpos;
       user.dropbox = localuser.dropbox;
       // merge localuser with user where user profile item is null
       if (localuser.profile) {
-        if (!user.profile.party && localuser.profile.party) { user.profile.party = localuser.profile.party; remote = true; }
-        if (!user.profile.home_address && localuser.profile.home_address) { user.profile.home_address = localuser.profile.home_address; remote = true; }
-        if (!user.profile.home_lng && localuser.profile.home_lng) { user.profile.home_lng = localuser.profile.home_lng; remote = true; }
-        if (!user.profile.home_lat && localuser.profile.home_lat) { user.profile.home_lat = localuser.profile.home_lat; remote = true; }
+        if (!user.profile.home_address && localuser.profile.home_address) user.profile.home_address = localuser.profile.home_address;
+        if (!user.profile.home_lng && localuser.profile.home_lng) user.profile.home_lng = localuser.profile.home_lng;
+        if (!user.profile.home_lat && localuser.profile.home_lat) user.profile.home_lat = localuser.profile.home_lat;
       }
     }
     user.lastsmlogin = Math.floor(new Date().getTime());
     user.loggedin = true;
-    _saveUser(user, remote);
+    _saveUser(user);
   } else {
     user = await _get_userlocal();
   }
