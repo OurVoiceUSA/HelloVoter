@@ -143,18 +143,6 @@ return last_touch, active_name, total_active, total_assigned`,
   else
     return cqdo(req, res, 'call spatial.intersects("turf", {longitude: {longitude}, latitude: {latitude}}) yield node return node{.id, .name, .created}', req.query);
 })
-.get('/turf/assigned/team/list', (req, res) => {
-  if (!valid(req.query.turfId)) return _400(res, "Invalid value to parameter 'turfId'.");
-  return cqdo(req, res, 'match (a:Turf {id:{turfId}})-[:ASSIGNED]-(b:Team) return b', req.query, true);
-})
-.post('/turf/assigned/team/add', (req, res) => {
-  if (!valid(req.body.turfId) || !valid(req.body.teamId)) return _400(res, "Invalid value to parameter 'turfId' or 'teamId'.");
-  return cqdo(req, res, 'match (a:Turf {id:{turfId}}), (b:Team {id:{teamId}}) merge (a)-[:ASSIGNED]->(b)', req.body, true);
-})
-.post('/turf/assigned/team/remove', (req, res) => {
-  if (!valid(req.body.turfId) || !valid(req.body.teamId)) return _400(res, "Invalid value to parameter 'turfId' or 'teamId'.");
-  return cqdo(req, res, 'match (a:Turf {id:{turfId}})-[r:ASSIGNED]-(b:Team {id:{teamId}}) delete r', req.body, true);
-})
 .get('/turf/assigned/volunteer/list', async (req, res) => {
   if (!valid(req.query.turfId)) return _400(res, "Invalid value to parameter 'turfId'.");
 

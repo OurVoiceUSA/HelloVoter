@@ -11,7 +11,6 @@ import Login from './Login';
 import LogoutDialog from './LogoutDialog';
 import Map from './Map';
 import Settings from './Settings';
-import Teams from './Teams';
 import { Turf } from './Turf';
 import { Volunteers } from './Volunteers';
 import { Header, Sidebar } from './Header';
@@ -30,7 +29,6 @@ export {
   LogoutDialog,
   Map,
   Settings,
-  Teams,
   Turf,
   Volunteers,
   Header,

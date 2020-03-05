@@ -90,10 +90,8 @@ async function peopleVisitUpdate(req, res) {
 
 /*
 TODO: constrain update to a turf their assigned to, but without creating multiple visits due to multiple assignments
-  optional match (t:Turf)-[:ASSIGNED]->(:Team)-[:MEMBERS]->(v)
-    with v, collect(t.id) as tt
   optional match (t:Turf)-[:ASSIGNED]->(v)
-    with v, tt + collect(t.id) as turfIds
+    with v, collect(t.id) as turfIds
   match (t:Turf) where t.id in turfIds
     with v
   match `+(req.body.personId?'(p:Person {id:{personId}})-[r:RESIDENCE {current:true}]->':'')+(req.body.unit?'(u:Unit {name:{unit}})-[:AT]->':'')+`(a:Address {id:{addressId}})-[:WITHIN]->(t)
@@ -175,12 +173,7 @@ async function visitsAndPeople(req, res) {
     let ret = await visitsAndPeopleFromPoint(req, req.query.longitude, req.query.latitude);
     if (ret.length === 0) {
       // find center(ish) of an assigned turf and use that as the query point
-      let ref = await req.db.query(`match (v:Volunteer {id:{id}})
-      optional match (t:Turf)-[:ASSIGNED]->(:Team)-[:MEMBERS]->(v)
-        with v, collect(t) as tt
-      optional match (t:Turf)-[:ASSIGNED]->(v)
-        with tt + collect(t) as turfs
-      unwind turfs as t
+      let ref = await req.db.query(`match (v:Volunteer {id:{id}})<-[:ASSIGNED]-(t:Turf)
       return (t.bbox[0]+t.bbox[2])/2, (t.bbox[1]+t.bbox[3])/2 limit 1`, req.query);
       if (!ref.data || !ref.data[0]) return _403(res, "No Turf assignments.");
       ret = await visitsAndPeopleFromPoint(req, ref.data[0][0], ref.data[0][1]);
@@ -216,10 +209,8 @@ async function visitsAndPeopleFromPoint(req, longitude, latitude) {
   let q = '';
 
   if (ov_config.disable_spatial === false) q = `match (v:Volunteer {id:{id}})
-optional match (t:Turf)-[:ASSIGNED]->(:Team)-[:MEMBERS]->(v)
-  with v, collect(t.id) as tt
 optional match (t:Turf)-[:ASSIGNED]->(v)
-  with tt + collect(t.id) as turfIds
+  with collect(t.id) as turfIds
 call spatial.withinDistance("turf", {longitude: {longitude}, latitude: {latitude}}, {dist}/1000) yield node
   where node.id in turfIds
   with node as t limit 4 `;

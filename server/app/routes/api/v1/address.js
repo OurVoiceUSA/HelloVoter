@@ -10,7 +10,6 @@ import { Router } from 'express';
 
 module.exports = Router({mergeParams: true})
 .get('/address/get/byposition', async (req, res) => {
-  // TODO: allow team leader too
   if (req.user.admin !== true) return _403(res, "Permission denied.");
 
   req.query.longitude = parseFloat(req.query.longitude);

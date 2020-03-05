@@ -29,7 +29,7 @@ export default class App extends Component {
   constructor(props) {
     super(props);
 
-    const dash = (localStorage.getItem('dash') || 'vol,team,turf,form,attributes,addr,dbsz').split(',');
+    const dash = (localStorage.getItem('dash') || 'vol,turf,form,attributes,addr,dbsz').split(',');
 
     this.state = {
       global: props.global,
@@ -71,11 +71,6 @@ export default class App extends Component {
           name: 'Volunteers',
           stat: data.volunteers,
           icon: faUser,
-        },
-        team: {
-          name: 'Teams',
-          stat: data.teams,
-          icon: faUsers,
         },
         turf: {
           name: 'Turfs',

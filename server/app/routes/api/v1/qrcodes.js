@@ -75,14 +75,6 @@ module.exports = Router({mergeParams: true})
   if (!valid(req.body.turfId) || !valid(req.body.qId)) return _400(res, "Invalid value to parameter 'turfId' or 'qId'.");
   return cqdo(req, res, 'match (t:Turf {id:{turfId}})<-[r:AUTOASSIGN_TO]-(:QRCode {id:{qId}}) delete r', req.body, true);
 })
-.post('/qrcode/team/add', async (req, res) => {
-  if (!valid(req.body.teamId) || !valid(req.body.qId)) return _400(res, "Invalid value to parameter 'teamId' or 'qId'.");
-  return cqdo(req, res, 'match (t:Team {id:{teamId}}) match (qr:QRCode {id:{qId}}) merge (qr)-[:AUTOASSIGN_TO]->(t)', req.body);
-})
-.post('/qrcode/team/remove', async (req, res) => {
-  if (!valid(req.body.teamId) || !valid(req.body.qId)) return _400(res, "Invalid value to parameter 'teamId' or 'qId'.");
-  return cqdo(req, res, 'match (t:Team {id:{teamId}})<-[r:AUTOASSIGN_TO]-(:QRCode {id:{qId}}) delete r', req.body, true);
-})
 .post('/qrcode/form/add', async (req, res) => {
   if (!valid(req.body.formId) || !valid(req.body.qId)) return _400(res, "Invalid value to parameter 'formId' or 'qId'.");
   return cqdo(req, res, 'match (f:Form {id:{formId}}) match (qr:QRCode {id:{qId}}) merge (qr)-[:AUTOASSIGN_TO]->(f)', req.body);

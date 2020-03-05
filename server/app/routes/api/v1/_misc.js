@@ -57,7 +57,6 @@ module.exports = Router({mergeParams: true})
 
         // check inviteCode against QRCode objects and copy assignments to this volunteer
         await req.db.query('match (v:Volunteer {id:{id}}) match (qr:QRCode {id:{inviteCode}}) where qr.disable is null match (qr)-[:AUTOASSIGN_TO]->(f:Form) merge (f)-[:ASSIGNED]->(v) set qr.last_used = timestamp()', params);
-        await req.db.query('match (v:Volunteer {id:{id}}) match (qr:QRCode {id:{inviteCode}}) where qr.disable is null match (qr)-[:AUTOASSIGN_TO]->(t:Team) merge (t)-[:MEMBERS]->(v) set qr.last_used = timestamp()', params);
         await req.db.query('match (v:Volunteer {id:{id}}) match (qr:QRCode {id:{inviteCode}}) where qr.disable is null create (v)-[:SCANNED {created: timestamp()}]->(qr) set qr.last_used = timestamp()', params);
         // turf is either autoturf or direct assignment
         await req.db.query('match (v:Volunteer {id:{id}}) match (qr:QRCode {id:{inviteCode}}) where qr.disable is null and qr.autoturf is null match (qr)-[:AUTOASSIGN_TO]->(t:Turf) merge (t)-[:ASSIGNED]->(v)', params);
@@ -93,7 +92,6 @@ module.exports = Router({mergeParams: true})
     if (req.user.admin === true) return res.json({
       admins: (await req.db.query('match (v:Volunteer {admin:true}) return count(v)')).data[0],
       volunteers: (await req.db.query('match (a:Volunteer) return count(a)')).data[0],
-      teams: (await req.db.query('match (a:Team) return count(a)')).data[0],
       turfs: (await req.db.query('match (a:Turf) return count(a)')).data[0],
       attributes: (await req.db.query('match (at:Attribute) return count(at)')).data[0],
       forms: (await req.db.query('match (a:Form) return count(a)')).data[0],
@@ -106,8 +104,7 @@ module.exports = Router({mergeParams: true})
       let ass = await volunteerAssignments(req, 'Volunteer', req.user);
       return res.json({
         admins: (await req.db.query('match (v:Volunteer {admin:true}) return count(v)')).data[0],
-        volunteers: (await req.db.query('match (a:Volunteer {id:{id}}) return a as node UNION match (a:Volunteer {id:{id}})-[:MEMBERS]-(:Team)-[:MEMBERS]-(c:Volunteer) return distinct(c) as node', req.user)).data.length,
-        teams: ass.teams.length,
+        volunteers: (await req.db.query('match (v:Volunteer {id:{id}}) return v', req.user)).data.length,
         turfs: ass.turfs.length,
         attributes: 'N/A',
         forms: ass.forms.length,

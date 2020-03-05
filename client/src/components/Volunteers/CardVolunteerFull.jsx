@@ -68,33 +68,7 @@ export const CardVolunteerFull = props => (
     <br />
     <br />
     <div>
-      Teams this volunteer is a member of:
-      <Select
-        value={props.refer.state.selectedTeamsOption}
-        onChange={props.refer.handleTeamsChange}
-        options={props.refer.state.teamOptions}
-        isMulti={true}
-        isSearchable={true}
-        placeholder="None"
-      />
-    </div>
-
-    <br />
-    {props.refer.state.selectedTeamsOption.length ? (
-      <div>
-        Forms / Turf this users sees based on the above team(s):
-        <br />
-        {props.volunteer.ass.forms.filter(f => !f.direct).map(f => (
-          <CardForm global={global} key={f.id} form={f} refer={props.refer} />
-        ))}
-        {props.volunteer.ass.turfs.filter(t => !t.direct).map(t => (
-          <CardTurf global={global} key={t.id} turf={t} refer={props.refer} />
-        ))}
-      </div>
-    ):''
-    }
-    <div>
-      Forms this volunteer is directly assigned to:
+      Forms this volunteer is assigned to:
       <Select
         value={props.refer.state.selectedFormsOption}
         onChange={props.refer.handleFormsChange}
@@ -104,7 +78,7 @@ export const CardVolunteerFull = props => (
         placeholder="None"
       />
       <br />
-      Turf this volunteer is directly assigned to:
+      Turf this volunteer is assigned to:
       <Select
         value={props.refer.state.selectedTurfOption}
         onChange={props.refer.handleTurfChange}

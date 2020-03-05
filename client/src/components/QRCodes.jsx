@@ -23,7 +23,6 @@ import {
   _handleSelectChange,
   _loadQRCode,
   _loadQRCodes,
-  _loadTeams,
   _loadForms,
   _loadTurfs,
   _inviteLink,
@@ -34,7 +33,6 @@ import {
 
 import { CardTurf } from './Turf';
 import { CardForm } from './Forms';
-import { CardTeam } from './Teams';
 
 import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en';
@@ -221,7 +219,6 @@ export class CardQRCode extends Component {
       global: props.global,
       refer: this.props.refer.props.refer,
       qrcode: this.props.qrcode,
-      selectedTeamsOption: [],
       selectedFormsOption: [],
       selectedTurfOption: [],
     };
@@ -236,52 +233,6 @@ export class CardQRCode extends Component {
   componentDidUpdate() {
     ReactTooltip.rebuild();
   }
-
-  handleTeamsChange = async selectedTeamsOption => {
-    const { global } = this.state;
-
-    if (!selectedTeamsOption) selectedTeamsOption = [];
-    this.props.refer.setState({ saving: true });
-    try {
-      let obj = _handleSelectChange(
-        this.state.selectedTeamsOption,
-        selectedTeamsOption
-      );
-
-      let adrm = [];
-
-      obj.add.forEach(add => {
-        adrm.push(_fetch(
-          global,
-          '/qrcode/team/add',
-          'POST',
-          { teamId: add, qId: this.props.id }
-        ));
-      });
-
-      obj.rm.forEach(rm => {
-        adrm.push(_fetch(
-          global,
-          '/qrcode/team/remove',
-          'POST',
-          { teamId: rm, qId: this.props.id }
-        ));
-      });
-
-      await Promise.all(adrm);
-
-      // refresh info
-      let qrcode = await _loadQRCode(global, this.props.id);
-      notify_success('Team assignments saved.');
-      this.setState({
-        selectedTeamsOption,
-        qrcode
-      });
-    } catch (e) {
-      notify_error(e, 'Unable to add/remove teams.');
-    }
-    this.props.refer.setState({ saving: false });
-  };
 
   handleFormsChange = async selectedFormsOption => {
     const { global } = this.state;
@@ -374,26 +325,22 @@ export class CardQRCode extends Component {
 
     let qrcode = {},
       forms = [],
-      turf = [],
-      teams = [];
+      turf = [];
 
     this.setState({ loading: true });
 
     try {
-      [qrcode, forms, turf, teams] = await Promise.all([
+      [qrcode, forms, turf] = await Promise.all([
         _loadQRCode(global, this.props.id),
         _loadForms(global),
         _loadTurfs(global),
-        _loadTeams(global),
       ]);
     } catch (e) {
       notify_error(e, 'Unable to load canavasser info.');
       return this.setState({ loading: false });
     }
 
-    let teamOptions = [];
     let leaderOptions = [];
-    let selectedTeamsOption = [];
     let selectedFormsOption = [];
     let selectedTurfOption = [];
 
@@ -402,28 +349,6 @@ export class CardQRCode extends Component {
     let turfOptions = [
       { value: '', label: 'None' },
     ];
-
-    teams.forEach(t => {
-      teamOptions.push({
-        value: _searchStringify(t),
-        id: t.id,
-        label: <CardTeam global={global} key={t.id} team={t} refer={this} />
-      });
-      qrcode.ass.teams.forEach((a, idx) => {
-        if (a.id === t.id) {
-          selectedTeamsOption.push({
-            value: _searchStringify(t),
-            id: t.id,
-            label: <CardTeam global={global} key={t.id} team={t} refer={this} />
-          });
-          leaderOptions.push({
-            value: _searchStringify(t),
-            id: t.id,
-            label: <CardTeam global={global} key={t.id} team={t} refer={this} />
-          });
-        }
-      });
-    });
 
     forms.forEach(f => {
       formOptions.push({
@@ -434,13 +359,11 @@ export class CardQRCode extends Component {
     });
 
     qrcode.ass.forms.forEach(f => {
-      if (f.direct) {
-        selectedFormsOption.push({
-          value: _searchStringify(f),
-          id: f.id,
-          label: <CardForm global={global} key={f.id} form={f} refer={this} />
-        });
-      }
+      selectedFormsOption.push({
+        value: _searchStringify(f),
+        id: f.id,
+        label: <CardForm global={global} key={f.id} form={f} refer={this} />
+      });
     });
 
     turf.forEach(t => {
@@ -452,30 +375,26 @@ export class CardQRCode extends Component {
     });
 
     qrcode.ass.turfs.forEach(t => {
-      if (t.direct) {
-        selectedTurfOption.push({
-          value: _searchStringify(t),
-          id: t.id,
-          label: (
-            <CardTurf
-              global={global}
-              key={t.id}
-              turf={t}
-              refer={this}
-            />
-          )
-        });
-      }
+      selectedTurfOption.push({
+        value: _searchStringify(t),
+        id: t.id,
+        label: (
+          <CardTurf
+            global={global}
+            key={t.id}
+            turf={t}
+            refer={this}
+          />
+        )
+      });
     });
 
     this.setState({
       loading: false,
       qrcode,
-      teamOptions,
       leaderOptions,
       formOptions,
       turfOptions,
-      selectedTeamsOption,
       selectedFormsOption,
       selectedTurfOption,
     });
@@ -595,32 +514,6 @@ export const CardQRCodeFull = props => (
     Number of people who've used it: {props.qrcode.num_volunteers}
     <br />
     <br />
-    <div>
-      Teams this QRCode gives access to:
-      <Select
-        value={props.refer.state.selectedTeamsOption}
-        onChange={props.refer.handleTeamsChange}
-        options={props.refer.state.teamOptions}
-        isMulti={true}
-        isSearchable={true}
-        placeholder="None"
-      />
-    </div>
-
-    <br />
-    {props.refer.state.selectedTeamsOption.length ? (
-      <div>
-        Forms / Turf this users sees based on the above team(s):
-        <br />
-        {props.qrcode.ass.forms.filter(f => !f.direct).map(f => (
-          <CardForm global={global} key={f.id} form={f} refer={props.refer} />
-        ))}
-        {props.qrcode.ass.turfs.filter(t => !t.direct).map(t => (
-          <CardTurf global={global} key={t.id} turf={t} refer={props.refer} />
-        ))}
-      </div>
-    ):''
-    }
     <div>
       Forms this QRCode gives access to:
       <Select

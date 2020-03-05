@@ -14,7 +14,7 @@ module.exports = Router({mergeParams: true})
     if (req.user.admin)
       volunteers = await _volunteersFromCypher(req, 'match (a:Volunteer) return a');
     else
-      volunteers = await _volunteersFromCypher(req, 'match (a:Volunteer {id:{id}})-[:MEMBERS {leader:true}]-(:Team)-[]-(t:Turf) where t.wkt is not null call spatial.intersects("volunteer", t.wkt) yield node return node UNION match (a:Volunteer {id:{id}})-[:MEMBERS]-(:Team)-[:MEMBERS]-(c:Volunteer) return distinct(c) as node UNION match (a:Volunteer {id:{id}}) return a as node', req.user);
+      volunteers = await _volunteersFromCypher(req, 'match (a:Volunteer {id:{id}}) return a', req.user);
   } catch (e) {
     return _500(res, e);
   }

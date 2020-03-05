@@ -188,7 +188,7 @@ export async function _loadVolunteer(global, id) {
   } catch (e) {
     notify_error(e, 'Unable to load volunteer info.');
   }
-  if (!volunteer.ass) volunteer.ass = {forms:[],teams:[],turfs:[]};
+  if (!volunteer.ass) volunteer.ass = {forms:[],turfs:[]};
   return volunteer;
 }
 
@@ -198,8 +198,7 @@ export async function _loadVolunteers(global, byType, id) {
   try {
     let call = 'volunteer/list';
 
-    if (byType === 'team') call = 'team/members/list?teamId=' + id;
-    else if (byType === 'turf')
+    if (byType === 'turf')
       call = 'turf/assigned/volunteer/list?turfId=' + id;
     else if (byType === 'form')
       call = 'form/assigned/volunteer/list?formId=' + id;
@@ -228,13 +227,11 @@ export async function _loadTurf(global, id) {
   return turf;
 }
 
-export async function _loadTurfs(global, teamId, flag) {
+export async function _loadTurfs(global, flag) {
   let turf = [];
 
   try {
     let call = 'turf/list' + (flag ? '?geometry=true' : '');
-    if (teamId)
-      call = 'team/turf/list?teamId=' + teamId + (flag ? '&geometry=true' : '');
     let data = await _fetch(global, '/' + call);
     turf = data.data ? data.data : [];
   } catch (e) {
@@ -257,39 +254,6 @@ export async function _loadNearbyTurfs(global, lng, lat, dist) {
   return turf;
 }
 
-export async function _loadTeam(global, id) {
-  let team = {};
-
-  try {
-    team = await _fetch(
-      global,
-      '/team/get?teamId=' + id
-    );
-  } catch (e) {
-    notify_error(e, 'Unable to load team data.');
-  }
-
-  return team.data[0];
-}
-
-export async function _loadTeams(global, byType, id) {
-  let teams = [];
-
-  try {
-    let call = 'team/list';
-
-    if (byType === 'turf') call = 'turf/assigned/team/list?turfId=' + id;
-    else if (byType === 'form') call = 'form/assigned/team/list?formId=' + id;
-
-    let data = await _fetch(global, '/' + call);
-    teams = data.data ? data.data : [];
-  } catch (e) {
-    notify_error(e, 'Unable to load teams data.');
-  }
-
-  return teams;
-}
-
 export async function _loadForm(global, id) {
   let form = {};
 
@@ -305,14 +269,11 @@ export async function _loadForm(global, id) {
   return form;
 }
 
-export async function _loadForms(global, teamId) {
+export async function _loadForms(global) {
   let forms = [];
 
   try {
-    let uri;
-
-    if (teamId) uri = 'team/form/list?teamId=' + teamId;
-    else uri = 'form/list';
+    let uri = 'form/list';
 
     forms = await _fetch(global, '/' + uri);
   } catch (e) {

@@ -3,7 +3,6 @@ import { Route, Switch } from 'react-router-dom';
 import {
   Dashboard,
   Volunteers,
-  Teams,
   Turf,
   Forms,
   QRCodes,
@@ -30,7 +29,6 @@ export const Routes = ({ global }) => (
     <Route exact={true} path="/" render={() => <Dashboard global={global} />} />
     <Route path="/jwt/" render={props => <Login {...props} global={global} />} />
     <Route path="/volunteers/" render={() => <Volunteers global={global} />} />
-    <Route path="/teams/" render={() => <Teams global={global} />} />
     <Route path="/turf/" render={() => <Turf global={global} />} />
     <Route path="/forms/" render={() => <Forms global={global} />} />
     <Route path="/qrcode/" render={() => <QRCodes global={global} />} />

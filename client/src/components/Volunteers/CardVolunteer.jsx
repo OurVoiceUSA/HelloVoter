@@ -15,7 +15,6 @@ import {
   _searchStringify,
   _handleSelectChange,
   _loadVolunteer,
-  _loadTeams,
   _loadForms,
   _loadTurfs,
   _loadNearbyTurfs,
@@ -24,7 +23,6 @@ import {
 
 import { CardTurf } from '../Turf';
 import { CardForm } from '../Forms';
-import { CardTeam } from '../Teams';
 import { CardVolunteerFull } from './CardVolunteerFull';
 
 import {
@@ -57,8 +55,6 @@ export class CardVolunteer extends Component {
       global: props.global,
       refer: this.props.refer.props.refer,
       volunteer: this.props.volunteer,
-      selectedTeamsOption: [],
-      selectedLeaderOption: [],
       selectedFormsOption: [],
       selectedTurfOption: [],
     };
@@ -73,95 +69,6 @@ export class CardVolunteer extends Component {
   componentDidUpdate() {
     ReactTooltip.rebuild();
   }
-
-  handleTeamsChange = async selectedTeamsOption => {
-    const { global } = this.state;
-
-    if (!selectedTeamsOption) selectedTeamsOption = [];
-    this.props.refer.setState({ saving: true });
-    try {
-      let obj = _handleSelectChange(
-        this.state.selectedTeamsOption,
-        selectedTeamsOption
-      );
-
-      let adrm = [];
-
-      obj.add.forEach(add => {
-        adrm.push(_fetch(
-          global,
-          '/team/members/add',
-          'POST',
-          { teamId: add, vId: this.props.id }
-        ));
-      });
-
-      obj.rm.forEach(rm => {
-        adrm.push(_fetch(
-          global,
-          '/team/members/remove',
-          'POST',
-          { teamId: rm, vId: this.props.id }
-        ));
-      });
-
-      await Promise.all(adrm);
-
-      // refresh volunteer info
-      let volunteer = await _loadVolunteer(global, this.props.id);
-      notify_success('Team assignments saved.');
-      this.setState({
-        selectedTeamsOption,
-        volunteer
-      });
-    } catch (e) {
-      notify_error(e, 'Unable to add/remove teams.');
-    }
-    this.props.refer.setState({ saving: false });
-  };
-
-  handleLeaderChange = async selectedLeaderOption => {
-    const { global } = this.state;
-
-    if (!selectedLeaderOption) selectedLeaderOption = [];
-    this.props.refer.setState({ saving: true });
-    try {
-      let obj = _handleSelectChange(
-        this.state.selectedLeaderOption,
-        selectedLeaderOption
-      );
-
-      let adrm = [];
-
-      obj.add.forEach(add => {
-        adrm.push(_fetch(
-          global,
-          '/team/members/promote',
-          'POST',
-          { teamId: add, vId: this.props.id }
-        ));
-      });
-
-      obj.rm.forEach(rm => {
-        adrm.push(_fetch(
-          global,
-          '/team/members/demote',
-          'POST',
-          { teamId: rm, vId: this.props.id }
-        ));
-      });
-
-      await Promise.all(adrm);
-
-      // refresh volunteer info
-      let volunteer = await _loadVolunteer(global, this.props.id);
-      notify_success('Team leaders saved.');
-      this.setState({ selectedLeaderOption, volunteer });
-    } catch (e) {
-      notify_error(e, 'Unable to edit team leadership.');
-    }
-    this.props.refer.setState({ saving: false });
-  };
 
   handleFormsChange = async selectedFormsOption => {
     const { global } = this.state;
@@ -255,18 +162,16 @@ export class CardVolunteer extends Component {
     let volunteer = {},
       forms = [],
       turf = [],
-      teams = [],
       hometurf = [],
       nearbyturf = [];
 
     this.setState({ loading: true });
 
     try {
-      [volunteer, forms, turf, teams] = await Promise.all([
+      [volunteer, forms, turf] = await Promise.all([
         _loadVolunteer(global, this.props.id),
         _loadForms(global),
         _loadTurfs(global),
-        _loadTeams(global),
       ]);
     } catch (e) {
       notify_error(e, 'Unable to load canavasser info.');
@@ -278,10 +183,6 @@ export class CardVolunteer extends Component {
       nearbyturf = await _loadNearbyTurfs(global, volunteer.location.x, volunteer.location.y, NEARBY_DIST);
     }
 
-    let teamOptions = [];
-    let leaderOptions = [];
-    let selectedTeamsOption = [];
-    let selectedLeaderOption = [];
     let selectedFormsOption = [];
     let selectedTurfOption = [];
 
@@ -290,35 +191,6 @@ export class CardVolunteer extends Component {
     let turfOptions = [
       { value: '', label: 'None' }
     ];
-
-    teams.forEach(t => {
-      teamOptions.push({
-        value: _searchStringify(t),
-        id: t.id,
-        label: <CardTeam global={global} key={t.id} team={t} refer={this} />
-      });
-      volunteer.ass.teams.forEach((a, idx) => {
-        if (a.id === t.id) {
-          selectedTeamsOption.push({
-            value: _searchStringify(t),
-            id: t.id,
-            label: <CardTeam global={global} key={t.id} team={t} refer={this} />
-          });
-          leaderOptions.push({
-            value: _searchStringify(t),
-            id: t.id,
-            label: <CardTeam global={global} key={t.id} team={t} refer={this} />
-          });
-          if (a.leader) {
-            selectedLeaderOption.push({
-              value: _searchStringify(t),
-              id: t.id,
-              label: <CardTeam global={global} key={t.id} team={t} refer={this} />
-            });
-          }
-        }
-      });
-    });
 
     forms.forEach(f => {
       formOptions.push({
@@ -329,13 +201,11 @@ export class CardVolunteer extends Component {
     });
 
     volunteer.ass.forms.forEach(f => {
-      if (f.direct) {
-        selectedFormsOption.push({
-          value: _searchStringify(f),
-          id: f.id,
-          label: <CardForm global={global} key={f.id} form={f} refer={this} />
-        });
-      }
+      selectedFormsOption.push({
+        value: _searchStringify(f),
+        id: f.id,
+        label: <CardForm global={global} key={f.id} form={f} refer={this} />
+      });
     });
 
     turf.forEach(t => {
@@ -347,32 +217,26 @@ export class CardVolunteer extends Component {
     });
 
     volunteer.ass.turfs.forEach(t => {
-      if (t.direct) {
-        selectedTurfOption.push({
-          value: _searchStringify(t),
-          id: t.id,
-          label: (
-            <CardTurf
-              global={global}
-              key={t.id}
-              turf={t}
-              refer={this}
-              icon={volunteer.autoturf ? faHome : null}
-            />
-          )
-        });
-      }
+      selectedTurfOption.push({
+        value: _searchStringify(t),
+        id: t.id,
+        label: (
+          <CardTurf
+            global={global}
+            key={t.id}
+            turf={t}
+            refer={this}
+            icon={volunteer.autoturf ? faHome : null}
+          />
+        )
+      });
     });
 
     this.setState({
       loading: false,
       volunteer,
-      teamOptions,
-      leaderOptions,
       formOptions,
       turfOptions,
-      selectedTeamsOption,
-      selectedLeaderOption,
       selectedFormsOption,
       selectedTurfOption,
       hometurf,
@@ -464,15 +328,6 @@ const VolunteerBadges = props => {
         color="gold"
         key={id + 'admin'}
         data-tip="Administrator"
-      />
-    );
-  if (props.volunteer.ass.leader)
-    badges.push(
-      <Icon
-        icon={faFlag}
-        color="green"
-        key={id + 'leader'}
-        data-tip="Team Leader"
       />
     );
   if (props.volunteer.locked)

@@ -59,7 +59,7 @@ module.exports = Router({mergeParams: true})
     if (req.user.admin)
       ref = await req.db.query('match (a:Form) return a');
     else
-      ref = await req.db.query('match (a:Volunteer {id:{id}})-[:MEMBERS]-(b:Team)-[:ASSIGNED]-(c:Form) return c UNION match (a:Volunteer {id:{id}})-[:ASSIGNED]-(c:Form) return c', req.user);
+      ref = await req.db.query('match (v:Volunteer {id:{id}})-[:ASSIGNED]-(f:Form) return f', req.user);
 
     list = ref.data;
   } catch (e) {
@@ -113,18 +113,6 @@ module.exports = Router({mergeParams: true})
   if (req.user.admin !== true) return _403(res, "Permission denied.");
   if (!valid(req.body.formId)) return _400(res, "Invalid value to parameter 'formId'.");
   return cqdo(req, res, 'match (a:Form {id:{formId}}) detach delete a', req.body, true);
-})
-.get('/form/assigned/team/list', (req, res) => {
-  if (!valid(req.query.formId)) return _400(res, "Invalid value to parameter 'formId'.");
-  return cqdo(req, res, 'match (a:Form {id:{formId}})-[:ASSIGNED]-(b:Team) return b', req.query, true);
-})
-.post('/form/assigned/team/add', (req, res) => {
-  if (!valid(req.body.formId) || !valid(req.body.teamId)) return _400(res, "Invalid value to parameter 'formId' or 'teamId'.");
-  return cqdo(req, res, 'match (a:Form {id:{formId}}), (b:Team {id:{teamId}}) merge (a)-[:ASSIGNED]->(b)', req.body, true);
-})
-.post('/form/assigned/team/remove', (req, res) => {
-  if (!valid(req.body.formId) || !valid(req.body.teamId)) return _400(res, "Invalid value to parameter 'formId' or 'teamId'.");
-  return cqdo(req, res, 'match (a:Form {id:{formId}})-[r:ASSIGNED]-(b:Team {id:{teamId}}) delete r', req.body, true);
 })
 .get('/form/assigned/volunteer/list', async (req, res) => {
   if (!valid(req.query.formId)) return _400(res, "Invalid value to parameter 'formId'.");

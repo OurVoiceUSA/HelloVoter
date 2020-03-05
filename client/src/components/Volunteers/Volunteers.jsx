@@ -92,7 +92,7 @@ export default class App extends Component {
       if (c.locked) {
         denied.push(c);
       } else if (c.invited) invited.push(c);
-      else if (c.ass.ready || c.ass.teams.length) ready.push(c);
+      else if (c.ass.ready) ready.push(c);
       else unassigned.push(c);
     });
 

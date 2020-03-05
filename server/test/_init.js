@@ -12,7 +12,6 @@ import { doDbInit } from '../app/lib/startup';
 var api;
 var db;
 var c = {};
-var teams = {};
 var turfs = {};
 var forms = {};
 var public_key, private_key;
@@ -26,7 +25,6 @@ describe('Database Init', function () {
 
   after(async () => {
     writeObj('volunteers', c);
-    writeObj('teams', teams);
     writeObj('turfs', turfs);
     writeObj('forms', forms);
     db.close();
@@ -183,32 +181,6 @@ describe('Database Init', function () {
     expect(r.body.msg).to.equal("Thanks for your request to join us! You are currently awaiting an assignment.");
     expect(r.body.data.ready).to.equal(false);
     expect(r.body.data).to.not.have.property("admin");
-  });
-
-  it('generate test objects - teams', async () => {
-    let r;
-
-    teams.A = { name: genName("Team") };
-
-    r = await api.post(base_uri+'/team/create')
-      .set('Authorization', 'Bearer '+c.admin.jwt)
-      .send({
-        name: teams.A.name,
-      });
-    expect(r.statusCode).to.equal(200);
-    expect(typeof r.body.teamId).to.equal("string");
-    teams.A.id = r.body.teamId;
-
-    teams.B = { name: genName("Team") };
-
-    r = await api.post(base_uri+'/team/create')
-      .set('Authorization', 'Bearer '+c.admin.jwt)
-      .send({
-        name: teams.B.name,
-      });
-    expect(r.statusCode).to.equal(200);
-    expect(typeof r.body.teamId).to.equal("string");
-    teams.B.id = r.body.teamId;
   });
 
   it('generate test objects - turfs', async () => {

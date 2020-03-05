@@ -7,7 +7,7 @@ import { appInit, base_uri, getObjs } from '../lib/utils';
 
 var api;
 var db;
-var c, teams, turfs, forms;
+var c, turfs, forms;
 
 describe('New Volunteer Zero Visibility', function () {
 
@@ -15,7 +15,6 @@ describe('New Volunteer Zero Visibility', function () {
     db = new neo4j(ov_config);
     api = appInit(db);
     c = getObjs('volunteers');
-    teams = getObjs('teams');
     turfs = getObjs('turfs');
     forms = getObjs('forms');
   });
@@ -32,20 +31,6 @@ describe('New Volunteer Zero Visibility', function () {
       .set('Authorization', 'Bearer '+c.mike.jwt)
     expect(r.statusCode).to.equal(200);
     expect(r.body.length).to.equal(1);
-  });
-
-  it('can not list teams', async () => {
-    let r = await api.get(base_uri+'/team/list')
-      .set('Authorization', 'Bearer '+c.mike.jwt)
-    expect(r.statusCode).to.equal(200);
-    expect(r.body.data.length).to.equal(0);
-  });
-
-  it('can not list team members', async () => {
-    let r = await api.get(base_uri+'/team/members/list?teamId='+teams.A.id)
-      .set('Authorization', 'Bearer '+c.mike.jwt)
-    expect(r.statusCode).to.equal(200);
-    expect(r.body.length).to.equal(0);
   });
 
   it('can not list turfs', async () => {

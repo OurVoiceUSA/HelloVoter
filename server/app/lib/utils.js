@@ -33,16 +33,6 @@ export async function cqdo(req, res, q, p, a) {
   return res.status(200).json({msg: "OK", data: ref.data});
 }
 
-export async function volunteerIsLeader(req, id, teamId) {
-  try {
-    let ref = await req.db.query('match (:Volunteer {id:{id}})-[:MEMBERS {leader:true}]-(a:Team {id:{teamId}}) return a', {id: id, teamId: teamId})
-    if (ref.data.length > 0) return true;
-  } catch (e) {
-    console.warn(e);
-  }
-  return false;
-}
-
 export async function onMyTurf(req, ida, idb) {
   if (ida === idb) return true;
   if (await sameTeam(req, ida, idb)) return true;
@@ -78,7 +68,6 @@ export async function volunteerCanSee(req, ida, idb) {
 export async function volunteerAssignments(req, type, vol) {
   let obj = {
     ready: false,
-    teams: [],
     turfs: [],
     forms: [],
   };
@@ -92,11 +81,10 @@ export async function volunteerAssignments(req, type, vol) {
   }
 
   try {
-    let ref = await req.db.query('match (a:'+type+' {id:{id}}) optional match (a)-[r:'+members+']-(b:Team) with a, collect(b{.*,leader:r.leader}) as teams optional match (a)-[:'+assigned+']-(b:Form) with a, teams, collect(b{.*,direct:true}) as dforms optional match (a)-[:'+members+']-(:Team)-[:ASSIGNED]-(b:Form) with a, teams, dforms + collect(b{.*}) as forms optional match (a)-[:'+assigned+']-(b:Turf) with a, teams, forms, collect(b{.id,.name,direct:true}) as dturf optional match (a)-[:'+members+']-(:Team)-[:ASSIGNED]-(b:Turf) with a, teams, forms, dturf + collect(b{.id,.name}) as turf return teams, forms, turf', vol);
+    let ref = await req.db.query('match (a:'+type+' {id:{id}}) optional match (a)-[r:'+members+']-(b:Team) with a, collect(b{.*,leader:r.leader}) as teams optional match (a)-[:'+assigned+']-(b:Form) with a, teams, collect(b{.*,direct:true}) as dforms optional match (a)-[:'+members+']-(:Team)-[:ASSIGNED]-(b:Form) with a, teams, dforms + collect(b{.*}) as forms optional match (a)-[:'+assigned+']-(b:Turf) with a, teams, forms, collect(b{.id,.name,direct:true}) as dturf optional match (a)-[:'+members+']-(:Team)-[:ASSIGNED]-(b:Turf) with a, teams, forms, dturf + collect(b{.id,.name}) as turf return forms, turf', vol);
 
-    obj.teams = ref.data[0][0];
-    obj.forms = ref.data[0][1];
-    obj.turfs = ref.data[0][2];
+    obj.forms = ref.data[0][0];
+    obj.turfs = ref.data[0][1];
 
   } catch (e) {
     console.warn(e);

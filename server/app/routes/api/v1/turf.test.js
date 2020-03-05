@@ -8,7 +8,7 @@ import { appInit, base_uri, getObjs } from '../../../../test/lib/utils';
 
 var api;
 var db;
-var c, teams, turfs, forms;
+var c, turfs, forms;
 
 describe('Turf', function () {
 
@@ -16,7 +16,6 @@ describe('Turf', function () {
     db = new neo4j(ov_config);
     api = appInit(db);
     c = getObjs('volunteers');
-    teams = getObjs('teams');
     turfs = getObjs('turfs');
     forms = getObjs('forms');
   });
@@ -197,60 +196,6 @@ describe('Turf', function () {
     expect(r.statusCode).to.equal(200);
     expect(r.body.data.length).to.equal(0);
   });
-
-  // assigned/team/add
-
-  it('assign a team invalid parameter', async () => {
-    let r;
-
-    r = await api.post(base_uri+'/turf/assigned/team/add')
-      .set('Authorization', 'Bearer '+c.admin.jwt)
-      .send({
-        turfId: turfs.A.id,
-      });
-    expect(r.statusCode).to.equal(400);
-
-    r = await api.post(base_uri+'/turf/assigned/team/add')
-      .set('Authorization', 'Bearer '+c.admin.jwt)
-      .send({
-        teamId: teams.A.id,
-      });
-    expect(r.statusCode).to.equal(400);
-  });
-
-  it('assign a team as non-admin', async () => {
-    let r = await api.post(base_uri+'/turf/assigned/team/add')
-      .set('Authorization', 'Bearer '+c.bob.jwt)
-      .send({
-        teamId: teams.A.id,
-        turfId: turfs.A.id,
-      });
-    expect(r.statusCode).to.equal(403);
-  });
-
-  it('assign a team as admin', async () => {
-    let r;
-
-    r = await api.post(base_uri+'/turf/assigned/team/add')
-      .set('Authorization', 'Bearer '+c.admin.jwt)
-      .send({
-        teamId: teams.A.id,
-        turfId: turfs.A.id,
-      });
-    expect(r.statusCode).to.equal(200);
-
-    r = await api.post(base_uri+'/turf/assigned/team/add')
-      .set('Authorization', 'Bearer '+c.admin.jwt)
-      .send({
-        teamId: teams.B.id,
-        turfId: turfs.B.id,
-      });
-    expect(r.statusCode).to.equal(200);
-  });
-
-  // assigned/team/list
-
-  // assigned/team/remove
 
   // assigned/volunteer/add
 

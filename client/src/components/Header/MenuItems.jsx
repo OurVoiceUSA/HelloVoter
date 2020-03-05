@@ -40,14 +40,6 @@ const MenuItems = ({ assignments, handleClickLogout }) => (
           <ListItemText primary="Volunteers" />
         </ListItem>
       </Link>
-      <Link to={'/teams/'}>
-        <ListItem button>
-          <ListItemIcon>
-            <PeopleIcon />
-          </ListItemIcon>
-          <ListItemText primary="Teams" />
-        </ListItem>
-      </Link>
       <Link to={'/turf/'}>
         <ListItem button>
           <ListItemIcon>

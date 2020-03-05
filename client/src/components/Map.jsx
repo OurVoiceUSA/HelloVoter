@@ -46,7 +46,7 @@ export class App extends Component {
       turfs,
       forms,
     ] = await Promise.all([
-      _loadTurfs(global, null, true),
+      _loadTurfs(global, true),
       _loadForms(global),
     ]);
 

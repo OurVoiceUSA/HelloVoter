@@ -6,17 +6,7 @@ import { PaperTable } from '../Elements';
 export const CardTurfFull = props => (
   <div>
     <div>
-      Teams assigned to this turf:
-      <Select
-        value={props.refer.state.selectedTeamsOption}
-        onChange={props.refer.handleTeamsChange}
-        options={props.refer.state.teamOptions}
-        isMulti={true}
-        isSearchable={true}
-        placeholder="None"
-      />
-      <br />
-      Volunteers assigned directly to this turf:
+      Volunteers assigned to this turf:
       <Select
         value={props.refer.state.selectedMembersOption}
         onChange={props.refer.handleMembersChange}

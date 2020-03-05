@@ -7,17 +7,7 @@ export const CardFormFull = props => (
   <div>
     <div>
       <br />
-      Teams assigned to this form:
-      <Select
-        value={props.refer.state.selectedTeamsOption}
-        onChange={props.refer.handleTeamsChange}
-        options={props.refer.state.teamOptions}
-        isMulti={true}
-        isSearchable={true}
-        placeholder="None"
-      />
-      <br />
-      Volunteers assigned directly to this form:
+      Volunteers assigned to this form:
       <Select
         value={props.refer.state.selectedMembersOption}
         onChange={props.refer.handleMembersChange}
