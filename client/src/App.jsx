@@ -36,7 +36,7 @@ class App extends Component {
       server: localStorage.getItem('server'),
       token: localStorage.getItem('jwt'),
       orgId: localStorage.getItem('orgId'),
-      experimental: (localStorage.getItem('experimental')?true:false),
+      experimental: ((process.env.NODE_ENV === 'development' || localStorage.getItem('experimental'))?true:false),
       qserver: v.server
     };
 
