@@ -33,7 +33,7 @@ export const Routes = ({ global }) => (
     <Route path="/forms/" render={() => <Forms global={global} />} />
     <Route path="/qrcode/" render={() => <QRCodes global={global} />} />
     <Route path="/attributes/" render={() => <Attributes global={global} />} />
-    {(process.env.NODE_ENV === 'development')&&
+    {(process.env.NODE_ENV === 'development' || global.state.experimental)&&
     <Route path="/import/" render={() => <ImportData global={global} />} />
     }
     <Route path="/queue/" render={() => <Queue global={global} />} />

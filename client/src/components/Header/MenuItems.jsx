@@ -74,7 +74,8 @@ const MenuItems = ({ assignments, handleClickLogout }) => (
           <ListItemText primary="Attributes" />
         </ListItem>
       </Link>
-      {(process.env.NODE_ENV === 'development')&&
+
+      {(process.env.NODE_ENV === 'development' || global.state.experimental)&&
       <Link to={'/import/'}>
         <ListItem button>
           <ListItemIcon>
