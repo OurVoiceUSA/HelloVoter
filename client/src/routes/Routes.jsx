@@ -24,7 +24,7 @@ import NoMatch from './NoMatch';
     server: <server description>
   }
 */
-export const Routes = ({ global }) => (
+export const Routes = ({ global, experimental }) => (
   <Switch>
     <Route exact={true} path="/" render={() => <Dashboard global={global} />} />
     <Route path="/jwt/" render={props => <Login {...props} global={global} />} />
@@ -33,7 +33,7 @@ export const Routes = ({ global }) => (
     <Route path="/forms/" render={() => <Forms global={global} />} />
     <Route path="/qrcode/" render={() => <QRCodes global={global} />} />
     <Route path="/attributes/" render={() => <Attributes global={global} />} />
-    {(process.env.NODE_ENV === 'development' || global.state.experimental)&&
+    {(experimental)&&
     <Route path="/import/" render={() => <ImportData global={global} />} />
     }
     <Route path="/queue/" render={() => <Queue global={global} />} />

@@ -21,7 +21,7 @@ import IndeterminateCheckBoxIcon from '@material-ui/icons/IndeterminateCheckBox'
 import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
 import HelpIcon from '@material-ui/icons/Help';
 
-const MenuItems = ({ assignments, handleClickLogout }) => (
+const MenuItems = ({ assignments, handleClickLogout, experimental }) => (
   <Fragment>
     <List>
       <Link to={'/'}>
@@ -75,7 +75,7 @@ const MenuItems = ({ assignments, handleClickLogout }) => (
         </ListItem>
       </Link>
 
-      {(process.env.NODE_ENV === 'development' || global.state.experimental)&&
+      {(experimental)&&
       <Link to={'/import/'}>
         <ListItem button>
           <ListItemIcon>

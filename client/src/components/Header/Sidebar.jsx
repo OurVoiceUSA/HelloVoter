@@ -10,6 +10,7 @@ export const Sidebar = ({
   classes,
   open,
   assignments,
+  experimental,
   handleClickLogout,
   handleDrawerClose
 }) => (
@@ -26,7 +27,7 @@ export const Sidebar = ({
       </IconButton>
     </div>
     <Divider />
-    <MenuItems assignments={assignments} handleClickLogout={handleClickLogout} />
+    <MenuItems assignments={assignments} handleClickLogout={handleClickLogout} experimental={experimental} />
   </Drawer>
 );
 

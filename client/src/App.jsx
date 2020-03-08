@@ -36,7 +36,7 @@ class App extends Component {
       server: localStorage.getItem('server'),
       token: localStorage.getItem('jwt'),
       orgId: localStorage.getItem('orgId'),
-      experimental: localStorage.getItem('experimental'),
+      experimental: (localStorage.getItem('experimental')?true:false),
       qserver: v.server
     };
 
@@ -260,7 +260,7 @@ class App extends Component {
 
   render() {
     const { classes } = this.props;
-    let { assignments, server, token, loading } = this.state;
+    let { assignments, experimental, server, token, loading } = this.state;
 
     if (loading) return (
       <Router>
@@ -288,6 +288,7 @@ class App extends Component {
           />
           <Sidebar
             assignments={assignments}
+            experimental={experimental}
             classes={classes}
             open={this.state.open}
             getUserProp={this.getUserProp}
@@ -297,7 +298,7 @@ class App extends Component {
           <main className={classes.content}>
             <div className={classes.appBarSpacer} />
             <NotificationContainer />
-            <Routes global={this} />
+            <Routes global={this} experimental={experimental} />
             <LogoutDialog
               menuLogout={this.state.menuLogout}
               handleCloseLogout={this.handleCloseLogout}
