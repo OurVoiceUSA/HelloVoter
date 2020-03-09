@@ -195,7 +195,7 @@ export async function doDbInit(db) {
   let defaultAttributes = [
     {id: "013a31db-fe24-4fad-ab6a-dd9d831e72f9", name: "Name", order: 0, type: "string", multi: false},
     {id: "a0e622d2-db0a-410e-a315-52c65f678ffa", name: "Gender", order: 1, type: "string", multi: false, values: ["Male","Female","Non-Binary"]},
-    {id: "4a320f76-ef7b-4d73-ae2a-8f4ccf5de344", name: "Party Affiliation", order: 2, type: "string", multi: false, values: ["No Party Preference","Democratic","Republican","Green","Libertarian"]},
+    {id: "4a320f76-ef7b-4d73-ae2a-8f4ccf5de344", name: "Party Affiliation", order: 2, type: "string", multi: false, values: ["No Party Preference","Democratic","Republican","Green","Libertarian","Other"]},
     {id: "dcfc1fbb-4609-4900-bbb3-1c4afb2a5127", name: "Registered to Vote", order: 3, type: "boolean", multi: false},
     {id: "134095d5-c1c8-46ad-9952-cc66e2934f9e", name: "Receive Notifications", order: 4, type: "string", multi: true, values: ["Phone","Text","Email"]},
     {id: "7d3466e5-2cee-491e-b3f4-bfea3a4b010a", name: "Phone Number", order: 5, type: "string", multi: true},
