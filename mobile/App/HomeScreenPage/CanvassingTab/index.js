@@ -97,7 +97,7 @@ export default class App extends LocationComponent {
 
       this.connectToServer('gotv-'+place+'.ourvoiceusa.org', orgId, inviteCode);
     } else if (orgId && orgId.match(/\./)) {
-      this.connectToServer(orgId, null, inviteCode);
+      this.connectToServer(orgId.toLowerCase(), null, inviteCode);
     } else {
       this.alert('Error', say("must_enter_valid_qr_code"));
     }
