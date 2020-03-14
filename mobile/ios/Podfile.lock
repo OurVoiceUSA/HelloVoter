@@ -211,13 +211,13 @@ PODS:
     - React-cxxreact (= 0.61.5)
     - React-jsi (= 0.61.5)
   - React-jsinspector (0.61.5)
-  - react-native-camera (3.19.0):
+  - react-native-camera (3.19.1):
     - React
-    - react-native-camera/RCT (= 3.19.0)
-    - react-native-camera/RN (= 3.19.0)
-  - react-native-camera/RCT (3.19.0):
+    - react-native-camera/RCT (= 3.19.1)
+    - react-native-camera/RN (= 3.19.1)
+  - react-native-camera/RCT (3.19.1):
     - React
-  - react-native-camera/RN (3.19.0):
+  - react-native-camera/RN (3.19.1):
     - React
   - react-native-config (0.12.0):
     - React
@@ -225,7 +225,7 @@ PODS:
     - React
   - react-native-geolocation (2.0.2):
     - React
-  - react-native-get-random-values (1.2.0):
+  - react-native-get-random-values (1.3.0):
     - React
   - react-native-google-maps (0.26.1):
     - Google-Maps-iOS-Utils (= 2.1.0)
@@ -239,7 +239,7 @@ PODS:
     - React
   - react-native-maps (0.26.1):
     - React
-  - react-native-netinfo (5.5.1):
+  - react-native-netinfo (5.6.2):
     - React
   - react-native-safari-view (1.0.0):
     - React
@@ -280,7 +280,7 @@ PODS:
     - React-cxxreact (= 0.61.5)
     - React-jsi (= 0.61.5)
     - ReactCommon/jscallinvoker (= 0.61.5)
-  - ReactNativeART (1.1.2):
+  - ReactNativeART (1.2.0):
     - React
   - RNCAsyncStorage (1.8.1):
     - React
@@ -296,11 +296,10 @@ PODS:
     - React
   - RNRate (1.1.10):
     - React
-  - RNScreens (2.2.0):
+  - RNScreens (2.3.0):
     - React
-  - RNSVG (12.0.0):
+  - RNSVG (12.0.3):
     - React
-    - React-RCTImage
   - RNVectorIcons (6.6.0):
     - React
   - Yoga (1.14.0)
@@ -494,16 +493,16 @@ SPEC CHECKSUMS:
   React-jsi: cb2cd74d7ccf4cffb071a46833613edc79cdf8f7
   React-jsiexecutor: d5525f9ed5f782fdbacb64b9b01a43a9323d2386
   React-jsinspector: fa0ecc501688c3c4c34f28834a76302233e29dc0
-  react-native-camera: 1a62f163f06c7e54811fc9396cdb80269a665238
+  react-native-camera: 2eb144a4572d9342bddc946f4c0c3bc2b50e374e
   react-native-config: f2c2ae45625a068c35681a16b9bfb1ca58b0adc7
   react-native-geocoder-reborn: c31cbc630d9307ebbceea1dea2746d0054be35c4
   react-native-geolocation: cbd9d6bd06bac411eed2671810f454d4908484a8
-  react-native-get-random-values: 34ff720b6ad484b14d2190edf9074c443b564e4e
+  react-native-get-random-values: 6f638190cfaa202576b43ea9534d5cf88181f139
   react-native-google-maps: 2e2e697dab576abd5809d78cd74e775865b62bf7
   react-native-google-places: 1531c5b40622f71b6dacfb476e30be9e08e857b8
   react-native-keep-awake: eba3137546b10003361b37c761f6c429b59814ae
   react-native-maps: 6e499eee4eabf422ba8b6f94e993cc768bf35153
-  react-native-netinfo: 1ee553f84e01aaffbed0e5bd53d8515f7d675055
+  react-native-netinfo: c67896313964727ddae153d6e119f65dae840d51
   react-native-safari-view: 955d7160d159241b8e9395d12d10ea0ef863dcdd
   react-native-safe-area-context: 8260e5157617df4b72865f44006797f895b2ada7
   React-RCTActionSheet: 600b4d10e3aea0913b5a92256d2719c0cdd26d76
@@ -516,7 +515,7 @@ SPEC CHECKSUMS:
   React-RCTText: 9ccc88273e9a3aacff5094d2175a605efa854dbe
   React-RCTVibration: a49a1f42bf8f5acf1c3e297097517c6b3af377ad
   ReactCommon: 198c7c8d3591f975e5431bec1b0b3b581aa1c5dd
-  ReactNativeART: c496c53089b3149663215d74d6f1adb3a62e07eb
+  ReactNativeART: f003b07dfa7098aa419ed95b69560923440b1eee
   RNCAsyncStorage: 00bdf63f7f1e0f11d3323533dba4f222e58bf092
   RNCMaskedView: 90dd32f5b786bd562e876e1421ea77c700cbf71e
   RNDeviceInfo: 67607dfe9cfbed105838144c40187a8392aa404d
@@ -524,11 +523,11 @@ SPEC CHECKSUMS:
   RNLocalize: 7ea191e47e1755d2ad48614a2e9d07d290abc58e
   RNPermissions: 6db7e0a4d94c9c02390d11020b1d3d187aaf77e5
   RNRate: d44a8bca6ee08f5d890ecccddaec2810955ffbb3
-  RNScreens: 812b79d384e2bea7eebc4ec981469160d4948fd5
-  RNSVG: e06eb87ed992232097735185d3d148e8b4e8e1a9
+  RNScreens: 03bf608b92ac0acf323f47d8f5b63a8f829340c8
+  RNSVG: 7e16ddfc6e00d5aa69c9eb83e699bcce5dcb85d4
   RNVectorIcons: 0bb4def82230be1333ddaeee9fcba45f0b288ed4
   Yoga: f2a7cd4280bfe2cca5a7aed98ba0eb3d1310f18b
 
 PODFILE CHECKSUM: 5c820bd53444b31858cd20f1e1cff8ca27911dc1
 
-COCOAPODS: 1.8.4
+COCOAPODS: 1.9.1
