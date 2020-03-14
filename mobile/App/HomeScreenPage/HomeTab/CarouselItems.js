@@ -37,7 +37,7 @@ export function carouselItems(refer) {
 
   items.push(
     {
-      title: say("canvas_for_any_cause"),
+      title: say("canvass_for_any_cause"),
       subtitle: say("our_zero_cost_tool"),
       illustration: require('../../../img/canvassing.png'),
       onPress: () => refer.setState({active: 'canvassing'}),

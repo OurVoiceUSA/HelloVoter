@@ -51,7 +51,7 @@ export default class App extends LocationComponent {
       connectmode: false,
       waitmode: false,
       waitprogress: 0,
-      canvaslater: null,
+      canvasslater: null,
       error: false,
       user: null,
       myOrgID: null,
@@ -87,7 +87,7 @@ export default class App extends LocationComponent {
     const { state, orgId, inviteCode } = this.state;
 
     if (!state) {
-      this.setState({canvaslater: 451});
+      this.setState({canvasslater: 451});
       return this.alert(say("out_of_bounds"), say("not_located_within_us_bounds"));
     }
 
@@ -123,7 +123,7 @@ export default class App extends LocationComponent {
   sayHello = async (server, orgId, inviteCode) => {
     const { dinfo, myPosition } = this.state;
     let { servers, startPosition } = this.state;
-    let canvaslater;
+    let canvasslater;
 
     if (!this.checkLocationAccess()) return;
     if (!startPosition.longitude || !startPosition.latitude) startPosition = myPosition;
@@ -167,25 +167,25 @@ export default class App extends LocationComponent {
         switch (res.status) {
           case 200:
             retry = false;
-            canvaslater = null;
+            canvasslater = null;
             break;
           case 401:
             this.setState({user: {profile:{}}, connectmode: false, waitmode: false});
             return;
           case 418:
             if (retrycount === 0) this.setState({connectmode: false, waitmode: true, waitprogress: 0}, () => this.recursiveProgress(0));
-            canvaslater = null;
+            canvasslater = null;
             await sleep(12345);
             break;
           default:
             // allow for one error to happen without bombing
             if (res.status >= 500 && skiperr) {
               skiperr = false;
-              canvaslater = null;
+              canvasslater = null;
               await sleep(12345);
             } else {
               retry = false;
-              canvaslater = res.status;
+              canvasslater = res.status;
             }
             break;
         }
@@ -194,13 +194,13 @@ export default class App extends LocationComponent {
       }
     }
 
-    this.setState({waitmode: false, canvaslater});
+    this.setState({waitmode: false, canvasslater});
 
     if (retry) {
       this.setState({error: true});
       console.warn("retry failed");
     }
-    if (retry || canvaslater) {
+    if (retry || canvasslater) {
       this.setState({connectmode: false});
       return;
     }
@@ -216,7 +216,7 @@ export default class App extends LocationComponent {
     let now = new Date();
     let times = SunCalc.getTimes(now, startPosition.latitude, startPosition.longitude);
     if (!admin && !json.sundownok && (now < times.sunrise || now > times.sunset)) {
-      setTimeout(() => this.setState({canvaslater: 409}), 600);
+      setTimeout(() => this.setState({canvasslater: 409}), 600);
       return;
     }
 
@@ -377,7 +377,7 @@ export default class App extends LocationComponent {
         }
       }
       else if (res.status === 400 || res.status === 401) this.setState({user: {profile:{}}});
-      else if (res.status < 500) this.setState({canvaslater: res.status});
+      else if (res.status < 500) this.setState({canvasslater: res.status});
 
     } catch (e) {
       console.warn(e);
@@ -462,14 +462,14 @@ export default class App extends LocationComponent {
     const {
       showCamera, newOrg, dinfo, loading, user, forms, error, locationDenied,
       askOrgId, SelectModeScreen, myOrgID, connectmode, waitmode, waitprogress,
-      canvaslater, TellThemYourAddress, TellThemYourAddressError,
+      canvasslater, TellThemYourAddress, TellThemYourAddressError,
     } = this.state;
     const { navigate } = this.props.navigation;
 
     if (locationDenied) return (<NotRightNow refer={this} image={lost} title="Location Unknown" message="" />);
 
-    if (canvaslater || error) {
-      switch (canvaslater) {
+    if (canvasslater || error) {
+      switch (canvasslater) {
         case 402: return (<NotRightNow refer={this} image={crowd} title="Quota Exceeded" message="Your organization has used our services so heavily that we cannot offer it to you for free anymore. Become a patron to continue to use our services." patreon={true} />);
         case 403: return (<NotRightNow refer={this} image={lockedout} title="Locked Out" message="You have been locked out of this organization. Please contact your organization administrator." />);
         case 409: return (<NotRightNow refer={this} image={darkoutside} title="It's Dark Outside" message="Whoa there! The sun's not up. Relax and try again later." youtube={true} />);
@@ -543,7 +543,7 @@ export default class App extends LocationComponent {
 
         <Button block danger onPress={() => this.setState({SelectModeScreen: true})}>
           <Icon name="plus-circle" backgroundColor="#d7d7d7" color="white" size={30} />
-          <Text>{say("start_new_canvas_activity")}</Text>
+          <Text>{say("start_new_canvass_activity")}</Text>
         </Button>
 
         <Divider />
@@ -571,7 +571,7 @@ export default class App extends LocationComponent {
         </View>
 
         <Dialog
-          title={say("start_new_canvas_activity")}
+          title={say("start_new_canvass_activity")}
           visible={SelectModeScreen}
           onTouchOutside={() => this.setState({SelectModeScreen: false})}>
           <View>
@@ -594,7 +594,7 @@ export default class App extends LocationComponent {
 
                 if (!this.checkLocationAccess()) return;
                 if (!state) {
-                  this.setState({canvaslater: 451});
+                  this.setState({canvasslater: 451});
                   return this.alert(say("out_of_bounds"), say("not_located_within_us_bounds"));
                 }
 
@@ -698,7 +698,7 @@ const NotRightNow = props => (
       resizeMode: 'stretch',
     }} />
     <View style={{position: 'absolute', left: 0, top: 0, alignItems: 'center'}}>
-      <H1 style={{margin: 5, alignSelf: 'center'}}>{props.title}{(__DEV__?" ("+props.refer.state.canvaslater+")":"")}</H1>
+      <H1 style={{margin: 5, alignSelf: 'center'}}>{props.title}{(__DEV__?" ("+props.refer.state.canvasslater+")":"")}</H1>
       <Text style={{padding: 10}}>{props.message}</Text>
       {props.youtube&&
       <Content>

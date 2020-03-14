@@ -120,7 +120,7 @@ Terms of Service</Text>.
         }
 
         if (res.status !== 200) {
-          refer.setState({ newOrg: false, canvaslater: res.status, error: true, loading: false})
+          refer.setState({ newOrg: false, canvasslater: res.status, error: true, loading: false})
           return;
         }
 

@@ -346,7 +346,7 @@ const VolunteerBadges = props => {
           icon={faCheckCircle}
           color="green"
           key={id + 'ready'}
-          data-tip="Ready to Canvas"
+          data-tip="Ready to Canvass"
         />
       );
     else
