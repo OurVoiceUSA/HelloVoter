@@ -209,7 +209,7 @@ const AddAttribute = (props) => {
                 <MenuItem value='string'>Text</MenuItem>
                 <MenuItem value='textbox'>Textbox</MenuItem>
                 <MenuItem value='number'>Number</MenuItem>
-                <MenuItem value='boolean'>Boolean</MenuItem>
+                <MenuItem value='boolean'>On/Off Switch (Boolean)</MenuItem>
                 <MenuItem value='hyperlink'>Hyperlink</MenuItem>
                 <MenuItem value='note'>Note</MenuItem>
                 {/* TODO: <MenuItem value='date'>Date</MenuItem> */}
