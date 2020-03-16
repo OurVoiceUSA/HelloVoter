@@ -148,8 +148,9 @@ export default class queue {
     let filename = input.filename;
     let stats;
 
-    // if no pid, create with randomUUID()
-    await this.db.query('match (a:ImportFile {filename:{filename}})<-[:FILE]-(b:ImportRecord) where b.pid = "" set b.pid = randomUUID()', {filename: filename});
+    // if no pid, create with randomUUID(), unless there are no attributes
+    await this.db.query('match (if:ImportFile {filename:{filename}}) where length(if.attributes) = 0 match (if)<-[:FILE]-(ir:ImportRecord) set ir.pid = null', {filename: filename});
+    await this.db.query('match (if:ImportFile {filename:{filename}}) where length(if.attributes) > 0 match (if)<-[:FILE]-(ir:ImportRecord) where ir.pid = "" set ir.pid = randomUUID()', {filename: filename});
 
     // parse_start
     await this.db.query('match (a:ImportFile {filename:{filename}}) set a.parse_start = timestamp()', {filename: filename});
@@ -371,4 +372,3 @@ async function doGeocode(db, data) {
   }
 
 }
-
