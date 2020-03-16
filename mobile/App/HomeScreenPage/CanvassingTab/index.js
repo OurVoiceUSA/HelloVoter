@@ -24,7 +24,7 @@ import SunCalc from 'suncalc';
 
 import {
   DINFO, STORAGE_KEY_JWT, STORAGE_KEY_OLDFORMS, URL_GUIDELINES, URL_HELP,
-  Divider, say, _getApiToken, api_base_uri, _loginPing, openURL, getUSState, localaddress,
+  Divider, say, _getApiToken, verify_aud, api_base_uri, _loginPing, openURL, getUSState, localaddress,
   _specificAddress,
 } from '../../common';
 import { wsbase } from '../../config';
@@ -143,6 +143,7 @@ export default class App extends LocationComponent {
       // if the jwt doesn't have an id, discard it
       let obj = jwt_decode(jwt);
       if (!obj.id) throw "not a full user object";
+      if (!verify_aud(server, obj)) throw "jwt intent mismatch";
     } catch (e) {
       await storage.del(STORAGE_KEY_JWT);
       this.setState({user: {profile:{}}, waitmode: false});

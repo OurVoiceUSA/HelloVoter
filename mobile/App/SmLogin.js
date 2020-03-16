@@ -70,10 +70,10 @@ export default class App extends PureComponent {
   };
 
   // Handle Login with Facebook button tap
-  loginWithFacebook = () => openURL(wsbase+'/auth/fm');
+  loginWithFacebook = () => openURL(wsbase+'/auth/fm?aud=gotv.ourvoiceusa.org');
 
   // Handle Login with Google button tap
-  loginWithGoogle = (hint) => openURL(wsbase+'/auth/gm'+(hint?'?loginHint='+hint:''));
+  loginWithGoogle = (hint) => openURL(wsbase+'/auth/gm?aud=gotv.ourvoiceusa.org'+(hint?'&loginHint='+hint:''));
 
   render() {
     const { user } = this.state;

@@ -283,6 +283,19 @@ export async function _getApiToken() {
   return jwt;
 }
 
+export function verify_aud(server, obj) {
+  // verify issuer
+  if (obj.iss !== 'ourvoiceusa.org') return false;
+  // verify audiance
+  if (obj.aud === server) return true;
+  // gotv audiance catchall
+  if (obj.aud === 'gotv.ourvoiceusa.org' && server.match(/^gotv.*\.ourvoiceusa\.org$/)) return true;
+  // local dev
+  if (server === localaddress()+':8080') return true;
+  // not a valid jwt for the given audiance
+  return false;
+}
+
 export async function _apiCall(uri, input) {
   var res;
   var retry = false;
