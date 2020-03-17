@@ -91,6 +91,8 @@ export function doExpressInit(log, db, qq) {
         break;
     }
     if (req.url.match(/^\/HelloVoterHQ.*mobile\//)) return next();
+    if (req.url.match(/^\/HelloVoterHQ.*public\//)) return next();
+    if (req.url.match(/\/\.\.\//)) return _400(res, "Not OK..");
 
     try {
       let u;
