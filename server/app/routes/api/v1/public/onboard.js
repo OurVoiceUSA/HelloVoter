@@ -16,7 +16,7 @@ module.exports = Router({mergeParams: true})
   try {
     let ref = await req.db.query('match (f:Form {id:{formId}, public:true}) return f', req.body);
 
-    if (!ref.data) return _403(res, "Invalid formId");
+    if (!ref.data[0]) return _403(res, "Invalid formId");
 
     // do something
   } catch (e) {
