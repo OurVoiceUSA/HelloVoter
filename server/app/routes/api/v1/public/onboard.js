@@ -6,7 +6,7 @@ import {
 import { Router } from 'express';
 
 module.exports = Router({mergeParams: true})
-.post('/onboard', async (req, res) => {
+.post('/public/onboard', async (req, res) => {
   if (!req.body.formId) return _400(res, "Missing parameter to 'formId'.");
   if (!req.body.longitude || !req.body.latitude) return _400(res, "Missing parameter to 'longitude' or 'latitude'.");
 
@@ -28,4 +28,3 @@ module.exports = Router({mergeParams: true})
 
   return res.json({});
 });
-
