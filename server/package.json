@@ -19,7 +19,7 @@
     "chai": "^4.2.0",
     "docker-cli-js": "^2.7.1",
     "keypair": "^1.0.1",
-    "mocha": "^7.1.0",
+    "mocha": "^7.1.1",
     "mocha-jenkins-reporter": "^0.4.2",
     "nodemon": "^2.0.2",
     "nyc": "^15.0.0",
