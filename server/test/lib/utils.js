@@ -1,5 +1,6 @@
 
 import supertest from 'supertest';
+import defaults from 'superagent-defaults';
 import jwt from 'jsonwebtoken';
 import fs from 'fs';
 
@@ -22,7 +23,7 @@ export function appInit(db) {
   if (process.env.TEST_TARGET) {
     api = supertest(process.env.TEST_TARGET);
   } else {
-    api = supertest(doExpressInit(false, db, new queue(db)));
+    api = defaults(supertest(doExpressInit(false, db, new queue(db)))).set({host:'localhost'});
   }
   return api;
 }
@@ -33,6 +34,7 @@ export function testToken(key) {
     id: 'test:' + id,
     name: "Test User "+id,
     iss: ov_config.jwt_iss,
+    aud: 'localhost',
     iat: Math.floor(new Date().getTime() / 1000),
     exp: Math.floor(new Date().getTime() / 1000)+604800,
     disclaimer: "THIS IS A TEST TOKEN",
