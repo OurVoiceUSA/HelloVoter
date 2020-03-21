@@ -88,6 +88,19 @@ export function api_base_uri(orgId) {
   return '/HelloVoterHQ/'+(orgId?orgId+'/':'')+'api/v1';
 }
 
+export function invite2obj(url) {
+  let obj = {};
+  try {
+    // Why oh why is the "new URL()" object not implemented in RN?!? gah
+    // brings me back to my perl days with ugly one liners. Ahh, the nostalgia! convert URI key/values to object
+    url.split('?')[1].split('&').forEach(p => {
+      const [p1,p2] = p.split('=');
+      obj[p1] = p2;
+    });
+  } catch (e) {}
+  return obj;
+}
+
 export async function createOrgID(data) {
   return fetch('https://gotv-'+data.state+'.ourvoiceusa.org/orgid/v1/new', {
     method: 'POST',

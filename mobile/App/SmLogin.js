@@ -6,15 +6,28 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import SafariView from 'react-native-safari-view';
 import jwt_decode from 'jwt-decode';
 import { wsbase } from './config';
-import { URL_PRIVACY_POLICY, say, _loginPing, _saveJWT, openURL } from './common';
+import {
+  URL_PRIVACY_POLICY, say, _loginPing, _saveJWT, openURL,
+  invite2obj, localaddress,
+} from './common';
+
+const DEFAULT_AUDIENCE = 'gotv.ourvoiceusa.org';
 
 export default class App extends PureComponent {
 
   constructor(props) {
     super(props);
+
+    let audience = DEFAULT_AUDIENCE;
+    if (props.refer.state && props.refer.state.server) audience = props.refer.state.server;
+    if (props.parent.state && props.parent.state.inviteUrl) audience = invite2obj(props.refer.state.refer.state.inviteUrl).server;
+
+    if (audience.match(/^gotv.*\.ourvoiceusa\.org$/) || audience === localaddress()+':8080') audience = DEFAULT_AUDIENCE;
+
     this.state = {
       refer: props.refer,
       user: null,
+      audience,
     };
   }
 
@@ -70,10 +83,10 @@ export default class App extends PureComponent {
   };
 
   // Handle Login with Facebook button tap
-  loginWithFacebook = () => openURL(wsbase+'/auth/fm?aud=gotv.ourvoiceusa.org');
+  loginWithFacebook = () => openURL(wsbase+'/auth/fm?aud='+this.state.audience);
 
   // Handle Login with Google button tap
-  loginWithGoogle = (hint) => openURL(wsbase+'/auth/gm?aud=gotv.ourvoiceusa.org'+(hint?'&loginHint='+hint:''));
+  loginWithGoogle = (hint) => openURL(wsbase+'/auth/gm?aud='+this.state.audience+(hint?'&loginHint='+hint:''));
 
   render() {
     const { user } = this.state;

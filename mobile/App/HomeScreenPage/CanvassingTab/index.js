@@ -25,7 +25,7 @@ import SunCalc from 'suncalc';
 import {
   DINFO, STORAGE_KEY_JWT, STORAGE_KEY_OLDFORMS, URL_GUIDELINES, URL_HELP,
   Divider, say, _getApiToken, verify_aud, api_base_uri, _loginPing, openURL, getUSState, localaddress,
-  _specificAddress,
+  _specificAddress, invite2obj,
 } from '../../common';
 import { wsbase } from '../../config';
 
@@ -97,7 +97,9 @@ export default class App extends LocationComponent {
 
       this.connectToServer('gotv-'+place+'.ourvoiceusa.org', orgId, inviteCode);
     } else if (orgId && orgId.match(/\./)) {
-      this.connectToServer(orgId.toLowerCase(), null, inviteCode);
+      this.setState({orgId: null}, () => {
+        this.connectToServer(orgId.toLowerCase(), null, inviteCode);
+      });
     } else {
       this.alert('Error', say("must_enter_valid_qr_code"));
     }
@@ -108,9 +110,9 @@ export default class App extends LocationComponent {
 
     if (!this.checkLocationAccess()) return;
 
-    this.setState({server, inviteCode});
-
-    if (user && user.loggedin) this.sayHello(server, orgId, inviteCode);
+    this.setState({server, inviteCode}, () => {
+      if (user && user.loggedin) this.sayHello(server, orgId, inviteCode);
+    });
   }
 
   recursiveProgress(i) {
@@ -173,6 +175,7 @@ export default class App extends LocationComponent {
             canvasslater = null;
             break;
           case 401:
+            await storage.del(STORAGE_KEY_JWT);
             this.setState({user: {profile:{}}, connectmode: false, waitmode: false});
             return;
           case 418:
@@ -379,7 +382,10 @@ export default class App extends LocationComponent {
           this.setState({myOrgID});
         }
       }
-      else if (res.status === 400 || res.status === 401) this.setState({user: {profile:{}}});
+      else if (res.status === 400 || res.status === 401) {
+        await storage.del(STORAGE_KEY_JWT);
+        this.setState({user: {profile:{}}});
+      }
       else if (res.status < 500) this.setState({canvasslater: res.status});
 
     } catch (e) {
@@ -399,17 +405,10 @@ export default class App extends LocationComponent {
   }
 
   parseInvite(url) {
-    let obj = {};
-
     this.setState({showCamera: false, newOrg: false, SelectModeScreen: false, askOrgId: false});
 
     try {
-      // Why oh why is the "new URL()" object not implemented in RN?!? gah
-      // brings me back to my perl days with ugly one liners. Ahh, the nostalgia! convert URI key/values to object
-      url.split('?')[1].split('&').forEach(p => {
-        const [p1,p2] = p.split('=');
-        obj[p1] = p2;
-      });
+      let obj = invite2obj(url);
 
       if (!obj.orgId && !obj.server) throw "invalid qr code";
 
@@ -465,7 +464,7 @@ export default class App extends LocationComponent {
     const {
       showCamera, newOrg, dinfo, loading, user, forms, error, locationDenied,
       askOrgId, SelectModeScreen, myOrgID, connectmode, waitmode, waitprogress,
-      canvasslater, TellThemYourAddress, TellThemYourAddressError,
+      canvasslater, TellThemYourAddress, TellThemYourAddressError, refer,
     } = this.state;
     const { navigate } = this.props.navigation;
 
@@ -493,7 +492,7 @@ export default class App extends LocationComponent {
 
     if (!user.loggedin) return (
       <View style={{flex: 1, backgroundColor: 'white', alignItems: 'center', justifyContent: 'center'}}>
-        <SmLogin refer={this} />
+        <SmLogin refer={this} parent={refer} />
       </View>
       );
 
@@ -685,7 +684,9 @@ const ServerList = props => {
         <Text>{(s.orgId?say("org_id")+": "+s.orgId:"Server: "+s.server)}</Text>
       </Body>
       <Right>
-        <Button onPress={() => refer.sayHello(s.server, s.orgId)}>
+        <Button onPress={() => {
+          refer.setState({server: s.server, orgId:  s.orgId}, () => refer.sayHello(s.server, s.orgId));
+        }}>
           <Text>Enter Map</Text>
         </Button>
       </Right>

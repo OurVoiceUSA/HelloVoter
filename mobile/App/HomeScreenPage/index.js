@@ -52,7 +52,7 @@ export default class App extends HVComponent {
   checkForInvite = async() => {
     try {
       let inviteUrl = await storage.get('HV_INVITE_URL');
-      if (inviteUrl) this.setState({active: 'canvassing'});
+      if (inviteUrl) this.setState({inviteUrl, active: 'canvassing'});
     } catch(e) {
       console.warn(e);
     }
