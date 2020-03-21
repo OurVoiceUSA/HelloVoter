@@ -105,7 +105,10 @@ export function doExpressInit(log, db, qq) {
       // verify props
       if (!u.id) return _400(res, "Your token is missing a required parameter.");
       if (u.iss !== jwt_iss) return _401(res, "Your token was issued for a different domain.");
-      if (u.aud && u.aud !== req.header('host')) return _400(res, "Your token has an incorrect audience.");
+      if (u.aud && (
+        (ov_config.jwt_aud && u.aud !== ov_config.jwt_aud) ||
+        (!ov_config.jwt_aud && u.aud !== req.header('host'))
+      )) return _400(res, "Your token has an incorrect audience.");
 
       if (!u.email) u.email = "";
       if (!u.avatar) u.avatar = "";
