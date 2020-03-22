@@ -40,6 +40,13 @@ describe('Cleanup', function () {
         turfId: turfs.B.id,
       });
     expect(r.statusCode).to.equal(200);
+
+    r = await api.post(base_uri+'/turf/delete')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        turfId: turfs.C.id,
+      });
+    expect(r.statusCode).to.equal(200);
   });
 
   (keep?it.skip:it)('delete forms', async () => {

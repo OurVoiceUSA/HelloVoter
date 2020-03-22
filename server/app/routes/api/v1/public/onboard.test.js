@@ -26,22 +26,22 @@ describe('Onboard', function () {
   it('missing input', async () => {
     let r = await api.post(base_uri+'/public/onboard')
       .send({
-        longitude: 1.1,
-        latitude: 1.1,
+        longitude: -111.9020553,
+        latitude: 40.7628194,
       });
     expect(r.statusCode).to.equal(400);
 
     r = await api.post(base_uri+'/public/onboard')
       .send({
         formId: forms.A.id,
-        latitude: 1.1,
+        latitude: 40.7628194,
       });
     expect(r.statusCode).to.equal(400);
 
     r = await api.post(base_uri+'/public/onboard')
       .send({
         formId: forms.A.id,
-        longitude: 1.1,
+        longitude: -111.9020553,
       });
     expect(r.statusCode).to.equal(400);
   });
@@ -50,8 +50,8 @@ describe('Onboard', function () {
     let r = await api.post(base_uri+'/public/onboard')
       .send({
         formId: forms.A.id,
-        longitude: 1.1,
-        latitude: 1.1,
+        longitude: -111.9020553,
+        latitude: 40.7628194,
         badinput: "foobar",
       });
     expect(r.statusCode).to.equal(403);
@@ -62,13 +62,13 @@ describe('Onboard', function () {
     let r = await api.post(base_uri+'/public/onboard')
       .send({
         formId: forms.A.id,
-        longitude: 1.1,
-        latitude: 1.1,
+        longitude: -111.9020553,
+        latitude: 40.7628194,
       });
     expect(r.statusCode).to.equal(403);
   });
 
-  it('valid formId valid turf', async () => {
+  it('valid formId valid turfs', async () => {
     let r = await api.post(base_uri+'/form/update')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
@@ -80,8 +80,17 @@ describe('Onboard', function () {
     r = await api.post(base_uri+'/public/onboard')
       .send({
         formId: forms.A.id,
-        longitude: -118.3281370,
-        latitude: 33.9208231,
+        longitude: -111.9020553,
+        latitude: 40.7628194,
+      });
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.inviteCode).to.equal(forms.A.id+','+turfs.C.id);
+
+    r = await api.post(base_uri+'/public/onboard')
+      .send({
+        formId: forms.A.id,
+        longitude: -122.4251828, // Alcatraz
+        latitude: 37.8267028,
       });
     expect(r.statusCode).to.equal(200);
     expect(r.body.inviteCode).to.equal(forms.A.id+','+turfs.A.id);
@@ -101,8 +110,8 @@ describe('Onboard', function () {
     let r = await api.post(base_uri+'/public/onboard')
       .send({
         formId: forms.B.id,
-        longitude: -118.3281370,
-        latitude: 33.9208231,
+        longitude: -111.9020553,
+        latitude: 40.7628194,
       });
     expect(r.statusCode).to.equal(403);
   });
@@ -119,8 +128,8 @@ describe('Onboard', function () {
     r = await api.post(base_uri+'/public/onboard')
       .send({
         formId: forms.A.id,
-        longitude: 1.1,
-        latitude: 1.1,
+        longitude: -111.9020553,
+        latitude: 40.7628194,
       });
     expect(r.statusCode).to.equal(403);
   });

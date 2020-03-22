@@ -7,7 +7,7 @@ import { appInit, base_uri, getObjs } from '../../../../test/lib/utils';
 
 var api;
 var db;
-var c;
+var c, turfs;
 
 describe('Queue', function () {
 
@@ -15,6 +15,7 @@ describe('Queue', function () {
     db = new neo4j(ov_config);
     api = appInit(db);
     c = getObjs('volunteers');
+    turfs = getObjs('turfs');
   });
 
   after(async () => {
@@ -34,7 +35,7 @@ describe('Queue', function () {
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     if (ov_config.disable_apoc === false)
-      expect(r.body.data.length).to.equal(2);
+      expect(r.body.data.length).to.equal(Object.keys(turfs).length);
   });
 
   // TODO: orphaned queue, as deleted turfs leave a hanging queue object

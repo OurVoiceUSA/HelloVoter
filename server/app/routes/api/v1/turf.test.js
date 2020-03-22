@@ -124,7 +124,7 @@ describe('Turf', function () {
     let r = await api.get(base_uri+'/turf/list')
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
-    expect(r.body.data.length).to.equal(2);
+    expect(r.body.data.length).to.equal(Object.keys(turfs).length);
     expect(r.body.data[0]).to.not.have.property("geometry");
   });
 
@@ -132,7 +132,7 @@ describe('Turf', function () {
     let r = await api.get(base_uri+'/turf/list?geometry=true')
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
-    expect(r.body.data.length).to.equal(2);
+    expect(r.body.data.length).to.equal(Object.keys(turfs).length);
     expect(r.body.data[0]).to.have.property("geometry");
   });
 

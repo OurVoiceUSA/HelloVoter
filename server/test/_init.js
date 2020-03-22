@@ -207,6 +207,17 @@ describe('Database Init', function () {
       });
     expect(r.statusCode).to.equal(200);
     turfs.B.id = r.body.turfId;
+
+    turfs.C = { name: genName("Turf") };
+
+    r = await api.post(base_uri+'/turf/create')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .send({
+        name: turfs.C.name,
+        geometry: JSON.parse(fs.readFileSync('./geojson/UT.geojson')),
+      });
+    expect(r.statusCode).to.equal(200);
+    turfs.C.id = r.body.turfId;
   });
 
   it('generate test objects - forms', async () => {
