@@ -51,7 +51,7 @@ describe('Onboard', function () {
         latitude: 1.1,
         badinput: "foobar",
       });
-    expect(r.statusCode).to.equal(200);
+    expect(r.statusCode).to.equal(403);
     expect(r.body.error).to.equal(true);
   });
 

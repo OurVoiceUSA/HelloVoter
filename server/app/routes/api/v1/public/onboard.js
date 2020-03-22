@@ -10,21 +10,26 @@ module.exports = Router({mergeParams: true})
   if (!req.body.formId) return _400(res, "Missing parameter to 'formId'.");
   if (!req.body.longitude || !req.body.latitude) return _400(res, "Missing parameter to 'longitude' or 'latitude'.");
 
+  let reject_msg = "Sorry, no availability in your area right now.";
+
   // sample rule; TODO: make it db driven
-  if (req.body.badinput) return res.json({error: true, message: "Sorry, no availability right now."});
+  if (req.body.badinput) return _403(res, reject_msg);
+
+  let turfId, formId;
 
   try {
-    let ref = await req.db.query('match (f:Form {id:{formId}, public:true}) return f', req.body);
+    let ref = await req.db.query('match (f:Form {id:{formId}, public_onboard:true}) return f', req.body);
 
     if (!ref.data[0]) return _403(res, "Invalid formId");
+    formId = ref.data[0];
 
-    // do something
+    ref = await req.db.query('call spatial.withinDistance("turf", {longitude: {longitude}, latitude: {latitude}}, 10) yield node as t where t.noautoturf is null with t limit 1 return t.id', req.body);
+
+    if (!ref.data[0]) return _403(res, reject_msg);
+    turfId = ref.data[0];
   } catch (e) {
     return _500(res, e);
   }
 
-  // stub out reply
-  return res.json({error: true, message: "Endpoint is not finished"});
-
-  return res.json({});
+  return res.json({inviteCode: formId+','+turfId});
 });

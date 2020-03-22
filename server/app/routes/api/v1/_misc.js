@@ -55,12 +55,19 @@ module.exports = Router({mergeParams: true})
       if (req.body.inviteCode) {
         let params = {id: req.user.id, inviteCode: req.body.inviteCode};
 
-        // check inviteCode against QRCode objects and copy assignments to this volunteer
-        await req.db.query('match (v:Volunteer {id:{id}}) match (qr:QRCode {id:{inviteCode}}) where qr.disable is null match (qr)-[:AUTOASSIGN_TO]->(f:Form) merge (f)-[:ASSIGNED]->(v) set qr.last_used = timestamp()', params);
-        await req.db.query('match (v:Volunteer {id:{id}}) match (qr:QRCode {id:{inviteCode}}) where qr.disable is null create (v)-[:SCANNED {created: timestamp()}]->(qr) set qr.last_used = timestamp()', params);
-        // turf is either autoturf or direct assignment
-        await req.db.query('match (v:Volunteer {id:{id}}) match (qr:QRCode {id:{inviteCode}}) where qr.disable is null and qr.autoturf is null match (qr)-[:AUTOASSIGN_TO]->(t:Turf) merge (t)-[:ASSIGNED]->(v)', params);
-        await req.db.query('match (v:Volunteer {id:{id}}) match (qr:QRCode {id:{inviteCode}}) where qr.disable is null and qr.autoturf = true call spatial.withinDistance("turf", {longitude: v.location.longitude, latitude: v.location.latitude}, 10) yield node as t where t.noautoturf is null with v,t limit 1 merge (t)-[:ASSIGNED]->(v)', params);
+        // public_onboard codes have a comma
+        if (req.body.inviteCode.match(/,/)) {
+          params.formId = req.body.inviteCode.split(',')[0];
+          params.turfId = req.body.inviteCode.split(',')[1];
+          await req.db.query('match (v:Volunteer {id:{id}}) match (f:Form {id:{formId}, public_onboard:true}) match (t:Turf {id:{turfId}}) merge (f)-[:ASSIGNED]->(v) merge (t)-[:ASSIGNED]->(v) create (v)-[:SCANNED {created: timestamp()}]->(f) set qr.last_onboard = timestamp()', params);
+        } else {
+          // check inviteCode against QRCode objects and copy assignments to this volunteer
+          await req.db.query('match (v:Volunteer {id:{id}}) match (qr:QRCode {id:{inviteCode}}) where qr.disable is null match (qr)-[:AUTOASSIGN_TO]->(f:Form) merge (f)-[:ASSIGNED]->(v) set qr.last_used = timestamp()', params);
+          await req.db.query('match (v:Volunteer {id:{id}}) match (qr:QRCode {id:{inviteCode}}) where qr.disable is null create (v)-[:SCANNED {created: timestamp()}]->(qr) set qr.last_used = timestamp()', params);
+          // turf is either autoturf or direct assignment
+          await req.db.query('match (v:Volunteer {id:{id}}) match (qr:QRCode {id:{inviteCode}}) where qr.disable is null and qr.autoturf is null match (qr)-[:AUTOASSIGN_TO]->(t:Turf) merge (t)-[:ASSIGNED]->(v)', params);
+          await req.db.query('match (v:Volunteer {id:{id}}) match (qr:QRCode {id:{inviteCode}}) where qr.disable is null and qr.autoturf = true call spatial.withinDistance("turf", {longitude: v.location.longitude, latitude: v.location.latitude}, 10) yield node as t where t.noautoturf is null with v,t limit 1 merge (t)-[:ASSIGNED]->(v)', params);
+        }
       }
     } catch (e) {
       return _500(res, e);

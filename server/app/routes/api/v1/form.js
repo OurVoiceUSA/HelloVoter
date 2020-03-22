@@ -97,12 +97,16 @@ module.exports = Router({mergeParams: true})
   if (req.body.attributes && typeof req.body.attributes !== "object")
     return _400(res, "Invalid value to parameter 'attributes'.");
 
+  if (req.body.public_onboard !== undefined && typeof req.body.public_onboard !== "boolean")
+    return _400(res, "Invalid value to parameter 'public_onboard'.");
+
   // TODO: validate every attributes exists
   let ref;
 
   try {
     if (req.body.name) await req.db.query('match (f:Form {id: {formId}}) set f.updated = timestamp(), f.name = {name}', req.body);
     if (req.body.attributes) await req.db.query('match (f:Form {id: {formId}}) set f.updated = timestamp(), f.attributes = {attributes} with f optional match (f)<-[r:COMPILED_ON]-(:Attribute) delete r with f unwind {attributes} as attr match (at:Attribute {id:attr}) merge (at)-[:COMPILED_ON]->(f)', req.body);
+    if (req.body.public_onboard) await req.db.query('match (f:Form {id: {formId}}) set f.updated = timestamp(), f.public_onboard = {public_onboard}', req.body);
   } catch (e) {
     return _500(res, e);
   }
