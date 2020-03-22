@@ -18,7 +18,7 @@ module.exports = Router({mergeParams: true})
   let turfId, formId;
 
   try {
-    let ref = await req.db.query('match (f:Form {id:{formId}, public_onboard:true}) return f', req.body);
+    let ref = await req.db.query('match (f:Form {id:{formId}, public_onboard:true}) return f.id', req.body);
 
     if (!ref.data[0]) return _403(res, "Invalid formId");
     formId = ref.data[0];
