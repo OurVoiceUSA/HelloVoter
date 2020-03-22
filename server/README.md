@@ -11,6 +11,7 @@ For this server, configure an `.env` file. The following is a complete list of v
     NEO4J_JMX_PORT=9999
     NEO4J_JMX_USER=monitor
     NEO4J_JMX_PASS=Neo4j
+    ENABLE_GEOCODE=false
     DISABLE_JMX=
     DISABLE_APOC=
     DISABLE_SPATIAL=
@@ -35,6 +36,7 @@ The meaning of each config item is as follows:
 * `NEO4J_JMX_PORT`: The port on your `NEO4J_HOST` that exposes JMX. This port isn't exposed by default by Neo4j. See "Neo4j Configuration" below for how to set this up on the database side.
 * `NEO4J_JMX_USER`: Username to use to connect to neo4j jmx.
 * `NEO4J_JMX_PASS`: Password to use to connect to neo4j jmx.
+* `ENABLE_GEOCODE`: Allow import of data that doesn't have longitude/latitude
 * `DISABLE_JMX`: Don't attempt to connect to neo4j jmx.
 * `DISABLE_APOC`: Don't use the neo4j apoc plugin. This limits data import functionality.
 * `DISABLE_SPATIAL`: Don't use the neo4j spatial plugin. This limit turf functionality.

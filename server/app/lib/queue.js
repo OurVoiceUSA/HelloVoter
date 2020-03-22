@@ -208,10 +208,12 @@ export default class queue {
     limit = 10000;
     let count = limit;
 
-    while (count === limit) {
-      let ref = await this.db.query('match (:ImportFile {filename:{filename}})<-[:FILE]-(:ImportRecord)<-[:SOURCE]-(a:Address) where a.position is null return distinct(a) limit {limit}', {filename: filename, limit: limit});
-      count = ref.data.length;
-      if (count) await doGeocode(this.db, ref.data);
+    if (ov_config.enable_geocode) {
+      while (count === limit) {
+        let ref = await this.db.query('match (:ImportFile {filename:{filename}})<-[:FILE]-(:ImportRecord)<-[:SOURCE]-(a:Address) where a.position is null return distinct(a) limit {limit}', {filename: filename, limit: limit});
+        count = ref.data.length;
+        if (count) await doGeocode(this.db, ref.data);
+      }
     }
 
     // geocode_end, geocode_success/fail, dedupe_start

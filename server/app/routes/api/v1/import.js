@@ -6,6 +6,10 @@ import {
 import { Router } from 'express';
 
 module.exports = Router({mergeParams: true})
+.get('/import/required-fields', (req, res) => {
+  if (ov_config.enable_geocode) return [1,3,5]; // things required to call a geocoder
+  else return [1,6,7]; // require street, lat, lng
+})
 .get('/import/list', (req, res) => {
   return cqdo(req, res, 'match (a:ImportFile) return a order by a.created desc', {}, true);
 })

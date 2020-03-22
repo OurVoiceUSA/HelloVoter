@@ -17,6 +17,7 @@ export const ov_config = {
   neo4j_jmx_port: getConfig("neo4j_jmx_port", false, 9999),
   neo4j_jmx_user: getConfig("noej4_jmx_user", false, "monitor"),
   neo4j_jmx_pass: getConfig("noej4_jmx_pass", false, "Neo4j"),
+  enable_geocode: getConfig("enable_geocode", false, false),
   disable_jmx: getConfig("disable_jmx", false, false),
   disable_apoc: getConfig("disable_apoc", false, false),
   disable_spatial: getConfig("disable_spatial", false, false),
