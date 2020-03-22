@@ -21,13 +21,25 @@ describe('Import', function () {
     db.close();
   });
 
-  it('get required-fields', async () => {
+  it('get required-fields permission denied', async () => {
     let r = await api.get(base_uri+'/import/required-fields')
       .set('Authorization', 'Bearer '+c.bob.jwt);
+    expect(r.statusCode).to.equal(403);
+  });
+
+  it('get required-fields', async () => {
+    let r = await api.get(base_uri+'/import/required-fields')
+      .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body[0]).to.equal(1);
     expect(r.body[1]).to.equal(6);
     expect(r.body[2]).to.equal(7);
+  });
+
+  it('list permission denied', async () => {
+    let r = await api.get(base_uri+'/import/list')
+      .set('Authorization', 'Bearer '+c.bob.jwt);
+    expect(r.statusCode).to.equal(403);
   });
 
 });
