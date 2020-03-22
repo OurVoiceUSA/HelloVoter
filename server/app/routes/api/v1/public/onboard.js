@@ -8,7 +8,7 @@ import { Router } from 'express';
 module.exports = Router({mergeParams: true})
 .post('/public/onboard', async (req, res) => {
   if (!req.body.formId) return _400(res, "Missing parameter to 'formId'.");
-  if (!req.body.longitude || !req.body.latitude) return _400(res, "Missing parameter to 'longitude' or 'latitude'.");
+  if (isNaN(req.body.longitude) || isNaN(req.body.latitude)) return _400(res, "Invalid value to parameters 'longitude' or 'latitude'.");
 
   let reject_msg = "Sorry, no availability in your area right now.";
 
