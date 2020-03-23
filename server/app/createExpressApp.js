@@ -1,5 +1,6 @@
 
 import express from 'express';
+import 'express-async-errors';
 import expressLogging from 'express-logging';
 import cors from 'cors';
 import logger from 'logops';
@@ -146,6 +147,11 @@ export function doExpressInit(log, db, qq) {
 
   app.use('/HelloVoterHQ/api/v1', router);
   app.use('/HelloVoterHQ/[0-9A-Z]+/api/v1', router);
+
+  // default error handler
+  app.use((err, req, res, next) => {
+    return _500(res, err);
+  });
 
   return app;
 }

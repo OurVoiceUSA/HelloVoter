@@ -26,21 +26,15 @@ module.exports = Router({mergeParams: true})
     default: return _400(res, "Invalid value to parameter 'type'.");
   }
 
-  let attributeId;
+  let ref = await req.db.query('match (v:Volunteer {id:{author_id}}) create (a:Attribute {id:randomUUID(), created: timestamp(), name:{name}, type:{type}})-[:AUTHOR]->(v) return a.id', req.body);
+  let attributeId = ref.data[0];
 
-  try {
-    let ref = await req.db.query('match (v:Volunteer {id:{author_id}}) create (a:Attribute {id:randomUUID(), created: timestamp(), name:{name}, type:{type}})-[:AUTHOR]->(v) return a.id', req.body);
-    attributeId = ref.data[0];
-
-    if (req.body.type.toLowerCase() === 'sand')
-      await req.db.query('match (at:Attribute {id:{id}}) set at.type = {type}, at.values = {values}', {id: attributeId, type: 'string', values: ["SA","A","N","D","SD"]});
-    if (req.body.type.toLowerCase() === 'hyperlink' || req.body.type.toLowerCase() === 'note')
-      await req.db.query('match (at:Attribute {id:{id}}) set at.value = {value}', {id: attributeId, value: req.body.value});
-    if (req.body.options && typeof req.body.options === "object" && req.body.options.length)
-      await req.db.query('match (at:Attribute {id:{id}}) set at.values = {values}', {id: attributeId, values: req.body.options});
-  } catch(e) {
-    return _500(res, e);
-  }
+  if (req.body.type.toLowerCase() === 'sand')
+    await req.db.query('match (at:Attribute {id:{id}}) set at.type = {type}, at.values = {values}', {id: attributeId, type: 'string', values: ["SA","A","N","D","SD"]});
+  if (req.body.type.toLowerCase() === 'hyperlink' || req.body.type.toLowerCase() === 'note')
+    await req.db.query('match (at:Attribute {id:{id}}) set at.value = {value}', {id: attributeId, value: req.body.value});
+  if (req.body.options && typeof req.body.options === "object" && req.body.options.length)
+    await req.db.query('match (at:Attribute {id:{id}}) set at.values = {values}', {id: attributeId, values: req.body.options});
 
   return res.json({attributeId});
 })

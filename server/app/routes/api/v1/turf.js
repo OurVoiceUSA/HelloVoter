@@ -44,27 +44,17 @@ module.exports = Router({mergeParams: true})
   if (!valid(req.body.name)) return _400(res, "Invalid value to parameter 'name'.");
   if (typeof req.body.geometry !== "object" || typeof req.body.geometry.coordinates !== "object") return _400(res, "Invalid value to parameter 'geometry'.");
 
-  try {
-    req.body.wkt = wkx.Geometry.parseGeoJSON(req.body.geometry).toEwkt().split(';')[1];
-  } catch (e) {
-    return _400(res, "Unable to parse geometry.");
-  }
+  req.body.wkt = wkx.Geometry.parseGeoJSON(req.body.geometry).toEwkt().split(';')[1];
 
   // store geojson too as string
   req.body.geometry = JSON.stringify(req.body.geometry);
   req.body.author_id = req.user.id;
 
-  let ref;
-
-  try {
-    // create Turf
-    ref = await req.db.query('match (v:Volunteer {id:{author_id}}) create (b:Turf {id:randomUUID(), created: timestamp(), name:{name}, geometry: {geometry}, wkt:{wkt}})-[:AUTHOR]->(v) '+
-        (ov_config.disable_spatial===false?'WITH b, collect(b) AS t CALL spatial.addNodes(\'turf\', t) YIELD count ':'')+
-        'return b.id',
-      req.body);
-  } catch(e) {
-    return _500(res, e);
-  }
+  // create Turf
+  let ref = await req.db.query('match (v:Volunteer {id:{author_id}}) create (b:Turf {id:randomUUID(), created: timestamp(), name:{name}, geometry: {geometry}, wkt:{wkt}})-[:AUTHOR]->(v) '+
+      (ov_config.disable_spatial===false?'WITH b, collect(b) AS t CALL spatial.addNodes(\'turf\', t) YIELD count ':'')+
+      'return b.id',
+    req.body);
 
   let job = await req.qq.queueTask('doTurfIndexing', 'Turf {id:{turfId}}', {turfId: ref.data[0]});
 
@@ -146,13 +136,7 @@ return last_touch, active_name, total_active, total_assigned`,
 .get('/turf/assigned/volunteer/list', async (req, res) => {
   if (!valid(req.query.turfId)) return _400(res, "Invalid value to parameter 'turfId'.");
 
-  let volunteers;
-
-  try {
-    volunteers = await _volunteersFromCypher(req, 'match (a:Turf {id:{turfId}})-[:ASSIGNED]-(b:Volunteer) return b', req.query, true);
-  } catch (e) {
-    return _500(res, e)
-  }
+  let volunteers = await _volunteersFromCypher(req, 'match (a:Turf {id:{turfId}})-[:ASSIGNED]-(b:Volunteer) return b', req.query, true);
 
   return res.json(volunteers);
 })
@@ -164,18 +148,14 @@ return last_touch, active_name, total_active, total_assigned`,
     return cqdo(req, res, "match (a:Volunteer {id:{vId}}) set a.autoturf=true", req.body, true);
 
   if (!req.body.override) {
-    try {
-      await req.db.query('match (a:Volunteer {id:{vId}}) return a', req.body);
-      //let c = ret.data[0];
+    await req.db.query('match (a:Volunteer {id:{vId}}) return a', req.body);
+    //let c = ret.data[0];
 
-      await req.db.query('match (a:Turf {id:{turfId}}) return a', req.body);
-      //let t = ret.data[0];
+    await req.db.query('match (a:Turf {id:{turfId}}) return a', req.body);
+    //let t = ret.data[0];
 
-      // TODO: config option for whether or not we care...
-      //if (!ingeojson(JSON.parse(t.geometry), c.longitude, c.latitude)) return _400(res, "Volunteer location is not inside that turf.");
-    } catch (e) {
-      return _500(res, e);
-    }
+    // TODO: config option for whether or not we care...
+    //if (!ingeojson(JSON.parse(t.geometry), c.longitude, c.latitude)) return _400(res, "Volunteer location is not inside that turf.");
   }
 
   return cqdo(req, res, 'match (a:Turf {id:{turfId}}), (b:Volunteer {id:{vId}}) merge (a)-[:ASSIGNED]->(b)', req.body);
@@ -192,11 +172,7 @@ return last_touch, active_name, total_active, total_assigned`,
   if (!req.user.admin) return _403(res, "Permission denied.");
   if (!valid(req.body.turfId)) return _400(res, "Invalid value to parameter 'turfId'.");
 
-  try {
-    await req.db.query('match (a:Turf {id:{turfId}}) detach delete a', req.body);
-  } catch(e) {
-    return _500(res, e);
-  }
+  await req.db.query('match (a:Turf {id:{turfId}}) detach delete a', req.body);
 
   return res.json({});
 });

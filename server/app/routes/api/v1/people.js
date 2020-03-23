@@ -74,19 +74,18 @@ async function peopleVisitUpdate(req, res) {
   // make sure formId is in ass.forms
   if (ass.forms.map(f => f.id).indexOf(req.body.formId) === -1) return _403(res, "You are not assigned this form.");
 
-  try {
-    req.body.id = req.user.id;
+  req.body.id = req.user.id;
 
-    if (req.addnewperson) {
-      // TODO: require leader permissions
+  if (req.addnewperson) {
+    // TODO: require leader permissions
 
-      // ensure this ID doesn't already exist
-      let ref = await req.db.query('match (p:Person {id:{personId}}) return count (p)', req.body);
+    // ensure this ID doesn't already exist
+    let ref = await req.db.query('match (p:Person {id:{personId}}) return count (p)', req.body);
 
-      if (ref.data[0] > 0) return _403(res, "Person already exists.");
+    if (ref.data[0] > 0) return _403(res, "Person already exists.");
 
-      await req.db.query('match (a:Address {id:{addressId}})'+(req.body.unit?'<-[:AT]-(u:Unit {name:{unit}})':'')+' create (p:Person {id:{personId}}) create (p)-[r:RESIDENCE {current:true}]->'+(req.body.unit?'(u)':'(a)'), req.body);
-    }
+    await req.db.query('match (a:Address {id:{addressId}})'+(req.body.unit?'<-[:AT]-(u:Unit {name:{unit}})':'')+' create (p:Person {id:{personId}}) create (p)-[r:RESIDENCE {current:true}]->'+(req.body.unit?'(u)':'(a)'), req.body);
+  }
 
 /*
 TODO: constrain update to a turf their assigned to, but without creating multiple visits due to multiple assignments
@@ -99,7 +98,7 @@ TODO: constrain update to a turf their assigned to, but without creating multipl
 ...
     with distinct(p) as p, r
 */
-    ref = await req.db.query(`
+  ref = await req.db.query(`
   match (v:Volunteer {id:{id}})
   match `+(req.body.personId?'(p:Person {id:{personId}})-[r:RESIDENCE {current:true}]->':'')+(req.body.unit?'(u:Unit {name:{unit}})-[:AT]->':'')+`(a:Address {id:{addressId}})
   match (d:Device {UniqueID:{deviceId}})-[:USED_BY]->(v),
@@ -131,9 +130,6 @@ TODO: constrain update to a turf their assigned to, but without creating multipl
 `):'')+`
   return count(vi)
     `, req.body);
-  } catch (e) {
-    return _500(res, e);
-  }
 
   // if nothing was returned, they had all the right params but it didn't match up with the dataset somehow
   // return the "Unprocessable Entity" http error code
@@ -169,19 +165,15 @@ async function visitsAndPeople(req, res) {
   // default & cap on limit
   if (!req.query.limit || req.query.limit > 1000) req.query.limit = 1000;
 
-  try {
-    let ret = await visitsAndPeopleFromPoint(req, req.query.longitude, req.query.latitude);
-    if (ret.length === 0) {
-      // find center(ish) of an assigned turf and use that as the query point
-      let ref = await req.db.query(`match (v:Volunteer {id:{id}})<-[:ASSIGNED]-(t:Turf)
-      return (t.bbox[0]+t.bbox[2])/2, (t.bbox[1]+t.bbox[3])/2 limit 1`, req.query);
-      if (!ref.data || !ref.data[0]) return _403(res, "No Turf assignments.");
-      ret = await visitsAndPeopleFromPoint(req, ref.data[0][0], ref.data[0][1]);
-    }
-    if (ret.length !== 0) return res.json(ret);
-  } catch (e) {
-    return _500(res, e);
+  let ret = await visitsAndPeopleFromPoint(req, req.query.longitude, req.query.latitude);
+  if (ret.length === 0) {
+    // find center(ish) of an assigned turf and use that as the query point
+    let ref = await req.db.query(`match (v:Volunteer {id:{id}})<-[:ASSIGNED]-(t:Turf)
+    return (t.bbox[0]+t.bbox[2])/2, (t.bbox[1]+t.bbox[3])/2 limit 1`, req.query);
+    if (!ref.data || !ref.data[0]) return _403(res, "No Turf assignments.");
+    ret = await visitsAndPeopleFromPoint(req, ref.data[0][0], ref.data[0][1]);
   }
+  if (ret.length !== 0) return res.json(ret);
 
   return res.json([]);
 }
