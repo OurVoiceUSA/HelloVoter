@@ -33,7 +33,15 @@ export class ImportMap extends React.Component {
       {
         mapped: this.mapData(this.state) || [],
       },
-      () => this.props.getMapped && this.props.getMapped(this.state.mapped)
+      () => {
+        const mappedAttributes = Object.keys(this.state.formats).map((key) => {
+          if (this.state.formats[key] && this.state.formats[key].value && this.state.formats[key].value.length > 0) {
+            return key
+          }
+        })
+        const test = mappedAttributes.filter((k) => k);
+        this.props.getMapped && this.props.getMapped(this.state.mapped, mappedAttributes)
+      }
     );
 
   mapData = ({ formats, fields }) => {
