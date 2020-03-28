@@ -56,6 +56,8 @@ export default class ImportData extends Component {
         'Longitude',
         'Latitude',
       ],
+      required: [],
+      mappedAttributes: [],
       ...defaultState,
     };
   }
@@ -76,11 +78,33 @@ export default class ImportData extends Component {
     this.setState({ data, headers, filename });
   };
 
+  getRequiredFields = async (global) => {
+    let required = [];
+
+    try {
+      required = await _fetch(global, '/import/required-fields');
+    } catch (e) {
+      notify_error(e, 'Unable to load required fields.');
+    }
+
+    return required;
+  };
+
   sendData = async () => {
-    const { global, fields, mapped: data, filename } = this.state;
+    const valid = this.state.required.every((requiredID) => {
+      return this.state.mappedAttributes.indexOf(this.state.fields[requiredID]) !== -1;
+    })
+
+    if (!valid) {
+      notify_error(null, `Required fields: ${this.state.required.map((r)=>this.state.fields[r])}`)
+      return
+    }
+
+    const { global, fields, mapped: data, filename, required } = this.state;
     const total = data.length;
 
     this.setState({sending: true, completed: 1});
+
     await _fetch(global, '/import/begin', 'POST', {
       filename: filename.name,
       attributes: fields.filter((meh,idx) => idx >= 8),
@@ -135,22 +159,24 @@ export default class ImportData extends Component {
 
     let imports = [];
     let attributes = [];
+    let required = [];
 
     this.setState({ loading: true });
     try {
       attributes = await _loadAttributes(global);
       imports = await _loadImports(global);
+      required = await this.getRequiredFields(global);
     } catch (e) {
       notify_error(e, 'Unable to load import data.');
     }
-    this.setState({ loading: false, imports, attributes }, () => {
+    this.setState({ loading: false, imports, attributes, required }, () => {
       this._resetState();
     });
   };
 
   _resetState = () => this.setState({ ...defaultState });
 
-  getMapped = mapped => this.setState({ mapped });
+  getMapped = (mapped, mappedAttributes) => this.setState({ mapped, mappedAttributes });
 
   handlePageClick = data => {
     this.setState({ pageNum: data.selected + 1 });
