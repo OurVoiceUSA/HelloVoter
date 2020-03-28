@@ -106,7 +106,7 @@ export default class ImportData extends Component {
     this.setState({sending: true, completed: 1});
 
     await _fetch(global, '/import/begin', 'POST', {
-      filename: filename,
+      filename: filename.name,
       attributes: fields.filter((meh,idx) => idx >= 8),
     });
 
@@ -134,14 +134,14 @@ export default class ImportData extends Component {
       }
 
       await _fetch(global, '/import/add', 'POST', {
-        filename: filename,
+        filename: filename.name,
         data: arr,
       });
       const percentage = Math.ceil(((total - data.length) / total) * 100);
       this.setState({ completed: percentage });
     }
     await _fetch(global, '/import/end', 'POST', {
-      filename: filename,
+      filename: filename.name,
     });
 
     this.setState({ completed: true });
