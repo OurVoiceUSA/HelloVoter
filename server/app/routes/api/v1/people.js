@@ -47,8 +47,10 @@ module.exports = Router({mergeParams: true})
   let ref = await req.db.query(`match (f:Form {id: {formId}})
     match (v:Volunteer {id:{id}})<-[:ASSIGNED]-(t:Turf)
       with f, t limit 1
+    match (dnc:Attribute {id:"a23d5959-892d-459f-95fc-9e2ddcf1bbc7"})
     match (t)<-[:WITHIN]-(a:Address)<-[:RESIDENCE {current:true}]-(p:Person)
       where NOT (p)<-[:VISIT_PERSON]-(:Visit)-[:VISIT_FORM]->(f)
+        and NOT (p)<-[:ATTRIBUTE_OF]-(:PersonAttribute {value:true})-[:ATTRIBUTE_TYPE]->(dnc)
       with p, rand() as r
       order by r
     match (:Attribute {id:"013a31db-fe24-4fad-ab6a-dd9d831e72f9"})<-[:ATTRIBUTE_TYPE]-(name:PersonAttribute)-[:ATTRIBUTE_OF]->(p)
