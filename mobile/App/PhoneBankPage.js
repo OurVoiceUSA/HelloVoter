@@ -7,7 +7,7 @@ import HVComponent, { HVConfirmDialog } from './HVComponent';
 
 import { StackActions, NavigationActions } from 'react-navigation';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { _getApiToken, api_base_uri, openURL, triggerNetworkWarning } from './common';
+import { _getApiToken, api_base_uri, openURL, triggerNetworkWarning, getEpoch } from './common';
 
 export default class App extends HVComponent {
 
@@ -22,7 +22,7 @@ export default class App extends HVComponent {
       forms: props.navigation.state.params.forms,
       form: props.navigation.state.params.forms[0], // fixme
       fetching: false,
-      target: {},
+      person: {},
       called: false,
     };
   }
@@ -34,9 +34,7 @@ export default class App extends HVComponent {
   _dataFetch = async () => {
     const { fetching, form, server, orgId } = this.state;
 
-    if (fetching) return;
-
-    this.setState({fetching: true, called: false});
+    this.setState({fetching: true});
 
     try {
       let https = true;
@@ -59,7 +57,7 @@ export default class App extends HVComponent {
         throw "Sync error";
       }
 
-      this.setState({target: json});
+      this.setState({person: json});
     } catch (e) {
       triggerNetworkWarning(e);
     }
@@ -67,14 +65,54 @@ export default class App extends HVComponent {
     this.setState({fetching: false});
   }
 
+  callresult = async (status, donotcall) => {
+    const { start, person, form, server, orgId } = this.state;
+
+    this.setState({fetching: true, called: false});
+
+    try {
+      let https = true;
+      if (server.match(/:8080/)) https = false;
+      let res = await fetch('http'+(https?'s':'')+'://'+server+api_base_uri(orgId)+'/poc/phone/callresult', {
+        method: 'POST',
+        body: JSON.stringify({
+          formId: form.id,
+          personId: person.id,
+          phone: person.phone,
+          donotcall,
+          status,
+          start,
+          end: getEpoch(),
+        }),
+        headers: {
+          'Authorization': 'Bearer '+await _getApiToken(),
+          'Content-Type': 'application/json',
+        },
+      });
+
+      let json = await res.json();
+
+      if (res.status !== 200 || json.error === true) {
+        if (res.status >= 400 && res.status < 500) return this.props.navigation.goBack(); // TODO: byeFelicia()
+        throw "Sync error";
+      }
+
+      this.setState({person: json});
+    } catch (e) {
+      triggerNetworkWarning(e);
+    }
+
+    this._dataFetch();
+  }
+
   call = async (input) => {
     let opened = await openURL('tel:+1'+input);
 //    if (!opened) refer.alert(say("app_error"), say("unable_to_launch_external"));
-    this.setState({called: true});
+    this.setState({called: true, start: getEpoch()});
   }
 
   render() {
-    const { admin, called, fetching, target } = this.state;
+    const { admin, called, fetching, person } = this.state;
 
     if (fetching) return (
         <View style={{flex: 1, alignItems: 'center'}}>
@@ -83,7 +121,7 @@ export default class App extends HVComponent {
         </View>
       );
 
-    if (target && !target.phone) return (
+    if (person && !person.phone) return (
       <View style={{flex: 1, alignItems: 'center'}}>
         <Text></Text>
         <H1>No Phone Numbers Available</H1>
@@ -109,15 +147,15 @@ export default class App extends HVComponent {
           <Text></Text>
           <Text>Tap the call button below to call this person:</Text>
           <Text></Text>
-          <Text>Name: {target.name}</Text>
+          <Text>Name: {person.name}</Text>
           <Text></Text>
-          {(target.party)&&
+          {(person.party)&&
           <View>
-            <Text>Party Affiliation: {target.party}</Text>
+            <Text>Party Affiliation: {person.party}</Text>
             <Text></Text>
           </View>
           }
-          <Text>Phone Number: {target.phone}</Text>
+          <Text>Phone Number: {person.phone}</Text>
           <Text></Text>
           {(called)&&
           <View>
@@ -127,39 +165,39 @@ export default class App extends HVComponent {
             </View>
             <Text></Text>
             <Text></Text>
-            <Button block success onPress={() => this._dataFetch()}>
+            <Button block success onPress={() => this.callresult(1, false)}>
               <Text>It went well!</Text>
             </Button>
             <Text></Text>
             <Text></Text>
-            <Button block info onPress={() => this._dataFetch()}>
+            <Button block info onPress={() => this.callresult(2, false)}>
               <Text>It didn't go well</Text>
             </Button>
             <Text></Text>
             <Text></Text>
-            <Button block warning onPress={() => this._dataFetch()}>
+            <Button block warning onPress={() => this.callresult(0, false)}>
               <Text>No answer</Text>
             </Button>
             <Text></Text>
             <Text></Text>
-            <Button block primary onPress={() => this._dataFetch()}>
+            <Button block primary onPress={() => this.callresult(3, false)}>
               <Text>Wrong number</Text>
             </Button>
             <Text></Text>
             <Text></Text>
-            <Button block danger onPress={() => this._dataFetch()}>
+            <Button block danger onPress={() => this.callresult(2, true)}>
               <Text>Do not call</Text>
             </Button>
           </View>
           ||
           <View>
-            <Button block primary onPress={() => this.call(target.phone)}>
+            <Button block primary onPress={() => this.call(person.phone)}>
               <Text>Call</Text>
             </Button>
             <Text></Text>
             <Text></Text>
-            <Button block warning onPress={() => this._dataFetch()}>
-              <Text>Skip</Text>
+            <Button block warning onPress={() => this.props.navigation.goBack()}>
+              <Text>I'm Done</Text>
             </Button>
           </View>
           }

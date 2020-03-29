@@ -20,19 +20,87 @@ module.exports = Router({mergeParams: true})
       with f, t limit 1
     match (dnc:Attribute {id:"a23d5959-892d-459f-95fc-9e2ddcf1bbc7"})
     match (t)<-[:WITHIN]-(a:Address)<-[:RESIDENCE {current:true}]-(p:Person)
-      where NOT (p)<-[:VISIT_PERSON]-(:Visit)-[:VISIT_FORM]->(f)
-        and NOT (p)<-[:ATTRIBUTE_OF]-(:PersonAttribute {value:true})-[:ATTRIBUTE_TYPE]->(dnc)
+        where NOT (p)<-[:ATTRIBUTE_OF]-(:PersonAttribute {value:true})-[:ATTRIBUTE_TYPE]->(dnc)
+        and (
+          NOT (p)<-[:VISIT_PERSON]-(:Visit)-[:VISIT_FORM]->(f)
+          OR (
+            (p)<-[:VISIT_PERSON]-(:Visit {status:0})-[:VISIT_FORM]->(f)
+            AND NOT (p)<-[:VISIT_PERSON]-(:Visit {status:1})-[:VISIT_FORM]->(f)
+            AND NOT (p)<-[:VISIT_PERSON]-(:Visit {status:2})-[:VISIT_FORM]->(f)
+            AND NOT (p)<-[:VISIT_PERSON]-(:Visit {status:3})-[:VISIT_FORM]->(f)
+          )
+        )
       with p, rand() as r
       order by r
-    match (:Attribute {id:"013a31db-fe24-4fad-ab6a-dd9d831e72f9"})<-[:ATTRIBUTE_TYPE]-(name:PersonAttribute)-[:ATTRIBUTE_OF]->(p)
-    match (:Attribute {id:"7d3466e5-2cee-491e-b3f4-bfea3a4b010a"})<-[:ATTRIBUTE_TYPE]-(phone:PersonAttribute)-[:ATTRIBUTE_OF]->(p)
+    match (:Attribute {id:"013a31db-fe24-4fad-ab6a-dd9d831e72f9"})<-[:ATTRIBUTE_TYPE]-(name:PersonAttribute)-[:ATTRIBUTE_OF {current:true}]->(p)
+    match (:Attribute {id:"7d3466e5-2cee-491e-b3f4-bfea3a4b010a"})<-[:ATTRIBUTE_TYPE]-(phone:PersonAttribute)-[:ATTRIBUTE_OF {current:true}]->(p)
       with p, name, phone limit 1
     optional match (:Attribute {id:"4a320f76-ef7b-4d73-ae2a-8f4ccf5de344"})<-[:ATTRIBUTE_TYPE]-(party:PersonAttribute)-[:ATTRIBUTE_OF]->(p)
     return {id: p.id, name: name.value, phone: phone.value, party: party.value}
-    `, req.body);
+  `, req.body);
 
   let tocall = {};
   if (ref.data[0]) tocall = ref.data[0];
 
   return res.json(tocall);
+})
+.post('/poc/phone/callresult', async (req, res) => {
+  // TODO: this is a hack job of peopleVisitUpdate -- need to merge this into that eventually
+  // did this because we aren't using the survey screen, or attrs, or lng/lat, or cold-calling,
+  // or doesn't return anything, or queuing for retry failed network transmissions client side
+  let ref = {};
+
+  if (!req.body.formId) return _400(res, "Invalid value to parameter 'formId'.");
+  if (!req.body.personId) return _400(res, "Invalid value to parameter 'personId'.");
+  if (!req.body.phone) return _400(res, "Invalid value to parameter 'phone'.");
+
+  req.body.status = parseInt(req.body.status);
+  req.body.start = parseInt(req.body.start);
+  req.body.end = parseInt(req.body.end);
+
+  // 0 = no answer, 1 = it went well, 2 = didn't go well OR do not call, 3 = wrong number
+  if (isNaN(req.body.status) || [0,1,2,3].indexOf(req.body.status) === -1) return _400(res, "Invalid value to parameter 'status'.");
+  if (isNaN(req.body.start)) return _400(res, "Invalid value to parameter 'start'.");
+  if (isNaN(req.body.end)) return _400(res, "Invalid value to parameter 'end'.");
+
+  let ass = await volunteerAssignments(req, 'Volunteer', req.user);
+  if (!ass.ready) return _403(res, "Volunteer is not assigned.");
+
+  // make sure formId is in ass.forms
+  if (ass.forms.map(f => f.id).indexOf(req.body.formId) === -1) return _403(res, "You are not assigned this form.");
+
+  req.body.id = req.user.id;
+
+  ref = await req.db.query(`
+  match (v:Volunteer {id:{id}})
+  match (p:Person {id:{personId}})
+  match (f:Form {id:{formId}})
+  create (vi:Visit {
+    start: toInteger({start}),
+    end: toInteger({end}),
+    status: toInt({status}),
+    uploaded: timestamp()
+  })
+  merge (vi)-[:VISIT_VOLUNTEER]->(v)
+  merge (vi)-[:VISIT_FORM]->(f)
+  merge (vi)-[:VISIT_PERSON]->(p)
+  return count(vi)
+    `, req.body);
+
+  // handle wrong phone number
+  if (req.body.donotcall) await req.db.query(`
+    match (:Attribute {id:"7d3466e5-2cee-491e-b3f4-bfea3a4b010a"})<-[:ATTRIBUTE_TYPE]-(:PersonAttribute {value:{phone}})-[r:ATTRIBUTE_OF]->(:Person {id:{personId}})
+    set r.current = false, r.updated = timestamp()
+  `, req.body);
+
+  // handle donotcall
+  if (req.body.donotcall) await req.db.query(`
+    match (dnc:Attribute {id:"a23d5959-892d-459f-95fc-9e2ddcf1bbc7"})
+    match (p:Person {id:{personId}})
+    create (pa:PersonAttribute {value:true})
+    create (pa)-[:ATTRIBUTE_TYPE]->(dnc)
+    create (pa)-[:ATTRIBUTE_OF {current:true}]->(p)
+  `, req.body);
+
+  return res.json({});
 })
