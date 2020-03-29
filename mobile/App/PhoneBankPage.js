@@ -72,7 +72,7 @@ export default class App extends HVComponent {
   }
 
   render() {
-    const { fetching, target } = this.state;
+    const { admin, fetching, target } = this.state;
 
     if (fetching) return (
         <View style={{flex: 1, alignItems: 'center'}}>
@@ -80,6 +80,25 @@ export default class App extends HVComponent {
           <Spinner />
         </View>
       );
+
+    if (target && !target.phone) return (
+      <View style={{flex: 1, alignItems: 'center'}}>
+        <Text></Text>
+        <H1>No Phone Numbers Available</H1>
+        <Text></Text>
+        <Text></Text>
+        {(admin)&&
+        <Text>There are no phone numbers available to you based on your assignments. Either all numbers have been dialed for this form, or there are no phone numbers in the system. To import data, use a web browser to login to https://apps.ourvoiceusa.org/HelloVoterHQ/</Text>
+        ||
+        <Text>Sorry, there aren't any phone numbers available to you based on your assignments. Please contact your administrator.</Text>
+        }
+        <Text></Text>
+        <Text></Text>
+        <Button block danger onPress={() => this.props.navigation.goBack()}>
+          <Text>Go Back</Text>
+        </Button>
+      </View>
+    );
 
     return (
       <Container>

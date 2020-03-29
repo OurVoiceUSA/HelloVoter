@@ -44,7 +44,7 @@ module.exports = Router({mergeParams: true})
 
   req.body.id = req.user.id;
 
-  let tocall = await req.db.query(`match (f:Form {id: {formId}})
+  let ref = await req.db.query(`match (f:Form {id: {formId}})
     match (v:Volunteer {id:{id}})<-[:ASSIGNED]-(t:Turf)
       with f, t limit 1
     match (t)<-[:WITHIN]-(a:Address)<-[:RESIDENCE {current:true}]-(p:Person)
@@ -58,7 +58,10 @@ module.exports = Router({mergeParams: true})
     return {id: p.id, name: name.value, phone: phone.value, party: party.value}
     `, req.body);
 
-  return res.json(tocall.data[0]);
+  let tocall = {};
+  if (ref.data[0]) tocall = ref.data[0];
+
+  return res.json(tocall);
 })
 .post('/people/visit/add', async (req, res) => {
   if (!ov_config.volunteer_add_new) return _403(res, "Permission denied.");
