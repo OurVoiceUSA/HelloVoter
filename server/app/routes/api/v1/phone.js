@@ -41,7 +41,8 @@ module.exports = Router({mergeParams: true})
 .post('/poc/phone/callresult', async (req, res) => {
   // TODO: this is a hack job of peopleVisitUpdate -- need to merge this into that eventually
   // did this because we aren't using the survey screen, or attrs, or lng/lat, or cold-calling,
-  // or doesn't return anything, or queuing for retry failed network transmissions client side
+  // or doesn't return anything, or queuing for retry failed network transmissions client side,
+  // or doesn't directly mark who said it was a wrong number
   let ref = {};
 
   if (!req.body.formId) return _400(res, "Invalid value to parameter 'formId'.");
@@ -82,7 +83,7 @@ module.exports = Router({mergeParams: true})
     `, req.body);
 
   // handle wrong phone number
-  if (req.body.donotcall) await req.db.query(`
+  if (req.body.status === 3) await req.db.query(`
     match (:Attribute {id:"7d3466e5-2cee-491e-b3f4-bfea3a4b010a"})<-[:ATTRIBUTE_TYPE]-(:PersonAttribute {value:{phone}})-[r:ATTRIBUTE_OF]->(:Person {id:{personId}})
     set r.current = false, r.updated = timestamp()
   `, req.body);
