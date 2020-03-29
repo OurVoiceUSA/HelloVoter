@@ -94,7 +94,7 @@ export default class App extends HVComponent {
           <Text></Text>
           <Text>Phone Number: {target.phone}</Text>
           <Text></Text>
-          <Button block primary>
+          <Button block primary onPress={() => this.call(target.phone)}>
             <Text>Call</Text>
           </Button>
           <Text></Text>
