@@ -13,7 +13,7 @@ import SettingsTab, { walkthroughSettings } from './SettingsTab';
 import {
   DINFO, STORAGE_KEY_SETTINGS, STORAGE_KEY_RETRY,
   api_base_uri, _doGeocode, _getApiToken, openURL, getEpoch, getLastVisit, getPinColor,
-  makeTooltipContent,
+  makeTooltipContent, triggerNetworkWarning,
 } from '../common';
 
 import { WalkthroughElement, startWalkthrough } from 'react-native-walkthrough';
@@ -34,16 +34,6 @@ function bystreet(a,b) {
   if ( na < nb ) return -1;
   if ( na > nb ) return 1;
   return 0;
-}
-
-function triggerNetworkWarning() {
-  Toast.show({
-    text: 'Network Error',
-    buttonText: 'OK',
-    position: 'bottom',
-    type: 'warning',
-    duration: 5000,
-  });
 }
 
 const walkthroughMapView = [

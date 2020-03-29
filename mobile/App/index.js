@@ -23,6 +23,8 @@ import HomeScreenPage from './HomeScreenPage';
 import InvitePage from './InvitePage';
 import SettingsPage from './SettingsPage';
 import CanvassingPage from './CanvassingPage';
+import CanvassOrPhonePage from './CanvassOrPhonePage';
+import PhoneBankPage from './PhoneBankPage';
 import SurveyPage from './SurveyPage';
 import ConvertLegacyPage from './ConvertLegacyPage';
 
@@ -67,6 +69,21 @@ const AppNavigator = createStackNavigator({
       title: 'Canvassing',
       headerLeft: () => (<GoBack nav={navigation} />),
       headerRight: () => (<WalkthroughHeader nav={navigation} />),
+      gestureEnabled: false,
+    }),
+  },
+  CanvassOrPhone: {
+    screen: CanvassOrPhonePage,
+    navigationOptions: ({navigation}) => ({
+      title: 'Select Campaign Mode',
+      headerLeft: () => null,
+    }),
+  },
+  PhoneBank: {
+    screen: PhoneBankPage,
+    navigationOptions: ({navigation}) => ({
+      title: 'Phone Banking',
+      headerLeft: () => (<GoBack nav={navigation} />),
       gestureEnabled: false,
     }),
   },

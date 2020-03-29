@@ -80,7 +80,7 @@ export default class App extends LocationComponent {
 
     if (!this.checkLocationAccess()) return;
 
-    navigate('Canvassing', args);
+    navigate('CanvassOrPhone', args);
   }
 
   connectToGOTV = () => {
@@ -687,7 +687,7 @@ const ServerList = props => {
         <Button onPress={() => {
           refer.setState({server: s.server, orgId:  s.orgId}, () => refer.sayHello(s.server, s.orgId));
         }}>
-          <Text>Enter Map</Text>
+          <Text>Enter Campaign</Text>
         </Button>
       </Right>
     </ListItem>

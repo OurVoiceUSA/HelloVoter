@@ -7,7 +7,7 @@ import {
   View,
 } from 'react-native';
 
-import { Text } from 'native-base';
+import { Toast, Text } from 'native-base';
 
 import storage from 'react-native-storage-wrapper';
 import { getLocales, getTimeZone } from 'react-native-localize';
@@ -86,6 +86,16 @@ export function timeAgo(val) {
 
 export function api_base_uri(orgId) {
   return '/HelloVoterHQ/'+(orgId?orgId+'/':'')+'api/v1';
+}
+
+export function triggerNetworkWarning() {
+  Toast.show({
+    text: 'Network Error',
+    buttonText: 'OK',
+    position: 'bottom',
+    type: 'warning',
+    duration: 5000,
+  });
 }
 
 export function invite2obj(url) {
