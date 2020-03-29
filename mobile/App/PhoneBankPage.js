@@ -109,8 +109,12 @@ export default class App extends HVComponent {
           <Text></Text>
           <Text>Name: {target.name}</Text>
           <Text></Text>
-          <Text>Party Affiliation: {(target.party?target.party:"Unknown")}</Text>
-          <Text></Text>
+          {(target.party)&&
+          <View>
+            <Text>Party Affiliation: {target.party}</Text>
+            <Text></Text>
+          </View>
+          }
           <Text>Phone Number: {target.phone}</Text>
           <Text></Text>
           <Button block primary onPress={() => this.call(target.phone)}>
