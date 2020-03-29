@@ -23,6 +23,7 @@ export default class App extends HVComponent {
       form: props.navigation.state.params.forms[0], // fixme
       fetching: false,
       target: {},
+      called: false,
     };
   }
 
@@ -35,7 +36,7 @@ export default class App extends HVComponent {
 
     if (fetching) return;
 
-    this.setState({fetching: true});
+    this.setState({fetching: true, called: false});
 
     try {
       let https = true;
@@ -69,10 +70,11 @@ export default class App extends HVComponent {
   call = async (input) => {
     let opened = await openURL('tel:+1'+input);
 //    if (!opened) refer.alert(say("app_error"), say("unable_to_launch_external"));
+    this.setState({called: true});
   }
 
   render() {
-    const { admin, fetching, target } = this.state;
+    const { admin, called, fetching, target } = this.state;
 
     if (fetching) return (
         <View style={{flex: 1, alignItems: 'center'}}>
@@ -117,14 +119,50 @@ export default class App extends HVComponent {
           }
           <Text>Phone Number: {target.phone}</Text>
           <Text></Text>
-          <Button block primary onPress={() => this.call(target.phone)}>
-            <Text>Call</Text>
-          </Button>
-          <Text></Text>
-          <Text></Text>
-          <Button block warning onPress={() => this._dataFetch()}>
-            <Text>Skip</Text>
-          </Button>
+          {(called)&&
+          <View>
+            <Text></Text>
+            <View style={{flex: 1, alignItems: 'center'}}>
+              <H1>How did it go?</H1>
+            </View>
+            <Text></Text>
+            <Text></Text>
+            <Button block success onPress={() => this._dataFetch()}>
+              <Text>It went well!</Text>
+            </Button>
+            <Text></Text>
+            <Text></Text>
+            <Button block info onPress={() => this._dataFetch()}>
+              <Text>It didn't go well</Text>
+            </Button>
+            <Text></Text>
+            <Text></Text>
+            <Button block warning onPress={() => this._dataFetch()}>
+              <Text>No answer</Text>
+            </Button>
+            <Text></Text>
+            <Text></Text>
+            <Button block primary onPress={() => this._dataFetch()}>
+              <Text>Wrong number</Text>
+            </Button>
+            <Text></Text>
+            <Text></Text>
+            <Button block danger onPress={() => this._dataFetch()}>
+              <Text>Do not call</Text>
+            </Button>
+          </View>
+          ||
+          <View>
+            <Button block primary onPress={() => this.call(target.phone)}>
+              <Text>Call</Text>
+            </Button>
+            <Text></Text>
+            <Text></Text>
+            <Button block warning onPress={() => this._dataFetch()}>
+              <Text>Skip</Text>
+            </Button>
+          </View>
+          }
         </Content>
       </Container>
     );
