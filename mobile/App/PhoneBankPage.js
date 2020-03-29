@@ -41,7 +41,7 @@ export default class App extends HVComponent {
     try {
       let https = true;
       if (server.match(/:8080/)) https = false;
-      let res = await fetch('http'+(https?'s':'')+'://'+server+api_base_uri(orgId)+'/people/get/tocall', {
+      let res = await fetch('http'+(https?'s':'')+'://'+server+api_base_uri(orgId)+'/poc/phone/tocall', {
         method: 'POST',
         body: JSON.stringify({
           formId: form.id,
