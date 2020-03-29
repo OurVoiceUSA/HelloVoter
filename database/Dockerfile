@@ -15,6 +15,7 @@ RUN mkdir -p /jmx \
 
 EXPOSE 9999
 
+ENV NEO4J_apoc_export_file_enabled=true
 ENV NEO4J_dbms_security_procedures_unrestricted=apoc.*
 ENV NEO4J_dbms_tx__log_rotation_retention__policy=false
 ENV NEO4J_dbms_tx__log_rotation_size=1m
