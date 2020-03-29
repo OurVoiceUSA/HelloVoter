@@ -21,15 +21,9 @@ module.exports = Router({mergeParams: true})
     match (dnc:Attribute {id:"a23d5959-892d-459f-95fc-9e2ddcf1bbc7"})
     match (t)<-[:WITHIN]-(a:Address)<-[:RESIDENCE {current:true}]-(p:Person)
         where NOT (p)<-[:ATTRIBUTE_OF]-(:PersonAttribute {value:true})-[:ATTRIBUTE_TYPE]->(dnc)
-        and (
-          NOT (p)<-[:VISIT_PERSON]-(:Visit)-[:VISIT_FORM]->(f)
-          OR (
-            (p)<-[:VISIT_PERSON]-(:Visit {status:0})-[:VISIT_FORM]->(f)
-            AND NOT (p)<-[:VISIT_PERSON]-(:Visit {status:1})-[:VISIT_FORM]->(f)
-            AND NOT (p)<-[:VISIT_PERSON]-(:Visit {status:2})-[:VISIT_FORM]->(f)
-            AND NOT (p)<-[:VISIT_PERSON]-(:Visit {status:3})-[:VISIT_FORM]->(f)
-          )
-        )
+    optional match (p)<-[:VISIT_PERSON]-(vi:Visit)-[:VISIT_FORM]->(f)
+      with p, collect(vi.status) as visits
+        where length(visits) = 0 or (NOT 1 in visits and NOT 2 in visits and NOT 3 in visits)
       with p, rand() as r
       order by r
     match (:Attribute {id:"013a31db-fe24-4fad-ab6a-dd9d831e72f9"})<-[:ATTRIBUTE_TYPE]-(name:PersonAttribute)-[:ATTRIBUTE_OF {current:true}]->(p)
