@@ -154,7 +154,7 @@ export async function doDbInit(db) {
     {label: 'Address', property: 'bbox', create: 'create index on :Address(bbox)'},
     {label: 'Device', property: 'UniqueID', create: 'create constraint on (a:Device) assert a.UniqueID is unique'},
     {label: 'Volunteer', property: 'id', create: 'create constraint on (a:Volunteer) assert a.id is unique'},
-    {label: 'Volunteer', property: 'location', create: 'create index on :Address(location)'},
+    {label: 'Volunteer', property: 'location', create: 'create index on :Volunteer(location)'},
     {label: 'Team', property: 'id', create: 'create constraint on (a:Team) assert a.id is unique'},
     {label: 'Team', property: 'name', create: 'create constraint on (a:Team) assert a.name is unique'},
     {label: 'Turf', property: 'id', create: 'create constraint on (a:Turf) assert a.id is unique'},
@@ -165,12 +165,16 @@ export async function doDbInit(db) {
     {label: 'ImportFile', property: 'filename', create: 'create constraint on (a:ImportFile) assert a.filename is unique'},
     {label: 'QueueTask', property: 'id', create: 'create constraint on (a:QueueTask) assert a.id is unique'},
     {label: 'QueueTask', property: 'created', create: 'create index on :QueueTask(created)'},
+    {label: 'CallerQueue', property: 'created', create: 'create index on :CallerQueue(created)'},
   ];
 
   // create any indexes we need if they don't exist
   await asyncForEach(indexes, async (index) => {
     let ref = await db.query('call db.indexes() yield tokenNames, properties with * where {label} in tokenNames and {property} in properties return count(*)', index);
-    if (ref.data[0] === 0) await db.query(index.create);
+    if (ref.data[0] === 0) {
+      console.log("Cypher exec: "+index.create);
+      await db.query(index.create);
+    }
   });
 
   let spatialLayers = [
