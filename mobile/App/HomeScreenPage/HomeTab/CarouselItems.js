@@ -48,8 +48,8 @@ export function carouselItems(refer) {
   if (lang === "en")
     items.push(
       {
-        title: say("coming_zoon_desktop_tools"),
-        subtitle: say("canvassing_at_scale"),
+        title: say("phonebank_for_any_cause"),
+        subtitle: say("phonebank_desc"),
         illustration: require('../../../img/phone-banking.png'),
         onPress: () => openDonate(),
       }
