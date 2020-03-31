@@ -6,6 +6,7 @@ module.exports = Router({mergeParams: true})
 .post('/poc/phone/tocall', async (req, res) => {
   // TODO: real rough endpoint. quick POC. doesn't look at units. lots of issues. meh! HELP ME!!
   if (!req.body.formId) return _400(res, "Invalid value to parameter 'formId'.");
+  if (req.body.filter_id) return _400(res, "Invalid parameter 'filter_id'.");
 
   let ass = await volunteerAssignments(req, 'Volunteer', req.user);
   if (!ass.ready) return _403(res, "Volunteer is not assigned.");
@@ -15,12 +16,40 @@ module.exports = Router({mergeParams: true})
 
   req.body.id = req.user.id;
 
-  let ref = await req.db.query(`match (f:Form {id: {formId}})
+  // calls per second rate-limit
+  let caller_sec_delay = 5;
+  let ref = await req.db.query(`match (cq:CallerQueue)-[:CALLER]->(v:Volunteer {id:{id}}) where cq.created > (timestamp()-`+caller_sec_delay+`*1000) return count(cq)`, req.body);
+  if (ref.data[0] > 0) {
+    console.log("caller_sec_delay rate-limit triggered for volunteer "+req.user.name+" / "+req.user.id);
+    return res.json({});
+  }
+
+  // calls per hour rate limit
+  let max_calls_hour = 120;
+  ref = await req.db.query(`match (cq:CallerQueue)-[:CALLER]->(v:Volunteer {id:{id}}) where cq.created > (timestamp()-60*60*1000) return count(cq)`, req.body);
+  if (ref.data[0] > max_calls_hour) {
+    console.log("max_calls_hour rate-limit triggered for volunteer "+req.user.name+" / "+req.user.id);
+    return res.json({});
+  }
+
+  let queue_minutes = 5;
+
+  // check for server-side attribute filter
+  ref = await req.db.query(`match (f:Form {id: {formId}})-[:PHONE_FILTER]->(at:Attribute) with at limit 1 return at.id`, req.body);
+  if (ref.data[0]) req.body.filter_id = ref.data[0];
+
+  ref = await req.db.query(`match (f:Form {id: {formId}})
     match (v:Volunteer {id:{id}})<-[:ASSIGNED]-(t:Turf)
       with f, t limit 1
     match (dnc:Attribute {id:"a23d5959-892d-459f-95fc-9e2ddcf1bbc7"})
     match (t)<-[:WITHIN]-(a:Address)<-[:RESIDENCE {current:true}]-(p:Person)
         where NOT (p)<-[:ATTRIBUTE_OF]-(:PersonAttribute {value:true})-[:ATTRIBUTE_TYPE]->(dnc)
+    `+(
+      req.body.filter_id?'match (p)<-[:ATTRIBUTE_OF]-(:PersonAttribute)-[:ATTRIBUTE_TYPE]->(:Attribute {id:{filter_id}})':''
+    )+`
+    optional match (p)<-[:CALL_TARGET]-(cq:CallerQueue)
+      with p, cq
+        where cq is null or cq.created < (timestamp()-`+queue_minutes+`*60*1000)
     optional match (p)<-[:VISIT_PERSON]-(vi:Visit)-[:VISIT_FORM]->(f)
       with p, collect(vi.status) as visits
         where length(visits) = 0 or (NOT 1 in visits and NOT 2 in visits and NOT 3 in visits)
@@ -34,7 +63,18 @@ module.exports = Router({mergeParams: true})
   `, req.body);
 
   let tocall = {};
-  if (ref.data[0]) tocall = ref.data[0];
+  if (ref.data[0]) {
+    req.body.personId = ref.data[0].id;
+    // queue this person so they aren't called by someone else for `queue_minutes`
+    await req.db.query(`
+    match (v:Volunteer {id:{id}})
+    match (p:Person {id:{personId}})
+    create (cq:CallerQueue {created:timestamp()})
+    create (cq)-[:CALL_TARGET]->(p)
+    create (cq)-[:CALLER]->(v)
+    `, req.body);
+    tocall = ref.data[0];
+  }
 
   return res.json(tocall);
 })
