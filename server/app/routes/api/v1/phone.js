@@ -57,6 +57,7 @@ module.exports = Router({mergeParams: true})
       order by r
     match (:Attribute {id:"013a31db-fe24-4fad-ab6a-dd9d831e72f9"})<-[:ATTRIBUTE_TYPE]-(name:PersonAttribute)-[:ATTRIBUTE_OF {current:true}]->(p)
     match (:Attribute {id:"7d3466e5-2cee-491e-b3f4-bfea3a4b010a"})<-[:ATTRIBUTE_TYPE]-(phone:PersonAttribute)-[:ATTRIBUTE_OF {current:true}]->(p)
+        where length(toString(phone.value)) > 9
       with p, name, phone limit 1
     optional match (:Attribute {id:"4a320f76-ef7b-4d73-ae2a-8f4ccf5de344"})<-[:ATTRIBUTE_TYPE]-(party:PersonAttribute)-[:ATTRIBUTE_OF]->(p)
     return {id: p.id, name: name.value, phone: phone.value, party: party.value}
