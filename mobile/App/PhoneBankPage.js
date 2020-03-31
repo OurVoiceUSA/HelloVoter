@@ -112,7 +112,7 @@ export default class App extends HVComponent {
   }
 
   render() {
-    const { admin, called, fetching, person } = this.state;
+    const { admin, called, fetching, form, person } = this.state;
 
     if (fetching) return (
         <View style={{flex: 1, alignItems: 'center'}}>
@@ -143,7 +143,9 @@ export default class App extends HVComponent {
     return (
       <Container>
         <Content padder>
-          <Text>Welcome to PHONE BANKING (a quick-n-dirty POC)</Text>
+          <View style={{flex: 1, alignItems: 'center'}}>
+            <H1>{form.name}</H1>
+          </View>
           <Text></Text>
           <Text>Tap the call button below to call this person:</Text>
           <Text></Text>
@@ -196,7 +198,15 @@ export default class App extends HVComponent {
             </Button>
             <Text></Text>
             <Text></Text>
-            <Button block warning onPress={() => this.props.navigation.goBack()}>
+            <Button block warning onPress={() => {
+              const resetAction = StackActions.reset({
+                index: 0,
+                actions: [
+                  NavigationActions.navigate({ routeName: 'HomeScreen'})
+                ]
+              });
+              this.props.navigation.dispatch(resetAction);
+            }}>
               <Text>I'm Done</Text>
             </Button>
           </View>
