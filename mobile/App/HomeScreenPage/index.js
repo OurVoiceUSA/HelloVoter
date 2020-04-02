@@ -5,7 +5,7 @@ import { Container, Header, Content, Footer, FooterTab, Text, Button, Spinner } 
 import HVComponent from '../HVComponent';
 import Home from './HomeTab';
 import YourReps from './YourRepsTab';
-import CanvassingSetup from './CanvassingTab';
+import Organizing from './OrganizingTab';
 import Supporters from './Supporters';
 import Legal from './Legal';
 import { carouselItems } from './HomeTab/CarouselItems';
@@ -71,7 +71,7 @@ export default class App extends HVComponent {
             <YourReps BundleId={BundleId} key={yridx} />
           }
           {active === 'canvassing' &&
-            <CanvassingSetup navigation={this.props.navigation} refer={this} key={ctidx} />
+            <Organizing navigation={this.props.navigation} refer={this} key={ctidx} />
           }
           {active === 'supporters' &&
             <Supporters refer={this} names={patreonNames} />
@@ -92,7 +92,7 @@ export default class App extends HVComponent {
             </Button>
             <Button active={(active === 'canvassing'?true:false)} onPress={() => this.setState({active: 'canvassing', ctidx: ctidx+1})}>
               <Icon name="map" size={25} />
-              <Text>{say("canvassing")}</Text>
+              <Text>{say("organizing")}</Text>
             </Button>
           </FooterTab>
         </Footer>

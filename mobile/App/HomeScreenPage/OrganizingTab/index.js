@@ -538,14 +538,14 @@ export default class App extends LocationComponent {
 
         <List>
           <ListItem itemDivider icon>
-            <Text>{say("select_canvassing_campaign")}:</Text>
+            <Text>{say("select_organizing_campaign")}:</Text>
           </ListItem>
           <ServerList refer={this} />
         </List>
 
         <Button block danger onPress={() => this.setState({SelectModeScreen: true})}>
           <Icon name="plus-circle" backgroundColor="#d7d7d7" color="white" size={30} />
-          <Text>{say("start_new_canvass_activity")}</Text>
+          <Text>{say("start_new_organizing_activity")}</Text>
         </Button>
 
         <Divider />
@@ -573,7 +573,7 @@ export default class App extends LocationComponent {
         </View>
 
         <Dialog
-          title={say("start_new_canvass_activity")}
+          title={say("start_new_organizing_activity")}
           visible={SelectModeScreen}
           onTouchOutside={() => this.setState({SelectModeScreen: false})}>
           <View>
