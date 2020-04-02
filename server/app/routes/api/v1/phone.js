@@ -25,18 +25,21 @@ module.exports = Router({mergeParams: true})
   }
 
   // calls per hour rate limit
-  let max_calls_hour = 180;
+  let max_calls_hour = 120;
   ref = await req.db.query(`match (cq:CallerQueue)-[:CALLER]->(v:Volunteer {id:{id}}) where cq.created > (timestamp()-60*60*1000) return count(cq)`, req.body);
   if (ref.data[0] > max_calls_hour) {
     console.log("max_calls_hour rate-limit triggered for volunteer "+req.user.name+" / "+req.user.id);
     return res.json({});
   }
 
-  let queue_minutes = 3;
+  let queue_minutes = 5;
 
   // check for server-side attribute filter
-  ref = await req.db.query(`match (f:Form {id: {formId}})-[:PHONE_FILTER]->(at:Attribute) with at limit 1 return at.id`, req.body);
-  if (ref.data[0]) req.body.filter_id = ref.data[0];
+  ref = await req.db.query(`match (f:Form {id: {formId}})-[:PHONE_FILTER]->(at:Attribute) with at limit 1 return at`, req.body);
+  if (ref.data[0]) {
+    req.body.filter_id = ref.data[0].id;
+    req.body.filter_name = ref.data[0].name;
+  }
 
   ref = await req.db.query(`match (f:Form {id: {formId}})
     match (v:Volunteer {id:{id}})<-[:ASSIGNED]-(t:Turf)
@@ -75,6 +78,7 @@ module.exports = Router({mergeParams: true})
     create (cq)-[:CALLER]->(v)
     `, req.body);
     tocall = ref.data[0];
+    if (req.body.filter_id) tocall.extra_info = req.body.filter_name;
   }
 
   return res.json(tocall);

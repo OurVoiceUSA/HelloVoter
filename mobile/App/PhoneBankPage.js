@@ -157,6 +157,12 @@ export default class App extends HVComponent {
             <Text></Text>
           </View>
           }
+          {(person.extra_info)&&
+          <View>
+            <Text>{person.extra_info}</Text>
+            <Text></Text>
+          </View>
+          }
           <Text>Phone Number: {person.phone}</Text>
           <Text></Text>
           {(called)&&
