@@ -74,8 +74,6 @@ const MenuItems = ({ assignments, handleClickLogout, experimental }) => (
           <ListItemText primary="Attributes" />
         </ListItem>
       </Link>
-
-      {(experimental)&&
       <Link to={'/import/'}>
         <ListItem button>
           <ListItemIcon>
@@ -84,7 +82,6 @@ const MenuItems = ({ assignments, handleClickLogout, experimental }) => (
           <ListItemText primary="Import Data" />
         </ListItem>
       </Link>
-      }
       <Link to={'/queue/'}>
         <ListItem button>
           <ListItemIcon>
