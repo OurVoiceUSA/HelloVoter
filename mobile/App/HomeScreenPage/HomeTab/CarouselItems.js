@@ -51,7 +51,7 @@ export function carouselItems(refer) {
         title: say("phonebank_for_any_cause"),
         subtitle: say("phonebank_desc"),
         illustration: require('../../../img/phone-banking.png'),
-        onPress: () => openDonate(),
+        onPress: () => refer.setState({active: 'canvassing'}),
       }
     );
 
