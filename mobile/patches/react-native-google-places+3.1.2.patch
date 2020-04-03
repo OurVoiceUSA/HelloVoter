@@ -1,5 +1,16 @@
+diff --git a/node_modules/react-native-google-places/ios/NSMutableDictionary+GMSPlace.h b/node_modules/react-native-google-places/ios/NSMutableDictionary+GMSPlace.h
+index 8991707..4e517b7 100644
+--- a/node_modules/react-native-google-places/ios/NSMutableDictionary+GMSPlace.h
++++ b/node_modules/react-native-google-places/ios/NSMutableDictionary+GMSPlace.h
+@@ -1,5 +1,6 @@
+ #import <Foundation/Foundation.h>
+ #import <GooglePlaces/GooglePlaces.h>
++#import <GoogleMapsBase/GoogleMapsBase.h>
+ 
+ @interface NSMutableDictionary (GMSPlace)
+ 
 diff --git a/node_modules/react-native-google-places/react-native-google-places.podspec b/node_modules/react-native-google-places/react-native-google-places.podspec
-index 7445c14..870e1c2 100644
+index 7445c14..bb29eca 100644
 --- a/node_modules/react-native-google-places/react-native-google-places.podspec
 +++ b/node_modules/react-native-google-places/react-native-google-places.podspec
 @@ -19,6 +19,6 @@ Pod::Spec.new do |s|
@@ -8,6 +19,6 @@ index 7445c14..870e1c2 100644
    s.dependency 'React'
 -  s.dependency 'GooglePlaces', '~> 3.1.0'
 -  s.dependency 'GoogleMaps', '~> 3.1.0'
-+  s.dependency 'GooglePlaces', '~> 3.2.0'
-+  s.dependency 'GoogleMaps', '~> 3.2.0'
++  s.dependency 'GooglePlaces', '3.5.0'
++  s.dependency 'GoogleMaps', '3.5.0'
  end
