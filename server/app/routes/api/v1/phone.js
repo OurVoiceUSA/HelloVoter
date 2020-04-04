@@ -50,9 +50,9 @@ module.exports = Router({mergeParams: true})
     `+(
       req.body.filter_id?'match (p)<-[:ATTRIBUTE_OF]-(:PersonAttribute)-[:ATTRIBUTE_TYPE]->(:Attribute {id:{filter_id}})':''
     )+`
-    optional match (p)<-[:CALL_TARGET]-(cq:CallerQueue)
+    optional match (p)<-[:CALL_TARGET]-(cq:CallerQueue) where cq.created > (timestamp()-`+queue_minutes+`*60*1000)
       with p, cq
-        where cq is null or cq.created < (timestamp()-`+queue_minutes+`*60*1000)
+        where cq is null
     optional match (p)<-[:VISIT_PERSON]-(vi:Visit)-[:VISIT_FORM]->(f)
       with p, collect(vi.status) as visits
         where length(visits) = 0 or (NOT 1 in visits and NOT 2 in visits and NOT 3 in visits)
