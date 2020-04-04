@@ -12,7 +12,7 @@
     "makeadmin": "cd server && npm run makeadmin --",
     "test": "cd server && npm test",
     "ncu": "ncu && cd client && ncu && cd ../server && ncu",
-    "client": "cd client && npm install && npm start",
+    "client": "cd client && npm install && npm run start-web",
     "server": "cd server && npm install && npm start",
     "start": "concurrently -k \"npm run client\" \"npm run server\""
   },

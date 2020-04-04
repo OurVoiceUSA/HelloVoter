@@ -10,5 +10,4 @@ sh database/build.sh
 docker push ourvoiceusa/neo4j-hv
 sh client/build.sh
 sh server/build.sh
-sh mobile/build.sh
 
