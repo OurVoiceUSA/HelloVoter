@@ -2,13 +2,13 @@
 import { expect } from 'chai';
 
 import { ov_config } from '../../../lib/ov_config';
+import { ID_PARTY } from '../../../lib/consts';
 import neo4j from '../../../lib/neo4j';
 import { appInit, base_uri, getObjs } from '../../../../test/lib/utils';
 
 var api;
 var db;
 var c, turfs;
-var aId = "4a320f76-ef7b-4d73-ae2a-8f4ccf5de344";
 
 describe('Analytics', function () {
 
@@ -32,34 +32,34 @@ describe('Analytics', function () {
   });
 
   it('list as non-admin', async () => {
-    let r = await api.get(base_uri+'/analytics/list?aId='+aId)
+    let r = await api.get(base_uri+'/analytics/list?aId='+ID_PARTY)
       .set('Authorization', 'Bearer '+c.bob.jwt);
     expect(r.statusCode).to.equal(403);
   });
 
   it('list without turf', async () => {
-    let r = await api.get(base_uri+'/analytics/list?aId='+aId)
+    let r = await api.get(base_uri+'/analytics/list?aId='+ID_PARTY)
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.data.length).to.equal(0);
   });
 
   it('list with turf', async () => {
-    let r = await api.get(base_uri+'/analytics/list?aId='+aId+'&turfId='+turfs.A.id)
+    let r = await api.get(base_uri+'/analytics/list?aId='+ID_PARTY+'&turfId='+turfs.A.id)
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.data.length).to.equal(0);
   });
 
   it('list without turf include_null', async () => {
-    let r = await api.get(base_uri+'/analytics/list?aId='+aId+'&include_null=true')
+    let r = await api.get(base_uri+'/analytics/list?aId='+ID_PARTY+'&include_null=true')
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.data.length).to.equal(0);
   });
 
   it('list with turf include_null', async () => {
-    let r = await api.get(base_uri+'/analytics/list?aId='+aId+'&turfId='+turfs.A.id+'&include_null=true')
+    let r = await api.get(base_uri+'/analytics/list?aId='+ID_PARTY+'&turfId='+turfs.A.id+'&include_null=true')
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.data.length).to.equal(0);

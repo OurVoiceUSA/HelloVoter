@@ -5,6 +5,11 @@ import { ov_config } from './ov_config';
 import { min_neo4j_version } from './utils';
 import queue from './queue';
 
+import {
+  ID_NAME, ID_GENDER, ID_PARTY, ID_REG_VOTER, ID_REC_NOTIF, ID_PHONE, ID_DONOTCALL,
+  ID_EMAIL, ID_DOB, ID_US_VET, ID_RACE, ID_LANGS, ID_NOTES,
+} from './consts';
+
 var _require = require; // so we can lazy load a module later on
 
 var jmx;
@@ -197,20 +202,19 @@ export async function doDbInit(db) {
 
   // common attributes that should be interchangeable between systems
   let defaultAttributes = [
-    {id: "013a31db-fe24-4fad-ab6a-dd9d831e72f9", name: "Name", order: 0, type: "string", multi: false},
-    {id: "a0e622d2-db0a-410e-a315-52c65f678ffa", name: "Gender", order: 1, type: "string", multi: false, values: ["Male","Female","Non-Binary"]},
-    {id: "4a320f76-ef7b-4d73-ae2a-8f4ccf5de344", name: "Party Affiliation", order: 2, type: "string", multi: false, values: ["No Party Preference","Democratic","Republican","Green","Libertarian","Other"]},
-    {id: "dcfc1fbb-4609-4900-bbb3-1c4afb2a5127", name: "Registered to Vote", order: 3, type: "boolean", multi: false},
-    {id: "134095d5-c1c8-46ad-9952-cc66e2934f9e", name: "Receive Notifications", order: 4, type: "string", multi: true, values: ["Phone","Text","Email"]},
-    {id: "7d3466e5-2cee-491e-b3f4-bfea3a4b010a", name: "Phone Number", order: 5, type: "string", multi: true},
-    {id: "a23d5959-892d-459f-95fc-9e2ddcf1bbc7", name: "Do Not Call", order: 6, type: "boolean", multi: false},
-    {id: "b687b86e-8fe3-4235-bb78-1919bcca00db", name: "Email Address", order: 7, type: "string", multi: true},
-    {id: "9a903e4f-66ea-4625-bacf-43abb53c6cfc", name: "Date of Birth", order: 8, type: "date", multi: false},
-    {id: "f6a41b03-0dc8-4d59-90bf-033db6a96214", name: "US Military Veteran", order: 9, type: "boolean", multi: false},
-    {id: "689dc96a-a1db-4b20-9443-e69185675d28", name: "Health Insurance", order: 10, type: "boolean", multi: false},
-    {id: "2ad269f5-2712-4a0e-a3d4-be3074a695b6", name: "Race and Ethnicity", order: 11, type: "string", multi: true, values: ["Prefer not to say","African American","Asian","Hispanic","Latino","Native American","Pacific Islander","White"]},
-    {id: "59f09d32-b782-4a32-b7f1-4ffe81975167", name: "Spoken Languages", order: 12, type: "string", multi: true, values: ["English","Spanish","Chinese","Arabic","French","German"]},
-    {id: "6d895d04-94b8-4df9-af12-7e5b08c624d5", name: "Notes", order: 13, type: "textbox", multi: false},
+    {id: ID_NAME, name: "Name", order: 0, type: "string", multi: false},
+    {id: ID_GENDER, name: "Gender", order: 1, type: "string", multi: false, values: ["Male","Female","Non-Binary"]},
+    {id: ID_PARTY, name: "Party Affiliation", order: 2, type: "string", multi: false, values: ["No Party Preference","Democratic","Republican","Green","Libertarian","Other"]},
+    {id: ID_REG_VOTER, name: "Registered to Vote", order: 3, type: "boolean", multi: false},
+    {id: ID_REC_NOTIF, name: "Receive Notifications", order: 4, type: "string", multi: true, values: ["Phone","Text","Email"]},
+    {id: ID_PHONE, name: "Phone Number", order: 5, type: "string", multi: true},
+    {id: ID_DONOTCALL, name: "Do Not Call", order: 6, type: "boolean", multi: false},
+    {id: ID_EMAIL, name: "Email Address", order: 7, type: "string", multi: true},
+    {id: ID_DOB, name: "Date of Birth", order: 8, type: "date", multi: false},
+    {id: ID_US_VET, name: "US Military Veteran", order: 9, type: "boolean", multi: false},
+    {id: ID_RACE, name: "Race and Ethnicity", order: 11, type: "string", multi: true, values: ["Prefer not to say","African American","Asian","Hispanic","Latino","Native American","Pacific Islander","White"]},
+    {id: ID_LANGS, name: "Spoken Languages", order: 12, type: "string", multi: true, values: ["English","Spanish","Chinese","Arabic","French","German"]},
+    {id: ID_NOTES, name: "Notes", order: 13, type: "textbox", multi: false},
   ];
 
   await asyncForEach(defaultAttributes, async (attribute) => {

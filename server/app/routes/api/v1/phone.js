@@ -1,6 +1,7 @@
 import { Router } from 'express';
 
 import { volunteerAssignments, _400, _403 } from '../../../lib/utils';
+import { ID_DONOTCALL, ID_NAME, ID_PHONE, ID_PARTY } from '../../../lib/consts';
 
 module.exports = Router({mergeParams: true})
 .post('/poc/phone/tocall', async (req, res) => {
@@ -44,7 +45,7 @@ module.exports = Router({mergeParams: true})
   ref = await req.db.query(`match (f:Form {id: {formId}})
     match (v:Volunteer {id:{id}})<-[:ASSIGNED]-(t:Turf)
       with f, t limit 1
-    match (dnc:Attribute {id:"a23d5959-892d-459f-95fc-9e2ddcf1bbc7"})
+    match (dnc:Attribute {id:"`+ID_DONOTCALL+`"})
     match (t)<-[:WITHIN]-(a:Address)<-[:RESIDENCE {current:true}]-(p:Person)
         where NOT (p)<-[:ATTRIBUTE_OF]-(:PersonAttribute {value:true})-[:ATTRIBUTE_TYPE]->(dnc)
     `+(
@@ -58,11 +59,11 @@ module.exports = Router({mergeParams: true})
         where length(visits) = 0 or (NOT 1 in visits and NOT 2 in visits and NOT 3 in visits)
       with p, rand() as r
       order by r
-    match (:Attribute {id:"013a31db-fe24-4fad-ab6a-dd9d831e72f9"})<-[:ATTRIBUTE_TYPE]-(name:PersonAttribute)-[:ATTRIBUTE_OF {current:true}]->(p)
-    match (:Attribute {id:"7d3466e5-2cee-491e-b3f4-bfea3a4b010a"})<-[:ATTRIBUTE_TYPE]-(phone:PersonAttribute)-[:ATTRIBUTE_OF {current:true}]->(p)
+    match (:Attribute {id:"`+ID_NAME+`"})<-[:ATTRIBUTE_TYPE]-(name:PersonAttribute)-[:ATTRIBUTE_OF {current:true}]->(p)
+    match (:Attribute {id:"`+ID_PHONE+`"})<-[:ATTRIBUTE_TYPE]-(phone:PersonAttribute)-[:ATTRIBUTE_OF {current:true}]->(p)
         where length(toString(phone.value)) > 9
       with p, name, phone limit 1
-    optional match (:Attribute {id:"4a320f76-ef7b-4d73-ae2a-8f4ccf5de344"})<-[:ATTRIBUTE_TYPE]-(party:PersonAttribute)-[:ATTRIBUTE_OF]->(p)
+    optional match (:Attribute {id:"`+ID_PARTY+`"})<-[:ATTRIBUTE_TYPE]-(party:PersonAttribute)-[:ATTRIBUTE_OF]->(p)
     return {id: p.id, name: name.value, phone: phone.value, party: party.value}
   `, req.body);
 

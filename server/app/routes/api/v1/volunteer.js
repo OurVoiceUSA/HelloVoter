@@ -4,6 +4,7 @@ import {
   cqdo, valid, _400, _403, _500
 } from '../../../lib/utils';
 
+import { ID_NAME } from '../../../lib/consts';
 import { Router } from 'express';
 
 module.exports = Router({mergeParams: true})
@@ -72,7 +73,7 @@ module.exports = Router({mergeParams: true})
     req.query.id = req.user.id;
   }
 
-  let ref = await req.db.query('match (v:Volunteer'+(req.user.admin?'':' {id:{id}}')+')<-[:VISIT_VOLUNTEER]-(vi:Visit)-[:VISIT_FORM]->(f:Form {id:{formId}}) where NOT vi.location is null optional match (vi)-[:VISIT_AT]->(u:Unit)-[:AT]->(a:Address) with v, vi, a{.*, street: a.street+\' #\'+u.name} as a optional match (vi)-[:VISIT_AT]->(ad:Address) with v, vi, CASE WHEN a.street is null THEN ad{.*} ELSE a END as a optional match (vi)-[:VISIT_PERSON]->(p:Person)<-[:ATTRIBUTE_OF]-(pa:PersonAttribute)-[:ATTRIBUTE_TYPE]->(at:Attribute {id:"013a31db-fe24-4fad-ab6a-dd9d831e72f9"}) with {id: ID(vi), volunteer: v, address: a, status: vi.status, person: p{.*, name: pa.value}, datetime: vi.end} as h return distinct(h) order by h.datetime desc limit 100', req.query);
+  let ref = await req.db.query('match (v:Volunteer'+(req.user.admin?'':' {id:{id}}')+')<-[:VISIT_VOLUNTEER]-(vi:Visit)-[:VISIT_FORM]->(f:Form {id:{formId}}) where NOT vi.location is null optional match (vi)-[:VISIT_AT]->(u:Unit)-[:AT]->(a:Address) with v, vi, a{.*, street: a.street+\' #\'+u.name} as a optional match (vi)-[:VISIT_AT]->(ad:Address) with v, vi, CASE WHEN a.street is null THEN ad{.*} ELSE a END as a optional match (vi)-[:VISIT_PERSON]->(p:Person)<-[:ATTRIBUTE_OF]-(pa:PersonAttribute)-[:ATTRIBUTE_TYPE]->(at:Attribute {id:"'+ID_NAME+'"}) with {id: ID(vi), volunteer: v, address: a, status: vi.status, person: p{.*, name: pa.value}, datetime: vi.end} as h return distinct(h) order by h.datetime desc limit 100', req.query);
 
   return res.json(ref.data);
 });
