@@ -1,6 +1,5 @@
 FROM node:erbium as node
-FROM ourvoiceusa/neo4j-hv
-COPY --from=node /usr/local/ /usr/local/
+
 RUN apt-get update && apt-get install -y git && apt-get clean
 
 WORKDIR /node
@@ -11,6 +10,13 @@ COPY package-lock.json .
 COPY patches ./patches/
 
 RUN npm --unsafe-perm install
+
+FROM ourvoiceusa/neo4j-hv
+
+COPY --from=node /usr/local/ /usr/local/
+COPY --from=node /node /node
+
+WORKDIR /node
 
 ENV NODE_ENV=production
 ENV BABEL_CACHE_PATH=/tmp/.babel_cache
