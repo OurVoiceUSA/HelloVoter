@@ -6,6 +6,66 @@ import {
 import { Router } from 'express';
 
 module.exports = Router({mergeParams: true})
+/**
+ * @swagger
+ *
+ * /public/onboard:
+ *   post:
+ *     description: Onboard a new volunteer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               formId:
+ *                 type: string
+ *               longitude:
+ *                 type: integer
+ *                 format: float
+ *                 example: -118.3281370
+ *               latitude:
+ *                 type: integer
+ *                 format: float
+ *                 example: 33.9208231
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 inviteCode:
+ *                   type: string
+ *       400:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: integer
+ *                   example: 400
+ *                 error:
+ *                   type: boolean
+ *                 msg:
+ *                   type: string
+ *       403:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: integer
+ *                   example: 403
+ *                 error:
+ *                   type: boolean
+ *                 msg:
+ *                   type: string
+ *
+ */
 .post('/public/onboard', async (req, res) => {
   if (!req.body.formId) return _400(res, "Missing parameter to 'formId'.");
   if (isNaN(req.body.longitude) || isNaN(req.body.latitude)) return _400(res, "Invalid value to parameters 'longitude' or 'latitude'.");

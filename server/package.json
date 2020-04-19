@@ -10,7 +10,7 @@
     "sandboxdatabase": "node node_modules/@babel/node/lib/_babel-node scripts/runSandboxDatabase.js",
     "genkeys": "node node_modules/@babel/node/lib/_babel-node scripts/genkeys.js",
     "test": "reset && npm run sandboxdatabase && npm run genkeys && JUNIT_REPORT_PATH=test-result/result.xml JUNIT_REPORT_STACK=1 nyc mocha --exit --file ./test/lib/config.js --recursive --require @babel/register --timeout 25000 --colors --reporter mocha-jenkins-reporter || true",
-    "start": "node node_modules/nodemon/bin/nodemon.js --signal SIGKILL --exec babel-node app/server.js"
+    "start": "node node_modules/nodemon/bin/nodemon.js --signal SIGKILL -i app/swagger.v1.json --exec ./start-nodemon.sh"
   },
   "author": "Our Voice USA",
   "license": "AGPL-3.0",
@@ -57,6 +57,8 @@
     "ourvoiceusa-sdk-js": "github:OurVoiceUSA/ourvoiceusa-sdk-js",
     "papaparse": "^5.2.0",
     "patch-package": "^6.2.2",
+    "swagger-jsdoc": "^4.0.0",
+    "swagger-ui-express": "^4.1.4",
     "wkx": "^0.5.0"
   },
   "optionalDependencies": {

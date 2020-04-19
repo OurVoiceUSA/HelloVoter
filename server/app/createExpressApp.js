@@ -17,6 +17,9 @@ import {
   cqdo, _400, _401, _403, _500, _503
 } from './lib/utils';
 
+import swaggerUi from 'swagger-ui-express';
+import swaggerDocumentv1 from './swagger.v1.json';
+
 const router = require('./routes/createRouter.js')();
 
 var public_key;
@@ -147,6 +150,8 @@ export function doExpressInit(log, db, qq) {
 
   app.use('/HelloVoterHQ/api/v1', router);
   app.use('/HelloVoterHQ/[0-9A-Z]+/api/v1', router);
+
+  app.use('/HelloVoterHQ/api/v1/public/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDocumentv1));
 
   // default error handler
   app.use((err, req, res, next) => {

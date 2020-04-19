@@ -1,6 +1,6 @@
 FROM node:erbium as node
 
-RUN apt-get update && apt-get install -y git && apt-get clean
+RUN apt-get update && apt-get install -y git
 
 WORKDIR /node
 
@@ -9,7 +9,7 @@ COPY package.json .
 COPY package-lock.json .
 COPY patches ./patches/
 
-RUN npm --unsafe-perm install
+RUN npm --unsafe-perm --production install
 
 FROM ourvoiceusa/neo4j-hv
 
@@ -31,5 +31,7 @@ HEALTHCHECK --interval=15s --timeout=5s --start-period=5s CMD node /node/app/pok
 COPY start.sh /start.sh
 COPY scripts scripts
 COPY app app
+COPY gen-swagger.sh .
+RUN ./gen-swagger.sh
 
 CMD [ "/start.sh" ]
