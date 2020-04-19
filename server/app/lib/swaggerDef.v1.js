@@ -6,5 +6,8 @@ module.exports = {
     version: p.version,
     description: p.description
   },
-  servers: [{url: '/HelloVoterHQ/api/v1'}]
+  servers: [{
+    url: '/HelloVoterHQ/{OrgID}/api/v1',
+    variables: {OrgID: {default: (process.env.NODE_ENV==='production'?"":"DEV")}}
+  }]
 };

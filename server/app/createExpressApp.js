@@ -152,6 +152,7 @@ export function doExpressInit(log, db, qq) {
   app.use('/HelloVoterHQ/[0-9A-Z]+/api/v1', router);
 
   app.use('/HelloVoterHQ/api/v1/public/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDocumentv1));
+  app.use('/HelloVoterHQ/[0-9A-Z]+/api/v1/public/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDocumentv1));
 
   // default error handler
   app.use((err, req, res, next) => {
