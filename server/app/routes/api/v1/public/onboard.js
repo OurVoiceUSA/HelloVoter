@@ -19,18 +19,7 @@ module.exports = Router({mergeParams: true})
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               formId:
- *                 type: string
- *               longitude:
- *                 type: integer
- *                 format: float
- *                 example: -118.3281370
- *               latitude:
- *                 type: integer
- *                 format: float
- *                 example: 33.9208231
+ *             "$ref": "#/components/schemas/formId_long_lat"
  *     responses:
  *       200:
  *         content:
@@ -44,28 +33,12 @@ module.exports = Router({mergeParams: true})
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 code:
- *                   type: integer
- *                   example: 400
- *                 error:
- *                   type: boolean
- *                 msg:
- *                   type: string
+ *               "$ref": "#/components/schemas/err400"
  *       403:
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 code:
- *                   type: integer
- *                   example: 403
- *                 error:
- *                   type: boolean
- *                 msg:
- *                   type: string
+ *               "$ref": "#/components/schemas/err403"
  *
  */
 .post('/public/onboard', async (req, res) => {
