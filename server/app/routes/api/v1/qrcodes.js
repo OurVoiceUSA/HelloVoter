@@ -1,7 +1,5 @@
 
-import {
-  valid, cqdo, _400, _403, _500, generateToken, volunteerAssignments
-} from '../../../lib/utils';
+import { valid, cqdo, _400, _403, generateToken, volunteerAssignments } from '../../../lib/utils';
 
 import crypto from 'crypto';
 

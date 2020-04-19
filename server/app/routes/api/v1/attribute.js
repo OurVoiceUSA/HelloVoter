@@ -1,7 +1,5 @@
 
-import {
-  cqdo, valid, _400, _500,
-} from '../../../lib/utils';
+import { cqdo, valid, _400 } from '../../../lib/utils';
 
 import { Router } from 'express';
 

@@ -3,10 +3,7 @@ import wkx from 'wkx';
 import { asyncForEach, sleep } from 'ourvoiceusa-sdk-js';
 import { ov_config } from '../../../lib/ov_config';
 import { deepCopy } from 'ourvoiceusa-sdk-js';
-import {
-  _volunteersFromCypher,
-  cqdo, valid, _400, _403, _500, _501
-} from '../../../lib/utils';
+import { _volunteersFromCypher, cqdo, valid, _400, _403, _501 } from '../../../lib/utils';
 
 import { Router } from 'express';
 

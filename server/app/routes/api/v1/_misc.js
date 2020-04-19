@@ -2,10 +2,7 @@
 import fetch from 'node-fetch';
 import { deepCopy } from 'ourvoiceusa-sdk-js';
 
-import {
-  volunteerAssignments,
-  _400, _401, _403, _500
-} from '../../../lib/utils';
+import { volunteerAssignments, _400, _401, _403 } from '../../../lib/utils';
 
 import { ov_config } from '../../../lib/ov_config';
 import { version } from '../../../../package.json';

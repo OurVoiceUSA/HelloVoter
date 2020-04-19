@@ -1,7 +1,7 @@
 
 import {
   _volunteersFromCypher, onMyTurf, volunteerCanSee, generateToken,
-  cqdo, valid, _400, _403, _500
+  cqdo, valid, _400, _403
 } from '../../../lib/utils';
 
 import { ID_NAME } from '../../../lib/consts';

@@ -1,10 +1,7 @@
 
 import { deepCopy } from 'ourvoiceusa-sdk-js';
 
-import {
-  _volunteersFromCypher, volunteerAssignments,
-  cqdo, valid, _400, _403, _500
-} from '../../../lib/utils';
+import { _volunteersFromCypher, volunteerAssignments, cqdo, valid, _400, _403 } from '../../../lib/utils';
 
 import { ov_config } from '../../../lib/ov_config';
 
