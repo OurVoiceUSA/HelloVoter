@@ -19,11 +19,11 @@ var err = {
 
 var err400 = deepCopy(err);
 err400.properties.code.example = 400;
-err400.properties.msg.example = "Bad Request";
+err400.properties.msg.example = "Invalid parameter.";
 
 var err403 = deepCopy(err);
 err403.properties.code.example = 403;
-err403.properties.msg.example = "Forbidden";
+err403.properties.msg.example = "Access denied to given resource.";
 
 var longitude = {
   type: 'integer',
