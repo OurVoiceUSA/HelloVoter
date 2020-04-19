@@ -12,6 +12,8 @@ module.exports = Router({mergeParams: true})
  * /public/onboard:
  *   post:
  *     description: Onboard a new volunteer
+ *     security:
+ *       []
  *     requestBody:
  *       required: true
  *       content:
