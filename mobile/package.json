@@ -7,7 +7,7 @@
     "url": "https://www.patreon.com/hellovoter"
   },
   "scripts": {
-    "postinstall": "patch-package; npx jetify; node node_modules/@babel/node/lib/_babel-node scripts/postinstall.js",
+    "postinstall": "./node_modules/patch-package/index.js; npx jetify; node node_modules/@babel/node/lib/_babel-node scripts/postinstall.js",
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "start": "react-native start",
