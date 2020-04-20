@@ -9,6 +9,48 @@ import { ov_config } from '../../../lib/ov_config';
 import { Router } from 'express';
 
 module.exports = Router({mergeParams: true})
+/**
+ * @swagger
+ *
+ * /address/get/byposition:
+ *   get:
+ *     description: Get addresses for a given position
+ *     requestBody:
+ *     parameters:
+ *       - in: query
+ *         name: formId
+ *         required: true
+ *         type: string
+ *       - in: query
+ *         name: longitude
+ *         required: true
+ *       - in: query
+ *         name: latitude
+ *         required: true
+ *       - in: query
+ *         name: limit
+ *         type: integer
+ *       - in: query
+ *         name: dist
+ *         type: integer
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/data"
+ *       400:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/err400"
+ *       403:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/err403"
+ *
+ */
 .get('/address/get/byposition', async (req, res) => {
   if (req.user.admin !== true) return _403(res, "Permission denied.");
 

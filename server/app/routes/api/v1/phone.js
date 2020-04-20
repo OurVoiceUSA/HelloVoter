@@ -4,6 +4,37 @@ import { volunteerAssignments, _400, _403 } from '../../../lib/utils';
 import { ID_DONOTCALL, ID_NAME, ID_PHONE, ID_PARTY } from '../../../lib/consts';
 
 module.exports = Router({mergeParams: true})
+/**
+ * @swagger
+ *
+ * /poc/phone/tocall:
+ *   post:
+ *     description: Get a phone number to call
+ *     deprecated: true
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             "$ref": "#/components/schemas/formId"
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/formId"
+ *       400:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/err400"
+ *       403:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/err403"
+ *
+ */
 .post('/poc/phone/tocall', async (req, res) => {
   // TODO: real rough endpoint. quick POC. doesn't look at units. lots of issues. meh! HELP ME!!
   if (!req.body.formId) return _400(res, "Invalid value to parameter 'formId'.");
@@ -84,6 +115,37 @@ module.exports = Router({mergeParams: true})
 
   return res.json(tocall);
 })
+/**
+ * @swagger
+ *
+ * /poc/phone/callresult:
+ *   post:
+ *     description: Post the resulting status of a phone call
+ *     deprecated: true
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             "$ref": "#/components/schemas/poc_callresult"
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/formId"
+ *       400:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/err400"
+ *       403:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/err403"
+ *
+ */
 .post('/poc/phone/callresult', async (req, res) => {
   // TODO: this is a hack job of peopleVisitUpdate -- need to merge this into that eventually
   // did this because we aren't using the survey screen, or attrs, or lng/lat, or cold-calling,

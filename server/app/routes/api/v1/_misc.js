@@ -10,6 +10,36 @@ import { version } from '../../../../package.json';
 import { Router } from 'express';
 
 module.exports = Router({mergeParams: true})
+/**
+ * @swagger
+ *
+ * /hello:
+ *   post:
+ *     description: First call made to the API, returns your assignments.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             "$ref": "#/components/schemas/hello"
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/data"
+ *       400:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/err400"
+ *       403:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/err403"
+ *
+ */
 .post('/hello', async (req, res) => {
   // they say that time's supposed to heal ya but i ain't done much healin'
 
