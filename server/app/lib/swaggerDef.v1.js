@@ -54,10 +54,7 @@ module.exports = {
     version: p.version,
     description: p.description
   },
-  servers: [{
-    url: '/HelloVoterHQ/{OrgID}/api/v1',
-    variables: {OrgID: {default: (process.env.NODE_ENV==='production'?"":"DEV")}}
-  }],
+  servers: [{url: '/HelloVoterHQ/api/v1'}],
   components: {
     securitySchemes: {
       BearerAuth: {
