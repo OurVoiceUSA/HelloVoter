@@ -96,6 +96,14 @@ describe('MISC endpoints', function () {
     expect(r.body).to.have.property("msg");
   });
 
+  it('hello 401 no apikey', async () => {
+    const r = await api.post(base_uri+'/hello')
+      .set('Authorization', 'Bearer apikey:')
+    expect(r.statusCode).to.equal(401);
+    expect(r.body.error).to.equal(true);
+    expect(r.body).to.have.property("msg");
+  });
+
   it('hello 200 good apikey admin', async () => {
     await db.query('match (v:Volunteer {id:{id}}) set v.apikey = "foobaradmin"', c.admin);
     const r = await api.post(base_uri+'/hello')
