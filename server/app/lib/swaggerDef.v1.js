@@ -78,9 +78,17 @@ module.exports = {
         type: 'object',
         properties: { formId }
       },
-      formId_long_lat: {
+      longitude: {
         type: 'object',
-        properties: { formId, longitude, latitude }
+        properties: { longitude }
+      },
+      latitude: {
+        type: 'object',
+        properties: { latitude }
+      },
+      inviteCode: {
+        type: 'object',
+        properties: { inviteCode }
       },
       poc_callresult: {
         type: 'object',

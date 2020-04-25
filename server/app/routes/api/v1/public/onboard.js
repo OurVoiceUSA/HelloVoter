@@ -15,16 +15,17 @@ module.exports = Router({mergeParams: true})
  *       content:
  *         application/json:
  *           schema:
- *             "$ref": "#/components/schemas/formId_long_lat"
+ *             allOf:
+ *               - "$ref": "#/components/schemas/formId"
+ *               - "$ref": "#/components/schemas/longitude"
+ *               - "$ref": "#/components/schemas/latitude"
  *     responses:
  *       200:
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 inviteCode:
- *                   type: string
+ *               allOf:
+ *                 - "$ref": "#/components/schemas/inviteCode"
  *       400:
  *         content:
  *           application/json:
