@@ -99,36 +99,43 @@ export function doExpressInit(log, db, qq) {
     if (req.url.match(/\/\.\.\//)) return _400(res, "Not OK..");
 
     try {
-      let u;
+      let u, a; // My Hero Academia
       if (!req.header('authorization')) return _400(res, "Missing required header.");
       let token = req.header('authorization').split(' ')[1];
 
-      if (ov_config.no_auth) u = jwt.decode(req.header('authorization').split(' ')[1]);
-      else u = jwt.verify(req.header('authorization').split(' ')[1], public_key);
+      if (token.match(/^apikey:/)) {
+        try {
+          let apikey = token.split(':')[1];
+          a = await req.db.query('match (v:Volunteer {apikey:{apikey}}) set v.last_seen = timestamp() return v', {apikey});
+        } catch (e) {
+          console.warn(e);
+          return _500(res, e);
+        }
+      } else {
+        u = (ov_config.no_auth?jwt.decode(token):jwt.verify(token, public_key));
 
-      // verify props
-      if (!u.id) return _401(res, "Your token is missing a required parameter.");
-      if (u.iss !== jwt_iss) return _401(res, "Your token was issued for a different domain.");
-      if (u.aud && (
-        (ov_config.jwt_aud && u.aud !== ov_config.jwt_aud) ||
-        (!ov_config.jwt_aud && u.aud !== req.header('host'))
-      )) return _401(res, "Your token has an incorrect audience.");
+        // verify props
+        if (!u.id) return _401(res, "Your token is missing a required parameter.");
+        if (u.iss !== jwt_iss) return _401(res, "Your token was issued for a different domain.");
+        if (u.aud && (
+          (ov_config.jwt_aud && u.aud !== ov_config.jwt_aud) ||
+          (!ov_config.jwt_aud && u.aud !== req.header('host'))
+        )) return _401(res, "Your token has an incorrect audience.");
 
-      if (!u.email) u.email = "";
-      if (!u.avatar) u.avatar = "";
+        if (!u.email) u.email = "";
+        if (!u.avatar) u.avatar = "";
 
-      let a;
-
-      try {
-        a = await req.db.query('merge (a:Volunteer {id:{id}}) on match set a += {last_seen: timestamp(), name:{name}, email:{email}, avatar:{avatar}} on create set a += {created: timestamp(), last_seen: timestamp(), name:{name}, email:{email}, avatar:{avatar}} return a', u);
-      } catch (e) {
-        console.warn(e);
-        return _500(res, e);
+        try {
+          a = await req.db.query('merge (a:Volunteer {id:{id}}) on match set a += {last_seen: timestamp(), name:{name}, email:{email}, avatar:{avatar}} on create set a += {created: timestamp(), last_seen: timestamp(), name:{name}, email:{email}, avatar:{avatar}} return a', u);
+        } catch (e) {
+          console.warn(e);
+          return _500(res, e);
+        }
       }
 
       if (a.data.length === 1) {
         req.user = a.data[0];
-      } else return _500(res, {});
+      } else return _401(res, "Invalid token.");
 
       if (req.user.locked) return _403(res, "Your account is locked.");
 

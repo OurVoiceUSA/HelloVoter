@@ -159,6 +159,7 @@ export async function doDbInit(db) {
     {label: 'Address', property: 'bbox', create: 'create index on :Address(bbox)'},
     {label: 'Device', property: 'UniqueID', create: 'create constraint on (a:Device) assert a.UniqueID is unique'},
     {label: 'Volunteer', property: 'id', create: 'create constraint on (a:Volunteer) assert a.id is unique'},
+    {label: 'Volunteer', property: 'apikey', create: 'create index on :Volunteer(apikey)'},
     {label: 'Volunteer', property: 'location', create: 'create index on :Volunteer(location)'},
     {label: 'Team', property: 'id', create: 'create constraint on (a:Team) assert a.id is unique'},
     {label: 'Team', property: 'name', create: 'create constraint on (a:Team) assert a.name is unique'},
