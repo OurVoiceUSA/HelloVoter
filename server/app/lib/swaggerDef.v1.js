@@ -52,7 +52,13 @@ module.exports = {
   info: {
     title: p.name,
     version: p.version,
-    description: p.description
+    description: p.description,
+    termsOfService: 'https://raw.githubusercontent.com/OurVoiceUSA/HelloVoter/master/docs/Terms-of-Service.md',
+    license: { name: p.license },
+    externalDocs: {
+      description: 'Find out more',
+      url: 'https://github.com/OurVoiceUSA/HelloVoter/tree/master/docs',
+    }
   },
   servers: [{url: '/HelloVoterHQ/api/v1'}],
   components: {
