@@ -2,7 +2,7 @@
 import fetch from 'node-fetch';
 import { deepCopy } from 'ourvoiceusa-sdk-js';
 
-import { volunteerAssignments, _400, _401, _403 } from '../../../lib/utils';
+import { volunteerAssignments, _400, _401 } from '../../../lib/utils';
 
 import { ov_config } from '../../../lib/ov_config';
 import { version } from '../../../../package.json';
@@ -34,16 +34,6 @@ module.exports = Router({mergeParams: true})
  *               allOf:
  *                 - "$ref": "#/components/schemas/msg"
  *                 - "$ref": "#/components/schemas/data"
- *       400:
- *         content:
- *           application/json:
- *             schema:
- *               "$ref": "#/components/schemas/err400"
- *       403:
- *         content:
- *           application/json:
- *             schema:
- *               "$ref": "#/components/schemas/err403"
  *
  */
 .post('/hello', async (req, res) => {

@@ -26,16 +26,6 @@ module.exports = Router({mergeParams: true})
  *             schema:
  *               allOf:
  *                 - "$ref": "#/components/schemas/inviteCode"
- *       400:
- *         content:
- *           application/json:
- *             schema:
- *               "$ref": "#/components/schemas/err400"
- *       403:
- *         content:
- *           application/json:
- *             schema:
- *               "$ref": "#/components/schemas/err403"
  *
  */
 .post('/public/onboard', async (req, res) => {

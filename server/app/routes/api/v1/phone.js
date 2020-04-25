@@ -23,16 +23,6 @@ module.exports = Router({mergeParams: true})
  *           application/json:
  *             schema:
  *               "$ref": "#/components/schemas/formId"
- *       400:
- *         content:
- *           application/json:
- *             schema:
- *               "$ref": "#/components/schemas/err400"
- *       403:
- *         content:
- *           application/json:
- *             schema:
- *               "$ref": "#/components/schemas/err403"
  *
  */
 .post('/poc/phone/tocall', async (req, res) => {
@@ -140,16 +130,6 @@ module.exports = Router({mergeParams: true})
  *           application/json:
  *             schema:
  *               "$ref": "#/components/schemas/formId"
- *       400:
- *         content:
- *           application/json:
- *             schema:
- *               "$ref": "#/components/schemas/err400"
- *       403:
- *         content:
- *           application/json:
- *             schema:
- *               "$ref": "#/components/schemas/err403"
  *
  */
 .post('/poc/phone/callresult', async (req, res) => {

@@ -6,15 +6,24 @@ var error = {type: 'boolean'};
 var msg = {type: 'string'};
 var formId = {type: 'string'};
 var personId = {type: 'string'};
+var deviceId = {type: 'string'};
+var addressId = {type: 'string'};
 var phone = {type: 'string'};
 var inviteCode = {type: 'string'};
 var status = {type: 'integer', enum: [0,1,2,3]};
+var timestamp = {type: 'integer'};
 var start = {type: 'integer'};
 var end = {type: 'integer'};
 var limit = {type: 'integer'};
 var dist = {type: 'integer'};
 var dinfo = {type: 'object'};
+var street = {type: 'string', example: '1 Rocket Rd'};
+var unit = {type: 'string', example: '103'};
+var city = {type: 'string', example: 'Hawthorn'};
+var state = {type: 'string', example: 'CA'};
+var zip = {type: 'string', example: '90250'};
 var data = {type: 'array', items: 'string'};
+var empty = {type: 'object'};
 
 var err = {
   type: 'object',
@@ -72,6 +81,7 @@ module.exports = {
     schemas: {
       err400,
       err403,
+      empty: { type: 'object' },
       msg: { type: 'object', properties: { msg } },
       data: { type: 'object', properties: { data } },
       dinfo: { type: 'object', properties: { dinfo } },
@@ -83,7 +93,15 @@ module.exports = {
       phone: { type: 'object', properties: { phone } },
       status: { type: 'object', properties: { status } },
       start: { type: 'object', properties: { start } },
-      end: { type: 'object', properties: { end } }
+      end: { type: 'object', properties: { end } },
+      deviceId: { type: 'object', properties: { deviceId } },
+      addressId: { type: 'object', properties: { addressId } },
+      unit: { type: 'object', properties: { unit } },
+      timestamp: { type: 'object', properties: { timestamp } },
+      street: { type: 'object', properties: { street } },
+      city: { type: 'object', properties: { city } },
+      state: { type: 'object', properties: { state } },
+      zip: { type: 'object', properties: { zip } },
     },
   },
   security: [{BearerAuth: []}],

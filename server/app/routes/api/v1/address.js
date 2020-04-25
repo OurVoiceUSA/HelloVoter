@@ -39,16 +39,6 @@ module.exports = Router({mergeParams: true})
  *           application/json:
  *             schema:
  *               "$ref": "#/components/schemas/data"
- *       400:
- *         content:
- *           application/json:
- *             schema:
- *               "$ref": "#/components/schemas/err400"
- *       403:
- *         content:
- *           application/json:
- *             schema:
- *               "$ref": "#/components/schemas/err403"
  *
  */
 .get('/address/get/byposition', async (req, res) => {
@@ -82,6 +72,34 @@ module.exports = Router({mergeParams: true})
 
   return res.json([]);
 })
+/**
+ * @swagger
+ *
+ * /address/add/location:
+ *   post:
+ *     description: Add a new address
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             allOf:
+ *               - "$ref": "#/components/schemas/longitude"
+ *               - "$ref": "#/components/schemas/latitude"
+ *               - "$ref": "#/components/schemas/deviceId"
+ *               - "$ref": "#/components/schemas/formId"
+ *               - "$ref": "#/components/schemas/timestamp"
+ *               - "$ref": "#/components/schemas/street"
+ *               - "$ref": "#/components/schemas/city"
+ *               - "$ref": "#/components/schemas/state"
+ *               - "$ref": "#/components/schemas/zip"
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/empty"
+ */
 .post('/address/add/location', async (req, res) => {
   req.body.longitude = parseFloat(req.body.longitude);
   req.body.latitude = parseFloat(req.body.latitude);
@@ -91,6 +109,30 @@ module.exports = Router({mergeParams: true})
 
   return addressAdd(req, res);
 })
+/**
+ * @swagger
+ *
+ * /address/add/unit:
+ *   post:
+ *     description: Add a new unit to an address
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             allOf:
+ *               - "$ref": "#/components/schemas/addressId"
+ *               - "$ref": "#/components/schemas/unit"
+ *               - "$ref": "#/components/schemas/deviceId"
+ *               - "$ref": "#/components/schemas/formId"
+ *               - "$ref": "#/components/schemas/timestamp"
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/empty"
+ */
 .post('/address/add/unit', async (req, res) => {
   if (!req.body.addressId) return _400(res, "Invalid value to parameter 'addressId'.");
   if (!req.body.unit) return _400(res, "Invalid value to parameter 'unit'.");
