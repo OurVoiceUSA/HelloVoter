@@ -4,26 +4,41 @@ function deepCopy(o) {return JSON.parse(JSON.stringify(o))}
 
 var error = {type: 'boolean'};
 var msg = {type: 'string'};
+
+// object IDs
+var id  = {type: 'string'};
 var formId = {type: 'string'};
 var personId = {type: 'string'};
 var deviceId = {type: 'string'};
 var addressId = {type: 'string'};
+var attributeId = {type: 'string'};
+var attributeType = {type: 'string'};
+
+// strings
+var name = {type: 'string'};
+var value = {type: 'string'};
 var phone = {type: 'string'};
+var street = {type: 'string', example: '1 Rocket Rd'};
+var unit = {type: 'string', example: '103'};
+var city = {type: 'string', example: 'Hawthorn'};
+var state = {type: 'string', example: 'CA'};
+var zip = {type: 'string', example: '90250'};
 var inviteCode = {type: 'string'};
+
+// integer types
 var status = {type: 'integer', enum: [0,1,2,3]};
 var timestamp = {type: 'integer'};
 var start = {type: 'integer'};
 var end = {type: 'integer'};
 var limit = {type: 'integer'};
 var dist = {type: 'integer'};
+
+// misc objects
+var object = {type: 'object'};
 var dinfo = {type: 'object'};
-var street = {type: 'string', example: '1 Rocket Rd'};
-var unit = {type: 'string', example: '103'};
-var city = {type: 'string', example: 'Hawthorn'};
-var state = {type: 'string', example: 'CA'};
-var zip = {type: 'string', example: '90250'};
-var data = {type: 'array', items: 'string'};
 var empty = {type: 'object'};
+var data = {type: 'array', items: 'string'};
+var options = {type: 'array', items: 'string'};
 
 var err = {
   type: 'object',
@@ -83,9 +98,16 @@ module.exports = {
       err403,
       empty: { type: 'object' },
       msg: { type: 'object', properties: { msg } },
+      id: { type: 'object', properties: { id } },
+      name: { type: 'object', properties: { name } },
+      value: { type: 'object', properties: { value } },
+      options: { type: 'object', properties: { options } },
+      object:  { type: 'object', properties: { object } },
       data: { type: 'object', properties: { data } },
       dinfo: { type: 'object', properties: { dinfo } },
       formId: { type: 'object', properties: { formId } },
+      attributeId: { type: 'object', properties: { attributeId } },
+      attributeType: { type: 'object', properties: { attributeType } },
       longitude: { type: 'object', properties: { longitude } },
       latitude: { type: 'object', properties: { latitude } },
       inviteCode: { type: 'object', properties: { inviteCode } },
