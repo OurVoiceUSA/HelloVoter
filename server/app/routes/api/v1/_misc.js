@@ -21,13 +21,19 @@ module.exports = Router({mergeParams: true})
  *       content:
  *         application/json:
  *           schema:
- *             "$ref": "#/components/schemas/hello"
+ *             allOf:
+ *               - "$ref": "#/components/schemas/dinfo"
+ *               - "$ref": "#/components/schemas/longitude"
+ *               - "$ref": "#/components/schemas/latitude"
+ *               - "$ref": "#/components/schemas/inviteCode"
  *     responses:
  *       200:
  *         content:
  *           application/json:
  *             schema:
- *               "$ref": "#/components/schemas/data"
+ *               allOf:
+ *                 - "$ref": "#/components/schemas/msg"
+ *                 - "$ref": "#/components/schemas/data"
  *       400:
  *         content:
  *           application/json:

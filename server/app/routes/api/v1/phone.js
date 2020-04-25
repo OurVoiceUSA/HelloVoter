@@ -127,7 +127,13 @@ module.exports = Router({mergeParams: true})
  *       content:
  *         application/json:
  *           schema:
- *             "$ref": "#/components/schemas/poc_callresult"
+ *             allOf:
+ *               - "$ref": "#/components/schemas/formId"
+ *               - "$ref": "#/components/schemas/personId"
+ *               - "$ref": "#/components/schemas/phone"
+ *               - "$ref": "#/components/schemas/status"
+ *               - "$ref": "#/components/schemas/start"
+ *               - "$ref": "#/components/schemas/end"
  *     responses:
  *       200:
  *         content:

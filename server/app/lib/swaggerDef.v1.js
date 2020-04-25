@@ -66,35 +66,19 @@ module.exports = {
     schemas: {
       err400,
       err403,
-      hello: {
-        type: 'object',
-        properties: { dinfo, longitude, latitude, inviteCode }
-      },
-      data: {
-        type: 'object',
-        properties: { msg, data }
-      },
-      formId: {
-        type: 'object',
-        properties: { formId }
-      },
-      longitude: {
-        type: 'object',
-        properties: { longitude }
-      },
-      latitude: {
-        type: 'object',
-        properties: { latitude }
-      },
-      inviteCode: {
-        type: 'object',
-        properties: { inviteCode }
-      },
-      poc_callresult: {
-        type: 'object',
-        properties: { formId, personId, phone, status, start, end }
-      }
-    }
+      msg: { type: 'object', properties: { msg } },
+      data: { type: 'object', properties: { data } },
+      dinfo: { type: 'object', properties: { dinfo } },
+      formId: { type: 'object', properties: { formId } },
+      longitude: { type: 'object', properties: { longitude } },
+      latitude: { type: 'object', properties: { latitude } },
+      inviteCode: { type: 'object', properties: { inviteCode } },
+      personId: { type: 'object', properties: { personId } },
+      phone: { type: 'object', properties: { phone } },
+      status: { type: 'object', properties: { status } },
+      start: { type: 'object', properties: { start } },
+      end: { type: 'object', properties: { end } }
+    },
   },
-  security: [{BearerAuth: []}]
+  security: [{BearerAuth: []}],
 };
