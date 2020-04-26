@@ -60,6 +60,11 @@ var atget = (req, res) => {
   return cqdo(req, res, 'match (a:Attribute {id:{id}}) return a', req.query, true);
 }
 
+var atdelete = (req, res) => {
+  if (!valid(req.body.id)) return _400(res, "Invalid value to parameter 'id'.");
+  return cqdo(req, res, 'match (a:Attribute {id:{id}}) detach delete a', req.body, true);
+}
+
 module.exports = Router({mergeParams: true})
 /**
  * @swagger
@@ -114,6 +119,20 @@ module.exports = Router({mergeParams: true})
  *           application/json:
  *             schema:
  *               "$ref": "#/components/schemas/attributeId"
+ *   delete:
+ *     description: Delete an attribute
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             "$ref": "#/components/schemas/attributeId"
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/empty"
  */
 .get('/attribute', atget)
 .get('/attribute/get', atget) // depricated
@@ -121,6 +140,8 @@ module.exports = Router({mergeParams: true})
 .post('/attribute/create', atcreate) // depricated
 .put('/attribute', atupdate)
 .post('/attribute/update', atupdate) // depricated
+.delete('/attribute', atdelete)
+.post('/attribute/delete', atdelete) // depricated
 .get('/attribute/list', (req, res) => {
   if (req.user.admin === true)
     return cqdo(req, res, 'match (at:Attribute) return at order by at.order', {}, true);
@@ -146,7 +167,3 @@ module.exports = Router({mergeParams: true})
   if (!valid(req.body.id) || !valid(req.body.formId)) return _400(res, "Invalid value to parameter 'key' or 'formId'.");
   return cqdo(req, res, 'match (a:Attribute {id:{id}})-[r:COMPILED_ON]-(b:Form {id:{formId}}) delete r', req.body, true);
 })
-.post('/attribute/delete', (req, res) => {
-  if (!valid(req.body.id)) return _400(res, "Invalid value to parameter 'id'.");
-  return cqdo(req, res, 'match (a:Attribute {id:{id}}) detach delete a', req.body, true);
-});
