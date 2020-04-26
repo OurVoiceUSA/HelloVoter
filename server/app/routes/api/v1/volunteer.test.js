@@ -248,14 +248,14 @@ describe('Volunteer', function () {
   // apikey management
 
   it('get no apikey', async () => {
-    let r = await api.get(base_uri+'/volunteer/apikey')
+    let r = await api.get(base_uri+'/volunteer/'+c.sally.id+'/apikey')
       .set('Authorization', 'Bearer '+c.sally.jwt)
     expect(r.statusCode).to.equal(200);
     expect(r.body.apikey).to.not.exist;
   });
 
   it('generate apikey', async () => {
-    let r = await api.put(base_uri+'/volunteer/apikey')
+    let r = await api.put(base_uri+'/volunteer/'+c.sally.id+'/apikey')
       .set('Authorization', 'Bearer '+c.sally.jwt)
     expect(r.statusCode).to.equal(200);
     expect(r.body.apikey.length).to.equal(64);
@@ -263,20 +263,45 @@ describe('Volunteer', function () {
   });
 
   it('test apikey', async () => {
-    let r = await api.get(base_uri+'/volunteer/apikey')
+    let r = await api.get(base_uri+'/volunteer/'+c.sally.id+'/apikey')
       .set('Authorization', 'Bearer '+apikey)
     expect(r.statusCode).to.equal(200);
     expect(r.body.apikey).to.equal(apikey);
   });
 
+  it('admin can see another apikey', async () => {
+    let r = await api.get(base_uri+'/volunteer/'+c.sally.id+'/apikey')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.apikey).to.equal(apikey);
+  });
+
+  it('non-admin can NOT see another apikey', async () => {
+    let r = await api.get(base_uri+'/volunteer/'+c.sally.id+'/apikey')
+      .set('Authorization', 'Bearer '+c.bob.jwt)
+    expect(r.statusCode).to.equal(404);
+  });
+
+  it('admin can delete another apikey', async () => {
+    let r = await api.delete(base_uri+'/volunteer/'+c.bob.id+'/apikey')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+    expect(r.statusCode).to.equal(200);
+  });
+
+  it('non-admin can NOT delete another apikey', async () => {
+    let r = await api.delete(base_uri+'/volunteer/'+c.sally.id+'/apikey')
+      .set('Authorization', 'Bearer '+c.bob.jwt)
+    expect(r.statusCode).to.equal(404);
+  });
+
   it('delete apikey', async () => {
-    let r = await api.delete(base_uri+'/volunteer/apikey')
+    let r = await api.delete(base_uri+'/volunteer/'+c.sally.id+'/apikey')
       .set('Authorization', 'Bearer '+apikey)
     expect(r.statusCode).to.equal(200);
   });
 
   it('test deleted apikey', async () => {
-    let r = await api.get(base_uri+'/volunteer/apikey')
+    let r = await api.get(base_uri+'/volunteer/'+c.sally.id+'/apikey')
       .set('Authorization', 'Bearer '+apikey)
     expect(r.statusCode).to.equal(401);
   });

@@ -1,11 +1,11 @@
-
-import {
-  _volunteersFromCypher, onMyTurf, volunteerCanSee, generateToken,
-  cqdo, valid, _400, _403
-} from '../../../lib/utils';
+import { Router } from 'express';
+import _ from 'lodash';
 
 import { ID_NAME } from '../../../lib/consts';
-import { Router } from 'express';
+import {
+  _volunteersFromCypher, onMyTurf, volunteerCanSee, generateToken,
+  cqdo, valid, _400, _403, _404
+} from '../../../lib/utils';
 
 module.exports = Router({mergeParams: true})
 .get('/volunteer/list', async (req, res) => {
@@ -68,9 +68,14 @@ module.exports = Router({mergeParams: true})
 /**
  * @swagger
  *
- * /volunteer/apikey:
+ * /volunteer/{id}/apikey:
  *   get:
  *     description: Get your apikey
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         type: string
  *     responses:
  *       200:
  *         content:
@@ -79,6 +84,11 @@ module.exports = Router({mergeParams: true})
  *               "$ref": "#/components/schemas/apikey"
  *   put:
  *     description: Generate a new apikey
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         type: string
  *     responses:
  *       200:
  *         content:
@@ -88,6 +98,11 @@ module.exports = Router({mergeParams: true})
  *
  *   delete:
  *     description: Delete your apikey
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         type: string
  *     responses:
  *       200:
  *         content:
@@ -96,16 +111,21 @@ module.exports = Router({mergeParams: true})
  *               "$ref": "#/components/schemas/empty"
  *
  */
-.get('/volunteer/apikey', async (req, res) => {
-  let ref = await req.db.query('match (v:Volunteer {id:{id}}) return v.apikey', req.user);
+.get('/volunteer/:id/apikey', async (req, res) => {
+  if (!req.user.admin && req.params.id !== req.user.id) return _404(res, "Volunteer not found");
+  let ref = await req.db.query('match (v:Volunteer {id:{id}}) return v.apikey', req.params);
   return res.json({apikey: ref.data[0]});
 })
-.put('/volunteer/apikey', async (req, res) => {
+.put('/volunteer/:id/apikey', async (req, res) => {
+  if (!req.user.admin && req.params.id !== req.user.id) return _404(res, "Volunteer not found");
   let apikey = await generateToken();
-  await req.db.query('match (v:Volunteer {id:{id}}) set v.apikey = {apikey}', {apikey, id: req.user.id});
+  await req.db.query('match (v:Volunteer {id:{id}}) set v.apikey = {apikey}',
+    _.merge({apikey}, req.params));
   return res.json({apikey});
 })
-.delete('/volunteer/apikey', async (req, res) => {
-  await req.db.query('match (v:Volunteer {id:{id}}) set v.apikey = null', req.user);
+.delete('/volunteer/:id/apikey', async (req, res) => {
+  if (!req.user.admin && req.params.id !== req.user.id) return _404(res, "Volunteer not found");
+  await req.db.query('match (v:Volunteer {id:{id}}) set v.apikey = null',
+    _.merge({}, req.body, req.params));
   return res.json({});
 })
