@@ -27,14 +27,14 @@ describe('Attributes', function () {
   it('create invalid parameter', async () => {
     let r;
 
-    r = await api.post(base_uri+'/attribute/create')
+    r = await api.post(base_uri+'/attribute')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: "inval",
       });
     expect(r.statusCode).to.equal(400);
 
-    r = await api.post(base_uri+'/attribute/create')
+    r = await api.post(base_uri+'/attribute')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         type: "string",
@@ -43,7 +43,7 @@ describe('Attributes', function () {
   });
 
   it('create invalid type', async () => {
-    let r = await api.post(base_uri+'/attribute/create')
+    let r = await api.post(base_uri+'/attribute')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: "inval",
@@ -56,7 +56,7 @@ describe('Attributes', function () {
     let type = "string";
     let r;
 
-    r = await api.post(base_uri+'/attribute/create')
+    r = await api.post(base_uri+'/attribute')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: type,
@@ -65,7 +65,7 @@ describe('Attributes', function () {
     expect(r.statusCode).to.equal(200);
     let id = r.body.attributeId;
 
-    r = await api.get(base_uri+'/attribute/get?id='+id)
+    r = await api.get(base_uri+'/attribute?id='+id)
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.data[0].type).to.equal(type);
@@ -75,7 +75,7 @@ describe('Attributes', function () {
     let type = "textbox";
     let r;
 
-    r = await api.post(base_uri+'/attribute/create')
+    r = await api.post(base_uri+'/attribute')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: type,
@@ -84,7 +84,7 @@ describe('Attributes', function () {
     expect(r.statusCode).to.equal(200);
     let id = r.body.attributeId;
 
-    r = await api.get(base_uri+'/attribute/get?id='+id)
+    r = await api.get(base_uri+'/attribute?id='+id)
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.data[0].type).to.equal(type);
@@ -94,7 +94,7 @@ describe('Attributes', function () {
     let type = "number";
     let r;
 
-    r = await api.post(base_uri+'/attribute/create')
+    r = await api.post(base_uri+'/attribute')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: type,
@@ -103,7 +103,7 @@ describe('Attributes', function () {
     expect(r.statusCode).to.equal(200);
     let id = r.body.attributeId;
 
-    r = await api.get(base_uri+'/attribute/get?id='+id)
+    r = await api.get(base_uri+'/attribute?id='+id)
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.data[0].type).to.equal(type);
@@ -113,7 +113,7 @@ describe('Attributes', function () {
     let type = "boolean";
     let r;
 
-    r = await api.post(base_uri+'/attribute/create')
+    r = await api.post(base_uri+'/attribute')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: type,
@@ -122,7 +122,7 @@ describe('Attributes', function () {
     expect(r.statusCode).to.equal(200);
     let id = r.body.attributeId;
 
-    r = await api.get(base_uri+'/attribute/get?id='+id)
+    r = await api.get(base_uri+'/attribute?id='+id)
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.data[0].type).to.equal(type);
@@ -132,7 +132,7 @@ describe('Attributes', function () {
     let type = "date";
     let r;
 
-    r = await api.post(base_uri+'/attribute/create')
+    r = await api.post(base_uri+'/attribute')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: type,
@@ -141,7 +141,7 @@ describe('Attributes', function () {
     expect(r.statusCode).to.equal(200);
     let id = r.body.attributeId;
 
-    r = await api.get(base_uri+'/attribute/get?id='+id)
+    r = await api.get(base_uri+'/attribute?id='+id)
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.data[0].type).to.equal(type);
@@ -151,7 +151,7 @@ describe('Attributes', function () {
     let type = "SAND";
     let r;
 
-    r = await api.post(base_uri+'/attribute/create')
+    r = await api.post(base_uri+'/attribute')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: type,
@@ -160,7 +160,7 @@ describe('Attributes', function () {
     expect(r.statusCode).to.equal(200);
     let id = r.body.attributeId;
 
-    r = await api.get(base_uri+'/attribute/get?id='+id)
+    r = await api.get(base_uri+'/attribute?id='+id)
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.data[0].type).to.equal('string');

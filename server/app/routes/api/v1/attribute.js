@@ -3,31 +3,7 @@ import { cqdo, valid, _400 } from '../../../lib/utils';
 
 import { Router } from 'express';
 
-module.exports = Router({mergeParams: true})
-/**
- * @swagger
- *
- * /attribute/create:
- *   post:
- *     description: Add a new attribute
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             allOf:
- *               - "$ref": "#/components/schemas/name"
- *               - "$ref": "#/components/schemas/attributeType"
- *               - "$ref": "#/components/schemas/options"
- *               - "$ref": "#/components/schemas/value"
- *     responses:
- *       200:
- *         content:
- *           application/json:
- *             schema:
- *               "$ref": "#/components/schemas/attributeId"
- */
-.post('/attribute/create', async (req, res) => {
+var atcreate = async (req, res) => {
   if (!req.user.admin) return _403(res, "Permission denied.");
   if (!valid(req.body.name)) return _400(res, "Invalid value to parameter 'name'.");
   if (!valid(req.body.type)) return _400(res, "Invalid value to parameter 'type'.");
@@ -58,12 +34,69 @@ module.exports = Router({mergeParams: true})
     await req.db.query('match (at:Attribute {id:{id}}) set at.values = {values}', {id: attributeId, values: req.body.options});
 
   return res.json({attributeId});
-})
+}
+
+var atupdate = (req, res) => {
+  if (!valid(req.body.id)) return _400(res, "Invalid value to parameter 'id'.");
+
+  if (req.body.type) {
+    switch (req.body.type) {
+      case 'string':
+      case 'textbox':
+      case 'number':
+      case 'boolean':
+      case 'date':
+      case 'SAND':
+        break;
+      default: return _400(res, "Invalid value to parameter 'type'.");
+    }
+  }
+
+  return cqdo(req, res, 'match (at:Attribute {id:{id}}) set at.updated = timestamp(), at.name = {name}'+(req.body.type?', at.type = {type}':'')+' return at', req.body, true);
+}
+
+var atget = (req, res) => {
+  if (!valid(req.query.id)) return _400(res, "Invalid value to parameter 'id'.");
+  return cqdo(req, res, 'match (a:Attribute {id:{id}}) return a', req.query, true);
+}
+
+module.exports = Router({mergeParams: true})
 /**
  * @swagger
  *
- * /attribute/update:
+ * /attribute:
+ *   get:
+ *     description: Get attribute object definition
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/data"
  *   post:
+ *     description: Add a new attribute
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             allOf:
+ *               - "$ref": "#/components/schemas/name"
+ *               - "$ref": "#/components/schemas/attributeType"
+ *               - "$ref": "#/components/schemas/options"
+ *               - "$ref": "#/components/schemas/value"
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/attributeId"
+ *   put:
  *     description: Update a given property of an attribute
  *     requestBody:
  *       required: true
@@ -82,47 +115,12 @@ module.exports = Router({mergeParams: true})
  *             schema:
  *               "$ref": "#/components/schemas/attributeId"
  */
-.post('/attribute/update', (req, res) => {
-  if (!valid(req.body.id)) return _400(res, "Invalid value to parameter 'id'.");
-
-  if (req.body.type) {
-    switch (req.body.type) {
-      case 'string':
-      case 'textbox':
-      case 'number':
-      case 'boolean':
-      case 'date':
-      case 'SAND':
-        break;
-      default: return _400(res, "Invalid value to parameter 'type'.");
-    }
-  }
-
-  return cqdo(req, res, 'match (at:Attribute {id:{id}}) set at.updated = timestamp(), at.name = {name}'+(req.body.type?', at.type = {type}':'')+' return at', req.body, true);
-})
-/**
- * @swagger
- *
- * /attribute/get:
- *   get:
- *     description: Get attribute object definition
- *     parameters:
- *       - in: query
- *         name: id
- *         required: true
- *         type: string
- *     responses:
- *       200:
- *         content:
- *           application/json:
- *             schema:
- *               "$ref": "#/components/schemas/data"
- *
- */
-.get('/attribute/get', (req, res) => {
-  if (!valid(req.query.id)) return _400(res, "Invalid value to parameter 'id'.");
-  return cqdo(req, res, 'match (a:Attribute {id:{id}}) return a', req.query, true);
-})
+.get('/attribute', atget)
+.get('/attribute/get', atget) // depricated
+.post('/attribute', atcreate)
+.post('/attribute/create', atcreate) // depricated
+.put('/attribute', atupdate)
+.post('/attribute/update', atupdate) // depricated
 .get('/attribute/list', (req, res) => {
   if (req.user.admin === true)
     return cqdo(req, res, 'match (at:Attribute) return at order by at.order', {}, true);
