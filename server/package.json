@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "postinstall": "./node_modules/patch-package/index.js",
+    "postinstall": "./node_modules/patch-package/index.js && ./gen-swagger.sh",
     "makeadmin": "node node_modules/@babel/node/lib/_babel-node scripts/makeadmin.js",
     "database": "npm install && node node_modules/@babel/node/lib/_babel-node scripts/runDatabase.js",
     "sandboxdatabase": "node node_modules/@babel/node/lib/_babel-node scripts/runSandboxDatabase.js",
