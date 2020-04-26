@@ -107,7 +107,19 @@ module.exports = Router({mergeParams: true})
 .post('/form/assigned/volunteer/remove', (req, res) => {
   if (!valid(req.body.formId) || !valid(req.body.vId)) return _400(res, "Invalid value to parameter 'formId' or 'vId'.");
   return cqdo(req, res, 'match (a:Form {id:{formId}})-[r:ASSIGNED]-(b:Volunteer {id:{vId}}) delete r', req.body, true);
-});
+})
+.get('/attribute/form/list', (req, res) => {
+  if (!valid(req.query.id)) return _400(res, "Invalid value to parameter 'id'.");
+  return cqdo(req, res, 'match (a:Attribute {id:{id}})-[:COMPILED_ON]-(b:Form) return b', req.query, true);
+})
+.post('/attribute/form/add', (req, res) => {
+  if (!valid(req.body.id) || !valid(req.body.formId)) return _400(res, "Invalid value to parameter 'key' or 'formId'.");
+  return cqdo(req, res, 'match (a:Attribute {id:{id}}) with a match (b:Form {id:{formId}}) merge (a)-[:COMPILED_ON]->(b)', req.body, true);
+})
+.post('/attribute/form/remove', (req, res) => {
+  if (!valid(req.body.id) || !valid(req.body.formId)) return _400(res, "Invalid value to parameter 'key' or 'formId'.");
+  return cqdo(req, res, 'match (a:Attribute {id:{id}})-[r:COMPILED_ON]-(b:Form {id:{formId}}) delete r', req.body, true);
+})
 
 function idInArrObj (arr, id) {
   for (let i in arr)

@@ -12,7 +12,7 @@ var personId = {type: 'string'};
 var deviceId = {type: 'string'};
 var addressId = {type: 'string'};
 var attributeId = {type: 'string'};
-var attributeType = {type: 'string'};
+var type = {type: 'string'};
 var apikey = {type: 'string'};
 
 // strings
@@ -33,6 +33,7 @@ var start = {type: 'integer'};
 var end = {type: 'integer'};
 var limit = {type: 'integer'};
 var dist = {type: 'integer'};
+var count = {type: 'integer', example: 10};
 
 // misc objects
 var object = {type: 'object'};
@@ -40,6 +41,7 @@ var dinfo = {type: 'object'};
 var empty = {type: 'object'};
 var data = {type: 'array', items: 'string'};
 var options = {type: 'array', items: 'string'};
+var attributes = {type: 'array', items: 'object'};
 
 var err = {
   type: 'object',
@@ -105,11 +107,12 @@ module.exports = {
       apikey: { type: 'object', properties: { apikey } },
       options: { type: 'object', properties: { options } },
       object:  { type: 'object', properties: { object } },
+      attributes: { type: 'object', properties: {count,  attributes } },
       data: { type: 'object', properties: { data } },
       dinfo: { type: 'object', properties: { dinfo } },
       formId: { type: 'object', properties: { formId } },
       attributeId: { type: 'object', properties: { attributeId } },
-      attributeType: { type: 'object', properties: { attributeType } },
+      type: { type: 'object', properties: { type } },
       longitude: { type: 'object', properties: { longitude } },
       latitude: { type: 'object', properties: { latitude } },
       inviteCode: { type: 'object', properties: { inviteCode } },

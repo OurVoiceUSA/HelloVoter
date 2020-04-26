@@ -66,6 +66,13 @@ describe('App Utils', function () {
     expect(r.body.msg).to.equal("Forbidden");
   });
 
+  it('_404 returns 404', () => {
+    let r = utils._404(res, "Not Found.");
+    expect(r.statusCode).to.equal(404);
+    expect(r.body.error).to.equal(true);
+    expect(r.body.msg).to.equal("Not Found.");
+  });
+
   it('_422 returns 422', () => {
     let r = utils._422(res, "Unprocessable Entity");
     expect(r.statusCode).to.equal(422);
