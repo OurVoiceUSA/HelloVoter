@@ -8,6 +8,7 @@ import { appInit, base_uri, getObjs } from '../../../../test/lib/utils';
 var api;
 var db;
 var c;
+var apikey;
 
 describe('Volunteer', function () {
 
@@ -242,6 +243,42 @@ describe('Volunteer', function () {
     let r = await api.get(base_uri+'/volunteer/visit/history')
       .set('Authorization', 'Bearer '+c.bob.jwt)
     expect(r.statusCode).to.equal(400);
+  });
+
+  // apikey management
+
+  it('get no apikey', async () => {
+    let r = await api.get(base_uri+'/volunteer/apikey')
+      .set('Authorization', 'Bearer '+c.sally.jwt)
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.apikey).to.not.exist;
+  });
+
+  it('generate apikey', async () => {
+    let r = await api.put(base_uri+'/volunteer/apikey')
+      .set('Authorization', 'Bearer '+c.sally.jwt)
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.apikey.length).to.equal(64);
+    apikey = r.body.apikey;
+  });
+
+  it('test apikey', async () => {
+    let r = await api.get(base_uri+'/volunteer/apikey')
+      .set('Authorization', 'Bearer '+apikey)
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.apikey).to.equal(apikey);
+  });
+
+  it('delete apikey', async () => {
+    let r = await api.delete(base_uri+'/volunteer/apikey')
+      .set('Authorization', 'Bearer '+apikey)
+    expect(r.statusCode).to.equal(200);
+  });
+
+  it('test deleted apikey', async () => {
+    let r = await api.get(base_uri+'/volunteer/apikey')
+      .set('Authorization', 'Bearer '+apikey)
+    expect(r.statusCode).to.equal(401);
   });
 
 });

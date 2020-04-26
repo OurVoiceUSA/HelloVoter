@@ -64,4 +64,48 @@ module.exports = Router({mergeParams: true})
   let ref = await req.db.query('match (v:Volunteer'+(req.user.admin?'':' {id:{id}}')+')<-[:VISIT_VOLUNTEER]-(vi:Visit)-[:VISIT_FORM]->(f:Form {id:{formId}}) where NOT vi.location is null optional match (vi)-[:VISIT_AT]->(u:Unit)-[:AT]->(a:Address) with v, vi, a{.*, street: a.street+\' #\'+u.name} as a optional match (vi)-[:VISIT_AT]->(ad:Address) with v, vi, CASE WHEN a.street is null THEN ad{.*} ELSE a END as a optional match (vi)-[:VISIT_PERSON]->(p:Person)<-[:ATTRIBUTE_OF]-(pa:PersonAttribute)-[:ATTRIBUTE_TYPE]->(at:Attribute {id:"'+ID_NAME+'"}) with {id: ID(vi), volunteer: v, address: a, status: vi.status, person: p{.*, name: pa.value}, datetime: vi.end} as h return distinct(h) order by h.datetime desc limit 100', req.query);
 
   return res.json(ref.data);
-});
+})
+/**
+ * @swagger
+ *
+ * /volunteer/apikey:
+ *   get:
+ *     description: Get your apikey
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/apikey"
+ *   put:
+ *     description: Generate a new apikey
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/apikey"
+ *
+ *   delete:
+ *     description: Delete your apikey
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/empty"
+ *
+ */
+.get('/volunteer/apikey', async (req, res) => {
+  let ref = await req.db.query('match (v:Volunteer {id:{id}}) return v.apikey', req.user);
+  return res.json({apikey: ref.data[0]});
+})
+.put('/volunteer/apikey', async (req, res) => {
+  let apikey = await generateToken();
+  await req.db.query('match (v:Volunteer {id:{id}}) set v.apikey = {apikey}', {apikey, id: req.user.id});
+  return res.json({apikey});
+})
+.delete('/volunteer/apikey', async (req, res) => {
+  await req.db.query('match (v:Volunteer {id:{id}}) set v.apikey = null', req.user);
+  return res.json({});
+})

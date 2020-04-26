@@ -76,15 +76,7 @@ describe('MISC endpoints', function () {
 
   it('hello 401 bad apikey', async () => {
     const r = await api.post(base_uri+'/hello')
-      .set('Authorization', 'Bearer apikey:foobar')
-    expect(r.statusCode).to.equal(401);
-    expect(r.body.error).to.equal(true);
-    expect(r.body).to.have.property("msg");
-  });
-
-  it('hello 401 no apikey', async () => {
-    const r = await api.post(base_uri+'/hello')
-      .set('Authorization', 'Bearer apikey:')
+      .set('Authorization', 'Bearer foobar')
     expect(r.statusCode).to.equal(401);
     expect(r.body.error).to.equal(true);
     expect(r.body).to.have.property("msg");
@@ -93,7 +85,7 @@ describe('MISC endpoints', function () {
   it('hello 200 good apikey admin', async () => {
     await db.query('match (v:Volunteer {id:{id}}) set v.apikey = "foobaradmin"', c.admin);
     const r = await api.post(base_uri+'/hello')
-      .set('Authorization', 'Bearer apikey:foobaradmin')
+      .set('Authorization', 'Bearer foobaradmin')
     expect(r.statusCode).to.equal(200);
     expect(r.body.data.admin).to.equal(true);
   });
@@ -101,7 +93,7 @@ describe('MISC endpoints', function () {
   it('hello 200 good apikey non-admin', async () => {
     await db.query('match (v:Volunteer {id:{id}}) set v.apikey = "foobar"', c.bob);
     const r = await api.post(base_uri+'/hello')
-      .set('Authorization', 'Bearer apikey:foobar')
+      .set('Authorization', 'Bearer foobar')
     expect(r.statusCode).to.equal(200);
     expect(r.body.data.admin).to.not.exist;
   });

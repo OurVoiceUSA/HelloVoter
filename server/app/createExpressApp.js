@@ -103,10 +103,9 @@ export function doExpressInit(log, db, qq) {
       if (!req.header('authorization')) return _400(res, "Missing required header.");
       let token = req.header('authorization').split(' ')[1];
 
-      if (token.match(/^apikey:/)) {
+      if (token.length <= 64) {
         try {
-          let apikey = token.split(':')[1];
-          a = await req.db.query('match (v:Volunteer {apikey:{apikey}}) set v.last_seen = timestamp() return v', {apikey});
+          a = await req.db.query('match (v:Volunteer {apikey:{apikey}}) set v.last_seen = timestamp() return v', {apikey: token});
         } catch (e) {
           return _500(res, e);
         }

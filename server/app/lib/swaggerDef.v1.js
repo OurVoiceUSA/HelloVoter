@@ -13,6 +13,7 @@ var deviceId = {type: 'string'};
 var addressId = {type: 'string'};
 var attributeId = {type: 'string'};
 var attributeType = {type: 'string'};
+var apikey = {type: 'string'};
 
 // strings
 var name = {type: 'string'};
@@ -101,6 +102,7 @@ module.exports = {
       id: { type: 'object', properties: { id } },
       name: { type: 'object', properties: { name } },
       value: { type: 'object', properties: { value } },
+      apikey: { type: 'object', properties: { apikey } },
       options: { type: 'object', properties: { options } },
       object:  { type: 'object', properties: { object } },
       data: { type: 'object', properties: { data } },
