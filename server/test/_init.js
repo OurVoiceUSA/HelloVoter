@@ -246,4 +246,11 @@ describe('Database Init', function () {
     forms.B.id = r.body.formId;
   });
 
+  it('test db with DEBUG on', async () => {
+    let db = new neo4j({...ov_config, DEBUG: true,});
+    await db.query('return timestamp()');
+    await db.query('return timestamp({date})', {date: '1970-01-01'});
+    db.close();
+  });
+
 });
