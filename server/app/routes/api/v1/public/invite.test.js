@@ -42,4 +42,16 @@ describe('Invite', function () {
     expect(r.headers.location).to.equal('OurVoiceApp://invite?inviteCode=undefined&server=undefined');
   });
 
+  it('invite URL mobile input/output test', async () => {
+    let r = await api.get(base_uri+'/public/invite?inviteCode=asdf&server=hellovoter.example.com')
+      .set('User-Agent', mua);
+    expect(r.statusCode).to.equal(302);
+    expect(r.headers.location).to.equal('OurVoiceApp://invite?inviteCode=asdf&server=hellovoter.example.com');
+
+    r = await api.get(base_uri+'/public/invite?inviteCode=demoyay&orgId=DEMO')
+      .set('User-Agent', mua);
+    expect(r.statusCode).to.equal(302);
+    expect(r.headers.location).to.equal('OurVoiceApp://invite?inviteCode=demoyay&orgId=DEMO');
+  });
+
 });
