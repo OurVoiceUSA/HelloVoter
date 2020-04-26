@@ -1,13 +1,13 @@
-
 import jwt from 'jsonwebtoken';
 import { expect } from 'chai';
 import fs from 'fs';
 
-import { ov_config } from '../app/lib/ov_config';
-import neo4j from '../app/lib/neo4j';
-import { min_neo4j_version } from '../app/lib/utils';
 import { appInit, base_uri, genName, testToken, writeObj } from './lib/utils';
+import { runDatabase, genkeys } from '../scripts/lib/utils';
+import { min_neo4j_version } from '../app/lib/utils';
+import { ov_config } from '../app/lib/ov_config';
 import { doDbInit } from '../app/lib/startup';
+import neo4j from '../app/lib/neo4j';
 
 var api;
 var db;
@@ -19,6 +19,14 @@ var public_key, private_key;
 describe('Database Init', function () {
 
   before(async () => {
+    await runDatabase(true, {
+      pagecache_size: 0,
+      heap_size_init: 0,
+      heap_size_max: 0,
+    });
+
+    genkeys();
+
     db = new neo4j(ov_config);
     api = appInit(db);
   });

@@ -1,6 +1,6 @@
-
+import keypair from 'keypair';
+import fs from 'fs';
 import { Docker, Options } from 'docker-cli-js';
-
 import { ov_config } from '../../app/lib/ov_config';
 
 export async function runDatabase(sandbox, {pagecache_size, heap_size_init, heap_size_max}) {
@@ -39,4 +39,24 @@ export async function runDatabase(sandbox, {pagecache_size, heap_size_init, heap
     process.exit(1);
   }
 
+}
+
+export function genkeys() {
+  let gen = false;
+
+  try {
+    fs.readFileSync('./test/rsa.pub');
+    fs.readFileSync('./test/rsa.key');
+    console.log("RSA keypair already exists, not generating a new one.");
+  } catch (e) {
+    gen = true;
+  }
+
+  if (gen) {
+    console.log("Generating new RSA keypair...");
+    var pair = keypair();
+    fs.writeFileSync("./test/rsa.pub", pair.public);
+    fs.writeFileSync("./test/rsa.key", pair.private);
+    console.log("RSA keypair generation complete!")
+  }
 }
