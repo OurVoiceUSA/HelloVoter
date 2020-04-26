@@ -200,19 +200,20 @@ describe('Volunteer', function () {
     let r;
 
     r = await api.post(base_uri+'/volunteer/unlock')
-      .set('Authorization', 'Bearer '+c.admin.jwt)
+      .set('Authorization', 'Bearer '+c.bob.jwt)
       .send({
         id: c.bob.id,
       });
-    expect(r.statusCode).to.equal(200);
+    expect(r.statusCode).to.equal(403);
+  });
 
-    r = await api.post(base_uri+'/hello')
-      .set('Authorization', 'Bearer '+c.bob.jwt)
+  it('unlock volunteer no id', async () => {
+    let r = await api.post(base_uri+'/volunteer/unlock')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
-        longitude: -118.3281370,
-        latitude: 33.9208231,
+        foo: 'bar',
       });
-    expect(r.statusCode).to.equal(200);
+    expect(r.statusCode).to.equal(400);
   });
 
   // visit/history

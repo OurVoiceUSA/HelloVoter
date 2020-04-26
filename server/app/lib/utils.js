@@ -21,15 +21,7 @@ function sendError(res, code, msg) {
 export async function cqdo(req, res, q, p, a) {
   if (a === true && req.user.admin !== true)
     return _403(res, "Permission denied.");
-
-  let ref;
-
-  try {
-    ref = await req.db.query(q, p);
-  } catch (e) {
-    return _500(res, e);
-  }
-
+  let ref = await req.db.query(q, p);
   return res.status(200).json({msg: "OK", data: ref.data});
 }
 
@@ -37,24 +29,15 @@ export async function onMyTurf(req, ida, idb) {
   if (ida === idb) return true;
   if (await sameTeam(req, ida, idb)) return true;
   if (ov_config.disable_spatial !== false) return false;
-  try {
-    // TODO: extend to also seach for direct turf assignments with leader:true
-    let ref = await req.db.query('match (v:Volunteer {id:{idb}}) where exists(v.location) call spatial.intersects("turf", v.location) yield node match (:Volunteer {id:{ida}})-[:MEMBERS {leader:true}]-(:Team)-[:ASSIGNED]-(node) return count(v)', {ida: ida, idb: idb});
-    if (ref.data[0] > 0) return true;
-  } catch (e) {
-    console.warn(e);
-  }
+  // TODO: extend to also seach for direct turf assignments with leader:true
+  let ref = await req.db.query('match (v:Volunteer {id:{idb}}) where exists(v.location) call spatial.intersects("turf", v.location) yield node match (:Volunteer {id:{ida}})-[:MEMBERS {leader:true}]-(:Team)-[:ASSIGNED]-(node) return count(v)', {ida: ida, idb: idb});
+  if (ref.data[0] > 0) return true;
   return false;
 }
 
 export async function sameTeam(req, ida, idb) {
-  try {
-    let ref = await req.db.query('match (a:Volunteer {id:{ida}})-[:MEMBERS]-(:Team)-[:MEMBERS]-(b:Volunteer {id:{idb}}) return b', {ida: ida, idb: idb});
-    if (ref.data.length > 0) return true;
-  } catch (e) {
-    console.warn(e);
-  }
-
+  let ref = await req.db.query('match (a:Volunteer {id:{ida}})-[:MEMBERS]-(:Team)-[:MEMBERS]-(b:Volunteer {id:{idb}}) return b', {ida: ida, idb: idb});
+  if (ref.data.length > 0) return true;
   return false;
 }
 
@@ -80,15 +63,10 @@ export async function volunteerAssignments(req, type, vol) {
     assigned = "AUTOASSIGN_TO";
   }
 
-  try {
-    let ref = await req.db.query('match (a:'+type+' {id:{id}}) optional match (a)-[r:'+members+']-(b:Team) with a, collect(b{.*,leader:r.leader}) as teams optional match (a)-[:'+assigned+']-(b:Form) with a, teams, collect(b{.*,direct:true}) as dforms optional match (a)-[:'+members+']-(:Team)-[:ASSIGNED]-(b:Form) with a, teams, dforms + collect(b{.*}) as forms optional match (a)-[:'+assigned+']-(b:Turf) with a, teams, forms, collect(b{.id,.name,direct:true}) as dturf optional match (a)-[:'+members+']-(:Team)-[:ASSIGNED]-(b:Turf) with a, teams, forms, dturf + collect(b{.id,.name}) as turf return forms, turf', vol);
+  let ref = await req.db.query('match (a:'+type+' {id:{id}}) optional match (a)-[r:'+members+']-(b:Team) with a, collect(b{.*,leader:r.leader}) as teams optional match (a)-[:'+assigned+']-(b:Form) with a, teams, collect(b{.*,direct:true}) as dforms optional match (a)-[:'+members+']-(:Team)-[:ASSIGNED]-(b:Form) with a, teams, dforms + collect(b{.*}) as forms optional match (a)-[:'+assigned+']-(b:Turf) with a, teams, forms, collect(b{.id,.name,direct:true}) as dturf optional match (a)-[:'+members+']-(:Team)-[:ASSIGNED]-(b:Turf) with a, teams, forms, dturf + collect(b{.id,.name}) as turf return forms, turf', vol);
 
-    obj.forms = ref.data[0][0];
-    obj.turfs = ref.data[0][1];
-
-  } catch (e) {
-    console.warn(e);
-  }
+  obj.forms = ref.data[0][0];
+  obj.turfs = ref.data[0][1];
 
   if (obj.turfs.length > 0 && obj.forms.length > 0)
     obj.ready = true;

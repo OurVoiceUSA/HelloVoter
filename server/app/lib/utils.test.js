@@ -98,25 +98,6 @@ describe('App Utils', function () {
     expect(utils.getClientIP(req)).to.equal('127.0.0.1');
   });
 
-  it('cqdo returns 500 with db error', async () => {
-    let reqe = deepCopy(req);
-    reqe.db.query = () => {
-      throw new Error("mocked");
-    };
-
-    let r = await utils.cqdo(reqe, res, "not a cypher query", {}, false);
-    expect(r.statusCode).to.equal(500);
-    expect(r.body.error).to.equal(true);
-    expect(r.body.msg).to.equal("Internal server error.");
-  });
-
-  it('cqdo returns 500 with bad query syntax', async () => {
-    let r = await utils.cqdo(req, res, "not a cypher query", {}, false);
-    expect(r.statusCode).to.equal(500);
-    expect(r.body.error).to.equal(true);
-    expect(r.body.msg).to.equal("Internal server error.");
-  });
-
   it('cqdo returns 200 with proper query', async () => {
     let r = await utils.cqdo(req, res, "return timestamp()", {});
     expect(r.statusCode).to.equal(200);

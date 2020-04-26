@@ -8,13 +8,11 @@ import { ID_NAME } from '../../../lib/consts';
 import { Router } from 'express';
 
 module.exports = Router({mergeParams: true})
-.get('/volunteer/list',  async (req, res) => {
+.get('/volunteer/list', async (req, res) => {
   let volunteers = [];
 
-  if (req.user.admin)
-    volunteers = await _volunteersFromCypher(req, 'match (a:Volunteer) return a');
-  else
-    volunteers = await _volunteersFromCypher(req, 'match (a:Volunteer {id:{id}}) return a', req.user);
+  if (req.user.admin) volunteers = await _volunteersFromCypher(req, 'match (a:Volunteer) return a');
+  else volunteers = await _volunteersFromCypher(req, 'match (a:Volunteer {id:{id}}) return a', req.user);
 
   return res.json(volunteers);
 })
@@ -38,15 +36,6 @@ module.exports = Router({mergeParams: true})
 
   return res.json({});
 })
-.post('/volunteer/invite', async (req, res) => {
-  if (!req.user.admin) return _403(res, "Permission denied.");
-
-  let token = await generateToken();
-
-  await req.db.query('match (v:Volunteer {id:{id}}) create (i:Volunteer {id: {token}}) create (i)-[r:INVITED_BY]->(v) set r.created = timestamp(), i.invited = true', {id: req.user.id, token: 'invite:'+token});
-
-  return res.json({token});
-})
 .post('/volunteer/lock', async (req, res) => {
   if (req.body.id === req.user.id) return _403(res, "You can't lock yourself.");
 
@@ -59,11 +48,10 @@ module.exports = Router({mergeParams: true})
 
   return cqdo(req, res, 'match (a:Volunteer {id:{id}}) set a.locked=true', req.body);
 })
-.post('/volunteer/unlock', async (req, res) => {
+.post('/volunteer/unlock', (req, res) => {
   if (!valid(req.body.id)) return _400(res, "Invalid value to parameter 'id'.");
-  if (req.user.admin || await onMyTurf(req, req.user.id, req.body.id))
-    return cqdo(req, res, 'match (a:Volunteer {id:{id}}) remove a.locked', req.body);
-  return _403(res, "Permission denied.");
+  if (!req.user.admin) return _403(res, "Permission denied.");
+  return cqdo(req, res, 'match (a:Volunteer {id:{id}}) remove a.locked', req.body);
 })
 .get('/volunteer/visit/history', async (req, res) => {
   if (!req.query.formId) return _400(res, "Invalid value to parameter 'formId'.");
