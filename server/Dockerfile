@@ -8,6 +8,7 @@ COPY .babelrc .
 COPY package.json .
 COPY package-lock.json .
 COPY patches ./patches/
+COPY gen-swagger.sh .
 
 RUN npm --unsafe-perm --production install
 
@@ -31,7 +32,6 @@ HEALTHCHECK --interval=15s --timeout=5s --start-period=5s CMD node /node/app/pok
 COPY start.sh /start.sh
 COPY scripts scripts
 COPY app app
-COPY gen-swagger.sh .
 RUN ./gen-swagger.sh
 
 CMD [ "/start.sh" ]
