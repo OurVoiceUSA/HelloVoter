@@ -19,8 +19,6 @@ export const ov_config = {
   neo4j_jmx_pass: getConfig("neo4j_jmx_pass", false, "Neo4j"),
   enable_geocode: getConfig("enable_geocode", false, false),
   disable_jmx: getConfig("disable_jmx", false, false),
-  disable_apoc: getConfig("disable_apoc", false, false),
-  disable_spatial: getConfig("disable_spatial", false, false),
   job_concurrency: parseInt(getConfig("job_concurrency", false, 1)),
   jwt_pub_key: getConfig("jwt_pub_key", false, null),
   jwt_aud: getConfig("jwt_aud", false, (process.env.NODE_ENV==='production'?null:'gotv.ourvoiceusa.org')),

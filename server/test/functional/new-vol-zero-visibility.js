@@ -35,10 +35,10 @@ describe('New Volunteer Zero Visibility', function () {
   });
 
   it('can not list turfs', async () => {
-    let r = await api.get(base_uri+'/turf/list')
+    let r = await api.get(base_uri+'/turfs')
       .set('Authorization', 'Bearer '+c.mike.jwt)
     expect(r.statusCode).to.equal(200);
-    expect(r.body.data.length).to.equal(0);
+    expect(r.body.turfs.length).to.equal(0);
   });
 
   it('can not list forms', async () => {

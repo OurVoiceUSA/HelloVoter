@@ -38,9 +38,7 @@ describe('Database Init', function () {
     db.close();
   });
 
-  (ov_config.disable_apoc === false?it:it.skip)('correct database version', async () => {
-    let r;
-
+  it('correct database version', async () => {
     let arr = (await db.version()).split('.');
     let ver = Number.parseFloat(arr[0]+'.'+arr[1]);
 
@@ -196,7 +194,7 @@ describe('Database Init', function () {
 
     turfs.A = { name: genName("Turf") };
 
-    r = await api.post(base_uri+'/turf/create')
+    r = await api.post(base_uri+'/turf')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: turfs.A.name,
@@ -207,7 +205,7 @@ describe('Database Init', function () {
 
     turfs.B = { name: genName("Turf") };
 
-    r = await api.post(base_uri+'/turf/create')
+    r = await api.post(base_uri+'/turf')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: turfs.B.name,
@@ -218,7 +216,7 @@ describe('Database Init', function () {
 
     turfs.C = { name: genName("Turf") };
 
-    r = await api.post(base_uri+'/turf/create')
+    r = await api.post(base_uri+'/turf')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: turfs.C.name,

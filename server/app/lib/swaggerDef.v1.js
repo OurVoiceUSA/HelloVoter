@@ -12,6 +12,7 @@ var personId = {type: 'string'};
 var deviceId = {type: 'string'};
 var addressId = {type: 'string'};
 var attributeId = {type: 'string'};
+var turfId = {type: 'string'};
 var type = {type: 'string'};
 var apikey = {type: 'string'};
 
@@ -40,6 +41,7 @@ var count = {type: 'integer', example: 10};
 var object = {type: 'object'};
 var dinfo = {type: 'object'};
 var empty = {type: 'object'};
+var geometry = {type: 'object'};
 var data = {type: 'array', items: 'string'};
 var options = {type: 'array', items: 'string'};
 var attributes = {type: 'array', items: 'object'};
@@ -115,6 +117,8 @@ module.exports = {
       dinfo: { type: 'object', properties: { dinfo } },
       formId: { type: 'object', properties: { formId } },
       attributeId: { type: 'object', properties: { attributeId } },
+      turfId: { type: 'object', properties: { turfId } },
+      geometry: { type: 'object', properties: { geometry } },
       type: { type: 'object', properties: { type } },
       longitude: { type: 'object', properties: { longitude } },
       latitude: { type: 'object', properties: { latitude } },

@@ -27,25 +27,16 @@ describe('Cleanup', function () {
   (keep?it.skip:it)('delete turfs', async () => {
     let r;
 
-    r = await api.post(base_uri+'/turf/delete')
+    r = await api.delete(base_uri+'/turf/'+turfs.A.id)
       .set('Authorization', 'Bearer '+c.admin.jwt)
-      .send({
-        turfId: turfs.A.id,
-      });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.post(base_uri+'/turf/delete')
+    r = await api.delete(base_uri+'/turf/'+turfs.B.id)
       .set('Authorization', 'Bearer '+c.admin.jwt)
-      .send({
-        turfId: turfs.B.id,
-      });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.post(base_uri+'/turf/delete')
+    r = await api.delete(base_uri+'/turf/'+turfs.C.id)
       .set('Authorization', 'Bearer '+c.admin.jwt)
-      .send({
-        turfId: turfs.C.id,
-      });
     expect(r.statusCode).to.equal(200);
   });
 

@@ -108,10 +108,8 @@ export async function doDbInit(db) {
 
   // make sure we have the plugins we need
   try {
-    if (ov_config.disable_spatial === false) await db.query('call spatial.procedures()');
-    else console.warn("WARNING: You have disabled the check for the neo4j spatial plugin. Turf features are limited.");
-    if (ov_config.disable_apoc === false) await db.query('call apoc.config.map()');
-    else console.warn("WARNING: You have disabled the check for the neo4j apoc plugin. Data import features are limited.");
+    await db.query('call spatial.procedures()');
+    await db.query('call apoc.config.map()');
   } catch (e) {
     console.error("The APOC and SPATIAL plugins are required for this application to function.");
     console.error(e);
@@ -188,16 +186,14 @@ export async function doDbInit(db) {
     {name: "address", create: 'call spatial.addLayerWithEncoder("address", "NativePointEncoder", "position")'},
   ];
 
-  if(ov_config.disable_spatial === false) {
-    // create any spatial layers we need if they don't exist
-    await asyncForEach(spatialLayers, async (layer) => {
-      let ref = await db.query('match (a {layer:{layer}})-[:LAYER]-(:ReferenceNode {name:"spatial_root"}) return count(a)', {layer: layer.name});
-      if (ref.data[0] === 0) {
-        await db.query(layer.create);
-        await sleep(1000);
-      }
-    });
-  }
+  // create any spatial layers we need if they don't exist
+  await asyncForEach(spatialLayers, async (layer) => {
+    let ref = await db.query('match (a {layer:{layer}})-[:LAYER]-(:ReferenceNode {name:"spatial_root"}) return count(a)', {layer: layer.name});
+    if (ref.data[0] === 0) {
+      await db.query(layer.create);
+      await sleep(1000);
+    }
+  });
 
   // TODO: load race/language data from a 3rd party and have the client do "autocomplete" type functionality
 

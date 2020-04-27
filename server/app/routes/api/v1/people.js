@@ -195,9 +195,7 @@ async function visitsAndPeopleFromPoint(req, longitude, latitude) {
     if (req.query.dist >= 16000) enough = true;
   }
 
-  let q = '';
-
-  if (ov_config.disable_spatial === false) q = `match (v:Volunteer {id:{id}})
+  let q = `match (v:Volunteer {id:{id}})
 optional match (t:Turf)-[:ASSIGNED]->(v)
   with collect(t.id) as turfIds
 call spatial.withinDistance("turf", {longitude: {longitude}, latitude: {latitude}}, {dist}/1000) yield node
@@ -208,9 +206,9 @@ call spatial.withinDistance("turf", {longitude: {longitude}, latitude: {latitude
   if (req.query.aId) q += `match (a:Address {id:{aId}}) `;
   else q += `match (a:Address) using index a:Address(position) `;
 
-  q += `where `+(ov_config.disable_spatial === false?`(a)-[:WITHIN]->(t) `:``);
+  q += `where (a)-[:WITHIN]->(t) `;
 
-  if (!req.query.aId) q += (ov_config.disable_spatial === false?`and `:``)+`distance(a.position, point({longitude: {longitude}, latitude: {latitude}})) < {dist}
+  if (!req.query.aId) q += `and distance(a.position, point({longitude: {longitude}, latitude: {latitude}})) < {dist}
 with a, distance(a.position, point({longitude: {longitude}, latitude: {latitude}})) as dist
 order by dist limit {limit} `;
 
