@@ -9,6 +9,8 @@ module.exports = Router({mergeParams: true})
  * /attribute:
  *   post:
  *     description: Create a new attribute
+ *     tags:
+ *       - attributes
  *     requestBody:
  *       required: true
  *       content:
@@ -66,6 +68,8 @@ module.exports = Router({mergeParams: true})
  * /attribute/{id}:
  *   get:
  *     description: Get attribute object definition
+ *     tags:
+ *       - attributes
  *     parameters:
  *       - in: path
  *         name: id
@@ -79,6 +83,8 @@ module.exports = Router({mergeParams: true})
  *               "$ref": "#/components/schemas/data"
  *   put:
  *     description: Update a given property of an attribute
+ *     tags:
+ *       - attributes
  *     parameters:
  *       - in: path
  *         name: id
@@ -101,6 +107,8 @@ module.exports = Router({mergeParams: true})
  *               "$ref": "#/components/schemas/attributeId"
  *   delete:
  *     description: Delete an attribute
+ *     tags:
+ *       - attributes
  *     parameters:
  *       - in: path
  *         name: id
@@ -159,6 +167,8 @@ module.exports = Router({mergeParams: true})
  * /attributes:
  *   get:
  *     description: Get an array of attribute objects matching a filter.
+ *     tags:
+ *       - attributes
  *     parameters:
  *       - in: query
  *         name: filter

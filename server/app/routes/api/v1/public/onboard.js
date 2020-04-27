@@ -8,6 +8,8 @@ module.exports = Router({mergeParams: true})
  * /public/onboard:
  *   post:
  *     description: Onboard a new volunteer
+ *     tags:
+ *       - public
  *     security:
  *       []
  *     requestBody:

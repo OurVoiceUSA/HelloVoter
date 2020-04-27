@@ -11,6 +11,8 @@ module.exports = Router({mergeParams: true})
  * /volunteer/whoami:
  *   get:
  *     description: Get your volunteer object
+ *     tags:
+ *       - volunteers
  *     responses:
  *       200:
  *         content:
@@ -28,6 +30,8 @@ module.exports = Router({mergeParams: true})
  * /volunteer/{id}:
  *   get:
  *     description: Get a volunteer by their id
+ *     tags:
+ *       - volunteers
  *     parameters:
  *       - in: path
  *         name: id
@@ -41,6 +45,8 @@ module.exports = Router({mergeParams: true})
  *               "$ref": "#/components/schemas/data"
  *   put:
  *     description: Update a given property of a volunteer
+ *     tags:
+ *       - volunteers
  *     parameters:
  *       - in: path
  *         name: id
@@ -88,6 +94,8 @@ module.exports = Router({mergeParams: true})
  * /volunteer/{id}/lock:
  *   put:
  *     description: Lock a volunteer out of the system
+ *     tags:
+ *       - volunteers
  *     parameters:
  *       - in: path
  *         name: id
@@ -101,6 +109,8 @@ module.exports = Router({mergeParams: true})
  *               "$ref": "#/components/schemas/data"
  *   delete:
  *     description: Remove the lock on a volunteer
+ *     tags:
+ *       - volunteers
  *     parameters:
  *       - in: path
  *         name: id
@@ -134,6 +144,8 @@ module.exports = Router({mergeParams: true})
  * /volunteer/{id}/visits:
  *   get:
  *     description: Get a volunteer's visit history
+ *     tags:
+ *       - volunteers
  *     parameters:
  *       - in: path
  *         name: id
@@ -179,6 +191,8 @@ module.exports = Router({mergeParams: true})
  * /volunteer/{id}/apikey:
  *   get:
  *     description: Get your apikey
+ *     tags:
+ *       - volunteers
  *     parameters:
  *       - in: path
  *         name: id
@@ -192,6 +206,8 @@ module.exports = Router({mergeParams: true})
  *               "$ref": "#/components/schemas/apikey"
  *   put:
  *     description: Generate a new apikey
+ *     tags:
+ *       - volunteers
  *     parameters:
  *       - in: path
  *         name: id
@@ -206,6 +222,8 @@ module.exports = Router({mergeParams: true})
  *
  *   delete:
  *     description: Delete your apikey
+ *     tags:
+ *       - volunteers
  *     parameters:
  *       - in: path
  *         name: id
@@ -243,6 +261,8 @@ module.exports = Router({mergeParams: true})
  * /volunteers:
  *   get:
  *     description: Get an array of volunteers matching a filter.
+ *     tags:
+ *       - volunteers
  *     parameters:
  *       - in: query
  *         name: filter

@@ -9,6 +9,8 @@ module.exports = Router({mergeParams: true})
  * /public/invite:
  *   get:
  *     description: Redirect to native mobile endpoint for the given invite
+ *     tags:
+ *       - public
  *     security:
  *       []
  *     parameters:

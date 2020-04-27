@@ -15,6 +15,8 @@ module.exports = Router({mergeParams: true})
  * /address/get/byposition:
  *   get:
  *     description: Get addresses for a given position
+ *     tags:
+ *       - address
  *     requestBody:
  *     parameters:
  *       - in: query
@@ -78,6 +80,8 @@ module.exports = Router({mergeParams: true})
  * /address/add/location:
  *   post:
  *     description: Add a new address
+ *     tags:
+ *       - address
  *     requestBody:
  *       required: true
  *       content:
@@ -115,6 +119,8 @@ module.exports = Router({mergeParams: true})
  * /address/add/unit:
  *   post:
  *     description: Add a new unit to an address
+ *     tags:
+ *       - address
  *     requestBody:
  *       required: true
  *       content:

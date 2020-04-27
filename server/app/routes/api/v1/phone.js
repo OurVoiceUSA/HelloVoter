@@ -10,6 +10,8 @@ module.exports = Router({mergeParams: true})
  * /poc/phone/tocall:
  *   post:
  *     description: Get a phone number to call
+ *     tags:
+ *       - phonebank
  *     deprecated: true
  *     requestBody:
  *       required: true
@@ -111,6 +113,8 @@ module.exports = Router({mergeParams: true})
  * /poc/phone/callresult:
  *   post:
  *     description: Post the resulting status of a phone call
+ *     tags:
+ *       - phonebank
  *     deprecated: true
  *     requestBody:
  *       required: true
