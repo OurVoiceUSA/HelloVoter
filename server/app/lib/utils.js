@@ -25,26 +25,9 @@ export async function cqdo(req, res, q, p, a) {
   return res.status(200).json({msg: "OK", data: ref.data});
 }
 
-export async function onMyTurf(req, ida, idb) {
-  if (ida === idb) return true;
-  if (await sameTeam(req, ida, idb)) return true;
-  if (ov_config.disable_spatial !== false) return false;
-  // TODO: extend to also seach for direct turf assignments with leader:true
-  let ref = await req.db.query('match (v:Volunteer {id:{idb}}) where exists(v.location) call spatial.intersects("turf", v.location) yield node match (:Volunteer {id:{ida}})-[:MEMBERS {leader:true}]-(:Team)-[:ASSIGNED]-(node) return count(v)', {ida: ida, idb: idb});
-  if (ref.data[0] > 0) return true;
-  return false;
-}
-
 export async function sameTeam(req, ida, idb) {
   let ref = await req.db.query('match (a:Volunteer {id:{ida}})-[:MEMBERS]-(:Team)-[:MEMBERS]-(b:Volunteer {id:{idb}}) return b', {ida: ida, idb: idb});
   if (ref.data.length > 0) return true;
-  return false;
-}
-
-export async function volunteerCanSee(req, ida, idb) {
-  if (ida === idb) return true;
-  if (await sameTeam(req, ida, idb)) return true;
-  if (await onMyTurf(req, ida, idb)) return true;
   return false;
 }
 

@@ -19,6 +19,7 @@ var apikey = {type: 'string'};
 var name = {type: 'string'};
 var value = {type: 'string'};
 var phone = {type: 'string'};
+var address = {type: 'string'};
 var street = {type: 'string', example: '1 Rocket Rd'};
 var unit = {type: 'string', example: '103'};
 var city = {type: 'string', example: 'Hawthorn'};
@@ -42,6 +43,7 @@ var empty = {type: 'object'};
 var data = {type: 'array', items: 'string'};
 var options = {type: 'array', items: 'string'};
 var attributes = {type: 'array', items: 'object'};
+var volunteers = {type: 'array', items: 'object'};
 
 var err = {
   type: 'object',
@@ -107,7 +109,8 @@ module.exports = {
       apikey: { type: 'object', properties: { apikey } },
       options: { type: 'object', properties: { options } },
       object:  { type: 'object', properties: { object } },
-      attributes: { type: 'object', properties: {count,  attributes } },
+      attributes: { type: 'object', properties: { count, attributes } },
+      volunteers: { type: 'object', properties: { count, volunteers } },
       data: { type: 'object', properties: { data } },
       dinfo: { type: 'object', properties: { dinfo } },
       formId: { type: 'object', properties: { formId } },
@@ -125,6 +128,7 @@ module.exports = {
       addressId: { type: 'object', properties: { addressId } },
       unit: { type: 'object', properties: { unit } },
       timestamp: { type: 'object', properties: { timestamp } },
+      address: { type: 'object', properties: { address } },
       street: { type: 'object', properties: { street } },
       city: { type: 'object', properties: { city } },
       state: { type: 'object', properties: { state } },

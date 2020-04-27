@@ -9,6 +9,9 @@ var api;
 var db;
 var c;
 var apikey;
+var longitude = -98.469764;
+var latitude = 39.250758;
+var address = "Nowhere, KS";
 
 describe('Volunteer', function () {
 
@@ -25,25 +28,49 @@ describe('Volunteer', function () {
   // list
 
   it('list volunteers via admin', async () => {
-    const r = await api.get(base_uri+'/volunteer/list')
+    const r = await api.get(base_uri+'/volunteers')
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
-    expect(r.body).to.be.an('array');
-    expect(r.body.length).to.equal(7);
+    expect(r.body.volunteers).to.be.an('array');
+    expect(r.body.volunteers.length).to.equal(7);
+  });
+
+  it('list volunteers via admin with skip and limit', async () => {
+    let r = await api.get(base_uri+'/volunteers?limit=2')
+      .set('Authorization', 'Bearer '+c.admin.jwt);
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.volunteers).to.be.an('array');
+    expect(r.body.volunteers.length).to.equal(2);
+    let alt = r.body.volunteers[1];
+
+    r = await api.get(base_uri+'/volunteers?start=1&limit=2')
+      .set('Authorization', 'Bearer '+c.admin.jwt);
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.volunteers).to.be.an('array');
+    expect(r.body.volunteers.length).to.equal(2);
+    expect(r.body.volunteers[0].id).to.equal(alt.id);
+  });
+
+  it('list volunteers via admin with filter', async () => {
+    let r = await api.get(base_uri+'/volunteers?filter=Admin')
+      .set('Authorization', 'Bearer '+c.admin.jwt);
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.volunteers).to.be.an('array');
+    expect(r.body.volunteers.length).to.equal(1);
   });
 
   it('list volunteers via non-admin', async () => {
-    const r = await api.get(base_uri+'/volunteer/list')
+    const r = await api.get(base_uri+'/volunteers')
       .set('Authorization', 'Bearer '+c.bob.jwt);
     expect(r.statusCode).to.equal(200);
-    expect(r.body).to.be.an('array');
-    expect(r.body.length).to.equal(1);
+    expect(r.body.volunteers).to.be.an('array');
+    expect(r.body.volunteers.length).to.equal(1);
   });
 
   // get
 
   it('get volunteer via admin', async () => {
-    const r = await api.get(base_uri+'/volunteer/get?id='+c.bob.id)
+    const r = await api.get(base_uri+'/volunteer/'+c.bob.id)
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body).to.be.an('object');
@@ -51,7 +78,7 @@ describe('Volunteer', function () {
   });
 
   it('get volunteer via non-admin', async () => {
-    const r = await api.get(base_uri+'/volunteer/get?id='+c.bob.id)
+    const r = await api.get(base_uri+'/volunteer/'+c.bob.id)
       .set('Authorization', 'Bearer '+c.bob.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body).to.be.an('object');
@@ -59,63 +86,49 @@ describe('Volunteer', function () {
   });
 
   it('get volunteer permission denied', async () => {
-    const r = await api.get(base_uri+'/volunteer/get?id='+c.admin.id)
+    const r = await api.get(base_uri+'/volunteer/'+c.admin.id)
       .set('Authorization', 'Bearer '+c.bob.jwt);
     expect(r.statusCode).to.equal(403);
+  });
+
+  it('volunteer whoami', async () => {
+    const r = await api.get(base_uri+'/volunteer/whoami')
+      .set('Authorization', 'Bearer '+c.bob.jwt);
+    expect(r.body.id).to.equal(c.bob.id);
   });
 
   // update
 
   it('update volunteer via admin', async () => {
-    let r;
-    let lng = -98.469764;
-    let lat = 39.250758;
-    let locationstr = "Nowhere, KS";
-
-    r = await api.post(base_uri+'/volunteer/update')
+    let r = await api.put(base_uri+'/volunteer/'+c.bob.id)
       .set('Authorization', 'Bearer '+c.admin.jwt)
-      .send({
-        id: c.bob.id,
-        address: locationstr,
-        lng: lng,
-        lat: lat,
-      });
+      .send({ address, longitude, latitude })
     expect(r.statusCode).to.equal(200);
 
-    r = await api.get(base_uri+'/volunteer/get?id='+c.bob.id)
+    r = await api.get(base_uri+'/volunteer/whoami')
       .set('Authorization', 'Bearer '+c.bob.jwt)
     expect(r.statusCode).to.equal(200);
-    expect(r.body.locationstr).to.equal(locationstr);
-    expect(r.body.location.x).to.equal(lng);
-    expect(r.body.location.y).to.equal(lat);
+    expect(r.body.locationstr).to.equal(address);
+    expect(r.body.location.x).to.equal(longitude);
+    expect(r.body.location.y).to.equal(latitude);
   });
 
   it('update volunteer via self', async () => {
-    let r;
-    let lng = -93.504074;
-    let lat = 38.4813632;
-    let locationstr = "Nowhere, MO";
-
-    r = await api.post(base_uri+'/volunteer/update')
-      .set('Authorization', 'Bearer '+c.bob.jwt)
-      .send({
-        id: c.bob.id,
-        address: locationstr,
-        lng: lng,
-        lat: lat,
-      });
+    let r = await api.put(base_uri+'/volunteer/'+c.sally.id)
+      .set('Authorization', 'Bearer '+c.sally.jwt)
+      .send({ address, longitude, latitude })
     expect(r.statusCode).to.equal(200);
 
-    r = await api.get(base_uri+'/volunteer/get?id='+c.bob.id)
-      .set('Authorization', 'Bearer '+c.bob.jwt)
+    r = await api.get(base_uri+'/volunteer/whoami')
+      .set('Authorization', 'Bearer '+c.sally.jwt)
     expect(r.statusCode).to.equal(200);
-    expect(r.body.locationstr).to.equal(locationstr);
-    expect(r.body.location.x).to.equal(lng);
-    expect(r.body.location.y).to.equal(lat);
+    expect(r.body.locationstr).to.equal(address);
+    expect(r.body.location.x).to.equal(longitude);
+    expect(r.body.location.y).to.equal(latitude);
   });
 
   it('update volunteer invalid parameter', async () => {
-    let r = await api.post(base_uri+'/volunteer/update')
+    let r = await api.put(base_uri+'/volunteer/'+c.bob.id)
       .set('Authorization', 'Bearer '+c.bob.jwt)
       .send({
         address: "Invalid, TX",
@@ -126,13 +139,8 @@ describe('Volunteer', function () {
   // lock
 
   it('lock volunteer', async () => {
-    let r;
-
-    r = await api.post(base_uri+'/volunteer/lock')
+    let r = await api.put(base_uri+'/volunteer/'+c.bob.id+'/lock')
       .set('Authorization', 'Bearer '+c.admin.jwt)
-      .send({
-        id: c.bob.id,
-      });
     expect(r.statusCode).to.equal(200);
 
     r = await api.post(base_uri+'/hello')
@@ -142,24 +150,16 @@ describe('Volunteer', function () {
   });
 
   it('lock volunteer permission denied', async () => {
-    let r;
-
-    r = await api.post(base_uri+'/volunteer/lock')
+    let r = await api.put(base_uri+'/volunteer/'+c.admin.id+'/lock')
       .set('Authorization', 'Bearer '+c.bob.jwt)
-      .send({
-        id: c.admin.id,
-      });
     expect(r.statusCode).to.equal(403);
 
     r = await api.post(base_uri+'/hello')
       .set('Authorization', 'Bearer '+c.admin.jwt)
     expect(r.statusCode).to.equal(200);
 
-    r = await api.post(base_uri+'/volunteer/lock')
+    r = await api.put(base_uri+'/volunteer/'+c.sally.id+'/lock')
       .set('Authorization', 'Bearer '+c.bob.jwt)
-      .send({
-        id: c.sally.id,
-      });
     expect(r.statusCode).to.equal(403);
 
     r = await api.post(base_uri+'/hello')
@@ -168,79 +168,53 @@ describe('Volunteer', function () {
   });
 
   it('lock volunteer admin permission denied', async () => {
-    let r = await api.post(base_uri+'/volunteer/lock')
+    let r = await api.put(base_uri+'/volunteer/'+c.admin.id+'/lock')
       .set('Authorization', 'Bearer '+c.admin.jwt)
-      .send({
-        id: c.admin.id,
-      });
     expect(r.statusCode).to.equal(403);
   });
 
   // unlock
 
   it('unlock volunteer', async () => {
-    let r;
-
-    r = await api.post(base_uri+'/volunteer/unlock')
+    let r = await api.delete(base_uri+'/volunteer/'+c.bob.id+'/lock')
       .set('Authorization', 'Bearer '+c.admin.jwt)
-      .send({
-        id: c.bob.id,
-      });
     expect(r.statusCode).to.equal(200);
 
     r = await api.post(base_uri+'/hello')
       .set('Authorization', 'Bearer '+c.bob.jwt)
-      .send({
-        longitude: -118.3281370,
-        latitude: 33.9208231,
-      });
     expect(r.statusCode).to.equal(200);
   });
 
   it('unlock volunteer permission denied', async () => {
-    let r;
-
-    r = await api.post(base_uri+'/volunteer/unlock')
+    let r = await api.delete(base_uri+'/volunteer/'+c.bob.id+'/lock')
       .set('Authorization', 'Bearer '+c.bob.jwt)
-      .send({
-        id: c.bob.id,
-      });
     expect(r.statusCode).to.equal(403);
   });
 
-  it('unlock volunteer no id', async () => {
-    let r = await api.post(base_uri+'/volunteer/unlock')
-      .set('Authorization', 'Bearer '+c.admin.jwt)
-      .send({
-        foo: 'bar',
-      });
-    expect(r.statusCode).to.equal(400);
-  });
-
-  // visit/history
+  // visits
 
   it('view history for self', async () => {
-    let r = await api.get(base_uri+'/volunteer/visit/history?formId=test')
+    let r = await api.get(base_uri+'/volunteer/'+c.bob.id+'/visits?formId=test')
       .set('Authorization', 'Bearer '+c.bob.jwt)
     expect(r.statusCode).to.equal(200);
-    expect(r.body).to.be.an('array');
+    expect(r.body.visits).to.be.an('array');
   });
 
   it('view history via admin', async () => {
-    let r = await api.get(base_uri+'/volunteer/visit/history?id='+c.bob.id+'&formId=test')
+    let r = await api.get(base_uri+'/volunteer/'+c.admin.id+'/visits?formId=test')
       .set('Authorization', 'Bearer '+c.admin.jwt)
     expect(r.statusCode).to.equal(200);
-    expect(r.body).to.be.an('array');
+    expect(r.body.visits).to.be.an('array');
   });
 
   it('view history permission denied', async () => {
-    let r = await api.get(base_uri+'/volunteer/visit/history?id='+c.sally.id+'&formId=test')
+    let r = await api.get(base_uri+'/volunteer/'+c.sally.id+'/visits?formId=test')
       .set('Authorization', 'Bearer '+c.bob.jwt)
     expect(r.statusCode).to.equal(403);
   });
 
   it('view history no formId', async () => {
-    let r = await api.get(base_uri+'/volunteer/visit/history')
+    let r = await api.get(base_uri+'/volunteer/'+c.bob.id+'/visits')
       .set('Authorization', 'Bearer '+c.bob.jwt)
     expect(r.statusCode).to.equal(400);
   });

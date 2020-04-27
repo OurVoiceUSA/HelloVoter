@@ -28,11 +28,11 @@ export function appInit(db) {
   return api;
 }
 
-export function testToken(key) {
+export function testToken(key, admin) {
   let id = Math.ceil(Math.random()*10000000);
   return jwt.sign(JSON.stringify({
     id: 'test:' + id,
-    name: "Test User "+id,
+    name: "Test "+(admin?"Admin":"User")+" "+id,
     iss: ov_config.jwt_iss,
     aud: 'gotv.ourvoiceusa.org',
     iat: Math.floor(new Date().getTime() / 1000),

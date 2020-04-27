@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import _ from 'lodash';
-import { cqdo, valid, _400, _404 } from '../../../lib/utils';
+import { valid, _400, _404 } from '../../../lib/utils';
 
 module.exports = Router({mergeParams: true})
 /**
@@ -181,7 +181,6 @@ module.exports = Router({mergeParams: true})
   else req.query.start = 0;
   if (req.query.limit) req.query.limit = parseInt(req.query.limit);
   if (req.query.filter) req.query.filter = '.*'+req.query.filter+'.*';
-  req.query.id = req.user.id;
 
   let ref = await req.db.query(
     (req.user.admin?
@@ -195,7 +194,7 @@ module.exports = Router({mergeParams: true})
     )+
     (req.query.filter?` where at.name =~ {filter}`:``)+
     ` return at order by at.order skip {start} `+(req.query.limit?`limit {limit}`:``),
-    req.query);
+    _.merge({}, req.query, req.user));
 
   return res.json({
     count: ref.data.length,

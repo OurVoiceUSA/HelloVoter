@@ -27,10 +27,11 @@ describe('New Volunteer Zero Visibility', function () {
   // TODO: need to hit more endpoints
 
   it('can see only self', async () => {
-    let r = await api.get(base_uri+'/volunteer/list')
+    let r = await api.get(base_uri+'/volunteers')
       .set('Authorization', 'Bearer '+c.mike.jwt)
     expect(r.statusCode).to.equal(200);
-    expect(r.body.length).to.equal(1);
+    expect(r.body.volunteers.length).to.equal(1);
+    expect(r.body.volunteers[0].id).to.equal(c.mike.id);
   });
 
   it('can not list turfs', async () => {

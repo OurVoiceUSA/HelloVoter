@@ -70,7 +70,7 @@ describe('Database Init', function () {
   it('hello 200 admin awaiting assignment', async () => {
     let r;
 
-    let t = testToken(private_key);
+    let t = testToken(private_key, true);
     c.admin = jwt.verify(t, public_key);
     c.admin.jwt = t;
 
