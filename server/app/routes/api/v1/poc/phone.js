@@ -1,7 +1,7 @@
 import { Router } from 'express';
 
-import { volunteerAssignments, _400, _403 } from '../../../lib/utils';
-import { ID_DONOTCALL, ID_NAME, ID_PHONE, ID_PARTY } from '../../../lib/consts';
+import { ID_DONOTCALL, ID_NAME, ID_PHONE, ID_PARTY } from '../../../../lib/consts';
+import { volunteerAssignments, _400, _403 } from '../../../../lib/utils';
 
 module.exports = Router({mergeParams: true})
 /**
