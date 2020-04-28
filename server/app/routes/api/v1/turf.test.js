@@ -7,7 +7,7 @@ import neo4j from '../../../lib/neo4j';
 
 var api;
 var db;
-var c, turfs, forms;
+var c, turfs;
 
 describe('Turf', function () {
 
@@ -16,7 +16,6 @@ describe('Turf', function () {
     api = appInit(db);
     c = getObjs('volunteers');
     turfs = getObjs('turfs');
-    forms = getObjs('forms');
   });
 
   after(async () => {
@@ -104,7 +103,7 @@ describe('Turf', function () {
     expect(r.body.id).to.equal(turfs.A.id);
   });
 
-  // update
+  // TODO: update
 
   // list
 

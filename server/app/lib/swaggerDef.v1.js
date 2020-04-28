@@ -13,6 +13,7 @@ var deviceId = {type: 'string'};
 var addressId = {type: 'string'};
 var attributeId = {type: 'string'};
 var turfId = {type: 'string'};
+var formId = {type: 'string'};
 var type = {type: 'string'};
 var apikey = {type: 'string'};
 
@@ -46,6 +47,7 @@ var data = {type: 'array', items: 'string'};
 var options = {type: 'array', items: 'string'};
 var attributes = {type: 'array', items: 'object'};
 var volunteers = {type: 'array', items: 'object'};
+var forms = {type: 'array', items: 'object'};
 
 var err = {
   type: 'object',
@@ -113,11 +115,13 @@ module.exports = {
       object:  { type: 'object', properties: { object } },
       attributes: { type: 'object', properties: { count, attributes } },
       volunteers: { type: 'object', properties: { count, volunteers } },
+      forms: { type: 'object', properties: { count, forms } },
       data: { type: 'object', properties: { data } },
       dinfo: { type: 'object', properties: { dinfo } },
       formId: { type: 'object', properties: { formId } },
       attributeId: { type: 'object', properties: { attributeId } },
       turfId: { type: 'object', properties: { turfId } },
+      formId: { type: 'object', properties: { formId } },
       geometry: { type: 'object', properties: { geometry } },
       type: { type: 'object', properties: { type } },
       longitude: { type: 'object', properties: { longitude } },

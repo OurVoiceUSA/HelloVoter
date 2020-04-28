@@ -69,12 +69,9 @@ describe('Onboard', function () {
   });
 
   it('valid formId valid turfs', async () => {
-    let r = await api.post(base_uri+'/form/update')
+    let r = await api.put(base_uri+'/form/'+forms.A.id)
       .set('Authorization', 'Bearer '+c.admin.jwt)
-      .send({
-        formId: forms.A.id,
-        public_onboard: true,
-      });
+      .send({ public_onboard: true });
     expect(r.statusCode).to.equal(200);
 
     r = await api.post(base_uri+'/public/onboard')
@@ -117,12 +114,9 @@ describe('Onboard', function () {
   });
 
   it('invalid formId after unset public_onboard', async () => {
-    let r = await api.post(base_uri+'/form/update')
+    let r = await api.put(base_uri+'/form/'+forms.A.id)
       .set('Authorization', 'Bearer '+c.admin.jwt)
-      .send({
-        formId: forms.A.id,
-        public_onboard: false,
-      });
+      .send({ public_onboard: false });
     expect(r.statusCode).to.equal(200);
 
     r = await api.post(base_uri+'/public/onboard')

@@ -43,18 +43,12 @@ describe('Cleanup', function () {
   (keep?it.skip:it)('delete forms', async () => {
     let r;
 
-    r = await api.post(base_uri+'/form/delete')
+    r = await api.delete(base_uri+'/form/'+forms.A.id)
       .set('Authorization', 'Bearer '+c.admin.jwt)
-      .send({
-        formId: forms.A.id,
-      });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.post(base_uri+'/form/delete')
+    r = await api.delete(base_uri+'/form/'+forms.B.id)
       .set('Authorization', 'Bearer '+c.admin.jwt)
-      .send({
-        formId: forms.B.id,
-      });
     expect(r.statusCode).to.equal(200);
   });
 

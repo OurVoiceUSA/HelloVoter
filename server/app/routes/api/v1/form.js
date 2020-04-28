@@ -1,60 +1,32 @@
+import { Router } from 'express';
+import _ from 'lodash';
 
-import { deepCopy } from 'ourvoiceusa-sdk-js';
-
-import { _volunteersFromCypher, volunteerAssignments, cqdo, valid, _400, _403 } from '../../../lib/utils';
-
+import { volunteerAssignments, valid, _400, _403 } from '../../../lib/utils';
 import { ov_config } from '../../../lib/ov_config';
 
-import { Router } from 'express';
-
 module.exports = Router({mergeParams: true})
-.get('/form/get', async (req, res) => {
-  let ass = await volunteerAssignments(req, 'Volunteer', req.user);
-  if (!req.user.admin && !idInArrObj(ass.forms, req.query.formId)) return _403(res, "Volunteer is not assigned to this form.");
-
-  let form = {};
-
-  let a = await req.db.query('match (a:Form {id:{formId}})-[:AUTHOR]-(b:Volunteer) return a,b', req.query);
-  form = a.data[0][0];
-  form.author_id = a.data[0][1].id;
-  form.author = a.data[0][1].name;
-  // convert array of form IDs to array of form objects
-  let order = deepCopy(form.attributes);
-  form.attributes = [];
-  let b = await req.db.query('match (a:Attribute)-[c:COMPILED_ON]->(b:Form {id:{formId}}) return a{.*, readonly: c.readonly}', req.query);
-  for (let o in order) {
-    let id = order[o];
-    for (let i in b.data) {
-      if (b.data[i].id === id) form.attributes.push(b.data[i]);
-    }
-  }
-  // add the user's turfs to this form
-  let c = await req.db.query('match (t:Turf) where t.id in {turfIds} return t.id, t.name, t.geometry', {turfIds: idFromArrObj(ass.turfs)});
-  form.turfs = c.data.map(t => {
-    let turf = JSON.parse(t[2]);
-    turf.id = t[0];
-    turf.name = t[1];
-    return turf;
-  });
-  // add default filters to this form
-  let d = await req.db.query('match (:Form {id:{formId}})-[r:DEFAULT_FILTER]->(at:Attribute) return at{.*, value: r.value}', req.query);
-  if (d.data[0]) form.default_filters = d.data;
-
-  if (ov_config.volunteer_add_new) form.add_new = true;
-
-  return res.json(form);
-})
-.get('/form/list', async (req, res) => {
-  let ref;
-
-  if (req.user.admin)
-    ref = await req.db.query('match (a:Form) return a');
-  else
-    ref = await req.db.query('match (v:Volunteer {id:{id}})-[:ASSIGNED]-(f:Form) return f', req.user);
-
-  return res.json(ref.data);
-})
-.post('/form/create', async (req, res) => {
+/**
+ * @swagger
+ *
+ * /form:
+ *   post:
+ *     description: Create a new form
+ *     tags:
+ *       - forms
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             "$ref": "#/components/schemas/name"
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/formId"
+ */
+.post('/form', async (req, res) => {
   if (req.user.admin !== true) return _403(res, "Permission denied.");
   if (!valid(req.body.name) || typeof req.body.attributes !== "object")
     return _400(res, "Invalid value to parameter 'name' or 'attributes'.");
@@ -67,10 +39,114 @@ module.exports = Router({mergeParams: true})
 
   return res.json({formId: ref.data[0]});
 })
-.post('/form/update', async (req, res) => {
+/**
+ * @swagger
+ *
+ * /form/{id}:
+ *   get:
+ *     description: Get form object definition and the attributes that are compiled on it
+ *     tags:
+ *       - forms
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/data"
+ *   put:
+ *     description: Update a given property of a form
+ *     tags:
+ *       - forms
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         type: string
+ *       - in: query
+ *         name: name
+ *         type: string
+ *       - in: query
+ *         name: public_onboard
+ *         type: boolean
+ *       - in: query
+ *         name: attributes
+ *         type: array
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             allOf:
+ *               - "$ref": "#/components/schemas/name"
+ *               - "$ref": "#/components/schemas/attributes"
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/formId"
+ *   delete:
+ *     description: Delete a form
+ *     tags:
+ *       - forms
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/empty"
+ */
+.get('/form/:formId', async (req, res) => {
+  let ass = await volunteerAssignments(req, 'Volunteer', req.user);
+  if (!req.user.admin && !idInArrObj(ass.forms, req.params.formId)) return _403(res, "Volunteer is not assigned to this form.");
+
+  let form = {};
+
+  let a = await req.db.query('match (a:Form {id:{formId}})-[:AUTHOR]-(b:Volunteer) return a,b', req.params);
+  form = a.data[0][0];
+  form.author_id = a.data[0][1].id;
+  form.author = a.data[0][1].name;
+
+  // convert array of form IDs to array of form objects
+  let order = _.merge({}, form.attributes);
+  form.attributes = [];
+  let b = await req.db.query('match (a:Attribute)-[c:COMPILED_ON]->(b:Form {id:{formId}}) return a{.*, readonly: c.readonly}', req.params);
+  for (let o in order) {
+    let id = order[o];
+    for (let i in b.data) {
+      if (b.data[i].id === id) form.attributes.push(b.data[i]);
+    }
+  }
+
+  // add the user's turfs to this form
+  let c = await req.db.query('match (t:Turf) where t.id in {turfIds} return t.id, t.name, t.geometry', {turfIds: idFromArrObj(ass.turfs)});
+  form.turfs = c.data.map(t => {
+    let turf = JSON.parse(t[2]);
+    turf.id = t[0];
+    turf.name = t[1];
+    return turf;
+  });
+
+  // add default filters to this form
+  let d = await req.db.query('match (:Form {id:{formId}})-[r:DEFAULT_FILTER]->(at:Attribute) return at{.*, value: r.value}', req.params);
+  if (d.data[0]) form.default_filters = d.data;
+
+  if (ov_config.volunteer_add_new) form.add_new = true;
+
+  return res.json(form);
+})
+.put('/form/:formId', async (req, res) => {
   if (req.user.admin !== true) return _403(res, "Permission denied.");
-  if (!valid(req.body.formId))
-    return _400(res, "Invalid value to parameter 'formId'.");
 
   if (req.body.name && !valid(req.body.name))
     return _400(res, "Invalid value to parameter 'name'.");
@@ -82,44 +158,59 @@ module.exports = Router({mergeParams: true})
     return _400(res, "Invalid value to parameter 'public_onboard'.");
 
   // TODO: validate every attributes exists
-  if (req.body.name) await req.db.query('match (f:Form {id: {formId}}) set f.updated = timestamp(), f.name = {name}', req.body);
-  if (req.body.attributes) await req.db.query('match (f:Form {id: {formId}}) set f.updated = timestamp(), f.attributes = {attributes} with f optional match (f)<-[r:COMPILED_ON]-(:Attribute) delete r with f unwind {attributes} as attr match (at:Attribute {id:attr}) merge (at)-[:COMPILED_ON]->(f)', req.body);
-  if (req.body.public_onboard !== undefined) await req.db.query('match (f:Form {id: {formId}}) set f.updated = timestamp(), f.public_onboard = {public_onboard}', req.body);
+  if (req.body.name) await req.db.query('match (f:Form {id: {formId}}) set f.updated = timestamp(), f.name = {name}', _.merge({}, req.body, req.params));
+  if (req.body.attributes) await req.db.query('match (f:Form {id: {formId}}) set f.updated = timestamp(), f.attributes = {attributes} with f optional match (f)<-[r:COMPILED_ON]-(:Attribute) delete r with f unwind {attributes} as attr match (at:Attribute {id:attr}) merge (at)-[:COMPILED_ON]->(f)', _.merge({}, req.body, req.params));
+  if (req.body.public_onboard !== undefined) await req.db.query('match (f:Form {id: {formId}}) set f.updated = timestamp(), f.public_onboard = {public_onboard}', _.merge({}, req.body, req.params));
 
-  return res.json({});
+  return res.json({updated: true});
 })
-.post('/form/delete', (req, res) => {
+.delete('/form/:formId', async (req, res) => {
   if (req.user.admin !== true) return _403(res, "Permission denied.");
-  if (!valid(req.body.formId)) return _400(res, "Invalid value to parameter 'formId'.");
-  return cqdo(req, res, 'match (a:Form {id:{formId}}) detach delete a', req.body, true);
+  await req.db.query('match (a:Form {id:{formId}}) detach delete a', req.params);
+  return res.json({deleted: true});
 })
-.get('/form/assigned/volunteer/list', async (req, res) => {
-  if (!valid(req.query.formId)) return _400(res, "Invalid value to parameter 'formId'.");
+/**
+ * @swagger
+ *
+ * /forms:
+ *   get:
+ *     description: Get an array of form objects matching a filter.
+ *     tags:
+ *       - forms
+ *     parameters:
+ *       - in: query
+ *         name: filter
+ *         type: array
+ *       - in: query
+ *         name: start
+ *         type: integer
+ *       - in: query
+ *         name: limit
+ *         type: integer
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/forms"
+ */
+.get('/forms', async (req, res) => {
+  let ref;
 
-  let volunteers = await _volunteersFromCypher(req, 'match (a:Form {id:{formId}})-[:ASSIGNED]-(b:Volunteer) return b', req.query, true);
+// TODO: filter, start, limit
 
-  return res.json(volunteers);
+  if (req.user.admin)
+    ref = await req.db.query('match (a:Form) return a');
+  else
+    ref = await req.db.query('match (v:Volunteer {id:{id}})-[:ASSIGNED]-(f:Form) return f', req.user);
+
+  return res.json({
+    count: ref.data.length,
+    forms: ref.data,
+  });
 })
-.post('/form/assigned/volunteer/add', (req, res) => {
-  if (!valid(req.body.formId) || !valid(req.body.vId)) return _400(res, "Invalid value to parameter 'formId' or 'vId'.");
-  return cqdo(req, res, 'match (a:Form {id:{formId}}), (b:Volunteer {id:{vId}}) merge (a)-[:ASSIGNED]->(b)', req.body, true);
-})
-.post('/form/assigned/volunteer/remove', (req, res) => {
-  if (!valid(req.body.formId) || !valid(req.body.vId)) return _400(res, "Invalid value to parameter 'formId' or 'vId'.");
-  return cqdo(req, res, 'match (a:Form {id:{formId}})-[r:ASSIGNED]-(b:Volunteer {id:{vId}}) delete r', req.body, true);
-})
-.get('/attribute/form/list', (req, res) => {
-  if (!valid(req.query.id)) return _400(res, "Invalid value to parameter 'id'.");
-  return cqdo(req, res, 'match (a:Attribute {id:{id}})-[:COMPILED_ON]-(b:Form) return b', req.query, true);
-})
-.post('/attribute/form/add', (req, res) => {
-  if (!valid(req.body.id) || !valid(req.body.formId)) return _400(res, "Invalid value to parameter 'key' or 'formId'.");
-  return cqdo(req, res, 'match (a:Attribute {id:{id}}) with a match (b:Form {id:{formId}}) merge (a)-[:COMPILED_ON]->(b)', req.body, true);
-})
-.post('/attribute/form/remove', (req, res) => {
-  if (!valid(req.body.id) || !valid(req.body.formId)) return _400(res, "Invalid value to parameter 'key' or 'formId'.");
-  return cqdo(req, res, 'match (a:Attribute {id:{id}})-[r:COMPILED_ON]-(b:Form {id:{formId}}) delete r', req.body, true);
-})
+
+// TODO: use lodash for the below?
 
 function idInArrObj (arr, id) {
   for (let i in arr)

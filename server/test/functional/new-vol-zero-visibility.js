@@ -42,9 +42,9 @@ describe('New Volunteer Zero Visibility', function () {
   });
 
   it('can not list forms', async () => {
-    let r = await api.get(base_uri+'/form/list')
+    let r = await api.get(base_uri+'/forms')
       .set('Authorization', 'Bearer '+c.mike.jwt)
     expect(r.statusCode).to.equal(200);
-    expect(r.body.length).to.equal(0);
+    expect(r.body.forms.length).to.equal(0);
   });
 });

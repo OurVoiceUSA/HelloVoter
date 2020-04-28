@@ -1,7 +1,6 @@
 import { Router } from 'express';
 
 import { volunteerAssignments, _400, _403, _422 } from '../../../lib/utils';
-
 import { ov_config } from '../../../lib/ov_config';
 
 module.exports = Router({mergeParams: true})

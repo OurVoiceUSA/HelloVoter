@@ -1,24 +1,19 @@
-
 import express from 'express';
 import 'express-async-errors';
 import expressLogging from 'express-logging';
-import cors from 'cors';
+import swaggerUi from 'swagger-ui-express';
+import bodyParser from 'body-parser';
+import jwt from 'jsonwebtoken';
+import mobile from 'is-mobile';
+import fetch from 'node-fetch';
 import logger from 'logops';
 import helmet from 'helmet';
-import jwt from 'jsonwebtoken';
-import bodyParser from 'body-parser';
-import mobile from 'is-mobile';
+import cors from 'cors';
 import fs from 'fs';
-import fetch from 'node-fetch';
 
-import { ov_config } from './lib/ov_config';
-
-import {
-  cqdo, _400, _401, _403, _500, _503
-} from './lib/utils';
-
-import swaggerUi from 'swagger-ui-express';
+import { _400, _401, _403, _500, _503 } from './lib/utils';
 import swaggerDocumentv1 from './swagger.v1.json';
+import { ov_config } from './lib/ov_config';
 
 const router = require('./routes/createRouter.js')();
 
@@ -145,8 +140,9 @@ export function doExpressInit(log, db, qq) {
   });
 
   // healtcheck
-  app.get('/poke', (req, res) => {
-    return cqdo(req, res, 'return timestamp()', false)
+  app.get('/poke', async (req, res) => {
+    let ref = await req.db.query('return timestamp()');
+    return res.json({timestamp: ref.data[0]});
   });
 
   app.get('/HelloVoterHQ/mobile/invite', invite);

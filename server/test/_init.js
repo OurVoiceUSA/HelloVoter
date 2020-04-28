@@ -231,7 +231,7 @@ describe('Database Init', function () {
 
     forms.A = { name: genName("Form") };
 
-    r = await api.post(base_uri+'/form/create')
+    r = await api.post(base_uri+'/form')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: forms.A.name,
@@ -242,7 +242,7 @@ describe('Database Init', function () {
 
     forms.B = { name: genName("Form") };
 
-    r = await api.post(base_uri+'/form/create')
+    r = await api.post(base_uri+'/form')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: forms.B.name,

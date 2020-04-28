@@ -26,7 +26,7 @@ describe('MISC endpoints', function () {
   it('poke 200 timestamp', async () => {
     let r = await api.get('/poke');
     expect(r.statusCode).to.equal(200);
-    expect(r.body.data[0]).to.satisfy(Number.isInteger);
+    expect(r.body.timestamp).to.satisfy(Number.isInteger);
   });
 
   it('root uri 404', async () => {

@@ -1,9 +1,10 @@
 
-import { asyncForEach, sleep, deepCopy } from 'ourvoiceusa-sdk-js';
+import { asyncForEach, sleep } from 'ourvoiceusa-sdk-js';
 import EventEmitter from 'events';
 import FormData from 'form-data';
 import fetch from 'node-fetch';
 import papa from 'papaparse';
+import _ from 'lodash';
 
 import { ov_config } from './ov_config';
 import { concurrency } from './startup';
@@ -95,7 +96,7 @@ export default class queue {
 
     // create QueueTask object in database -- either we can execute now (active: true, started: timestamp()) or we have to wait (active: false)
     try {
-      let args = deepCopy(input);
+      let args = _.merge({}, input);
       args.input = JSON.stringify(input);
       args.task = task;
 

@@ -1,6 +1,5 @@
-
 import fetch from 'node-fetch';
-import { deepCopy } from 'ourvoiceusa-sdk-js';
+import _ from 'lodash';
 
 import { volunteerAssignments, _400, _401 } from '../../../lib/utils';
 
@@ -45,7 +44,7 @@ module.exports = Router({mergeParams: true})
     let dkeys = ['ApplicationName', 'Brand', 'BuildNumber', 'BundleId', 'Carrier', 'DeviceCountry', 'DeviceId', 'DeviceLocale', 'DeviceName', 'FontScale', 'FreeDiskStorage', 'Manufacturer', 'Model', 'ReadableVersion', 'SystemName', 'SystemVersion', 'Timezone', 'TotalDiskCapacity', 'TotalMemory', 'UniqueID', 'UserAgent', 'Version', 'Emulator', 'Tablet', 'hasNotch', 'Landscape'];
     let dinfo_str = dkeys.map(d => d+':{'+d+'}').join(',');
 
-    let args = deepCopy(req.body.dinfo);
+    let args = _.merge({}, req.body.dinfo);
     args.id = req.user.id;
     args.lng = parseFloat(req.body.longitude);
     args.lat = parseFloat(req.body.latitude);
