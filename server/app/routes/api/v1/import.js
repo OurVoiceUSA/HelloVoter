@@ -1,19 +1,22 @@
+import { Router } from 'express';
 
-import { cqdo, valid, _400, _403 } from '../../../lib/utils';
-
+import { valid, _400, _403 } from '../../../lib/utils';
 import { ov_config } from '../../../lib/ov_config';
 
-import { Router } from 'express';
 
 module.exports = Router({mergeParams: true})
 .get('/import/required-fields', (req, res) => {
   if (req.user.admin !== true) return _403(res, "Permission denied.");
-  if (ov_config.enable_geocode) return res.json([1,3,5]); // things required to call a geocoder
-  else return res.json([1,6,7]); // require street, lat, lng
+  if (ov_config.enable_geocode) return res.json({couint: 3, fields: [1,3,5]}); // things required to call a geocoder
+  else return res.json({count: 3, fields: [1,6,7]}); // require street, lat, lng
 })
-.get('/import/list', (req, res) => {
+.get('/import', async (req, res) => {
   if (req.user.admin !== true) return _403(res, "Permission denied.");
-  return cqdo(req, res, 'match (a:ImportFile) return a order by a.created desc', {}, true);
+  let ref = await req.db.query('match (a:ImportFile) return a order by a.created desc', {});
+  return res.json({
+    count: ref.data.length,
+    import: ref.data,
+  });
 })
 .post('/import/begin', async (req, res) => {
   if (req.user.admin !== true) return _403(res, "Permission denied.");

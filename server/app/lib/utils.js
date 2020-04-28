@@ -16,21 +16,6 @@ function sendError(res, code, msg) {
   return res.status(code).json(obj);
 }
 
-// just do a query and either return OK or ERROR
-
-export async function cqdo(req, res, q, p, a) {
-  if (a === true && req.user.admin !== true)
-    return _403(res, "Permission denied.");
-  let ref = await req.db.query(q, p);
-  return res.status(200).json({msg: "OK", data: ref.data});
-}
-
-export async function sameTeam(req, ida, idb) {
-  let ref = await req.db.query('match (a:Volunteer {id:{ida}})-[:MEMBERS]-(:Team)-[:MEMBERS]-(b:Volunteer {id:{idb}}) return b', {ida: ida, idb: idb});
-  if (ref.data.length > 0) return true;
-  return false;
-}
-
 export async function volunteerAssignments(req, type, vol) {
   let obj = {
     ready: false,

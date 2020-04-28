@@ -25,17 +25,16 @@ describe('Queue', function () {
   // list
 
   it('list as non-admin', async () => {
-    let r = await api.get(base_uri+'/queue/list')
+    let r = await api.get(base_uri+'/queue')
       .set('Authorization', 'Bearer '+c.bob.jwt);
     expect(r.statusCode).to.equal(403);
   });
 
   it('list as admin', async () => {
-    let r = await api.get(base_uri+'/queue/list')
+    let r = await api.get(base_uri+'/queue')
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
-    if (ov_config.disable_apoc === false)
-      expect(r.body.data.length).to.equal(Object.keys(turfs).length);
+    expect(r.body.queue.length).to.equal(Object.keys(turfs).length);
   });
 
   // TODO: orphaned queue, as deleted turfs leave a hanging queue object

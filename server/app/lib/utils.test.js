@@ -102,11 +102,4 @@ describe('App Utils', function () {
     expect(utils.getClientIP(req)).to.equal('127.0.0.1');
   });
 
-  it('cqdo returns 200 with proper query', async () => {
-    let r = await utils.cqdo(req, res, "return timestamp()", {});
-    expect(r.statusCode).to.equal(200);
-    expect(r.body.msg).to.equal("OK");
-    expect(r.body.data.length).to.equal(1);
-  });
-
 });

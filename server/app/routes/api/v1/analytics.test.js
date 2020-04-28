@@ -1,10 +1,9 @@
-
 import { expect } from 'chai';
 
+import { appInit, base_uri, getObjs } from '../../../../test/lib/utils';
 import { ov_config } from '../../../lib/ov_config';
 import { ID_PARTY } from '../../../lib/consts';
 import neo4j from '../../../lib/neo4j';
-import { appInit, base_uri, getObjs } from '../../../../test/lib/utils';
 
 var api;
 var db;
@@ -26,43 +25,43 @@ describe('Analytics', function () {
   // list
 
   it('list invalid parameter', async () => {
-    let r = await api.get(base_uri+'/analytics/list')
+    let r = await api.get(base_uri+'/analytics')
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(400);
   });
 
   it('list as non-admin', async () => {
-    let r = await api.get(base_uri+'/analytics/list?aId='+ID_PARTY)
+    let r = await api.get(base_uri+'/analytics?aId='+ID_PARTY)
       .set('Authorization', 'Bearer '+c.bob.jwt);
     expect(r.statusCode).to.equal(403);
   });
 
   it('list without turf', async () => {
-    let r = await api.get(base_uri+'/analytics/list?aId='+ID_PARTY)
+    let r = await api.get(base_uri+'/analytics?aId='+ID_PARTY)
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
-    expect(r.body.data.length).to.equal(0);
+    expect(r.body.analytics.length).to.equal(0);
   });
 
   it('list with turf', async () => {
-    let r = await api.get(base_uri+'/analytics/list?aId='+ID_PARTY+'&turfId='+turfs.A.id)
+    let r = await api.get(base_uri+'/analytics?aId='+ID_PARTY+'&turfId='+turfs.A.id)
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
-    expect(r.body.data.length).to.equal(0);
+    expect(r.body.analytics.length).to.equal(0);
   });
 
   it('list without turf include_null', async () => {
-    let r = await api.get(base_uri+'/analytics/list?aId='+ID_PARTY+'&include_null=true')
+    let r = await api.get(base_uri+'/analytics?aId='+ID_PARTY+'&include_null=true')
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
-    expect(r.body.data.length).to.equal(0);
+    expect(r.body.analytics.length).to.equal(0);
   });
 
   it('list with turf include_null', async () => {
-    let r = await api.get(base_uri+'/analytics/list?aId='+ID_PARTY+'&turfId='+turfs.A.id+'&include_null=true')
+    let r = await api.get(base_uri+'/analytics?aId='+ID_PARTY+'&turfId='+turfs.A.id+'&include_null=true')
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
-    expect(r.body.data.length).to.equal(0);
+    expect(r.body.analytics.length).to.equal(0);
   });
 
 });

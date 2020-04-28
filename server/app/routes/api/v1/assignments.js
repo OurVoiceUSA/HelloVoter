@@ -1,7 +1,14 @@
 import { Router } from 'express';
 
 import { ov_config } from '../../../lib/ov_config';
-import { _volunteersFromCypher, cqdo, _400, _403 } from '../../../lib/utils';
+import { _volunteersFromCypher, _400, _403 } from '../../../lib/utils';
+
+async function cqdo(req, res, q, p, a) {
+  if (a === true && req.user.admin !== true)
+    return _403(res, "Permission denied.");
+  let ref = await req.db.query(q, p);
+  return res.status(200).json({msg: "OK", data: ref.data});
+}
 
 module.exports = Router({mergeParams: true})
 .get('/turf/assigned/volunteer/list', async (req, res) => {
