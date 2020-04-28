@@ -6,11 +6,13 @@ import { appInit, base_uri, genName, testToken, writeObj } from './lib/utils';
 import { runDatabase, genkeys } from '../scripts/lib/utils';
 import { min_neo4j_version } from '../app/lib/utils';
 import { ov_config } from '../app/lib/ov_config';
-import { doDbInit } from '../app/lib/startup';
+import { doStartupTasks } from '../app/lib/startup';
 import neo4j from '../app/lib/neo4j';
+import queue from '../app/lib/queue';
 
 var api;
 var db;
+var qq;
 var c = {};
 var turfs = {};
 var forms = {};
@@ -28,6 +30,7 @@ describe('Database Init', function () {
     genkeys();
 
     db = new neo4j(ov_config);
+    qq = new queue(db);
     api = appInit(db);
   });
 
@@ -55,7 +58,7 @@ describe('Database Init', function () {
   });
 
   it('database startup tasks', async () => {
-    await doDbInit(db);
+    await doStartupTasks(db, qq);
   });
 
   it('rsa keys match', async () => {
