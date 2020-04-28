@@ -1,20 +1,25 @@
 import jwt from 'jsonwebtoken';
 import { expect } from 'chai';
 
+import { appInit, base_uri, getObjs } from '../../../../test/lib/utils';
 import { ov_config } from '../../../lib/ov_config';
 import neo4j from '../../../lib/neo4j';
-import { appInit, base_uri, getObjs } from '../../../../test/lib/utils';
+import { version } from '../../../../../package.json';
 
 var api;
 var db;
-var c;
+var nv;
+var c, turfs, forms;
 
 describe('MISC endpoints', function () {
 
-  before(() => {
+  before(async () => {
     db = new neo4j(ov_config);
+    nv = await db.version();
     api = appInit(db);
     c = getObjs('volunteers');
+    turfs = getObjs('turfs');
+    forms = getObjs('forms');
   });
 
   after(async () => {
@@ -96,6 +101,34 @@ describe('MISC endpoints', function () {
       .set('Authorization', 'Bearer foobar')
     expect(r.statusCode).to.equal(200);
     expect(r.body.data.admin).to.not.exist;
+  });
+
+  it('dashboard admin', async () => {
+    const r = await api.get(base_uri+'/dashboard')
+      .set('Authorization', 'Bearer '+c.admin.jwt)
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.admins).to.equal(1);
+    expect(r.body.volunteers).to.equal(Object.keys(c).length);
+    expect(r.body.turfs).to.equal(Object.keys(turfs).length);
+    expect(r.body.forms).to.equal(Object.keys(forms).length);
+    expect(r.body.attributes).to.equal(13);
+    expect(r.body.addresses).to.equal(0);
+    expect(r.body.version).to.equal(version);
+    expect(r.body.neo4j_version).to.equal(nv);
+  });
+
+  it('dashboard non-admin', async () => {
+    const r = await api.get(base_uri+'/dashboard')
+      .set('Authorization', 'Bearer '+c.bob.jwt)
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.admins).to.equal(1);
+    expect(r.body.volunteers).to.equal(1);
+    expect(r.body.turfs).to.equal(0);
+    expect(r.body.forms).to.equal(0);
+    expect(r.body.attributes).to.equal('N/A');
+    expect(r.body.addresses).to.equal('N/A');
+    expect(r.body.version).to.equal(null);
+    expect(r.body.neo4j_version).to.equal(null);
   });
 
 });
