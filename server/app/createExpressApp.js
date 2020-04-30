@@ -4,7 +4,6 @@ import expressLogging from 'express-logging';
 import swaggerUi from 'swagger-ui-express';
 import bodyParser from 'body-parser';
 import jwt from 'jsonwebtoken';
-import mobile from 'is-mobile';
 import fetch from 'node-fetch';
 import logger from 'logops';
 import helmet from 'helmet';
@@ -13,12 +12,12 @@ import fs from 'fs';
 
 import { _400, _401, _403, _500, _503 } from './lib/utils';
 import swaggerDocumentv1 from './swagger.v1.json';
-import { ov_config } from './lib/ov_config';
+import { hv_config } from './lib/hv_config';
 
 const router = require('./routes/createRouter.js')();
 
 var public_key;
-var jwt_iss = ov_config.jwt_iss;
+var jwt_iss = hv_config.jwt_iss;
 
 export function doExpressInit(log, db, qq) {
 
@@ -33,13 +32,13 @@ export function doExpressInit(log, db, qq) {
   app.use(cors({exposedHeaders: ['x-sm-oauth-url']}));
   app.use(helmet());
 
-  if (ov_config.no_auth) {
+  if (hv_config.no_auth) {
     console.warn("Starting up without authentication!");
-  } else if (ov_config.jwt_pub_key) {
-    public_key = fs.readFileSync(ov_config.jwt_pub_key, "utf8");
+  } else if (hv_config.jwt_pub_key) {
+    public_key = fs.readFileSync(hv_config.jwt_pub_key, "utf8");
   } else {
-    console.log("JWT_PUB_KEY not defined, attempting to fetch from "+ov_config.sm_oauth_url+'/pubkey');
-    fetch(ov_config.sm_oauth_url+'/pubkey')
+    console.log("JWT_PUB_KEY not defined, attempting to fetch from "+hv_config.sm_oauth_url+'/pubkey');
+    fetch(hv_config.sm_oauth_url+'/pubkey')
     .then(res => {
       jwt_iss = res.headers.get('x-jwt-iss');
       if (res.status !== 200) throw "http code "+res.status;
@@ -49,17 +48,17 @@ export function doExpressInit(log, db, qq) {
       public_key = body;
     })
     .catch((e) => {
-      console.log("Unable to read SM_OAUTH_URL "+ov_config.sm_oauth_url);
+      console.log("Unable to read SM_OAUTH_URL "+hv_config.sm_oauth_url);
       console.log(e);
       process.exit(1);
     });
   }
 
   // require ip_header if config for it is set
-  if (!ov_config.DEBUG && ov_config.ip_header) {
+  if (!hv_config.DEBUG && hv_config.ip_header) {
     app.use(function (req, res, next) {
-      if (!req.header(ov_config.ip_header)) {
-        console.log('Connection without '+ov_config.ip_header+' header');
+      if (!req.header(hv_config.ip_header)) {
+        console.log('Connection without '+hv_config.ip_header+' header');
        return _400(res, "Missing required header.");
       }
       else next();
@@ -75,9 +74,9 @@ export function doExpressInit(log, db, qq) {
     req.db = db;
     req.qq = qq;
 
-    res.set('x-sm-oauth-url', ov_config.sm_oauth_url);
+    res.set('x-sm-oauth-url', hv_config.sm_oauth_url);
 
-    if (!public_key && !ov_config.no_auth) {
+    if (!public_key && !hv_config.no_auth) {
       return _503(res, "Server is starting up.");
     }
 
@@ -89,9 +88,7 @@ export function doExpressInit(log, db, qq) {
       default:
         break;
     }
-    if (req.url.match(/^\/HelloVoterHQ[a-zA-Z0-9/]*\/mobile\//)) return next();
-    if (req.url.match(/^\/HelloVoterHQ[a-zA-Z0-9/]*\/public\//)) return next();
-    if (req.url.match(/\/\.\.\//)) return _400(res, "Not OK..");
+    if (req.url.match(/^\/[a-zA-Z0-9/]*\/v1\/public\//)) return next();
 
     try {
       let u, a; // My Hero Academia
@@ -105,14 +102,14 @@ export function doExpressInit(log, db, qq) {
           return _500(res, e);
         }
       } else {
-        u = (ov_config.no_auth?jwt.decode(token):jwt.verify(token, public_key));
+        u = (hv_config.no_auth?jwt.decode(token):jwt.verify(token, public_key));
 
         // verify props
         if (!u.id) return _401(res, "Your token is missing a required parameter.");
         if (u.iss !== jwt_iss) return _401(res, "Your token was issued for a different domain.");
         if (u.aud && (
-          (ov_config.jwt_aud && u.aud !== ov_config.jwt_aud) ||
-          (!ov_config.jwt_aud && u.aud !== req.header('host'))
+          (hv_config.jwt_aud && u.aud !== hv_config.jwt_aud) ||
+          (!hv_config.jwt_aud && u.aud !== req.header('host'))
         )) return _401(res, "Your token has an incorrect audience.");
 
         if (!u.email) u.email = "";
@@ -125,8 +122,8 @@ export function doExpressInit(log, db, qq) {
         }
       }
 
-      if (a.data.length === 1) {
-        req.user = a.data[0];
+      if (a.length === 1) {
+        req.user = a[0];
       } else return _401(res, "Invalid token.");
 
       if (req.user.locked) return _403(res, "Your account is locked.");
@@ -141,17 +138,11 @@ export function doExpressInit(log, db, qq) {
 
   // healtcheck
   app.get('/poke', async (req, res) => {
-    let ref = await req.db.query('return timestamp()');
-    return res.json({timestamp: ref.data[0]});
+    return res.json({timestamp: (await req.db.query('return timestamp()'))[0]});
   });
 
-  app.get('/HelloVoterHQ/mobile/invite', invite);
-  app.get('/HelloVoterHQ/[0-9A-Z]+/mobile/invite', invite);
-
-  app.use('/HelloVoterHQ/api/v1', router);
-  app.use('/HelloVoterHQ/[0-9A-Z]+/api/v1', router);
-
-  app.use('/HelloVoterHQ/api/v1/public/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDocumentv1));
+  app.use(hv_config.base_uri+'/v1', router);
+  app.use(hv_config.base_uri+'/v1/public/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDocumentv1));
 
   // default error handler
   app.use((err, req, res, next) => {
@@ -161,8 +152,3 @@ export function doExpressInit(log, db, qq) {
   return app;
 }
 
-function invite(req, res) {
- let url = 'https://ourvoiceusa.org/hellovoter/';
- if (mobile({ua:req.get('User-Agent')})) url = 'OurVoiceApp://invite?inviteCode='+req.query.inviteCode+'&'+(req.query.orgId?'orgId='+req.query.orgId:'server='+req.query.server);
- res.redirect(url);
-}

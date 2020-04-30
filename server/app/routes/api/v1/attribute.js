@@ -52,7 +52,7 @@ module.exports = Router({mergeParams: true})
   }
 
   let ref = await req.db.query('match (v:Volunteer {id:{author_id}}) create (a:Attribute {id:randomUUID(), created: timestamp(), name:{name}, type:{type}})-[:AUTHOR]->(v) return a.id', req.body);
-  let attributeId = ref.data[0];
+  let attributeId = ref[0];
 
   if (req.body.type.toLowerCase() === 'sand')
     await req.db.query('match (at:Attribute {id:{id}}) set at.type = {type}, at.values = {values}', {id: attributeId, type: 'string', values: ["SA","A","N","D","SD"]});
@@ -126,8 +126,8 @@ module.exports = Router({mergeParams: true})
   if (!valid(req.params.id)) return _400(res, "Invalid value to parameter 'id'.");
   // TODO: for non-admin, is this attribute COMPILED_ON a form they can see?
   let ref = await req.db.query('match (a:Attribute {id:{id}}) return a', req.params);
-  if (ref.data.length === 0) return _404(res, "Attribute not found.");
-  return res.json(ref.data[0])
+  if (ref.length === 0) return _404(res, "Attribute not found.");
+  return res.json(ref[0])
 })
 .put('/attribute/:id', async (req, res) => {
   if (!req.user.admin) return _403(res, "Permission denied.");
@@ -193,7 +193,7 @@ module.exports = Router({mergeParams: true})
   if (req.query.limit) req.query.limit = parseInt(req.query.limit);
   if (req.query.filter) req.query.filter = '.*'+req.query.filter+'.*';
 
-  let ref = await req.db.query(
+  let attributes = await req.db.query(
     (req.user.admin?
       `match (at:Attribute)`
       :
@@ -208,7 +208,7 @@ module.exports = Router({mergeParams: true})
     _.merge({}, req.query, req.user));
 
   return res.json({
-    count: ref.data.length,
-    attributes: ref.data,
+    count: attributes.length,
+    attributes,
   });
 })

@@ -48,6 +48,7 @@ var options = {type: 'array', items: 'string'};
 var attributes = {type: 'array', items: 'object'};
 var volunteers = {type: 'array', items: 'object'};
 var forms = {type: 'array', items: 'object'};
+var persons = {type: 'array', items: 'object'};
 
 var err = {
   type: 'object',
@@ -93,7 +94,7 @@ module.exports = {
       url: 'https://github.com/OurVoiceUSA/HelloVoter/tree/master/docs',
     }
   },
-  servers: [{url: '/HelloVoterHQ/api/v1'}],
+  servers: [{url: '/api/v1'}],
   components: {
     securitySchemes: {
       BearerAuth: {
@@ -116,6 +117,7 @@ module.exports = {
       attributes: { type: 'object', properties: { count, attributes } },
       volunteers: { type: 'object', properties: { count, volunteers } },
       forms: { type: 'object', properties: { count, forms } },
+      persons: { type: 'object', properties: { count, persons } },
       data: { type: 'object', properties: { data } },
       dinfo: { type: 'object', properties: { dinfo } },
       formId: { type: 'object', properties: { formId } },

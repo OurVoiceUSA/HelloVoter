@@ -5,10 +5,10 @@ import jwt from 'jsonwebtoken';
 import fs from 'fs';
 
 import { doExpressInit } from '../../app/createExpressApp';
-import { ov_config } from '../../app/lib/ov_config';
+import { hv_config } from '../../app/lib/hv_config';
 import queue from '../../app/lib/queue';
 
-export var base_uri = '/HelloVoterHQ/api/v1/';
+export var base_uri = hv_config.base_uri+'/v1';
 export var tpx = "Test ";
 
 export var writeObj = (name, obj) => fs.writeFileSync('./test/'+name+'.json', JSON.stringify(obj));
@@ -33,7 +33,7 @@ export function testToken(key, admin) {
   return jwt.sign(JSON.stringify({
     id: 'test:' + id,
     name: "Test "+(admin?"Admin":"User")+" "+id,
-    iss: ov_config.jwt_iss,
+    iss: hv_config.jwt_iss,
     aud: 'gotv.ourvoiceusa.org',
     iat: Math.floor(new Date().getTime() / 1000),
     exp: Math.floor(new Date().getTime() / 1000)+604800,

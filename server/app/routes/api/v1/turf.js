@@ -1,10 +1,9 @@
-import { asyncForEach, sleep } from 'ourvoiceusa-sdk-js';
 import { Router } from 'express';
 import _ from 'lodash';
 import wkx from 'wkx';
 
-import { valid, _400, _403 } from '../../../lib/utils';
-import { ov_config } from '../../../lib/ov_config';
+import { asyncForEach, sleep, valid, _400, _403 } from '../../../lib/utils';
+import { hv_config } from '../../../lib/hv_config';
 
 module.exports = Router({mergeParams: true})
 /**
@@ -47,9 +46,9 @@ module.exports = Router({mergeParams: true})
        'return b.id',
      req.body);
 
-   let job = await req.qq.queueTask('doTurfIndexing', 'Turf {id:{turfId}}', {turfId: ref.data[0]});
+   let job = await req.qq.queueTask('doTurfIndexing', 'Turf {id:{turfId}}', {turfId: ref[0]});
 
-   job.turfId = ref.data[0];
+   job.turfId = ref[0];
 
    return res.json(job);
 })
@@ -126,8 +125,8 @@ module.exports = Router({mergeParams: true})
       _.merge({}, req.params, req.user));
   }
 
-  if (ref.data.length) {
-    turf = _.merge({}, ref.data[0]);
+  if (ref.length) {
+    turf = _.merge({}, ref[0]);
 
     ref = await req.db.query(`
 match (t:Turf {id:{turfId}})
@@ -144,16 +143,16 @@ return last_touch, active_name, total_active, total_assigned`,
 
     // turf stats
     turf.stats = {
-      'Last Touch': ref.data[0][0],
-      'Most active volunteer': ref.data[0][1],
-      'Number of active volunteers': ref.data[0][2],
-      'Number of volunteers assigned': ref.data[0][3],
+      'Last Touch': ref[0][0],
+      'Most active volunteer': ref[0][1],
+      'Number of active volunteers': ref[0][2],
+      'Number of volunteers assigned': ref[0][3],
       'First assigned': 'N/A',
       'Stats by Attribute': {
         'total': await stats_by_attr(req),
       }
     };
-    await asyncForEach((await req.db.query('match (aq:AttributeQuery) return aq.id, aq.name order by aq.name')).data, async (aq) => {
+    await asyncForEach((await req.db.query('match (aq:AttributeQuery) return aq.id, aq.name order by aq.name')), async (aq) => {
       turf.stats['Stats by Attribute'][aq[1]] = await stats_by_attr(req, aq[0]);
     });
   }
@@ -164,7 +163,7 @@ return last_touch, active_name, total_active, total_assigned`,
       match (t)--(qr:QRCode)--(f)
       return qr.id limit 1`,
       _.merge({}, req.query, req.params));
-    turf.qrcode = ref.data[0];
+    turf.qrcode = ref[0];
   }
 
   return res.json(turf);
@@ -214,25 +213,25 @@ return last_touch, active_name, total_active, total_assigned`,
   if (req.query.geometry) geom = true;
 
 // TODO: filter, start, limit
-  let ref;
+  let turfs;
 
   if (req.query.longitude || req.query.latitude) {
     req.query.longitude = parseFloat(req.query.longitude);
     req.query.latitude = parseFloat(req.query.latitude);
     if (isNaN(req.query.longitude) || isNaN(req.query.latitude)) return _400(res, "Invalid value to parameters 'longitude' or 'latitude'.");
 
-    ref = await req.db.query('call spatial.intersects("turf", {longitude: {longitude}, latitude: {latitude}}) yield node return node{.id, .name, .created}', req.query);
+    turfs = await req.db.query('call spatial.intersects("turf", {longitude: {longitude}, latitude: {latitude}}) yield node return node{.id, .name, .created}', req.query);
   } else {
 
     if (req.user.admin)
-      ref = await req.db.query('match (a:Turf) return a{.id, .name, .created'+(geom?', .geometry':'')+'} order by a.name');
+      turfs = await req.db.query('match (a:Turf) return a{.id, .name, .created'+(geom?', .geometry':'')+'} order by a.name');
     else
-      ref = await req.db.query('match (v:Volunteer {id:{id}}) optional match (v)-[:ASSIGNED]-(t:Turf) with v, t as dturf optional match (v)-[:MEMBERS]-(:Team)-[:ASSIGNED]-(t:Turf) with v, dturf + collect(t) as turf unwind turf as t call spatial.intersects("turf", t.wkt) yield node return node{.id, .name, .created'+(geom?', .geometry':'')+'} order by node.name', req.user);
+      turfs = await req.db.query('match (v:Volunteer {id:{id}}) optional match (v)-[:ASSIGNED]-(t:Turf) with v, t as dturf optional match (v)-[:MEMBERS]-(:Team)-[:ASSIGNED]-(t:Turf) with v, dturf + collect(t) as turf unwind turf as t call spatial.intersects("turf", t.wkt) yield node return node{.id, .name, .created'+(geom?', .geometry':'')+'} order by node.name', req.user);
   }
 
   return res.json({
-    count: ref.data.length,
-    turfs: ref.data,
+    count: turfs.length,
+    turfs,
   });
 })
 
@@ -241,7 +240,7 @@ async function stats_by_attr(req, aq) {
   let ref;
   if (aq) {
     ref = await req.db.query('match (aq:AttributeQuery {id:{id}})-[r:CONSTRAIN]->(at:Attribute) return at.id, r.not, r.op, r.value', {id: aq});
-    c = ref.data.map((attr, idx) => {
+    c = ref.map((attr, idx) => {
       req.query['aid'+idx] = attr[0];
       req.query['aval'+idx] = attr[3];
       return 'match (p)<-[:ATTRIBUTE_OF]-(pa'+idx+':PersonAttribute)-[:ATTRIBUTE_TYPE]->(:Attribute {id:{aid'+idx+'}}) where '+(attr[1]?'NOT':'')+' pa'+idx+'.value '+attr[2]+' {aval'+idx+'}';
@@ -257,9 +256,9 @@ optional match (p)<-[:VISIT_PERSON]-(rvi:Visit) where rvi.end > timestamp()-(100
 return count(distinct(a)), count(p), count(visits), count(recent_visits)`
   , _.merge({}, req.query, req.params));
   return {
-    'Total Addresses': ref.data[0][0],
-    'Total People': ref.data[0][1],
-    'Total People Visited': ref.data[0][2],
-    'People Visited in past month': ref.data[0][3],
+    'Total Addresses': ref[0][0],
+    'Total People': ref[0][1],
+    'Total People Visited': ref[0][2],
+    'People Visited in past month': ref[0][3],
   };
 }

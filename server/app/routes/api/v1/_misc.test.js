@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import { expect } from 'chai';
 
 import { appInit, base_uri, getObjs } from '../../../../test/lib/utils';
-import { ov_config } from '../../../lib/ov_config';
+import { hv_config } from '../../../lib/hv_config';
 import neo4j from '../../../lib/neo4j';
 import { version } from '../../../../../package.json';
 
@@ -14,7 +14,7 @@ var c, turfs, forms;
 describe('MISC endpoints', function () {
 
   before(async () => {
-    db = new neo4j(ov_config);
+    db = new neo4j(hv_config);
     nv = await db.version();
     api = appInit(db);
     c = getObjs('volunteers');

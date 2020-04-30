@@ -43,13 +43,13 @@ module.exports = Router({mergeParams: true})
 
   let ref = await req.db.query('match (f:Form {id:{formId}, public_onboard:true}) return f.id', req.body);
 
-  if (!ref.data[0]) return _403(res, "Invalid formId");
-  formId = ref.data[0];
+  if (!ref[0]) return _403(res, "Invalid formId");
+  formId = ref[0];
 
   ref = await req.db.query('call spatial.withinDistance("turf", {longitude: {longitude}, latitude: {latitude}}, 10) yield node as t where t.noautoturf is null with t limit 1 return t.id', req.body);
 
-  if (!ref.data[0]) return _403(res, reject_msg);
-  turfId = ref.data[0];
+  if (!ref[0]) return _403(res, reject_msg);
+  turfId = ref[0];
 
   return res.json({inviteCode: formId+','+turfId});
 });

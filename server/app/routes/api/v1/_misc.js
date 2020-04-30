@@ -3,7 +3,7 @@ import _ from 'lodash';
 
 import { volunteerAssignments, _400, _401 } from '../../../lib/utils';
 
-import { ov_config } from '../../../lib/ov_config';
+import { hv_config } from '../../../lib/hv_config';
 import { version } from '../../../../package.json';
 
 import { Router } from 'express';
@@ -100,7 +100,7 @@ module.exports = Router({mergeParams: true})
     msg = "You are assigned turf and ready to volunteer!";
 
   let ref = await req.db.query('match (s:SystemSetting {id:"sundownok"}) return s.value');
-  if (ref.data && ref.data[0]) ass.sundownok = true;
+  if (ref && ref[0]) ass.sundownok = true;
 
   return res.json({msg: msg, data: ass});
 })
@@ -110,12 +110,12 @@ module.exports = Router({mergeParams: true})
 .get('/dashboard', async (req, res) => {
   let nv = await req.db.version();
   if (req.user.admin === true) return res.json({
-    admins: (await req.db.query('match (v:Volunteer {admin:true}) return count(v)')).data[0],
-    volunteers: (await req.db.query('match (a:Volunteer) return count(a)')).data[0],
-    turfs: (await req.db.query('match (a:Turf) return count(a)')).data[0],
-    attributes: (await req.db.query('match (at:Attribute) return count(at)')).data[0],
-    forms: (await req.db.query('match (a:Form) return count(a)')).data[0],
-    addresses: (await req.db.query('match (a:Address) return count(a)')).data[0],
+    admins: (await req.db.query('match (v:Volunteer {admin:true}) return count(v)'))[0],
+    volunteers: (await req.db.query('match (a:Volunteer) return count(a)'))[0],
+    turfs: (await req.db.query('match (a:Turf) return count(a)'))[0],
+    attributes: (await req.db.query('match (at:Attribute) return count(at)'))[0],
+    forms: (await req.db.query('match (a:Form) return count(a)'))[0],
+    addresses: (await req.db.query('match (a:Address) return count(a)'))[0],
     dbsize: await req.db.size(),
     version: version,
     neo4j_version: nv,
@@ -123,8 +123,8 @@ module.exports = Router({mergeParams: true})
   else {
     let ass = await volunteerAssignments(req, 'Volunteer', req.user);
     return res.json({
-      admins: (await req.db.query('match (v:Volunteer {admin:true}) return count(v)')).data[0],
-      volunteers: (await req.db.query('match (v:Volunteer {id:{id}}) return v', req.user)).data.length,
+      admins: (await req.db.query('match (v:Volunteer {admin:true}) return count(v)'))[0],
+      volunteers: (await req.db.query('match (v:Volunteer {id:{id}}) return v', req.user)).length,
       turfs: ass.turfs.length,
       attributes: 'N/A',
       forms: ass.forms.length,
@@ -136,6 +136,6 @@ module.exports = Router({mergeParams: true})
 })
 .get('/google_maps_key', async (req, res) => {
   let ass = await volunteerAssignments(req, 'Volunteer', req.user);
-  if (ass.ready || req.user.admin) return res.json({google_maps_key: ov_config.google_maps_key });
+  if (ass.ready || req.user.admin) return res.json({google_maps_key: hv_config.google_maps_key });
   else return _401(res, "No soup for you");
 });

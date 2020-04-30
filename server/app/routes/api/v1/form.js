@@ -2,7 +2,7 @@ import { Router } from 'express';
 import _ from 'lodash';
 
 import { volunteerAssignments, valid, _400, _403 } from '../../../lib/utils';
-import { ov_config } from '../../../lib/ov_config';
+import { hv_config } from '../../../lib/hv_config';
 
 module.exports = Router({mergeParams: true})
 /**
@@ -37,7 +37,7 @@ module.exports = Router({mergeParams: true})
   // attributes property stores which order they come in as
   let ref = await req.db.query('match (a:Volunteer {id:{author_id}}) create (b:Form {id: randomUUID(), created: timestamp(), updated: timestamp(), name:{name}, attributes:{attributes}})-[:AUTHOR]->(a) with b unwind {attributes} as attr match (a:Attribute {id:attr}) merge (a)-[:COMPILED_ON]->(b) return b.id', req.body);
 
-  return res.json({formId: ref.data[0]});
+  return res.json({formId: ref[0]});
 })
 /**
  * @swagger
@@ -113,9 +113,9 @@ module.exports = Router({mergeParams: true})
   let form = {};
 
   let a = await req.db.query('match (a:Form {id:{formId}})-[:AUTHOR]-(b:Volunteer) return a,b', req.params);
-  form = a.data[0][0];
-  form.author_id = a.data[0][1].id;
-  form.author = a.data[0][1].name;
+  form = a[0][0];
+  form.author_id = a[0][1].id;
+  form.author = a[0][1].name;
 
   // convert array of form IDs to array of form objects
   let order = _.merge({}, form.attributes);
@@ -123,14 +123,14 @@ module.exports = Router({mergeParams: true})
   let b = await req.db.query('match (a:Attribute)-[c:COMPILED_ON]->(b:Form {id:{formId}}) return a{.*, readonly: c.readonly}', req.params);
   for (let o in order) {
     let id = order[o];
-    for (let i in b.data) {
-      if (b.data[i].id === id) form.attributes.push(b.data[i]);
+    for (let i in b) {
+      if (b[i].id === id) form.attributes.push(b[i]);
     }
   }
 
   // add the user's turfs to this form
   let c = await req.db.query('match (t:Turf) where t.id in {turfIds} return t.id, t.name, t.geometry', {turfIds: idFromArrObj(ass.turfs)});
-  form.turfs = c.data.map(t => {
+  form.turfs = c.map(t => {
     let turf = JSON.parse(t[2]);
     turf.id = t[0];
     turf.name = t[1];
@@ -139,9 +139,9 @@ module.exports = Router({mergeParams: true})
 
   // add default filters to this form
   let d = await req.db.query('match (:Form {id:{formId}})-[r:DEFAULT_FILTER]->(at:Attribute) return at{.*, value: r.value}', req.params);
-  if (d.data[0]) form.default_filters = d.data;
+  if (d[0]) form.default_filters = d;
 
-  if (ov_config.volunteer_add_new) form.add_new = true;
+  if (hv_config.volunteer_add_new) form.add_new = true;
 
   return res.json(form);
 })
@@ -195,18 +195,18 @@ module.exports = Router({mergeParams: true})
  *               "$ref": "#/components/schemas/forms"
  */
 .get('/forms', async (req, res) => {
-  let ref;
+  let forms;
 
 // TODO: filter, start, limit
 
   if (req.user.admin)
-    ref = await req.db.query('match (a:Form) return a');
+    forms = await req.db.query('match (a:Form) return a');
   else
-    ref = await req.db.query('match (v:Volunteer {id:{id}})-[:ASSIGNED]-(f:Form) return f', req.user);
+    forms = await req.db.query('match (v:Volunteer {id:{id}})-[:ASSIGNED]-(f:Form) return f', req.user);
 
   return res.json({
-    count: ref.data.length,
-    forms: ref.data,
+    count: forms.length,
+    forms,
   });
 })
 

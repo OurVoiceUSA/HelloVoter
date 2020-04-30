@@ -3,7 +3,7 @@ import _ from 'lodash';
 
 import { appInit, base_uri, getObjs } from '../../../../test/lib/utils';
 import { ID_NAME, ID_REG_VOTER } from '../../../lib/consts';
-import { ov_config } from '../../../lib/ov_config';
+import { hv_config } from '../../../lib/hv_config';
 import neo4j from '../../../lib/neo4j';
 
 var api;
@@ -14,7 +14,7 @@ var at;
 describe('Attributes', function () {
 
   before(() => {
-    db = new neo4j(ov_config);
+    db = new neo4j(hv_config);
     api = appInit(db);
     c = getObjs('volunteers');
     forms = getObjs('forms');

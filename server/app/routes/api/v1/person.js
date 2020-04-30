@@ -1,41 +1,202 @@
 import { Router } from 'express';
 
 import { volunteerAssignments, _400, _403, _422 } from '../../../lib/utils';
-import { ov_config } from '../../../lib/ov_config';
+import { hv_config } from '../../../lib/hv_config';
 
 module.exports = Router({mergeParams: true})
-.get('/people/get/byposition', async (req, res) => {
-  req.query.longitude = parseFloat(req.query.longitude);
-  req.query.latitude = parseFloat(req.query.latitude);
-
-  if (isNaN(req.query.longitude) || isNaN(req.query.latitude)) return _400(res, "Invalid value to parameters 'longitude' or 'latitude'.");
-
-  return visitsAndPeople(req, res);
-})
-.post('/people/get/byposition', async (req, res) => {
-  // hack the post to be like a get
-  req.query = req.body;
-
-  req.query.longitude = parseFloat(req.query.longitude);
-  req.query.latitude = parseFloat(req.query.latitude);
-
-  if (isNaN(req.query.longitude) || isNaN(req.query.latitude)) return _400(res, "Invalid value to parameters 'longitude' or 'latitude'.");
-
-  return visitsAndPeople(req, res);
-})
-.get('/people/get/byaddress', async (req, res) => {
-  if (!req.query.aId) return _400(res, "Invalid value to parameter 'aId'.");
-
-  return visitsAndPeople(req, res);
-})
-.post('/people/visit/add', async (req, res) => {
-  if (!ov_config.volunteer_add_new) return _403(res, "Permission denied.");
+/**
+ * @swagger
+ *
+ * /person:
+ *   post:
+ *     description: Add a new person
+ *     tags:
+ *       - persons
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             allOf:
+ *               - "$ref": "#/components/schemas/formId"
+ *               - "$ref": "#/components/schemas/deviceId"
+ *               - "$ref": "#/components/schemas/addressId"
+ *               - "$ref": "#/components/schemas/unit"
+ *               - "$ref": "#/components/schemas/longitude"
+ *               - "$ref": "#/components/schemas/latitude"
+ *               - "$ref": "#/components/schemas/status"
+ *               - "$ref": "#/components/schemas/start"
+ *               - "$ref": "#/components/schemas/end"
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/personId"
+ */
+.post('/person', async (req, res) => {
+  if (!hv_config.volunteer_add_new) return _403(res, "Permission denied.");
+  if (!req.body.personId) return _400(res, "Invalid value to parameter 'personId'.");
   req.addnewperson = true;
   return peopleVisitUpdate(req, res);
 })
-.post('/people/visit/update', async (req, res) => {
+/**
+ * @swagger
+ *
+ * /person/{id}:
+ *   get:
+ *     description: Get info about a person
+ *     tags:
+ *       - persons
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/data"
+ *   put:
+ *     description: Update given attributes of a person
+ *     tags:
+ *       - persons
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             allOf:
+ *               - "$ref": "#/components/schemas/formId"
+ *               - "$ref": "#/components/schemas/deviceId"
+ *               - "$ref": "#/components/schemas/addressId"
+ *               - "$ref": "#/components/schemas/unit"
+ *               - "$ref": "#/components/schemas/longitude"
+ *               - "$ref": "#/components/schemas/latitude"
+ *               - "$ref": "#/components/schemas/status"
+ *               - "$ref": "#/components/schemas/start"
+ *               - "$ref": "#/components/schemas/end"
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/personId"
+ *   delete:
+ *     description: Delete a person. Virtually. Murder is wrong!
+ *     tags:
+ *       - persons
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/empty"
+ */
+.get('/person/:id', async (req, res) => {
+  // TODO: implement this
+  return res.json({id: req.params.id});
+})
+.put('/person/:id', async (req, res) => {
+  req.body.personId = req.params.id;
   return peopleVisitUpdate(req, res);
-});
+  return res.json({updated: true});
+})
+.delete('/person/:id', async (req, res) => {
+  if (!req.user.admin) return _403(res, "Permission denied.");
+  // TODO: queue this & also delete visit objects too
+  await req.db.query('match (p:Person {id:{id}}) detach delete p', req.params.id);
+  return res.json({deleted: true});
+})
+/**
+ * @swagger
+ *
+ * /persons:
+ *   get:
+ *     description: Get an array of persons matching a filter.
+ *     tags:
+ *       - persons
+ *     parameters:
+ *       - in: query
+ *         required: true
+ *         name: longitude
+ *         type: integer
+ *       - in: query
+ *         required: true
+ *         name: latitude
+ *         type: integer
+ *       - in: query
+ *         name: filters
+ *         type: array
+ *       - in: query
+ *         name: dist
+ *         type: integer
+ *       - in: query
+ *         name: limit
+ *         type: integer
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/persons"
+ */
+.get('/persons', async (req, res) => {
+  req.query.longitude = parseFloat(req.query.longitude);
+  req.query.latitude = parseFloat(req.query.latitude);
+
+  if (isNaN(req.query.longitude) || isNaN(req.query.latitude)) return _400(res, "Invalid value to parameters 'longitude' or 'latitude'.");
+
+  // TODO: Need to solve address + unit query complexity problem
+  // TODO: Visits needs to be by person, not by address/unit, and only the latest one
+
+  if (!req.query.formId) return _400(res, "Invalid value to parameter 'formId'.");
+
+  if (req.query.limit) req.query.limit = parseInt(req.query.limit);
+  req.query.id = req.user.id;
+
+  // initialize empty filters if not defined so we can check length below
+  if (!req.query.filters) req.query.filters = [];
+
+  // filter out empty filter values
+  if (req.query.filters.length) {
+    req.query.filters = req.query.filters.filter(f => {
+      if (typeof f.value === "object" && f.value.length && f.value.indexOf(null) === -1) return true;
+      if (typeof f.value === "boolean") {
+        f.value = [f.value];
+        return true;
+      }
+      return false;
+    });
+  }
+
+  // default & cap on limit
+  if (!req.query.limit || req.query.limit > 1000) req.query.limit = 1000;
+
+  let ret = await visitsAndPeopleFromPoint(req, req.query.longitude, req.query.latitude);
+  if (ret.length === 0) {
+    // find center(ish) of an assigned turf and use that as the query point
+    let ref = await req.db.query(`match (v:Volunteer {id:{id}})<-[:ASSIGNED]-(t:Turf)
+    return (t.bbox[0]+t.bbox[2])/2, (t.bbox[1]+t.bbox[3])/2 limit 1`, req.query);
+    if (!ref || !ref[0]) return _403(res, "No Turf assignments.");
+    ret = await visitsAndPeopleFromPoint(req, ref[0][0], ref[0][1]);
+  }
+  if (ret.length !== 0) return res.json(ret);
+
+  return res.json([]);
+})
 
 async function peopleVisitUpdate(req, res) {
   let ref = {};
@@ -78,7 +239,7 @@ async function peopleVisitUpdate(req, res) {
     // ensure this ID doesn't already exist
     let ref = await req.db.query('match (p:Person {id:{personId}}) return count (p)', req.body);
 
-    if (ref.data[0] > 0) return _403(res, "Person already exists.");
+    if (ref[0] > 0) return _403(res, "Person already exists.");
 
     await req.db.query('match (a:Address {id:{addressId}})'+(req.body.unit?'<-[:AT]-(u:Unit {name:{unit}})':'')+' create (p:Person {id:{personId}}) create (p)-[r:RESIDENCE {current:true}]->'+(req.body.unit?'(u)':'(a)'), req.body);
   }
@@ -129,49 +290,12 @@ TODO: constrain update to a turf their assigned to, but without creating multipl
 
   // if nothing was returned, they had all the right params but it didn't match up with the dataset somehow
   // return the "Unprocessable Entity" http error code
-  if (!ref.data[0]) {
+  if (!ref[0]) {
     console.warn({body: req.body});
     return _422(res, "Query returned no data. Something went wrong with your request.");
   }
 
-  return res.json(ref.data);
-}
-
-async function visitsAndPeople(req, res) {
-  if (!req.query.formId) return _400(res, "Invalid value to parameter 'formId'.");
-
-  if (req.query.limit) req.query.limit = parseInt(req.query.limit);
-  req.query.id = req.user.id;
-
-  // initialize empty filters if not defined so we can check length below
-  if (!req.query.filters) req.query.filters = [];
-
-  // filter out empty filter values
-  if (req.query.filters.length) {
-    req.query.filters = req.query.filters.filter(f => {
-      if (typeof f.value === "object" && f.value.length && f.value.indexOf(null) === -1) return true;
-      if (typeof f.value === "boolean") {
-        f.value = [f.value];
-        return true;
-      }
-      return false;
-    });
-  }
-
-  // default & cap on limit
-  if (!req.query.limit || req.query.limit > 1000) req.query.limit = 1000;
-
-  let ret = await visitsAndPeopleFromPoint(req, req.query.longitude, req.query.latitude);
-  if (ret.length === 0) {
-    // find center(ish) of an assigned turf and use that as the query point
-    let ref = await req.db.query(`match (v:Volunteer {id:{id}})<-[:ASSIGNED]-(t:Turf)
-    return (t.bbox[0]+t.bbox[2])/2, (t.bbox[1]+t.bbox[3])/2 limit 1`, req.query);
-    if (!ref.data || !ref.data[0]) return _403(res, "No Turf assignments.");
-    ret = await visitsAndPeopleFromPoint(req, ref.data[0][0], ref.data[0][1]);
-  }
-  if (ret.length !== 0) return res.json(ret);
-
-  return res.json([]);
+  return res.json(ref);
 }
 
 async function visitsAndPeopleFromPoint(req, longitude, latitude) {
@@ -190,7 +314,7 @@ async function visitsAndPeopleFromPoint(req, longitude, latitude) {
     // scale up distance
     req.query.dist *= 2;
     let ref = await req.db.query(`match (a:Address) using index a:Address(position) where distance(a.position, point({longitude: {longitude}, latitude: {latitude}})) < {dist} return count(a)`, req.query);
-    if (ref.data[0] >= (req.query.limit*(req.query.filters.length+1))) enough = true;
+    if (ref[0] >= (req.query.limit*(req.query.filters.length+1))) enough = true;
     if (req.query.dist >= 16000) enough = true;
   }
 
@@ -255,5 +379,5 @@ optional match (r)<-[:VISIT_AT]-(v:Visit)-[:VISIT_FORM]->(:Form {id:{formId}})
 
   let ref = await req.db.query(q, req.query);
 
-  return ref.data[0];
+  return ref[0];
 }

@@ -1,21 +1,21 @@
 import { Router } from 'express';
 
 import { valid, _400, _403 } from '../../../lib/utils';
-import { ov_config } from '../../../lib/ov_config';
+import { hv_config } from '../../../lib/hv_config';
 
 
 module.exports = Router({mergeParams: true})
 .get('/import/required-fields', (req, res) => {
   if (req.user.admin !== true) return _403(res, "Permission denied.");
-  if (ov_config.enable_geocode) return res.json({couint: 3, fields: [1,3,5]}); // things required to call a geocoder
+  if (hv_config.enable_geocode) return res.json({couint: 3, fields: [1,3,5]}); // things required to call a geocoder
   else return res.json({count: 3, fields: [1,6,7]}); // require street, lat, lng
 })
 .get('/import', async (req, res) => {
   if (req.user.admin !== true) return _403(res, "Permission denied.");
-  let ref = await req.db.query('match (a:ImportFile) return a order by a.created desc', {});
+  let im = await req.db.query('match (a:ImportFile) return a order by a.created desc', {});
   return res.json({
-    count: ref.data.length,
-    import: ref.data,
+    count: im.length,
+    import: im,
   });
 })
 .post('/import/begin', async (req, res) => {
@@ -26,7 +26,7 @@ module.exports = Router({mergeParams: true})
   // TODO: validate that req.body.filename is a file name
   req.body.id = req.user.id;
   let ref = await req.db.query('match (a:ImportFile {filename:{filename}}) where a.submitted is not null return count(a)', req.body);
-  if (ref.data[0] !== 0) return _403(res, "Import File already exists.");
+  if (ref[0] !== 0) return _403(res, "Import File already exists.");
 
   // attributes property stores which order they come in as
   await req.db.query('match (a:Volunteer {id:{id}}) merge (b:ImportFile {filename:{filename}}) on create set b += {id: randomUUID(), created: timestamp(), attributes: {attributes}} merge (b)-[:IMPORTED_BY]->(a) with b unwind {attributes} as attr match (a:Attribute {name:attr}) merge (b)-[:ATTRIBUTES]->(a)', req.body);
@@ -42,8 +42,8 @@ module.exports = Router({mergeParams: true})
   // convert attriutes to part of a cypher query
   let attrq = "";
   let ref = await req.db.query('match (a:ImportFile {filename:{filename}}) return a.attributes', req.body);
-  for (let i = 0; i < ref.data[0].length; i++) {
-    attrq += ',`'+ref.data[0][i]+'`:r['+(i+8)+']';
+  for (let i = 0; i < ref[0].length; i++) {
+    attrq += ',`'+ref[0][i]+'`:r['+(i+8)+']';
   }
   await req.db.query(`
 match (a:ImportFile {filename:{filename}})
@@ -61,7 +61,7 @@ merge (b)-[:FILE]->(a)`,
   if (!valid(req.body.filename)) return _400(res, "Invalid value to parameter 'filename'.");
 
   let ref = await req.db.query('match (a:ImportFile {filename:{filename}}) where a.submitted is null set a.submitted = timestamp() return count(a)', req.body);
-  if (ref.data[0] !== 1) return _403(res, "Import File already submitted for processing.");
+  if (ref[0] !== 1) return _403(res, "Import File already submitted for processing.");
 
   let job = await req.qq.queueTask('doProcessImport', 'ImportFile {filename:{filename}}', {filename: req.body.filename});
 

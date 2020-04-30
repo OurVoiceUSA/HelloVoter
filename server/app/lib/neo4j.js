@@ -24,7 +24,7 @@ export default class db {
           console.log('DEBUG: :params '+str.substring(0, 1024));
         }
       }
-      return this.db[func](params[0], params[1], params[2]);
+      return (await this.db[func](params[0], params[1], params[2])).data;
   }
 
   async query(q, p, d) {
@@ -41,11 +41,11 @@ export default class db {
   }
 
   async version() {
-    return ((await this.query('call apoc.monitor.kernel() yield kernelVersion return split(split(kernelVersion, ",")[1], " ")[2]'))).data[0];
+    return (await this.query('call apoc.monitor.kernel() yield kernelVersion return split(split(kernelVersion, ",")[1], " ")[2]'))[0];
   }
 
   async size() {
-    return ((await this.query('CALL apoc.monitor.store() YIELD totalStoreSize return totalStoreSize'))).data[0];
+    return (await this.query('CALL apoc.monitor.store() YIELD totalStoreSize return totalStoreSize'))[0];
   }
 
 }

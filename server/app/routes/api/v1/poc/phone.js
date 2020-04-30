@@ -43,7 +43,7 @@ module.exports = Router({mergeParams: true})
   // calls per second rate-limit
   let caller_sec_delay = 5;
   let ref = await req.db.query(`match (cq:CallerQueue)-[:CALLER]->(v:Volunteer {id:{id}}) where cq.created > (timestamp()-`+caller_sec_delay+`*1000) return count(cq)`, req.body);
-  if (ref.data[0] > 0) {
+  if (ref[0] > 0) {
     console.log("caller_sec_delay rate-limit triggered for volunteer "+req.user.name+" / "+req.user.id);
     return res.json({});
   }
@@ -51,7 +51,7 @@ module.exports = Router({mergeParams: true})
   // calls per hour rate limit
   let max_calls_hour = 120;
   ref = await req.db.query(`match (cq:CallerQueue)-[:CALLER]->(v:Volunteer {id:{id}}) where cq.created > (timestamp()-60*60*1000) return count(cq)`, req.body);
-  if (ref.data[0] > max_calls_hour) {
+  if (ref[0] > max_calls_hour) {
     console.log("max_calls_hour rate-limit triggered for volunteer "+req.user.name+" / "+req.user.id);
     return res.json({});
   }
@@ -60,9 +60,9 @@ module.exports = Router({mergeParams: true})
 
   // check for server-side attribute filter
   ref = await req.db.query(`match (f:Form {id: {formId}})-[:PHONE_FILTER]->(at:Attribute) with at limit 1 return at`, req.body);
-  if (ref.data[0]) {
-    req.body.filter_id = ref.data[0].id;
-    req.body.filter_name = ref.data[0].name;
+  if (ref[0]) {
+    req.body.filter_id = ref[0].id;
+    req.body.filter_name = ref[0].name;
   }
 
   ref = await req.db.query(`match (f:Form {id: {formId}})
@@ -91,8 +91,8 @@ module.exports = Router({mergeParams: true})
   `, req.body);
 
   let tocall = {};
-  if (ref.data[0]) {
-    req.body.personId = ref.data[0].id;
+  if (ref[0]) {
+    req.body.personId = ref[0].id;
     // queue this person so they aren't called by someone else for `queue_minutes`
     await req.db.query(`
     match (v:Volunteer {id:{id}})
@@ -101,7 +101,7 @@ module.exports = Router({mergeParams: true})
     create (cq)-[:CALL_TARGET]->(p)
     create (cq)-[:CALLER]->(v)
     `, req.body);
-    tocall = ref.data[0];
+    tocall = ref[0];
     if (req.body.filter_id) tocall.extra_info = req.body.filter_name;
   }
 

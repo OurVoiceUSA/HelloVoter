@@ -1,7 +1,7 @@
 
 import { expect } from 'chai';
 
-import { ov_config } from '../../app/lib/ov_config';
+import { hv_config } from '../../app/lib/hv_config';
 import neo4j from '../../app/lib/neo4j';
 import { appInit, base_uri, getObjs } from '../lib/utils';
 
@@ -12,7 +12,7 @@ var c, turfs, forms;
 describe('New Volunteer Zero Visibility', function () {
 
   before(() => {
-    db = new neo4j(ov_config);
+    db = new neo4j(hv_config);
     api = appInit(db);
     c = getObjs('volunteers');
     turfs = getObjs('turfs');

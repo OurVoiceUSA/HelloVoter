@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { ov_config } from './ov_config';
+import { hv_config } from './hv_config';
 import neo4j from './neo4j';
 import * as utils from './utils';
 
@@ -34,7 +34,7 @@ var res = {
 describe('App Utils', function () {
 
   before(() => {
-    db = new neo4j(ov_config);
+    db = new neo4j(hv_config);
     req.db = db;
   });
 
@@ -100,6 +100,32 @@ describe('App Utils', function () {
 
   it('getClientIP', () => {
     expect(utils.getClientIP(req)).to.equal('127.0.0.1');
+  });
+
+  it('randomBytes runs', async () => {
+    let str = await utils.generateToken({crypto: {
+      randomBytes: (size, callback) => {
+        callback(null, Buffer.from("notrandomandlongenoughtogivespecialchars", 'utf8'));
+      }
+    }});
+    expect(str).to.equal("bm90cmFuZG9tYW5kbG9uZ2Vub3VnaHRvZ2l2ZXNwZWNpYWxjaGFycw__");
+  });
+
+  it('randomBytes throws error', async () => {
+    try {
+      await utils.generateToken({crypto: {
+        randomBytes: (size, callback) => {
+          callback("error", null);
+        }
+      }});
+      expect(false).to.equal(true);
+    } catch (e) {
+      expect(true).to.equal(true);
+    }
+  });
+
+  it('two birds with one stone', async () => {
+    await utils.asyncForEach([1,2,3], utils.sleep);
   });
 
 });

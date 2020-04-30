@@ -1,8 +1,5 @@
-
-import { asyncForEach, sleep } from 'ourvoiceusa-sdk-js';
-
-import { ov_config } from './ov_config';
-import { min_neo4j_version } from './utils';
+import { asyncForEach, sleep, min_neo4j_version } from './utils';
+import { hv_config } from './hv_config';
 import queue from './queue';
 
 import {
@@ -16,31 +13,29 @@ var jmx;
 var jmxclient = {};
 var jvmconfig = {};
 
-export var concurrency = ov_config.job_concurrency;
+export var concurrency = hv_config.job_concurrency;
 
 // tasks to do on startup
-export async function doStartupTasks(db, qq) {
+export async function doStartupTasks(db, qq, jmx) {
   // required to do in sequence
-  if (!ov_config.disable_jmx) await doJmxInit(db, qq);
+  if (!hv_config.disable_jmx) await doJmxInit(db, qq, jmx);
   await doDbInit(db);
   // can happen in parallel
   postDbInit(qq);
 }
 
-async function doJmxInit(db, qq) {
+async function doJmxInit(db, qq, jmx) {
   let start = new Date().getTime();
   console.log("doJmxInit() started @ "+start);
 
   try {
     let data;
 
-    jmx = _require('jmx');
-
     jmxclient = jmx.createClient({
-      host: ov_config.neo4j_host,
-      port: ov_config.neo4j_jmx_port,
-      username: ov_config.neo4j_jmx_user,
-      password: ov_config.neo4j_jmx_pass,
+      host: hv_config.neo4j_host,
+      port: hv_config.neo4j_jmx_port,
+      username: hv_config.neo4j_jmx_user,
+      password: hv_config.neo4j_jmx_pass,
     });
     await new Promise((resolve, reject) => {
       jmxclient.on('connect', resolve);
@@ -68,18 +63,14 @@ async function doJmxInit(db, qq) {
     jvmconfig.numcpus = data;
 
     // close the connection
-    // TODO: hold it open and actively monitor the system
     jmxclient.disconnect();
 
-  } catch (e) {
-    console.warn("Unable to connect to JMX, see error below. As a result, we won't be able to optimize database queries on large sets of data, nor can we honor the JOB_CONCURRENCY configuration.");
-    console.warn(e);
-  }
+  } catch (e) {}
 
   // community edition maxes at 4 cpus
   if (jvmconfig.numcpus && jvmconfig.numcpus > 4) {
     let ref = await db.query('call dbms.components() yield edition');
-    if (ref.data[0] !== 'enterprise') {
+    if (ref[0] !== 'enterprise') {
       console.warn("WARNING: Your neo4j database host has "+jvmconfig.numcpus+" CPUs but you're not running enterprise edition, so only up to 4 are actually utilized by neo4j.");
       jvmconfig.numcpus = 4;
     }
@@ -175,7 +166,7 @@ export async function doDbInit(db) {
   // create any indexes we need if they don't exist
   await asyncForEach(indexes, async (index) => {
     let ref = await db.query('call db.indexes() yield tokenNames, properties with * where {label} in tokenNames and {property} in properties return count(*)', index);
-    if (ref.data[0] === 0) {
+    if (ref[0] === 0) {
       console.log("Cypher exec: "+index.create);
       await db.query(index.create);
     }
@@ -189,7 +180,7 @@ export async function doDbInit(db) {
   // create any spatial layers we need if they don't exist
   await asyncForEach(spatialLayers, async (layer) => {
     let ref = await db.query('match (a {layer:{layer}})-[:LAYER]-(:ReferenceNode {name:"spatial_root"}) return count(a)', {layer: layer.name});
-    if (ref.data[0] === 0) {
+    if (ref[0] === 0) {
       await db.query(layer.create);
       await sleep(1000);
     }
@@ -216,7 +207,7 @@ export async function doDbInit(db) {
 
   await asyncForEach(defaultAttributes, async (attribute) => {
     let ref = await db.query('match (a:Attribute {id:{id}}) return count(a)', {id: attribute.id});
-    if (ref.data[0] === 0) {
+    if (ref[0] === 0) {
       await db.query('create (:Attribute {id:{id},name:{name},order:{order},type:{type},multi:{multi}})', attribute);
       if (attribute.values) await db.query('match (a:Attribute {id:{id}}) set a.values = {values}', attribute);
     }

@@ -1,12 +1,9 @@
-
-import crypto from 'crypto';
-
-import { ov_config } from './ov_config';
+import { hv_config } from './hv_config';
 
 export var min_neo4j_version = 3.5;
 
 export function getClientIP(req) {
-  if (ov_config.ip_header) return req.header(ov_config.ip_header);
+  if (hv_config.ip_header) return req.header(hv_config.ip_header);
   else return req.connection.remoteAddress;
 }
 
@@ -33,8 +30,8 @@ export async function volunteerAssignments(req, type, vol) {
 
   let ref = await req.db.query('match (a:'+type+' {id:{id}}) optional match (a)-[r:'+members+']-(b:Team) with a, collect(b{.*,leader:r.leader}) as teams optional match (a)-[:'+assigned+']-(b:Form) with a, teams, collect(b{.*,direct:true}) as dforms optional match (a)-[:'+members+']-(:Team)-[:ASSIGNED]-(b:Form) with a, teams, dforms + collect(b{.*}) as forms optional match (a)-[:'+assigned+']-(b:Turf) with a, teams, forms, collect(b{.id,.name,direct:true}) as dturf optional match (a)-[:'+members+']-(:Team)-[:ASSIGNED]-(b:Turf) with a, teams, forms, dturf + collect(b{.id,.name}) as turf return forms, turf', vol);
 
-  obj.forms = ref.data[0][0];
-  obj.turfs = ref.data[0][1];
+  obj.forms = ref[0][0];
+  obj.turfs = ref[0][1];
 
   if (obj.turfs.length > 0 && obj.forms.length > 0)
     obj.ready = true;
@@ -48,8 +45,8 @@ export async function _volunteersFromCypher(req, query, args) {
   let volunteers = [];
 
   let ref = await req.db.query(query, args)
-  for (let i in ref.data) {
-    let c = ref.data[i];
+  for (let i in ref) {
+    let c = ref[i];
     c.ass = await volunteerAssignments(req, 'Volunteer', c);
     volunteers.push(c);
   }
@@ -57,7 +54,7 @@ export async function _volunteersFromCypher(req, query, args) {
   return volunteers;
 }
 
-export function generateToken({ stringBase = 'base64', byteLength = 48 } = {}) {
+export async function generateToken({ crypto, stringBase = 'base64', byteLength = 48 } = {}) {
   return new Promise((resolve, reject) => {
     crypto.randomBytes(byteLength, (err, buffer) => {
       if (err) {
@@ -115,3 +112,9 @@ export function valid(str) {
   if (str.match(/\*/)) return false;
   return true;
 }
+
+export async function asyncForEach(a, c) {
+  for (let i = 0; i < a.length; i++) await c(a[i], i, a);
+}
+
+export var sleep = m => new Promise(r => setTimeout(r, m));

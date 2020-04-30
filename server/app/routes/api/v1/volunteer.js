@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import crypto from 'crypto';
 import _ from 'lodash';
 
 import { generateToken, valid, _400, _403, _404 } from '../../../lib/utils';
@@ -22,7 +23,7 @@ module.exports = Router({mergeParams: true})
  */
 .get('/volunteer/whoami', async (req, res) => {
   let ref = await req.db.query('match (v:Volunteer {id:{id}}) return v', req.user);
-  return res.json(ref.data[0]);
+  return res.json(ref[0]);
 })
 /**
  * @swagger
@@ -71,7 +72,7 @@ module.exports = Router({mergeParams: true})
 .get('/volunteer/:id', async (req, res) => {
   if (!req.user.admin && req.params.id !== req.user.id) return _403(res, "Permission denied.");
   let ref = await req.db.query('match (v:Volunteer {id:{id}}) return v{.id, .name, .email, .avatar, .locationstr, .admin}', req.params);
-  return res.json(ref.data[0]);
+  return res.json(ref[0]);
 })
 .put('/volunteer/:id', async (req, res) => {
   // TODO: need to validate input, and only do updates based on what was posted
@@ -128,7 +129,7 @@ module.exports = Router({mergeParams: true})
   if (req.params.id === req.user.id) return _403(res, "You can't lock yourself.");
 
   let ref = await req.db.query("match (a:Volunteer {id:{id}}) return a", req.params);
-  if (ref.data[0] && ref.data[0].admin === true) return _403(res, "Permission denied.");
+  if (ref[0] && ref[0].admin === true) return _403(res, "Permission denied.");
 
   await req.db.query('match (a:Volunteer {id:{id}}) set a.locked=true', req.params);
   return res.json({updated: true})
@@ -167,7 +168,7 @@ module.exports = Router({mergeParams: true})
 
   if (!req.user.admin && req.params.id !== req.user.id) return _403(res, "Permission denied.");
 
-  let ref = await req.db.query(`match (v:Volunteer`+
+  let visits = await req.db.query(`match (v:Volunteer`+
     (req.user.admin?``:` {id:{id}}`)+
     `)<-[:VISIT_VOLUNTEER]-(vi:Visit)-[:VISIT_FORM]->(f:Form {id:{formId}})
       where NOT vi.location is null
@@ -181,8 +182,8 @@ module.exports = Router({mergeParams: true})
     _.merge({}, req.query, req.params));
 
   return res.json({
-    count: ref.data.length,
-    visits: ref.data,
+    count: visits.length,
+    visits,
   });
 })
 /**
@@ -240,11 +241,11 @@ module.exports = Router({mergeParams: true})
 .get('/volunteer/:id/apikey', async (req, res) => {
   if (!req.user.admin && req.params.id !== req.user.id) return _404(res, "Volunteer not found");
   let ref = await req.db.query('match (v:Volunteer {id:{id}}) return v.apikey', req.params);
-  return res.json({apikey: ref.data[0]});
+  return res.json({apikey: ref[0]});
 })
 .put('/volunteer/:id/apikey', async (req, res) => {
   if (!req.user.admin && req.params.id !== req.user.id) return _404(res, "Volunteer not found");
-  let apikey = await generateToken();
+  let apikey = await generateToken({crypto});
   await req.db.query('match (v:Volunteer {id:{id}}) set v.apikey = {apikey}',
     _.merge({apikey}, req.params));
   return res.json({apikey});
@@ -286,13 +287,13 @@ module.exports = Router({mergeParams: true})
   if (req.query.limit) req.query.limit = parseInt(req.query.limit);
   if (req.query.filter) req.query.filter = '.*'+req.query.filter+'.*';
 
-  let ref = await req.db.query(`match (v:Volunteer`+(req.user.admin?``:` {id:{id}}`)+`)
+  let volunteers = await req.db.query(`match (v:Volunteer`+(req.user.admin?``:` {id:{id}}`)+`)
     `+(req.query.filter?` where v.name =~ {filter} or v.email =~ {filter} or v.locationstr = {filter}`:``)+
     ` return v{.id, .name, .email, .avatar, .locationstr, .admin} order by v.name skip {start}`+(req.query.limit?` limit {limit}`:``),
     _.merge({}, req.query, req.user));
 
   return res.json({
-    count: ref.data.length,
-    volunteers: ref.data,
+    count: volunteers.length,
+    volunteers,
   });
 })

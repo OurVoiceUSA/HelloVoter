@@ -1,13 +1,13 @@
 import { Router } from 'express';
 
-import { ov_config } from '../../../lib/ov_config';
+import { hv_config } from '../../../lib/hv_config';
 import { _volunteersFromCypher, _400, _403 } from '../../../lib/utils';
 
 async function cqdo(req, res, q, p, a) {
   if (a === true && req.user.admin !== true)
     return _403(res, "Permission denied.");
   let ref = await req.db.query(q, p);
-  return res.status(200).json({msg: "OK", data: ref.data});
+  return res.status(200).json({msg: "OK", data: ref});
 }
 
 module.exports = Router({mergeParams: true})
@@ -27,10 +27,10 @@ module.exports = Router({mergeParams: true})
 
   if (!req.body.override) {
     await req.db.query('match (a:Volunteer {id:{vId}}) return a', req.body);
-    //let c = ret.data[0];
+    //let c = ret[0];
 
     await req.db.query('match (a:Turf {id:{turfId}}) return a', req.body);
-    //let t = ret.data[0];
+    //let t = ret[0];
 
     // TODO: config option for whether or not we care...
     //if (!ingeojson(JSON.parse(t.geometry), c.longitude, c.latitude)) return _400(res, "Volunteer location is not inside that turf.");

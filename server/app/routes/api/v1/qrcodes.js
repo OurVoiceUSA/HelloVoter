@@ -7,17 +7,17 @@ module.exports = Router({mergeParams: true})
 .post('/qrcode', async (req, res) => {
   if (!req.user.admin) return _403(res, "Permission denied.");
 
-  let token = await generateToken();
+  let token = await generateToken({crypto});
 
   let ref = await req.db.query('match (v:Volunteer {id:{id}}) create (qr:QRCode {id: {token}}) create (qr)-[:GENERATED_BY]->(v) set qr.created = timestamp(), qr.name = "Unnamed QR Code" return qr', {id: req.user.id, token});
 
-  return res.json(ref.data[0]);
+  return res.json(ref[0]);
 })
 .get('/qrcode/:id', async (req, res) => {
   if (!req.user.admin) return _403(res, "Permission denied.");
 
   let ref = await req.db.query('match (qr:QRCode {id:{id}}) optional match (v:Volunteer)-[:SCANNED]->(qr) return qr{.*, num_volunteers: count(distinct(v))}', req.query);
-  let qrcode = ref.data[0];
+  let qrcode = ref[0];
   qrcode.ass = await volunteerAssignments(req, 'QRCode', qrcode);
 
   return res.json(qrcode);
@@ -47,5 +47,5 @@ module.exports = Router({mergeParams: true})
 
   let qrcodes = await req.db.query('match (qr:QRCode) return qr');
 
-  return res.json(qrcodes.data);
+  return res.json(qrcodes);
 })

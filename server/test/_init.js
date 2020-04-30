@@ -1,11 +1,13 @@
+import { Docker, Options } from 'docker-cli-js';
 import jwt from 'jsonwebtoken';
 import { expect } from 'chai';
+import keypair from 'keypair';
 import fs from 'fs';
 
 import { appInit, base_uri, genName, testToken, writeObj } from './lib/utils';
 import { runDatabase, genkeys } from '../scripts/lib/utils';
 import { min_neo4j_version } from '../app/lib/utils';
-import { ov_config } from '../app/lib/ov_config';
+import { hv_config } from '../app/lib/hv_config';
 import { doStartupTasks } from '../app/lib/startup';
 import neo4j from '../app/lib/neo4j';
 import queue from '../app/lib/queue';
@@ -17,19 +19,20 @@ var c = {};
 var turfs = {};
 var forms = {};
 var public_key, private_key;
+var docker = new Docker(new Options());
 
 describe('Database Init', function () {
 
   before(async () => {
-    await runDatabase(true, {
+    await runDatabase({docker, sandbox: true, config: {
       pagecache_size: 0,
       heap_size_init: 0,
       heap_size_max: 0,
-    });
+    }});
 
-    genkeys();
+    genkeys({fs, keypair});
 
-    db = new neo4j(ov_config);
+    db = new neo4j(hv_config);
     qq = new queue(db);
     api = appInit(db);
   });
@@ -54,11 +57,11 @@ describe('Database Init', function () {
   it('database has no nodes', async () => {
     await db.query("match (a) detach delete a");
     let ref = await db.query("match (a) return count(a)");
-    expect(ref.data[0]).to.equal(0);
+    expect(ref[0]).to.equal(0);
   });
 
   it('database startup tasks', async () => {
-    await doStartupTasks(db, qq);
+    await doStartupTasks(db, qq, {});
   });
 
   it('rsa keys match', async () => {
@@ -256,7 +259,7 @@ describe('Database Init', function () {
   });
 
   it('test db with DEBUG on', async () => {
-    let db = new neo4j({...ov_config, DEBUG: true,});
+    let db = new neo4j({...hv_config, DEBUG: true,});
     await db.query('return timestamp()');
     await db.query('return timestamp({date})', {date: '1970-01-01'});
     db.close();

@@ -2,7 +2,7 @@
 import jwt from 'jsonwebtoken';
 import { expect } from 'chai';
 
-import { ov_config } from '../app/lib/ov_config';
+import { hv_config } from '../app/lib/hv_config';
 import neo4j from '../app/lib/neo4j';
 import { appInit, base_uri, getObjs, keep, tpx } from './lib/utils';
 
@@ -13,7 +13,7 @@ var c, turfs, forms;
 describe('Cleanup', function () {
 
   before(() => {
-    db = new neo4j(ov_config);
+    db = new neo4j(hv_config);
     api = appInit(db);
     c = getObjs('volunteers');
     turfs = getObjs('turfs');
@@ -58,7 +58,7 @@ describe('Cleanup', function () {
 
   (keep?it.skip:it)('chemistry test - confirming all test objects argon', async () => {
     let ref = await db.query('match (a) where a.name =~ "'+tpx+'.*" return count(a)');
-    expect(ref.data[0]).to.equal(0);
+    expect(ref[0]).to.equal(0);
   });
 
   it('bob\'s your uncle', async () => {
