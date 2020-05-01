@@ -114,7 +114,9 @@ export function valid(str) {
 }
 
 export async function asyncForEach(a, c) {
-  for (let i = 0; i < a.length; i++) await c(a[i], i, a);
+  let ret = [];
+  for (let i = 0; i < a.length; i++) ret[i] = await c(a[i], i, a);
+  return ret;
 }
 
 export async function sleep(t) {

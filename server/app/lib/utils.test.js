@@ -125,7 +125,9 @@ describe('App Utils', function () {
   });
 
   it('two birds with one stone', async () => {
-    await utils.asyncForEach([1,2,3], utils.sleep);
+    let ret = await utils.asyncForEach([1,2,3], utils.sleep);
+    expect(ret.length).to.equal(3);
+    expect(ret[0]).to.equal(undefined);
   });
 
 });
