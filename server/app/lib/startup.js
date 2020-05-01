@@ -1,4 +1,4 @@
-import { asyncForEach, min_neo4j_version } from './utils';
+import { asyncForEach, sleep, min_neo4j_version } from './utils';
 import { hv_config } from './hv_config';
 import queue from './queue';
 
@@ -178,7 +178,10 @@ export async function doDbInit(db) {
   // create any spatial layers we need if they don't exist
   await asyncForEach(spatialLayers, async (layer) => {
     let ref = await db.query('match (a {layer:{layer}})-[:LAYER]-(:ReferenceNode {name:"spatial_root"}) return count(a)', {layer: layer.name});
-    if (ref[0] === 0) await db.query(layer.create);
+    if (ref[0] === 0) {
+      await db.query(layer.create);
+      await sleep(1000);
+    }
   });
 
   // TODO: load race/language data from a 3rd party and have the client do "autocomplete" type functionality

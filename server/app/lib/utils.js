@@ -117,4 +117,7 @@ export async function asyncForEach(a, c) {
   for (let i = 0; i < a.length; i++) await c(a[i], i, a);
 }
 
-export var sleep = m => new Promise(r => setTimeout(r, m));
+export async function sleep(t) {
+  if (process.env['TEST_EXEC']) return new Promise(r => r());
+  return new Promise(r => setTimeout(r, t));
+}
