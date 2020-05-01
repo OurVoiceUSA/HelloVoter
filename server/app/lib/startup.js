@@ -1,4 +1,4 @@
-import { asyncForEach, sleep, min_neo4j_version } from './utils';
+import { asyncForEach, min_neo4j_version } from './utils';
 import { hv_config } from './hv_config';
 import queue from './queue';
 
@@ -13,29 +13,32 @@ var jmx;
 var jmxclient = {};
 var jvmconfig = {};
 
-export var concurrency = hv_config.job_concurrency;
+export var concurrency = 1;
 
 // tasks to do on startup
 export async function doStartupTasks(db, qq, jmx) {
   // required to do in sequence
-  if (!hv_config.disable_jmx) await doJmxInit(db, qq, jmx);
-  await doDbInit(db);
+  if (!hv_config.disable_jmx) await doJmxInit(db, jmx, hv_config);
+  let ret = await doDbInit(db);
+  if (ret === false) process.exit(1);
   // can happen in parallel
   postDbInit(qq);
 }
 
-async function doJmxInit(db, qq, jmx) {
+export async function doJmxInit(db, jmx, config) {
   let start = new Date().getTime();
   console.log("doJmxInit() started @ "+start);
+
+  concurrency = config.job_concurrency;
 
   try {
     let data;
 
     jmxclient = jmx.createClient({
-      host: hv_config.neo4j_host,
-      port: hv_config.neo4j_jmx_port,
-      username: hv_config.neo4j_jmx_user,
-      password: hv_config.neo4j_jmx_pass,
+      host: config.neo4j_host,
+      port: config.neo4j_jmx_port,
+      username: config.neo4j_jmx_user,
+      password: config.neo4j_jmx_pass,
     });
     await new Promise((resolve, reject) => {
       jmxclient.on('connect', resolve);
@@ -44,7 +47,7 @@ async function doJmxInit(db, qq, jmx) {
     });
 
     data = await new Promise((resolve, reject) => {
-      jmxclient.getAttribute("java.lang:type=Memory", "HeapMemoryUsage", resolve); //, function(data) {
+      jmxclient.getAttribute("java.lang:type=Memory", "HeapMemoryUsage", resolve);
     });
 
     let max = data.getSync('max');
@@ -81,8 +84,7 @@ async function doJmxInit(db, qq, jmx) {
     if (!jvmconfig.numcpus) {
       concurrency = 1;
       console.warn("WARNING: Unable to determine number of CPUs available to neo4j. Unable to honor your JOB_CONCURRENCY setting.");
-    }
-    if (jvmconfig.numcpus <= (concurrency*3)) {
+    } else if (jvmconfig.numcpus <= (concurrency*3)) {
       concurrency = Math.floor(jvmconfig.numcpus/3);
       if (concurrency < 1) concurrency = 1;
       console.warn("WARNING: JOB_CONCURRENCY is set way too high for this database. Lowering it "+concurrency);
@@ -91,6 +93,8 @@ async function doJmxInit(db, qq, jmx) {
 
   let finish = new Date().getTime();
   console.log("doJmxInit() finished @ "+finish+" after "+(finish-start)+" milliseconds");
+
+  return concurrency;
 }
 
 export async function doDbInit(db) {
@@ -104,7 +108,7 @@ export async function doDbInit(db) {
   } catch (e) {
     console.error("The APOC and SPATIAL plugins are required for this application to function.");
     console.error(e);
-    process.exit(1);
+    return false;
   }
 
   let dbv = await db.version();
@@ -114,7 +118,7 @@ export async function doDbInit(db) {
 
     if (ver < min_neo4j_version) {
       console.warn("Neo4j version "+min_neo4j_version+" or higher is required.");
-      process.exit(1);
+      return false;
     }
   }
 
@@ -132,10 +136,7 @@ export async function doDbInit(db) {
       try {
         console.log("Calling apoc.warmup.run(); this may take several minutes.");
         await db.query('call apoc.warmup.run()');
-      } catch (e) {
-        console.warn("Call to APOC warmup failed.");
-        console.warn(e)
-      }
+      } catch (e) {}
     }
   }
 
@@ -166,10 +167,7 @@ export async function doDbInit(db) {
   // create any indexes we need if they don't exist
   await asyncForEach(indexes, async (index) => {
     let ref = await db.query('call db.indexes() yield tokenNames, properties with * where {label} in tokenNames and {property} in properties return count(*)', index);
-    if (ref[0] === 0) {
-      console.log("Cypher exec: "+index.create);
-      await db.query(index.create);
-    }
+    if (ref[0] === 0) await db.query(index.create);
   });
 
   let spatialLayers = [
@@ -180,10 +178,7 @@ export async function doDbInit(db) {
   // create any spatial layers we need if they don't exist
   await asyncForEach(spatialLayers, async (layer) => {
     let ref = await db.query('match (a {layer:{layer}})-[:LAYER]-(:ReferenceNode {name:"spatial_root"}) return count(a)', {layer: layer.name});
-    if (ref[0] === 0) {
-      await db.query(layer.create);
-      await sleep(1000);
-    }
+    if (ref[0] === 0) await db.query(layer.create);
   });
 
   // TODO: load race/language data from a 3rd party and have the client do "autocomplete" type functionality
@@ -215,6 +210,8 @@ export async function doDbInit(db) {
 
   let finish = new Date().getTime();
   console.log("doDbInit() finished @ "+finish+" after "+(finish-start)+" milliseconds");
+
+  return true;
 }
 
 async function postDbInit(qq) {
