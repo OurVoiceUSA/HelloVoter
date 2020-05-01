@@ -3,6 +3,7 @@ import { expect } from 'chai';
 import _ from 'lodash';
 
 import { doDbInit, doJmxInit } from './startup';
+import { min_neo4j_version } from './utils';
 import { hv_config } from './hv_config';
 
 class MockJmx {
@@ -51,7 +52,7 @@ function dbMockFactory({edition = 'community', size = 512}) {
       return [0];
     },
     version: () => {
-      return "3.5";
+      return min_neo4j_version.toString();
     },
     size: () => {
       return size;
@@ -87,7 +88,7 @@ describe('Startup Tasks', function () {
   });
 
   it('doDbInit bad neo4j version', async () => {
-    let c = await doDbInit({query: () => {}, version: () => {return "3.4"}});
+    let c = await doDbInit({query: () => {}, version: () => {return (min_neo4j_version-0.1).toString()}});
     expect(c).to.equal(false);
   });
 
