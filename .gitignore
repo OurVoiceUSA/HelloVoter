@@ -3,11 +3,12 @@
 # dependencies
 node_modules
 client/node_modules
-mobile/node_modules
 server/node_modules
 
 # production
 client/build
+client/web-build
+client/.expo
 
 # test data
 server/test/*.json
@@ -53,7 +54,7 @@ DerivedData
 *.ipa
 *.xcuserstate
 xcshareddata
-mobile/ios/Pods
+client/ios/Pods
 
 # Android/IntelliJ
 #
