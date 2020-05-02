@@ -32,8 +32,6 @@ export const hv_config = {
   google_maps_key: getConfig("google_maps_key", null),
   sm_oauth_url: getConfig("sm_oauth_url", 'https://ws.ourvoiceusa.org/auth'),
   volunteer_add_new: getConfig("volunteer_add_new", null),
-  purge_import_records: getConfig("purge_import_records", null),
-  wabase: getConfig("wabase", 'https://apps.ourvoiceusa.org'),
   DEBUG: getConfig("debug", false),
 };
 
