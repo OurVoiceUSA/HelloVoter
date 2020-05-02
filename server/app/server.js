@@ -1,4 +1,5 @@
-
+import expressLogging from 'express-logging';
+import logger from 'logops';
 import https from 'https';
 import fs from 'fs';
 
@@ -27,7 +28,7 @@ db.query('return timestamp()')
     }
     await doStartupTasks(db, qq, jmx);
 
-    const app = doExpressInit(true, db, qq);
+    const app = doExpressInit(expressLogging(logger), db, qq);
 
     // Launch the server
     if (hv_config.server_ssl_port && hv_config.server_ssl_key && hv_config.server_ssl_cert) {

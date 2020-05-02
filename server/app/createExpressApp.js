@@ -1,11 +1,9 @@
 import express from 'express';
 import 'express-async-errors';
-import expressLogging from 'express-logging';
 import swaggerUi from 'swagger-ui-express';
 import bodyParser from 'body-parser';
 import jwt from 'jsonwebtoken';
 import fetch from 'node-fetch';
-import logger from 'logops';
 import helmet from 'helmet';
 import cors from 'cors';
 import fs from 'fs';
@@ -19,13 +17,12 @@ const router = require('./routes/createRouter.js')();
 var public_key;
 var jwt_iss = hv_config.jwt_iss;
 
-export function doExpressInit(log, db, qq) {
+export function doExpressInit(logger, db, qq) {
 
   // Initialize http server
   const app = express();
 
-  if (log) app.use(expressLogging(logger));
-
+  app.use(logger);
   app.disable('x-powered-by');
   app.disable('etag');
   app.use(bodyParser.json({limit: '5mb'}));

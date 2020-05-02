@@ -16,7 +16,7 @@ export var getObjs = (name) => JSON.parse(fs.readFileSync('./test/'+name+'.json'
 export var genName = (name) => tpx+name+' '+Math.ceil(Math.random()*10000000);
 
 export function appInit(db) {
-  return defaults(supertest(doExpressInit(false, db, new queue(db)))).set({host:'localhost'});
+  return defaults(supertest(doExpressInit((l,m,n) => {n()}, db, new queue(db)))).set({host:'localhost'});
 }
 
 export function testToken(key, admin) {

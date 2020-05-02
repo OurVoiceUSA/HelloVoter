@@ -1,6 +1,5 @@
 import { asyncForEach, sleep, min_neo4j_version } from './utils';
 import { hv_config } from './hv_config';
-import queue from './queue';
 
 import {
   ID_NAME, ID_GENDER, ID_PARTY, ID_REG_VOTER, ID_REC_NOTIF, ID_PHONE, ID_DONOTCALL,
