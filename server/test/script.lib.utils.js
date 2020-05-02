@@ -44,7 +44,7 @@ describe('Script Utils', function () {
 
   it('runDatabase throws error', async () => {
     try {
-      await runDatabase({docker: {command: () => {throw "error"}}, sandbox: true, config});
+      await runDatabase({docker: {command: () => {throw Error()}}, sandbox: true, config});
       expect(true).to.equal(false);
     } catch (e) {
       expect(true).to.equal(true);
@@ -58,7 +58,7 @@ describe('Script Utils', function () {
   });
 
   it('genkeys creates keypair', async () => {
-    let pair = genkeys({fs: {readFileSync: () => {throw "error"}, writeFileSync: () => {}}, keypair});
+    let pair = genkeys({fs: {readFileSync: () => {throw Error()}, writeFileSync: () => {}}, keypair});
     expect(pair.public).to.equal("public");
     expect(pair.private).to.equal("private");
   });

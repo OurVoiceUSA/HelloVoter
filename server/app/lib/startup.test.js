@@ -83,7 +83,7 @@ describe('Startup Tasks', function () {
   });
 
   it('doDbInit db error', async () => {
-    let c = await doDbInit({query: () => {throw "error"}});
+    let c = await doDbInit({query: () => {throw Error()}});
     expect(c).to.equal(false);
   });
 
