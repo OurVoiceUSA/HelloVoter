@@ -17,7 +17,7 @@ const router = require('./routes/createRouter.js')();
 var public_key;
 var jwt_iss = hv_config.jwt_iss;
 
-export function doExpressInit(logger, db, qq) {
+export async function doExpressInit({db, qq, logger, config = hv_config}) {
 
   // Initialize http server
   const app = express();
@@ -29,33 +29,27 @@ export function doExpressInit(logger, db, qq) {
   app.use(cors({exposedHeaders: ['x-sm-oauth-url']}));
   app.use(helmet());
 
-  if (hv_config.no_auth) {
-    console.warn("Starting up without authentication!");
-  } else if (hv_config.jwt_pub_key) {
-    public_key = fs.readFileSync(hv_config.jwt_pub_key, "utf8");
+  if (config.jwt_pub_key) {
+    public_key = fs.readFileSync(config.jwt_pub_key, "utf8");
   } else {
-    console.log("JWT_PUB_KEY not defined, attempting to fetch from "+hv_config.sm_oauth_url+'/pubkey');
-    fetch(hv_config.sm_oauth_url+'/pubkey')
-    .then(res => {
+    console.log("JWT_PUB_KEY not defined, attempting to fetch from "+config.sm_oauth_url+'/pubkey');
+    try {
+      let res = await fetch(config.sm_oauth_url+'/pubkey');
       jwt_iss = res.headers.get('x-jwt-iss');
       if (res.status !== 200) throw "http code "+res.status;
-      return res.text()
-    })
-    .then(body => {
-      public_key = body;
-    })
-    .catch((e) => {
-      console.log("Unable to read SM_OAUTH_URL "+hv_config.sm_oauth_url);
+      public_key = res.text();
+    } catch (e) {
+      console.log("Unable to read SM_OAUTH_URL "+config.sm_oauth_url);
       console.log(e);
-      process.exit(1);
-    });
+      return {error: true};
+    };
   }
 
   // require ip_header if config for it is set
-  if (!hv_config.DEBUG && hv_config.ip_header) {
+  if (!config.DEBUG && config.ip_header) {
     app.use(function (req, res, next) {
-      if (!req.header(hv_config.ip_header)) {
-        console.log('Connection without '+hv_config.ip_header+' header');
+      if (!req.header(config.ip_header)) {
+        console.log('Connection without '+config.ip_header+' header');
        return _400(res, "Missing required header.");
       }
       else next();
@@ -71,11 +65,7 @@ export function doExpressInit(logger, db, qq) {
     req.db = db;
     req.qq = qq;
 
-    res.set('x-sm-oauth-url', hv_config.sm_oauth_url);
-
-    if (!public_key && !hv_config.no_auth) {
-      return _503(res, "Server is starting up.");
-    }
+    res.set('x-sm-oauth-url', config.sm_oauth_url);
 
     // uri whitelist
     switch (req.url) {
@@ -99,14 +89,14 @@ export function doExpressInit(logger, db, qq) {
           return _500(res, e);
         }
       } else {
-        u = (hv_config.no_auth?jwt.decode(token):jwt.verify(token, public_key));
+        u = jwt.verify(token, public_key);
 
         // verify props
         if (!u.id) return _401(res, "Your token is missing a required parameter.");
         if (u.iss !== jwt_iss) return _401(res, "Your token was issued for a different domain.");
         if (u.aud && (
-          (hv_config.jwt_aud && u.aud !== hv_config.jwt_aud) ||
-          (!hv_config.jwt_aud && u.aud !== req.header('host'))
+          (config.jwt_aud && u.aud !== config.jwt_aud) ||
+          (!config.jwt_aud && u.aud !== req.header('host'))
         )) return _401(res, "Your token has an incorrect audience.");
 
         if (!u.email) u.email = "";
@@ -138,8 +128,8 @@ export function doExpressInit(logger, db, qq) {
     return res.json({timestamp: (await req.db.query('return timestamp()'))[0]});
   });
 
-  app.use(hv_config.base_uri+'/v1', router);
-  app.use(hv_config.base_uri+'/v1/public/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDocumentv1));
+  app.use(config.base_uri+'/v1', router);
+  app.use(config.base_uri+'/v1/public/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDocumentv1));
 
   // default error handler
   app.use((err, req, res, next) => {
@@ -148,4 +138,3 @@ export function doExpressInit(logger, db, qq) {
 
   return app;
 }
-

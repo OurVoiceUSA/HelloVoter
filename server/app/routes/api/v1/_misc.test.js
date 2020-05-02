@@ -16,7 +16,7 @@ describe('MISC endpoints', function () {
   before(async () => {
     db = new neo4j(hv_config);
     nv = await db.version();
-    api = appInit(db);
+    api = await appInit(db);
     c = getObjs('volunteers');
     turfs = getObjs('turfs');
     forms = getObjs('forms');

@@ -23,7 +23,6 @@
     "mocha-jenkins-reporter": "^0.4.3",
     "nodemon": "^2.0.3",
     "nyc": "^15.0.1",
-    "superagent-defaults": "^0.1.14",
     "supertest": "^4.0.2"
   },
   "nodemonConfig": {

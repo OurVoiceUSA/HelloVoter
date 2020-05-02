@@ -34,7 +34,7 @@ describe('Database Init', function () {
 
     db = new neo4j(hv_config);
     qq = new queue(db);
-    api = appInit(db);
+    api = await appInit(db);
   });
 
   after(async () => {

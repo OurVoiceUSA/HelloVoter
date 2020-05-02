@@ -16,17 +16,7 @@ To get set up locally, simply run the following commands:
 
 This sets up everything except the mobile app. To get setup with local development of the mobile app as well, see [mobile/README.md](mobile/README.md).
 
-If you want to interact with the API from a script outside of the web app, make sure you include your JWT with the "Authorization: Bearer" header. You can either get the JWT from your browser's dev tools after you sign into the web app, or, you can use the no-auth dev JWT. This requires you stop the "npm start" process, set an environment variable, and make that user an admin, before you re-start it:
-
-    export REACT_APP_NO_AUTH=1
-    npm run makeadmin -- "noauth:localuser"
-    npm start
-
-The JWT token you can use is as follows:
-
-    eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Im5vYXV0aDpsb2NhbHVzZXIiLCJuYW1lIjoiTG9jYWwgVXNlciIsImVtYWlsIjoibG9jYWxAbG9jYWxob3N0IiwiaXNzIjoib3Vydm9pY2V1c2Eub3JnIiwiaWF0IjoxLCJleHAiOjIsImRpc2NsYWltZXIiOiJCbGFoIGJsYWggZGlzY2xhaW1lciJ9.qa5K2pgi1uLYkV7jP3aNvazcchvgBD8RwhdG6Q86GxlvusQx7nNCTr3LrAnn6pxDJxNidJoqjD3Ie77jj5hWK_-lbgtHMLhNXGExDxI8pQ0I5ZnAV_5pDu7vARinoy3mctQWFO2pIQSu8KzQc7eQ90IQZBseE7nQV-ugZRfK8Teo_48COcJxGxqwCNCO80G_JzBoif2xaWRb2i2n0qeSUKfXN4Fwy46JOiHFnL9yOS5s54tB6doe1wFJNYps8eVQbVkTBL1I9PQP4Gs-BmzND0vcQaczTdu_J50uvLL5do1FHb48lRhrA44ZrYv3EVwNsJXZtH3MbasxgPrZhl69VQ
-
-You should be all set!
+If you want to interact with the API from a script outside of the web app, make sure you include your JWT with the "Authorization: Bearer" header. You can either get the JWT from your browser's dev tools after you sign into the web app, or generate an API key for your user and use that instead of the JWT.
 
 ## Test Automation
 

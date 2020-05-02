@@ -10,9 +10,9 @@ var mua = 'Mozilla/5.0 (iPhone; CPU iPhone OS 5_0 like Mac OS X) AppleWebKit/534
 
 describe('Invite', function () {
 
-  before(() => {
+  before(async () => {
     db = new neo4j(hv_config);
-    api = appInit(db);
+    api = await appInit(db);
   });
 
   after(async () => {

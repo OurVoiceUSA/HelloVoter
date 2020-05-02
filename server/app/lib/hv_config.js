@@ -31,7 +31,6 @@ export const hv_config = {
   jwt_iss: getConfig("jwt_iss", "ourvoiceusa.org"),
   google_maps_key: getConfig("google_maps_key", null),
   sm_oauth_url: getConfig("sm_oauth_url", 'https://ws.ourvoiceusa.org/auth'),
-  no_auth: getConfig("react_app_no_auth", false),
   volunteer_add_new: getConfig("volunteer_add_new", null),
   purge_import_records: getConfig("purge_import_records", null),
   wabase: getConfig("wabase", 'https://apps.ourvoiceusa.org'),

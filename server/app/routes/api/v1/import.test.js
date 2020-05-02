@@ -10,9 +10,9 @@ var c;
 
 describe('Import', function () {
 
-  before(() => {
+  before(async () => {
     db = new neo4j(hv_config);
-    api = appInit(db);
+    api = await appInit(db);
     c = getObjs('volunteers');
   });
 

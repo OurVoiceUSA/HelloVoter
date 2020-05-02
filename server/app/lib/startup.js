@@ -6,8 +6,6 @@ import {
   ID_EMAIL, ID_DOB, ID_US_VET, ID_RACE, ID_LANGS, ID_NOTES,
 } from './consts';
 
-var _require = require; // so we can lazy load a module later on
-
 var jmx;
 var jmxclient = {};
 var jvmconfig = {};

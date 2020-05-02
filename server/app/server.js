@@ -9,6 +9,8 @@ import { hv_config } from './lib/hv_config';
 import neo4j from './lib/neo4j';
 import queue from './lib/queue';
 
+var _require = require; // so we can lazy load a module later on
+
 const db = new neo4j(hv_config);
 const qq = new queue(db);
 
@@ -28,7 +30,9 @@ db.query('return timestamp()')
     }
     await doStartupTasks(db, qq, jmx);
 
-    const app = doExpressInit(expressLogging(logger), db, qq);
+    const app = await doExpressInit({db, qq, logger: expressLogging(logger)});
+
+    if (app.error) process.exit(1);
 
     // Launch the server
     if (hv_config.server_ssl_port && hv_config.server_ssl_key && hv_config.server_ssl_cert) {

@@ -1,4 +1,3 @@
-import defaults from 'superagent-defaults';
 import supertest from 'supertest';
 import jwt from 'jsonwebtoken';
 import fs from 'fs';
@@ -15,8 +14,8 @@ export var writeObj = (name, obj) => fs.writeFileSync('./test/'+name+'.json', JS
 export var getObjs = (name) => JSON.parse(fs.readFileSync('./test/'+name+'.json'));
 export var genName = (name) => tpx+name+' '+Math.ceil(Math.random()*10000000);
 
-export function appInit(db) {
-  return defaults(supertest(doExpressInit((l,m,n) => {n()}, db, new queue(db)))).set({host:'localhost'});
+export async function appInit(db, config = hv_config) {
+  return supertest(await doExpressInit({db, qq: new queue(db), logger: (l,m,n) => {n()}, config}));
 }
 
 export function testToken(key, admin) {
@@ -31,4 +30,3 @@ export function testToken(key, admin) {
     disclaimer: "THIS IS A TEST TOKEN",
   }), key, {algorithm: 'RS256'});
 }
-
