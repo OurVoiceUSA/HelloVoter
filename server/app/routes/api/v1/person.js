@@ -117,7 +117,7 @@ module.exports = Router({mergeParams: true})
 .delete('/person/:id', async (req, res) => {
   if (!req.user.admin) return _403(res, "Permission denied.");
   // TODO: queue this & also delete visit objects too
-  await req.db.query('match (p:Person {id:{id}}) detach delete p', req.params.id);
+  await req.db.query('match (p:Person {id:{id}}) set p:DeletedPerson remove p:Person', req.params.id);
   return res.json({deleted: true});
 })
 /**
@@ -190,8 +190,8 @@ module.exports = Router({mergeParams: true})
     // find center(ish) of an assigned turf and use that as the query point
     let ref = await req.db.query(`match (v:Volunteer {id:{id}})<-[:ASSIGNED]-(t:Turf)
     return (t.bbox[0]+t.bbox[2])/2, (t.bbox[1]+t.bbox[3])/2 limit 1`, req.query);
-    if (!ref || !ref[0]) return _403(res, "No Turf assignments.");
-    ret = await visitsAndPeopleFromPoint(req, ref[0][0], ref[0][1]);
+    if (!ref.data || !ref.data[0]) return _403(res, "No Turf assignments.");
+    ret = await visitsAndPeopleFromPoint(req, ref.data[0][0], ref.data[0][1]);
   }
   if (ret.length !== 0) return res.json(ret);
 
@@ -239,7 +239,7 @@ async function peopleVisitUpdate(req, res) {
     // ensure this ID doesn't already exist
     let ref = await req.db.query('match (p:Person {id:{personId}}) return count (p)', req.body);
 
-    if (ref[0] > 0) return _403(res, "Person already exists.");
+    if (ref.data[0] > 0) return _403(res, "Person already exists.");
 
     await req.db.query('match (a:Address {id:{addressId}})'+(req.body.unit?'<-[:AT]-(u:Unit {name:{unit}})':'')+' create (p:Person {id:{personId}}) create (p)-[r:RESIDENCE {current:true}]->'+(req.body.unit?'(u)':'(a)'), req.body);
   }
@@ -290,12 +290,12 @@ TODO: constrain update to a turf their assigned to, but without creating multipl
 
   // if nothing was returned, they had all the right params but it didn't match up with the dataset somehow
   // return the "Unprocessable Entity" http error code
-  if (!ref[0]) {
+  if (!ref.data[0]) {
     console.warn({body: req.body});
     return _422(res, "Query returned no data. Something went wrong with your request.");
   }
 
-  return res.json(ref);
+  return res.json(ref.data);
 }
 
 async function visitsAndPeopleFromPoint(req, longitude, latitude) {
@@ -314,7 +314,7 @@ async function visitsAndPeopleFromPoint(req, longitude, latitude) {
     // scale up distance
     req.query.dist *= 2;
     let ref = await req.db.query(`match (a:Address) using index a:Address(position) where distance(a.position, point({longitude: {longitude}, latitude: {latitude}})) < {dist} return count(a)`, req.query);
-    if (ref[0] >= (req.query.limit*(req.query.filters.length+1))) enough = true;
+    if (ref.data[0] >= (req.query.limit*(req.query.filters.length+1))) enough = true;
     if (req.query.dist >= 16000) enough = true;
   }
 
@@ -379,5 +379,5 @@ optional match (r)<-[:VISIT_AT]-(v:Visit)-[:VISIT_FORM]->(:Form {id:{formId}})
 
   let ref = await req.db.query(q, req.query);
 
-  return ref[0];
+  return ref.data[0];
 }

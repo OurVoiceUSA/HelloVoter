@@ -174,7 +174,7 @@ return last_touch, active_name, total_active, total_assigned`,
 .delete('/turf/:turfId', async (req, res) => {
   if (!req.user.admin) return _403(res, "Permission denied.");
   // TODO: queue this & iterate
-  await req.db.query('match (t:Turf {id:{turfId}}) detach delete t', req.params);
+  await req.db.query('match (t:Turf {id:{turfId}}) set t:DeletedTurf remove t:Turf', req.params);
   return res.json({deleted: true});
 })
 /**

@@ -38,7 +38,7 @@ module.exports = Router({mergeParams: true})
 .delete('/qrcode/:id', async (req, res) => {
   if (!req.user.admin) return _403(res, "Permission denied.");
 
-  await req.db.query("match (qr:QRCode {id:{id}}) set qr.disabled = true", req.body);
+  await req.db.query("match (qr:QRCode {id:{id}}) set qr:DeletedQRCode remove qr:QRCode", req.body);
 
   return res.json({});
 })

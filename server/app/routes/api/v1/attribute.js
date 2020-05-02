@@ -159,7 +159,7 @@ module.exports = Router({mergeParams: true})
   if (!req.user.admin) return _403(res, "Permission denied.");
   if (!valid(req.params.id)) return _400(res, "Invalid value to parameter 'id'.");
   // TODO: can take a while when used on large databases. Queue + iterate this!
-  await req.db.query('match (at:Attribute {id:{id}}) detach delete at', req.params);
+  await req.db.query('match (at:Attribute {id:{id}}) set at:DeletedAttribute remove at:Attribute', req.params);
   return res.json({deleted: true});
 })
 /**

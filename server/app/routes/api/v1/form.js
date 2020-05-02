@@ -166,7 +166,7 @@ module.exports = Router({mergeParams: true})
 })
 .delete('/form/:formId', async (req, res) => {
   if (req.user.admin !== true) return _403(res, "Permission denied.");
-  await req.db.query('match (a:Form {id:{formId}}) detach delete a', req.params);
+  await req.db.query('match (f:Form {id:{formId}}) set f:DeletedForm remove f:Form', req.params);
   return res.json({deleted: true});
 })
 /**

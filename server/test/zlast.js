@@ -57,7 +57,7 @@ describe('Cleanup', function () {
   });
 
   (keep?it.skip:it)('chemistry test - confirming all test objects argon', async () => {
-    let ref = await db.query('match (a) where a.name =~ "'+tpx+'.*" return count(a)');
+    let ref = await db.query('match (a) where a.name =~ "'+tpx+'.*" and NOT labels(a)[0] =~ "Deleted.*" return count(a)');
     expect(ref[0]).to.equal(0);
   });
 
