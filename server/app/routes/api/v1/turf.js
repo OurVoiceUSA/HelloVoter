@@ -213,21 +213,22 @@ return last_touch, active_name, total_active, total_assigned`,
   if (req.query.geometry) geom = true;
 
 // TODO: filter, start, limit
-  let turfs;
+  let spatial = `match (t:Turf)`;
 
   if (req.query.longitude || req.query.latitude) {
     req.query.longitude = parseFloat(req.query.longitude);
     req.query.latitude = parseFloat(req.query.latitude);
     if (isNaN(req.query.longitude) || isNaN(req.query.latitude)) return _400(res, "Invalid value to parameters 'longitude' or 'latitude'.");
 
-    turfs = await req.db.query('call spatial.intersects("turf", {longitude: {longitude}, latitude: {latitude}}) yield node return node{.id, .name, .created}', req.query);
-  } else {
-
-    if (req.user.admin)
-      turfs = await req.db.query('match (a:Turf) return a{.id, .name, .created'+(geom?', .geometry':'')+'} order by a.name');
-    else
-      turfs = await req.db.query('match (v:Volunteer {id:{id}}) optional match (v)-[:ASSIGNED]-(t:Turf) with v, t as dturf optional match (v)-[:MEMBERS]-(:Team)-[:ASSIGNED]-(t:Turf) with v, dturf + collect(t) as turf unwind turf as t call spatial.intersects("turf", t.wkt) yield node return node{.id, .name, .created'+(geom?', .geometry':'')+'} order by node.name', req.user);
+    spatial = `call spatial.intersects("turf", {longitude: {longitude}, latitude: {latitude}}) yield node as t`;
   }
+
+  let turfs = await req.db.query(
+    (req.user.admin?``:`match (v:Volunteer {id:{id}}) `)+
+    spatial+
+    (req.user.admin?``:` where (v)-[:ASSIGNED]-(t) or (v)-[:MEMBERS]-(:Team)-[:ASSIGNED]-(t)`)+
+    ` return t{.id, .name, .created`+(geom?`, .geometry`:``)+`} order by t.name`,
+    _.merge({}, req.query, req.user));
 
   return res.json({
     count: turfs.length,

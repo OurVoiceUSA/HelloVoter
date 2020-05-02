@@ -162,7 +162,7 @@ describe('Turf', function () {
     expect(r.body.turfs.length).to.equal(2);
   });
 
-  it.skip('list byposition non-admin', async () => {
+  it('list byposition non-admin', async () => {
     let r = await api.get(base_uri+'/turfs?longitude=-116.566483&latitude=35.6430223')
       .set('Authorization', 'Bearer '+c.bob.jwt);
     expect(r.statusCode).to.equal(200);
