@@ -1,6 +1,7 @@
 import { Router } from 'express';
 
 import { volunteerAssignments, _400, _403, _422 } from '../../../lib/utils';
+import { systemSettings } from '../../../lib/utils';
 import { hv_config } from '../../../lib/hv_config';
 
 module.exports = Router({mergeParams: true})
@@ -35,7 +36,7 @@ module.exports = Router({mergeParams: true})
  *               "$ref": "#/components/schemas/personId"
  */
 .post('/person', async (req, res) => {
-  if (!hv_config.volunteer_add_new) return _403(res, "Permission denied.");
+  if (!systemSettings['volunteer_add_new']) return _403(res, "Permission denied.");
   if (!req.body.personId) return _400(res, "Invalid value to parameter 'personId'.");
   req.addnewperson = true;
   return peopleVisitUpdate(req, res);

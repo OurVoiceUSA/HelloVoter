@@ -1,12 +1,8 @@
-
-import {
-  volunteerAssignments,
-  _400, _403,
-} from '../../../lib/utils';
-
-import { hv_config } from '../../../lib/hv_config';
-
 import { Router } from 'express';
+
+import { volunteerAssignments, _400, _403 } from '../../../lib/utils';
+import { systemSettings } from '../../../lib/utils';
+import { hv_config } from '../../../lib/hv_config';
 
 module.exports = Router({mergeParams: true})
 /**
@@ -149,7 +145,7 @@ module.exports = Router({mergeParams: true})
 });
 
 async function addressAdd(req, res) {
-  if (!hv_config.volunteer_add_new) return _403(res, "Permission denied.");
+  if (!systemSettings['volunteer_add_new']) return _403(res, "Permission denied.");
   if (!req.body.deviceId) return _400(res, "Invalid value to parameter 'deviceId'.");
   if (!req.body.formId) return _400(res, "Invalid value to parameter 'formId'.");
 

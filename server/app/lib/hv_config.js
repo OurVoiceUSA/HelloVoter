@@ -31,6 +31,5 @@ export const hv_config = {
   jwt_iss: getConfig("jwt_iss", "ourvoiceusa.org"),
   google_maps_key: getConfig("google_maps_key", null),
   sm_oauth_url: getConfig("sm_oauth_url", 'https://ws.ourvoiceusa.org/auth'),
-  volunteer_add_new: getConfig("volunteer_add_new", null),
 };
 

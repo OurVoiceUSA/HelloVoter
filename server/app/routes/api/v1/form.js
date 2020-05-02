@@ -2,6 +2,7 @@ import { Router } from 'express';
 import _ from 'lodash';
 
 import { volunteerAssignments, valid, _400, _403 } from '../../../lib/utils';
+import { systemSettings } from '../../../lib/utils';
 import { hv_config } from '../../../lib/hv_config';
 
 module.exports = Router({mergeParams: true})
@@ -141,7 +142,7 @@ module.exports = Router({mergeParams: true})
   let d = await req.db.query('match (:Form {id:{formId}})-[r:DEFAULT_FILTER]->(at:Attribute) return at{.*, value: r.value}', req.params);
   if (d[0]) form.default_filters = d;
 
-  if (hv_config.volunteer_add_new) form.add_new = true;
+  form.add_new = systemSettings['volunteer_add_new'];
 
   return res.json(form);
 })

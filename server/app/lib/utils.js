@@ -6,6 +6,7 @@ export var systemSettings = {};
 export async function initSystemSettings(db) {
   let defaultSettings = [
     {id: 'debug', value: false},
+    {id: 'volunteer_add_new', value: true},
   ];
 
   await asyncForEach(defaultSettings, async (ss) => {
