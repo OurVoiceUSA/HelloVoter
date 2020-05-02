@@ -8,7 +8,7 @@ import helmet from 'helmet';
 import cors from 'cors';
 import fs from 'fs';
 
-import { _400, _401, _403, _500, _503 } from './lib/utils';
+import { _400, _401, _403, _500 } from './lib/utils';
 import swaggerDocumentv1 from './swagger.v1.json';
 import { hv_config } from './lib/hv_config';
 

@@ -91,13 +91,6 @@ describe('App Utils', function () {
     expect(r.body.msg).to.equal("Not Implemented.");
   });
 
-  it('_503 returns 503', () => {
-    let r = utils._503(res, "Service Unavailable");
-    expect(r.statusCode).to.equal(503);
-    expect(r.body.error).to.equal(true);
-    expect(r.body.msg).to.equal("Service Unavailable");
-  });
-
   it('getClientIP', () => {
     expect(utils.getClientIP(req)).to.equal('127.0.0.1');
   });

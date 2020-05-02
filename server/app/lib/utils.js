@@ -102,10 +102,6 @@ export function _501(res, msg) {
   return sendError(res, 501, msg);
 }
 
-export function _503(res, msg) {
-  return sendError(res, 503, msg);
-}
-
 export function valid(str) {
   if (!str) return false;
   if (typeof str !== "string") return true;
