@@ -1,6 +1,23 @@
 import { hv_config } from './hv_config';
 
 export var min_neo4j_version = 3.5;
+export var systemSettings = {};
+
+export async function initSystemSettings(db) {
+  let defaultSettings = [
+    {id: 'debug', value: false},
+  ];
+
+  await asyncForEach(defaultSettings, async (ss) => {
+    // ensure system settings exist
+    let ref = await db.query('match (ss:SystemSetting {id:{id}}) return ss.value', ss);
+    if (ref.length === 0) {
+      await db.query('create (:SystemSetting {id:{id},value:{value}})', ss);
+      ref[0] = ss.value;
+    }
+    systemSettings[ss.id] = ref[0];
+  });
+}
 
 export function getClientIP(req) {
   if (hv_config.ip_header) return req.header(hv_config.ip_header);

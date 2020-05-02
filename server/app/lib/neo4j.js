@@ -2,7 +2,7 @@
 import neo4j from 'neo4j-driver';
 import BoltAdapter from 'node-neo4j-bolt-adapter';
 
-import { systemSettings } from './startup';
+import { systemSettings } from './utils';
 
 export default class db {
 

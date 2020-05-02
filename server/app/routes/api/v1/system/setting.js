@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import _ from 'lodash';
 
-import { systemSettings } from '../../../../lib/startup';
+import { systemSettings } from '../../../../lib/utils';
 import { version } from '../../../../../package.json';
 import { _403, _404 } from '../../../../lib/utils';
 

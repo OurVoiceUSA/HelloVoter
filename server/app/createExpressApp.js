@@ -8,7 +8,7 @@ import helmet from 'helmet';
 import cors from 'cors';
 import fs from 'fs';
 
-import { _400, _401, _403, _500 } from './lib/utils';
+import { initSystemSettings, _400, _401, _403, _500 } from './lib/utils';
 import swaggerDocumentv1 from './swagger.v1.json';
 import { hv_config } from './lib/hv_config';
 
@@ -18,6 +18,8 @@ var public_key;
 var jwt_iss = hv_config.jwt_iss;
 
 export async function doExpressInit({db, qq, logger, config = hv_config}) {
+
+  await initSystemSettings(db);
 
   // Initialize http server
   const app = express();

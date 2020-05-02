@@ -1,4 +1,4 @@
-import { asyncForEach, sleep, min_neo4j_version } from './utils';
+import { asyncForEach, initSystemSettings, sleep, min_neo4j_version } from './utils';
 import { hv_config } from './hv_config';
 
 import {
@@ -11,7 +11,6 @@ var jmxclient = {};
 var jvmconfig = {};
 
 export var concurrency = 1;
-export var systemSettings = {};
 
 // tasks to do on startup
 export async function doStartupTasks(db, qq, jmx) {
@@ -120,19 +119,7 @@ export async function doDbInit(db) {
     }
   }
 
-  let defaultSettings = [
-    {id: 'debug', value: false},
-  ];
-
-  await asyncForEach(defaultSettings, async (ss) => {
-    // ensure system settings exist
-    let ref = await db.query('match (ss:SystemSetting {id:{id}}) return ss.value', ss);
-    if (ref.length === 0) {
-      await db.query('create (:SystemSetting {id:{id},value:{value}})', ss);
-      ref[0] = ss.value;
-    }
-    systemSettings[ss.id] = ref[0];
-  });
+  await initSystemSettings(db);
 
   // only call warmup there's enough room to cache the database
   if (!jvmconfig.maxheap || !jvmconfig.totalmemory) {
