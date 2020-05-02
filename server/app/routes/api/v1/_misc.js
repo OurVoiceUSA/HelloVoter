@@ -92,17 +92,16 @@ module.exports = Router({mergeParams: true})
     }
   }
 
-  let msg = "Thanks for your request to join us! You are currently awaiting an assignment.";
-  let ass = {};
+  let ass;
 
   ass = await volunteerAssignments(req, 'Volunteer', req.user);
-  if (ass.ready)
-    msg = "You are assigned turf and ready to volunteer!";
+  if (ass.ready) ass.msg = "You are assigned turf and ready to volunteer!";
+  else ass.msg = "Thanks for your request to join us! You are currently awaiting an assignment.";
 
   let ref = await req.db.query('match (s:SystemSetting {id:"sundownok"}) return s.value');
   if (ref && ref[0]) ass.sundownok = true;
 
-  return res.json({msg: msg, data: ass});
+  return res.json(ass);
 })
 .get('/uncle', (req, res) => {
   return res.json({name: "Bob"});

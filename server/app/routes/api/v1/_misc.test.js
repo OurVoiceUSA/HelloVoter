@@ -92,7 +92,7 @@ describe('MISC endpoints', function () {
     const r = await api.post(base_uri+'/hello')
       .set('Authorization', 'Bearer foobaradmin')
     expect(r.statusCode).to.equal(200);
-    expect(r.body.data.admin).to.equal(true);
+    expect(r.body.admin).to.equal(true);
   });
 
   it('hello 200 good apikey non-admin', async () => {
@@ -100,7 +100,7 @@ describe('MISC endpoints', function () {
     const r = await api.post(base_uri+'/hello')
       .set('Authorization', 'Bearer foobar')
     expect(r.statusCode).to.equal(200);
-    expect(r.body.data.admin).to.not.exist;
+    expect(r.body.admin).to.not.exist;
   });
 
   it('dashboard admin', async () => {

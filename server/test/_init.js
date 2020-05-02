@@ -84,7 +84,7 @@ describe('Database Init', function () {
       });
     expect(r.statusCode).to.equal(200);
     expect(r.body.msg).to.equal("Thanks for your request to join us! You are currently awaiting an assignment.");
-    expect(r.body.data.ready).to.equal(false);
+    expect(r.body.ready).to.equal(false);
 
     // make admin an admin
     await db.query('match (a:Volunteer {id:{id}}) set a.admin=true', c.admin);
@@ -96,7 +96,7 @@ describe('Database Init', function () {
         latitude: 33.9208231,
       });
     expect(r.statusCode).to.equal(200);
-    expect(r.body.data.admin).to.equal(true);
+    expect(r.body.admin).to.equal(true);
   });
 
   it('hello 200 volunteers awaiting assignment', async () => {
@@ -132,8 +132,8 @@ describe('Database Init', function () {
       });
     expect(r.statusCode).to.equal(200);
     expect(r.body.msg).to.equal("Thanks for your request to join us! You are currently awaiting an assignment.");
-    expect(r.body.data.ready).to.equal(false);
-    expect(r.body.data).to.not.have.property("admin");
+    expect(r.body.ready).to.equal(false);
+    expect(r.body).to.not.have.property("admin");
 
     r = await api.post(base_uri+'/hello')
       .set('Authorization', 'Bearer '+c.sally.jwt)
@@ -143,8 +143,8 @@ describe('Database Init', function () {
       });
     expect(r.statusCode).to.equal(200);
     expect(r.body.msg).to.equal("Thanks for your request to join us! You are currently awaiting an assignment.");
-    expect(r.body.data.ready).to.equal(false);
-    expect(r.body.data).to.not.have.property("admin");
+    expect(r.body.ready).to.equal(false);
+    expect(r.body).to.not.have.property("admin");
 
     r = await api.post(base_uri+'/hello')
       .set('Authorization', 'Bearer '+c.rich.jwt)
@@ -154,8 +154,8 @@ describe('Database Init', function () {
       });
     expect(r.statusCode).to.equal(200);
     expect(r.body.msg).to.equal("Thanks for your request to join us! You are currently awaiting an assignment.");
-    expect(r.body.data.ready).to.equal(false);
-    expect(r.body.data).to.not.have.property("admin");
+    expect(r.body.ready).to.equal(false);
+    expect(r.body).to.not.have.property("admin");
 
     r = await api.post(base_uri+'/hello')
       .set('Authorization', 'Bearer '+c.jane.jwt)
@@ -165,8 +165,8 @@ describe('Database Init', function () {
       });
     expect(r.statusCode).to.equal(200);
     expect(r.body.msg).to.equal("Thanks for your request to join us! You are currently awaiting an assignment.");
-    expect(r.body.data.ready).to.equal(false);
-    expect(r.body.data).to.not.have.property("admin");
+    expect(r.body.ready).to.equal(false);
+    expect(r.body).to.not.have.property("admin");
 
     r = await api.post(base_uri+'/hello')
       .set('Authorization', 'Bearer '+c.mike.jwt)
@@ -176,8 +176,8 @@ describe('Database Init', function () {
       });
     expect(r.statusCode).to.equal(200);
     expect(r.body.msg).to.equal("Thanks for your request to join us! You are currently awaiting an assignment.");
-    expect(r.body.data.ready).to.equal(false);
-    expect(r.body.data).to.not.have.property("admin");
+    expect(r.body.ready).to.equal(false);
+    expect(r.body).to.not.have.property("admin");
 
     r = await api.post(base_uri+'/hello')
       .set('Authorization', 'Bearer '+c.han.jwt)
@@ -187,8 +187,8 @@ describe('Database Init', function () {
       });
     expect(r.statusCode).to.equal(200);
     expect(r.body.msg).to.equal("Thanks for your request to join us! You are currently awaiting an assignment.");
-    expect(r.body.data.ready).to.equal(false);
-    expect(r.body.data).to.not.have.property("admin");
+    expect(r.body.ready).to.equal(false);
+    expect(r.body).to.not.have.property("admin");
   });
 
   it('generate test objects - turfs', async () => {
