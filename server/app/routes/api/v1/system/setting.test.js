@@ -80,6 +80,10 @@ describe('System', function () {
     expect(r.body.id).to.equal('debug');
     expect(r.body.value).to.equal(true);
 
+    // poke while in debug for code branch coverage
+    r = await api.get(base_uri+'/public/poke')
+    expect(r.statusCode).to.equal(200);
+
     r = await api.put(base_uri+'/system/setting/debug')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({ value: false })

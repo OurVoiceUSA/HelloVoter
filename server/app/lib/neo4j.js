@@ -2,6 +2,8 @@
 import neo4j from 'neo4j-driver';
 import BoltAdapter from 'node-neo4j-bolt-adapter';
 
+import { systemSettings } from './startup';
+
 export default class db {
 
   constructor(config) {
@@ -15,7 +17,7 @@ export default class db {
   async dbwrap() {
       var params = Array.prototype.slice.call(arguments);
       var func = params.shift();
-      if (this.config.DEBUG) {
+      if (systemSettings['debug']) {
         let funcName = func.replace('Async', '');
         console.log('DEBUG: '+funcName+' '+params[0]+';');
         if (params[1]) {

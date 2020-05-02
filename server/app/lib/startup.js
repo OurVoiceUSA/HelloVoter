@@ -11,6 +11,7 @@ var jmxclient = {};
 var jvmconfig = {};
 
 export var concurrency = 1;
+export var systemSettings = {};
 
 // tasks to do on startup
 export async function doStartupTasks(db, qq, jmx) {
@@ -119,6 +120,20 @@ export async function doDbInit(db) {
     }
   }
 
+  let defaultSettings = [
+    {id: 'debug', value: false},
+  ];
+
+  await asyncForEach(defaultSettings, async (ss) => {
+    // ensure system settings exist
+    let ref = await db.query('match (ss:SystemSetting {id:{id}}) return ss.value', ss);
+    if (ref.length === 0) {
+      await db.query('create (:SystemSetting {id:{id},value:{value}})', ss);
+      ref[0] = ss.value;
+    }
+    systemSettings[ss.id] = ref[0];
+  });
+
   // only call warmup there's enough room to cache the database
   if (!jvmconfig.maxheap || !jvmconfig.totalmemory) {
     console.warn("WARNING: Unable to determine neo4j max heap or total memory. Not initiating database warmup.");
@@ -206,16 +221,6 @@ export async function doDbInit(db) {
       await db.query('create (:Attribute {id:{id},name:{name},order:{order},type:{type},multi:{multi}})', attribute);
       if (attribute.values) await db.query('match (a:Attribute {id:{id}}) set a.values = {values}', attribute);
     }
-  });
-
-  // ensure system settings exist
-  let defaultSettings = [
-    {id: 'debug', value: false},
-  ];
-
-  await asyncForEach(defaultSettings, async (ss) => {
-    let ref = await db.query('match (ss:SystemSetting {id:{id}}) return count(ss)', ss);
-    if (ref[0] === 0) await db.query('create (:SystemSetting {id:{id},value:{value}})', ss);
   });
 
   let finish = new Date().getTime();

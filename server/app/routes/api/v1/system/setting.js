@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import _ from 'lodash';
 
+import { systemSettings } from '../../../../lib/startup';
 import { version } from '../../../../../package.json';
 import { _403, _404 } from '../../../../lib/utils';
 
@@ -89,6 +90,8 @@ module.exports = Router({mergeParams: true})
     set ss.updated = timestamp(),
     ss.value = {value}`,
     _.merge({}, req.body, req.params));
+
+  systemSettings[req.params.id] = req.body.value;
 
   return res.json({updated: true});
 })

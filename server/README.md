@@ -19,9 +19,7 @@ For this server, configure an `.env` file. The following is a complete list of v
     JOB_CONCURRENCY=1
     SM_OAUTH_URL=https://ws.ourvoiceusa.org/auth
     JWT_PUB_KEY=SM_OAUTH_URL/pubkey
-    WABASE=https://apps.ourvoiceusa.org
     VOLUNTEER_ADD_NEW=
-    DEBUG=
 
 The meaning of each config item is as follows:
 
@@ -41,6 +39,5 @@ The meaning of each config item is as follows:
 * `JOB_CONCURRENCY`: Number of import jobs that can run in parallel. This is only relevant if you're using Neo4j Enterprise Edition, as Community Edition is limited to 4 CPUs, and the minimum CPUs required for parallel jobs is 6.
 * `SM_OAUTH_URL`: URL of the oauth provider.
 * `JWT_PUB_KEY`: Path to the public key of the oauth provider.
-* `WABASE`: URL of the HelloVoterHQ react application.
 * `VOLUNTEER_ADD_NEW`: Whether or not volunteers can add new addresses & people that don't exist in the database.
-* `DEBUG`: Whether or not cypher and other debugging info is sent to the console log.
+
