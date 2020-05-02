@@ -1,12 +1,9 @@
+import { Router } from 'express';
 import fetch from 'node-fetch';
 import _ from 'lodash';
 
 import { volunteerAssignments, _400, _401 } from '../../../lib/utils';
-
 import { hv_config } from '../../../lib/hv_config';
-import { version } from '../../../../package.json';
-
-import { Router } from 'express';
 
 module.exports = Router({mergeParams: true})
 /**
@@ -103,38 +100,10 @@ module.exports = Router({mergeParams: true})
 
   return res.json(ass);
 })
+.get('/public/poke', async (req, res) => {
+  // PSA: make sure you ask people in public for their permission before you poke them!
+  return res.json({timestamp: (await req.db.query('return timestamp()'))[0]});
+})
 .get('/uncle', (req, res) => {
   return res.json({name: "Bob"});
 })
-.get('/dashboard', async (req, res) => {
-  let nv = await req.db.version();
-  if (req.user.admin === true) return res.json({
-    admins: (await req.db.query('match (v:Volunteer {admin:true}) return count(v)'))[0],
-    volunteers: (await req.db.query('match (a:Volunteer) return count(a)'))[0],
-    turfs: (await req.db.query('match (a:Turf) return count(a)'))[0],
-    attributes: (await req.db.query('match (at:Attribute) return count(at)'))[0],
-    forms: (await req.db.query('match (a:Form) return count(a)'))[0],
-    addresses: (await req.db.query('match (a:Address) return count(a)'))[0],
-    dbsize: await req.db.size(),
-    version: version,
-    neo4j_version: nv,
-  });
-  else {
-    let ass = await volunteerAssignments(req, 'Volunteer', req.user);
-    return res.json({
-      admins: (await req.db.query('match (v:Volunteer {admin:true}) return count(v)'))[0],
-      volunteers: (await req.db.query('match (v:Volunteer {id:{id}}) return v', req.user)).length,
-      turfs: ass.turfs.length,
-      attributes: 'N/A',
-      forms: ass.forms.length,
-      addresses: 'N/A',
-      version: (ass.ready?version:null),
-      neo4j_version: (ass.ready?nv:null),
-    });
-  }
-})
-.get('/google_maps_key', async (req, res) => {
-  let ass = await volunteerAssignments(req, 'Volunteer', req.user);
-  if (ass.ready || req.user.admin) return res.json({google_maps_key: hv_config.google_maps_key });
-  else return _401(res, "No soup for you");
-});

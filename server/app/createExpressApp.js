@@ -45,14 +45,13 @@ export async function doExpressInit({db, qq, logger, config = hv_config}) {
     };
   }
 
-  // require ip_header if config for it is set
-  if (!config.DEBUG && config.ip_header) {
+  if (config.ip_header) {
     app.use(function (req, res, next) {
       if (!req.header(config.ip_header)) {
         console.log('Connection without '+config.ip_header+' header');
-       return _400(res, "Missing required header.");
+        return _400(res, "Missing required header.");
       }
-      else next();
+      next();
     });
   }
 
@@ -68,13 +67,6 @@ export async function doExpressInit({db, qq, logger, config = hv_config}) {
     res.set('x-sm-oauth-url', config.sm_oauth_url);
 
     // uri whitelist
-    switch (req.url) {
-      case '/':
-      case '/poke':
-        return next();
-      default:
-        break;
-    }
     if (req.url.match(/^\/[a-zA-Z0-9/]*\/v1\/public\//)) return next();
 
     try {
@@ -121,11 +113,6 @@ export async function doExpressInit({db, qq, logger, config = hv_config}) {
     }
 
     next();
-  });
-
-  // healtcheck
-  app.get('/poke', async (req, res) => {
-    return res.json({timestamp: (await req.db.query('return timestamp()'))[0]});
   });
 
   app.use(config.base_uri+'/v1', router);

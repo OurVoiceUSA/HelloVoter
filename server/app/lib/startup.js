@@ -208,6 +208,16 @@ export async function doDbInit(db) {
     }
   });
 
+  // ensure system settings exist
+  let defaultSettings = [
+    {id: 'debug', value: false},
+  ];
+
+  await asyncForEach(defaultSettings, async (ss) => {
+    let ref = await db.query('match (ss:SystemSetting {id:{id}}) return count(ss)', ss);
+    if (ref[0] === 0) await db.query('create (:SystemSetting {id:{id},value:{value}})', ss);
+  });
+
   let finish = new Date().getTime();
   console.log("doDbInit() finished @ "+finish+" after "+(finish-start)+" milliseconds");
 

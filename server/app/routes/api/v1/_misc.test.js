@@ -4,7 +4,6 @@ import { expect } from 'chai';
 import { appInit, base_uri, getObjs } from '../../../../test/lib/utils';
 import { hv_config } from '../../../lib/hv_config';
 import neo4j from '../../../lib/neo4j';
-import { version } from '../../../../../package.json';
 
 var api;
 var db;
@@ -26,20 +25,21 @@ describe('MISC endpoints', function () {
     db.close();
   });
 
-  // these aren't in _misc.js but have to test them somewhere
+  it('root uri 400', async () => {
+    let r = await api.get('/');
+    expect(r.statusCode).to.equal(400);
+  });
+
+  it('baser_uri 400', async () => {
+    let r = await api.get(base_uri);
+    expect(r.statusCode).to.equal(400);
+  });
 
   it('poke 200 timestamp', async () => {
-    let r = await api.get('/poke');
+    let r = await api.get(base_uri+'/public/poke');
     expect(r.statusCode).to.equal(200);
     expect(r.body.timestamp).to.satisfy(Number.isInteger);
   });
-
-  it('root uri 404', async () => {
-    let r = await api.get('/');
-    expect(r.statusCode).to.equal(404);
-  });
-
-  // hello
 
   it('hello 400 no jwt', async () => {
     const r = await api.post(base_uri+'/hello')
@@ -101,34 +101,6 @@ describe('MISC endpoints', function () {
       .set('Authorization', 'Bearer foobar')
     expect(r.statusCode).to.equal(200);
     expect(r.body.admin).to.not.exist;
-  });
-
-  it('dashboard admin', async () => {
-    const r = await api.get(base_uri+'/dashboard')
-      .set('Authorization', 'Bearer '+c.admin.jwt)
-    expect(r.statusCode).to.equal(200);
-    expect(r.body.admins).to.equal(1);
-    expect(r.body.volunteers).to.equal(Object.keys(c).length);
-    expect(r.body.turfs).to.equal(Object.keys(turfs).length);
-    expect(r.body.forms).to.equal(Object.keys(forms).length);
-    expect(r.body.attributes).to.equal(13);
-    expect(r.body.addresses).to.equal(0);
-    expect(r.body.version).to.equal(version);
-    expect(r.body.neo4j_version).to.equal(nv);
-  });
-
-  it('dashboard non-admin', async () => {
-    const r = await api.get(base_uri+'/dashboard')
-      .set('Authorization', 'Bearer '+c.bob.jwt)
-    expect(r.statusCode).to.equal(200);
-    expect(r.body.admins).to.equal(1);
-    expect(r.body.volunteers).to.equal(1);
-    expect(r.body.turfs).to.equal(0);
-    expect(r.body.forms).to.equal(0);
-    expect(r.body.attributes).to.equal('N/A');
-    expect(r.body.addresses).to.equal('N/A');
-    expect(r.body.version).to.equal(null);
-    expect(r.body.neo4j_version).to.equal(null);
   });
 
 });

@@ -46,6 +46,7 @@ var geometry = {type: 'object'};
 var data = {type: 'array', items: 'string'};
 var options = {type: 'array', items: 'string'};
 var attributes = {type: 'array', items: 'object'};
+var settings = {type: 'array', items: 'object'};
 var volunteers = {type: 'array', items: 'object'};
 var forms = {type: 'array', items: 'object'};
 var persons = {type: 'array', items: 'object'};
@@ -115,6 +116,7 @@ module.exports = {
       options: { type: 'object', properties: { options } },
       object:  { type: 'object', properties: { object } },
       attributes: { type: 'object', properties: { count, attributes } },
+      settings: { type: 'object', properties: { settings } },
       volunteers: { type: 'object', properties: { count, volunteers } },
       forms: { type: 'object', properties: { count, forms } },
       persons: { type: 'object', properties: { count, persons } },
