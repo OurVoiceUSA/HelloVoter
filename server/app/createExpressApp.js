@@ -37,7 +37,7 @@ export async function doExpressInit({db, qq, logger, config = hv_config}) {
       let res = await fetch(config.sm_oauth_url+'/pubkey');
       jwt_iss = res.headers.get('x-jwt-iss');
       if (res.status !== 200) throw "http code "+res.status;
-      public_key = res.text();
+      public_key = await res.text();
     } catch (e) {
       console.log("Unable to read SM_OAUTH_URL "+config.sm_oauth_url);
       console.log(e);
