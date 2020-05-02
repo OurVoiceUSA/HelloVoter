@@ -68,17 +68,15 @@ describe('Database Init', function () {
     public_key = fs.readFileSync('./test/rsa.pub', "utf8");
     private_key = fs.readFileSync('./test/rsa.key', "utf8");
 
-    jwt.verify(testToken(private_key), public_key);
+    expect(jwt.verify(testToken(private_key), public_key)).to.have.property('id');
   });
 
   it('hello 200 admin awaiting assignment', async () => {
-    let r;
-
     let t = testToken(private_key, true);
     c.admin = jwt.verify(t, public_key);
     c.admin.jwt = t;
 
-    r = await api.post(base_uri+'/hello')
+    let r = await api.post(base_uri+'/hello')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         longitude: -118.3281370,
@@ -102,9 +100,7 @@ describe('Database Init', function () {
   });
 
   it('hello 200 volunteers awaiting assignment', async () => {
-    let r, t;
-
-    t = testToken(private_key);
+    let t = testToken(private_key);
     c.bob = jwt.verify(t, public_key);
     c.bob.jwt = t;
 
@@ -128,7 +124,7 @@ describe('Database Init', function () {
     c.han = jwt.verify(t, public_key);
     c.han.jwt = t;
 
-    r = await api.post(base_uri+'/hello')
+    let r = await api.post(base_uri+'/hello')
       .set('Authorization', 'Bearer '+c.bob.jwt)
       .send({
         longitude: -118.3281370,
@@ -196,11 +192,9 @@ describe('Database Init', function () {
   });
 
   it('generate test objects - turfs', async () => {
-    let r;
-
     turfs.A = { name: genName("Turf") };
 
-    r = await api.post(base_uri+'/turf')
+    let r = await api.post(base_uri+'/turf')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: turfs.A.name,
@@ -233,11 +227,9 @@ describe('Database Init', function () {
   });
 
   it('generate test objects - forms', async () => {
-    let r;
-
     forms.A = { name: genName("Form") };
 
-    r = await api.post(base_uri+'/form')
+    let r = await api.post(base_uri+'/form')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: forms.A.name,
