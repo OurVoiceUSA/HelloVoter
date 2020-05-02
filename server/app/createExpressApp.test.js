@@ -19,7 +19,7 @@ describe('doExpressInit', function () {
   });
 
   it('ip_header check', async () => {
-    let api = await appInit(db, _.merge({}, hv_config, {ip_header: 'x-client-ip'}));
+    let api = await appInit(db, _.merge({}, hv_config, {DEBUG: false, ip_header: 'x-client-ip'}));
     let r = await api.get('/poke');
     expect(r.statusCode).to.equal(400);
     expect(r.body.msg).to.equal('Missing required header.');
