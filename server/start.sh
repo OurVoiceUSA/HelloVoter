@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 if [ ! -f /data/dbms/auth ]; then
   if [ -f /run/secrets/neo4j_pass ]; then

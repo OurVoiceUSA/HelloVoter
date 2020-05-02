@@ -7,6 +7,8 @@ server/node_modules
 
 # production
 client/build
+client/web-build
+client/.expo
 
 # test data
 server/test/*.json
