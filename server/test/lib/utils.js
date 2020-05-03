@@ -4,7 +4,6 @@ import fs from 'fs';
 
 import { doExpressInit } from '../../app/createExpressApp';
 import { hv_config } from '../../app/lib/hv_config';
-import queue from '../../app/lib/queue';
 
 export var keep = (process.env.KEEP_TEST_DATA ? true : false);
 export var base_uri = hv_config.base_uri+'/v1';
@@ -14,8 +13,14 @@ export var writeObj = (name, obj) => fs.writeFileSync('./test/'+name+'.json', JS
 export var getObjs = (name) => JSON.parse(fs.readFileSync('./test/'+name+'.json'));
 export var genName = (name) => tpx+name+' '+Math.ceil(Math.random()*10000000);
 
+var logger = (l,m,n) => {n()};
+var qq = {
+  queueTask: () => {return {}},
+  clearQueue: () => {},
+};
+
 export async function appInit(db, config = hv_config) {
-  return supertest(await doExpressInit({db, qq: new queue(db), logger: (l,m,n) => {n()}, config}));
+  return supertest(await doExpressInit({db, qq, logger, config}));
 }
 
 export function testToken(key, admin) {
