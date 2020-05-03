@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import _ from 'lodash';
 
 import { valid, _400, _403 } from '../../../lib/utils';
 
@@ -8,15 +9,7 @@ module.exports = Router({mergeParams: true})
   if (req.config.enable_geocode) return res.json({count: 3, fields: [1,3,5]}); // things required to call a geocoder
   else return res.json({count: 3, fields: [1,6,7]}); // require street, lat, lng
 })
-.get('/import', async (req, res) => {
-  if (req.user.admin !== true) return _403(res, "Permission denied.");
-  let im = await req.db.query('match (a:ImportFile) return a order by a.created desc', {});
-  return res.json({
-    count: im.length,
-    import: im,
-  });
-})
-.post('/import/begin', async (req, res) => {
+.post('/import', async (req, res) => {
   if (req.user.admin !== true) return _403(res, "Permission denied.");
   if (!valid(req.body.filename)) return _400(res, "Invalid value to parameter 'filename'.");
   if (typeof req.body.attributes !== 'object') return _400(res, "Invalid value to parameter 'attributes'.");
@@ -31,37 +24,53 @@ module.exports = Router({mergeParams: true})
 
   return res.json({});
 })
-.post('/import/add', async (req, res) => {
+.get('/import/:filename', async (req, res) => {
   if (req.user.admin !== true) return _403(res, "Permission denied.");
-  if (!valid(req.body.filename)) return _400(res, "Invalid value to parameter 'filename'.");
+  let imf = await req.db.query('match (if:ImportFile {filename:{filename}}) return if', req.params);
+  return res.json(imf[0]);
+})
+.post('/import/:filename', async (req, res) => {
+  if (req.user.admin !== true) return _403(res, "Permission denied.");
 
   // TODO: verify data[0].length matches attriutes.length+8
   // TODO: verify each attribute exists
   // convert attriutes to part of a cypher query
   let attrq = "";
-  let ref = await req.db.query('match (a:ImportFile {filename:{filename}}) return a.attributes', req.body);
+  let ref = await req.db.query('match (if:ImportFile {filename:{filename}}) return if.attributes', req.params);
   for (let i = 0; i < ref[0].length; i++) {
     attrq += ',`'+ref[0][i]+'`:r['+(i+8)+']';
   }
   await req.db.query(`
-match (a:ImportFile {filename:{filename}})
-with collect(a) as lock call apoc.lock.nodes(lock)
-match (a:ImportFile {filename:{filename}})
+match (if:ImportFile {filename:{filename}})
+with collect(if) as lock call apoc.lock.nodes(lock)
+match (if:ImportFile {filename:{filename}})
 unwind {data} as r
 create (b:ImportRecord {pid:r[0], street:r[1], unit:r[2], city:r[3], state:r[4], zip:r[5], lng:r[6], lat:r[7]`+attrq+`})
-merge (b)-[:FILE]->(a)`,
-    req.body);
+merge (b)-[:FILE]->(if)`,
+    _.merge({}, req.body, req.params));
 
   return res.json({});
 })
-.post('/import/end', async (req, res) => {
+.put('/import/:filename', async (req, res) => {
   if (req.user.admin !== true) return _403(res, "Permission denied.");
-  if (!valid(req.body.filename)) return _400(res, "Invalid value to parameter 'filename'.");
 
-  let ref = await req.db.query('match (a:ImportFile {filename:{filename}}) where a.submitted is null set a.submitted = timestamp() return count(a)', req.body);
+  let ref = await req.db.query('match (if:ImportFile {filename:{filename}}) where if.submitted is null set if.submitted = timestamp() return count(if)', req.params);
   if (ref[0] !== 1) return _403(res, "Import File already submitted for processing.");
 
-  let job = await req.qq.queueTask('doProcessImport', 'ImportFile {filename:{filename}}', {filename: req.body.filename});
+  let job = await req.qq.queueTask('doProcessImport', 'ImportFile {filename:{filename}}', req.params);
 
   return res.json(job);
-});
+})
+.delete('/import/:filename', async (req, res) => {
+  // TODO: delete imported records as well
+  await req.db.query('match (if:ImportFile {filename:{filename}}) set if:DeletedImportFile remove if:ImportFile', req.params);
+  return res.json({deleted: true})
+})
+.get('/imports', async (req, res) => {
+  if (req.user.admin !== true) return _403(res, "Permission denied.");
+  let im = await req.db.query('match (a:ImportFile) return a order by a.created desc', {});
+  return res.json({
+    count: im.length,
+    import: im,
+  });
+})

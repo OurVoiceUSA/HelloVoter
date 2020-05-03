@@ -32,6 +32,8 @@ describe('Import', function () {
     let r = await api.get(base_uri+'/import/required-fields')
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
+    expect(r.body.count).to.equal(3);
+    expect(r.body.fields.length).to.equal(r.body.count);
     expect(r.body.fields[0]).to.equal(1);
     expect(r.body.fields[1]).to.equal(6);
     expect(r.body.fields[2]).to.equal(7);
@@ -41,20 +43,22 @@ describe('Import', function () {
     let r = await gapi.get(base_uri+'/import/required-fields')
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
+    expect(r.body.count).to.equal(3);
+    expect(r.body.fields.length).to.equal(r.body.count);
     expect(r.body.fields[0]).to.equal(1);
     expect(r.body.fields[1]).to.equal(3);
     expect(r.body.fields[2]).to.equal(5);
   });
 
   it('list as admin', async () => {
-    let r = await api.get(base_uri+'/import')
+    let r = await api.get(base_uri+'/imports')
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.import.length).to.equal(0);
   });
 
   it('list non-admin', async () => {
-    let r = await api.get(base_uri+'/import')
+    let r = await api.get(base_uri+'/imports')
       .set('Authorization', 'Bearer '+c.bob.jwt);
     expect(r.statusCode).to.equal(403);
   });
