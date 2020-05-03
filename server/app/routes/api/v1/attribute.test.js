@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import _ from 'lodash';
 
-import { appInit, base_uri, getObjs } from '../../../../test/lib/utils';
+import { appInit, base_uri, getObjs, isuuid } from '../../../../test/lib/utils';
 import { ID_NAME, ID_REG_VOTER } from '../../../lib/consts';
 import { hv_config } from '../../../lib/hv_config';
 import neo4j from '../../../lib/neo4j';
@@ -65,6 +65,7 @@ describe('Attributes', function () {
         type: type,
       });
     expect(r.statusCode).to.equal(200);
+    expect(isuuid(r.body.attributeId)).to.equal(true);
     at = _.cloneDeep(r.body);
     let id = r.body.attributeId;
 
@@ -85,6 +86,7 @@ describe('Attributes', function () {
         type: type,
       });
     expect(r.statusCode).to.equal(200);
+    expect(isuuid(r.body.attributeId)).to.equal(true);
     let id = r.body.attributeId;
 
     r = await api.get(base_uri+'/attribute/'+id)
@@ -104,6 +106,7 @@ describe('Attributes', function () {
         type: type,
       });
     expect(r.statusCode).to.equal(200);
+    expect(isuuid(r.body.attributeId)).to.equal(true);
     let id = r.body.attributeId;
 
     r = await api.get(base_uri+'/attribute/'+id)
@@ -123,6 +126,7 @@ describe('Attributes', function () {
         type: type,
       });
     expect(r.statusCode).to.equal(200);
+    expect(isuuid(r.body.attributeId)).to.equal(true);
     let id = r.body.attributeId;
 
     r = await api.get(base_uri+'/attribute/'+id)
@@ -142,6 +146,7 @@ describe('Attributes', function () {
         type: type,
       });
     expect(r.statusCode).to.equal(200);
+    expect(isuuid(r.body.attributeId)).to.equal(true);
     let id = r.body.attributeId;
 
     r = await api.get(base_uri+'/attribute/'+id)
@@ -161,6 +166,7 @@ describe('Attributes', function () {
         type: type,
       });
     expect(r.statusCode).to.equal(200);
+    expect(isuuid(r.body.attributeId)).to.equal(true);
     let id = r.body.attributeId;
 
     r = await api.get(base_uri+'/attribute/'+id)

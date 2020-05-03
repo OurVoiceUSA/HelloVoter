@@ -34,7 +34,7 @@ describe('Queue', function () {
     let r = await api.get(base_uri+'/queue')
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
-    expect(r.body.queue.length).to.equal(Object.keys(turfs).length);
+    expect(r.body.queue.length).to.equal(Object.keys(turfs).length+1);
   });
 
   // TODO: orphaned queue, as deleted turfs leave a hanging queue object
