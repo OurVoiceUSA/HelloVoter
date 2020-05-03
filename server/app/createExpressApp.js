@@ -14,7 +14,6 @@ import { hv_config } from './lib/hv_config';
 
 const router = require('./routes/createRouter.js')();
 
-var public_key;
 var jwt_iss = hv_config.jwt_iss;
 
 export async function doExpressInit({db, qq, logger, config = hv_config}) {
@@ -22,7 +21,7 @@ export async function doExpressInit({db, qq, logger, config = hv_config}) {
   await initSystemSettings(db);
 
   // Initialize http server
-  const app = express();
+  let app = express();
 
   app.use(logger);
   app.disable('x-powered-by');
@@ -32,14 +31,14 @@ export async function doExpressInit({db, qq, logger, config = hv_config}) {
   app.use(helmet());
 
   if (config.jwt_pub_key) {
-    public_key = fs.readFileSync(config.jwt_pub_key, "utf8");
+    app.public_key = fs.readFileSync(config.jwt_pub_key, "utf8");
   } else {
     console.log("JWT_PUB_KEY not defined, attempting to fetch from "+config.sm_oauth_url+'/pubkey');
     try {
       let res = await fetch(config.sm_oauth_url+'/pubkey');
       jwt_iss = res.headers.get('x-jwt-iss');
       if (res.status !== 200) throw "http code "+res.status;
-      public_key = await res.text();
+      app.public_key = await res.text();
     } catch (e) {
       console.log("Unable to read SM_OAUTH_URL "+config.sm_oauth_url);
       console.log(e);
@@ -84,7 +83,7 @@ export async function doExpressInit({db, qq, logger, config = hv_config}) {
           return _500(res, e);
         }
       } else {
-        u = jwt.verify(token, public_key);
+        u = jwt.verify(token, app.public_key);
 
         // verify props
         if (!u.id) return _401(res, "Your token is missing a required parameter.");
