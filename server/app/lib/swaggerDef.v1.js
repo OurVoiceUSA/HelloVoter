@@ -14,12 +14,14 @@ var addressId = {type: 'string'};
 var attributeId = {type: 'string'};
 var turfId = {type: 'string'};
 var formId = {type: 'string'};
+var importId = {type: 'string'};
 var type = {type: 'string'};
 var apikey = {type: 'string'};
 
 // strings
 var name = {type: 'string'};
 var value = {type: 'string'};
+var filename = {type: 'string'};
 var phone = {type: 'string'};
 var address = {type: 'string'};
 var street = {type: 'string', example: '1 Rocket Rd'};
@@ -112,6 +114,7 @@ module.exports = {
       id: { type: 'object', properties: { id } },
       name: { type: 'object', properties: { name } },
       value: { type: 'object', properties: { value } },
+      filename: { type: 'object', properties: { filename } },
       apikey: { type: 'object', properties: { apikey } },
       options: { type: 'object', properties: { options } },
       object:  { type: 'object', properties: { object } },
@@ -123,6 +126,7 @@ module.exports = {
       data: { type: 'object', properties: { data } },
       dinfo: { type: 'object', properties: { dinfo } },
       formId: { type: 'object', properties: { formId } },
+      importId: { type: 'object', properties: { importId } },
       attributeId: { type: 'object', properties: { attributeId } },
       turfId: { type: 'object', properties: { turfId } },
       formId: { type: 'object', properties: { formId } },

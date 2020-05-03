@@ -4,11 +4,49 @@ import _ from 'lodash';
 import { valid, _400, _403, _404 } from '../../../lib/utils';
 
 module.exports = Router({mergeParams: true})
+/**
+ * @swagger
+ *
+ * /import/required-fields:
+ *   get:
+ *     description: Get what import fields are required.
+ *     tags:
+ *       - import
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/data"
+ */
 .get('/import/required-fields', (req, res) => {
   if (req.user.admin !== true) return _403(res, "Permission denied.");
   if (req.config.enable_geocode) return res.json({count: 3, fields: [1,3,5]}); // things required to call a geocoder
   else return res.json({count: 3, fields: [1,6,7]}); // require street, lat, lng
 })
+/**
+ * @swagger
+ *
+ * /import:
+ *   post:
+ *     description: Start a new import process
+ *     tags:
+ *       - import
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             allOf:
+ *               - "$ref": "#/components/schemas/filename"
+ *               - "$ref": "#/components/schemas/attributes"
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/importId"
+ */
 .post('/import', async (req, res) => {
   if (req.user.admin !== true) return _403(res, "Permission denied.");
   if (!valid(req.body.filename)) return _400(res, "Invalid value to parameter 'filename'.");
@@ -31,6 +69,77 @@ module.exports = Router({mergeParams: true})
 
   return res.json({importId: ref[0]});
 })
+/**
+ * @swagger
+ *
+ * /import/{id}:
+ *   post:
+ *     description: Add data to an existing import process.
+ *     tags:
+ *       - import
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             "$ref": "#/components/schemas/data"
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/empty"
+ *   get:
+ *     description: Get stats of an import
+ *     tags:
+ *       - import
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/object"
+ *   put:
+ *     description: Signal you are done sending data to an import. Or more colloquially, "put" and "end" to an import
+ *     tags:
+ *       - import
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/empty"
+ *   delete:
+ *     description: Delete an import
+ *     tags:
+ *       - import
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/empty"
+ */
 .get('/import/:id', async (req, res) => {
   if (req.user.admin !== true) return _403(res, "Permission denied.");
   let imf = await req.db.query('match (if:ImportFile {id:{id}}) return if', req.params);
@@ -83,6 +192,21 @@ module.exports = Router({mergeParams: true})
   await req.db.query('match (if:ImportFile {id:{id}}) set if:DeletedImportFile remove if:ImportFile', req.params);
   return res.json({deleted: true})
 })
+/**
+ * @swagger
+ *
+ * /imports:
+ *   get:
+ *     description: List all imports
+ *     tags:
+ *       - import
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/data"
+ */
 .get('/imports', async (req, res) => {
   if (req.user.admin !== true) return _403(res, "Permission denied.");
   let im = await req.db.query('match (a:ImportFile) return a order by a.created desc', {});
