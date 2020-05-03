@@ -20,7 +20,9 @@ var qq = {
 };
 
 export async function appInit(db, config = hv_config) {
-  return supertest(await doExpressInit({db, qq, logger, config}));
+  let api = await doExpressInit({db, qq, logger, config});
+  if (api.error) throw Error("Failed to doExpressInit");
+  return supertest(api);
 }
 
 export function testToken(key, admin) {
