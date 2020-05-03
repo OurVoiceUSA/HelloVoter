@@ -30,13 +30,12 @@ describe('Queue', function () {
     expect(r.statusCode).to.equal(403);
   });
 
+  // TODO: this test needs queue.test.js to execute first
   it('list as admin', async () => {
     let r = await api.get(base_uri+'/queue')
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
-    expect(r.body.queue.length).to.equal(Object.keys(turfs).length+1);
+    expect(r.body.queue.length).to.equal(0);
   });
-
-  // TODO: orphaned queue, as deleted turfs leave a hanging queue object
 
 });
