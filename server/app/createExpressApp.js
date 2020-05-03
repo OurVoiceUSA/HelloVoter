@@ -63,6 +63,7 @@ export async function doExpressInit({db, qq, logger, config = hv_config}) {
     if (req.method == 'OPTIONS') return next(); // skip OPTIONS requests
 
     req.user = {};
+    req.config = config;
     req.db = db;
     req.qq = qq;
 

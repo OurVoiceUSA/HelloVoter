@@ -3,7 +3,6 @@ import fetch from 'node-fetch';
 import _ from 'lodash';
 
 import { volunteerAssignments, _400, _401 } from '../../../lib/utils';
-import { hv_config } from '../../../lib/hv_config';
 
 module.exports = Router({mergeParams: true})
 /**

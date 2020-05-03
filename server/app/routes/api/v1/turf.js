@@ -3,7 +3,6 @@ import _ from 'lodash';
 import wkx from 'wkx';
 
 import { asyncForEach, sleep, valid, _400, _403 } from '../../../lib/utils';
-import { hv_config } from '../../../lib/hv_config';
 
 module.exports = Router({mergeParams: true})
 /**

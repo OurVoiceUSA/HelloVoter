@@ -3,7 +3,6 @@ import _ from 'lodash';
 
 import { volunteerAssignments, valid, _400, _403 } from '../../../lib/utils';
 import { systemSettings } from '../../../lib/utils';
-import { hv_config } from '../../../lib/hv_config';
 
 module.exports = Router({mergeParams: true})
 /**

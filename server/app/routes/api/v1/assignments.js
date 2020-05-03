@@ -1,6 +1,5 @@
 import { Router } from 'express';
 
-import { hv_config } from '../../../lib/hv_config';
 import { _volunteersFromCypher, _400, _403 } from '../../../lib/utils';
 
 async function cqdo(req, res, q, p, a) {
