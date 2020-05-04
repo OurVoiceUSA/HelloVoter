@@ -7,72 +7,7 @@ module.exports = Router({mergeParams: true})
 /**
  * @swagger
  *
- * /address/get/byposition:
- *   get:
- *     description: Get addresses for a given position
- *     tags:
- *       - address
- *     requestBody:
- *     parameters:
- *       - in: query
- *         name: formId
- *         required: true
- *         type: string
- *       - in: query
- *         name: longitude
- *         required: true
- *       - in: query
- *         name: latitude
- *         required: true
- *       - in: query
- *         name: limit
- *         type: integer
- *       - in: query
- *         name: dist
- *         type: integer
- *     responses:
- *       200:
- *         content:
- *           application/json:
- *             schema:
- *               "$ref": "#/components/schemas/data"
- *
- */
-.get('/address/get/byposition', async (req, res) => {
-  if (req.user.admin !== true) return _403(res, "Permission denied.");
-
-  req.query.longitude = parseFloat(req.query.longitude);
-  req.query.latitude = parseFloat(req.query.latitude);
-  if (req.query.limit) req.query.limit = parseInt(req.query.limit);
-  if (req.query.dist) req.query.dist = parseInt(req.query.dist);
-
-  if (isNaN(req.query.longitude) || isNaN(req.query.latitude)) return _400(res, "Invalid value to parameters 'longitude' and 'latitude'.");
-
-  // TODO: include status from visits via req.query.formId
-
-  // default admin limits
-  if (!req.query.limit) req.query.limit = 10000;
-  if (!req.query.dist) req.query.dist = 10000;
-
-  let ref = await req.db.query(`
-  match (a:Address) using index a:Address(position)
-    where distance(a.position, point({longitude: {longitude}, latitude: {latitude}})) < {dist}
-    with a, distance(a.position, point({longitude: {longitude}, latitude: {latitude}})) as dist
-    order by dist limit {limit}
-  `+(req.query.formId?'with a optional match (a)<-[:VISIT_AT]-(v:Visit)-[:VISIT_FORM]->(:Form {id:{formId}}) with a, collect(v) as visits':'')+`
-  return collect({
-    address: a{longitude:a.position.x,latitude:a.position.y,.id,.street,.city,.state,.zip,.updated},
-    visits: `+(req.query.formId?'visits':'[]')+`})
-    `, req.query);
-
-  if (ref[0].length) return res.json(ref[0]);
-
-  return res.json([]);
-})
-/**
- * @swagger
- *
- * /address/add/location:
+ * /address:
  *   post:
  *     description: Add a new address
  *     tags:
@@ -99,7 +34,7 @@ module.exports = Router({mergeParams: true})
  *             schema:
  *               "$ref": "#/components/schemas/empty"
  */
-.post('/address/add/location', async (req, res) => {
+.post('/address', async (req, res) => {
   req.body.longitude = parseFloat(req.body.longitude);
   req.body.latitude = parseFloat(req.body.latitude);
 
@@ -111,19 +46,95 @@ module.exports = Router({mergeParams: true})
 /**
  * @swagger
  *
- * /address/add/unit:
- *   post:
- *     description: Add a new unit to an address
+ * /address/{id}:
+ *   get:
+ *     description: Get info about an address
  *     tags:
  *       - address
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/data"
+ *   put:
+ *     description: Update a given property of an address
+ *     tags:
+ *       - address
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         type: string
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             allOf:
- *               - "$ref": "#/components/schemas/addressId"
- *               - "$ref": "#/components/schemas/unit"
+ *               - "$ref": "#/components/schemas/longitude"
+ *               - "$ref": "#/components/schemas/latitude"
+ *               - "$ref": "#/components/schemas/note"
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/empty"
+ *   delete:
+ *     description: Delete an address
+ *     tags:
+ *       - address
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/empty"
+ */
+.get('/address/:id', async (req, res) => {
+  if (req.user.admin !== true) return _403(res, "Permission denied.");
+  let address = {};
+  return res.json(address);
+})
+.put('/address/:id', async (req, res) => {
+  if (req.user.admin !== true) return _403(res, "Permission denied.");
+  return res.json({updated: true});
+})
+.delete('/address/:id', async (req, res) => {
+  if (req.user.admin !== true) return _403(res, "Permission denied.");
+  return res.json({deleted: true});
+})
+/**
+ * @swagger
+ *
+ * /address/{id}/unit:
+ *   post:
+ *     description: Add a new unit to an address
+ *     tags:
+ *       - address
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             allOf:
+ *               - "$ref": "#/components/schemas/name"
  *               - "$ref": "#/components/schemas/deviceId"
  *               - "$ref": "#/components/schemas/formId"
  *               - "$ref": "#/components/schemas/timestamp"
@@ -134,14 +145,153 @@ module.exports = Router({mergeParams: true})
  *             schema:
  *               "$ref": "#/components/schemas/empty"
  */
-.post('/address/add/unit', async (req, res) => {
+.post('/address/:id/unit', async (req, res) => {
   if (!req.body.addressId) return _400(res, "Invalid value to parameter 'addressId'.");
   if (!req.body.unit) return _400(res, "Invalid value to parameter 'unit'.");
 
   // TODO: ensure no duplicate
 
   return addressAdd(req, res);
-});
+})
+/**
+ * @swagger
+ *
+ * /address/{id}/unit/{name}:
+ *   get:
+ *     description: Get info about a unit at an address
+ *     tags:
+ *       - address
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         type: string
+ *       - in: path
+ *         name: name
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/data"
+ *   put:
+ *     description: Update a given property of a unit at an address.
+ *     tags:
+ *       - address
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         type: string
+ *       - in: path
+ *         name: name
+ *         required: true
+ *         type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *            "$ref": "#/components/schemas/empty"
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/note"
+ *   delete:
+ *     description: Delete a unit at an address.
+ *     tags:
+ *       - address
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         type: string
+ *       - in: path
+ *         name: name
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/empty"
+ */
+.get('/address/:id/unit/:name', async (req, res) => {
+  if (req.user.admin !== true) return _403(res, "Permission denied.");
+  let address = {};
+  return res.json(address);
+})
+.put('/address/:id/unit/:name', async (req, res) => {
+  if (req.user.admin !== true) return _403(res, "Permission denied.");
+  let address = {};
+  return res.json({updated: true});
+})
+.delete('/address/:id/unit/:name', async (req, res) => {
+  if (req.user.admin !== true) return _403(res, "Permission denied.");
+  return res.json({deleted: true});
+})
+/**
+ * @swagger
+ *
+ * /addresses:
+ *   get:
+ *     description: Get addresses for a given position
+ *     tags:
+ *       - address
+ *     requestBody:
+ *     parameters:
+ *       - in: query
+ *         name: longitude
+ *         required: true
+ *       - in: query
+ *         name: latitude
+ *         required: true
+ *       - in: query
+ *         name: limit
+ *         type: integer
+ *       - in: query
+ *         name: dist
+ *         type: integer
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/data"
+ *
+ */
+.get('/addresses', async (req, res) => {
+  if (req.user.admin !== true) return _403(res, "Permission denied.");
+
+  req.query.longitude = parseFloat(req.query.longitude);
+  req.query.latitude = parseFloat(req.query.latitude);
+  if (req.query.limit) req.query.limit = parseInt(req.query.limit);
+  if (req.query.dist) req.query.dist = parseInt(req.query.dist);
+
+  if (isNaN(req.query.longitude) || isNaN(req.query.latitude)) return _400(res, "Invalid value to parameters 'longitude' and 'latitude'.");
+
+  // default admin limits
+  if (!req.query.limit) req.query.limit = 10000;
+  if (!req.query.dist) req.query.dist = 10000;
+
+  let ref = await req.db.query(`
+  match (a:Address) using index a:Address(position)
+    where distance(a.position, point({longitude: {longitude}, latitude: {latitude}})) < {dist}
+    with a, distance(a.position, point({longitude: {longitude}, latitude: {latitude}})) as dist
+    order by dist limit {limit}
+  return collect({
+    address: a{longitude:a.position.x,latitude:a.position.y,.id,.street,.city,.state,.zip,.updated}})`,
+    req.query);
+
+  if (ref[0].length) return res.json(ref[0]);
+
+  return res.json([]);
+})
 
 async function addressAdd(req, res) {
   if (!systemSettings['volunteer_add_new']) return _403(res, "Permission denied.");

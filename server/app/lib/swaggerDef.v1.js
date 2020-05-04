@@ -21,6 +21,7 @@ var apikey = {type: 'string'};
 // strings
 var name = {type: 'string'};
 var value = {type: 'string'};
+var note = {type: 'string'};
 var filename = {type: 'string'};
 var phone = {type: 'string'};
 var address = {type: 'string'};
@@ -114,6 +115,7 @@ module.exports = {
       id: { type: 'object', properties: { id } },
       name: { type: 'object', properties: { name } },
       value: { type: 'object', properties: { value } },
+      note: { type: 'object', properties: { note } },
       filename: { type: 'object', properties: { filename } },
       apikey: { type: 'object', properties: { apikey } },
       options: { type: 'object', properties: { options } },
