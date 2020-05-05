@@ -71,6 +71,11 @@ describe('Database Init', function () {
     expect(jwt.verify(testToken(private_key), public_key)).to.have.property('id');
   });
 
+  it('OPTIONS returns ok', async () => {
+    let r = await api.options(base_uri+'/poke')
+    expect(r.statusCode).to.equal(204);
+  });
+
   it('hello 200 admin awaiting assignment', async () => {
     let t = testToken(private_key, true);
     c.admin = jwt.verify(t, public_key);
