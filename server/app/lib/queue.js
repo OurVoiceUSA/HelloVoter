@@ -19,37 +19,47 @@ export default class queue {
     this.queue.on('doTask', async (id) => {
       await this.doTask(id);
     });
-
-    this.queue.on('checkQueue', async function () {
-      console.log("Checking queue for tasks to run...");
-      try {
-        let ref = await db.query('match (a:QueueTask {active: true}) return count(a)');
-        let running = ref[0];
-        console.log("Number of running jobs: "+running);
-        if (running >= concurrency) {
-          console.log("Too many tasks running to start another.");
-          return;
-        }
-
-        let job = await db.query('match (a:QueueTask) where a.active = false and not exists(a.started) with a limit 1 set a.active = true, a.started = timestamp() return a');
-        if (!job[0]) {
-          console.log("No tasks in queue to execute.");
-          return;
-        }
-
-        queue.emit('doTask', job[0].id);
-
-        // wait a second, then check again if we have capacity to run more
-        await sleep(1000);
-
-        if ((running+1) < concurrency) queue.emit('checkQueue');
-
-      } catch (e) {
-        console.warn("Houston we have a problem.");
-        console.warn(e);
-        return;
-      }
+    this.queue.on('checkQueue', async () => {
+      await this.checkQueue();
     });
+  }
+
+  async checkQueue() {
+    let db = this.db;
+    let queue = this.queue;
+    let ran = false;
+
+    console.log("Checking queue for tasks to run...");
+    try {
+      let ref = await db.query('match (a:QueueTask {active: true}) return count(a)');
+      let running = ref[0];
+      console.log("Number of running jobs: "+running);
+      if (running >= concurrency) {
+        console.log("Too many tasks running to start another.");
+        return true;
+      }
+
+      let job = await db.query('match (a:QueueTask) where a.active = false and not exists(a.started) with a limit 1 set a.active = true, a.started = timestamp() return a');
+      if (!job[0]) {
+        console.log("No tasks in queue to execute.");
+        return false;
+      }
+
+      queue.emit('doTask', job[0].id);
+      ran = true;
+
+      // wait a second, then check again if we have capacity to run more
+      await sleep(1000);
+
+      if ((running+1) < concurrency) queue.emit('checkQueue');
+
+    } catch (e) {
+      console.warn("Houston we have a problem.");
+      console.warn(e);
+      return;
+    }
+
+    return ran;
   }
 
   async doTask(id) {
@@ -62,7 +72,7 @@ export default class queue {
     let start = new Date().getTime();
 
     try {
-      let job = await db.query('match (a:QueueTask {id:{id}}) return a', {id: id});
+      let job = await db.query('match (a:QueueTask {id:{id}}) return a', {id});
 
       if (!job[0])
         throw new Error("QueueTask with id "+id+" does not exist.");
@@ -73,13 +83,13 @@ export default class queue {
       let ret = await tt[task](id, JSON.parse(job[0].input));
 
       // mark job as success
-      await db.query('match (a:QueueTask {id:{id}}) set a.active = false, a.completed = timestamp(), a.success = true, a.error = null', {id: id});
+      await db.query('match (a:QueueTask {id:{id}}) set a.active = false, a.completed = timestamp(), a.success = true, a.error = null', {id});
     } catch (e) {
       console.warn("Caught exception while executing task: "+task);
       console.warn(e);
       // mark job as failed
       await db.query('match (a:QueueTask {id:{id}}) set a.active = false, a.completed = timestamp(), a.success = false, a.error = {error}', {
-        id: id,
+        id,
         error: e.toString(),
       });
       error = true;
@@ -96,6 +106,8 @@ export default class queue {
 
     // check to see if there's another job to execute
     queue.emit('checkQueue');
+
+    return error;
   }
 
   async queueTask(task, pattern, input) {
@@ -130,6 +142,14 @@ export default class queue {
     // when clearing the queue, assume any "active" tasks are dead, and mark them as failed
     await this.db.query('match (a:QueueTask {active: true}) set a.active = false, a.completed = timestamp(), a.success = false, a.error = {msg}', {msg: msg});
     this.queue.emit('checkQueue');
+  }
+
+  async noop() {
+    console.log("Smooth Operator...");
+  }
+
+  async errop() {
+    throw Error("You've been hit by, you've been struck by, a smooth criminal!");
   }
 
   async doAddAddress(jobId, input) {

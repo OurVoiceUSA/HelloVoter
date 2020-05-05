@@ -25,7 +25,7 @@ describe('Cleanup', function () {
   });
 
   it('all queue tasks returned success', async () => {
-    let c = await db.query('match (qt:QueueTask) where NOT qt.success = true return count(qt)');
+    let c = await db.query('match (qt:QueueTask) where NOT qt.task = "errop" and NOT qt.success = true return count(qt)');
     expect(c[0]).to.equal(0);
   });
 
