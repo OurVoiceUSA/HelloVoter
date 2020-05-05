@@ -14,8 +14,6 @@ import { hv_config } from './lib/hv_config';
 
 const router = require('./routes/createRouter.js')();
 
-var jwt_iss = hv_config.jwt_iss;
-
 export async function doExpressInit({db, qq, logger, config = hv_config}) {
 
   await initSystemSettings(db);
@@ -31,12 +29,17 @@ export async function doExpressInit({db, qq, logger, config = hv_config}) {
   app.use(helmet());
 
   if (config.jwt_pub_key) {
+    app.jwt_iss = config.jwt_iss;
     app.public_key = fs.readFileSync(config.jwt_pub_key, "utf8");
   } else {
     console.log("JWT_PUB_KEY not defined, attempting to fetch from "+config.sm_oauth_url+'/pubkey');
     try {
       let res = await fetch(config.sm_oauth_url+'/pubkey');
-      jwt_iss = res.headers.get('x-jwt-iss');
+      app.jwt_iss = res.headers.get('x-jwt-iss');
+      if (app.jwt_iss !== config.jwt_iss) {
+        console.log("Your SM_OAUTH_URL has different issuer than your config does.");
+        return {error: true};
+      }
       if (res.status !== 200) throw "http code "+res.status;
       app.public_key = await res.text();
     } catch (e) {
@@ -87,7 +90,7 @@ export async function doExpressInit({db, qq, logger, config = hv_config}) {
 
         // verify props
         if (!u.id) return _401(res, "Your token is missing a required parameter.");
-        if (u.iss !== jwt_iss) return _401(res, "Your token was issued for a different domain.");
+        if (u.iss !== app.jwt_iss) return _401(res, "Your token was issued for a different domain.");
         if (u.aud && (
           (config.jwt_aud && u.aud !== config.jwt_aud) ||
           (!config.jwt_aud && u.aud !== req.header('host'))

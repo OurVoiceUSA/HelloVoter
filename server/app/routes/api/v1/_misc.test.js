@@ -35,6 +35,13 @@ describe('MISC endpoints', function () {
     expect(r.statusCode).to.equal(400);
   });
 
+  it('public poke 200 timestamp', async () => {
+    let r = await api.get(base_uri+'/poke')
+      .set('Authorization', 'Bearer '+c.bob.jwt)
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.timestamp).to.satisfy(Number.isInteger);
+  });
+
   it('poke 200 timestamp', async () => {
     let r = await api.get(base_uri+'/public/poke');
     expect(r.statusCode).to.equal(200);

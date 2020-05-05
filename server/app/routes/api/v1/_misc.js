@@ -100,9 +100,16 @@ module.exports = Router({mergeParams: true})
   return res.json(ass);
 })
 .get('/public/poke', async (req, res) => {
-  // PSA: make sure you ask people in public for their permission before you poke them!
-  return res.json({timestamp: (await req.db.query('return timestamp()'))[0]});
+  return poke(req, res);
+})
+.get('/poke', async (req, res) => {
+  return poke(req, res);
 })
 .get('/uncle', (req, res) => {
   return res.json({name: "Bob"});
 })
+
+async function poke(req, res) {
+  // PSA: make sure you ask people in public for their permission before you poke them!
+  return res.json({timestamp: (await req.db.query('return timestamp()'))[0]});
+}
