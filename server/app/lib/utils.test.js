@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import http from 'http';
 
 import { hv_config } from './hv_config';
 import neo4j from './neo4j';
@@ -93,6 +94,19 @@ describe('App Utils', function () {
 
   it('getClientIP', () => {
     expect(utils.getClientIP(req)).to.equal('127.0.0.1');
+  });
+
+  it('doGeocode', async () => {
+    let server = http.createServer((req, res) => {
+      res.write('"0","1 Rocket Rd,Hawthorn,CA,90250","Match","Exact","1 ROCKET RD, HAWTHORN, CA, 90250","-118.3281370,33.9208231","12","L"');
+      res.write("\n")
+      res.end();
+    });
+    server.listen(9990);
+
+    await utils.doGeocode({query: () => {}}, [{id: "a92193beff42c7c11b293bae65acf8b3", street: "1 Rocket Rd", city: "Hawthorn", state: "CA", zip: "90250"}], 'http://localhost:9990');
+
+    server.close();
   });
 
   it('randomBytes runs', async () => {

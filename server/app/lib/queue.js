@@ -1,10 +1,7 @@
 import EventEmitter from 'events';
-import FormData from 'form-data';
-import fetch from 'node-fetch';
-import papa from 'papaparse';
 import _ from 'lodash';
 
-import { asyncForEach, sleep } from './utils';
+import { asyncForEach, doGeocode, sleep } from './utils';
 import { hv_config } from './hv_config';
 import { concurrency } from './startup';
 
@@ -235,9 +232,9 @@ export default class queue {
 
     if (hv_config.enable_geocode) {
       while (count === limit) {
-        let ref = await this.db.query('match (:ImportFile {filename:{filename}})<-[:FILE]-(:ImportRecord)<-[:SOURCE]-(a:Address) where a.position is null return distinct(a) limit {limit}', {filename: filename, limit: limit});
+        let ref = await this.db.query('match (:ImportFile {filename:{filename}})<-[:FILE]-(:ImportRecord)<-[:SOURCE]-(a:Address) where a.position is null return distinct(a) limit {limit}', {filename, limit});
         count = ref.length;
-        if (count) await doGeocode(this.db, ref);
+        if (count) await doGeocode(this.db, ref, 'https://geocoding.geo.census.gov/geocoder/locations/addressbatch');
       }
     }
 
@@ -316,83 +313,6 @@ export default class queue {
 
     // turfadd_end, completed
     await this.db.query('match (a:ImportFile {filename:{filename}}) set a.index_end = timestamp(), a.completed = timestamp()', {filename: filename});
-  }
-
-}
-
-async function doGeocode(db, data) {
-  let start = new Date().getTime();
-  let file = "";
-
-  // build the "file" to submit
-  for (let i in data) {
-    // assign a row number to each item
-    data[i].idx = i;
-    file += i+","+data[i].street+","+data[i].city+","+data[i].state+","+data[i].zip+"\n"
-  }
-
-  let fd = new FormData();
-  fd.append('benchmark', 'Public_AR_Current');
-  fd.append('returntype', 'locations');
-  fd.append('addressFile', file, 'import.csv');
-
-  try {
-    console.log("Calling census.gov geocoder @ "+start);
-    let res = await fetch('https://geocoding.geo.census.gov/geocoder/locations/addressbatch', {
-      method: 'POST',
-      body: fd
-    });
-
-    // they return a csv file, parse it
-    let pp = papa.parse(await res.text());
-
-    // map pp back into data
-    for (let i in pp) {
-      for (let e in data) {
-        if (pp[i][0] === data[e].idx) {
-          data[e].pp = pp[i];
-        }
-      }
-    }
-
-    // pp has format of:
-    // 0   1             2       3                            4                          5                    6           7
-    // row,input address,"Match",Exact/Non_Exact/Tie/No_Match,"STREET, CITY, STATE, ZIP","longitude,latitude",some number,L or R side of road
-    for (let i in data) {
-      let lng = 0, lat = 0;
-
-      // ensure we have a pp array
-      if (!data[i].pp) data[i].pp = [];
-
-      // set lat/lng if we got it
-      if (data[i].pp[5]) {
-        let pos = data[i].pp[5].split(",");
-        lng = pos[0];
-        lat = pos[1];
-      }
-      data[i].longitude = lng;
-      data[i].latitude = lat;
-
-      // if we got an address back, update it
-      if (data[i].pp[4]) {
-        let addr = data[i].pp[4].split(", ")
-        data[i].street = addr[0];
-        data[i].city = addr[1];
-        data[i].state = addr[2];
-        data[i].zip = addr[3];
-      }
-    }
-
-    // update database
-    await db.query('unwind {data} as r match (a:Address {id:r.id}) set a.street = r.street, a.city = r.city, a.state = r.state, a.zip = r.zip, a.position = point({longitude: toFloat(r.longitude), latitude: toFloat(r.latitude)})', {data: data});
-
-    // update ids
-    await db.query('unwind {data} as r match (a:Address {id:r.id}) set a.id = apoc.util.md5([toLower(a.street), toLower(a.city), toLower(a.state), substring(a.zip,0,5)])', {data: data});
-
-    console.log("Geocoded "+data.length+" records in "+((new Date().getTime())-start)+" milliseconds.");
-
-  } catch (e) {
-    console.warn(e);
   }
 
 }

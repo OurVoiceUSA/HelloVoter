@@ -5,6 +5,7 @@ import neo4j from './neo4j';
 import queue from './queue';
 
 var db, qq;
+var dberr = {query: () => {throw Error()}};
 
 describe('Queue Tasks', function () {
 
@@ -25,6 +26,18 @@ describe('Queue Tasks', function () {
   it('checkQueue picks up no tasks', async () => {
     let ret = await qq.checkQueue();
     expect(ret).to.equal(false);
+  });
+
+  it('checkQueue handles db error', async () => {
+    let q = new queue(dberr);
+    let ret = await q.checkQueue();
+    expect(ret).to.equal(undefined);
+  });
+
+  it('queueTask handles db error', async () => {
+    let q = new queue(dberr);
+    let ret = await q.queueTask();
+    expect(ret).to.equal(undefined);
   });
 
   it('handle error task', async () => {
