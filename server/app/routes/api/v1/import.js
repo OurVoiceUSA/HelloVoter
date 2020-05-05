@@ -181,13 +181,17 @@ module.exports = Router({mergeParams: true})
   if (ref.length === 0) return _404(res, "Import not found.");
   if (ref[0].submitted) return _403(res, "Import File already submitted for processing.");
 
-  await req.db.query('match (if:ImportFile {id:{id}}) set if.submitted = timestamp() return count(if)', req.params);
-  let job = await req.qq.queueTask('doProcessImport', 'ImportFile {id:{id}}', req.params);
+  let imf = await req.db.query('match (if:ImportFile {id:{id}}) set if.submitted = timestamp() return if', req.params);
+  let job = await req.qq.queueTask('doProcessImport', 'ImportFile {filename:{filename}}', {filename: imf[0].filename});
 
   return res.json(job);
 })
 .delete('/import/:id', async (req, res) => {
   if (req.user.admin !== true) return _403(res, "Permission denied.");
+  // prevent deleting an in-flight import
+  let qt = await req.db.query('match (if:ImportFile {id:{id}})-[:PROCESSED_BY]->(qt:QueueTask) return qt', req.params);
+  if (!qt[0].completed) return _403(res, "Import is not finished yet.");
+
   // TODO: delete imported records as well
   await req.db.query('match (if:ImportFile {id:{id}}) set if:DeletedImportFile remove if:ImportFile', req.params);
   return res.json({deleted: true})

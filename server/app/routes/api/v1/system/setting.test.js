@@ -32,7 +32,7 @@ describe('System', function () {
     expect(r.body.turfs).to.equal(Object.keys(turfs).length);
     expect(r.body.forms).to.equal(Object.keys(forms).length);
     expect(r.body.attributes).to.equal(18);
-    expect(r.body.addresses).to.equal(0);
+    expect(r.body.addresses).to.equal(1);
     expect(r.body.dbversion).to.equal(await db.version());
     expect(r.body.apiversion).to.equal(version);
   });

@@ -1,10 +1,10 @@
-
 import jwt from 'jsonwebtoken';
 import { expect } from 'chai';
 
-import { hv_config } from '../app/lib/hv_config';
-import neo4j from '../app/lib/neo4j';
 import { appInit, base_uri, getObjs, keep, tpx } from './lib/utils';
+import { hv_config } from '../app/lib/hv_config';
+import { asyncForEach, sleep } from '../app/lib/utils';
+import neo4j from '../app/lib/neo4j';
 
 var api;
 var db;
@@ -22,6 +22,11 @@ describe('Cleanup', function () {
 
   after(async () => {
     db.close();
+  });
+
+  it('all queue tasks returned success', async () => {
+    let c = await db.query('match (qt:QueueTask) where NOT qt.success = true return count(qt)');
+    expect(c[0]).to.equal(0);
   });
 
   (keep?it.skip:it)('delete turfs', async () => {

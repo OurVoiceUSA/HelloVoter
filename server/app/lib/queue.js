@@ -16,46 +16,8 @@ export default class queue {
     this.queue = queue;
     var tt = this;
 
-    this.queue.on('doTask', async function (id) {
-      let task;
-      let error = false;
-      let start = new Date().getTime();
-
-      try {
-        let job = await db.query('match (a:QueueTask {id:{id}}) return a', {id: id});
-
-        if (!job[0])
-          throw new Error("QueueTask with id "+id+" does not exist.");
-
-        task = job[0].task;
-        console.log(task+"() started @ "+start);
-
-        let ret = await tt[task](id, JSON.parse(job[0].input));
-
-        // mark job as success
-        await db.query('match (a:QueueTask {id:{id}}) set a.active = false, a.completed = timestamp(), a.success = true, a.error = null', {id: id});
-      } catch (e) {
-        console.warn("Caught exception while executing task: "+task);
-        console.warn(e);
-        // mark job as failed
-        await db.query('match (a:QueueTask {id:{id}}) set a.active = false, a.completed = timestamp(), a.success = false, a.error = {error}', {
-          id: id,
-          error: e.toString(),
-        });
-        error = true;
-      }
-
-      let finish = new Date().getTime();
-      console.log(task+"() finished @ "+finish+" after "+(finish-start)+" milliseconds");
-
-      // if we encountered an error, wait a bit before we trigger another queue check
-      if (error) {
-        console.warn("Due to queue task error, waiting 10 seconds before triggering checkQueue again.");
-        await sleep(10000);
-      }
-
-      // check to see if there's another job to execute
-      queue.emit('checkQueue');
+    this.queue.on('doTask', async (id) => {
+      await this.doTask(id);
     });
 
     this.queue.on('checkQueue', async function () {
@@ -90,6 +52,52 @@ export default class queue {
     });
   }
 
+  async doTask(id) {
+    let db = this.db;
+    let queue = this.queue;
+    let tt = this;
+
+    let task;
+    let error = false;
+    let start = new Date().getTime();
+
+    try {
+      let job = await db.query('match (a:QueueTask {id:{id}}) return a', {id: id});
+
+      if (!job[0])
+        throw new Error("QueueTask with id "+id+" does not exist.");
+
+      task = job[0].task;
+      console.log(task+"() started @ "+start);
+
+      let ret = await tt[task](id, JSON.parse(job[0].input));
+
+      // mark job as success
+      await db.query('match (a:QueueTask {id:{id}}) set a.active = false, a.completed = timestamp(), a.success = true, a.error = null', {id: id});
+    } catch (e) {
+      console.warn("Caught exception while executing task: "+task);
+      console.warn(e);
+      // mark job as failed
+      await db.query('match (a:QueueTask {id:{id}}) set a.active = false, a.completed = timestamp(), a.success = false, a.error = {error}', {
+        id: id,
+        error: e.toString(),
+      });
+      error = true;
+    }
+
+    let finish = new Date().getTime();
+    console.log(task+"() finished @ "+finish+" after "+(finish-start)+" milliseconds");
+
+    // if we encountered an error, wait a bit before we trigger another queue check
+    if (error) {
+      console.warn("Due to queue task error, waiting 10 seconds before triggering checkQueue again.");
+      await sleep(10000);
+    }
+
+    // check to see if there's another job to execute
+    queue.emit('checkQueue');
+  }
+
   async queueTask(task, pattern, input) {
     let job;
 
@@ -107,7 +115,9 @@ export default class queue {
     }
 
     // find out whether we execute or enqueue
-    if (job[0].active) {
+    if (process.env['TEST_EXEC']) {
+      await this.doTask(job[0].id);
+    } else if (job[0].active) {
       this.queue.emit('doTask', job[0].id);
     } else {
       console.log("Enqueued task "+task);

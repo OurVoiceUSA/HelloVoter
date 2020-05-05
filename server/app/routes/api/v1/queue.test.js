@@ -35,7 +35,7 @@ describe('Queue', function () {
     let r = await api.get(base_uri+'/queue')
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
-    expect(r.body.queue.length).to.equal(0);
+    expect(r.body.queue.length).to.equal(4);
   });
 
 });
