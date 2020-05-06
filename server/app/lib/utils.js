@@ -1,6 +1,7 @@
 import FormData from 'form-data';
 import fetch from 'node-fetch';
 import papa from 'papaparse';
+import _ from 'lodash';
 
 import { hv_config } from './hv_config';
 
@@ -103,10 +104,10 @@ export async function doGeocode(db, data, geocoder) {
     let pp = papa.parse(await res.text());
 
     // map pp back into data
-    for (let i in pp) {
+    for (let i in pp.data) {
       for (let e in data) {
-        if (pp[i][0] === data[e].idx) {
-          data[e].pp = pp[i];
+        if (pp.data[i][0] === data[e].idx) {
+          data[e].pp = pp.data[i];
         }
       }
     }
@@ -151,6 +152,7 @@ export async function doGeocode(db, data, geocoder) {
     console.warn(e);
   }
 
+  return data;
 }
 
 export async function generateToken({ crypto, stringBase = 'base64', byteLength = 48 } = {}) {

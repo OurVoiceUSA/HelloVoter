@@ -96,7 +96,13 @@ describe('App Utils', function () {
     expect(utils.getClientIP(req)).to.equal('127.0.0.1');
   });
 
-  it('doGeocode', async () => {
+  it('doGeocode fails', async () => {
+    let data = await utils.doGeocode({query: () => {}}, [{id: "a92193beff42c7c11b293bae65acf8b3", street: "1 Rocket Rd", city: "Hawthorn", state: "CA", zip: "90250"}], 'http://localhost:9990');
+    expect(data[0]).to.not.have.property('longitude');
+    expect(data[0]).to.not.have.property('latitude');
+  });
+
+  it('doGeocode gives longitude and latitude', async () => {
     let server = http.createServer((req, res) => {
       res.write('"0","1 Rocket Rd,Hawthorn,CA,90250","Match","Exact","1 ROCKET RD, HAWTHORN, CA, 90250","-118.3281370,33.9208231","12","L"');
       res.write("\n")
@@ -104,7 +110,9 @@ describe('App Utils', function () {
     });
     server.listen(9990);
 
-    await utils.doGeocode({query: () => {}}, [{id: "a92193beff42c7c11b293bae65acf8b3", street: "1 Rocket Rd", city: "Hawthorn", state: "CA", zip: "90250"}], 'http://localhost:9990');
+    let data = await utils.doGeocode({query: () => {}}, [{id: "a92193beff42c7c11b293bae65acf8b3", street: "1 Rocket Rd", city: "Hawthorn", state: "CA", zip: "90250"}], 'http://localhost:9990');
+    expect(data[0]).to.have.property('longitude');
+    expect(data[0]).to.have.property('latitude');
 
     server.close();
   });
