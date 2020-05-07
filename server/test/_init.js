@@ -1,26 +1,40 @@
-
+import { Docker, Options } from 'docker-cli-js';
 import jwt from 'jsonwebtoken';
 import { expect } from 'chai';
+import keypair from 'keypair';
 import fs from 'fs';
 
-import { ov_config } from '../app/lib/ov_config';
-import neo4j from '../app/lib/neo4j';
-import { min_neo4j_version } from '../app/lib/utils';
 import { appInit, base_uri, genName, testToken, writeObj } from './lib/utils';
-import { doDbInit } from '../app/lib/startup';
+import { runDatabase, genkeys } from '../scripts/lib/utils';
+import { min_neo4j_version } from '../app/lib/utils';
+import { hv_config } from '../app/lib/hv_config';
+import { doStartupTasks } from '../app/lib/startup';
+import neo4j from '../app/lib/neo4j';
+import queue from '../app/lib/queue';
 
 var api;
 var db;
+var qq;
 var c = {};
 var turfs = {};
 var forms = {};
 var public_key, private_key;
+var docker = new Docker(new Options());
 
 describe('Database Init', function () {
 
   before(async () => {
-    db = new neo4j(ov_config);
-    api = appInit(db);
+    await runDatabase({docker, sandbox: true, config: {
+      pagecache_size: 0,
+      heap_size_init: 0,
+      heap_size_max: 0,
+    }});
+
+    genkeys({fs, keypair});
+
+    db = new neo4j(hv_config);
+    qq = new queue(db);
+    api = await appInit(db);
   });
 
   after(async () => {
@@ -30,9 +44,7 @@ describe('Database Init', function () {
     db.close();
   });
 
-  (ov_config.disable_apoc === false?it:it.skip)('correct database version', async () => {
-    let r;
-
+  it('correct database version', async () => {
     let arr = (await db.version()).split('.');
     let ver = Number.parseFloat(arr[0]+'.'+arr[1]);
 
@@ -45,28 +57,31 @@ describe('Database Init', function () {
   it('database has no nodes', async () => {
     await db.query("match (a) detach delete a");
     let ref = await db.query("match (a) return count(a)");
-    expect(ref.data[0]).to.equal(0);
+    expect(ref[0]).to.equal(0);
   });
 
   it('database startup tasks', async () => {
-    await doDbInit(db);
+    await doStartupTasks(db, qq, {});
   });
 
   it('rsa keys match', async () => {
     public_key = fs.readFileSync('./test/rsa.pub', "utf8");
     private_key = fs.readFileSync('./test/rsa.key', "utf8");
 
-    jwt.verify(testToken(private_key), public_key);
+    expect(jwt.verify(testToken(private_key), public_key)).to.have.property('id');
+  });
+
+  it('OPTIONS returns ok', async () => {
+    let r = await api.options(base_uri+'/poke')
+    expect(r.statusCode).to.equal(204);
   });
 
   it('hello 200 admin awaiting assignment', async () => {
-    let r;
-
-    let t = testToken(private_key);
+    let t = testToken(private_key, true);
     c.admin = jwt.verify(t, public_key);
     c.admin.jwt = t;
 
-    r = await api.post(base_uri+'/hello')
+    let r = await api.post(base_uri+'/hello')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         longitude: -118.3281370,
@@ -74,7 +89,7 @@ describe('Database Init', function () {
       });
     expect(r.statusCode).to.equal(200);
     expect(r.body.msg).to.equal("Thanks for your request to join us! You are currently awaiting an assignment.");
-    expect(r.body.data.ready).to.equal(false);
+    expect(r.body.ready).to.equal(false);
 
     // make admin an admin
     await db.query('match (a:Volunteer {id:{id}}) set a.admin=true', c.admin);
@@ -86,13 +101,11 @@ describe('Database Init', function () {
         latitude: 33.9208231,
       });
     expect(r.statusCode).to.equal(200);
-    expect(r.body.data.admin).to.equal(true);
+    expect(r.body.admin).to.equal(true);
   });
 
   it('hello 200 volunteers awaiting assignment', async () => {
-    let r, t;
-
-    t = testToken(private_key);
+    let t = testToken(private_key);
     c.bob = jwt.verify(t, public_key);
     c.bob.jwt = t;
 
@@ -116,7 +129,7 @@ describe('Database Init', function () {
     c.han = jwt.verify(t, public_key);
     c.han.jwt = t;
 
-    r = await api.post(base_uri+'/hello')
+    let r = await api.post(base_uri+'/hello')
       .set('Authorization', 'Bearer '+c.bob.jwt)
       .send({
         longitude: -118.3281370,
@@ -124,8 +137,8 @@ describe('Database Init', function () {
       });
     expect(r.statusCode).to.equal(200);
     expect(r.body.msg).to.equal("Thanks for your request to join us! You are currently awaiting an assignment.");
-    expect(r.body.data.ready).to.equal(false);
-    expect(r.body.data).to.not.have.property("admin");
+    expect(r.body.ready).to.equal(false);
+    expect(r.body).to.not.have.property("admin");
 
     r = await api.post(base_uri+'/hello')
       .set('Authorization', 'Bearer '+c.sally.jwt)
@@ -135,8 +148,8 @@ describe('Database Init', function () {
       });
     expect(r.statusCode).to.equal(200);
     expect(r.body.msg).to.equal("Thanks for your request to join us! You are currently awaiting an assignment.");
-    expect(r.body.data.ready).to.equal(false);
-    expect(r.body.data).to.not.have.property("admin");
+    expect(r.body.ready).to.equal(false);
+    expect(r.body).to.not.have.property("admin");
 
     r = await api.post(base_uri+'/hello')
       .set('Authorization', 'Bearer '+c.rich.jwt)
@@ -146,8 +159,8 @@ describe('Database Init', function () {
       });
     expect(r.statusCode).to.equal(200);
     expect(r.body.msg).to.equal("Thanks for your request to join us! You are currently awaiting an assignment.");
-    expect(r.body.data.ready).to.equal(false);
-    expect(r.body.data).to.not.have.property("admin");
+    expect(r.body.ready).to.equal(false);
+    expect(r.body).to.not.have.property("admin");
 
     r = await api.post(base_uri+'/hello')
       .set('Authorization', 'Bearer '+c.jane.jwt)
@@ -157,8 +170,8 @@ describe('Database Init', function () {
       });
     expect(r.statusCode).to.equal(200);
     expect(r.body.msg).to.equal("Thanks for your request to join us! You are currently awaiting an assignment.");
-    expect(r.body.data.ready).to.equal(false);
-    expect(r.body.data).to.not.have.property("admin");
+    expect(r.body.ready).to.equal(false);
+    expect(r.body).to.not.have.property("admin");
 
     r = await api.post(base_uri+'/hello')
       .set('Authorization', 'Bearer '+c.mike.jwt)
@@ -168,8 +181,8 @@ describe('Database Init', function () {
       });
     expect(r.statusCode).to.equal(200);
     expect(r.body.msg).to.equal("Thanks for your request to join us! You are currently awaiting an assignment.");
-    expect(r.body.data.ready).to.equal(false);
-    expect(r.body.data).to.not.have.property("admin");
+    expect(r.body.ready).to.equal(false);
+    expect(r.body).to.not.have.property("admin");
 
     r = await api.post(base_uri+'/hello')
       .set('Authorization', 'Bearer '+c.han.jwt)
@@ -179,16 +192,14 @@ describe('Database Init', function () {
       });
     expect(r.statusCode).to.equal(200);
     expect(r.body.msg).to.equal("Thanks for your request to join us! You are currently awaiting an assignment.");
-    expect(r.body.data.ready).to.equal(false);
-    expect(r.body.data).to.not.have.property("admin");
+    expect(r.body.ready).to.equal(false);
+    expect(r.body).to.not.have.property("admin");
   });
 
   it('generate test objects - turfs', async () => {
-    let r;
-
     turfs.A = { name: genName("Turf") };
 
-    r = await api.post(base_uri+'/turf/create')
+    let r = await api.post(base_uri+'/turf')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: turfs.A.name,
@@ -199,7 +210,7 @@ describe('Database Init', function () {
 
     turfs.B = { name: genName("Turf") };
 
-    r = await api.post(base_uri+'/turf/create')
+    r = await api.post(base_uri+'/turf')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: turfs.B.name,
@@ -210,7 +221,7 @@ describe('Database Init', function () {
 
     turfs.C = { name: genName("Turf") };
 
-    r = await api.post(base_uri+'/turf/create')
+    r = await api.post(base_uri+'/turf')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: turfs.C.name,
@@ -221,11 +232,9 @@ describe('Database Init', function () {
   });
 
   it('generate test objects - forms', async () => {
-    let r;
-
     forms.A = { name: genName("Form") };
 
-    r = await api.post(base_uri+'/form/create')
+    let r = await api.post(base_uri+'/form')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: forms.A.name,
@@ -236,7 +245,7 @@ describe('Database Init', function () {
 
     forms.B = { name: genName("Form") };
 
-    r = await api.post(base_uri+'/form/create')
+    r = await api.post(base_uri+'/form')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: forms.B.name,

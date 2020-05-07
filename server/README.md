@@ -3,6 +3,7 @@
 
 For this server, configure an `.env` file. The following is a complete list of variables and their defaults:
 
+    BASE_URI=/api
     SERVER_PORT=8080
     NEO4J_HOST=localhost
     NEO4J_PORT=7687
@@ -13,21 +14,16 @@ For this server, configure an `.env` file. The following is a complete list of v
     NEO4J_JMX_PASS=Neo4j
     ENABLE_GEOCODE=false
     DISABLE_JMX=
-    DISABLE_APOC=
-    DISABLE_SPATIAL=
     IP_HEADER=
     GOOGLE_MAPS_KEY=
     JOB_CONCURRENCY=1
     SM_OAUTH_URL=https://ws.ourvoiceusa.org/auth
     JWT_PUB_KEY=SM_OAUTH_URL/pubkey
-    WABASE=https://apps.ourvoiceusa.org
-    AUTOENROLL_FORMID=
     VOLUNTEER_ADD_NEW=
-    PURGE_IMPORT_RECORDS=
-    DEBUG=
 
 The meaning of each config item is as follows:
 
+* `BASE_URI`: Routing prefix to the API calls
 * `SERVER_PORT`: Port for node to listen on for http requests.
 * `NEO4J_HOST`: Hostname of your neo4j server.
 * `NEO4J_PORT`: Port number of your neo4j server.
@@ -38,15 +34,10 @@ The meaning of each config item is as follows:
 * `NEO4J_JMX_PASS`: Password to use to connect to neo4j jmx.
 * `ENABLE_GEOCODE`: Allow import of data that doesn't have longitude/latitude
 * `DISABLE_JMX`: Don't attempt to connect to neo4j jmx.
-* `DISABLE_APOC`: Don't use the neo4j apoc plugin. This limits data import functionality.
-* `DISABLE_SPATIAL`: Don't use the neo4j spatial plugin. This limit turf functionality.
 * `IP_HEADER`: Name of the header to check for, if you're behind an http reverse proxy and want to deny direct http requests.
 * `GOOGLE_MAPS_KEY`: API Key for Google maps. Get one here: https://developers.google.com/maps/documentation/javascript/get-api-key
 * `JOB_CONCURRENCY`: Number of import jobs that can run in parallel. This is only relevant if you're using Neo4j Enterprise Edition, as Community Edition is limited to 4 CPUs, and the minimum CPUs required for parallel jobs is 6.
 * `SM_OAUTH_URL`: URL of the oauth provider.
 * `JWT_PUB_KEY`: Path to the public key of the oauth provider.
-* `WABASE`: URL of the HelloVoterHQ react application.
-* `AUTOENROLL_FORMID`: The ID of the form new volunteers get auto-enrolled in with autoturf set so they can go right into the map with data, no approval needed. We use this for our demo server. You probably don't want to set this.
 * `VOLUNTEER_ADD_NEW`: Whether or not volunteers can add new addresses & people that don't exist in the database.
-* `PURGE_IMPORT_RECORDS`: By default, import records are kept in the database, so you can trace where things came from. For larger operations (>20 million), we recommend setting this to `1` as otherwise the speed of data imports will be significantly impacted.
-* `DEBUG`: Whether or not cypher and other debugging info is sent to the console log.
+

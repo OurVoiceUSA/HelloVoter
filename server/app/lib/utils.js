@@ -1,12 +1,32 @@
+import FormData from 'form-data';
+import fetch from 'node-fetch';
+import papa from 'papaparse';
+import _ from 'lodash';
 
-import crypto from 'crypto';
-
-import { ov_config } from './ov_config';
+import { hv_config } from './hv_config';
 
 export var min_neo4j_version = 3.5;
+export var systemSettings = {};
+
+export async function initSystemSettings(db) {
+  let defaultSettings = [
+    {id: 'debug', value: false},
+    {id: 'volunteer_add_new', value: true},
+  ];
+
+  await asyncForEach(defaultSettings, async (ss) => {
+    // ensure system settings exist
+    let ref = await db.query('match (ss:SystemSetting {id:{id}}) return ss.value', ss);
+    if (ref.length === 0) {
+      await db.query('create (:SystemSetting {id:{id},value:{value}})', ss);
+      ref[0] = ss.value;
+    }
+    systemSettings[ss.id] = ref[0];
+  });
+}
 
 export function getClientIP(req) {
-  if (ov_config.ip_header) return req.header(ov_config.ip_header);
+  if (hv_config.ip_header) return req.header(hv_config.ip_header);
   else return req.connection.remoteAddress;
 }
 
@@ -14,55 +34,6 @@ function sendError(res, code, msg) {
   let obj = {code: code, error: true, msg: msg};
   console.warn('Returning http '+code+' error with msg: '+msg);
   return res.status(code).json(obj);
-}
-
-// just do a query and either return OK or ERROR
-
-export async function cqdo(req, res, q, p, a) {
-  if (a === true && req.user.admin !== true)
-    return _403(res, "Permission denied.");
-
-  let ref;
-
-  try {
-    ref = await req.db.query(q, p);
-  } catch (e) {
-    return _500(res, e);
-  }
-
-  return res.status(200).json({msg: "OK", data: ref.data});
-}
-
-export async function onMyTurf(req, ida, idb) {
-  if (ida === idb) return true;
-  if (await sameTeam(req, ida, idb)) return true;
-  if (ov_config.disable_spatial !== false) return false;
-  try {
-    // TODO: extend to also seach for direct turf assignments with leader:true
-    let ref = await req.db.query('match (v:Volunteer {id:{idb}}) where exists(v.location) call spatial.intersects("turf", v.location) yield node match (:Volunteer {id:{ida}})-[:MEMBERS {leader:true}]-(:Team)-[:ASSIGNED]-(node) return count(v)', {ida: ida, idb: idb});
-    if (ref.data[0] > 0) return true;
-  } catch (e) {
-    console.warn(e);
-  }
-  return false;
-}
-
-export async function sameTeam(req, ida, idb) {
-  try {
-    let ref = await req.db.query('match (a:Volunteer {id:{ida}})-[:MEMBERS]-(:Team)-[:MEMBERS]-(b:Volunteer {id:{idb}}) return b', {ida: ida, idb: idb});
-    if (ref.data.length > 0) return true;
-  } catch (e) {
-    console.warn(e);
-  }
-
-  return false;
-}
-
-export async function volunteerCanSee(req, ida, idb) {
-  if (ida === idb) return true;
-  if (await sameTeam(req, ida, idb)) return true;
-  if (await onMyTurf(req, ida, idb)) return true;
-  return false;
 }
 
 export async function volunteerAssignments(req, type, vol) {
@@ -80,15 +51,10 @@ export async function volunteerAssignments(req, type, vol) {
     assigned = "AUTOASSIGN_TO";
   }
 
-  try {
-    let ref = await req.db.query('match (a:'+type+' {id:{id}}) optional match (a)-[r:'+members+']-(b:Team) with a, collect(b{.*,leader:r.leader}) as teams optional match (a)-[:'+assigned+']-(b:Form) with a, teams, collect(b{.*,direct:true}) as dforms optional match (a)-[:'+members+']-(:Team)-[:ASSIGNED]-(b:Form) with a, teams, dforms + collect(b{.*}) as forms optional match (a)-[:'+assigned+']-(b:Turf) with a, teams, forms, collect(b{.id,.name,direct:true}) as dturf optional match (a)-[:'+members+']-(:Team)-[:ASSIGNED]-(b:Turf) with a, teams, forms, dturf + collect(b{.id,.name}) as turf return forms, turf', vol);
+  let ref = await req.db.query('match (a:'+type+' {id:{id}}) optional match (a)-[r:'+members+']-(b:Team) with a, collect(b{.*,leader:r.leader}) as teams optional match (a)-[:'+assigned+']-(b:Form) with a, teams, collect(b{.*,direct:true}) as dforms optional match (a)-[:'+members+']-(:Team)-[:ASSIGNED]-(b:Form) with a, teams, dforms + collect(b{.*}) as forms optional match (a)-[:'+assigned+']-(b:Turf) with a, teams, forms, collect(b{.id,.name,direct:true}) as dturf optional match (a)-[:'+members+']-(:Team)-[:ASSIGNED]-(b:Turf) with a, teams, forms, dturf + collect(b{.id,.name}) as turf return forms, turf', vol);
 
-    obj.forms = ref.data[0][0];
-    obj.turfs = ref.data[0][1];
-
-  } catch (e) {
-    console.warn(e);
-  }
+  obj.forms = ref[0][0];
+  obj.turfs = ref[0][1];
 
   if (obj.turfs.length > 0 && obj.forms.length > 0)
     obj.ready = true;
@@ -102,8 +68,8 @@ export async function _volunteersFromCypher(req, query, args) {
   let volunteers = [];
 
   let ref = await req.db.query(query, args)
-  for (let i in ref.data) {
-    let c = ref.data[i];
+  for (let i in ref) {
+    let c = ref[i];
     c.ass = await volunteerAssignments(req, 'Volunteer', c);
     volunteers.push(c);
   }
@@ -111,7 +77,85 @@ export async function _volunteersFromCypher(req, query, args) {
   return volunteers;
 }
 
-export function generateToken({ stringBase = 'base64', byteLength = 48 } = {}) {
+export async function doGeocode(db, data, geocoder) {
+  let start = new Date().getTime();
+  let file = "";
+
+  // build the "file" to submit
+  for (let i in data) {
+    // assign a row number to each item
+    data[i].idx = i;
+    file += i+","+data[i].street+","+data[i].city+","+data[i].state+","+data[i].zip+"\n"
+  }
+
+  let fd = new FormData();
+  fd.append('benchmark', 'Public_AR_Current');
+  fd.append('returntype', 'locations');
+  fd.append('addressFile', file, 'import.csv');
+
+  try {
+    console.log("Calling census.gov geocoder @ "+start);
+    let res = await fetch(geocoder, {
+      method: 'POST',
+      body: fd
+    });
+
+    // they return a csv file, parse it
+    let pp = papa.parse(await res.text());
+
+    // map pp back into data
+    for (let i in pp.data) {
+      for (let e in data) {
+        if (pp.data[i][0] === data[e].idx) {
+          data[e].pp = pp.data[i];
+        }
+      }
+    }
+
+    // pp has format of:
+    // 0   1             2       3                            4                          5                    6           7
+    // row,input address,"Match",Exact/Non_Exact/Tie/No_Match,"STREET, CITY, STATE, ZIP","longitude,latitude",some number,L or R side of road
+    for (let i in data) {
+      let lng = 0, lat = 0;
+
+      // ensure we have a pp array
+      if (!data[i].pp) data[i].pp = [];
+
+      // set lat/lng if we got it
+      if (data[i].pp[5]) {
+        let pos = data[i].pp[5].split(",");
+        lng = pos[0];
+        lat = pos[1];
+      }
+      data[i].longitude = lng;
+      data[i].latitude = lat;
+
+      // if we got an address back, update it
+      if (data[i].pp[4]) {
+        let addr = data[i].pp[4].split(", ")
+        data[i].street = addr[0];
+        data[i].city = addr[1];
+        data[i].state = addr[2];
+        data[i].zip = addr[3];
+      }
+    }
+
+    // update database
+    await db.query('unwind {data} as r match (a:Address {id:r.id}) set a.street = r.street, a.city = r.city, a.state = r.state, a.zip = r.zip, a.position = point({longitude: toFloat(r.longitude), latitude: toFloat(r.latitude)})', {data});
+
+    // update ids
+    await db.query('unwind {data} as r match (a:Address {id:r.id}) set a.id = apoc.util.md5([toLower(a.street), toLower(a.city), toLower(a.state), substring(a.zip,0,5)])', {data: data});
+
+    console.log("Geocoded "+data.length+" records in "+((new Date().getTime())-start)+" milliseconds.");
+
+  } catch (e) {
+    console.warn(e);
+  }
+
+  return data;
+}
+
+export async function generateToken({ crypto, stringBase = 'base64', byteLength = 48 } = {}) {
   return new Promise((resolve, reject) => {
     crypto.randomBytes(byteLength, (err, buffer) => {
       if (err) {
@@ -142,6 +186,10 @@ export function _403(res, msg) {
   return sendError(res, 403, msg);
 }
 
+export function _404(res, msg) {
+  return sendError(res, 404, msg);
+}
+
 export function _422(res, msg) {
   return sendError(res, 422, msg);
 }
@@ -155,13 +203,20 @@ export function _501(res, msg) {
   return sendError(res, 501, msg);
 }
 
-export function _503(res, msg) {
-  return sendError(res, 503, msg);
-}
-
 export function valid(str) {
   if (!str) return false;
   if (typeof str !== "string") return true;
   if (str.match(/\*/)) return false;
   return true;
+}
+
+export async function asyncForEach(a, c) {
+  let ret = [];
+  for (let i = 0; i < a.length; i++) ret[i] = await c(a[i], i, a);
+  return ret;
+}
+
+export async function sleep(t) {
+  if (process.env['TEST_EXEC']) return new Promise(r => r());
+  return new Promise(r => setTimeout(r, t));
 }

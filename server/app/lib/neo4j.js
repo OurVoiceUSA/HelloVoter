@@ -2,6 +2,8 @@
 import neo4j from 'neo4j-driver';
 import BoltAdapter from 'node-neo4j-bolt-adapter';
 
+import { systemSettings } from './utils';
+
 export default class db {
 
   constructor(config) {
@@ -15,7 +17,7 @@ export default class db {
   async dbwrap() {
       var params = Array.prototype.slice.call(arguments);
       var func = params.shift();
-      if (this.config.DEBUG) {
+      if (systemSettings['debug']) {
         let funcName = func.replace('Async', '');
         console.log('DEBUG: '+funcName+' '+params[0]+';');
         if (params[1]) {
@@ -24,7 +26,7 @@ export default class db {
           console.log('DEBUG: :params '+str.substring(0, 1024));
         }
       }
-      return this.db[func](params[0], params[1], params[2]);
+      return (await this.db[func](params[0], params[1], params[2])).data;
   }
 
   async query(q, p, d) {
@@ -41,13 +43,11 @@ export default class db {
   }
 
   async version() {
-    if (this.config.disable_apoc !== false) return null;
-    return ((await this.query('call apoc.monitor.kernel() yield kernelVersion return split(split(kernelVersion, ",")[1], " ")[2]'))).data[0];
+    return (await this.query('call apoc.monitor.kernel() yield kernelVersion return split(split(kernelVersion, ",")[1], " ")[2]'))[0];
   }
 
   async size() {
-    if (this.config.disable_apoc !== false) return null;
-    return ((await this.query('CALL apoc.monitor.store() YIELD totalStoreSize return totalStoreSize'))).data[0];
+    return (await this.query('CALL apoc.monitor.store() YIELD totalStoreSize return totalStoreSize'))[0];
   }
 
 }

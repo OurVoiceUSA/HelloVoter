@@ -2,17 +2,17 @@ var http = require("http");
 
 var ip_header = (process.env.CLIENT_IP_HEADER?process.env.CLIENT_IP_HEADER:"x-client-ip");
 
-var options = {  
+var options = {
    host : 'localhost',
    port : '8080',
-   path: '/poke',
+   path: '/api/v1/public/poke',
    timeout : 4500,
    headers: {
      [ip_header]: "127.0.0.1",
    },
 };
 
-var request = http.request(options, (res) => {  
+var request = http.request(options, (res) => {
   if (res.statusCode == 200) {
     process.exit(0);
   }
@@ -20,9 +20,9 @@ var request = http.request(options, (res) => {
   process.exit(1);
 });
 
-request.on('error', function(err) {  
+request.on('error', function(err) {
     console.log('node.js http error');
     process.exit(1);
 });
 
-request.end();  
+request.end();

@@ -1,9 +1,8 @@
-
 import { expect } from 'chai';
 
-import { ov_config } from '../../../lib/ov_config';
-import neo4j from '../../../lib/neo4j';
-import { appInit, base_uri, getObjs } from '../../../../test/lib/utils';
+import { appInit, base_uri, getObjs } from '../../../../../test/lib/utils';
+import { hv_config } from '../../../../lib/hv_config';
+import neo4j from '../../../../lib/neo4j';
 
 var api;
 var db;
@@ -11,9 +10,9 @@ var c, forms;
 
 describe('Volunteer', function () {
 
-  before(() => {
-    db = new neo4j(ov_config);
-    api = appInit(db);
+  before(async () => {
+    db = new neo4j(hv_config);
+    api = await appInit(db);
     c = getObjs('volunteers');
     forms = getObjs('forms');
   });

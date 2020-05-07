@@ -8,7 +8,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "database": "cd server && npm run database",
+    "database": "cd server && npm install && npm run database",
     "makeadmin": "cd server && npm run makeadmin --",
     "test": "cd server && npm test",
     "ncu": "ncu && cd client && ncu && cd ../server && ncu",

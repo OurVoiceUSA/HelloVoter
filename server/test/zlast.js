@@ -1,10 +1,10 @@
-
 import jwt from 'jsonwebtoken';
 import { expect } from 'chai';
 
-import { ov_config } from '../app/lib/ov_config';
-import neo4j from '../app/lib/neo4j';
 import { appInit, base_uri, getObjs, keep, tpx } from './lib/utils';
+import { hv_config } from '../app/lib/hv_config';
+import { asyncForEach, sleep } from '../app/lib/utils';
+import neo4j from '../app/lib/neo4j';
 
 var api;
 var db;
@@ -12,9 +12,9 @@ var c, turfs, forms;
 
 describe('Cleanup', function () {
 
-  before(() => {
-    db = new neo4j(ov_config);
-    api = appInit(db);
+  before(async () => {
+    db = new neo4j(hv_config);
+    api = await appInit(db);
     c = getObjs('volunteers');
     turfs = getObjs('turfs');
     forms = getObjs('forms');
@@ -24,46 +24,36 @@ describe('Cleanup', function () {
     db.close();
   });
 
+  it('all queue tasks returned success', async () => {
+    let c = await db.query('match (qt:QueueTask) where NOT qt.task = "errop" and NOT qt.success = true return count(qt)');
+    expect(c[0]).to.equal(0);
+  });
+
   (keep?it.skip:it)('delete turfs', async () => {
     let r;
 
-    r = await api.post(base_uri+'/turf/delete')
+    r = await api.delete(base_uri+'/turf/'+turfs.A.id)
       .set('Authorization', 'Bearer '+c.admin.jwt)
-      .send({
-        turfId: turfs.A.id,
-      });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.post(base_uri+'/turf/delete')
+    r = await api.delete(base_uri+'/turf/'+turfs.B.id)
       .set('Authorization', 'Bearer '+c.admin.jwt)
-      .send({
-        turfId: turfs.B.id,
-      });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.post(base_uri+'/turf/delete')
+    r = await api.delete(base_uri+'/turf/'+turfs.C.id)
       .set('Authorization', 'Bearer '+c.admin.jwt)
-      .send({
-        turfId: turfs.C.id,
-      });
     expect(r.statusCode).to.equal(200);
   });
 
   (keep?it.skip:it)('delete forms', async () => {
     let r;
 
-    r = await api.post(base_uri+'/form/delete')
+    r = await api.delete(base_uri+'/form/'+forms.A.id)
       .set('Authorization', 'Bearer '+c.admin.jwt)
-      .send({
-        formId: forms.A.id,
-      });
     expect(r.statusCode).to.equal(200);
 
-    r = await api.post(base_uri+'/form/delete')
+    r = await api.delete(base_uri+'/form/'+forms.B.id)
       .set('Authorization', 'Bearer '+c.admin.jwt)
-      .send({
-        formId: forms.B.id,
-      });
     expect(r.statusCode).to.equal(200);
   });
 
@@ -72,8 +62,8 @@ describe('Cleanup', function () {
   });
 
   (keep?it.skip:it)('chemistry test - confirming all test objects argon', async () => {
-    let ref = await db.query('match (a) where a.name =~ "'+tpx+'.*" return count(a)');
-    expect(ref.data[0]).to.equal(0);
+    let ref = await db.query('match (a) where a.name =~ "'+tpx+'.*" and NOT labels(a)[0] =~ "Deleted.*" return count(a)');
+    expect(ref[0]).to.equal(0);
   });
 
   it('bob\'s your uncle', async () => {

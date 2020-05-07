@@ -1,7 +1,7 @@
 
 import { expect } from 'chai';
 
-import { ov_config } from '../../../lib/ov_config';
+import { hv_config } from '../../../lib/hv_config';
 import neo4j from '../../../lib/neo4j';
 import { appInit, base_uri, getObjs } from '../../../../test/lib/utils';
 
@@ -11,9 +11,9 @@ var c, turfs;
 
 describe('Queue', function () {
 
-  before(() => {
-    db = new neo4j(ov_config);
-    api = appInit(db);
+  before(async () => {
+    db = new neo4j(hv_config);
+    api = await appInit(db);
     c = getObjs('volunteers');
     turfs = getObjs('turfs');
   });
@@ -25,19 +25,17 @@ describe('Queue', function () {
   // list
 
   it('list as non-admin', async () => {
-    let r = await api.get(base_uri+'/queue/list')
+    let r = await api.get(base_uri+'/queue')
       .set('Authorization', 'Bearer '+c.bob.jwt);
     expect(r.statusCode).to.equal(403);
   });
 
+  // TODO: this test needs queue.test.js to execute first
   it('list as admin', async () => {
-    let r = await api.get(base_uri+'/queue/list')
+    let r = await api.get(base_uri+'/queue')
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
-    if (ov_config.disable_apoc === false)
-      expect(r.body.data.length).to.equal(Object.keys(turfs).length);
+    expect(r.body.queue.length).to.equal(4);
   });
-
-  // TODO: orphaned queue, as deleted turfs leave a hanging queue object
 
 });

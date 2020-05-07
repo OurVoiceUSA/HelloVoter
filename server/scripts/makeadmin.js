@@ -1,9 +1,9 @@
 
-import { ov_config } from '../app/lib/ov_config';
+import { hv_config } from '../app/lib/hv_config';
 import neo4j from '../app/lib/neo4j';
 
 async function makeadmin(id) {
-  let db = new neo4j(ov_config);
+  let db = new neo4j(hv_config);
   await db.query("match (v:Volunteer {id:{id}}) set v.admin = true", {id: id});
   db.close();
 }

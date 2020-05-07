@@ -1,18 +1,36 @@
-
-import fetch from 'node-fetch';
-import { deepCopy } from 'ourvoiceusa-sdk-js';
-
-import {
-  volunteerAssignments,
-  _400, _401, _403, _500
-} from '../../../lib/utils';
-
-import { ov_config } from '../../../lib/ov_config';
-import { version } from '../../../../package.json';
-
 import { Router } from 'express';
+import fetch from 'node-fetch';
+import _ from 'lodash';
+
+import { volunteerAssignments, _400, _401 } from '../../../lib/utils';
 
 module.exports = Router({mergeParams: true})
+/**
+ * @swagger
+ *
+ * /hello:
+ *   post:
+ *     description: First call made to the API, returns your assignments.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             allOf:
+ *               - "$ref": "#/components/schemas/dinfo"
+ *               - "$ref": "#/components/schemas/longitude"
+ *               - "$ref": "#/components/schemas/latitude"
+ *               - "$ref": "#/components/schemas/inviteCode"
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - "$ref": "#/components/schemas/msg"
+ *                 - "$ref": "#/components/schemas/data"
+ *
+ */
 .post('/hello', async (req, res) => {
   // they say that time's supposed to heal ya but i ain't done much healin'
 
@@ -22,7 +40,7 @@ module.exports = Router({mergeParams: true})
     let dkeys = ['ApplicationName', 'Brand', 'BuildNumber', 'BundleId', 'Carrier', 'DeviceCountry', 'DeviceId', 'DeviceLocale', 'DeviceName', 'FontScale', 'FreeDiskStorage', 'Manufacturer', 'Model', 'ReadableVersion', 'SystemName', 'SystemVersion', 'Timezone', 'TotalDiskCapacity', 'TotalMemory', 'UniqueID', 'UserAgent', 'Version', 'Emulator', 'Tablet', 'hasNotch', 'Landscape'];
     let dinfo_str = dkeys.map(d => d+':{'+d+'}').join(',');
 
-    let args = deepCopy(req.body.dinfo);
+    let args = _.merge({}, req.body.dinfo);
     args.id = req.user.id;
     args.lng = parseFloat(req.body.longitude);
     args.lat = parseFloat(req.body.latitude);
@@ -61,59 +79,37 @@ module.exports = Router({mergeParams: true})
         await req.db.query('match (v:Volunteer {id:{id}}) match (f:Form {id:{formId}, public_onboard:true}) where NOT (f)-[:ASSIGNED]->(v) match (t:Turf {id:{turfId}}) merge (f)-[:ASSIGNED]->(v) merge (t)-[:ASSIGNED]->(v) create (v)-[:SCANNED {created: timestamp()}]->(f) set f.last_onboard = timestamp()', params);
       } else {
         // check inviteCode against QRCode objects and copy assignments to this volunteer
-        await req.db.query('match (v:Volunteer {id:{id}}) match (qr:QRCode {id:{inviteCode}}) where qr.disable is null match (qr)-[:AUTOASSIGN_TO]->(f:Form) merge (f)-[:ASSIGNED]->(v) set qr.last_used = timestamp()', params);
-        await req.db.query('match (v:Volunteer {id:{id}}) match (qr:QRCode {id:{inviteCode}}) where qr.disable is null create (v)-[:SCANNED {created: timestamp()}]->(qr) set qr.last_used = timestamp()', params);
+        await req.db.query('match (v:Volunteer {id:{id}}) match (qr:QRCode {id:{inviteCode}}) match (qr)-[:AUTOASSIGN_TO]->(f:Form) merge (f)-[:ASSIGNED]->(v) set qr.last_used = timestamp()', params);
+        await req.db.query('match (v:Volunteer {id:{id}}) match (qr:QRCode {id:{inviteCode}}) create (v)-[:SCANNED {created: timestamp()}]->(qr) set qr.last_used = timestamp()', params);
         // turf is either autoturf or direct assignment
-        await req.db.query('match (v:Volunteer {id:{id}}) match (qr:QRCode {id:{inviteCode}}) where qr.disable is null and qr.autoturf is null match (qr)-[:AUTOASSIGN_TO]->(t:Turf) merge (t)-[:ASSIGNED]->(v)', params);
-        await req.db.query('match (v:Volunteer {id:{id}}) match (qr:QRCode {id:{inviteCode}}) where qr.disable is null and qr.autoturf = true call spatial.withinDistance("turf", {longitude: v.location.longitude, latitude: v.location.latitude}, 10) yield node as t where t.noautoturf is null with v,t limit 1 merge (t)-[:ASSIGNED]->(v)', params);
+        await req.db.query('match (v:Volunteer {id:{id}}) match (qr:QRCode {id:{inviteCode}}) where qr.autoturf is null match (qr)-[:AUTOASSIGN_TO]->(t:Turf) merge (t)-[:ASSIGNED]->(v)', params);
+        await req.db.query('match (v:Volunteer {id:{id}}) match (qr:QRCode {id:{inviteCode}}) where qr.autoturf = true call spatial.withinDistance("turf", {longitude: v.location.longitude, latitude: v.location.latitude}, 10) yield node as t where t.noautoturf is null with v,t limit 1 merge (t)-[:ASSIGNED]->(v)', params);
       }
     }
   }
 
-  let msg = "Thanks for your request to join us! You are currently awaiting an assignment.";
-  let ass = {};
+  let ass;
 
   ass = await volunteerAssignments(req, 'Volunteer', req.user);
-  if (ass.ready)
-    msg = "You are assigned turf and ready to volunteer!";
+  if (ass.ready) ass.msg = "You are assigned turf and ready to volunteer!";
+  else ass.msg = "Thanks for your request to join us! You are currently awaiting an assignment.";
 
   let ref = await req.db.query('match (s:SystemSetting {id:"sundownok"}) return s.value');
-  if (ref.data && ref.data[0]) ass.sundownok = true;
+  if (ref && ref[0]) ass.sundownok = true;
 
-  return res.json({msg: msg, data: ass});
+  return res.json(ass);
+})
+.get('/public/poke', async (req, res) => {
+  return poke(req, res);
+})
+.get('/poke', async (req, res) => {
+  return poke(req, res);
 })
 .get('/uncle', (req, res) => {
   return res.json({name: "Bob"});
 })
-.get('/dashboard', async (req, res) => {
-  let nv = await req.db.version();
-  if (req.user.admin === true) return res.json({
-    admins: (await req.db.query('match (v:Volunteer {admin:true}) return count(v)')).data[0],
-    volunteers: (await req.db.query('match (a:Volunteer) return count(a)')).data[0],
-    turfs: (await req.db.query('match (a:Turf) return count(a)')).data[0],
-    attributes: (await req.db.query('match (at:Attribute) return count(at)')).data[0],
-    forms: (await req.db.query('match (a:Form) return count(a)')).data[0],
-    addresses: (await req.db.query('match (a:Address) return count(a)')).data[0],
-    dbsize: await req.db.size(),
-    version: version,
-    neo4j_version: nv,
-  });
-  else {
-    let ass = await volunteerAssignments(req, 'Volunteer', req.user);
-    return res.json({
-      admins: (await req.db.query('match (v:Volunteer {admin:true}) return count(v)')).data[0],
-      volunteers: (await req.db.query('match (v:Volunteer {id:{id}}) return v', req.user)).data.length,
-      turfs: ass.turfs.length,
-      attributes: 'N/A',
-      forms: ass.forms.length,
-      addresses: 'N/A',
-      version: (ass.ready?version:null),
-      neo4j_version: (ass.ready?nv:null),
-    });
-  }
-})
-.get('/google_maps_key', async (req, res) => {
-  let ass = await volunteerAssignments(req, 'Volunteer', req.user);
-  if (ass.ready || req.user.admin) return res.json({google_maps_key: ov_config.google_maps_key });
-  else return _401(res, "No soup for you");
-});
+
+async function poke(req, res) {
+  // PSA: make sure you ask people in public for their permission before you poke them!
+  return res.json({timestamp: (await req.db.query('return timestamp()'))[0]});
+}

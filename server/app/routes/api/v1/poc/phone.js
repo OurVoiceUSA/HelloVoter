@@ -1,9 +1,32 @@
 import { Router } from 'express';
 
-import { volunteerAssignments, _400, _403 } from '../../../lib/utils';
-import { ID_DONOTCALL, ID_NAME, ID_PHONE, ID_PARTY } from '../../../lib/consts';
+import { ID_DONOTCALL, ID_NAME, ID_PHONE, ID_PARTY } from '../../../../lib/consts';
+import { volunteerAssignments, _400, _403 } from '../../../../lib/utils';
 
 module.exports = Router({mergeParams: true})
+/**
+ * @swagger
+ *
+ * /poc/phone/tocall:
+ *   post:
+ *     description: Get a phone number to call
+ *     tags:
+ *       - phonebank
+ *     deprecated: true
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             "$ref": "#/components/schemas/formId"
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/formId"
+ *
+ */
 .post('/poc/phone/tocall', async (req, res) => {
   // TODO: real rough endpoint. quick POC. doesn't look at units. lots of issues. meh! HELP ME!!
   if (!req.body.formId) return _400(res, "Invalid value to parameter 'formId'.");
@@ -20,7 +43,7 @@ module.exports = Router({mergeParams: true})
   // calls per second rate-limit
   let caller_sec_delay = 5;
   let ref = await req.db.query(`match (cq:CallerQueue)-[:CALLER]->(v:Volunteer {id:{id}}) where cq.created > (timestamp()-`+caller_sec_delay+`*1000) return count(cq)`, req.body);
-  if (ref.data[0] > 0) {
+  if (ref[0] > 0) {
     console.log("caller_sec_delay rate-limit triggered for volunteer "+req.user.name+" / "+req.user.id);
     return res.json({});
   }
@@ -28,7 +51,7 @@ module.exports = Router({mergeParams: true})
   // calls per hour rate limit
   let max_calls_hour = 120;
   ref = await req.db.query(`match (cq:CallerQueue)-[:CALLER]->(v:Volunteer {id:{id}}) where cq.created > (timestamp()-60*60*1000) return count(cq)`, req.body);
-  if (ref.data[0] > max_calls_hour) {
+  if (ref[0] > max_calls_hour) {
     console.log("max_calls_hour rate-limit triggered for volunteer "+req.user.name+" / "+req.user.id);
     return res.json({});
   }
@@ -37,9 +60,9 @@ module.exports = Router({mergeParams: true})
 
   // check for server-side attribute filter
   ref = await req.db.query(`match (f:Form {id: {formId}})-[:PHONE_FILTER]->(at:Attribute) with at limit 1 return at`, req.body);
-  if (ref.data[0]) {
-    req.body.filter_id = ref.data[0].id;
-    req.body.filter_name = ref.data[0].name;
+  if (ref[0]) {
+    req.body.filter_id = ref[0].id;
+    req.body.filter_name = ref[0].name;
   }
 
   ref = await req.db.query(`match (f:Form {id: {formId}})
@@ -68,8 +91,8 @@ module.exports = Router({mergeParams: true})
   `, req.body);
 
   let tocall = {};
-  if (ref.data[0]) {
-    req.body.personId = ref.data[0].id;
+  if (ref[0]) {
+    req.body.personId = ref[0].id;
     // queue this person so they aren't called by someone else for `queue_minutes`
     await req.db.query(`
     match (v:Volunteer {id:{id}})
@@ -78,12 +101,41 @@ module.exports = Router({mergeParams: true})
     create (cq)-[:CALL_TARGET]->(p)
     create (cq)-[:CALLER]->(v)
     `, req.body);
-    tocall = ref.data[0];
+    tocall = ref[0];
     if (req.body.filter_id) tocall.extra_info = req.body.filter_name;
   }
 
   return res.json(tocall);
 })
+/**
+ * @swagger
+ *
+ * /poc/phone/callresult:
+ *   post:
+ *     description: Post the resulting status of a phone call
+ *     tags:
+ *       - phonebank
+ *     deprecated: true
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             allOf:
+ *               - "$ref": "#/components/schemas/formId"
+ *               - "$ref": "#/components/schemas/personId"
+ *               - "$ref": "#/components/schemas/phone"
+ *               - "$ref": "#/components/schemas/status"
+ *               - "$ref": "#/components/schemas/start"
+ *               - "$ref": "#/components/schemas/end"
+ *     responses:
+ *       200:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               "$ref": "#/components/schemas/formId"
+ *
+ */
 .post('/poc/phone/callresult', async (req, res) => {
   // TODO: this is a hack job of peopleVisitUpdate -- need to merge this into that eventually
   // did this because we aren't using the survey screen, or attrs, or lng/lat, or cold-calling,

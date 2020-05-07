@@ -1,23 +1,21 @@
-
-import fs from 'fs';
 import { expect } from 'chai';
+import fs from 'fs';
 
-import { ov_config } from '../../../lib/ov_config';
-import neo4j from '../../../lib/neo4j';
 import { appInit, base_uri, getObjs } from '../../../../test/lib/utils';
+import { hv_config } from '../../../lib/hv_config';
+import neo4j from '../../../lib/neo4j';
 
 var api;
 var db;
-var c, turfs, forms;
+var c, turfs;
 
 describe('Turf', function () {
 
-  before(() => {
-    db = new neo4j(ov_config);
-    api = appInit(db);
+  before(async () => {
+    db = new neo4j(hv_config);
+    api = await appInit(db);
     c = getObjs('volunteers');
     turfs = getObjs('turfs');
-    forms = getObjs('forms');
   });
 
   after(async () => {
@@ -27,7 +25,7 @@ describe('Turf', function () {
   // create
 
   it('create invalid characters', async () => {
-    let r = await api.post(base_uri+'/turf/create')
+    let r = await api.post(base_uri+'/turf')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: "*",
@@ -36,7 +34,7 @@ describe('Turf', function () {
   });
 
   it('create no geometry', async () => {
-    let r = await api.post(base_uri+'/turf/create')
+    let r = await api.post(base_uri+'/turf')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: "No Geometry",
@@ -45,7 +43,7 @@ describe('Turf', function () {
   });
 
   it('create non-JSON geometry', async () => {
-    let r = await api.post(base_uri+'/turf/create')
+    let r = await api.post(base_uri+'/turf')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: turfs.A.name,
@@ -55,7 +53,7 @@ describe('Turf', function () {
   });
 
   it('create top level geojson', async () => {
-    let r = await api.post(base_uri+'/turf/create')
+    let r = await api.post(base_uri+'/turf')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: "top level geojson",
@@ -66,11 +64,11 @@ describe('Turf', function () {
 
   // TODO: check polygon that doesn't end where it starts
 
-  (ov_config.disable_spatial===false?it:it.skip)('create malformed geometry', async () => {
+  it('create malformed geometry', async () => {
     let geom = JSON.parse(fs.readFileSync('./geojson/CA.geojson'));
     geom.coordinates[0].pop();
 
-    let r = await api.post(base_uri+'/turf/create')
+    let r = await api.post(base_uri+'/turf')
       .set('Authorization', 'Bearer '+c.admin.jwt)
       .send({
         name: "malformed geometry",
@@ -80,7 +78,7 @@ describe('Turf', function () {
   });
 
   it('create as non-admin', async () => {
-    let r = await api.post(base_uri+'/turf/create')
+    let r = await api.post(base_uri+'/turf')
       .set('Authorization', 'Bearer '+c.bob.jwt)
       .send({
         name: "non-admin",
@@ -91,135 +89,91 @@ describe('Turf', function () {
 
   // get
 
-  it('get invalid parameter', async () => {
-    let r = await api.get(base_uri+'/turf/get')
-      .set('Authorization', 'Bearer '+c.admin.jwt);
-    expect(r.statusCode).to.equal(400);
-  });
-
   it('get as non-admin', async () => {
-    let r = await api.get(base_uri+'/turf/get?turfId='+turfs.A.id)
+    let r = await api.get(base_uri+'/turf/'+turfs.A.id)
       .set('Authorization', 'Bearer '+c.bob.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.id).to.not.exist;
   });
 
   it('get as admin', async () => {
-    let r = await api.get(base_uri+'/turf/get?turfId='+turfs.A.id)
+    let r = await api.get(base_uri+'/turf/'+turfs.A.id)
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
     expect(r.body.id).to.equal(turfs.A.id);
   });
 
+  // TODO: update
+
   // list
 
   it('list as non-admin', async () => {
-    let r = await api.get(base_uri+'/turf/list')
+    let r = await api.get(base_uri+'/turfs')
       .set('Authorization', 'Bearer '+c.bob.jwt);
     expect(r.statusCode).to.equal(200);
-    expect(r.body.data.length).to.equal(0);
+    expect(r.body.turfs.length).to.equal(0);
   });
 
   it('list as admin with no geometry', async () => {
-    let r = await api.get(base_uri+'/turf/list')
+    let r = await api.get(base_uri+'/turfs')
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
-    expect(r.body.data.length).to.equal(Object.keys(turfs).length);
-    expect(r.body.data[0]).to.not.have.property("geometry");
+    expect(r.body.turfs.length).to.equal(Object.keys(turfs).length);
+    expect(r.body.turfs[0]).to.not.have.property("geometry");
   });
 
   it('list as admin with geometry', async () => {
-    let r = await api.get(base_uri+'/turf/list?geometry=true')
+    let r = await api.get(base_uri+'/turfs?geometry=true')
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(200);
-    expect(r.body.data.length).to.equal(Object.keys(turfs).length);
-    expect(r.body.data[0]).to.have.property("geometry");
+    expect(r.body.turfs.length).to.equal(Object.keys(turfs).length);
+    expect(r.body.turfs[0]).to.have.property("geometry");
   });
 
-  // list/byposition
-
-  it('list byposition no coordinates', async () => {
-    let r = await api.get(base_uri+'/turf/list/byposition')
-      .set('Authorization', 'Bearer '+c.admin.jwt);
-    expect(r.statusCode).to.equal(400);
-  });
+  // list filter byposition
 
   it('list byposition missing coordinate', async () => {
-    let r;
-
-    r = await api.get(base_uri+'/turf/list/byposition?longitude=-118.3281370')
+    let r = await api.get(base_uri+'/turfs?longitude=-118.3281370')
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(400);
 
-    r = await api.get(base_uri+'/turf/list/byposition?latitude=33.9208231')
+    r = await api.get(base_uri+'/turfs?latitude=33.9208231')
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(400);
   });
 
   it('list byposition coordinates not a number', async () => {
-    let r = await api.get(base_uri+'/turf/list/byposition?longitude=ABC&latitude=DEF')
+    let r = await api.get(base_uri+'/turfs?longitude=ABC&latitude=DEF')
       .set('Authorization', 'Bearer '+c.admin.jwt);
     expect(r.statusCode).to.equal(400);
   });
 
   it('list byposition single turf', async () => {
-    let r;
-
-    r = await api.get(base_uri+'/turf/list/byposition?longitude=-116.566483&latitude=35.6430223')
+    let r = await api.get(base_uri+'/turfs?longitude=-116.566483&latitude=35.6430223')
       .set('Authorization', 'Bearer '+c.admin.jwt);
-    if (ov_config.disable_spatial === false) {
-      expect(r.statusCode).to.equal(200);
-      expect(r.body.data.length).to.equal(1);
-    } else {
-      expect(r.statusCode).to.equal(501);
-    }
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.turfs.length).to.equal(1);
   });
 
   it('list byposition turf overlap', async () => {
-    let r;
-
-    r = await api.get(base_uri+'/turf/list/byposition?longitude=-118.3281370&latitude=33.9208231')
+    let r = await api.get(base_uri+'/turfs?longitude=-118.3281370&latitude=33.9208231')
       .set('Authorization', 'Bearer '+c.admin.jwt);
-    if (ov_config.disable_spatial === false) {
-      expect(r.statusCode).to.equal(200);
-      expect(r.body.data.length).to.equal(2);
-    } else {
-      expect(r.statusCode).to.equal(501);
-    }
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.turfs.length).to.equal(2);
   });
 
-  it.skip('list byposition non-admin', async () => {
-    let r;
-
-    r = await api.get(base_uri+'/turf/list/byposition?longitude=-116.566483&latitude=35.6430223')
+  it('list byposition non-admin', async () => {
+    let r = await api.get(base_uri+'/turfs?longitude=-116.566483&latitude=35.6430223')
       .set('Authorization', 'Bearer '+c.bob.jwt);
     expect(r.statusCode).to.equal(200);
-    expect(r.body.data.length).to.equal(0);
+    expect(r.body.turfs.length).to.equal(0);
   });
-
-  // assigned/volunteer/add
-
-  // assigned/volunteer/list
-
-  // assigned/volunteer/remove
 
   // delete
 
-  it('delete invalid parameter', async () => {
-    const r = await api.post(base_uri+'/turf/delete')
-      .set('Authorization', 'Bearer '+c.admin.jwt)
-      .send({
-        name: "The Muse",
-      });
-    expect(r.statusCode).to.equal(400);
-  });
-
   it('delete as non-admin', async () => {
-    const r = await api.post(base_uri+'/turf/delete')
+    const r = await api.delete(base_uri+'/turf/'+turfs.A.id)
       .set('Authorization', 'Bearer '+c.bob.jwt)
-      .send({
-        turfId: turfs.A.id,
-      });
     expect(r.statusCode).to.equal(403);
   });
 

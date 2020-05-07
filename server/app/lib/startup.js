@@ -1,46 +1,41 @@
-
-import { asyncForEach, sleep } from 'ourvoiceusa-sdk-js';
-
-import { ov_config } from './ov_config';
-import { min_neo4j_version } from './utils';
-import queue from './queue';
+import { asyncForEach, initSystemSettings, sleep, min_neo4j_version } from './utils';
+import { hv_config } from './hv_config';
 
 import {
   ID_NAME, ID_GENDER, ID_PARTY, ID_REG_VOTER, ID_REC_NOTIF, ID_PHONE, ID_DONOTCALL,
   ID_EMAIL, ID_DOB, ID_US_VET, ID_RACE, ID_LANGS, ID_NOTES,
 } from './consts';
 
-var _require = require; // so we can lazy load a module later on
-
 var jmx;
 var jmxclient = {};
 var jvmconfig = {};
 
-export var concurrency = ov_config.job_concurrency;
+export var concurrency = 1;
 
 // tasks to do on startup
-export async function doStartupTasks(db, qq) {
+export async function doStartupTasks(db, qq, jmx) {
   // required to do in sequence
-  if (!ov_config.disable_jmx) await doJmxInit(db, qq);
-  await doDbInit(db);
+  if (!hv_config.disable_jmx) await doJmxInit(db, jmx, hv_config);
+  let ret = await doDbInit(db);
+  if (ret === false) process.exit(1);
   // can happen in parallel
   postDbInit(qq);
 }
 
-async function doJmxInit(db, qq) {
+export async function doJmxInit(db, jmx, config) {
   let start = new Date().getTime();
   console.log("doJmxInit() started @ "+start);
+
+  concurrency = config.job_concurrency;
 
   try {
     let data;
 
-    jmx = _require('jmx');
-
     jmxclient = jmx.createClient({
-      host: ov_config.neo4j_host,
-      port: ov_config.neo4j_jmx_port,
-      username: ov_config.neo4j_jmx_user,
-      password: ov_config.neo4j_jmx_pass,
+      host: config.neo4j_host,
+      port: config.neo4j_jmx_port,
+      username: config.neo4j_jmx_user,
+      password: config.neo4j_jmx_pass,
     });
     await new Promise((resolve, reject) => {
       jmxclient.on('connect', resolve);
@@ -49,7 +44,7 @@ async function doJmxInit(db, qq) {
     });
 
     data = await new Promise((resolve, reject) => {
-      jmxclient.getAttribute("java.lang:type=Memory", "HeapMemoryUsage", resolve); //, function(data) {
+      jmxclient.getAttribute("java.lang:type=Memory", "HeapMemoryUsage", resolve);
     });
 
     let max = data.getSync('max');
@@ -68,18 +63,14 @@ async function doJmxInit(db, qq) {
     jvmconfig.numcpus = data;
 
     // close the connection
-    // TODO: hold it open and actively monitor the system
     jmxclient.disconnect();
 
-  } catch (e) {
-    console.warn("Unable to connect to JMX, see error below. As a result, we won't be able to optimize database queries on large sets of data, nor can we honor the JOB_CONCURRENCY configuration.");
-    console.warn(e);
-  }
+  } catch (e) {}
 
   // community edition maxes at 4 cpus
   if (jvmconfig.numcpus && jvmconfig.numcpus > 4) {
     let ref = await db.query('call dbms.components() yield edition');
-    if (ref.data[0] !== 'enterprise') {
+    if (ref[0] !== 'enterprise') {
       console.warn("WARNING: Your neo4j database host has "+jvmconfig.numcpus+" CPUs but you're not running enterprise edition, so only up to 4 are actually utilized by neo4j.");
       jvmconfig.numcpus = 4;
     }
@@ -90,8 +81,7 @@ async function doJmxInit(db, qq) {
     if (!jvmconfig.numcpus) {
       concurrency = 1;
       console.warn("WARNING: Unable to determine number of CPUs available to neo4j. Unable to honor your JOB_CONCURRENCY setting.");
-    }
-    if (jvmconfig.numcpus <= (concurrency*3)) {
+    } else if (jvmconfig.numcpus <= (concurrency*3)) {
       concurrency = Math.floor(jvmconfig.numcpus/3);
       if (concurrency < 1) concurrency = 1;
       console.warn("WARNING: JOB_CONCURRENCY is set way too high for this database. Lowering it "+concurrency);
@@ -100,6 +90,8 @@ async function doJmxInit(db, qq) {
 
   let finish = new Date().getTime();
   console.log("doJmxInit() finished @ "+finish+" after "+(finish-start)+" milliseconds");
+
+  return concurrency;
 }
 
 export async function doDbInit(db) {
@@ -108,14 +100,12 @@ export async function doDbInit(db) {
 
   // make sure we have the plugins we need
   try {
-    if (ov_config.disable_spatial === false) await db.query('call spatial.procedures()');
-    else console.warn("WARNING: You have disabled the check for the neo4j spatial plugin. Turf features are limited.");
-    if (ov_config.disable_apoc === false) await db.query('call apoc.config.map()');
-    else console.warn("WARNING: You have disabled the check for the neo4j apoc plugin. Data import features are limited.");
+    await db.query('call spatial.procedures()');
+    await db.query('call apoc.config.map()');
   } catch (e) {
     console.error("The APOC and SPATIAL plugins are required for this application to function.");
     console.error(e);
-    process.exit(1);
+    return false;
   }
 
   let dbv = await db.version();
@@ -125,9 +115,11 @@ export async function doDbInit(db) {
 
     if (ver < min_neo4j_version) {
       console.warn("Neo4j version "+min_neo4j_version+" or higher is required.");
-      process.exit(1);
+      return false;
     }
   }
+
+  await initSystemSettings(db);
 
   // only call warmup there's enough room to cache the database
   if (!jvmconfig.maxheap || !jvmconfig.totalmemory) {
@@ -143,10 +135,7 @@ export async function doDbInit(db) {
       try {
         console.log("Calling apoc.warmup.run(); this may take several minutes.");
         await db.query('call apoc.warmup.run()');
-      } catch (e) {
-        console.warn("Call to APOC warmup failed.");
-        console.warn(e)
-      }
+      } catch (e) {}
     }
   }
 
@@ -159,6 +148,7 @@ export async function doDbInit(db) {
     {label: 'Address', property: 'bbox', create: 'create index on :Address(bbox)'},
     {label: 'Device', property: 'UniqueID', create: 'create constraint on (a:Device) assert a.UniqueID is unique'},
     {label: 'Volunteer', property: 'id', create: 'create constraint on (a:Volunteer) assert a.id is unique'},
+    {label: 'Volunteer', property: 'apikey', create: 'create index on :Volunteer(apikey)'},
     {label: 'Volunteer', property: 'location', create: 'create index on :Volunteer(location)'},
     {label: 'Team', property: 'id', create: 'create constraint on (a:Team) assert a.id is unique'},
     {label: 'Team', property: 'name', create: 'create constraint on (a:Team) assert a.name is unique'},
@@ -176,10 +166,7 @@ export async function doDbInit(db) {
   // create any indexes we need if they don't exist
   await asyncForEach(indexes, async (index) => {
     let ref = await db.query('call db.indexes() yield tokenNames, properties with * where {label} in tokenNames and {property} in properties return count(*)', index);
-    if (ref.data[0] === 0) {
-      console.log("Cypher exec: "+index.create);
-      await db.query(index.create);
-    }
+    if (ref[0] === 0) await db.query(index.create);
   });
 
   let spatialLayers = [
@@ -187,16 +174,14 @@ export async function doDbInit(db) {
     {name: "address", create: 'call spatial.addLayerWithEncoder("address", "NativePointEncoder", "position")'},
   ];
 
-  if(ov_config.disable_spatial === false) {
-    // create any spatial layers we need if they don't exist
-    await asyncForEach(spatialLayers, async (layer) => {
-      let ref = await db.query('match (a {layer:{layer}})-[:LAYER]-(:ReferenceNode {name:"spatial_root"}) return count(a)', {layer: layer.name});
-      if (ref.data[0] === 0) {
-        await db.query(layer.create);
-        await sleep(1000);
-      }
-    });
-  }
+  // create any spatial layers we need if they don't exist
+  await asyncForEach(spatialLayers, async (layer) => {
+    let ref = await db.query('match (a {layer:{layer}})-[:LAYER]-(:ReferenceNode {name:"spatial_root"}) return count(a)', {layer: layer.name});
+    if (ref[0] === 0) {
+      await db.query(layer.create);
+      await sleep(1000);
+    }
+  });
 
   // TODO: load race/language data from a 3rd party and have the client do "autocomplete" type functionality
 
@@ -219,7 +204,7 @@ export async function doDbInit(db) {
 
   await asyncForEach(defaultAttributes, async (attribute) => {
     let ref = await db.query('match (a:Attribute {id:{id}}) return count(a)', {id: attribute.id});
-    if (ref.data[0] === 0) {
+    if (ref[0] === 0) {
       await db.query('create (:Attribute {id:{id},name:{name},order:{order},type:{type},multi:{multi}})', attribute);
       if (attribute.values) await db.query('match (a:Attribute {id:{id}}) set a.values = {values}', attribute);
     }
@@ -227,6 +212,8 @@ export async function doDbInit(db) {
 
   let finish = new Date().getTime();
   console.log("doDbInit() finished @ "+finish+" after "+(finish-start)+" milliseconds");
+
+  return true;
 }
 
 async function postDbInit(qq) {

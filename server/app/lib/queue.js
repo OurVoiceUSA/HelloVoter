@@ -1,11 +1,8 @@
-
-import { asyncForEach, sleep, deepCopy } from 'ourvoiceusa-sdk-js';
 import EventEmitter from 'events';
-import FormData from 'form-data';
-import fetch from 'node-fetch';
-import papa from 'papaparse';
+import _ from 'lodash';
 
-import { ov_config } from './ov_config';
+import { asyncForEach, doGeocode, sleep } from './utils';
+import { hv_config } from './hv_config';
 import { concurrency } from './startup';
 
 export default class queue {
@@ -16,91 +13,106 @@ export default class queue {
     this.queue = queue;
     var tt = this;
 
-    this.queue.on('doTask', async function (id) {
-      let task;
-      let error = false;
-      let start = new Date().getTime();
-
-      try {
-        let job = await db.query('match (a:QueueTask {id:{id}}) return a', {id: id});
-
-        if (!job.data[0])
-          throw new Error("QueueTask with id "+id+" does not exist.");
-
-        task = job.data[0].task;
-        console.log(task+"() started @ "+start);
-
-        let ret = await tt[task](id, JSON.parse(job.data[0].input));
-
-        // mark job as success
-        await db.query('match (a:QueueTask {id:{id}}) set a.active = false, a.completed = timestamp(), a.success = true, a.error = null', {id: id});
-      } catch (e) {
-        console.warn("Caught exception while executing task: "+task);
-        console.warn(e);
-        // mark job as failed
-        await db.query('match (a:QueueTask {id:{id}}) set a.active = false, a.completed = timestamp(), a.success = false, a.error = {error}', {
-          id: id,
-          error: e.toString(),
-        });
-        error = true;
-      }
-
-      let finish = new Date().getTime();
-      console.log(task+"() finished @ "+finish+" after "+(finish-start)+" milliseconds");
-
-      // if we encountered an error, wait a bit before we trigger another queue check
-      if (error) {
-        console.warn("Due to queue task error, waiting 10 seconds before triggering checkQueue again.");
-        await sleep(10000);
-      }
-
-      // check to see if there's another job to execute
-      queue.emit('checkQueue');
+    this.queue.on('doTask', async (id) => {
+      await this.doTask(id);
     });
-
-    this.queue.on('checkQueue', async function () {
-      console.log("Checking queue for tasks to run...");
-      try {
-        let ref = await db.query('match (a:QueueTask {active: true}) return count(a)');
-        let running = ref.data[0];
-        console.log("Number of running jobs: "+running);
-        if (running >= concurrency) {
-          console.log("Too many tasks running to start another.");
-          return;
-        }
-
-        let job = await db.query('match (a:QueueTask) where a.active = false and not exists(a.started) with a limit 1 set a.active = true, a.started = timestamp() return a');
-        if (!job.data[0]) {
-          console.log("No tasks in queue to execute.");
-          return;
-        }
-
-        queue.emit('doTask', job.data[0].id);
-
-        // wait a second, then check again if we have capacity to run more
-        await sleep(1000);
-
-        if ((running+1) < concurrency) queue.emit('checkQueue');
-
-      } catch (e) {
-        console.warn("Houston we have a problem.");
-        console.warn(e);
-        return;
-      }
+    this.queue.on('checkQueue', async () => {
+      await this.checkQueue();
     });
+  }
+
+  async checkQueue() {
+    let db = this.db;
+    let queue = this.queue;
+    let ran = false;
+
+    console.log("Checking queue for tasks to run...");
+    try {
+      let ref = await db.query('match (a:QueueTask {active: true}) return count(a)');
+      let running = ref[0];
+      console.log("Number of running jobs: "+running);
+      if (running >= concurrency) {
+        console.log("Too many tasks running to start another.");
+        return true;
+      }
+
+      let job = await db.query('match (a:QueueTask) where a.active = false and not exists(a.started) with a limit 1 set a.active = true, a.started = timestamp() return a');
+      if (!job[0]) {
+        console.log("No tasks in queue to execute.");
+        return false;
+      }
+
+      queue.emit('doTask', job[0].id);
+      ran = true;
+
+      // wait a second, then check again if we have capacity to run more
+      await sleep(1000);
+
+      if ((running+1) < concurrency) queue.emit('checkQueue');
+
+    } catch (e) {
+      console.warn("Houston we have a problem.");
+      console.warn(e);
+      return;
+    }
+
+    return ran;
+  }
+
+  async doTask(id) {
+    let db = this.db;
+    let queue = this.queue;
+    let tt = this;
+
+    let task;
+    let error = false;
+    let start = new Date().getTime();
+
+    try {
+      let job = await db.query('match (a:QueueTask {id:{id}}) return a', {id});
+
+      if (!job[0])
+        throw new Error("QueueTask with id "+id+" does not exist.");
+
+      task = job[0].task;
+      console.log(task+"() started @ "+start);
+
+      let ret = await tt[task](id, JSON.parse(job[0].input));
+
+      // mark job as success
+      await db.query('match (a:QueueTask {id:{id}}) set a.active = false, a.completed = timestamp(), a.success = true, a.error = null', {id});
+    } catch (e) {
+      console.warn("Caught exception while executing task: "+task);
+      console.warn(e);
+      // mark job as failed
+      await db.query('match (a:QueueTask {id:{id}}) set a.active = false, a.completed = timestamp(), a.success = false, a.error = {error}', {
+        id,
+        error: e.toString(),
+      });
+      error = true;
+    }
+
+    let finish = new Date().getTime();
+    console.log(task+"() finished @ "+finish+" after "+(finish-start)+" milliseconds");
+
+    // if we encountered an error, wait a bit before we trigger another queue check
+    if (error) {
+      console.warn("Due to queue task error, waiting 10 seconds before triggering checkQueue again.");
+      await sleep(10000);
+    }
+
+    // check to see if there's another job to execute
+    queue.emit('checkQueue');
+
+    return error;
   }
 
   async queueTask(task, pattern, input) {
     let job;
 
-    if (ov_config.disable_apoc !== false || ov_config.disable_spatial !== false) {
-      console.warn("WARNING: queueTask called while disable_apoc or disable_spatial was set");
-      return {};
-    }
-
     // create QueueTask object in database -- either we can execute now (active: true, started: timestamp()) or we have to wait (active: false)
     try {
-      let args = deepCopy(input);
+      let args = _.merge({}, input);
       args.input = JSON.stringify(input);
       args.task = task;
 
@@ -112,19 +124,29 @@ export default class queue {
     }
 
     // find out whether we execute or enqueue
-    if (job.data[0].active) {
-      this.queue.emit('doTask', job.data[0].id);
+    if (process.env['TEST_EXEC']) {
+      await this.doTask(job[0].id);
+    } else if (job[0].active) {
+      this.queue.emit('doTask', job[0].id);
     } else {
       console.log("Enqueued task "+task);
     }
 
-    return job.data[0];
+    return job[0];
   }
 
   async clearQueue(msg) {
     // when clearing the queue, assume any "active" tasks are dead, and mark them as failed
     await this.db.query('match (a:QueueTask {active: true}) set a.active = false, a.completed = timestamp(), a.success = false, a.error = {msg}', {msg: msg});
     this.queue.emit('checkQueue');
+  }
+
+  async noop() {
+    console.log("Smooth Operator...");
+  }
+
+  async errop() {
+    throw Error("You've been hit by, you've been struck by, a smooth criminal!");
   }
 
   async doAddAddress(jobId, input) {
@@ -137,7 +159,7 @@ export default class queue {
     let start = new Date().getTime();
 
     let ref = await this.db.query('CALL apoc.periodic.iterate("match (a:Turf {id:\\"'+input.turfId+'\\"}) call spatial.intersects(\\"address\\", a.wkt) yield node return node, a", "merge (node)-[:WITHIN]->(a)", {batchSize:1000,iterateList:true}) yield total return total', input);
-    let total = ref.data[0];
+    let total = ref[0];
     console.log("Processed "+total+" records for "+input.turfId+" in "+((new Date().getTime())-start)+" milliseconds");
 
     return {total: total};
@@ -192,7 +214,7 @@ export default class queue {
 
     let aref = await this.db.query('match (a:ImportFile {filename:{filename}}) with a.attributes as attrs unwind attrs as attr match (a:Attribute {name:attr}) return a.id', {filename: filename});
 
-    await asyncForEach(aref.data, async (id) => {
+    await asyncForEach(aref, async (id) => {
       await this.db.query('match (if:ImportFile {filename:{filename}}) match (a:Attribute {id:{aId}}) CALL apoc.periodic.iterate("match (a:Person)-[:SOURCE]->(b:ImportRecord)-[:FILE]->(c:ImportFile {filename:\\""+if.filename+"\\"})-[:ATTRIBUTES]->(d:Attribute {id:\\""+a.id+"\\"}) return a,b,c,d", "create (e:PersonAttribute {value:b[d.name]})-[:ATTRIBUTE_OF {current:true, updated: timestamp()}]->(a) create (e)-[:COLLECTED_ON]->(c) create (e)-[:ATTRIBUTE_TYPE]->(d)", {batchSize:{limit},iterateList:true}) yield total return total', {filename: filename, limit: limit, aId: id});
     });
 
@@ -200,38 +222,38 @@ export default class queue {
 
     // parse_end + num_*, geocode_start
     stats = await this.db.query('match (a:ImportFile {filename:{filename}})<-[:FILE]-(b:ImportRecord)<-[:SOURCE]-(c:Address) with a, count(distinct(b)) as num_records, count(distinct(c)) as num_addresses match (a)<-[:FILE]-(b:ImportRecord)<-[:SOURCE]-(d:Person) return num_records, num_addresses, count(distinct(d)) as num_people', {filename: filename});
-    let num_addresses = stats.data[0][1]; // save for below
-    await this.db.query('match (a:ImportFile {filename:{filename}}) set a.parse_end = timestamp(), a.geocode_start = timestamp(), a.num_records = toInt({num_records}), a.num_addresses = toInt({num_addresses}), a.num_people = toInt({num_people})', {filename: filename, num_records: stats.data[0][0], num_addresses: stats.data[0][1], num_people: stats.data[0][2]});
+    let num_addresses = stats[0][1]; // save for below
+    await this.db.query('match (a:ImportFile {filename:{filename}}) set a.parse_end = timestamp(), a.geocode_start = timestamp(), a.num_records = toInt({num_records}), a.num_addresses = toInt({num_addresses}), a.num_people = toInt({num_people})', {filename: filename, num_records: stats[0][0], num_addresses: stats[0][1], num_people: stats[0][2]});
 
     // geocoding
     // census has a limit of 10k per batch
     limit = 10000;
     let count = limit;
 
-    if (ov_config.enable_geocode) {
+    if (hv_config.enable_geocode) {
       while (count === limit) {
-        let ref = await this.db.query('match (:ImportFile {filename:{filename}})<-[:FILE]-(:ImportRecord)<-[:SOURCE]-(a:Address) where a.position is null return distinct(a) limit {limit}', {filename: filename, limit: limit});
-        count = ref.data.length;
-        if (count) await doGeocode(this.db, ref.data);
+        let ref = await this.db.query('match (:ImportFile {filename:{filename}})<-[:FILE]-(:ImportRecord)<-[:SOURCE]-(a:Address) where a.position is null return distinct(a) limit {limit}', {filename, limit});
+        count = ref.length;
+        if (count) await doGeocode(this.db, ref, 'https://geocoding.geo.census.gov/geocoder/locations/addressbatch');
       }
     }
 
     // geocode_end, geocode_success/fail, dedupe_start
     stats = await this.db.query('match (:ImportFile {filename:{filename}})<-[:FILE]-(:ImportRecord)<-[:SOURCE]-(a:Address) where a.position = point({longitude: 0, latitude: 0}) return count(a)', {filename: filename});
-    await this.db.query('match (a:ImportFile {filename:{filename}}) set a.geocode_end = timestamp(), a.geocode_success = toInt({geocode_success}), a.goecode_fail = toInt({goecode_fail}), a.dedupe_start = timestamp()', {filename: filename, geocode_success: (num_addresses-stats.data[0]), goecode_fail: stats.data[0]});
+    await this.db.query('match (a:ImportFile {filename:{filename}}) set a.geocode_end = timestamp(), a.geocode_success = toInt({geocode_success}), a.goecode_fail = toInt({goecode_fail}), a.dedupe_start = timestamp()', {filename: filename, geocode_success: (num_addresses-stats[0]), goecode_fail: stats[0]});
 
     // find instances of duplicate Address(id) and merge them into a single node
     // TODO: we only merge :Address here - can still have dupe Unit & Person nodes
     stats = await this.db.query('match (a:ImportFile {filename: {filename}}) call apoc.periodic.iterate("match (aa:Address)-[:SOURCE]->(:ImportRecord)-[:FILE]->(:ImportFile {filename:\\""+a.filename+"\\"}) with distinct(aa) as a return a", "match (b:Address {id:a.id}) with a, count(b) as count where count > 1 match (aa:Address {id:{a.id}}) with collect(aa) as nodes call apoc.refactor.mergeNodes(nodes) yield node return node", {batchSize:100,iterateList:false}) yield total return total', {filename: filename});
 
     // dedupe_end, dupes, turfadd_start
-    await this.db.query('match (a:ImportFile {filename:{filename}}) set a.dedupe_end = timestamp(), a.dupes_address = toInt({dupes_address}), a.turfadd_start = timestamp()', {filename: filename, dupes_address: stats.data[0]});
+    await this.db.query('match (a:ImportFile {filename:{filename}}) set a.dedupe_end = timestamp(), a.dupes_address = toInt({dupes_address}), a.turfadd_start = timestamp()', {filename: filename, dupes_address: stats[0]});
 
     // turf count
     let tref = await this.db.query('match (t:Turf) return count(t)');
 
     // if turf count is zero, don't bother with the turf indexing
-    if (tref.data[0] !== 0) {
+    if (tref[0] !== 0) {
       // create a temporary point layer to do turf indexing
       await this.db.query('call spatial.addLayerWithEncoder({filename}, "NativePointEncoder", "position")', {filename: filename});
 
@@ -243,7 +265,7 @@ export default class queue {
       while (count === limit) {
         let start = new Date().getTime();
         let ref = await this.db.query('match (a:ReferenceNode {name:"spatial_root"}) with collect(a) as lock call apoc.lock.nodes(lock) match (:ImportFile {filename:{filename}})<-[:FILE]-(:ImportRecord)<-[:SOURCE]-(a:Address) where not exists(a.bbox) and not a.position = point({longitude: 0, latitude: 0}) with distinct(a) limit {limit} with collect(a) as nodes call spatial.addNodes({filename}, nodes) yield count return count', {filename: filename, limit: limit});
-        count = ref.data[0];
+        count = ref[0];
         console.log("Processed "+count+" records into spatial.addNodes() for temporary layer for "+filename+" in "+((new Date().getTime())-start)+" milliseconds");
       }
 
@@ -257,14 +279,14 @@ export default class queue {
         ref = {data: []};
       }
 
-      console.log("Records for "+filename+" may exist in up to "+ref.data.length+" turfs; begin turf index processing.");
+      console.log("Records for "+filename+" may exist in up to "+ref.length+" turfs; begin turf index processing.");
 
       // loop through each turfId and add it to
-      await asyncForEach(ref.data, async (turfId) => {
+      await asyncForEach(ref, async (turfId) => {
         // TODO: refactor; this is a copy/paste of doTurfIndexing, it's just done on a different spatial layer
         let st = new Date().getTime();
         let t = await this.db.query('CALL apoc.periodic.iterate("match (a:Turf {id:\\"'+turfId+'\\"}) call spatial.intersects(\\"'+filename+'\\", a.wkt) yield node return node, a", "merge (node)-[:WITHIN]->(a)", {batchSize:1000,iterateList:true}) yield total return total', input);
-        let total = t.data[0];
+        let total = t[0];
         console.log("Processed "+total+" records for "+turfId+" in "+((new Date().getTime())-st)+" milliseconds");
       });
 
@@ -285,92 +307,12 @@ export default class queue {
     while (count === limit) {
       let start = new Date().getTime();
       let ref = await this.db.query('match (a:ReferenceNode {name:"spatial_root"}) with collect(a) as lock call apoc.lock.nodes(lock) match (a:Address)-[:SOURCE]-(:ImportRecord)-[:FILE]-(:ImportFile {filename:{filename}}) where not exists(a.bbox) and not a.position = point({longitude: 0, latitude: 0}) with distinct(a) limit {limit} with collect(distinct(a)) as nodes call spatial.addNodes("address", nodes) yield count return count', {filename: filename, limit: limit});
-      count = ref.data[0];
+      count = ref[0];
       console.log("Processed "+count+" records into spatial.addNodes() for "+filename+" in "+((new Date().getTime())-start)+" milliseconds");
     }
 
     // turfadd_end, completed
     await this.db.query('match (a:ImportFile {filename:{filename}}) set a.index_end = timestamp(), a.completed = timestamp()', {filename: filename});
-
-    // if purge, run delete on ImportRecord until they're gone
-    if (ov_config.purge_import_records) await this.db.query('match (f:ImportFile {filename:{filename}}) call apoc.periodic.commit("match (:ImportFile {filename:\\""+f.filename+"\\"})<-[:FILE]-(r:ImportRecord) with r limit 1000 detach delete r return count(r)", {}) yield executions return executions', {filename: filename});
-  }
-
-}
-
-async function doGeocode(db, data) {
-  let start = new Date().getTime();
-  let file = "";
-
-  // build the "file" to submit
-  for (let i in data) {
-    // assign a row number to each item
-    data[i].idx = i;
-    file += i+","+data[i].street+","+data[i].city+","+data[i].state+","+data[i].zip+"\n"
-  }
-
-  let fd = new FormData();
-  fd.append('benchmark', 'Public_AR_Current');
-  fd.append('returntype', 'locations');
-  fd.append('addressFile', file, 'import.csv');
-
-  try {
-    console.log("Calling census.gov geocoder @ "+start);
-    let res = await fetch('https://geocoding.geo.census.gov/geocoder/locations/addressbatch', {
-      method: 'POST',
-      body: fd
-    });
-
-    // they return a csv file, parse it
-    let pp = papa.parse(await res.text());
-
-    // map pp.data back into data
-    for (let i in pp.data) {
-      for (let e in data) {
-        if (pp.data[i][0] === data[e].idx) {
-          data[e].pp = pp.data[i];
-        }
-      }
-    }
-
-    // pp has format of:
-    // 0   1             2       3                            4                          5                    6           7
-    // row,input address,"Match",Exact/Non_Exact/Tie/No_Match,"STREET, CITY, STATE, ZIP","longitude,latitude",some number,L or R side of road
-    for (let i in data) {
-      let lng = 0, lat = 0;
-
-      // ensure we have a pp array
-      if (!data[i].pp) data[i].pp = [];
-
-      // set lat/lng if we got it
-      if (data[i].pp[5]) {
-        let pos = data[i].pp[5].split(",");
-        lng = pos[0];
-        lat = pos[1];
-      }
-      data[i].longitude = lng;
-      data[i].latitude = lat;
-
-      // if we got an address back, update it
-      if (data[i].pp[4]) {
-        let addr = data[i].pp[4].split(", ")
-        data[i].street = addr[0];
-        data[i].city = addr[1];
-        data[i].state = addr[2];
-        data[i].zip = addr[3];
-      }
-    }
-
-    // update database
-    await db.query('unwind {data} as r match (a:Address {id:r.id}) set a.street = r.street, a.city = r.city, a.state = r.state, a.zip = r.zip, a.position = point({longitude: toFloat(r.longitude), latitude: toFloat(r.latitude)})', {data: data});
-
-    // update ids
-    await db.query('unwind {data} as r match (a:Address {id:r.id}) set a.id = apoc.util.md5([toLower(a.street), toLower(a.city), toLower(a.state), substring(a.zip,0,5)])', {data: data});
-
-    console.log("Geocoded "+data.length+" records in "+((new Date().getTime())-start)+" milliseconds.");
-
-  } catch (e) {
-    console.warn(e);
   }
 
 }

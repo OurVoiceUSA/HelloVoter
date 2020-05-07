@@ -12,4 +12,3 @@ export const ID_US_VET    = "f6a41b03-0dc8-4d59-90bf-033db6a96214";
 export const ID_RACE      = "2ad269f5-2712-4a0e-a3d4-be3074a695b6";
 export const ID_LANGS     = "59f09d32-b782-4a32-b7f1-4ffe81975167";
 export const ID_NOTES     = "6d895d04-94b8-4df9-af12-7e5b08c624d5";
-

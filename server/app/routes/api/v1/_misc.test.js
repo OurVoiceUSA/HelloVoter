@@ -1,54 +1,52 @@
-
-import fetch from 'node-fetch';
 import jwt from 'jsonwebtoken';
 import { expect } from 'chai';
 
-import { ov_config } from '../../../lib/ov_config';
-import neo4j from '../../../lib/neo4j';
 import { appInit, base_uri, getObjs } from '../../../../test/lib/utils';
+import { hv_config } from '../../../lib/hv_config';
+import neo4j from '../../../lib/neo4j';
 
 var api;
 var db;
-var c;
+var nv;
+var c, turfs, forms;
 
 describe('MISC endpoints', function () {
 
-  before(() => {
-    db = new neo4j(ov_config);
-    api = appInit(db);
+  before(async () => {
+    db = new neo4j(hv_config);
+    nv = await db.version();
+    api = await appInit(db);
     c = getObjs('volunteers');
+    turfs = getObjs('turfs');
+    forms = getObjs('forms');
   });
 
   after(async () => {
     db.close();
   });
 
-  // these aren't in _misc.js but have to test them somewhere
+  it('root uri 400', async () => {
+    let r = await api.get('/');
+    expect(r.statusCode).to.equal(400);
+  });
+
+  it('baser_uri 400', async () => {
+    let r = await api.get(base_uri);
+    expect(r.statusCode).to.equal(400);
+  });
+
+  it('public poke 200 timestamp', async () => {
+    let r = await api.get(base_uri+'/poke')
+      .set('Authorization', 'Bearer '+c.bob.jwt)
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.timestamp).to.satisfy(Number.isInteger);
+  });
 
   it('poke 200 timestamp', async () => {
-    let r = await api.get('/poke');
+    let r = await api.get(base_uri+'/public/poke');
     expect(r.statusCode).to.equal(200);
-    expect(r.body.data[0]).to.satisfy(Number.isInteger);
+    expect(r.body.timestamp).to.satisfy(Number.isInteger);
   });
-
-  it('root uri 404', async () => {
-    let r = await api.get('/');
-    expect(r.statusCode).to.equal(404);
-  });
-
-  it('invite URL desktop redirects to web', async () => {
-    let r = await api.get('/HelloVoterHQ/mobile/invite');
-    expect(r.statusCode).to.equal(302);
-  });
-
-  // TODO: spoof mobile aser-agent and test OurVoiceApp:// redirect
-
-  it('invite URL desktop redirects to web with orgId', async () => {
-    let r = await api.get('/HelloVoterHQ/NA2DEMO/mobile/invite');
-    expect(r.statusCode).to.equal(302);
-  });
-
-  // hello
 
   it('hello 400 no jwt', async () => {
     const r = await api.post(base_uri+'/hello')
@@ -86,6 +84,30 @@ describe('MISC endpoints', function () {
     expect(r.statusCode).to.equal(400);
     expect(r.body.msg).to.equal("Invalid value to parameters 'longitude' and 'latitude'.");
 
+  });
+
+  it('hello 401 bad apikey', async () => {
+    const r = await api.post(base_uri+'/hello')
+      .set('Authorization', 'Bearer foobar')
+    expect(r.statusCode).to.equal(401);
+    expect(r.body.error).to.equal(true);
+    expect(r.body).to.have.property("msg");
+  });
+
+  it('hello 200 good apikey admin', async () => {
+    await db.query('match (v:Volunteer {id:{id}}) set v.apikey = "foobaradmin"', c.admin);
+    const r = await api.post(base_uri+'/hello')
+      .set('Authorization', 'Bearer foobaradmin')
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.admin).to.equal(true);
+  });
+
+  it('hello 200 good apikey non-admin', async () => {
+    await db.query('match (v:Volunteer {id:{id}}) set v.apikey = "foobar"', c.bob);
+    const r = await api.post(base_uri+'/hello')
+      .set('Authorization', 'Bearer foobar')
+    expect(r.statusCode).to.equal(200);
+    expect(r.body.admin).to.not.exist;
   });
 
 });
