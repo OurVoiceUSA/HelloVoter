@@ -32,7 +32,7 @@ class App extends Component {
           console.log('got token: ', token);
           if (token) {
             await this.setToken(token);
-            setTimeout(() => {window.location.href = '/HelloVoter/#/'}, 500);
+            setTimeout(() => {window.location.href = '/hellovoter/#/'}, 500);
             setTimeout(() => {window.location.reload()}, 1500);
             return;
           }

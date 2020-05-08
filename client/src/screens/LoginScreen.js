@@ -74,7 +74,7 @@ async function login (refer, sm) {
     case 400: break; // TODO: rm jwt?
     case 401:
       if (Platform.OS === 'web') {
-        window.location.href = sm_oauth_url + '/'+sm+'/?app=HelloVoter'+(https?'':'&local=true');
+        window.location.href = sm_oauth_url + '/'+sm+'/?app=hellovoter'+(https?'':'&local=true');
       } else {
         openURL(sm_oauth_url+'/'+sm)
       }
