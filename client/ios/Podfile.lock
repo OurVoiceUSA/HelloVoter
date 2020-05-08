@@ -42,11 +42,11 @@ PODS:
     - GoogleMaps/Base
   - GooglePlaces (3.5.0):
     - GoogleMaps/Base (= 3.5.0)
-  - Permission-Camera (2.0.10):
+  - Permission-Camera (2.1.4):
     - RNPermissions
-  - Permission-LocationWhenInUse (2.0.10):
+  - Permission-LocationWhenInUse (2.1.4):
     - RNPermissions
-  - Permission-Notifications (2.0.10):
+  - Permission-Notifications (2.1.4):
     - RNPermissions
   - RCTRequired (0.61.5)
   - RCTTypeSafety (0.61.5):
@@ -211,13 +211,13 @@ PODS:
     - React-cxxreact (= 0.61.5)
     - React-jsi (= 0.61.5)
   - React-jsinspector (0.61.5)
-  - react-native-camera (3.22.0):
+  - react-native-camera (3.24.1):
     - React
-    - react-native-camera/RCT (= 3.22.0)
-    - react-native-camera/RN (= 3.22.0)
-  - react-native-camera/RCT (3.22.0):
+    - react-native-camera/RCT (= 3.24.1)
+    - react-native-camera/RN (= 3.24.1)
+  - react-native-camera/RCT (3.24.1):
     - React
-  - react-native-camera/RN (3.22.0):
+  - react-native-camera/RN (3.24.1):
     - React
   - react-native-config (1.0.0):
     - React
@@ -225,7 +225,7 @@ PODS:
     - React
   - react-native-geolocation (2.0.2):
     - React
-  - react-native-get-random-values (1.3.1):
+  - react-native-get-random-values (1.4.0):
     - React
   - react-native-google-maps (0.27.1):
     - Google-Maps-iOS-Utils (= 2.1.0)
@@ -239,7 +239,7 @@ PODS:
     - React
   - react-native-maps (0.27.1):
     - React
-  - react-native-netinfo (5.7.0):
+  - react-native-netinfo (5.8.0):
     - React
   - react-native-safari-view (1.0.0):
     - React
@@ -282,23 +282,25 @@ PODS:
     - ReactCommon/jscallinvoker (= 0.61.5)
   - ReactNativeART (1.2.0):
     - React
-  - RNCAsyncStorage (1.9.0):
+  - RNCAsyncStorage (1.10.0):
     - React
-  - RNCMaskedView (0.1.7):
+  - RNCMaskedView (0.1.10):
     - React
-  - RNDeviceInfo (5.5.4):
+  - RNDeviceInfo (5.5.7):
     - React
   - RNGestureHandler (1.6.1):
     - React
-  - RNLocalize (1.3.4):
+  - RNLocalize (1.4.0):
     - React
-  - RNPermissions (2.0.10):
+  - RNPermissions (2.1.4):
     - React
   - RNRate (1.2.1):
     - React
-  - RNScreens (2.4.0):
+  - RNReanimated (1.8.0):
     - React
-  - RNSVG (12.0.3):
+  - RNScreens (2.7.0):
+    - React
+  - RNSVG (12.1.0):
     - React
   - RNVectorIcons (6.6.0):
     - React
@@ -355,6 +357,7 @@ DEPENDENCIES:
   - RNLocalize (from `../node_modules/react-native-localize`)
   - RNPermissions (from `../node_modules/react-native-permissions`)
   - RNRate (from `../node_modules/react-native-rate`)
+  - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNSVG (from `../node_modules/react-native-svg`)
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
@@ -462,6 +465,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-permissions"
   RNRate:
     :path: "../node_modules/react-native-rate"
+  RNReanimated:
+    :path: "../node_modules/react-native-reanimated"
   RNScreens:
     :path: "../node_modules/react-native-screens"
   RNSVG:
@@ -481,9 +486,9 @@ SPEC CHECKSUMS:
   Google-Maps-iOS-Utils: c32891ff472eaaa1fca032beedafa1a013af7875
   GoogleMaps: 32ca02de09de357a10ac773f2c70f1986751392d
   GooglePlaces: be6f19fe8aa6ff0b5bcccfa1b8805cc977ea1450
-  Permission-Camera: 8f0e5decca5f28f70f28a8dc31f012c9bad40ad8
-  Permission-LocationWhenInUse: cc12f2f8edc1ab6966c66a34f7df92407b876524
-  Permission-Notifications: 6925b1c95603159fe683e6652b8aed40c222eb0d
+  Permission-Camera: 3ed116545ee8806cd706bca0e1a9a2c3cd36c6bd
+  Permission-LocationWhenInUse: fd5f96c0bb38fef7ce36f450ac45c82906e6eb70
+  Permission-Notifications: 2d332751cadd3f39bf6062333f36a1bc3e0281d2
   RCTRequired: b153add4da6e7dbc44aebf93f3cf4fcae392ddf1
   RCTTypeSafety: 9aa1b91d7f9310fc6eadc3cf95126ffe818af320
   React: b6a59ef847b2b40bb6e0180a97d0ca716969ac78
@@ -493,16 +498,16 @@ SPEC CHECKSUMS:
   React-jsi: cb2cd74d7ccf4cffb071a46833613edc79cdf8f7
   React-jsiexecutor: d5525f9ed5f782fdbacb64b9b01a43a9323d2386
   React-jsinspector: fa0ecc501688c3c4c34f28834a76302233e29dc0
-  react-native-camera: fcfb64dea064dfa8c2ce2b5a11390c8dd8354731
+  react-native-camera: cee386e852c0623ce3451173c0fcc90f92da4c24
   react-native-config: 7db9b96479164dfd7b2be68eb9079e08279511c4
   react-native-geocoder-reborn: c31cbc630d9307ebbceea1dea2746d0054be35c4
   react-native-geolocation: cbd9d6bd06bac411eed2671810f454d4908484a8
-  react-native-get-random-values: 148a42f97f2ce180a52d219144e83c278d4fe24b
+  react-native-get-random-values: 2b7500cdb68066aba87cdccd97067c29e16ffe95
   react-native-google-maps: 0a989abda71059db2caa98b9dacca7a8f38a47d0
   react-native-google-places: 52cbbfd66ef8483bb622093ab6aa7b3c294a3fee
   react-native-keep-awake: eba3137546b10003361b37c761f6c429b59814ae
   react-native-maps: f4b89da81626ad7f151a8bfcb79733295d31ce5c
-  react-native-netinfo: 61a837131d5f0194d22f8048a456d8f31a074baa
+  react-native-netinfo: 6458a467af4b3b7b0b87a179776ba6ba469e4f22
   react-native-safari-view: 955d7160d159241b8e9395d12d10ea0ef863dcdd
   react-native-safe-area-context: 8260e5157617df4b72865f44006797f895b2ada7
   React-RCTActionSheet: 600b4d10e3aea0913b5a92256d2719c0cdd26d76
@@ -516,15 +521,16 @@ SPEC CHECKSUMS:
   React-RCTVibration: a49a1f42bf8f5acf1c3e297097517c6b3af377ad
   ReactCommon: 198c7c8d3591f975e5431bec1b0b3b581aa1c5dd
   ReactNativeART: f003b07dfa7098aa419ed95b69560923440b1eee
-  RNCAsyncStorage: b16697280b08bab4b5f2f67f752d93d13a52e9ed
-  RNCMaskedView: 90dd32f5b786bd562e876e1421ea77c700cbf71e
-  RNDeviceInfo: 82e0a23d22ec73b2f71bd686a95d3dd278f223d7
+  RNCAsyncStorage: b34d2399d3e25db01d5b881949b503bd3c224d57
+  RNCMaskedView: f5c7d14d6847b7b44853f7acb6284c1da30a3459
+  RNDeviceInfo: 498ccbf8b1361fe858581e3c1193ecee1a031e62
   RNGestureHandler: 8f09cd560f8d533eb36da5a6c5a843af9f056b38
-  RNLocalize: d8025bb1ac74c0ad54155ea9862538624ebf74d8
-  RNPermissions: 8afd37dbc1be65748363c6a90caffd1806567651
+  RNLocalize: fc27ee5878ce5a3af73873fb2d8e866e0d1e6d84
+  RNPermissions: 8ca17fd6c822eea589fe84709d9426e05cc39c39
   RNRate: a747cbaa6040d72994861864c988037fe0696548
-  RNScreens: b5c0e1b2b04512919e78bd3898e144a157ce2363
-  RNSVG: 7e16ddfc6e00d5aa69c9eb83e699bcce5dcb85d4
+  RNReanimated: 955cf4068714003d2f1a6e2bae3fb1118f359aff
+  RNScreens: cf198f915f8a2bf163de94ca9f5bfc8d326c3706
+  RNSVG: ce9d996113475209013317e48b05c21ee988d42e
   RNVectorIcons: 0bb4def82230be1333ddaeee9fcba45f0b288ed4
   Yoga: f2a7cd4280bfe2cca5a7aed98ba0eb3d1310f18b
 

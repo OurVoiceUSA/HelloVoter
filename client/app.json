@@ -1,33 +1,4 @@
 {
-  "expo": {
-    "name": "hello-voter",
-    "slug": "hello-voter",
-    "platforms": [
-      "ios",
-      "android",
-      "web"
-    ],
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "ourvoiceapp",
-    "splash": {
-      "image": "./assets/images/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "updates": {
-      "fallbackToCacheTimeout": 0
-    },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
-    "ios": {
-      "supportsTablet": true
-    },
-    "android": {
-      "package": "org.ourvoiceinitiative.ourvoice_expo_test",
-      "versionCode": 1
-    }
-  }
+  "name": "HelloVoter",
+  "displayName": "HelloVoter"
 }

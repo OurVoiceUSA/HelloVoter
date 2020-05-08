@@ -1,22 +1,42 @@
 import React from "react";
-import { Platform, Text } from "react-native";
+import { Platform, Text, Linking } from "react-native";
 import { Root, Content } from "../components/Layout";
 import { Button } from "../components/Buttons";
-import * as WebBrowser from 'expo-web-browser';
 
-export const LoginScreen = ({ navigation }) => {
+import { SafariView } from '../App/routing';
+import * as storage from '../lib/storage';
+
+export const LoginScreen = ({ refer }) => {
+  const { user } = refer.state;
+
   return (
     <Root>
       <Content>
-        <Text>Welcome to Hello Voter</Text>
+        <Text>Welcome to Hello Voter!</Text>
         <Button
-          onPress={() => login("google")}
+          title="Log in with Facebook"
+          onPress={() => login("fm")}
+        />
+        <Button
           title="Log in with Google"
+          onPress={() => login("gm")}
+          alt={true}
         />
-        <Button
-          onPress={() => navigation.navigate("Dashboard")}
-          title="Dashboard (skip login)"
-        />
+
+        <Text></Text>
+        <Text>Built with ❤️ by Our Voice USA</Text>
+        <Text></Text>
+        <Text>Not for any candidate or political party.</Text>
+        <Text></Text>
+        <Text>Copyright (c) 2020, Our Voice USA. All rights reserved.</Text>
+        <Text></Text>
+        <Text style={{width: 350}}>
+          This program is free software; you can redistribute it and/or
+          modify it under the terms of the GNU Affero General Public License
+          as published by the Free Software Foundation; either version 3
+          of the License, or (at your option) any later version.
+        </Text>
+
       </Content>
     </Root>
   );
@@ -24,17 +44,11 @@ export const LoginScreen = ({ navigation }) => {
 
 let state = {}
 
-async function login (target) {
+async function login (sm) {
   let res
   let orgId
   let token
-  let server
-
-  if (Platform.OS === 'web') {
-    server = 'localhost:8080' // just testing
-  } else {
-    server = 'gotv-vt.ourvoiceusa.org' // just testing
-  }
+  let server = process.env.NODE_ENV === 'development' ? 'localhost:8080' : 'gotv.ourvoiceusa.org';
 
   let https = true;
   if (server.match(/:8080$/)) https = false;
@@ -43,12 +57,10 @@ async function login (target) {
     let retry = true;
 
     while (retry) {
-      res = await fetch('http'+(https?'s':'')+'://' + server + '/HelloVoterHQ/'+(orgId?orgId+'/':'')+'api/v1/hello', {
+      res = await fetch('http'+(https?'s':'')+'://' + server + '/'+(orgId?orgId+'/':'')+'api/v1/hello', {
         method: 'POST',
         headers: {
-          Authorization:
-            'Bearer ' +
-            (token ? token : (state.token ? state.token : 'of the one ring')),
+          Authorization: 'Bearer ' + (token ? token : 'of the one ring'),
           'Content-Type': 'application/json'
         },
       });
@@ -62,52 +74,39 @@ async function login (target) {
       return { error: true, msg: 'Missing required header.' };
 
     switch (res.status) {
-    case 200:
-      break; // valid - break to proceed
-    case 400:
-      return {
-        error: true,
-        msg:
-            'The server didn\'t understand the request sent from this device.'
-      };
+    case 200: return true;
+    case 400: return false;
     case 401:
-      let sm = '';
-      if (target === 'google') sm = 'gm';
-      if (target === 'facebook') sm = 'fm';
-
       if (Platform.OS === 'web') {
-        window.location.href = sm_oauth_url + '/'+sm+'/?app=HelloVoterHQ'+(https?'':'&local=true');
+        window.location.href = sm_oauth_url + '/'+sm+'/?app=HelloVoter'+(https?'':'&local=true');
       } else {
-        WebBrowser.openBrowserAsync(sm_oauth_url + '/' + sm)
+        openURL(sm_oauth_url+'/'+sm)
       }
-
-      return { error: false, flag: true };
-    case 403:
-      return {
-        error: true,
-        msg:
-            'We\'re sorry, but your request to volunteer with this server has been rejected.'
-      };
-    default:
-      return { error: true, msg: 'Unknown error connecting to server.' };
-    }
-
-    let body = await res.json();
-
-    if (body.data.ready !== true) {
-
-      alert('the server said: ', body.msg)
-      return { error: false, msg: 'The server said: ' + body.msg, data: body.data };
-    } else {
-      // TODO: use form data from body.data.forms[0] and save it in the forms_local cache
-      // TODO: if there's more than one form in body.data.forms - don't navigate
-      alert({ user: this.state.user });
-      return { error: false, flag: true, data: body.data };
+      return false;
+    case 403: return false;
+    default: return false;
     }
   } catch (e) {
-    return {
-      error: true,
-      msg: 'Unable to make a connection to target server'
-    };
   }
+  return false;
+}
+
+export async function openURL(url, external) {
+  try {
+    // Use SafariView in-line to the app on iOS if it's an http URL
+    if (url.match(/^http/) && Platform.OS === 'ios' && !external) {
+      SafariView.show({
+        url: url,
+        fromBottom: true,
+      });
+    } else {
+      await Linking.openURL(url);
+    }
+    return true;
+  } catch (e) {
+    console.warn(e);
+    // TODO
+    // refer.alert(say("app_error"), say("unable_to_launch_external"));
+  }
+  return false;
 }
