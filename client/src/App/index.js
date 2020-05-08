@@ -3,25 +3,11 @@ import { Linking, Platform, Text, TouchableOpacity } from "react-native";
 import SideMenu from 'react-native-side-menu';
 import jwt_decode from 'jwt-decode';
 
-import { LoginScreen, Canvassing, Dashboard, NoMatch } from '../screens';
+import { LoginScreen, Canvassing, Dashboard, MainMenu, NoMatch } from '../screens';
 import { Router, Switch, Route, Link, SafariView } from './routing';
 import { Root, Content } from '../components/Layout';
 import * as storage from '../lib/storage';
 import { colors } from '../colors';
-
-const MainMenu = (
-  <Root>
-    <Content>
-      <Text>Dashboard</Text>
-      <Text>Canvassing</Text>
-      <Text>Phone Banking</Text>
-      <Text>Settings</Text>
-      <Text>Help</Text>
-      <Text>About</Text>
-      <Text>Logout</Text>
-    </Content>
-  </Root>
-);
 
 class App extends Component {
 
@@ -94,26 +80,28 @@ class App extends Component {
   render() {
     const { loading, menuOpen, user } = this.state;
 
+    const menu = (<MainMenu refer={this} />);
+
     if (loading) return (<Text>LOADING</Text>);
     if (!user) return (<Router><Route path="/" render={() => <LoginScreen refer={this} />} /></Router>);
 
     return (
-      <SideMenu menu={MainMenu} openMenuOffset={200} isOpen={menuOpen}>
-      <Root>
-      <Content>
-        <TouchableOpacity onPress={() => this.setState({menuOpen: true})}>
-          <Text>MENU</Text>
-        </TouchableOpacity>
-            <Router>
+      <Router>
+        <SideMenu menu={menu} openMenuOffset={200} isOpen={menuOpen} bounceBackOnOverdraw={false}>
+        <Root>
+          <Content>
+            <TouchableOpacity onPress={() => this.setState({menuOpen: true})}>
+              <Text>MENU</Text>
+            </TouchableOpacity>
               <Switch>
                 <Route exact={true} path="/" render={() => <Dashboard refer={this} />} />
                 <Route path="/canvassing" render={() => <Canvassing refer={this} />} />
                 <Route component={NoMatch} />
               </Switch>
-            </Router>
-          </Content>
-        </Root>
-      </SideMenu>
+            </Content>
+          </Root>
+        </SideMenu>
+      </Router>
     );
   }
 }

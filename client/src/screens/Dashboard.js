@@ -4,7 +4,6 @@ import { Text, View } from 'react-native';
 import { Heading, MediumText } from "../components/Type";
 import { ViewCenter, ViewFlex, Row, Space } from '../components/Layout';
 import { Button } from "../components/Buttons";
-import * as storage from '../lib/storage';
 import { Link } from '../App/routing';
 
 export const Dashboard = ({ refer }) => {
@@ -39,15 +38,6 @@ export const Dashboard = ({ refer }) => {
           </Button>
         </ViewFlex>
       </Row>
-      <Button to="/settings" title="Settings" />
-      <Button
-        title="Logout"
-        alt={true}
-        onPress={() => {
-          storage.del('jwt');
-          refer.setState({user: null});
-        }}
-      />
     </View>
   );
 };
