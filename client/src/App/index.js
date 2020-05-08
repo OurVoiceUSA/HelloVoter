@@ -1,11 +1,11 @@
 import React, { Component } from "react";
-import { Linking, Platform, Text, TouchableOpacity } from "react-native";
+import { ActivityIndicator, Linking, Platform, Text, TouchableOpacity } from "react-native";
 import SideMenu from 'react-native-side-menu';
 import jwt_decode from 'jwt-decode';
 
 import { LoginScreen, Canvassing, Dashboard, MainMenu, NoMatch } from '../screens';
 import { Router, Switch, Route, Link, SafariView } from './routing';
-import { Root, Content } from '../components/Layout';
+import { Root, Content, Space, ViewCenter } from '../components/Layout';
 import * as storage from '../lib/storage';
 import { colors } from '../colors';
 
@@ -56,6 +56,11 @@ class App extends Component {
     this.setState({loading: false});
   }
 
+  logout = async () => {
+    storage.del('jwt');
+    this.setState({user: null, menuOpen: false});
+  }
+
   setToken = async (token) => {
     try {
       let user = jwt_decode(token);
@@ -75,6 +80,8 @@ class App extends Component {
     if (Platform.OS === 'ios') {
       SafariView.dismiss();
     }
+
+    this.setState({loading: false});
   }
 
   render() {
@@ -82,7 +89,17 @@ class App extends Component {
 
     const menu = (<MainMenu refer={this} />);
 
-    if (loading) return (<Text>LOADING</Text>);
+    if (loading) return (
+      <Root>
+        <Content>
+          <ViewCenter>
+            <Text>Loading HelloVoter...</Text>
+            <Space />
+            <ActivityIndicator size="large" />
+          </ViewCenter>
+        </Content>
+      </Root>
+    );
     if (!user) return (<Router><Route path="/" render={() => <LoginScreen refer={this} />} /></Router>);
 
     return (

@@ -17,11 +17,11 @@ export const LoginScreen = ({ refer }) => {
         <ViewCenter>
           <Button
             title="Log in with Facebook"
-            onPress={() => login("fm")}
+            onPress={() => login(refer, "fm")}
           />
           <Button
             title="Log in with Google"
-            onPress={() => login("gm")}
+            onPress={() => login(refer, "gm")}
             alt={true}
           />
           <Space />
@@ -45,51 +45,46 @@ export const LoginScreen = ({ refer }) => {
 
 let state = {}
 
-async function login (sm) {
-  let res
+async function login (refer, sm) {
+  let ret = false;
   let orgId
   let token
   let server = process.env.NODE_ENV === 'development' ? 'localhost:8080' : 'gotv.ourvoiceusa.org';
+
+  refer.setState({loading: true});
 
   let https = true;
   if (server.match(/:8080$/)) https = false;
 
   try {
-    let retry = true;
-
-    while (retry) {
-      res = await fetch('http'+(https?'s':'')+'://' + server + '/'+(orgId?orgId+'/':'')+'api/v1/hello', {
-        method: 'POST',
-        headers: {
-          Authorization: 'Bearer ' + (token ? token : 'of the one ring'),
-          'Content-Type': 'application/json'
-        },
-      });
-
-      retry = false;
-    }
+    let res = await fetch('http'+(https?'s':'')+'://' + server + '/'+(orgId?orgId+'/':'')+'api/v1/hello', {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer ' + (token ? token : 'of the one ring'),
+        'Content-Type': 'application/json'
+      },
+    });
 
     let sm_oauth_url = res.headers.get('x-sm-oauth-url');
 
-    if (!sm_oauth_url)
-      return { error: true, msg: 'Missing required header.' };
+    if (!sm_oauth_url) throw new Error("Missing required header.");
 
     switch (res.status) {
-    case 200: return true;
-    case 400: return false;
+    case 200: ret = true; break;
+    case 400: break; // TODO: rm jwt?
     case 401:
       if (Platform.OS === 'web') {
         window.location.href = sm_oauth_url + '/'+sm+'/?app=HelloVoter'+(https?'':'&local=true');
       } else {
         openURL(sm_oauth_url+'/'+sm)
       }
-      return false;
-    case 403: return false;
-    default: return false;
+      break;
+    default: break;
     }
   } catch (e) {
   }
-  return false;
+
+  return ret;
 }
 
 export async function openURL(url, external) {
