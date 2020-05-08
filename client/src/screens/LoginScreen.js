@@ -1,8 +1,9 @@
 import React from "react";
 import { Platform, Text, Linking } from "react-native";
-import { Root, Content } from "../components/Layout";
-import { Button } from "../components/Buttons";
 
+import { Root, Content, ViewCenter, Space } from "../components/Layout";
+import { Button } from "../components/Buttons";
+import { Heading } from "../components/Type";
 import { SafariView } from '../App/routing';
 import * as storage from '../lib/storage';
 
@@ -12,31 +13,31 @@ export const LoginScreen = ({ refer }) => {
   return (
     <Root>
       <Content>
-        <Text>Welcome to Hello Voter!</Text>
-        <Button
-          title="Log in with Facebook"
-          onPress={() => login("fm")}
-        />
-        <Button
-          title="Log in with Google"
-          onPress={() => login("gm")}
-          alt={true}
-        />
-
-        <Text></Text>
-        <Text>Built with ❤️ by Our Voice USA</Text>
-        <Text></Text>
-        <Text>Not for any candidate or political party.</Text>
-        <Text></Text>
-        <Text>Copyright (c) 2020, Our Voice USA. All rights reserved.</Text>
-        <Text></Text>
-        <Text style={{width: 350}}>
-          This program is free software; you can redistribute it and/or
-          modify it under the terms of the GNU Affero General Public License
-          as published by the Free Software Foundation; either version 3
-          of the License, or (at your option) any later version.
-        </Text>
-
+        <Heading>Welcome to Hello Voter!</Heading>
+        <ViewCenter>
+          <Button
+            title="Log in with Facebook"
+            onPress={() => login("fm")}
+          />
+          <Button
+            title="Log in with Google"
+            onPress={() => login("gm")}
+            alt={true}
+          />
+          <Space />
+          <Text>Built with ❤️ by Our Voice USA</Text>
+          <Space />
+          <Text>Not for any candidate or political party.</Text>
+          <Space />
+          <Text>Copyright (c) 2020, Our Voice USA. All rights reserved.</Text>
+          <Space />
+          <Text style={{width: 350}}>
+            This program is free software; you can redistribute it and/or
+            modify it under the terms of the GNU Affero General Public License
+            as published by the Free Software Foundation; either version 3
+            of the License, or (at your option) any later version.
+          </Text>
+        </ViewCenter>
       </Content>
     </Root>
   );
@@ -105,8 +106,6 @@ export async function openURL(url, external) {
     return true;
   } catch (e) {
     console.warn(e);
-    // TODO
-    // refer.alert(say("app_error"), say("unable_to_launch_external"));
   }
   return false;
 }

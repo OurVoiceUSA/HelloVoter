@@ -1,7 +1,8 @@
 import React from "react";
 import { Text, View } from 'react-native';
 
-import { ViewFlex, Row } from '../components/Layout';
+import { Heading, MediumText } from "../components/Type";
+import { ViewCenter, ViewFlex, Row, Space } from '../components/Layout';
 import { Button } from "../components/Buttons";
 import * as storage from '../lib/storage';
 import { Link } from '../App/routing';
@@ -11,8 +12,15 @@ export const Dashboard = ({ refer }) => {
 
   return (
     <View>
-      <Text>Welcome, {user.name}</Text>
-      <Text></Text>
+      <Heading>Welcome, {user.name}</Heading>
+      <Space />
+      <ViewCenter>
+        <MediumText>You've knocked on 14 doors.</MediumText>
+        <MediumText>You've sent 18 postcards.</MediumText>
+        <MediumText>You've made 35 phone calls.</MediumText>
+      </ViewCenter>
+      <ViewFlex />
+      <Heading>What do you want to do?</Heading>
       <Row>
         <ViewFlex>
           <Button>
