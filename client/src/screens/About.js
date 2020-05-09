@@ -1,13 +1,12 @@
+/* eslint-disable jsx-a11y/accessible-emoji */
 import React from 'react';
 import { Text, View, Platform } from 'react-native';
 
 import { URL_TERMS_OF_SERVICE, URL_PRIVACY_POLICY, } from '../lib/consts';
-import { ViewCenter, ViewFlex, Row, Space } from '../components/Layout';
+import { ViewCenter, Space } from '../components/Layout';
 import { openURL, openGitHub } from '../lib/common';
 import { Button } from '../components/Buttons';
 import { version } from '../../package.json';
-
-const say = (msg) => (<Text>{msg}</Text>);
 
 export const About = props => (
   <ViewCenter>

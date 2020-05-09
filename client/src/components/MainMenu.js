@@ -1,5 +1,4 @@
 import React from 'react';
-import { Text, View } from 'react-native';
 
 import { Root, Content, Space } from '../components/Layout';
 import { Button } from "../components/Buttons";

@@ -1,5 +1,6 @@
+/* eslint-disable no-mixed-operators */
 import React, { Component } from 'react';
-import { ActivityIndicator, Text, View, TouchableOpacity, StyleSheet } from 'react-native';
+import { ActivityIndicator, Text, View } from 'react-native';
 
 import { _getApiToken, api_base_uri, openURL, getEpoch } from '../lib/common';
 import { Button } from '../components/Buttons';
@@ -27,7 +28,7 @@ export class PhoneBank extends Component {
   }
 
   _dataFetch = async () => {
-    const { fetching, form, server, orgId } = this.state;
+    const { form, server, orgId } = this.state;
 
     this.setState({fetching: true});
 
@@ -49,7 +50,7 @@ export class PhoneBank extends Component {
 
       if (res.status !== 200 || json.error === true) {
         if (res.status >= 400 && res.status < 500) return this.props.navigation.goBack(); // TODO: byeFelicia()
-        throw "Sync error";
+        throw new Error("Sync error");
       }
 
       this.setState({person: json});
@@ -89,7 +90,7 @@ export class PhoneBank extends Component {
 
       if (res.status !== 200 || json.error === true) {
         if (res.status >= 400 && res.status < 500) return this.props.navigation.goBack(); // TODO: byeFelicia()
-        throw "Sync error";
+        throw new Error("Sync error");
       }
 
       this.setState({person: json});
@@ -101,8 +102,7 @@ export class PhoneBank extends Component {
   }
 
   call = async (input) => {
-    let opened = await openURL('tel:+1'+input);
-//    if (!opened) refer.alert(say("app_error"), say("unable_to_launch_external"));
+    await openURL('tel:+1'+input);
     this.setState({called: true, start: getEpoch()});
   }
 
@@ -207,20 +207,3 @@ export class PhoneBank extends Component {
     );
   }
 }
-
-const colors = {
-  white: "#FFFFFF",
-  monza: "#C70039",
-  switchEnabled: "#C70039",
-  switchDisabled: "#efeff3",
-  blueGem: "#27139A",
-};
-
-
-const styles = StyleSheet.create({
-  iconContainer: {
-    backgroundColor: '#ffffff', width: 65, height: 65, borderRadius: 65,
-    borderWidth: 2, borderColor: '#000000',
-    alignItems: 'center', justifyContent: 'center', margin: 2.5,
-  },
-});

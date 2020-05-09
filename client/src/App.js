@@ -3,11 +3,10 @@ import { ActivityIndicator, Linking, Platform, Text, TouchableOpacity } from 're
 import SideMenu from 'react-native-side-menu';
 import jwt_decode from 'jwt-decode';
 
-import { Router, Switch, Route, Link, SafariView } from './lib/routing';
+import { Router, Switch, Route, SafariView } from './lib/routing';
 import { Root, Content, Space, ViewCenter } from './components/Layout';
 import { MainMenu } from './components/MainMenu';
 import * as storage from './lib/storage';
-import { colors } from './lib/colors';
 import * as Screens from './screens';
 
 class App extends Component {
