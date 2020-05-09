@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import { BackHandler, StyleSheet, View, TouchableOpacity } from 'react-native';
-import { Root, Toast, Container, Content, Footer, FooterTab, Text, Button, Spinner } from 'native-base';
+import { StyleSheet, View } from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps'
 
 export default class App extends Component {
