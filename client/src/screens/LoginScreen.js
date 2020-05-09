@@ -4,6 +4,7 @@ import { Platform, Text, Linking } from "react-native";
 import { Root, Content, ViewCenter, Space } from "../components/Layout";
 import { Button } from "../components/Buttons";
 import { Heading } from "../components/Type";
+import { localaddress } from '../lib/common';
 import { SafariView } from '../App/routing';
 import * as storage from '../lib/storage';
 
@@ -49,7 +50,7 @@ async function login (refer, sm) {
   let ret = false;
   let orgId
   let token
-  let server = process.env.NODE_ENV === 'development' ? 'localhost:8080' : 'gotv.ourvoiceusa.org';
+  let server = process.env.NODE_ENV === 'development' ? localaddress()+':8080' : 'gotv.ourvoiceusa.org';
 
   refer.setState({loading: true});
 
