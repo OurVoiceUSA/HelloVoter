@@ -2,6 +2,10 @@
 
 Our Voice USA is a 501(c)(3) non-profit, non-partisan organization for civic education. We are writing tools to engage everyday citizens with the political process by providing easy access to civic information that's relevant to the individual.
 
+## HelloVoter App
+
+HelloVoter is designed to work on almost any consumer device. For the full version, install the app from either the [Google Play Store (Android)](https://play.google.com/store/apps/details?id=org.ourvoiceinitiative.ourvoice) or the [Apple Store (iPhone)](https://itunes.apple.com/us/app/our-voice-usa/id1275301651?ls=1&mt=8). For the web version, go to https://apps.ourvoiceusa.org/hellovoter/
+
 ## Development Setup
 
 Docker is required to get the database running, so make sure you have that installed on your system.
@@ -14,9 +18,9 @@ To get set up locally, simply run the following commands:
     npm run database
     npm start
 
-This sets up everything except the mobile app. To get setup with local development of the mobile app as well, see [mobile/README.md](mobile/README.md).
+This sets up everything except the native mobile app. To get setup with local development of the native mobile app as well, see [client/README.md](client/README.md).
 
-If you want to interact with the API from a script outside of the web app, make sure you include your JWT with the "Authorization: Bearer" header. You can either get the JWT from your browser's dev tools after you sign into the web app, or generate an API key for your user and use that instead of the JWT.
+If you want to interact with the server's API from a script outside of the app, you can generate an API key for your user. Read the swagger documentation: https://demo.ourvoiceusa.org/api/v1/public/swagger/
 
 ## Test Automation
 
@@ -32,7 +36,7 @@ Please be sure to write any tests that correspond to your code changes before yo
 
 ## Production Setup
 
-This app is designed such that you do not need to deploy the mobile app or the web client, as Our Voice USA publishes the mobile app to the app stores and hosts a production copy of the react app here: https://apps.ourvoiceusa.org/HelloVoterHQ/ (details in [client/README.md](client/README.md))
+This app is designed such that you do not need to deploy the client, as Our Voice USA publishes the native mobile app to the app stores and hosts a production copy of the web app here: https://apps.ourvoiceusa.org/hellovoter/ (details in [client/README.md](client/README.md))
 
 See [database/README.md](database/README.md) for details on how to setup a database and [server/README.md](server/README.md) for details on how to configure and deploy the server.
 

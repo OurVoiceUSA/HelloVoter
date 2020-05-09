@@ -42,7 +42,6 @@ You can connect to the database with a web browser by navigating to `YOUR_IP:747
 
     docker exec -ti $(docker ps -qf name=hellovoter) cypher-shell -u neo4j -p $NEO4J_PASS
 
-Now you can navigate to the web UI which is published here: https://apps.ourvoiceusa.org/HelloVoterHQ/
+Now you can navigate to the web app which is published here: https://apps.ourvoiceusa.org/hellovoter/
 
-Enter the public domain name of your server and click one of the sign-in options. Make sure you have SSL properly configured!
-
+On the organize screen, enter the public domain name of your server and click one of the sign-in options. Make sure you have SSL properly configured!
