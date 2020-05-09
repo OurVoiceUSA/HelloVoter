@@ -6,6 +6,7 @@ import jwt_decode from 'jwt-decode';
 import { Router, Switch, Route, SafariView } from './lib/routing';
 import { Root, Content, Space, ViewCenter } from './components/Layout';
 import { MainMenu } from './components/MainMenu';
+import { STORAGE_KEY_JWT } from './lib/consts';
 import * as storage from './lib/storage';
 import * as Screens from './screens';
 
@@ -49,7 +50,7 @@ class App extends Component {
       });
     }
 
-    token = await storage.get('jwt');
+    token = await storage.get(STORAGE_KEY_JWT);
 
     if (token) this.setToken(token);
 
@@ -57,17 +58,17 @@ class App extends Component {
   }
 
   logout = async () => {
-    storage.del('jwt');
+    storage.del(STORAGE_KEY_JWT);
     this.setState({user: null, menuOpen: false});
   }
 
   setToken = async (token) => {
     try {
       let user = jwt_decode(token);
-      await storage.set('jwt', token);
+      await storage.set(STORAGE_KEY_JWT, token);
       this.setState({token, user});
     } catch (e) {
-      storage.del('jwt');
+      storage.del(STORAGE_KEY_JWT);
     }
   }
 

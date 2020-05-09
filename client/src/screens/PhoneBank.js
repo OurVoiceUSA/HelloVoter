@@ -12,11 +12,12 @@ export class PhoneBank extends Component {
 
     this.state = {
       refer: props.refer,
-      server: props.server,
-      orgId: props.orgId,
-      admin: props.admin,
-      forms: props.forms,
-      form: props.form,
+      server: 'demo.ourvoiceusa.org',//props.server,
+      orgId: null,//props.orgId,
+      admin: false,//props.admin,
+      form: {
+        id: "9fa67e4c-bb75-412c-ac52-e358071ea756",
+      },//props.form,
       fetching: false,
       person: {},
       called: false,
@@ -49,7 +50,7 @@ export class PhoneBank extends Component {
       let json = await res.json();
 
       if (res.status !== 200 || json.error === true) {
-        if (res.status >= 400 && res.status < 500) return this.props.navigation.goBack(); // TODO: byeFelicia()
+        if (res.status >= 400 && res.status < 500) return;// this.props.navigation.goBack(); // TODO: byeFelicia()
         throw new Error("Sync error");
       }
 
@@ -89,7 +90,7 @@ export class PhoneBank extends Component {
       let json = await res.json();
 
       if (res.status !== 200 || json.error === true) {
-        if (res.status >= 400 && res.status < 500) return this.props.navigation.goBack(); // TODO: byeFelicia()
+        if (res.status >= 400 && res.status < 500) return;// this.props.navigation.goBack(); // TODO: byeFelicia()
         throw new Error("Sync error");
       }
 
@@ -127,11 +128,6 @@ export class PhoneBank extends Component {
         ||
         <Text>Sorry, there aren't any phone numbers available to you based on your assignments. Please contact your administrator.</Text>
         }
-        <Text></Text>
-        <Text></Text>
-        <Button block danger>
-          <Text>Go Back</Text>
-        </Button>
       </View>
     );
 

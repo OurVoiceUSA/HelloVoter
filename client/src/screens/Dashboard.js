@@ -21,7 +21,7 @@ export const Dashboard = ({ refer }) => {
       <Heading>What do you want to do?</Heading>
       <Row>
         <ViewFlex>
-          <Button>
+          <Button to="/phonebank">
             Phone Banking
           </Button>
           <Button>
