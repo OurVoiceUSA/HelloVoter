@@ -55,14 +55,6 @@ export default HomeTab = props => (
       tappableDots={!!props.refer._sliderRef}
     />
 
-    <Text>{say("homescreen_summary")}</Text>
-    <View style={{flexDirection: 'row', justifyContent: 'center', marginBottom: 15}}>
-      <Icon name="facebook-official" size={40} color="#3b5998" style={{marginRight: 25}} onPress={() => openURL('https://m.facebook.com/OurVoiceUsa')} />
-      <Icon name="twitter" size={40} color="#0084b4" style={{marginRight: 25}} onPress={() => openURL('https://twitter.com/OurVoiceUsa')} />
-      <Icon name="youtube-play" size={40} color="#ff0000" style={{marginRight: 25}} onPress={() => openURL('https://www.youtube.com/channel/UCw5fpnK-IZVQ4IkYuapIbiw')} />
-      <Icon name="github" size={40} style={{marginRight: 25}} onPress={() => openGitHub()} />
-      <Icon name="globe" size={40} color="#008080" onPress={() => openURL('https://ourvoiceusa.org/')} />
-    </View>
 
     <View style={{flexDirection: 'row', justifyContent: 'center', marginBottom: 15}}>
       <Button primary onPress={() => props.refer.setState({active: 'supporters'})}><Text>{say("app_supporters")}</Text></Button>

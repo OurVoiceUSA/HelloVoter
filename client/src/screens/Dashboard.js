@@ -1,10 +1,10 @@
-import React from "react";
+import React from 'react';
 import { Text, View } from 'react-native';
 
-import { Heading, MediumText } from "../components/Type";
 import { ViewCenter, ViewFlex, Row, Space } from '../components/Layout';
-import { Button } from "../components/Buttons";
-import { Link } from '../App/routing';
+import { Heading, MediumText } from '../components/Type';
+import { Button } from '../components/Buttons';
+import { Link } from '../lib/routing';
 
 export const Dashboard = ({ refer }) => {
   const { user } = refer.state;

@@ -1,13 +1,14 @@
-import React, { Component } from "react";
-import { ActivityIndicator, Linking, Platform, Text, TouchableOpacity } from "react-native";
+import React, { Component } from 'react';
+import { ActivityIndicator, Linking, Platform, Text, TouchableOpacity } from 'react-native';
 import SideMenu from 'react-native-side-menu';
 import jwt_decode from 'jwt-decode';
 
-import * as Screens from '../screens';
-import { Router, Switch, Route, Link, SafariView } from './routing';
-import { Root, Content, Space, ViewCenter } from '../components/Layout';
-import * as storage from '../lib/storage';
-import { colors } from '../colors';
+import { Router, Switch, Route, Link, SafariView } from './lib/routing';
+import { Root, Content, Space, ViewCenter } from './components/Layout';
+import { MainMenu } from './components/MainMenu';
+import * as storage from './lib/storage';
+import { colors } from './lib/colors';
+import * as Screens from './screens';
 
 class App extends Component {
 
@@ -87,7 +88,7 @@ class App extends Component {
   render() {
     const { loading, menuOpen, user } = this.state;
 
-    const menu = (<Screens.MainMenu refer={this} />);
+    const menu = (<MainMenu refer={this} />);
 
     if (loading) return (
       <Root>
@@ -113,6 +114,7 @@ class App extends Component {
               <Switch>
                 <Route exact={true} path="/" render={() => <Screens.Dashboard refer={this} />} />
                 <Route path="/canvassing" render={() => <Screens.Canvassing refer={this} />} />
+                <Route path="/about" render={() => <Screens.About refer={this} />} />
                 <Route component={Screens.NoMatch} />
               </Switch>
             </Content>

@@ -1,5 +1,6 @@
-import { colors } from "../colors";
-import styled, { css } from "styled-components/native";
+import styled, { css } from 'styled-components/native';
+
+import { colors } from '../lib/colors';
 
 export const RegularText = styled.Text`
   font-size: 14px;

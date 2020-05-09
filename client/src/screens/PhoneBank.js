@@ -1,26 +1,23 @@
-import React from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { Component } from 'react';
+import { ActivityIndicator, View, TouchableOpacity, StyleSheet } from 'react-native';
 
-import { H1, Container, Content, Text, Button, Spinner } from 'native-base';
+//import { H1, Container, Content, Text, Button, Spinner } from 'native-base';
 
-import HVComponent, { HVConfirmDialog } from './HVComponent';
-
-import { StackActions, NavigationActions } from 'react-navigation';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { _getApiToken, api_base_uri, openURL, triggerNetworkWarning, getEpoch } from './common';
 
-export default class App extends HVComponent {
+export default class App extends Component {
 
   constructor(props) {
     super(props);
 
     this.state = {
-      refer: props.navigation.state.params.refer,
-      server: props.navigation.state.params.server,
-      orgId: props.navigation.state.params.orgId,
-      admin: props.navigation.state.params.admin,
-      forms: props.navigation.state.params.forms,
-      form: props.navigation.state.params.forms[0], // fixme
+      refer: props.refer,
+      server: props.server,
+      orgId: props.orgId,
+      admin: props.admin,
+      forms: props.forms,
+      form: props.form,
       fetching: false,
       person: {},
       called: false,
@@ -117,7 +114,7 @@ export default class App extends HVComponent {
     if (fetching) return (
         <View style={{flex: 1, alignItems: 'center'}}>
           <H1>Loading Data...</H1>
-          <Spinner />
+          <ActivityIndicator />
         </View>
       );
 

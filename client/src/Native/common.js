@@ -106,43 +106,6 @@ export async function createOrgID(data) {
   });
 }
 
-export function _logout() {
-  _rmJWT();
-  _rmUser();
-}
-
-export async function openURL(url, external) {
-  try {
-    // Use SafariView in-line to the app on iOS if it's an http URL
-    if (url.match(/^http/) && Platform.OS === 'ios' && !external) {
-      SafariView.show({
-        url: url,
-        fromBottom: true,
-      });
-    } else {
-      await Linking.openURL(url);
-    }
-    return true;
-  } catch (e) {
-    console.warn(e);
-    // TODO
-    // refer.alert(say("app_error"), say("unable_to_launch_external"));
-  }
-  return false;
-}
-
-export function openGitHub(repo) {
-  openURL('https://github.com/OurVoiceUSA/'+(repo?repo:''));
-}
-
-export function openDonate() {
-  try {
-    Linking.openURL('https://www.patreon.com/join/hellovoter');
-  } catch (e) {
-    console.warn(e);
-  }
-}
-
 export function getPropFromArrObj(arr, id, prop) {
   for (let i in arr)
     if (arr[i].id === id) return arr[i][prop];

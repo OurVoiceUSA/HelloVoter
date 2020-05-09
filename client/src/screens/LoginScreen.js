@@ -1,12 +1,11 @@
-import React from "react";
-import { Platform, Text, Linking, View } from "react-native";
+import React from 'react';
+import { Platform, Text, View } from 'react-native';
 
-import { Root, Content, ViewCenter, Space } from "../components/Layout";
+import { Root, Content, ViewCenter, Space } from '../components/Layout';
+import { localaddress, openURL } from '../lib/common';
 import { URL_PRIVACY_POLICY } from '../lib/consts';
-import { Button } from "../components/Buttons";
-import { Heading } from "../components/Type";
-import { localaddress } from '../lib/common';
-import { SafariView } from '../App/routing';
+import { Button } from '../components/Buttons';
+import { Heading } from '../components/Type';
 import * as storage from '../lib/storage';
 
 export const LoginScreen = ({ refer }) => {
@@ -26,6 +25,16 @@ export const LoginScreen = ({ refer }) => {
             onPress={() => login(refer, "gm")}
             alt={true}
           />
+
+{/*
+          <View style={{flexDirection: 'row', justifyContent: 'center', marginBottom: 15}}>
+            <Icon name="facebook-official" size={40} color="#3b5998" style={{marginRight: 25}} onPress={() => openURL('https://m.facebook.com/OurVoiceUsa')} />
+            <Icon name="twitter" size={40} color="#0084b4" style={{marginRight: 25}} onPress={() => openURL('https://twitter.com/OurVoiceUsa')} />
+            <Icon name="youtube-play" size={40} color="#ff0000" style={{marginRight: 25}} onPress={() => openURL('https://www.youtube.com/channel/UCw5fpnK-IZVQ4IkYuapIbiw')} />
+            <Icon name="github" size={40} style={{marginRight: 25}} onPress={() => openGitHub()} />
+            <Icon name="globe" size={40} color="#008080" onPress={() => openURL('https://ourvoiceusa.org/')} />
+          </View>
+*/}
           <Space />
           <Text>
             We value your privacy! Read our <Text note style={{fontWeight: 'bold', color: 'blue'}} onPress={() => openURL(URL_PRIVACY_POLICY)}>privacy policy</Text> for details.
@@ -91,22 +100,4 @@ async function login (refer, sm) {
   }
 
   return ret;
-}
-
-export async function openURL(url, external) {
-  try {
-    // Use SafariView in-line to the app on iOS if it's an http URL
-    if (url.match(/^http/) && Platform.OS === 'ios' && !external) {
-      SafariView.show({
-        url: url,
-        fromBottom: true,
-      });
-    } else {
-      await Linking.openURL(url);
-    }
-    return true;
-  } catch (e) {
-    console.warn(e);
-  }
-  return false;
 }

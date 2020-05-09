@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 
-import { Root, Content } from '../components/Layout';
+import { Root, Content, Space } from '../components/Layout';
 import { Button } from "../components/Buttons";
 
 const MenuButton = (props) => (
@@ -16,8 +16,13 @@ export const MainMenu = ({refer}) => {
         <MenuButton refer={refer} to="/canvassing">Canvassing</MenuButton>
         <MenuButton refer={refer} to="/phonebank">Phone Banking</MenuButton>
         <MenuButton refer={refer} to="/settings">Settings</MenuButton>
+        <Space />
         <MenuButton refer={refer} to="/help">Help</MenuButton>
         <MenuButton refer={refer} to="/about">About</MenuButton>
+        <MenuButton refer={refer} to="/rate">Give Feedback</MenuButton>
+        <Space />
+        <MenuButton refer={refer} to="/donate">Donate</MenuButton>
+        <Space />
         <MenuButton refer={refer}
           alt={true}
           onPress={() => refer.logout()}>

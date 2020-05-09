@@ -1,8 +1,8 @@
 import React from "react";
 import { Text, View } from 'react-native';
 
-import { Root, Content } from "../components/Layout";
-import { Link } from '../App/routing';
+import { Root, Content } from '../components/Layout';
+import { Link } from '../lib/routing';
 
 export const Canvassing = ({ navigation }) => {
   return (

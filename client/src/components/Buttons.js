@@ -1,11 +1,10 @@
-import * as React from "react";
-import { colors } from "../colors";
-import { TouchableOpacity, Platform } from "react-native";
-import styled from "styled-components/native";
-import { ButtonText } from "../components/Type";
-//import Icon from "react-native-vector-icons/FontAwesome";
+import React from 'react';
+import { TouchableOpacity, Platform } from 'react-native';
+import styled from 'styled-components/native';
 
-import { Link } from '../App/routing';
+import { ButtonText } from '../components/Type';
+import { colors } from '../lib/colors';
+import { Link } from '../lib/routing';
 
 const MainButtonStyle = styled.View`
   background: ${colors.primary},
