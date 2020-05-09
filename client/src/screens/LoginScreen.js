@@ -1,7 +1,8 @@
 import React from "react";
-import { Platform, Text, Linking } from "react-native";
+import { Platform, Text, Linking, View } from "react-native";
 
 import { Root, Content, ViewCenter, Space } from "../components/Layout";
+import { URL_PRIVACY_POLICY } from '../lib/consts';
 import { Button } from "../components/Buttons";
 import { Heading } from "../components/Type";
 import { localaddress } from '../lib/common';
@@ -25,6 +26,10 @@ export const LoginScreen = ({ refer }) => {
             onPress={() => login(refer, "gm")}
             alt={true}
           />
+          <Space />
+          <Text>
+            We value your privacy! Read our <Text note style={{fontWeight: 'bold', color: 'blue'}} onPress={() => openURL(URL_PRIVACY_POLICY)}>privacy policy</Text> for details.
+          </Text>
           <Space />
           <Text>Built with ❤️ by Our Voice USA</Text>
           <Space />
