@@ -1,6 +1,8 @@
 import { Platform, Linking } from "react-native";
 
+import { STORAGE_KEY_JWT } from './consts';
 import { SafariView } from './routing';
+import * as storage from './storage';
 
 export function localaddress() {
   return (Platform.OS === 'android'?'10.0.2.2':'localhost');
@@ -34,4 +36,18 @@ export function openDonate() {
   } catch (e) {
     console.warn(e);
   }
+}
+
+export async function _getApiToken() {
+  let jwt = await storage.get(STORAGE_KEY_JWT);
+  if (!jwt) return "of the one ring";
+  return jwt;
+}
+
+export function api_base_uri(orgId) {
+  return '/'+(orgId?orgId+'/':'')+'api/v1';
+}
+
+export function getEpoch() {
+  return Math.floor(new Date().getTime())
 }

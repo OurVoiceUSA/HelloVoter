@@ -18,7 +18,6 @@ import DeviceInfo from 'react-native-device-info';
 import Permissions from 'react-native-permissions';
 import RNGooglePlaces from 'react-native-google-places';
 import Geocoder from 'react-native-geocoder-reborn';
-import memoize from 'lodash.memoize';
 import i18n from 'i18n-js';
 import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en';
@@ -32,11 +31,6 @@ export const makeTooltipContent = text => (
   <View style={{paddingHorizontal: 24, paddingVertical: 8}}>
     <Text>{text}</Text>
   </View>
-);
-
-export const say = memoize(
-  (key, config) => i18n.t(key, config),
-  (key, config) => (config ? key + JSON.stringify(config) : key)
 );
 
 var reA = /[^a-zA-Z]/g;
@@ -59,27 +53,9 @@ export function sortAlphaNum(ao, bo) {
 
 export const bbox_usa = {"type":"MultiPolygon","coordinates":[[[[-179,14],[-50,14],[-50,71],[-179,71],[-179,14]]]]};
 
-export function getEpoch() {
-  return Math.floor(new Date().getTime())
-}
-
 TimeAgo.addLocale(en);
 export function timeAgo(val) {
   return new TimeAgo('en-US').format(val);
-}
-
-export function api_base_uri(orgId) {
-  return '/HelloVoterHQ/'+(orgId?orgId+'/':'')+'api/v1';
-}
-
-export function triggerNetworkWarning() {
-  Toast.show({
-    text: 'Network Error',
-    buttonText: 'OK',
-    position: 'bottom',
-    type: 'warning',
-    duration: 5000,
-  });
 }
 
 export function invite2obj(url) {
@@ -245,12 +221,6 @@ async function _UserAgent() {
   return 'OurVoiceApp/'+info.Version+
     ' ('+info.Manufacturer+' '+info.Model+'; '+
     info.SystemName+' '+info.SystemVersion+')';
-}
-
-export async function _getApiToken() {
-  let jwt = await storage.get(STORAGE_KEY_JWT);
-  if (!jwt) return "of the one ring";
-  return jwt;
 }
 
 export function verify_aud(server, obj) {

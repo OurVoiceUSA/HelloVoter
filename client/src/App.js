@@ -114,6 +114,7 @@ class App extends Component {
               <Switch>
                 <Route exact={true} path="/" render={() => <Screens.Dashboard refer={this} />} />
                 <Route path="/canvassing" render={() => <Screens.Canvassing refer={this} />} />
+                <Route path="/phonebank" render={() => <Screens.PhoneBank refer={this} />} />
                 <Route path="/about" render={() => <Screens.About refer={this} />} />
                 <Route component={Screens.NoMatch} />
               </Switch>

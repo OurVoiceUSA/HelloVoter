@@ -1,12 +1,10 @@
 import React, { Component } from 'react';
-import { ActivityIndicator, View, TouchableOpacity, StyleSheet } from 'react-native';
+import { ActivityIndicator, Text, View, TouchableOpacity, StyleSheet } from 'react-native';
 
-//import { H1, Container, Content, Text, Button, Spinner } from 'native-base';
+import { _getApiToken, api_base_uri, openURL, getEpoch } from '../lib/common';
+import { Button } from '../components/Buttons';
 
-import Icon from 'react-native-vector-icons/FontAwesome';
-import { _getApiToken, api_base_uri, openURL, triggerNetworkWarning, getEpoch } from './common';
-
-export default class App extends Component {
+export class PhoneBank extends Component {
 
   constructor(props) {
     super(props);
@@ -56,7 +54,7 @@ export default class App extends Component {
 
       this.setState({person: json});
     } catch (e) {
-      triggerNetworkWarning(e);
+      console.warn(e);
     }
 
     this.setState({fetching: false});
@@ -96,7 +94,7 @@ export default class App extends Component {
 
       this.setState({person: json});
     } catch (e) {
-      triggerNetworkWarning(e);
+      console.warn(e);
     }
 
     this._dataFetch();
@@ -113,7 +111,7 @@ export default class App extends Component {
 
     if (fetching) return (
         <View style={{flex: 1, alignItems: 'center'}}>
-          <H1>Loading Data...</H1>
+          <Text>Loading Data...</Text>
           <ActivityIndicator />
         </View>
       );
@@ -121,7 +119,7 @@ export default class App extends Component {
     if (person && !person.phone) return (
       <View style={{flex: 1, alignItems: 'center'}}>
         <Text></Text>
-        <H1>No Phone Numbers Available</H1>
+        <Text>No Phone Numbers Available</Text>
         <Text></Text>
         <Text></Text>
         {(admin)&&
@@ -131,91 +129,81 @@ export default class App extends Component {
         }
         <Text></Text>
         <Text></Text>
-        <Button block danger onPress={() => this.props.navigation.goBack()}>
+        <Button block danger>
           <Text>Go Back</Text>
         </Button>
       </View>
     );
 
     return (
-      <Container>
-        <Content padder>
+      <View>
+        <View style={{flex: 1, alignItems: 'center'}}>
+          <Text>{form.name}</Text>
+        </View>
+        <Text></Text>
+        <Text>Tap the call button below to call this person:</Text>
+        <Text></Text>
+        <Text>Name: {person.name}</Text>
+        <Text></Text>
+        {(person.party)&&
+        <View>
+          <Text>Party Affiliation: {person.party}</Text>
+          <Text></Text>
+        </View>
+        }
+        {(person.extra_info)&&
+        <View>
+          <Text>{person.extra_info}</Text>
+          <Text></Text>
+        </View>
+        }
+        <Text>Phone Number: {person.phone}</Text>
+        <Text></Text>
+        {(called)&&
+        <View>
+          <Text></Text>
           <View style={{flex: 1, alignItems: 'center'}}>
-            <H1>{form.name}</H1>
+            <Text>How did it go?</Text>
           </View>
           <Text></Text>
-          <Text>Tap the call button below to call this person:</Text>
           <Text></Text>
-          <Text>Name: {person.name}</Text>
+          <Button block success onPress={() => this.callresult(1, false)}>
+            <Text>It went well!</Text>
+          </Button>
           <Text></Text>
-          {(person.party)&&
-          <View>
-            <Text>Party Affiliation: {person.party}</Text>
-            <Text></Text>
-          </View>
-          }
-          {(person.extra_info)&&
-          <View>
-            <Text>{person.extra_info}</Text>
-            <Text></Text>
-          </View>
-          }
-          <Text>Phone Number: {person.phone}</Text>
           <Text></Text>
-          {(called)&&
-          <View>
-            <Text></Text>
-            <View style={{flex: 1, alignItems: 'center'}}>
-              <H1>How did it go?</H1>
-            </View>
-            <Text></Text>
-            <Text></Text>
-            <Button block success onPress={() => this.callresult(1, false)}>
-              <Text>It went well!</Text>
-            </Button>
-            <Text></Text>
-            <Text></Text>
-            <Button block info onPress={() => this.callresult(2, false)}>
-              <Text>It didn't go well</Text>
-            </Button>
-            <Text></Text>
-            <Text></Text>
-            <Button block warning onPress={() => this.callresult(0, false)}>
-              <Text>No answer</Text>
-            </Button>
-            <Text></Text>
-            <Text></Text>
-            <Button block primary onPress={() => this.callresult(3, false)}>
-              <Text>Wrong number</Text>
-            </Button>
-            <Text></Text>
-            <Text></Text>
-            <Button block danger onPress={() => this.callresult(2, true)}>
-              <Text>Do not call</Text>
-            </Button>
-          </View>
-          ||
-          <View>
-            <Button block primary onPress={() => this.call(person.phone)}>
-              <Text>Call</Text>
-            </Button>
-            <Text></Text>
-            <Text></Text>
-            <Button block warning onPress={() => {
-              const resetAction = StackActions.reset({
-                index: 0,
-                actions: [
-                  NavigationActions.navigate({ routeName: 'HomeScreen'})
-                ]
-              });
-              this.props.navigation.dispatch(resetAction);
-            }}>
-              <Text>I'm Done</Text>
-            </Button>
-          </View>
-          }
-        </Content>
-      </Container>
+          <Button block info onPress={() => this.callresult(2, false)}>
+            <Text>It didn't go well</Text>
+          </Button>
+          <Text></Text>
+          <Text></Text>
+          <Button block warning onPress={() => this.callresult(0, false)}>
+            <Text>No answer</Text>
+          </Button>
+          <Text></Text>
+          <Text></Text>
+          <Button block primary onPress={() => this.callresult(3, false)}>
+            <Text>Wrong number</Text>
+          </Button>
+          <Text></Text>
+          <Text></Text>
+          <Button block danger onPress={() => this.callresult(2, true)}>
+            <Text>Do not call</Text>
+          </Button>
+        </View>
+        ||
+        <View>
+          <Button block primary onPress={() => this.call(person.phone)}>
+            <Text>Call</Text>
+          </Button>
+          <Text></Text>
+          <Text></Text>
+          <Button block warning>
+            <Text>I'm Done</Text>
+          </Button>
+        </View>
+        }
+      </View>
     );
   }
 }
