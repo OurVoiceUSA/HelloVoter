@@ -3,7 +3,7 @@ import { ActivityIndicator, Linking, Platform, Text, TouchableOpacity } from "re
 import SideMenu from 'react-native-side-menu';
 import jwt_decode from 'jwt-decode';
 
-import { LoginScreen, Canvassing, Dashboard, MainMenu, NoMatch } from '../screens';
+import * as Screens from '../screens';
 import { Router, Switch, Route, Link, SafariView } from './routing';
 import { Root, Content, Space, ViewCenter } from '../components/Layout';
 import * as storage from '../lib/storage';
@@ -87,7 +87,7 @@ class App extends Component {
   render() {
     const { loading, menuOpen, user } = this.state;
 
-    const menu = (<MainMenu refer={this} />);
+    const menu = (<Screens.MainMenu refer={this} />);
 
     if (loading) return (
       <Root>
@@ -100,7 +100,7 @@ class App extends Component {
         </Content>
       </Root>
     );
-    if (!user) return (<Router><Route path="/" render={() => <LoginScreen refer={this} />} /></Router>);
+    if (!user) return (<Router><Route path="/" render={() => <Screens.LoginScreen refer={this} />} /></Router>);
 
     return (
       <Router>
@@ -111,9 +111,9 @@ class App extends Component {
               <Text>MENU</Text>
             </TouchableOpacity>
               <Switch>
-                <Route exact={true} path="/" render={() => <Dashboard refer={this} />} />
-                <Route path="/canvassing" render={() => <Canvassing refer={this} />} />
-                <Route component={NoMatch} />
+                <Route exact={true} path="/" render={() => <Screens.Dashboard refer={this} />} />
+                <Route path="/canvassing" render={() => <Screens.Canvassing refer={this} />} />
+                <Route component={Screens.NoMatch} />
               </Switch>
             </Content>
           </Root>
