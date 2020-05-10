@@ -14,9 +14,10 @@ client/.expo
 server/test/*.json
 server/test/rsa.pub
 server/test/rsa.key
-server/.nyc_output
-server/test-result
-server/app/swagger.*.json
+coverage/
+swagger.*.json
+.nyc_output
+test-result
 
 # misc files
 *.orig
