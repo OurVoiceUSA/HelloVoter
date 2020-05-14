@@ -30,7 +30,7 @@ CI=true npm test
 )
 
 # build/launch iPhone simulator
-react-native run-ios --simulator "iPhone 11"
+react-native run-ios
 
 # build web
 npm run build-web
