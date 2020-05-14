@@ -4,11 +4,11 @@ set -ex
 
 cd $(dirname $0)
 
-rm -rf node_modules package-lock.json ios/build ios/pods ios/Podfile.lock android/build android/app/build
+rm -rf node_modules package-lock.json build ios/build ios/pods ios/Podfile.lock android/build android/app/build
 ncu -u
 npm install
 
-#CI=true npm test
+CI=true npm test
 
 # iOS pods
 (
