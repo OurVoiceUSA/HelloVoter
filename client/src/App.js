@@ -8,7 +8,7 @@ import { Root, Content, Space, ViewCenter } from './components/Layout';
 import { MainMenu } from './components/MainMenu';
 import { STORAGE_KEY_JWT } from './lib/consts';
 import * as storage from './lib/storage';
-import * as Screens from './screens';
+import * as Routes from './routes';
 
 class App extends Component {
 
@@ -101,7 +101,7 @@ class App extends Component {
         </Content>
       </Root>
     );
-    if (!user) return (<Router><Route path="/" render={() => <Screens.LoginScreen refer={this} />} /></Router>);
+    if (!user) return (<Router><Route path="/" render={() => <Routes.LoginScreen refer={this} />} /></Router>);
 
     return (
       <Router>
@@ -112,11 +112,11 @@ class App extends Component {
               <Text>MENU</Text>
             </TouchableOpacity>
               <Switch>
-                <Route exact={true} path="/" render={() => <Screens.Dashboard refer={this} />} />
-                <Route path="/canvassing" render={() => <Screens.Canvassing refer={this} />} />
-                <Route path="/phonebank" render={() => <Screens.PhoneBank refer={this} />} />
-                <Route path="/about" render={() => <Screens.About refer={this} />} />
-                <Route component={Screens.NoMatch} />
+                <Route exact={true} path="/" render={() => <Routes.Dashboard refer={this} />} />
+                <Route path="/canvassing" render={() => <Routes.Canvassing refer={this} />} />
+                <Route path="/phonebank" render={() => <Routes.PhoneBank refer={this} />} />
+                <Route path="/about" render={() => <Routes.About refer={this} />} />
+                <Route component={Routes.NoMatch} />
               </Switch>
             </Content>
           </Root>

@@ -1,25 +1,4 @@
 
-var pip = require('point-in-polygon');
-
-var ingeojson = function (json, lng, lat) {
-  switch (json.type) {
-    case "Polygon":
-      if (pip([lng, lat], json.coordinates[0])) {
-        return true;
-      }
-      break;
-    case "MultiPolygon":
-      for (let p in json.coordinates) {
-        if (pip([lng, lat], json.coordinates[p][0])) {
-          return true;
-        }
-      }
-      break;
-    default: return false; break;
-  }
-  return false;
-}
-
 // transform a geojson file into an array of polygons
 
 var geojson2polygons = function (json, flag) {
@@ -100,4 +79,3 @@ exports.sleep = sleep;
 exports.deepCopy = deepCopy;
 exports.getConfig = getConfig;
 exports.ucFirst = ucFirst;
-

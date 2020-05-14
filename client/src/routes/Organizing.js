@@ -1,14 +1,5 @@
 import React from 'react';
 import { Dimensions, Image, View } from 'react-native';
-import {
-  Content, List, ListItem, Left, Right, Body, Footer, FooterTab,
-  Text, Button, Spinner, H1,
-} from 'native-base';
-
-import LocationComponent from '../../LocationComponent';
-import { HVConfirmDialog } from '../../HVComponent';
-import SmLogin from '../../SmLogin';
-import NewOrg from './NewOrg';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { sleep, asyncForEach } from 'ourvoiceusa-sdk-js';
@@ -26,8 +17,7 @@ import {
   DINFO, STORAGE_KEY_JWT, STORAGE_KEY_OLDFORMS, URL_GUIDELINES, URL_HELP,
   Divider, say, _getApiToken, verify_aud, api_base_uri, _loginPing, openURL, getUSState, localaddress,
   _specificAddress, invite2obj,
-} from '../../common';
-import { wsbase } from '../../config';
+} from '../lib/common';
 
 var darkoutside = require('../../../img/darkoutside.png');
 var lockedout = require('../../../img/lockedout.png');

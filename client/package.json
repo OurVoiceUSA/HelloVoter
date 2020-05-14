@@ -99,7 +99,6 @@
     "@babel/preset-env": "^7.9.6",
     "@babel/runtime": "^7.9.6",
     "@react-native-community/eslint-config": "^1.0.0",
-    "babel-jest": "^26.0.1",
     "babel-plugin-react-native-web": "^0.12.2",
     "chai": "^4.2.0",
     "eslint-config-standard": "^14.1.1",
@@ -121,7 +120,13 @@
       "./tests/setup.js"
     ],
     "moduleFileExtensions": [
-      "web.js", "js", "json", "jsx", "ts", "tsx", "node"
+      "web.js",
+      "js",
+      "json",
+      "jsx",
+      "ts",
+      "tsx",
+      "node"
     ],
     "transformIgnorePatterns": [
       "node_modules/(?!react-native)/"

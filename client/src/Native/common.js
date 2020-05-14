@@ -11,7 +11,6 @@ import { Toast, Text } from 'native-base';
 
 import storage from 'react-native-storage-wrapper';
 import { getLocales, getTimeZone } from 'react-native-localize';
-import { ingeojson } from 'ourvoiceusa-sdk-js';
 import jwt_decode from 'jwt-decode';
 import SafariView from 'react-native-safari-view';
 import DeviceInfo from 'react-native-device-info';
@@ -22,10 +21,6 @@ import i18n from 'i18n-js';
 import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en';
 import { wsbase } from './config';
-
-import RBush from 'rbush';
-import rtree from '../rtree.json';
-import { geographies } from './geographies';
 
 export const makeTooltipContent = text => (
   <View style={{paddingHorizontal: 24, paddingVertical: 8}}>
@@ -500,19 +495,3 @@ export const PersonAttr = ({form, attrs, idx}) => {
   }
   return null;
 };
-
-export function getUSState(myPosition) {
-  let state;
-  new RBush(9).fromJSON(rtree).search({
-    minX: myPosition.longitude,
-    minY: myPosition.latitude,
-    maxX: myPosition.longitude,
-    maxY: myPosition.latitude,
-  }).forEach(bb => {
-    let geo = geographies[bb.state];
-    if (geo.geography) geo = geo.geography;
-    if (ingeojson(geo, myPosition.longitude, myPosition.latitude))
-      state = bb.state.toUpperCase();
-  });
-  return state;
-}

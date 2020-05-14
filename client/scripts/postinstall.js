@@ -3,7 +3,7 @@ import fs from 'fs';
 import RBush from 'rbush';
 import bbox from 'geojson-bbox';
 
-let state_path = './ocd-division/country/us/state';
+let state_path = './src/lib/ocd-division/country/us/state';
 var tree = new RBush();
 
 postInstall();
@@ -18,7 +18,7 @@ function postInstall() {
     tree.insert(obj);
   });
 
-  fs.writeFileSync('./rtree.json', JSON.stringify(tree.toJSON()));
+  fs.writeFileSync('./src/lib/rtree.json', JSON.stringify(tree.toJSON()));
   console.log("Wrote rtree.json");
 }
 
