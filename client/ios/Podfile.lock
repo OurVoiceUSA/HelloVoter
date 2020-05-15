@@ -211,13 +211,13 @@ PODS:
     - React-cxxreact (= 0.61.5)
     - React-jsi (= 0.61.5)
   - React-jsinspector (0.61.5)
-  - react-native-camera (3.24.1):
+  - react-native-camera (3.26.0):
     - React
-    - react-native-camera/RCT (= 3.24.1)
-    - react-native-camera/RN (= 3.24.1)
-  - react-native-camera/RCT (3.24.1):
+    - react-native-camera/RCT (= 3.26.0)
+    - react-native-camera/RN (= 3.26.0)
+  - react-native-camera/RCT (3.26.0):
     - React
-  - react-native-camera/RN (3.24.1):
+  - react-native-camera/RN (3.26.0):
     - React
   - react-native-config (1.0.0):
     - React
@@ -239,7 +239,7 @@ PODS:
     - React
   - react-native-maps (0.27.1):
     - React
-  - react-native-netinfo (5.8.0):
+  - react-native-netinfo (5.8.1):
     - React
   - react-native-safari-view (1.0.0):
     - React
@@ -282,7 +282,7 @@ PODS:
     - ReactCommon/jscallinvoker (= 0.61.5)
   - ReactNativeART (1.2.0):
     - React
-  - RNCAsyncStorage (1.10.0):
+  - RNCAsyncStorage (1.10.1):
     - React
   - RNCMaskedView (0.1.10):
     - React
@@ -498,7 +498,7 @@ SPEC CHECKSUMS:
   React-jsi: cb2cd74d7ccf4cffb071a46833613edc79cdf8f7
   React-jsiexecutor: d5525f9ed5f782fdbacb64b9b01a43a9323d2386
   React-jsinspector: fa0ecc501688c3c4c34f28834a76302233e29dc0
-  react-native-camera: cee386e852c0623ce3451173c0fcc90f92da4c24
+  react-native-camera: 9e3d60336e221d62e5b72adf551ca31ff74a94b5
   react-native-config: 7db9b96479164dfd7b2be68eb9079e08279511c4
   react-native-geocoder-reborn: c31cbc630d9307ebbceea1dea2746d0054be35c4
   react-native-geolocation: cbd9d6bd06bac411eed2671810f454d4908484a8
@@ -507,7 +507,7 @@ SPEC CHECKSUMS:
   react-native-google-places: 52cbbfd66ef8483bb622093ab6aa7b3c294a3fee
   react-native-keep-awake: eba3137546b10003361b37c761f6c429b59814ae
   react-native-maps: f4b89da81626ad7f151a8bfcb79733295d31ce5c
-  react-native-netinfo: 6458a467af4b3b7b0b87a179776ba6ba469e4f22
+  react-native-netinfo: ae21a6ab293d6c75af0c17c562ef37a931218886
   react-native-safari-view: 955d7160d159241b8e9395d12d10ea0ef863dcdd
   react-native-safe-area-context: 8260e5157617df4b72865f44006797f895b2ada7
   React-RCTActionSheet: 600b4d10e3aea0913b5a92256d2719c0cdd26d76
@@ -521,7 +521,7 @@ SPEC CHECKSUMS:
   React-RCTVibration: a49a1f42bf8f5acf1c3e297097517c6b3af377ad
   ReactCommon: 198c7c8d3591f975e5431bec1b0b3b581aa1c5dd
   ReactNativeART: f003b07dfa7098aa419ed95b69560923440b1eee
-  RNCAsyncStorage: b34d2399d3e25db01d5b881949b503bd3c224d57
+  RNCAsyncStorage: f640ddf9266df777c38e112ea5881ead7188b59c
   RNCMaskedView: f5c7d14d6847b7b44853f7acb6284c1da30a3459
   RNDeviceInfo: 498ccbf8b1361fe858581e3c1193ecee1a031e62
   RNGestureHandler: 8f09cd560f8d533eb36da5a6c5a843af9f056b38

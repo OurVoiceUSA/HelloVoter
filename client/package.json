@@ -9,10 +9,9 @@
   },
   "scripts": {
     "postinstall": "patch-package; npx jetify; node node_modules/@babel/node/lib/_babel-node scripts/postinstall.js",
-    "test": "jest --coverage",
-    "android": "./node_modules/react-native/cli.js  run-android",
-    "ios": "./node_modules/react-native/cli.js run-ios",
-    "start": "./node_modules/react-native/cli.js start",
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
+    "start": "react-native start",
     "start-web": "react-scripts start",
     "build-web": "react-scripts build"
   },
@@ -35,6 +34,7 @@
     "jwt-decode": "^2.2.0",
     "lodash": "^4.17.15",
     "md5": "^2.2.1",
+    "native-base": "^2.13.12",
     "natural-orderby": "^2.0.3",
     "pako": "^1.0.11",
     "point-in-polygon": "^1.0.1",
@@ -96,41 +96,16 @@
     "@babel/cli": "^7.8.4",
     "@babel/core": "^7.9.6",
     "@babel/node": "^7.8.7",
-    "@babel/preset-env": "^7.9.6",
     "@babel/runtime": "^7.9.6",
     "@react-native-community/eslint-config": "^1.0.0",
     "babel-plugin-react-native-web": "^0.12.2",
     "chai": "^4.2.0",
-    "eslint-config-standard": "^14.1.1",
-    "eslint-plugin-import": "^2.20.2",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-react": "^7.19.0",
-    "eslint-plugin-standard": "^4.0.1",
     "geojson-bbox": "0.0.0",
-    "jest-enzyme": "^7.1.2",
     "jetifier": "^1.6.5",
     "metro-react-native-babel-preset": "^0.59.0",
     "patch-package": "^6.2.2",
     "react-test-renderer": "^16.13.1",
     "ws": "^7.2.3"
-  },
-  "jest": {
-    "setupFilesAfterEnv": [
-      "./tests/setup.js"
-    ],
-    "moduleFileExtensions": [
-      "web.js",
-      "js",
-      "json",
-      "jsx",
-      "ts",
-      "tsx",
-      "node"
-    ],
-    "transformIgnorePatterns": [
-      "node_modules/(?!react-native)/"
-    ]
   },
   "browserslist": {
     "production": [
