@@ -10,9 +10,9 @@
   "scripts": {
     "postinstall": "patch-package; npx jetify; node node_modules/@babel/node/lib/_babel-node scripts/postinstall.js",
     "test": "jest --coverage",
-    "android": "react-native run-android",
-    "ios": "react-native run-ios",
-    "start": "react-native start",
+    "android": "./node_modules/react-native/cli.js  run-android",
+    "ios": "./node_modules/react-native/cli.js run-ios",
+    "start": "./node_modules/react-native/cli.js start",
     "start-web": "react-scripts start",
     "build-web": "react-scripts build"
   },
