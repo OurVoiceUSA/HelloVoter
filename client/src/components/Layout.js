@@ -1,4 +1,4 @@
-import styled from 'styled-components/native';
+import { styled } from '../lib/react-native';
 
 import { colors } from "../lib/colors";
 

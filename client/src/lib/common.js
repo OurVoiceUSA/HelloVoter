@@ -1,4 +1,4 @@
-import { Platform, Linking } from "react-native";
+import { Platform, Linking } from './react-native';
 import pip from 'point-in-polygon';
 import RBush from 'rbush';
 
@@ -70,9 +70,8 @@ export function ingeojson(json, lng, lat) {
         }
       }
       break;
-    default: return false; break;
+    default: return false;
   }
-  return false;
 }
 
 export function getUSState(myPosition) {

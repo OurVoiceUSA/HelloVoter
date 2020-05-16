@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text } from 'react-native';
+import { Text } from '../lib/react-native';
 
 import { Root, Content } from '../components/Layout';
 import { Button } from '../components/Buttons';

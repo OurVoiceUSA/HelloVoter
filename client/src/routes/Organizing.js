@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dimensions, Image, View } from 'react-native';
+import { Dimensions, Image, View } from '../lib/react-native';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { sleep, asyncForEach } from 'ourvoiceusa-sdk-js';

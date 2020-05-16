@@ -1,6 +1,5 @@
 import React from 'react';
-import { TouchableOpacity, Platform } from 'react-native';
-import styled from 'styled-components/native';
+import { TouchableOpacity, Platform, styled } from '../lib/react-native';
 
 import { ButtonText } from '../components/Type';
 import { colors } from '../lib/colors';
@@ -16,8 +15,14 @@ const MainButtonStyle = styled.View`
   border-radius: 5px;
 `;
 
-const AltButtonStyle = styled(MainButtonStyle)`
+const AltButtonStyle = styled.View`
   background: ${colors.alt};
+  padding: 10px;
+  margin: 5px;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  border-radius: 5px;
 `;
 
 export const Button = (props) => {

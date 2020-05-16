@@ -1,8 +1,8 @@
 import * as React from "react";
-import styled from "styled-components";
-import { colors } from "../colors";
-import { TouchableOpacity, Platform } from "react-native";
+import { TouchableOpacity, Platform, styled } from '../lib/react-native';
+
 import { MediumText } from "../components/Type";
+import { colors } from "../colors";
 
 // for some mysterious reason, this was necessary in RowItem but not in Layout.
 

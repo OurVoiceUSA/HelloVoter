@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/accessible-emoji */
 import React from 'react';
-import { Text, View, Platform } from 'react-native';
+import { Text, View, Platform } from '../lib/react-native';
 
 import { URL_TERMS_OF_SERVICE, URL_PRIVACY_POLICY, } from '../lib/consts';
 import { ViewCenter, Space } from '../components/Layout';

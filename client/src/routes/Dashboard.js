@@ -1,5 +1,5 @@
 import React from 'react';
-import { View } from 'react-native';
+import { View } from '../lib/react-native';
 
 import { ViewCenter, ViewFlex, Row, Space } from '../components/Layout';
 import { Heading, MediumText } from '../components/Type';

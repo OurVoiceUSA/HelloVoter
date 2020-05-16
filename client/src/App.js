@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import { ActivityIndicator, Linking, Platform, Text, TouchableOpacity } from 'react-native';
-import SideMenu from 'react-native-side-menu';
+import { ActivityIndicator, Linking, Platform, Text, TouchableOpacity, SideMenu } from './lib/react-native';
 import jwt_decode from 'jwt-decode';
 
 import { Router, Switch, Route, SafariView } from './lib/routing';

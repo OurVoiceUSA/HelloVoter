@@ -9,6 +9,7 @@
   },
   "scripts": {
     "postinstall": "patch-package; npx jetify; node node_modules/@babel/node/lib/_babel-node scripts/postinstall.js",
+    "test": "JUNIT_REPORT_PATH=test-result/result.xml JUNIT_REPORT_STACK=1 ./node_modules/nyc/bin/nyc.js ./node_modules/mocha/bin/mocha --exit --file ./test/lib/config.js --recursive --require @babel/register --timeout 25000 --colors --reporter mocha-jenkins-reporter && ./node_modules/nyc/bin/nyc.js check-coverage",
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "start": "react-native start",
@@ -96,6 +97,7 @@
     "@babel/cli": "^7.8.4",
     "@babel/core": "^7.9.6",
     "@babel/node": "^7.8.7",
+    "@babel/register": "^7.9.0",
     "@babel/runtime": "^7.9.6",
     "@react-native-community/eslint-config": "^1.0.0",
     "babel-plugin-react-native-web": "^0.12.2",
@@ -103,6 +105,9 @@
     "geojson-bbox": "0.0.0",
     "jetifier": "^1.6.5",
     "metro-react-native-babel-preset": "^0.59.0",
+    "mocha": "^7.1.2",
+    "mocha-jenkins-reporter": "^0.4.3",
+    "nyc": "^15.0.1",
     "patch-package": "^6.2.2",
     "react-test-renderer": "^16.13.1",
     "ws": "^7.2.3"
