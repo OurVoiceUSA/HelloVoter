@@ -16,9 +16,7 @@ function readStorage() {
 function writeStorage(storage) {
   try {
     fs.writeFileSync(file, JSON.stringify(storage));
-  } catch (e) {
-    console.log(e);
-  }
+  } catch (e) {}
 }
 
 export async function get(key) {
