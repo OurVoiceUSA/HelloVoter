@@ -28,19 +28,18 @@ class App extends Component {
 
     switch (Platform.OS) {
       case 'web':
-      try {
-        if (window.location.href.match(/\/jwt\//)) {
+      if (window.location.href.match(/\/jwt\//)) {
+        try {
           token = window.location.href.split('/').pop();
-          console.log('got token: ', token);
           if (token) {
             await this.setToken(token);
             setTimeout(() => {window.location.href = '/hellovoter/#/'}, 500);
             setTimeout(() => {window.location.reload()}, 1500);
             return;
           }
+        } catch (e) {
+          console.warn(e);
         }
-      } catch(e) {
-        console.warn(e);
       }
       break;
       case 'ios':
@@ -74,6 +73,7 @@ class App extends Component {
       await storage.set(STORAGE_KEY_JWT, token);
       this.setState({token, user});
     } catch (e) {
+      this.setState({token: null, user: null});
       storage.del(STORAGE_KEY_JWT);
     }
   }

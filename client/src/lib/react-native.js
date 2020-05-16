@@ -1,9 +1,17 @@
 // stubs for mocha execution
 
-const { ActivityIndicator, Linking, Text, TouchableOpacity, View, SideMenu, css } = {};
+const { ActivityIndicator, Text, TouchableOpacity, View, SideMenu, css } = {};
 
-const Platform = {
-  OS: 'node',
+class MockedPlatform {
+  OS = 'node';
+  setOS = (val) => {this.OS = val};
+}
+
+const Platform = new MockedPlatform();
+
+const Linking = {
+  addEventListener: async () => {},
+  getInitialURL: async () => {},
 };
 
 const styled = {
