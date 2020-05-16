@@ -30,15 +30,12 @@ class App extends Component {
       if (window.location.href.match(/\/jwt\//)) {
         try {
           token = window.location.href.split('/').pop();
-          if (token) {
-            await this.setToken(token);
-            setTimeout(() => {window.location.href = '/hellovoter/#/'}, 500);
-            setTimeout(() => {window.location.reload()}, 1500);
-            return;
-          }
+          if (token) await this.setToken(token);
         } catch (e) {
           console.warn(e);
         }
+        setTimeout(() => {window.location.href = '/hellovoter/#/'}, 500);
+        setTimeout(() => {window.location.reload()}, 1500);
       }
     } else {
       // Add event listener to handle OAuthLogin:// URLs
