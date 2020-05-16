@@ -2,7 +2,7 @@ import {
   NativeRouter as Router,
   Switch,
   Route,
-  Link
+  Link,
 } from 'react-router-native';
 
 export {
