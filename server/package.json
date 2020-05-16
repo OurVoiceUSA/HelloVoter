@@ -21,7 +21,7 @@
     "keypair": "^1.0.1",
     "mocha": "^7.1.2",
     "mocha-jenkins-reporter": "^0.4.3",
-    "nodemon": "^2.0.3",
+    "nodemon": "^2.0.4",
     "nyc": "^15.0.1",
     "supertest": "^4.0.2"
   },
