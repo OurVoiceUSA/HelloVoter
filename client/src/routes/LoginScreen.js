@@ -15,26 +15,26 @@ export const LoginScreen = ({ refer }) => (
       <ViewCenter>
         <Button
           title="Log in with Facebook"
-          onPress={() => login(refer, "fm")}
+          onPress={login.bind(refer, "fm")}
         />
         <Button
           title="Log in with Google"
-          onPress={() => login(refer, "gm")}
+          onPress={login.bind(refer, "gm")}
           alt={true}
         />
 
 {/*
         <View style={{flexDirection: 'row', justifyContent: 'center', marginBottom: 15}}>
-          <Icon name="facebook-official" size={40} color="#3b5998" style={{marginRight: 25}} onPress={() => openURL('https://m.facebook.com/OurVoiceUsa')} />
-          <Icon name="twitter" size={40} color="#0084b4" style={{marginRight: 25}} onPress={() => openURL('https://twitter.com/OurVoiceUsa')} />
-          <Icon name="youtube-play" size={40} color="#ff0000" style={{marginRight: 25}} onPress={() => openURL('https://www.youtube.com/channel/UCw5fpnK-IZVQ4IkYuapIbiw')} />
+          <Icon name="facebook-official" size={40} color="#3b5998" style={{marginRight: 25}} onPress={openURL.bind(refer, 'https://m.facebook.com/OurVoiceUsa')} />
+          <Icon name="twitter" size={40} color="#0084b4" style={{marginRight: 25}} onPress={openURL.bind(refer, 'https://twitter.com/OurVoiceUsa')} />
+          <Icon name="youtube-play" size={40} color="#ff0000" style={{marginRight: 25}} onPress={openURL.bind(refer, 'https://www.youtube.com/channel/UCw5fpnK-IZVQ4IkYuapIbiw')} />
           <Icon name="github" size={40} style={{marginRight: 25}} onPress={() => openGitHub()} />
-          <Icon name="globe" size={40} color="#008080" onPress={() => openURL('https://ourvoiceusa.org/')} />
+          <Icon name="globe" size={40} color="#008080" onPress={openURL.bind(refer, 'https://ourvoiceusa.org/')} />
         </View>
 */}
         <Space />
         <Text>
-          We value your privacy! Read our <Text note style={{fontWeight: 'bold', color: 'blue'}} onPress={() => openURL(URL_PRIVACY_POLICY)}>privacy policy</Text> for details.
+          We value your privacy! Read our <Text note style={{fontWeight: 'bold', color: 'blue'}} onPress={openURL.bind(refer, URL_PRIVACY_POLICY)}>privacy policy</Text> for details.
         </Text>
         <Space />
         <Text>Built with ❤️ by Our Voice USA</Text>
@@ -54,13 +54,13 @@ export const LoginScreen = ({ refer }) => (
   </Root>
 );
 
-async function login (refer, sm) {
+export async function login (sm) {
   let ret = false;
   let orgId
   let token
   let server = process.env.NODE_ENV === 'development' ? localaddress()+':8080' : 'gotv.ourvoiceusa.org';
 
-  refer.setState({loading: true});
+  this.setState({loading: true});
 
   let https = true;
   if (server.match(/:8080$/)) https = false;

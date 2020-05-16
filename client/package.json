@@ -102,6 +102,7 @@
     "@react-native-community/eslint-config": "^1.1.0",
     "babel-plugin-react-native-web": "^0.12.2",
     "chai": "^4.2.0",
+    "fetch-mock": "^9.9.0",
     "geojson-bbox": "0.0.0",
     "jetifier": "^1.6.5",
     "metro-react-native-babel-preset": "^0.59.0",
