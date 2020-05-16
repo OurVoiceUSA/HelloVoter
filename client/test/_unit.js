@@ -1,8 +1,13 @@
 import glob from 'glob';
 import fs from 'fs';
 
+const err = console.error;
+
 console.warn = function() {};
-console.error = function() {};
+console.error = (msg) => {
+  if (msg.match(/React/)) return;
+  err(msg);
+};
 
 // copy test files to run each of them as all platforms
 ['web','ios','android'].forEach(os => {
