@@ -28,14 +28,11 @@ class App extends Component {
 
     if (Platform.OS === 'web') {
       if (window.location.href.match(/\/jwt\//)) {
-        try {
-          token = window.location.href.split('/').pop();
-          if (token) await this.setToken(token);
-        } catch (e) {
-          console.warn(e);
-        }
+        token = window.location.href.split('/').pop();
+        if (token) await this.setToken(token);
         setTimeout(() => {window.location.href = '/hellovoter/#/'}, 500);
         setTimeout(() => {window.location.reload()}, 1500);
+        return;
       }
     } else {
       // Add event listener to handle OAuthLogin:// URLs
@@ -54,8 +51,8 @@ class App extends Component {
   }
 
   logout = async () => {
-    storage.del(STORAGE_KEY_JWT);
-    this.setState({user: null, menuOpen: false});
+    await storage.del(STORAGE_KEY_JWT);
+    this.setState({user: null, token: null, menuOpen: false});
   }
 
   setToken = async (token) => {
@@ -73,7 +70,7 @@ class App extends Component {
     // Extract jwt token out of the URL
     const m = url.match(/jwt=([^#]+)/);
 
-    if (m) this.setToken(m[1]);
+    if (m) await this.setToken(m[1]);
 
     SafariView.dismiss();
 
