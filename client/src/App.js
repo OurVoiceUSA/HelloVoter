@@ -25,7 +25,8 @@ class App extends Component {
   componentDidMount = async () => {
     let token;
 
-    if (Platform.OS === 'web') {
+    switch (Platform.OS) {
+      case 'web':
       try {
         if (window.location.href.match(/\/jwt\//)) {
           token = window.location.href.split('/').pop();
@@ -40,13 +41,18 @@ class App extends Component {
       } catch(e) {
         console.warn(e);
       }
-    } else {
+      break;
+      case 'ios':
+      case 'android':
       // Add event listener to handle OAuthLogin:// URLs
       Linking.addEventListener('url', this.handleOpenURL);
       // Launched from an external URL
       Linking.getInitialURL().then((url) => {
         if (url) this.handleOpenURL({ url });
       });
+      break;
+      default:
+      break;
     }
 
     token = await storage.get(STORAGE_KEY_JWT);

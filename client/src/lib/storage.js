@@ -1,12 +1,15 @@
+// stubs for mocha execution
+
+var storage = {};
 
 export async function get(key) {
-  return localStorage.getItem(key);
+  return storage[key];
 }
 
 export async function set(key, val) {
-  localStorage.setItem(key, val);
+  storage[key] = val;
 }
 
 export async function del(key) {
-  localStorage.removeItem(key);
+  delete storage[key];
 }
