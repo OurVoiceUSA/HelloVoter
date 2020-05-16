@@ -1,12 +1,16 @@
 import { expect } from 'chai';
 
+import { STORAGE_KEY_JWT } from '../src/lib/consts';
+import * as storage from '../src/lib/storage'
 import * as App from '../src/App';
 
 var a;
+var jwt = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAxMjM0NTY3ODkiLCJuYW1lIjoiVGVzdCBVc2VyIn0.L0UY1nzBJR3eYVvh2LDppVM_gZD7A-Zy_iXsGxbRfgM';
 
 describe('Test', function () {
 
   before(async () => {
+    await storage.set(STORAGE_KEY_JWT, jwt)
   });
 
   after(async () => {
@@ -36,6 +40,16 @@ describe('Test', function () {
       expect(false).to.equal(true);
     }
     expect(a.state.loading).to.equal(false);
+    expect(a.state.token).to.equal(jwt);
+  });
+
+  it('App setToken parses jwt', async () => {
+    try {
+      await a.setToken('foo');
+      expect(false).to.equal(true);
+    } catch (e) {
+      expect(true).to.equal(true);
+    }
   });
 
 });
