@@ -2,10 +2,11 @@ import React, { Component } from 'react';
 import { ActivityIndicator, Linking, Platform, Text, TouchableOpacity, SideMenu } from './lib/react-native';
 import jwt_decode from 'jwt-decode';
 
-import { Router, Switch, Route, SafariView } from './lib/routing';
+import { Router, Switch, Route } from './lib/routing';
 import { Root, Content, Space, ViewCenter } from './components/Layout';
 import { MainMenu } from './components/MainMenu';
 import { STORAGE_KEY_JWT } from './lib/consts';
+import { SafariView } from './lib/SafariView';
 import * as storage from './lib/storage';
 import * as Routes from './routes';
 
@@ -83,9 +84,7 @@ class App extends Component {
 
     if (m) this.setToken(m[1]);
 
-    if (Platform.OS === 'ios') {
-      SafariView.dismiss();
-    }
+    SafariView.dismiss();
 
     this.setState({loading: false});
   }

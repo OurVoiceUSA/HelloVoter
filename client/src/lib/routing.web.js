@@ -5,7 +5,10 @@ import {
   Link,
 } from 'react-router-dom';
 
-const SafariView = () => {};
+const SafariView = {
+  show: () => {},
+  dismiss: () => {},
+};
 
 export {
   Router,

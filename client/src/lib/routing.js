@@ -1,11 +1,10 @@
+// stubs for mocha execution
 
-const { Router, Switch, Route, Link, SafariView } = {};
+const { Router, Switch, Route, Link } = {};
 
 export {
   Router,
   Switch,
   Route,
   Link,
-  SafariView,
 };
-

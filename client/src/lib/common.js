@@ -4,7 +4,7 @@ import RBush from 'rbush';
 
 import { geographies } from './geographies';
 import { STORAGE_KEY_JWT } from './consts';
-import { SafariView } from './routing';
+import { SafariView } from './SafariView';
 import * as storage from './storage';
 import rtree from './rtree.json';
 
