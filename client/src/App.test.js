@@ -26,12 +26,14 @@ describe('App as ###OS###', function () {
 
   it('App loads', async () => {
     a = mockReact(App);
+    a.render();
     expect(a.state.loading).to.equal(true);
   });
 
   it('App componentDidMount', async () => {
     try {
       await a.componentDidMount();
+      a.render();
     } catch (e) {
       console.log(e);
       expect(false).to.equal(true);
@@ -45,6 +47,7 @@ describe('App as ###OS###', function () {
       await storage.set(STORAGE_KEY_JWT, jwt);
       a.setState({loading: true, user: null, token: null});
       await a.componentDidMount();
+      a.render();
     } catch (e) {
       console.log(e);
       expect(false).to.equal(true);
@@ -65,6 +68,7 @@ describe('App as ###OS###', function () {
       a.setState({loading: true, user: null, token: null});
       window.location.href = '/#/jwt/'+jwt;
       await a.componentDidMount();
+      a.render();
     } catch (e) {
       console.log(e);
       expect(false).to.equal(true);
@@ -85,6 +89,7 @@ describe('App as ###OS###', function () {
       await a.logout();
       window.location.href = '/#/jwt/';
       await a.componentDidMount();
+      a.render();
     } catch (e) {
       console.log(e);
       expect(false).to.equal(true);
@@ -130,6 +135,11 @@ describe('App as ###OS###', function () {
     }
     expect(a.state.token).to.equal(jwt);
     expect(await storage.get(STORAGE_KEY_JWT)).to.equal(jwt);
+  });
+
+  it('App setMenuOpen opens menu', async () => {
+    a.setMenuOpen();
+    expect(a.state.menuOpen).to.equal(true);
   });
 
 });

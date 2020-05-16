@@ -77,6 +77,10 @@ class App extends Component {
     this.setState({loading: false});
   }
 
+  setMenuOpen = () => {
+    this.setState({menuOpen: true})
+  }
+
   render() {
     const { loading, menuOpen, user } = this.state;
 
@@ -100,14 +104,22 @@ class App extends Component {
         <SideMenu menu={menu} openMenuOffset={200} isOpen={menuOpen} bounceBackOnOverdraw={false}>
         <Root>
           <Content>
-            <TouchableOpacity onPress={() => this.setState({menuOpen: true})}>
+            <TouchableOpacity onPress={this.setMenuOpen}>
               <Text>MENU</Text>
             </TouchableOpacity>
               <Switch>
-                <Route exact={true} path="/" render={() => <Routes.Dashboard refer={this} />} />
-                <Route path="/canvassing" render={() => <Routes.Canvassing refer={this} />} />
-                <Route path="/phonebank" render={() => <Routes.PhoneBank refer={this} />} />
-                <Route path="/about" render={() => <Routes.About refer={this} />} />
+                <Route exact={true} path="/">
+                  <Routes.Dashboard refer={this} />
+                </Route>
+                <Route path="/canvassing">
+                  <Routes.Canvassing refer={this} />
+                </Route>
+                <Route path="/phonebank">
+                  <Routes.PhoneBank refer={this} />
+                </Route>
+                <Route path="/about">
+                  <Routes.About refer={this} />
+                </Route>
                 <Route component={Routes.NoMatch} />
               </Switch>
             </Content>

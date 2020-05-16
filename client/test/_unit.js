@@ -2,6 +2,7 @@ import glob from 'glob';
 import fs from 'fs';
 
 console.warn = function() {};
+console.error = function() {};
 
 // copy test files to run each of them as all platforms
 ['web','ios','android'].forEach(os => {
@@ -16,4 +17,3 @@ console.warn = function() {};
       fs.unlink(`./${nfn}`, () => {});
     });
 });
-
