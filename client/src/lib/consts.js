@@ -9,3 +9,5 @@ export const URL_TERMS_OF_SERVICE = 'https://raw.githubusercontent.com/OurVoiceU
 export const URL_PRIVACY_POLICY = 'https://raw.githubusercontent.com/OurVoiceUSA/HelloVoter/master/docs/Privacy-Policy.md';
 export const URL_GUIDELINES = 'https://raw.githubusercontent.com/OurVoiceUSA/HelloVoter/master/docs/Canvassing-Guidelines.md';
 export const URL_HELP = 'https://github.com/OurVoiceUSA/HelloVoter/blob/master/docs/Canvassing.md';
+export const URL_APPLE_IOS = 'https://itunes.apple.com/us/app/our-voice-usa/id1275301651?ls=1&amp;mt=8';
+export const URL_GOOGLE_PLAY = 'https://play.google.com/store/apps/details?id=org.ourvoiceinitiative.ourvoice';
