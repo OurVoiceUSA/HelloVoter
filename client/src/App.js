@@ -110,7 +110,7 @@ class App extends Component {
         <Root>
           <Content>
             <TouchableOpacity onPress={this.setMenuOpen}>
-              <Icon.Menu />
+              <Icon.Menu size={30} />
             </TouchableOpacity>
               <Switch>
                 <Route exact={true} path="/">
