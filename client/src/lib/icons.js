@@ -1,23 +1,25 @@
 // stubs for mocha execution
 
 const {
-  IconCog,
-  IconDash,
-  IconDonate,
-  IconInfo,
-  IconMap,
-  IconPhone,
-  IconQuestion,
-  IconRate,
+  Cog,
+  Dash,
+  Donate,
+  Info,
+  Map,
+  Menu,
+  Phone,
+  Question,
+  Rate,
 } = {};
 
 export {
-  IconCog,
-  IconDash,
-  IconDonate,
-  IconInfo,
-  IconMap,
-  IconPhone,
-  IconQuestion,
-  IconRate,
+  Cog,
+  Dash,
+  Donate,
+  Info,
+  Map,
+  Menu,
+  Phone,
+  Question,
+  Rate,
 };
