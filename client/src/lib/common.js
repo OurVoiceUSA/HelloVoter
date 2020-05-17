@@ -13,6 +13,10 @@ export function localaddress() {
 }
 
 export async function openURL(url, external) {
+  if (Platform.OS === 'web') {
+    window.open(url, '_blank');
+    return true;
+  }
   try {
     // Use SafariView in-line to the app on iOS if it's an http URL
     if (url.match(/^http/) && Platform.OS === 'ios' && !external) {
