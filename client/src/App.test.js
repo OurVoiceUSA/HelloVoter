@@ -133,8 +133,9 @@ describe('App as ###OS###', function () {
       console.log(e);
       expect(false).to.equal(true);
     }
-    expect(a.state.token).to.equal(jwt);
     expect(await storage.get(STORAGE_KEY_JWT)).to.equal(jwt);
+    expect(a.state.token).to.equal(jwt);
+    expect(a.state.user.name).to.equal("Test User");
   });
 
   it('App setMenuOpen opens menu', async () => {
@@ -142,4 +143,10 @@ describe('App as ###OS###', function () {
     expect(a.state.menuOpen).to.equal(true);
   });
 
+  it('App setMenuClose closes menu', async () => {
+    a.setMenuClose();
+    expect(a.state.menuOpen).to.equal(false);
+  });
+
 });
+

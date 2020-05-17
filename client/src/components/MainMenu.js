@@ -4,7 +4,7 @@ import { Root, Content, Space } from '../components/Layout';
 import { Button } from "../components/Buttons";
 
 const MenuButton = (props) => (
-  <Button to={props.to} onPress={() => props.refer.setState({menuOpen: false})} {...props} />
+  <Button to={props.to} onPress={props.refer.setMenuClose.bind(props.refer)} {...props} />
 );
 
 export const MainMenu = ({refer}) => {
@@ -24,7 +24,7 @@ export const MainMenu = ({refer}) => {
         <Space />
         <MenuButton refer={refer}
           alt={true}
-          onPress={() => refer.logout()}>
+          onPress={refer.logout.bind(refer)}>
           Logout
         </MenuButton>
       </Content>

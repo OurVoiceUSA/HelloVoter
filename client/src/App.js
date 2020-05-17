@@ -81,6 +81,10 @@ class App extends Component {
     this.setState({menuOpen: true})
   }
 
+  setMenuClose = () => {
+    this.setState({menuOpen: false})
+  }
+
   render() {
     const { loading, menuOpen, user } = this.state;
 
