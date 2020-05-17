@@ -2,7 +2,8 @@ import React from 'react';
 import { Platform, DeviceEventEmitter } from 'react-native';
 import RNGLocation from 'react-native-google-location';
 
-import { sleep, permissionLocation } from '../../lib/common';
+import { permissionLocation } from './functions';
+import { sleep } from '../../lib/common';
 import HVComponent from './HVComponent';
 
 if (Platform.OS === 'ios') {
@@ -40,7 +41,9 @@ export default class LocationComponent extends HVComponent {
 
     try {
       access = await permissionLocation();
-    } catch(error) {}
+    } catch(e) {
+      console.warn(e);
+    }
 
     if (access === true) {
       if (Platform.OS === 'android') {
