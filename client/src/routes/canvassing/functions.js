@@ -1,3 +1,5 @@
+import React from 'react';
+import { Toast } from 'native-base';
 import { getLocales, getTimeZone } from 'react-native-localize';
 import Permissions from 'react-native-permissions';
 import DeviceInfo from 'react-native-device-info';
@@ -150,4 +152,14 @@ export var geojson2polygons = (json, flag) => {
   }
 
   return polygons;
+}
+
+export function triggerNetworkWarning() {
+  Toast.show({
+    text: 'Network Error',
+    buttonText: 'OK',
+    position: 'bottom',
+    type: 'warning',
+    duration: 5000,
+  });
 }

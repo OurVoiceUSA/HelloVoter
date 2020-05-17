@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { BackHandler, StyleSheet, View, TouchableOpacity } from 'react-native';
-import { Toast, Container, Content, Footer, FooterTab, Text, Button, Spinner } from 'native-base';
+import { Root, Toast, Container, Content, Footer, FooterTab, Text, Button, Spinner } from 'native-base';
 import { WalkthroughElement, startWalkthrough } from 'react-native-walkthrough';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -13,9 +13,9 @@ import _ from 'lodash';
 
 import {
   api_base_uri, _doGeocode, _getApiToken, openURL, getEpoch, getLastVisit, getPinColor,
-  makeTooltipContent, triggerNetworkWarning, ingeojson,
+  makeTooltipContent, ingeojson,
 } from '../../lib/common';
-import { DINFO, bystreet, geojson2polygons } from './functions';
+import { DINFO, bystreet, geojson2polygons, triggerNetworkWarning } from './functions';
 
 import { STORAGE_KEY_SETTINGS, STORAGE_KEY_RETRY } from '../../lib/consts';
 import { SelectFormDialog, NewAddressDialog } from './FormDialogs';
@@ -826,212 +826,214 @@ export default class Canvassing extends LocationComponent {
     // NOTE: always render the MapView, even if not on the Map View Tab. This keeps the
     // the component loaded in memory for better performance when switching back and forth
     return (
-      <Container>
-        <Content>
-          <View>
-          {active==='list'&&
-            <ListTab refer={this} />
-          }
-          {active==='dispatch'&&
-            <DispatchTab refer={this} />
-          }
-          {active==='settings'&&
-            <SettingsTab refer={this} form={form} />
-          }
-          </View>
-        </Content>
-
-        <MapView
-          ref={component => this.map = component}
-          initialRegion={{latitude: myPosition.latitude, longitude: myPosition.longitude, latitudeDelta: region.latitudeDelta, longitudeDelta: region.longitudeDelta}}
-          onMapReady={this.onMapReady}
-          provider={PROVIDER_GOOGLE}
-          style={(active==='map'?styles.map:null)}
-          showsUserLocation={true}
-          followsUserLocation={false}
-          keyboardShouldPersistTaps={true}
-          onRegionChangeComplete={this.onRegionChange}
-          showsIndoors={false}
-          showsTraffic={false}
-          onPress={this.onMapPress}
-          onPoiClick={this.onMapPress}
-          {...this.props}>
-          {active==='map'&&geofence.map((g, idx) => <MapView.Polyline key={idx} coordinates={g.polygon} strokeWidth={2} strokeColor={(g.id === selectedTurf.id ? "blue" : "black")} />)}
-          {active==='map'&&markers.map((marker) => (
-              <MapView.Marker
-                key={marker.address.id}
-                coordinate={{longitude: marker.address.longitude, latitude: marker.address.latitude}}
-                onPress={this.onMarkerPress}
-                pinColor={getPinColor(marker)}>
-                <MapView.Callout onPress={this.doMarkerPress.bind(this,marker)}>
-                  <View style={{backgroundColor: '#FFFFFF', padding: 5, width: 175}}>
-                    <Text style={{fontWeight: 'bold'}}>
-                      {marker.address.street}, {marker.address.city}, {marker.address.state}, {marker.address.zip}
-                    </Text>
-                    <Text>{(marker.units.length ? 'Multi-unit address' : getLastVisit(marker))}</Text>
-                  </View>
-                </MapView.Callout>
-              </MapView.Marker>
-          ))}
-          {active==='map'&&searchPins.map((place, idx) => (
-              <MapView.Marker
-                key={idx}
-                ref={(idx===(searchPins.length-1)?(component) => {
-                  this.selectedSearchPin = component;
-                  if (this.selectSelectedSearchPin) {
-                    this.selectSelectedSearchPin = false;
-                    setTimeout(() => this.selectedSearchPin.showCallout(), 50);
-                  }
-                }:undefined)}
-                coordinate={place.location}
-                onPress={(e) => e.nativeEvent.coordinate && this.updateTurfInfo(e.nativeEvent.coordinate)}
-                pinColor={"purple"}>
-                <MapView.Callout onPress={() => this.add_new && this.showConfirmAddress(place.location)}>
-                  <View style={{backgroundColor: '#FFFFFF', padding: 5, width: 175}}>
-                    {place.address&&<Text style={{fontWeight: 'bold'}}>{place.address}</Text>}
-                    {this.add_new&&<Button><Text>Add this location</Text></Button>}
-                  </View>
-                </MapView.Callout>
-              </MapView.Marker>
-          ))}
-        </MapView>
-
-        {fetching&&
-        <View style={{position: 'absolute', right: 0, ...styles.iconContainer}}>
-          <Spinner />
-        </View>
-        }
-
-        {active==='map'&&selectedTurf.id&&
-        <TouchableOpacity style={{position: 'absolute', left: 0, ...styles.turfInfoContainer}}
-          onPress={() => this._loadturfInfo()}>
-          <Text>{selectedTurf.name}</Text>
-        </TouchableOpacity>
-        }
-
-        {active==='map' &&
-        <View style={{alignItems: 'center', justifyContent: 'flex-end'}}>
-          <View style={{flexDirection: 'row', marginVertical: 5, backgroundColor: 'transparent',}}>
-            {!this.state.canvassSettings.pin_auto_reload &&
-            <WalkthroughElement id="refresh-button">
-              <TouchableOpacity style={styles.iconContainer} disabled={fetching}
-                onPress={() => this._dataGet(mapCamera.center)}>
-                <Icon
-                  name="refresh"
-                  size={50}
-                  color={(fetching?"#d3d3d3":"#00a86b")}
-                  {...styles.icon} />
-              </TouchableOpacity>
-            </WalkthroughElement>
+      <Root>
+        <Container>
+          <Content>
+            <View>
+            {active==='list'&&
+              <ListTab refer={this} />
             }
-
-            {this.add_new &&
-            <WalkthroughElement id="new-address-button">
-              <TouchableOpacity style={styles.iconContainer}
-                onPress={() => {
-                  if (pressAddsSearchPin) {
-                    Toast.hide();
-                    this.setState({pressAddsSearchPin: false});
-                    return;
-                  }
-                  if (mapCamera.zoom < 20) this.animateToCoordinate(mapCamera.center);
-                  this.setState({pressAddsSearchPin: true, searchPins: []});
-                  Toast.show({
-                    text: 'Tap on map where to add a marker.',
-                    position: 'bottom',
-                    type: 'success',
-                    duration: 60000,
-                  });
-                }}>
-                <Icon
-                  name="map-marker"
-                  testID="map-marker"
-                  size={50}
-                  color={(pressAddsSearchPin?"purple":"#8b4513")}
-                  {...styles.icon} />
-              </TouchableOpacity>
-            </WalkthroughElement>
+            {active==='dispatch'&&
+              <DispatchTab refer={this} />
             }
+            {active==='settings'&&
+              <SettingsTab refer={this} form={form} />
+            }
+            </View>
+          </Content>
 
-            <WalkthroughElement id="map2me-button">
-              <TouchableOpacity style={styles.iconContainer}
-                onPress={() => this.animateToCoordinate(myPosition, true)}>
-                <Icon
-                  name="location-arrow"
-                  size={50}
-                  color="#0084b4"
-                  {...styles.icon} />
-              </TouchableOpacity>
-            </WalkthroughElement>
+          <MapView
+            ref={component => this.map = component}
+            initialRegion={{latitude: myPosition.latitude, longitude: myPosition.longitude, latitudeDelta: region.latitudeDelta, longitudeDelta: region.longitudeDelta}}
+            onMapReady={this.onMapReady}
+            provider={PROVIDER_GOOGLE}
+            style={(active==='map'?styles.map:null)}
+            showsUserLocation={true}
+            followsUserLocation={false}
+            keyboardShouldPersistTaps={true}
+            onRegionChangeComplete={this.onRegionChange}
+            showsIndoors={false}
+            showsTraffic={false}
+            onPress={this.onMapPress}
+            onPoiClick={this.onMapPress}
+            {...this.props}>
+            {active==='map'&&geofence.map((g, idx) => <MapView.Polyline key={idx} coordinates={g.polygon} strokeWidth={2} strokeColor={(g.id === selectedTurf.id ? "blue" : "black")} />)}
+            {active==='map'&&markers.map((marker) => (
+                <MapView.Marker
+                  key={marker.address.id}
+                  coordinate={{longitude: marker.address.longitude, latitude: marker.address.latitude}}
+                  onPress={this.onMarkerPress}
+                  pinColor={getPinColor(marker)}>
+                  <MapView.Callout onPress={this.doMarkerPress.bind(this,marker)}>
+                    <View style={{backgroundColor: '#FFFFFF', padding: 5, width: 175}}>
+                      <Text style={{fontWeight: 'bold'}}>
+                        {marker.address.street}, {marker.address.city}, {marker.address.state}, {marker.address.zip}
+                      </Text>
+                      <Text>{(marker.units.length ? 'Multi-unit address' : getLastVisit(marker))}</Text>
+                    </View>
+                  </MapView.Callout>
+                </MapView.Marker>
+            ))}
+            {active==='map'&&searchPins.map((place, idx) => (
+                <MapView.Marker
+                  key={idx}
+                  ref={(idx===(searchPins.length-1)?(component) => {
+                    this.selectedSearchPin = component;
+                    if (this.selectSelectedSearchPin) {
+                      this.selectSelectedSearchPin = false;
+                      setTimeout(() => this.selectedSearchPin.showCallout(), 50);
+                    }
+                  }:undefined)}
+                  coordinate={place.location}
+                  onPress={(e) => e.nativeEvent.coordinate && this.updateTurfInfo(e.nativeEvent.coordinate)}
+                  pinColor={"purple"}>
+                  <MapView.Callout onPress={() => this.add_new && this.showConfirmAddress(place.location)}>
+                    <View style={{backgroundColor: '#FFFFFF', padding: 5, width: 175}}>
+                      {place.address&&<Text style={{fontWeight: 'bold'}}>{place.address}</Text>}
+                      {this.add_new&&<Button><Text>Add this location</Text></Button>}
+                    </View>
+                  </MapView.Callout>
+                </MapView.Marker>
+            ))}
+          </MapView>
 
-            <WalkthroughElement id="address-search-button">
-              <TouchableOpacity style={styles.iconContainer}
-                onPress={() => {
-                  RNGooglePlaces.openAutocompleteModal(
-                    {
-                      locationBias: {
-                        latitudeNE: mapCamera.center.latitude+0.1,
-                        longitudeNE: mapCamera.center.longitude+0.1,
-                        latitudeSW: mapCamera.center.latitude-0.1,
-                        longitudeSW: mapCamera.center.longitude-0.1,
-                      }
-                    },
-                    ['location','address']
-                  ).then((place) => {
-                    this.dropSearchPin(place);
-                  })
-                  .catch(e => {});
-                }}>
-                <Icon
-                  name="search"
-                  size={40}
-                  color="#000000"
-                  {...styles.icon} />
-              </TouchableOpacity>
-            </WalkthroughElement>
+          {fetching&&
+          <View style={{position: 'absolute', right: 0, ...styles.iconContainer}}>
+            <Spinner />
           </View>
-        </View>
-        }
+          }
 
-        <SelectFormDialog refer={this} />
-        <NewAddressDialog refer={this} />
-        <HVConfirmDialog refer={this} />
-        <WalkthroughElement id="start-map-walkthrough" />
-        <WalkthroughElement id="start-list-walkthrough" />
-        <WalkthroughElement id="start-dispatch-walkthrough" />
-        <WalkthroughElement id="start-settings-walkthrough" />
-        <WalkthroughElement id="all-set" />
+          {active==='map'&&selectedTurf.id&&
+          <TouchableOpacity style={{position: 'absolute', left: 0, ...styles.turfInfoContainer}}
+            onPress={() => this._loadturfInfo()}>
+            <Text>{selectedTurf.name}</Text>
+          </TouchableOpacity>
+          }
 
-        <Footer>
-          <FooterTab>
-            <WalkthroughElement id="mapview">
-              <Button active={(active === 'map'?true:false)} onPress={() => this.setState({active: 'map', activePrev: active})}>
-                <Icon name="map" size={25} />
-                <Text>Map View</Text>
-              </Button>
-            </WalkthroughElement>
-            <WalkthroughElement id="listview">
-              <Button active={(active === 'list'?true:false)} onPress={() => this.setState({active: 'list', activePrev: active})}>
-                <Icon name="list" size={25} />
-                <Text>List View</Text>
-              </Button>
-            </WalkthroughElement>
-            <WalkthroughElement id="dispatch">
-              <Button active={(active === 'dispatch'?true:false)} onPress={() => this.setState({active: 'dispatch', activePrev: active})}>
-                <Icon name="user-plus" size={25} />
-                <Text>Dispatch</Text>
-              </Button>
-            </WalkthroughElement>
-            <WalkthroughElement id="settings">
-              <Button active={(active === 'settings'?true:false)} onPress={() => this.setState({active: 'settings', activePrev: active})}>
-                <Icon name="cog" size={25} />
-                <Text>Settings</Text>
-              </Button>
-            </WalkthroughElement>
-          </FooterTab>
-        </Footer>
-        <KeepAwake />
-      </Container>
+          {active==='map' &&
+          <View style={{alignItems: 'center', justifyContent: 'flex-end'}}>
+            <View style={{flexDirection: 'row', marginVertical: 5, backgroundColor: 'transparent',}}>
+              {!this.state.canvassSettings.pin_auto_reload &&
+              <WalkthroughElement id="refresh-button">
+                <TouchableOpacity style={styles.iconContainer} disabled={fetching}
+                  onPress={() => this._dataGet(mapCamera.center)}>
+                  <Icon
+                    name="refresh"
+                    size={50}
+                    color={(fetching?"#d3d3d3":"#00a86b")}
+                    {...styles.icon} />
+                </TouchableOpacity>
+              </WalkthroughElement>
+              }
+
+              {this.add_new &&
+              <WalkthroughElement id="new-address-button">
+                <TouchableOpacity style={styles.iconContainer}
+                  onPress={() => {
+                    if (pressAddsSearchPin) {
+                      Toast.hide();
+                      this.setState({pressAddsSearchPin: false});
+                      return;
+                    }
+                    if (mapCamera.zoom < 20) this.animateToCoordinate(mapCamera.center);
+                    this.setState({pressAddsSearchPin: true, searchPins: []});
+                    Toast.show({
+                      text: 'Tap on map where to add a marker.',
+                      position: 'bottom',
+                      type: 'success',
+                      duration: 60000,
+                    });
+                  }}>
+                  <Icon
+                    name="map-marker"
+                    testID="map-marker"
+                    size={50}
+                    color={(pressAddsSearchPin?"purple":"#8b4513")}
+                    {...styles.icon} />
+                </TouchableOpacity>
+              </WalkthroughElement>
+              }
+
+              <WalkthroughElement id="map2me-button">
+                <TouchableOpacity style={styles.iconContainer}
+                  onPress={() => this.animateToCoordinate(myPosition, true)}>
+                  <Icon
+                    name="location-arrow"
+                    size={50}
+                    color="#0084b4"
+                    {...styles.icon} />
+                </TouchableOpacity>
+              </WalkthroughElement>
+
+              <WalkthroughElement id="address-search-button">
+                <TouchableOpacity style={styles.iconContainer}
+                  onPress={() => {
+                    RNGooglePlaces.openAutocompleteModal(
+                      {
+                        locationBias: {
+                          latitudeNE: mapCamera.center.latitude+0.1,
+                          longitudeNE: mapCamera.center.longitude+0.1,
+                          latitudeSW: mapCamera.center.latitude-0.1,
+                          longitudeSW: mapCamera.center.longitude-0.1,
+                        }
+                      },
+                      ['location','address']
+                    ).then((place) => {
+                      this.dropSearchPin(place);
+                    })
+                    .catch(e => {});
+                  }}>
+                  <Icon
+                    name="search"
+                    size={40}
+                    color="#000000"
+                    {...styles.icon} />
+                </TouchableOpacity>
+              </WalkthroughElement>
+            </View>
+          </View>
+          }
+
+          <SelectFormDialog refer={this} />
+          <NewAddressDialog refer={this} />
+          <HVConfirmDialog refer={this} />
+          <WalkthroughElement id="start-map-walkthrough" />
+          <WalkthroughElement id="start-list-walkthrough" />
+          <WalkthroughElement id="start-dispatch-walkthrough" />
+          <WalkthroughElement id="start-settings-walkthrough" />
+          <WalkthroughElement id="all-set" />
+
+          <Footer>
+            <FooterTab>
+              <WalkthroughElement id="mapview">
+                <Button active={(active === 'map'?true:false)} onPress={() => this.setState({active: 'map', activePrev: active})}>
+                  <Icon name="map" size={25} />
+                  <Text>Map View</Text>
+                </Button>
+              </WalkthroughElement>
+              <WalkthroughElement id="listview">
+                <Button active={(active === 'list'?true:false)} onPress={() => this.setState({active: 'list', activePrev: active})}>
+                  <Icon name="list" size={25} />
+                  <Text>List View</Text>
+                </Button>
+              </WalkthroughElement>
+              <WalkthroughElement id="dispatch">
+                <Button active={(active === 'dispatch'?true:false)} onPress={() => this.setState({active: 'dispatch', activePrev: active})}>
+                  <Icon name="user-plus" size={25} />
+                  <Text>Dispatch</Text>
+                </Button>
+              </WalkthroughElement>
+              <WalkthroughElement id="settings">
+                <Button active={(active === 'settings'?true:false)} onPress={() => this.setState({active: 'settings', activePrev: active})}>
+                  <Icon name="cog" size={25} />
+                  <Text>Settings</Text>
+                </Button>
+              </WalkthroughElement>
+            </FooterTab>
+          </Footer>
+          <KeepAwake />
+        </Container>
+      </Root>
     );
 
   }
