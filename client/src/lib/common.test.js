@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import fs from 'fs';
 
 import { STORAGE_KEY_JWT } from './consts';
 import { Platform } from './react-native';
@@ -47,7 +48,25 @@ describe('common.js as ###OS###', function () {
     expect(common.getEpoch()).to.be.above(1588610882000);
   });
 
-  // TODO: common.ingeojson(json, lng, lat) -- json.type of Polygon & MultiPolygon & default returns false
+  it('ingeojson not a polygon', async () => {
+    expect(common.ingeojson({}, -118.3281370, 33.9208231)).to.be.equal(false);
+  });
+
+  it('ingeojson Polygon true', async () => {
+    expect(common.ingeojson(JSON.parse(fs.readFileSync("../server/geojson/CA-sldl-62.geojson")).geometry, -118.3281370, 33.9208231)).to.be.equal(true);
+  });
+
+  it('ingeojson Polygon false', async () => {
+    expect(common.ingeojson(JSON.parse(fs.readFileSync("../server/geojson/CA-sldl-62.geojson")).geometry, 0, 0)).to.be.equal(false);
+  });
+
+  it('ingeojson MultiPolygon true', async () => {
+    expect(common.ingeojson(JSON.parse(fs.readFileSync("./src/lib/ocd-division/country/us/state/ca/shape.json")), -118.3281370, 33.9208231)).to.be.equal(true);
+  });
+
+  it('ingeojson MultiPolygon false', async () => {
+    expect(common.ingeojson(JSON.parse(fs.readFileSync("./src/lib/ocd-division/country/us/state/ca/shape.json")), 0, 0)).to.be.equal(false);
+  });
 
   it('getUSState', async () => {
     expect(common.getUSState({longitude: -118.3281370, latitude: 33.9208231})).to.be.equal('CA');
@@ -58,4 +77,3 @@ describe('common.js as ###OS###', function () {
   });
 
 });
-

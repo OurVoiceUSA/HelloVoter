@@ -62,14 +62,14 @@ export function ingeojson(json, lng, lat) {
       if (pip([lng, lat], json.coordinates[0])) {
         return true;
       }
-      break;
+      return false;
     case "MultiPolygon":
       for (let p in json.coordinates) {
         if (pip([lng, lat], json.coordinates[p][0])) {
           return true;
         }
       }
-      break;
+      return false;
     default: return false;
   }
 }
