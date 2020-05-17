@@ -27,7 +27,6 @@ function pnumber(person) {
 
 export default SegmentPeople = props => {
   const { refer } = props;
-  const { navigate } = refer.props.navigation;
   const { segmentList, people, onlyPhonePeople, peopleSearch, form, markers } = refer.state;
 
   if (segmentList!=='people') return null;
@@ -67,7 +66,7 @@ export default SegmentPeople = props => {
                     onPress={() => {
                       // find marker & unit by person
                       let marker = markers.find(m => m.address.id === p.address_id)
-                      navigate('Survey', {refer: refer, funcs: refer, form: form, marker: marker, unit: p.unit, person: p.person});
+                      console.warn("Unable to navigate() to Survey screen");//navigate('Survey', {refer: refer, funcs: refer, form: form, marker: marker, unit: p.unit, person: p.person});
                     }}>
                     <Icon name="user" color="black" size={40} style={{margin: 5}} />
                     <View>

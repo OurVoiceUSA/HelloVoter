@@ -1,0 +1,205 @@
+diff --git a/node_modules/react-native-settings-components/src/button/button.jsx b/node_modules/react-native-settings-components/src/button/button.js
+similarity index 100%
+rename from node_modules/react-native-settings-components/src/button/button.jsx
+rename to node_modules/react-native-settings-components/src/button/button.js
+diff --git a/node_modules/react-native-settings-components/src/category-header/category-header.jsx b/node_modules/react-native-settings-components/src/category-header/category-header.js
+similarity index 100%
+rename from node_modules/react-native-settings-components/src/category-header/category-header.jsx
+rename to node_modules/react-native-settings-components/src/category-header/category-header.js
+diff --git a/node_modules/react-native-settings-components/src/divider/divider-long.jsx b/node_modules/react-native-settings-components/src/divider/divider-long.js
+similarity index 100%
+rename from node_modules/react-native-settings-components/src/divider/divider-long.jsx
+rename to node_modules/react-native-settings-components/src/divider/divider-long.js
+diff --git a/node_modules/react-native-settings-components/src/divider/divider-short.jsx b/node_modules/react-native-settings-components/src/divider/divider-short.js
+similarity index 100%
+rename from node_modules/react-native-settings-components/src/divider/divider-short.jsx
+rename to node_modules/react-native-settings-components/src/divider/divider-short.js
+diff --git a/node_modules/react-native-settings-components/src/edit-text/edit-text.jsx b/node_modules/react-native-settings-components/src/edit-text/edit-text.js
+similarity index 83%
+rename from node_modules/react-native-settings-components/src/edit-text/edit-text.jsx
+rename to node_modules/react-native-settings-components/src/edit-text/edit-text.js
+index a504173..a3acaf3 100644
+--- a/node_modules/react-native-settings-components/src/edit-text/edit-text.jsx
++++ b/node_modules/react-native-settings-components/src/edit-text/edit-text.js
+@@ -73,6 +73,7 @@ const constants = {
+ };
+ 
+ class SettingsEditText extends Component {
++
+   static propTypes = {
+     containerProps: PropTypes.object,
+     containerStyle: PropTypes.object,
+@@ -138,60 +139,31 @@ class SettingsEditText extends Component {
+     touchableProps: {},
+   };
+ 
++  constructor() {
++    super();
++    this.state = {
++      visible: false,
++    };
++  }
++
+   onValueChange = (val) => {
+     const { onValueChange } = this.props;
+     onValueChange(trim(val));
+   };
+ 
+-  renderAndroidDialog = async () => {
+-    const {
+-      title, dialogDescription, positiveButtonTitle, negativeButtonTitle, value,
+-      androidDialogOptions, androidDialogInputType,
+-    } = this.props;
+-    const { action, text } = await DialogAndroid.prompt(title, dialogDescription, {
+-      defaultValue: value || '',
+-      positiveText: positiveButtonTitle,
+-      negativeText: negativeButtonTitle,
+-      keyboardType: androidDialogInputType,
+-      ...androidDialogOptions,
+-    });
+-
+-    if (action === DialogAndroid.actionPositive) {
+-      this.onValueChange(trim(
+-        text,
+-      ));
+-    }
+-  };
+-
+   openDialog = async () => {
+     const {
+       title, dialogDescription, negativeButtonTitle, positiveButtonTitle,
+       iosDialogInputType, value,
+     } = this.props;
+-    if (Platform.OS === 'ios') {
+-      AlertIOS.prompt(
+-        title,
+-        dialogDescription,
+-        [
+-          { text: negativeButtonTitle, onPress: () => {}, style: 'cancel' },
+-          {
+-            text: positiveButtonTitle,
+-            onPress: this.onValueChange,
+-          },
+-        ],
+-        iosDialogInputType,
+-        (value) || '',
+-      );
+-    } else {
+-      this.renderAndroidDialog();
+-    }
++    this.setState({visible: true});
+   };
+ 
+   render() {
+     const {
+-      disabled, containerProps, containerStyle, title,
++      disabled, containerProps, containerStyle, title, positiveButtonTitle,
+       titleProps, titleStyle, valueProps, valueStyle, valuePlaceholder, valueFormat,
+-      disabledOverlayStyle, touchableProps, value,
++      disabledOverlayStyle, touchableProps, value, onValueChange,
+     } = this.props;
+ 
+     return (!disabled) ? (
+@@ -233,6 +221,7 @@ class SettingsEditText extends Component {
+           {(isFunction(valueFormat) ? valueFormat(value) : value) || valuePlaceholder}
+         </Text>
+         <View style={[style.defaultDisabledOverlayStyle, disabledOverlayStyle]} />
++
+       </View>
+     );
+   }
+diff --git a/node_modules/react-native-settings-components/src/picker/picker.jsx b/node_modules/react-native-settings-components/src/picker/picker.js
+similarity index 91%
+rename from node_modules/react-native-settings-components/src/picker/picker.jsx
+rename to node_modules/react-native-settings-components/src/picker/picker.js
+index b2fdd7d..5bf5e8f 100644
+--- a/node_modules/react-native-settings-components/src/picker/picker.jsx
++++ b/node_modules/react-native-settings-components/src/picker/picker.js
+@@ -54,6 +54,7 @@ class SettingsPicker extends Component {
+     titleProps: PropTypes.object,
+     titleStyle: PropTypes.object,
+     title: PropTypes.string.isRequired,
++    title: PropTypes.string,
+     valueProps: PropTypes.object,
+     valueStyle: PropTypes.object,
+     value: PropTypes.any,
+@@ -61,6 +62,8 @@ class SettingsPicker extends Component {
+     valuePlaceholder: PropTypes.string,
+     options: PropTypes.array.isRequired,
+     dialogDescription: PropTypes.string,
++    onPress: PropTypes.func,
++    onPressOverride: PropTypes.bool,
+     onValueChange: PropTypes.func.isRequired,
+     disabled: PropTypes.bool,
+     modalStyle: PropTypes.shape({
+@@ -99,6 +102,8 @@ class SettingsPicker extends Component {
+     modalStyle: {},
+     singleRadio: true,
+     multi: false,
++    onPress: () => {},
++    onPressOverride: false,
+     renderCloseBtn: () => (
+       <Text style={style.headerCloseBtnText}>
+         {'CLOSE'}
+@@ -168,20 +173,19 @@ class SettingsPicker extends Component {
+     }
+     if (multi) {
+       if (isArray(value) && value.length) {
+-        return trim(join(value, ', '));
++        return join(value.sort(), '\n');
+       }
+-    } else if (value) {
+-      return value.toString();
+-    }
++    } else if (typeof value === 'boolean') return value.toString();
++    else if (value) return value.toString().split(', ').join('\n');
+     return valuePlaceholder;
+   };
+ 
+   render() {
+     const {
+       disabled, dialogDescription,
+-      containerProps, containerStyle, title, titleProps, titleStyle,
++      containerProps, containerStyle, title, titleProps, titleStyle, innerTitle,
+       valueProps, valueStyle, disabledOverlayStyle, modalStyle,
+-      options,
++      options, onPress, onPressOverride,
+       multi, renderCloseBtn, renderListItem,
+     } = this.props;
+     const { pickerOpen, pickerValue } = this.state;
+@@ -190,16 +194,15 @@ class SettingsPicker extends Component {
+       <View style={{ width: '100%' }}>
+         {(!disabled) ? (
+           <TouchableOpacity onPress={() => {
+-            this.setState({
+-              pickerOpen: true,
+-            });
++            if (!onPressOverride) this.setState({pickerOpen: true});
++            onPress();
+           }}
+           >
+             <PickerModal
+               closeModal={this.closeModal}
+               pickerOpen={pickerOpen}
+               pickerValue={pickerValue}
+-              title={title}
++              title={(innerTitle?innerTitle:title)}
+               options={options}
+               dialogDescription={dialogDescription}
+               modalStyle={modalStyle}
+diff --git a/node_modules/react-native-settings-components/src/picker/picker.modal.item.jsx b/node_modules/react-native-settings-components/src/picker/picker.modal.item.js
+similarity index 100%
+rename from node_modules/react-native-settings-components/src/picker/picker.modal.item.jsx
+rename to node_modules/react-native-settings-components/src/picker/picker.modal.item.js
+diff --git a/node_modules/react-native-settings-components/src/picker/picker.modal.jsx b/node_modules/react-native-settings-components/src/picker/picker.modal.js
+similarity index 100%
+rename from node_modules/react-native-settings-components/src/picker/picker.modal.jsx
+rename to node_modules/react-native-settings-components/src/picker/picker.modal.js
+diff --git a/node_modules/react-native-settings-components/src/switch/switch.jsx b/node_modules/react-native-settings-components/src/switch/switch.js
+similarity index 100%
+rename from node_modules/react-native-settings-components/src/switch/switch.jsx
+rename to node_modules/react-native-settings-components/src/switch/switch.js
+diff --git a/node_modules/react-native-settings-components/src/text-label/text-label.jsx b/node_modules/react-native-settings-components/src/text-label/text-label.js
+similarity index 100%
+rename from node_modules/react-native-settings-components/src/text-label/text-label.jsx
+rename to node_modules/react-native-settings-components/src/text-label/text-label.js

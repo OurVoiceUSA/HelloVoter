@@ -87,6 +87,7 @@ export default class Canvassing extends LocationComponent {
       forms: [],//props.navigation.state.params.forms,
       form: {
         id: "9fa67e4c-bb75-412c-ac52-e358071ea756",
+        attributes: [],
       },//props.form,
       turfs: [],
       active: 'map',
