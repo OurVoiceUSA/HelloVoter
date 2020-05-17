@@ -1,5 +1,15 @@
-import { ActivityIndicator, Linking, Platform, Text, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator, Linking, Platform, Text, TouchableOpacity, View,
+  YellowBox,
+} from 'react-native';
 import styled, { css } from 'styled-components/native';
 import SideMenu from 'react-native-side-menu';
 
-export { ActivityIndicator, Linking, Platform, Text, TouchableOpacity, View, SideMenu, styled, css };
+YellowBox.ignoreWarnings([
+  'SideMenu', // waiting for upstream fix to componentWillMount, etc
+]);
+
+export {
+  ActivityIndicator, Linking, Platform, Text, TouchableOpacity, View,
+  SideMenu, styled, css
+};
