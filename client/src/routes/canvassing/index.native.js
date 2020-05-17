@@ -1,8 +1,30 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { BackHandler, StyleSheet, View, TouchableOpacity } from 'react-native';
+import { Toast, Container, Content, Footer, FooterTab, Text, Button, Spinner } from 'native-base';
+import { WalkthroughElement, startWalkthrough } from 'react-native-walkthrough';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import RNGooglePlaces from 'react-native-google-places';
+import NetInfo from '@react-native-community/netinfo';
+import KeepAwake from 'react-native-keep-awake';
+import { debounce } from 'throttle-debounce';
+import QRCode from 'qrcode';
 
-export default class Canvassing extends Component {
+import {
+  DINFO, STORAGE_KEY_SETTINGS, STORAGE_KEY_RETRY,
+  api_base_uri, _doGeocode, _getApiToken, openURL, getEpoch, getLastVisit, getPinColor,
+  makeTooltipContent, triggerNetworkWarning, deepCopy, geojson2polygons, ingeojson,
+} from '../../lib/common';
+
+import { SelectFormDialog, NewAddressDialog } from './FormDialogs';
+import DispatchTab, { walkthroughDispatch } from './DispatchTab';
+import SettingsTab, { walkthroughSettings } from './SettingsTab';
+import ListTab, { walkthroughListView } from './ListTab';
+import LocationComponent from './LocationComponent';
+import { HVConfirmDialog } from './HVComponent';
+import * as storage from '../../lib/storage';
+
+export default class Canvassing extends LocationComponent {
 
   constructor(props) {
     super(props);

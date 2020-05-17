@@ -1,12 +1,10 @@
 import React from 'react';
 import { View } from 'react-native';
 import { Body, Right, Text, List, ListItem } from 'native-base';
-
 import { WalkthroughElement } from 'react-native-walkthrough';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-import { say, sortAlphaNum } from '../../common';
-
+import { sortAlphaNum } from '../../../lib/common';
 
 export default SegmentInfo = props => {
   const { refer } = props;

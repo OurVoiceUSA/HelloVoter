@@ -1,31 +1,3 @@
-import React from 'react';
-import { BackHandler, StyleSheet, View, TouchableOpacity } from 'react-native';
-import { Toast, Container, Content, Footer, FooterTab, Text, Button, Spinner } from 'native-base';
-
-import TermsDisclosure, { loadDisclosure } from '../TermsDisclosure';
-import LocationComponent from '../LocationComponent';
-import { HVConfirmDialog } from '../HVComponent';
-import { SelectFormDialog, NewAddressDialog } from './FormDialogs';
-import ListTab, { walkthroughListView } from './ListTab';
-import DispatchTab, { walkthroughDispatch } from './DispatchTab';
-import SettingsTab, { walkthroughSettings } from './SettingsTab';
-
-import {
-  DINFO, STORAGE_KEY_SETTINGS, STORAGE_KEY_RETRY,
-  api_base_uri, _doGeocode, _getApiToken, openURL, getEpoch, getLastVisit, getPinColor,
-  makeTooltipContent, triggerNetworkWarning,
-} from '../common';
-
-import { WalkthroughElement, startWalkthrough } from 'react-native-walkthrough';
-import { deepCopy, geojson2polygons, ingeojson } from 'ourvoiceusa-sdk-js';
-import MapView, { PROVIDER_GOOGLE } from 'react-native-maps'
-import Icon from 'react-native-vector-icons/FontAwesome';
-import RNGooglePlaces from 'react-native-google-places';
-import NetInfo from '@react-native-community/netinfo';
-import storage from 'react-native-storage-wrapper';
-import KeepAwake from 'react-native-keep-awake';
-import { debounce } from 'throttle-debounce';
-import QRCode from 'qrcode';
 
 function bystreet(a,b) {
   let na = parseInt(a.address.street.replace(/(\d+) .*/, '$1'));
@@ -185,7 +157,6 @@ export default class App extends LocationComponent {
     const { forms } = this.state;
     BackHandler.addEventListener('hardwareBackPress', this.props.navigation.goBack);
     DINFO().then(i => this.setState({UniqueID: i.UniqueID})).catch(() => this.setState({deviceError: true}));
-    loadDisclosure(this);
     this._getCanvassSettings();
     this.requestLocationPermission();
     this.setupConnectionListener();

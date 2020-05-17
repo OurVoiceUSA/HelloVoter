@@ -1,11 +1,9 @@
 import React from 'react';
 import { Platform, DeviceEventEmitter } from 'react-native';
-import HVComponent from './HVComponent';
-
 import RNGLocation from 'react-native-google-location';
-import { sleep } from 'ourvoiceusa-sdk-js';
 
-import { permissionLocation } from './common';
+import { sleep, permissionLocation } from '../../lib/common';
+import HVComponent from './HVComponent';
 
 if (Platform.OS === 'ios') {
   navigator.geolocation = require('@react-native-community/geolocation');

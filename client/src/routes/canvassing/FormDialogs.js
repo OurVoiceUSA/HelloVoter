@@ -1,13 +1,12 @@
 import React, { Component } from 'react';
 import { View } from 'react-native';
 import { Text, H3, Button, Spinner } from 'native-base';
-
-import { getEpoch } from '../common';
-
 import { Dialog } from 'react-native-simple-dialogs';
 import t from 'tcomb-form-native';
 import _ from 'lodash';
 import md5 from 'md5';
+
+import { getEpoch } from '../../lib/common';
 
 var Form = t.form.Form;
 

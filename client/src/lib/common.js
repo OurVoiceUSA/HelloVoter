@@ -1,4 +1,5 @@
-import { Platform, Linking } from './react-native';
+import React from 'react';
+import { Platform, Linking, View, Text } from './react-native';
 import pip from 'point-in-polygon';
 import RBush from 'rbush';
 
@@ -93,3 +94,11 @@ export function getUSState(myPosition) {
   });
   return state;
 }
+
+export const makeTooltipContent = (text) => (
+  <View style={{paddingHorizontal: 24, paddingVertical: 8}}>
+    <Text>{text}</Text>
+  </View>
+);
+
+export var sleep = m => new Promise(r => setTimeout(r, m));

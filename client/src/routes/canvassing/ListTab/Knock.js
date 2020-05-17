@@ -1,15 +1,13 @@
 import React from 'react';
 import { View, TouchableOpacity, FlatList } from 'react-native';
-import { Button, Text } from 'native-base';
-
-import HVComponent, { HVConfirmDialog } from '../../HVComponent';
-import { NewUnitButton } from './SegmentResidence';
-
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { Button, Text } from 'native-base';
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
 
-import { say, getEpoch, getLastVisit, PersonAttr } from '../../common';
+import { getEpoch, getLastVisit, PersonAttr } from '../../../lib/common';
+import HVComponent, { HVConfirmDialog } from '../HVComponent';
+import { NewUnitButton } from './SegmentResidence';
 
 export default class App extends HVComponent {
 

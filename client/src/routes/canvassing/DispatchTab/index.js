@@ -1,13 +1,11 @@
 import React from 'react';
 import { View } from 'react-native';
 import { Header, Text, Button, Segment } from 'native-base';
-
-import SegmentInfo from './SegmentInfo';
-import SegmentTurf from './SegmentTurf';
-
 import { WalkthroughElement } from 'react-native-walkthrough';
 
-import { say, makeTooltipContent } from '../../common';
+import { makeTooltipContent } from '../../../lib/common';
+import SegmentInfo from './SegmentInfo';
+import SegmentTurf from './SegmentTurf';
 
 export const walkthroughDispatch = [
   {

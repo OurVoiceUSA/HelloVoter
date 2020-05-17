@@ -10,23 +10,15 @@ import {
 import { Toast, Text } from 'native-base';
 
 import storage from 'react-native-storage-wrapper';
-import { getLocales, getTimeZone } from 'react-native-localize';
 import jwt_decode from 'jwt-decode';
 import SafariView from 'react-native-safari-view';
 import DeviceInfo from 'react-native-device-info';
 import Permissions from 'react-native-permissions';
 import RNGooglePlaces from 'react-native-google-places';
 import Geocoder from 'react-native-geocoder-reborn';
-import i18n from 'i18n-js';
 import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en';
 import { wsbase } from './config';
-
-export const makeTooltipContent = text => (
-  <View style={{paddingHorizontal: 24, paddingVertical: 8}}>
-    <Text>{text}</Text>
-  </View>
-);
 
 var reA = /[^a-zA-Z]/g;
 var reN = /[^0-9]/g;

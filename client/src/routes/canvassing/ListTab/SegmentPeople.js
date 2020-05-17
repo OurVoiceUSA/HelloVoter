@@ -1,10 +1,9 @@
 import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { Text, Header, Body, ListItem, Item, Input, CheckBox } from 'native-base';
-
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-import { say, PersonAttr } from '../../common';
+import { PersonAttr } from '../../../lib/common';
 
 function pname(person) {
   let name = "";

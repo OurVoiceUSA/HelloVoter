@@ -1,10 +1,9 @@
 import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { Accordion, Header, Content, Text } from 'native-base';
-
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-import { say, getPinColor, getLastVisit, Divider } from '../../common';
+import { getPinColor, getLastVisit, Divider } from '../../../lib/common';
 
 export default SegmentStreets = props => {
   const { refer } = props;

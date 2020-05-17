@@ -2,8 +2,6 @@ import React from 'react';
 import { View } from 'react-native';
 import { Body, Content, Text, Spinner, Left, Right, List, ListItem, Thumbnail } from 'native-base';
 
-import { say } from '../../common';
-
 function statusToText(code) {
   switch (code) {
     case 0: return 'Not Home';

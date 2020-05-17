@@ -1,7 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 import { Content, Text, } from 'native-base';
-import HVComponent, { HVConfirmDialog } from '../../HVComponent';
+import { WalkthroughElement } from 'react-native-walkthrough';
 
 import {
   SettingsDividerShort,
@@ -10,11 +10,10 @@ import {
   SettingsButton,
   SettingsSwitch,
   SettingsPicker,
-} from "react-native-settings-components";
+} from 'react-native-settings-components';
 
-import { WalkthroughElement } from 'react-native-walkthrough';
-
-import { say, makeTooltipContent } from '../../common';
+import HVComponent, { HVConfirmDialog } from '../HVComponent';
+import { makeTooltipContent } from '../../../lib/common';
 
 var size_matters = [
   { size: 100, label: "small", value: "small" },

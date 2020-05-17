@@ -1,13 +1,11 @@
 import React from 'react';
 import { View } from 'react-native';
 import { Accordion, Content, Text, Button, Item, Input } from 'native-base';
-
-import { NewUnitDialog } from '../FormDialogs';
-import Knock from './Knock';
-
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-import { say, getPinColor, getLastVisit, sortAlphaNum } from '../../common';
+import { getPinColor, getLastVisit, sortAlphaNum } from '../../../lib/common';
+import { NewUnitDialog } from '../FormDialogs';
+import Knock from './Knock';
 
 export default SegmentResidence = props => {
   const { refer } = props;

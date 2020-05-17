@@ -47,8 +47,6 @@ var asyncForEach = async function (a, c) {
   for (let i = 0; i < a.length; i++) await c(a[i], i, a);
 }
 
-var sleep = m => new Promise(r => setTimeout(r, m));
-
 var deepCopy = function (o) {
   return JSON.parse(JSON.stringify(o));
 }
@@ -71,11 +69,8 @@ var ucFirst = function (str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-exports.us_states = us_states;
-exports.ingeojson = ingeojson;
 exports.geojson2polygons = geojson2polygons;
 exports.asyncForEach = asyncForEach;
-exports.sleep = sleep;
 exports.deepCopy = deepCopy;
 exports.getConfig = getConfig;
 exports.ucFirst = ucFirst;

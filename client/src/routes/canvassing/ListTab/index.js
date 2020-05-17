@@ -1,15 +1,13 @@
 import React from 'react';
 import { View } from 'react-native';
 import { Header, Text, Button, Segment } from 'native-base';
-
-import SegmentStreets from './SegmentStreets';
-import SegmentResidence from './SegmentResidence';
-import SegmentPeople from './SegmentPeople';
-import SegmentHistory from './SegmentHistory';
-
 import { WalkthroughElement } from 'react-native-walkthrough';
 
-import { say, makeTooltipContent } from '../../common';
+import { makeTooltipContent } from '../../../lib/common';
+import SegmentResidence from './SegmentResidence';
+import SegmentStreets from './SegmentStreets';
+import SegmentHistory from './SegmentHistory';
+import SegmentPeople from './SegmentPeople';
 
 export const walkthroughListView = [
   {
