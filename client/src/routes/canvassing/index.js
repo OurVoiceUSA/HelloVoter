@@ -1,11 +1,11 @@
 import React from "react";
-import { Text, View, TouchableOpacity } from '../lib/react-native';
+import { Text, View, TouchableOpacity } from '../../lib/react-native';
 
-import { URL_APPLE_IOS, URL_GOOGLE_PLAY } from '../lib/consts';
-import { Root, Content } from '../components/Layout';
-import { openURL } from '../lib/common';
+import { URL_APPLE_IOS, URL_GOOGLE_PLAY } from '../../lib/consts';
+import { Root, Content } from '../../components/Layout';
+import { openURL } from '../../lib/common';
 
-export const Canvassing = ({refer}) => {
+export default ({refer}) => {
   return (
     <Root>
       <Content>
