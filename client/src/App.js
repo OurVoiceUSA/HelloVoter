@@ -8,6 +8,7 @@ import { MainMenu } from './components/MainMenu';
 import { STORAGE_KEY_JWT } from './lib/consts';
 import { SafariView } from './lib/SafariView';
 import * as storage from './lib/storage';
+import * as Icon from './lib/icons';
 import * as Routes from './routes';
 
 class App extends Component {
@@ -109,7 +110,7 @@ class App extends Component {
         <Root>
           <Content>
             <TouchableOpacity onPress={this.setMenuOpen}>
-              <Text>MENU</Text>
+              <Icon.Menu />
             </TouchableOpacity>
               <Switch>
                 <Route exact={true} path="/">
