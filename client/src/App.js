@@ -5,9 +5,9 @@ import {
 import jwt_decode from 'jwt-decode';
 
 import { Root, Content, Space, ViewCenter } from './components/Layout';
+import { STORAGE_KEY_JWT, STORAGE_KEY_ORGIDS } from './lib/consts';
 import { Router, Switch, Route } from './lib/routing';
 import { MainMenu } from './components/MainMenu';
-import { STORAGE_KEY_JWT } from './lib/consts';
 import { SafariView } from './lib/SafariView';
 import * as storage from './lib/storage';
 import * as Icon from './lib/icons';
@@ -22,6 +22,8 @@ class App extends Component {
       loading: true,
       token: null,
       user: null,
+      orgId: null,
+      orgIds: [],
       menuOpen: false,
     };
 
@@ -34,7 +36,7 @@ class App extends Component {
   }
 
   componentDidMount = async () => {
-    let token;
+    let token, orgId, orgIds;
 
     if (Platform.OS === 'web') {
       if (window.location.href.match(/\/jwt\//)) {
@@ -54,14 +56,22 @@ class App extends Component {
     }
 
     token = await storage.get(STORAGE_KEY_JWT);
+    if (token) await this.setToken(token);
 
-    if (token) this.setToken(token);
+    try {
+      orgIds = JSON.parse(await storage.get(STORAGE_KEY_ORGIDS));
+      if (orgIds.length === 1) orgId = orgIds[0];
+    } catch (e) {
+      await storage.del(STORAGE_KEY_ORGIDS);
+      orgIds = [];
+    }
 
-    this.setState({loading: false});
+    this.setState({loading: false, orgId, orgIds});
   }
 
   logout = async () => {
     await storage.del(STORAGE_KEY_JWT);
+    await storage.del(STORAGE_KEY_ORGIDS);
     this.setState({user: null, token: null, menuOpen: false});
   }
 
@@ -72,8 +82,25 @@ class App extends Component {
       this.setState({token, user});
     } catch (e) {
       this.setState({token: null, user: null});
-      storage.del(STORAGE_KEY_JWT);
+      await storage.del(STORAGE_KEY_JWT);
     }
+  }
+
+  setOrg = async (orgId) => {
+    let orgIds;
+    try {
+      orgIds = JSON.parse(await storage.get(STORAGE_KEY_ORGIDS));
+      if(!orgIds) orgIds = [orgId];
+      else if (orgIds.indexOf(orgId) !== -1) orgIds.push(orgId);
+    } catch (e) {
+      await storage.del(STORAGE_KEY_ORGIDS);
+    }
+
+    try {
+      await storage.set(STORAGE_KEY_ORGIDS, JSON.stringify(orgIds));
+    } catch (e) {}
+
+    this.setState({orgId, orgIds});
   }
 
   handleOpenURL = async ({ url }) => {
@@ -96,7 +123,7 @@ class App extends Component {
   }
 
   render() {
-    const { loading, menuOpen, user } = this.state;
+    const { loading, menuOpen, user, orgId } = this.state;
 
     const menu = (<MainMenu refer={this} />);
 
@@ -112,6 +139,7 @@ class App extends Component {
       </Root>
     );
     if (!user) return (<Router><Route path="/" render={() => <Routes.LoginScreen refer={this} />} /></Router>);
+    if (!orgId) return (<Router><Route path="/" render={() => <Routes.OrgSelect refer={this} />} /></Router>);
 
     return (
       <Router>
