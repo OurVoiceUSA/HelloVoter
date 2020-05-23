@@ -72,7 +72,7 @@ class App extends Component {
   logout = async () => {
     await storage.del(STORAGE_KEY_JWT);
     await storage.del(STORAGE_KEY_ORGIDS);
-    this.setState({user: null, token: null, menuOpen: false});
+    this.setState({user: null, orgId: null, orgIds: [], token: null, menuOpen: false});
   }
 
   setToken = async (token) => {
