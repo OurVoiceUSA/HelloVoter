@@ -42,11 +42,11 @@ PODS:
     - GoogleMaps/Base
   - GooglePlaces (3.5.0):
     - GoogleMaps/Base (= 3.5.0)
-  - Permission-Camera (2.1.4):
+  - Permission-Camera (2.1.5):
     - RNPermissions
-  - Permission-LocationWhenInUse (2.1.4):
+  - Permission-LocationWhenInUse (2.1.5):
     - RNPermissions
-  - Permission-Notifications (2.1.4):
+  - Permission-Notifications (2.1.5):
     - RNPermissions
   - RCTRequired (0.61.5)
   - RCTTypeSafety (0.61.5):
@@ -290,13 +290,9 @@ PODS:
     - React
   - RNLocalize (1.4.0):
     - React
-  - RNPermissions (2.1.4):
+  - RNPermissions (2.1.5):
     - React
   - RNRate (1.2.1):
-    - React
-  - RNReanimated (1.8.0):
-    - React
-  - RNScreens (2.7.0):
     - React
   - RNSVG (12.1.0):
     - React
@@ -354,8 +350,6 @@ DEPENDENCIES:
   - RNLocalize (from `../node_modules/react-native-localize`)
   - RNPermissions (from `../node_modules/react-native-permissions`)
   - RNRate (from `../node_modules/react-native-rate`)
-  - RNReanimated (from `../node_modules/react-native-reanimated`)
-  - RNScreens (from `../node_modules/react-native-screens`)
   - RNSVG (from `../node_modules/react-native-svg`)
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
@@ -460,10 +454,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-permissions"
   RNRate:
     :path: "../node_modules/react-native-rate"
-  RNReanimated:
-    :path: "../node_modules/react-native-reanimated"
-  RNScreens:
-    :path: "../node_modules/react-native-screens"
   RNSVG:
     :path: "../node_modules/react-native-svg"
   RNVectorIcons:
@@ -481,9 +471,9 @@ SPEC CHECKSUMS:
   Google-Maps-iOS-Utils: c32891ff472eaaa1fca032beedafa1a013af7875
   GoogleMaps: 32ca02de09de357a10ac773f2c70f1986751392d
   GooglePlaces: be6f19fe8aa6ff0b5bcccfa1b8805cc977ea1450
-  Permission-Camera: 3ed116545ee8806cd706bca0e1a9a2c3cd36c6bd
-  Permission-LocationWhenInUse: fd5f96c0bb38fef7ce36f450ac45c82906e6eb70
-  Permission-Notifications: 2d332751cadd3f39bf6062333f36a1bc3e0281d2
+  Permission-Camera: 53d46bd722aea28d796e20f05fb3cbe6cde6ccb6
+  Permission-LocationWhenInUse: 16ecd20d82341c6b4336dfe5520c098bea85a2f5
+  Permission-Notifications: 5ecb0f433b585c5621dc30b168772d60ae8574c2
   RCTRequired: b153add4da6e7dbc44aebf93f3cf4fcae392ddf1
   RCTTypeSafety: 9aa1b91d7f9310fc6eadc3cf95126ffe818af320
   React: b6a59ef847b2b40bb6e0180a97d0ca716969ac78
@@ -520,10 +510,8 @@ SPEC CHECKSUMS:
   RNDeviceInfo: 0d49fb8dd9fec5a239253ec374a07ef0efa9f875
   RNGestureHandler: 8f09cd560f8d533eb36da5a6c5a843af9f056b38
   RNLocalize: fc27ee5878ce5a3af73873fb2d8e866e0d1e6d84
-  RNPermissions: 8ca17fd6c822eea589fe84709d9426e05cc39c39
+  RNPermissions: 1888705aebcc81714efa5dbff94351e4388ae012
   RNRate: a747cbaa6040d72994861864c988037fe0696548
-  RNReanimated: 955cf4068714003d2f1a6e2bae3fb1118f359aff
-  RNScreens: cf198f915f8a2bf163de94ca9f5bfc8d326c3706
   RNSVG: ce9d996113475209013317e48b05c21ee988d42e
   RNVectorIcons: 0bb4def82230be1333ddaeee9fcba45f0b288ed4
   Yoga: f2a7cd4280bfe2cca5a7aed98ba0eb3d1310f18b
