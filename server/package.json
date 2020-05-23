@@ -9,7 +9,7 @@
     "database": "node node_modules/@babel/node/lib/_babel-node scripts/runDatabase.js",
     "sandboxdatabase": "node node_modules/@babel/node/lib/_babel-node scripts/runSandboxDatabase.js",
     "genkeys": "node node_modules/@babel/node/lib/_babel-node scripts/genkeys.js",
-    "test": "JUNIT_REPORT_PATH=test-result/result.xml JUNIT_REPORT_STACK=1 ./node_modules/nyc/bin/nyc.js ./node_modules/mocha/bin/mocha --exit --file ./test/lib/config.js --recursive --require @babel/register --timeout 25000 --colors --reporter mocha-jenkins-reporter && ./node_modules/nyc/bin/nyc.js check-coverage",
+    "test": "JUNIT_REPORT_PATH=test-result/result.xml JUNIT_REPORT_STACK=1 ./node_modules/nyc/bin/nyc.js ./node_modules/mocha/bin/mocha --exit --file ./test/lib/config.js --recursive --require @babel/register --timeout 25000 --colors --reporter mocha-jenkins-reporter",
     "start": "node node_modules/nodemon/bin/nodemon.js --signal SIGKILL -i app/swagger.v1.json --exec ./start-nodemon.sh"
   },
   "author": "Our Voice USA",
