@@ -3,6 +3,7 @@ import React from 'react';
 import { Root, Content, Space } from '../components/Layout';
 import { Button } from "../components/Buttons";
 
+import { isOnlyWeb } from '../lib/common';
 import * as Icon from '../lib/icons';
 
 const MenuButton = (props) => (
@@ -17,6 +18,9 @@ export const MainMenu = ({refer}) => {
         <MenuButton refer={refer} to="/canvassing"><Icon.Map />Canvassing</MenuButton>
         <MenuButton refer={refer} to="/phonebank"><Icon.Phone />Phone Banking</MenuButton>
         <MenuButton refer={refer} to="/settings"><Icon.Cog />Settings</MenuButton>
+        {isOnlyWeb()&&
+          <MenuButton refer={refer} to="/admin"><Icon.Cog />Admin</MenuButton>
+        }
         <Space />
         <MenuButton refer={refer} to="/help"><Icon.Question />Help</MenuButton>
         <MenuButton refer={refer} to="/about"><Icon.Info />About</MenuButton>

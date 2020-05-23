@@ -12,6 +12,9 @@ var jwt = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAxMjM0NTY3ODkiLCJuYW1l
 window = {
   location: {href: ""},
   realod: () => {},
+  navigator: {
+    userAgent: 'mocha',
+  },
 };
 
 describe('App as ###OS###', function () {
@@ -149,4 +152,3 @@ describe('App as ###OS###', function () {
   });
 
 });
-

@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { Platform } from '../lib/react-native';
 import { MainMenu } from './MainMenu';
 
-class MockRefer {  
+class MockRefer {
   setMenuClose = () => {}
   logout = () => {}
 }
@@ -23,4 +23,3 @@ describe('App as ###OS###', function () {
   });
 
 });
-

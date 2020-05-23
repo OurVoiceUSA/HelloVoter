@@ -23,6 +23,22 @@ describe('common.js as ###OS###', function () {
     }
   });
 
+  it('isOnlyWeb()', async () => {
+    let ret = common.isOnlyWeb();
+    switch (Platform.OS) {
+      case 'web': expect(ret).to.equal(true); break;
+      default: expect(ret).to.equal(false); break;
+    }
+  });
+
+  it('isOnlyNative()', async () => {
+    let ret = common.isOnlyNative();
+    switch (Platform.OS) {
+      case 'web': expect(ret).to.equal(false); break;
+      default: expect(ret).to.equal(true); break;
+    }
+  });
+
   // TODO: common.openURL(url, external)
   // TODO: common.openGitHub(repo);
   // TODO: common.openDonate()

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Platform, Linking, View, Text } from './react-native';
 import pip from 'point-in-polygon';
+import mobile from 'is-mobile';
 import RBush from 'rbush';
 
 import { geographies } from './geographies';
@@ -11,6 +12,16 @@ import rtree from './rtree.json';
 
 export function localaddress() {
   return (Platform.OS === 'android'?'10.0.2.2':'localhost');
+}
+
+export function isOnlyWeb() {
+  if (Platform.OS === 'web' && !mobile(window.navigator.userAgent)) return true;
+  return false;
+}
+
+export function isOnlyNative() {
+  if (Platform.OS !== 'web') return true;
+  return false;
 }
 
 export async function openURL(url, external) {
