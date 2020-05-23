@@ -15,7 +15,7 @@ export function localaddress() {
 }
 
 export function isOnlyWeb() {
-  if (Platform.OS === 'web' && !mobile(window.navigator.userAgent)) return true;
+  if (Platform.OS === 'web' && window && window.navigator && !mobile(window.navigator.userAgent)) return true;
   return false;
 }
 
