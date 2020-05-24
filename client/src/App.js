@@ -1,12 +1,10 @@
 import React, { Component } from 'react';
-import {
-  ActivityIndicator, Linking, Platform, Text, TouchableOpacity, SideMenu,
-} from './lib/react-native';
+import { Linking, Platform, TouchableOpacity, SideMenu } from './lib/react-native';
 import jwt_decode from 'jwt-decode';
 
-import { Root, Content, Space, ViewCenter } from './components/Layout';
 import { STORAGE_KEY_JWT, STORAGE_KEY_ORGIDS } from './lib/consts';
 import { Router, Switch, Route } from './lib/routing';
+import { Root, Content } from './components/Layout';
 import { MainMenu } from './components/MainMenu';
 import { SafariView } from './lib/SafariView';
 import Loading from './components/Loading';
