@@ -12,8 +12,8 @@ export class PhoneBank extends Component {
 
     this.state = {
       refer: props.refer,
-      server: 'demo.ourvoiceusa.org',//props.server,
-      orgId: null,//props.orgId,
+      server: 'gotv.ourvoiceusa.org',
+      orgId: props.refer.state.orgId,
       admin: false,//props.admin,
       form: {
         id: "9fa67e4c-bb75-412c-ac52-e358071ea756",
