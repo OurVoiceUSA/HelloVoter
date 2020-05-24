@@ -8,8 +8,8 @@ import { Root, Content } from './components/Layout';
 import { MainMenu } from './components/MainMenu';
 import { SafariView } from './lib/SafariView';
 import Loading from './components/Loading';
+import * as Icon from './components/icons';
 import * as storage from './lib/storage';
-import * as Icon from './lib/icons';
 import * as Routes from './routes';
 
 class App extends Component {

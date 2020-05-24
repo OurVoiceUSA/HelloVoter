@@ -5,6 +5,7 @@ import { Platform, Text, View } from '../lib/react-native';
 import { URL_TERMS_OF_SERVICE, URL_PRIVACY_POLICY, } from '../lib/consts';
 import { openURL, openGitHub } from '../lib/common';
 import { Button } from '../components/Buttons';
+import * as Icon from '../components/icons';
 import * as Layout from './Layout';
 
 const AboutOV = ({ refer }) => (

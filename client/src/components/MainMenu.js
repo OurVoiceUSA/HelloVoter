@@ -3,8 +3,8 @@ import React from 'react';
 import { Root, Content, Space } from '../components/Layout';
 import { Button } from "../components/Buttons";
 
+import * as Icon from '../components/icons';
 import { isOnlyWeb } from '../lib/common';
-import * as Icon from '../lib/icons';
 
 const MenuButton = (props) => (
   <Button to={props.to} onPress={props.refer.setMenuClose.bind(props.refer)} {...props} />
