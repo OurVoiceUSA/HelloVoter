@@ -4,9 +4,8 @@ import { Platform, Text, View } from '../lib/react-native';
 
 import { URL_TERMS_OF_SERVICE, URL_PRIVACY_POLICY, } from '../lib/consts';
 import { openURL, openGitHub } from '../lib/common';
-import { Button } from '../components/Buttons';
-import * as Layout from './Layout';
-import { Icon } from '.';
+import { Button } from './Buttons';
+import { Icon, Layout } from '.';
 
 export default ({ refer }) => (
   <Layout.ViewCenter>

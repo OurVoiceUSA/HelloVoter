@@ -3,8 +3,7 @@ import fs from 'fs';
 
 import { STORAGE_KEY_JWT } from './consts';
 import { Platform } from './react-native';
-import * as storage from './storage';
-import * as common from './common';
+import { common, storage } from '.';
 
 describe('common.js as ###OS###', function () {
 

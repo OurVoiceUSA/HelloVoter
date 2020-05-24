@@ -1,6 +1,6 @@
 import { styled } from '../lib/react-native';
 
-import { colors } from "../lib/colors";
+import { colors } from '../lib/colors';
 
 export const Root = styled.SafeAreaView`
   flex: 1;

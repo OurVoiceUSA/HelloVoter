@@ -24,7 +24,7 @@ import SettingsTab, { walkthroughSettings } from './SettingsTab';
 import ListTab, { walkthroughListView } from './ListTab';
 import LocationComponent from './LocationComponent';
 import { HVConfirmDialog } from './HVComponent';
-import * as storage from '../../lib/storage';
+import { storage } from '../../lib';
 
 const walkthroughMapView = [
   {

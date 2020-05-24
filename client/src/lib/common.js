@@ -7,8 +7,8 @@ import RBush from 'rbush';
 import { geographies } from './geographies';
 import { STORAGE_KEY_JWT } from './consts';
 import { SafariView } from './SafariView';
-import * as storage from './storage';
 import rtree from './rtree.json';
+import { storage } from '.';
 
 export function localaddress() {
   return (Platform.OS === 'android'?'10.0.2.2':'localhost');

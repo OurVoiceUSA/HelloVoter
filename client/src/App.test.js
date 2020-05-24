@@ -2,8 +2,8 @@ import { expect } from 'chai';
 
 import { STORAGE_KEY_JWT } from '../src/lib/consts';
 import { Platform } from '../src/lib/react-native';
-import * as storage from '../src/lib/storage';
 import { mockReact } from '../test/lib/utils';
+import { storage } from '../src/lib';
 import * as App from '../src/App';
 
 var a;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { ActivityIndicator, Text } from '../lib/react-native';
 
-import * as Layout from './Layout';
+import { Layout } from '.';
 
 const Loading = ({refer}) => (
   <Layout.Root>

@@ -2,13 +2,13 @@ import React, { Component } from 'react';
 import { Linking, Platform, TouchableOpacity, SideMenu } from './lib/react-native';
 import jwt_decode from 'jwt-decode';
 
-import { STORAGE_KEY_JWT, STORAGE_KEY_ORGIDS } from './lib/consts';
+import { STORAGE_KEY_JWT, STORAGE_KEY_ORGIDS, STORAGE_KEY_DISCLOSURE } from './lib/consts';
 import { Icon, Loading, MainMenu } from './components';
 import { Router, Switch, Route } from './lib/routing';
 import { Root, Content } from './components/Layout';
 import { SafariView } from './lib/SafariView';
-import * as storage from './lib/storage';
 import * as Routes from './routes';
+import { storage } from './lib';
 
 class App extends Component {
 
@@ -59,9 +59,9 @@ class App extends Component {
       orgIds = JSON.parse(await storage.get(STORAGE_KEY_ORGIDS));
     } catch (e) {
       await storage.del(STORAGE_KEY_ORGIDS);
-      orgIds = [];
     }
 
+    if (!orgIds) orgIds = [];
     if (orgIds.length === 1) orgId = orgIds[0];
 
     this.setState({loading: false, orgId, orgIds});
@@ -82,6 +82,7 @@ class App extends Component {
   logout = async () => {
     await storage.del(STORAGE_KEY_JWT);
     await storage.del(STORAGE_KEY_ORGIDS);
+    await storage.del(STORAGE_KEY_DISCLOSURE);
     this.setState({user: null, orgId: null, orgIds: [], token: null, menuOpen: false});
   }
 
