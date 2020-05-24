@@ -9,6 +9,7 @@ import { STORAGE_KEY_JWT, STORAGE_KEY_ORGIDS } from './lib/consts';
 import { Router, Switch, Route } from './lib/routing';
 import { MainMenu } from './components/MainMenu';
 import { SafariView } from './lib/SafariView';
+import Loading from './components/Loading';
 import * as storage from './lib/storage';
 import * as Icon from './lib/icons';
 import * as Routes from './routes';
@@ -69,6 +70,18 @@ class App extends Component {
     this.setState({loading: false, orgId, orgIds});
   }
 
+  fetch = async (url, args) => {
+    const { token } = this.state;
+
+    if (!args) args = {};
+    if (!args.headers) args.headers = {
+        'Authorization': 'Bearer '+token,
+        'Content-Type': 'application/json',
+      };
+
+    return fetch(url, args);
+  }
+
   logout = async () => {
     await storage.del(STORAGE_KEY_JWT);
     await storage.del(STORAGE_KEY_ORGIDS);
@@ -127,17 +140,7 @@ class App extends Component {
 
     const menu = (<MainMenu refer={this} />);
 
-    if (loading) return (
-      <Root>
-        <Content>
-          <ViewCenter>
-            <Text>Loading HelloVoter...</Text>
-            <Space />
-            <ActivityIndicator size="large" />
-          </ViewCenter>
-        </Content>
-      </Root>
-    );
+    if (loading) return (<Loading />);
     if (!user) return (<Router><Route path="/" render={() => <Routes.LoginScreen refer={this} />} /></Router>);
     if (!orgId) return (<Router><Route path="/" render={() => <Routes.OrgSelect refer={this} />} /></Router>);
 
