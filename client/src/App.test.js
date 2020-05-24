@@ -108,6 +108,30 @@ describe('App as ###OS###', function () {
     }
   });
 
+  it('App fetch', async () => {
+    let res = await a.fetch('https://gotv.ourvoiceusa.org/auth');
+    expect(res.status).to.equal(200);
+  });
+
+  it('App fetch custom headers', async () => {
+    let res = await a.fetch('https://gotv.ourvoiceusa.org/auth', {headers: {'Content-Type': 'application/json'}});
+    expect(res.status).to.equal(200);
+  });
+
+  it('App setOrg no orgs', async () => {
+    await a.setOrg('DEMO');
+    a.render();
+    expect(a.state.orgIds.length).to.equal(1);
+    expect(a.state.orgId).to.equal('DEMO');
+  });
+
+  it('App setOrg additional org', async () => {
+    await a.setOrg('TEST');
+    a.render();
+    expect(a.state.orgIds.length).to.equal(2);
+    expect(a.state.orgId).to.equal('TEST');
+  });
+
   it('App setToken invalid jwt', async () => {
     try {
       await a.setToken('foo');

@@ -59,11 +59,12 @@ class App extends Component {
 
     try {
       orgIds = JSON.parse(await storage.get(STORAGE_KEY_ORGIDS));
-      if (orgIds.length === 1) orgId = orgIds[0];
     } catch (e) {
       await storage.del(STORAGE_KEY_ORGIDS);
       orgIds = [];
     }
+
+    if (orgIds.length === 1) orgId = orgIds[0];
 
     this.setState({loading: false, orgId, orgIds});
   }
@@ -101,10 +102,9 @@ class App extends Component {
     let orgIds;
     try {
       orgIds = JSON.parse(await storage.get(STORAGE_KEY_ORGIDS));
-      if(!orgIds) orgIds = [orgId];
-      else if (orgIds.indexOf(orgId) !== -1) orgIds.push(orgId);
+      if (orgIds.indexOf(orgId) === -1) orgIds.push(orgId);
     } catch (e) {
-      await storage.del(STORAGE_KEY_ORGIDS);
+      orgIds = [orgId];
     }
 
     try {
