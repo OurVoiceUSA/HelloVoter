@@ -8,7 +8,7 @@ import { Button } from '../components/Buttons';
 import * as Icon from '../components/icons';
 import * as Layout from './Layout';
 
-const AboutOV = ({ refer }) => (
+export default ({ refer }) => (
   <Layout.ViewCenter>
     <Layout.Space />
     <Text>Built with ❤️ by Our Voice USA</Text>
@@ -19,7 +19,7 @@ const AboutOV = ({ refer }) => (
       <Icon.Facebook size={40} color="#3b5998" style={{marginRight: 25}} onPress={openURL.bind(refer, 'https://m.facebook.com/OurVoiceUsa')} />
       <Icon.Twitter size={40} color="#0084b4" style={{marginRight: 25}} onPress={openURL.bind(refer, 'https://twitter.com/OurVoiceUsa')} />
       <Icon.YouTube size={40} color="#ff0000" style={{marginRight: 25}} onPress={openURL.bind(refer, 'https://www.youtube.com/channel/UCw5fpnK-IZVQ4IkYuapIbiw')} />
-      <Icon.GitHub size={40} style={{marginRight: 25}} onPress={() => openGitHub()} />
+      <Icon.GitHub size={40} style={{marginRight: 25}} onPress={openGitHub.bind(refer)} />
       <Icon.Globe size={40} color="#008080" onPress={openURL.bind(refer, 'https://ourvoiceusa.org/')} />
     </View>
     <Layout.Space />
@@ -36,11 +36,11 @@ const AboutOV = ({ refer }) => (
     </Text>
     <Layout.Space />
     <View style={{flexDirection: 'row', justifyContent: 'center', marginBottom: 15}}>
-      <Button primary onPress={() => openURL(URL_TERMS_OF_SERVICE)}><Text>Terms of Service</Text></Button>
+      <Button primary onPress={openURL.bind(refer, URL_TERMS_OF_SERVICE)}><Text>Terms of Service</Text></Button>
       <Text>{'  '}</Text>
-      <Button primary onPress={() => openURL(URL_PRIVACY_POLICY)}><Text>Privacy Policy</Text></Button>
+      <Button primary onPress={openURL.bind(refer, URL_PRIVACY_POLICY)}><Text>Privacy Policy</Text></Button>
     </View>
-    <Button block danger onPress={() => openGitHub('HelloVoter')}>
+    <Button block danger onPress={openGitHub.bind(refer, 'HelloVoter')}>
       <Text>App Source Code</Text>
     </Button>
   <Layout.Space />
@@ -50,4 +50,3 @@ const AboutOV = ({ refer }) => (
   </Layout.ViewCenter>
 );
 
-export default AboutOV;
