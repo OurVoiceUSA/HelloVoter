@@ -163,6 +163,9 @@ class App extends Component {
                 <Route path="/about">
                   <Routes.About refer={this} />
                 </Route>
+                <Route path="/feedback">
+                  <Routes.Feedback refer={this} />
+                </Route>
                 <Route component={Routes.NoMatch} />
               </Switch>
             </Content>

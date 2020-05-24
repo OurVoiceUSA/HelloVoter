@@ -69,16 +69,7 @@ export function carouselItems(refer) {
       title: say("rate_this_app"),
       subtitle: say("feedback_helps_us"),
       illustration: require('../../../img/rate.png'),
-      onPress: () => {
-        let options = {
-          AppleAppID: "1275301651",
-          GooglePackageName: "org.ourvoiceinitiative.ourvoice",
-          preferredAndroidMarket: AndroidMarket.Google,
-          preferInApp: false,
-          openAppStoreIfInAppFails: true,
-        }
-        Rate.rate(options, (success) => {});
-      },
+      onPress: () => {},
     }
   );
 

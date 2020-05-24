@@ -1,6 +1,6 @@
 // stubs for mocha execution
 
-const { ActivityIndicator, Text, TouchableOpacity, View, SideMenu, css } = {};
+const { ActivityIndicator, Text, TouchableOpacity, View, SideMenu, Rate, AndroidMarket, css } = {};
 
 class MockedPlatform {
   OS = 'node';
@@ -20,4 +20,7 @@ const styled = {
   SafeAreaView: () => {},
 };
 
-export { ActivityIndicator, Linking, Platform, Text, TouchableOpacity, View, SideMenu, styled, css };
+export {
+  ActivityIndicator, Linking, Platform, Text, TouchableOpacity, View,
+  SideMenu, Rate, AndroidMarket, styled, css,
+};
