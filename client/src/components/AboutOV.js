@@ -10,17 +10,19 @@ import * as Layout from './Layout';
 
 const AboutOV = ({ refer }) => (
   <Layout.ViewCenter>
-    {/*
-      <View style={{flexDirection: 'row', justifyContent: 'center', marginBottom: 15}}>
-        <Icon name="facebook-official" size={40} color="#3b5998" style={{marginRight: 25}} onPress={openURL.bind(refer, 'https://m.facebook.com/OurVoiceUsa')} />
-        <Icon name="twitter" size={40} color="#0084b4" style={{marginRight: 25}} onPress={openURL.bind(refer, 'https://twitter.com/OurVoiceUsa')} />
-        <Icon name="youtube-play" size={40} color="#ff0000" style={{marginRight: 25}} onPress={openURL.bind(refer, 'https://www.youtube.com/channel/UCw5fpnK-IZVQ4IkYuapIbiw')} />
-        <Icon name="github" size={40} style={{marginRight: 25}} onPress={() => openGitHub()} />
-        <Icon name="globe" size={40} color="#008080" onPress={openURL.bind(refer, 'https://ourvoiceusa.org/')} />
-      </View>
-    */}
     <Layout.Space />
     <Text>Built with ❤️ by Our Voice USA</Text>
+    <Layout.Space />
+    <Text>Find us on various online networks:</Text>
+    <Layout.Space />
+    <View style={{flexDirection: 'row', justifyContent: 'center'}}>
+      <Icon.Facebook size={40} color="#3b5998" style={{marginRight: 25}} onPress={openURL.bind(refer, 'https://m.facebook.com/OurVoiceUsa')} />
+      <Icon.Twitter size={40} color="#0084b4" style={{marginRight: 25}} onPress={openURL.bind(refer, 'https://twitter.com/OurVoiceUsa')} />
+      <Icon.YouTube size={40} color="#ff0000" style={{marginRight: 25}} onPress={openURL.bind(refer, 'https://www.youtube.com/channel/UCw5fpnK-IZVQ4IkYuapIbiw')} />
+      <Icon.GitHub size={40} style={{marginRight: 25}} onPress={() => openGitHub()} />
+      <Icon.Globe size={40} color="#008080" onPress={openURL.bind(refer, 'https://ourvoiceusa.org/')} />
+    </View>
+    <Layout.Space />
     <Layout.Space />
     <Text>Not for any candidate or political party.</Text>
     <Layout.Space />
