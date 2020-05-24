@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
 import { Platform } from '../lib/react-native';
-import { MainMenu } from './MainMenu';
+import { MainMenu } from '.';
 
 class MockRefer {
   setMenuClose = () => {}

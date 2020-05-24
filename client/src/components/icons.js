@@ -2,6 +2,7 @@
 
 const {
   Cog,
+  Clipboard,
   Dash,
   Donate,
   Facebook,
@@ -12,13 +13,19 @@ const {
   Info,
   Map,
   Menu,
+  Paperclip,
+  Person,
   Phone,
   Question,
   Rate,
+  Queue,
+  QRCode,
+  Upload,
 } = {};
 
 export {
   Cog,
+  Clipboard,
   Dash,
   Donate,
   Facebook,
@@ -29,7 +36,12 @@ export {
   Info,
   Map,
   Menu,
+  Paperclip,
+  Person,
   Phone,
   Question,
   Rate,
+  Queue,
+  QRCode,
+  Upload,
 };

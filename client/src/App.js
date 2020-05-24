@@ -3,12 +3,10 @@ import { Linking, Platform, TouchableOpacity, SideMenu } from './lib/react-nativ
 import jwt_decode from 'jwt-decode';
 
 import { STORAGE_KEY_JWT, STORAGE_KEY_ORGIDS } from './lib/consts';
+import { Icon, Loading, MainMenu } from './components';
 import { Router, Switch, Route } from './lib/routing';
 import { Root, Content } from './components/Layout';
-import { MainMenu } from './components/MainMenu';
 import { SafariView } from './lib/SafariView';
-import Loading from './components/Loading';
-import * as Icon from './components/icons';
 import * as storage from './lib/storage';
 import * as Routes from './routes';
 

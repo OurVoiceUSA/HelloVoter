@@ -1,5 +1,6 @@
 import {
   FaCog as Cog,
+  FaClipboard as Clipboard,
   FaSquare as Dash,
   FaDonate as Donate,
   FaFacebook as Facebook,
@@ -10,13 +11,19 @@ import {
   FaInfo as Info,
   FaMap as Map,
   FaBars as Menu,
+  FaPaperclip as Paperclip,
+  FaUser as Person,
   FaPhone as Phone,
-  FaQuestion as Question,
+  FaQuestionCircle as Question,
   FaStar as Rate,
+  FaBriefcase as Queue,
+  FaQrcode as QRCode,
+  FaUpload as Upload,
 } from 'react-icons/fa';
 
 export {
   Cog,
+  Clipboard,
   Dash,
   Donate,
   Facebook,
@@ -27,7 +34,12 @@ export {
   Info,
   Map,
   Menu,
+  Paperclip,
+  Person,
   Phone,
   Question,
   Rate,
+  Queue,
+  QRCode,
+  Upload,
 };

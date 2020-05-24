@@ -3,16 +3,18 @@ import React from 'react';
 import { Rate, AndroidMarket } from '../lib/react-native';
 
 import { Root, Content, Space } from '../components/Layout';
-import { Button } from "../components/Buttons";
-
 import { isOnlyWeb, isOnlyNative } from '../lib/common';
-import * as Icon from '../components/icons';
+import { Button } from '../components/Buttons';
+import { Icon } from '.';
 
-const MenuButton = (props) => (
-  <Button to={props.to} onPress={props.refer.setMenuClose.bind(props.refer)} {...props} />
-);
+const MenuButton = (props) => {
+  //if (props.to && props.to.match(/^\/admin/) && !props.refer.state.user.admin) return null;
+  return (
+    <Button to={props.to} onPress={props.refer.setMenuClose.bind(props.refer)} {...props} />
+  )
+};
 
-export const MainMenu = ({refer}) => {
+export default ({ refer }) => {
   return (
     <Root>
       <Content>
@@ -20,8 +22,14 @@ export const MainMenu = ({refer}) => {
         <MenuButton refer={refer} to="/canvassing"><Icon.Map />Canvassing</MenuButton>
         <MenuButton refer={refer} to="/phonebank"><Icon.Phone />Phone Banking</MenuButton>
         <MenuButton refer={refer} to="/settings"><Icon.Cog />Settings</MenuButton>
+        <MenuButton refer={refer} to="/admin/volunteers"><Icon.Person />Volunteers</MenuButton>
+        <MenuButton refer={refer} to="/admin/turfs"><Icon.Map />Turf</MenuButton>
+        <MenuButton refer={refer} to="/admin/forms"><Icon.Clipboard />Forms</MenuButton>
+        <MenuButton refer={refer} to="/admin/qrcodes"><Icon.QRCode />QRCodes</MenuButton>
+        <MenuButton refer={refer} to="/admin/attributes"><Icon.Paperclip />Attributes</MenuButton>
+        <MenuButton refer={refer} to="/admin/queue"><Icon.Queue />Queue</MenuButton>
         {isOnlyWeb()&&
-          <MenuButton refer={refer} to="/admin"><Icon.Cog />Admin</MenuButton>
+          <MenuButton refer={refer} to="/admin/import" admin={true}><Icon.Upload />Import Data</MenuButton>
         }
         <Space />
         <MenuButton refer={refer} to="/help"><Icon.Question />Help</MenuButton>
