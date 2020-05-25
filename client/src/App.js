@@ -21,6 +21,7 @@ class App extends Component {
       user: null,
       orgId: null,
       orgIds: [],
+      tos: null,
       menuOpen: false,
     };
 
@@ -33,7 +34,7 @@ class App extends Component {
   }
 
   componentDidMount = async () => {
-    let token, orgId, orgIds;
+    let token, orgId, orgIds, tos;
 
     if (Platform.OS === 'web') {
       if (window.location.href.match(/\/jwt\//)) {
@@ -64,7 +65,9 @@ class App extends Component {
     if (!orgIds) orgIds = [];
     if (orgIds.length === 1) orgId = orgIds[0];
 
-    this.setState({loading: false, orgId, orgIds});
+    tos = await storage.get(STORAGE_KEY_DISCLOSURE);
+
+    this.setState({loading: false, orgId, orgIds, tos});
   }
 
   fetch = async (url, args) => {
@@ -133,12 +136,13 @@ class App extends Component {
   }
 
   render() {
-    const { loading, menuOpen, user, orgId } = this.state;
+    const { loading, menuOpen, user, orgId, tos } = this.state;
 
     const menu = (<MainMenu refer={this} />);
 
     if (loading) return (<Loading />);
     if (!user) return (<Router><Route path="/" render={() => <Routes.LoginScreen refer={this} />} /></Router>);
+    if (!tos) return (<Router><Route path="/" render={() => <Routes.TermsOfService refer={this} />} /></Router>);
     if (!orgId) return (<Router><Route path="/" render={() => <Routes.OrgSelect refer={this} />} /></Router>);
 
     return (
