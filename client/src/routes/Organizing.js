@@ -9,7 +9,6 @@ import storage from 'react-native-storage-wrapper';
 import * as Progress from 'react-native-progress';
 import KeepAwake from 'react-native-keep-awake';
 import Prompt from 'react-native-input-prompt';
-import { RNCamera } from 'react-native-camera';
 import jwt_decode from 'jwt-decode';
 import SunCalc from 'suncalc';
 
@@ -485,32 +484,6 @@ export default class App extends LocationComponent {
         <SmLogin refer={this} parent={refer} />
       </View>
       );
-
-    // if camera is open, render just that
-    if (showCamera) return (
-      <View style={{
-          width: Dimensions.get('window').width,
-          height: Dimensions.get('window').height*.8,
-      }}>
-        <RNCamera
-          ref={ref => {this.camera = ref;}}
-          style={{
-            flex: 1,
-            justifyContent: 'flex-end',
-            alignItems: 'center',
-          }}
-          captureAudio={false}
-          androidCameraPermissionOptions={{
-           title: say("permission_use_camera"),
-            message: say("we_need_permission_use_camera"),
-            buttonPositive: say("ok"),
-            buttonNegative: say("cancel"),
-          }}
-          onBarCodeRead={(b) => this.parseInvite(b.data)}
-          barCodeTypes={[RNCamera.Constants.BarCodeType.qr]}
-        />
-      </View>
-    );
 
     if (newOrg) return (<NewOrg refer={this} />);
 

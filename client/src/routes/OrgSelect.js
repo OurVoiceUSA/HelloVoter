@@ -1,9 +1,11 @@
+/* eslint-disable no-mixed-operators */
 import React, { Component } from 'react';
 import { Text } from '../lib/react-native';
 
-import { Layout, Loading } from '../components';
+import { Camera, Layout, Loading } from '../components';
 import { Button } from '../components/Buttons';
 import { Heading } from '../components/Type';
+import { isOnlyNative } from '../lib/common';
 
 export default class OrgSelect extends Component {
   constructor(props) {
@@ -12,6 +14,7 @@ export default class OrgSelect extends Component {
     this.state = {
       ack: false,
       refer: props.refer,
+      showCamera: false,
       loading: true,
       orgId: null,
     };
@@ -29,12 +32,14 @@ export default class OrgSelect extends Component {
   }
 
   render() {
-    const { loading, refer, orgId } = this.state;
+    const { loading, refer, showCamera, orgId } = this.state;
 
     if (loading) return (<Loading />);
 
     let orgs = ["DEMO"];
     if (orgId) orgs.push(orgId);
+
+    if (showCamera) return (<Camera refer={this} />);
 
     return (
       <Layout.Root>
@@ -47,6 +52,13 @@ export default class OrgSelect extends Component {
                 <Text>Enter {orgId}</Text>
               </Button>
             ))}
+
+            {isOnlyNative()&&
+              <Button onPress={() => this.setState({showCamera: true})}>
+                <Text>Scan QRCode</Text>
+              </Button>
+            }
+
           </Layout.ViewCenter>
         </Layout.Content>
       </Layout.Root>

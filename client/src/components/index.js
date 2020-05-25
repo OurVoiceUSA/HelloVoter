@@ -2,5 +2,6 @@ import * as Layout from './Layout';
 import MainMenu from './MainMenu';
 import Loading from './Loading';
 import * as Icon from './icons';
+import Camera from './Camera';
 
-export { Icon, Layout, Loading, MainMenu };
+export { Camera, Icon, Layout, Loading, MainMenu };
