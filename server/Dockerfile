@@ -10,7 +10,7 @@ COPY package-lock.json .
 COPY patches ./patches/
 COPY gen-swagger.sh .
 
-RUN npm --unsafe-perm --production install
+RUN npm --unsafe-perm --production ci
 
 FROM ourvoiceusa/neo4j-hv
 
