@@ -9,7 +9,6 @@ import { Icon } from '.';
 
 const MenuButton = (props) => {
   //if (props.to && props.to.match(/^\/admin/) && !props.refer.state.user.admin) return null;
-  
   return (
     <Button to={props.to} onPress={props.refer.setMenuClose.bind(props.refer)} {...props} />
   )
