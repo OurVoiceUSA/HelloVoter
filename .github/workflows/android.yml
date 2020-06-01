@@ -22,4 +22,4 @@ jobs:
       with:
         java-version: 1.8
     - name: Build with Gradle
-      run: (cd client && npm install && echo "GOOGLE_API_KEY_ANDROID=none" > .env && cd android && ./gradlew build)
+      run: (cd client && npm install && echo "GOOGLE_API_KEY_ANDROID=none" > .env && cd android && ./gradlew app:assembleDebug)
