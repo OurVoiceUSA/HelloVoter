@@ -10,8 +10,9 @@
   "scripts": {
     "database": "cd server && npm install && npm run database",
     "makeadmin": "cd server && npm run makeadmin --",
-    "test": "echo 'run tests from the server/ and client/ directories'; false",
+    "test": "cd client && npm test",
     "ncu": "ncu && cd client && ncu && cd ../server && ncu",
+    "build": "cd server && npm ci && cd ../client && npm ci && npm run build-web",
     "client": "cd client && npm install && npm run start-web",
     "server": "cd server && npm install && npm start",
     "start": "concurrently -k \"npm run client\" \"npm run server\""
