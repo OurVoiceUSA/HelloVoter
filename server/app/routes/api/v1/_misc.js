@@ -1,6 +1,6 @@
 
 import fetch from 'node-fetch';
-import { deepCopy } from 'ourvoiceusa-sdk-js';
+import { deepCopy } from '../../../lib/common';
 
 import {
   volunteerAssignments,

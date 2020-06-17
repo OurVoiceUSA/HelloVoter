@@ -40,6 +40,7 @@
     "@babel/runtime": "^7.9.2",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
+    "docker-secrets-nodejs": "^1.0.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-async-errors": "^3.1.1",
@@ -54,7 +55,6 @@
     "neo4j-driver": "^1.7.6",
     "node-fetch": "^2.6.0",
     "node-neo4j-bolt-adapter": "^1.0.6",
-    "ourvoiceusa-sdk-js": "github:OurVoiceUSA/ourvoiceusa-sdk-js",
     "papaparse": "^5.1.1",
     "patch-package": "^6.2.1",
     "wkx": "^0.5.0"

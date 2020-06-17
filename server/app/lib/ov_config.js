@@ -1,6 +1,6 @@
 
 import dotenv from 'dotenv';
-import { getConfig } from 'ourvoiceusa-sdk-js';
+import { getConfig } from './common';
 
 dotenv.config();
 

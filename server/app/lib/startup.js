@@ -1,5 +1,5 @@
 
-import { asyncForEach, sleep } from 'ourvoiceusa-sdk-js';
+import { asyncForEach, sleep } from './common';
 
 import { ov_config } from './ov_config';
 import { min_neo4j_version } from './utils';

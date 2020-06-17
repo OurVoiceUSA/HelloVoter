@@ -3,10 +3,9 @@ import { View } from 'react-native';
 import { Body, Right, Left, Text, List, ListItem, Spinner } from 'native-base';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { geojson2polygons } from 'ourvoiceusa-sdk-js';
 import { SvgXml } from 'react-native-svg';
 
-import { say, timeAgo } from '../../common';
+import { say, timeAgo, geojson2polygons } from '../../common';
 
 function polygonCenter(obj) {
   let arr = obj.map(o => [o.lng,o.lat]);

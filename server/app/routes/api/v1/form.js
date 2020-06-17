@@ -1,5 +1,5 @@
 
-import { deepCopy } from 'ourvoiceusa-sdk-js';
+import { deepCopy } from '../../../lib/common';
 
 import {
   _volunteersFromCypher, volunteerAssignments,

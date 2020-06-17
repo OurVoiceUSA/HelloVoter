@@ -11,7 +11,6 @@ import { Toast, Text } from 'native-base';
 
 import storage from 'react-native-storage-wrapper';
 import { getLocales, getTimeZone } from 'react-native-localize';
-import { ingeojson } from 'ourvoiceusa-sdk-js';
 import jwt_decode from 'jwt-decode';
 import SafariView from 'react-native-safari-view';
 import DeviceInfo from 'react-native-device-info';
@@ -599,3 +598,23 @@ export function getUSState(myPosition) {
   });
   return state;
 }
+
+// transform a geojson file into an array of polygons
+export var asyncForEach = async function (a, c) {
+  for (let i = 0; i < a.length; i++) await c(a[i], i, a);
+}
+
+export var deepCopy = function (o) {
+  return JSON.parse(JSON.stringify(o));
+}
+
+export var sleep = m => new Promise(r => setTimeout(r, m));
+
+export var geojson2polygons = function () {
+  // TODO
+}
+
+export var ingeojson = function () {
+  // TODO
+}
+

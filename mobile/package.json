@@ -28,7 +28,6 @@
     "md5": "^2.2.1",
     "native-base": "^2.13.12",
     "natural-orderby": "^2.0.3",
-    "ourvoiceusa-sdk-js": "github:OurVoiceUSA/ourvoiceusa-sdk-js",
     "pako": "^1.0.11",
     "promise-limit": "^2.7.0",
     "qrcode": "^1.4.4",

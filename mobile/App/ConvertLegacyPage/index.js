@@ -5,9 +5,8 @@ import { Container, Content, Text, Spinner, Button, H1, H3 } from 'native-base';
 import HVComponent from '../HVComponent';
 import TermsDisclosure, { loadDisclosure } from '../TermsDisclosure';
 
-import { DINFO, STORAGE_KEY_OLDFORMS, api_base_uri, _getApiToken, bbox_usa, createOrgID } from '../common';
+import { DINFO, STORAGE_KEY_OLDFORMS, api_base_uri, _getApiToken, bbox_usa, createOrgID, asyncForEach, sleep } from '../common';
 
-import { asyncForEach, sleep } from 'ourvoiceusa-sdk-js';
 import * as Progress from 'react-native-progress';
 import storage from 'react-native-storage-wrapper';
 import KeepAwake from 'react-native-keep-awake';

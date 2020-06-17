@@ -13,11 +13,10 @@ import SettingsTab, { walkthroughSettings } from './SettingsTab';
 import {
   DINFO, STORAGE_KEY_SETTINGS, STORAGE_KEY_RETRY,
   api_base_uri, _doGeocode, _getApiToken, openURL, getEpoch, getLastVisit, getPinColor,
-  makeTooltipContent, triggerNetworkWarning,
+  makeTooltipContent, triggerNetworkWarning, deepCopy, geojson2polygons, ingeojson,
 } from '../common';
 
 import { WalkthroughElement, startWalkthrough } from 'react-native-walkthrough';
-import { deepCopy, geojson2polygons, ingeojson } from 'ourvoiceusa-sdk-js';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps'
 import Icon from 'react-native-vector-icons/FontAwesome';
 import RNGooglePlaces from 'react-native-google-places';

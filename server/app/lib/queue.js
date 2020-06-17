@@ -1,5 +1,5 @@
 
-import { asyncForEach, sleep, deepCopy } from 'ourvoiceusa-sdk-js';
+import { asyncForEach, sleep, deepCopy } from './common';
 import EventEmitter from 'events';
 import FormData from 'form-data';
 import fetch from 'node-fetch';

@@ -1,6 +1,6 @@
 
 import { expect } from 'chai';
-import { deepCopy } from 'ourvoiceusa-sdk-js';
+import { deepCopy } from './common';
 
 import { ov_config } from './ov_config';
 import neo4j from './neo4j';
