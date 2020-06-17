@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 
 import {Map, InfoWindow, Marker, Polygon, GoogleApiWrapper} from 'google-maps-react';
 import Select from 'react-select';
-import {geojson2polygons} from 'ourvoiceusa-sdk-js';
 import {geolocated} from 'react-geolocated';
 
 import {
@@ -13,6 +12,7 @@ import {
   _loadTurfs,
   _loadAddressData,
   _loadPeopleAddressData,
+  geojson2polygons,
 } from '../common.js';
 
 import { CardForm } from './Forms';

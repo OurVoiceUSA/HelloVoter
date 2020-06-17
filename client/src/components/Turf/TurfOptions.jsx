@@ -4,11 +4,11 @@ import Select from 'react-select';
 
 import CircularProgress from '@material-ui/core/CircularProgress';
 
-import { us_states } from 'ourvoiceusa-sdk-js';
-
 import {
   PlacesAutocomplete,
 } from '../../common.js';
+
+var us_states = [];
 
 export class TurfOptions extends Component {
   handleStateChange = selectedStateOption => {

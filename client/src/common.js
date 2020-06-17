@@ -413,3 +413,21 @@ export const InviteSomeone = props => (
     </Modal>
   </div>
 );
+
+// transform a geojson file into an array of polygons
+
+export var asyncForEach = async function (a, c) {
+  for (let i = 0; i < a.length; i++) await c(a[i], i, a);
+}
+
+export var deepCopy = function (o) {
+  return JSON.parse(JSON.stringify(o));
+}
+
+export var sleep = m => new Promise(r => setTimeout(r, m));
+
+export var ucFirst = function (str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+export var geojson2polygons = function () {}

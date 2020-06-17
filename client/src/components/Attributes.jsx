@@ -5,7 +5,6 @@ import ReactPaginate from 'react-paginate';
 import EdiText from 'react-editext';
 import Select from 'react-select';
 import t from 'tcomb-form';
-import {ucFirst} from 'ourvoiceusa-sdk-js';
 
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Button from '@material-ui/core/Button';
@@ -24,6 +23,7 @@ import {
   notify_success,
   RootLoader,
   DialogSaving,
+  ucFirst,
 } from '../common.js';
 
 function value2select(val) {

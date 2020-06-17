@@ -10,8 +10,6 @@ import PaperclipIcon from '@material-ui/icons/AttachFile';
 import AddIcon from '@material-ui/icons/Add';
 import Select from 'react-select';
 
-import {ucFirst} from 'ourvoiceusa-sdk-js';
-
 import {
   notify_error,
   notify_success,
@@ -19,6 +17,7 @@ import {
   _loadImports,
   _loadAttributes,
   RootLoader,
+  ucFirst,
 } from '../../common';
 
 const defaultState = {

@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 
 import { HashRouter as Router, Route } from 'react-router-dom';
 import { NotificationContainer } from 'react-notifications';
-import { asyncForEach, sleep } from 'ourvoiceusa-sdk-js';
 import 'react-notifications/lib/notifications.css';
 import jwt from 'jsonwebtoken';
 import queryString from 'query-string';
@@ -17,7 +16,9 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 
 import {
   _fetch,
-  notify_error
+  notify_error,
+  asyncForEach,
+  sleep,
 } from './common.js';
 
 import styles from './app.styles';

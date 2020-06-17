@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 
 import { HashRouter as Router, Route } from 'react-router-dom';
 import { geocodeByAddress, getLatLng } from 'react-places-autocomplete';
-import { asyncForEach } from 'ourvoiceusa-sdk-js';
 import circleToPolygon from 'circle-to-polygon';
 import Select from 'react-select';
 import t from 'tcomb-form';
@@ -22,6 +21,7 @@ import {
   _loadTurfs,
   RootLoader,
   DialogSaving,
+  asyncForEach,
 } from '../../common.js';
 
 export default class App extends Component {
