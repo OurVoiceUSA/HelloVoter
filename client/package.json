@@ -33,6 +33,7 @@
     "react-number-format": "^4.4.1",
     "react-paginate": "^6.3.2",
     "react-places-autocomplete": "^7.2.1",
+    "react-plaid-link": "^2.3.0-alpha.0",
     "react-router-dom": "^5.1.2",
     "react-scripts": "^3.4.1",
     "react-select": "^3.0.8",
