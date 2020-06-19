@@ -32,4 +32,8 @@ export const ov_config = {
   purge_import_records: getConfig("purge_import_records", false, null),
   wabase: getConfig("wabase", false, 'https://apps.ourvoiceusa.org'),
   DEBUG: getConfig("debug", false, false),
+  plaid_client_id: getConfig('plaid_client_id', false, null),
+  plaid_secret: getConfig('plaid_secret', false, null),
+  plaid_public_key: getConfig('plaid_public_key', false, null),
+  stripe_secret_key: getConfig('stripe_secret_key', false, null),
 };

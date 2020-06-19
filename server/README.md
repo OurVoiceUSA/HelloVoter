@@ -25,6 +25,10 @@ For this server, configure an `.env` file. The following is a complete list of v
     VOLUNTEER_ADD_NEW=
     PURGE_IMPORT_RECORDS=
     DEBUG=
+    PLAID_CLIENT_ID=
+    PLAID_SECRET=
+    PLAID_PUBLIC_KEY=
+    STRIPE_SECRET_KEY=
 
 The meaning of each config item is as follows:
 
@@ -50,3 +54,7 @@ The meaning of each config item is as follows:
 * `VOLUNTEER_ADD_NEW`: Whether or not volunteers can add new addresses & people that don't exist in the database.
 * `PURGE_IMPORT_RECORDS`: By default, import records are kept in the database, so you can trace where things came from. For larger operations (>20 million), we recommend setting this to `1` as otherwise the speed of data imports will be significantly impacted.
 * `DEBUG`: Whether or not cypher and other debugging info is sent to the console log.
+* `PLAID_CLIENT_ID`: The client ID from your Plaid developer account. Needed for ambassador payouts.
+* `PLAID_SECRET`: The secret from your Plaid developer account. Needed for ambassador payouts.
+* `PLAID_PUBLIC_KEY`: The public key from your Plaid developer account. Needed for ambassador payouts.
+* `STRIPE_SECRET_KEY`: The secret key from your Stripe developer account. Needed for ambassador payouts.

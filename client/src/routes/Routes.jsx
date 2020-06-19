@@ -13,7 +13,8 @@ import {
   Analytics,
   Settings,
   Login,
-  About
+  About,
+  Payout
 } from '../components';
 import NoMatch from './NoMatch';
 
@@ -40,6 +41,7 @@ export const Routes = ({ global, experimental }) => (
     <Route path="/analytics/" render={() => <Analytics global={global} />} />
     <Route path="/settings/" render={() => <Settings global={global} />} />
     <Route path="/about/" render={() => <About global={global} />} />
+    <Route path="/payout/" render={() => <Payout global={global} />} />
     <Route component={NoMatch} />
   </Switch>
 );
