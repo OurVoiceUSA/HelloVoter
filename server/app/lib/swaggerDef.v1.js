@@ -91,11 +91,11 @@ module.exports = {
     title: p.name,
     version: p.version,
     description: p.description,
-    termsOfService: 'https://raw.githubusercontent.com/OurVoiceUSA/HelloVoter/master/docs/Terms-of-Service.md',
+    termsOfService: 'https://raw.githubusercontent.com/OurVoiceUSA/HelloVoter/develop/docs/Terms-of-Service.md',
     license: { name: p.license },
     externalDocs: {
       description: 'Find out more',
-      url: 'https://github.com/OurVoiceUSA/HelloVoter/tree/master/docs',
+      url: 'https://github.com/OurVoiceUSA/HelloVoter/tree/develop/docs',
     }
   },
   servers: [{url: '/api/v1'}],
